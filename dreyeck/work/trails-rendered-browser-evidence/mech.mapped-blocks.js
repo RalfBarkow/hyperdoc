@@ -1,0 +1,1251 @@
+import { soloListener, apply, requestSourceData, dotify, walks, kwic, md } from './library.js'
+import { uniq, delay, asSlug } from './mech.js'
+import { Graph } from './graph/graph.js'
+
+// https://github.com/nrn/universal-ticker
+import ticker from 'universal-ticker'
+
+export const api = {
+  trouble,
+  inspect,
+  response,
+  button,
+  element,
+  jfetch,
+  status,
+  sourceData,
+  showResult,
+  neighborhood,
+  publishSourceData,
+  newSVG,
+  SVGline,
+  ticker,
+  lineupAtKey,
+  thisLineupKey,
+  lineupPages,
+  host,
+  download,
+  closeTags,
+  reset,
+  report,
+  ago,
+}
+
+export function trouble(elem, message) {
+  if (elem.innerText.match(/✖︎/)) return
+  elem.innerHTML += `<button class=trouble>✖︎</button>`
+  elem.querySelector('button').addEventListener('click', event => {
+    elem.outerHTML += `<span class=trouble>${message}</span>`
+  })
+}
+
+export function inspect(elem, key, state) {
+  const div = elem.previousElementSibling
+  if (state.debug) {
+    elem['sample-' + key] = state[key] // proper lifetime and indirection
+    let look = div.querySelector(`.look[data-key="${key}"]`)
+    if (!look) {
+      look = document.createElement('div')
+      look.classList.add('look')
+      look.dataset.key = key
+      look.innerHTML = `<font color=gray size=small>${key} ⇒</font>`
+      div.insertAdjacentElement('beforeend', look)
+      look.querySelector('font').addEventListener('click', event => {
+        let see = look.querySelector('.see')
+        if (!see) {
+          see = document.createElement('div')
+          see.classList.add('see')
+          look.insertAdjacentElement('beforeend', see)
+          see.innerText = JSON.stringify(elem['sample-' + key]).substring(0, 400) + ' ...'
+        } else {
+          see.remove()
+        }
+      })
+    }
+  }
+}
+
+export function response(elem, html) {
+  elem.innerHTML += html
+}
+
+export function button(elem, label, handler) {
+  if (!elem.querySelector('button')) {
+    response(elem, `<button class=button>${label}</button>`)
+    elem.querySelector('button').addEventListener('click', handler)
+  }
+}
+
+export function element(key) {
+  return document.getElementById(key)
+}
+
+export async function jfetch(url) {
+  return fetch(url).then(res => (res.ok ? res.json() : null))
+}
+
+export function status(elem, command, text) {
+  elem.innerHTML = command + `<span class=status>${text}</span>`
+}
+
+export function sourceData(elem, topic) {
+  const item = elem.closest('.item')
+  const sources = requestSourceData(item, topic).map(({ div, result }) => ({
+    classList: [...div.classList],
+    id: div.dataset.id,
+    result,
+  }))
+  if (sources.length) return sources
+  trouble(elem, `Expected source for "${topic}" in the lineup.`)
+  return null
+}
+
+export function publishSourceData(elem, topic, data) {
+  const item = elem.closest('.item')
+  item.classList.add(`${topic}-source`)
+  item[`${topic}Data`] = () => data
+}
+
+export function showResult(elem, page) {
+  const options = { $page: $(elem.closest('.page')) }
+  wiki.showResult(wiki.newPage(page), options)
+}
+
+export function neighborhood(want) {
+  return Object.entries(wiki.neighborhoodObject.sites)
+    .filter(([domain, site]) => !site.sitemapRequestInflight && (!want || domain.includes(want)))
+    .map(([domain, site]) => (site.sitemap || []).map(info => Object.assign({ domain }, info)))
+}
+
+export function newSVG(elem) {
+  const div = document.createElement('div')
+  elem.closest('.item').firstElementChild.prepend(div)
+  div.outerHTML = `
+        <div style="border:1px solid black; background-color:#f8f8f8; margin-bottom:16px;">
+          <svg viewBox="0 0 400 400" width=100% height=400>
+            <circle id=dot r=5 cx=200 cy=200 stroke="#ccc"></circle>
+          </svg>
+        </div>`
+  const svg = elem.closest('.item').getElementsByTagName('svg')[0]
+  return svg
+}
+
+export function SVGline(svg, [x1, y1], [x2, y2]) {
+  const line = document.createElementNS('http://www.w3.org/2000/svg', 'line')
+  const set = (k, v) => line.setAttribute(k, Math.round(v))
+  set('x1', x1)
+  set('y1', 400 - y1)
+  set('x2', x2)
+  set('y2', 400 - y2)
+  line.style.stroke = 'black'
+  line.style.strokeWidth = '2px'
+  svg.appendChild(line)
+  const dot = svg.getElementById('dot')
+  dot.setAttribute('cx', Math.round(x2))
+  dot.setAttribute('cy', Math.round(400 - y2))
+}
+
+// export function ticker(handler) {
+//   const interval = setInterval(handler, 1000)
+//   const stop = () => clearInterval(interval)
+//   return { stop }
+// }
+
+export function lineupAtKey(key) {
+  return wiki.lineup.atKey(key)
+}
+
+export function thisLineupKey(elem) {
+  return elem.closest('.page').dataset.key
+}
+
+export function lineupPages(elem) {
+  const items = [...document.querySelectorAll('.page')]
+  const index = items.indexOf(elem.closest('.page'))
+  const pages = items.slice(0, index)
+  return pages.map(div => lineupAtKey(div.dataset.key))
+}
+
+export function host() {
+  location.host
+}
+
+export function download(string, file, mime = 'text/json') {
+  // const blob = new Blob([string], { type: mimeType }); // untested alternative?
+  // const data = URL.createObjectURL(blob);
+  var data = `data:${mime};charset=utf-8,` + encodeURIComponent(string)
+  var anchor = document.createElement('a')
+  anchor.setAttribute('href', data)
+  anchor.setAttribute('download', file)
+  document.body.appendChild(anchor) // required for firefox
+  anchor.click()
+  anchor.remove()
+}
+
+export function closeTags(html) {
+  const div = document.createElement('div')
+  div.innerHTML = html
+  return div.innerHTML
+}
+
+export function reset(elem) {
+  const div = elem.nextElementSibling
+  div.querySelectorAll('div.look').forEach(e => (e.outerText = ''))
+  div.querySelectorAll('.trouble').forEach(e => (e.outerText = ''))
+  div.querySelectorAll('button.button').forEach(e => (e.outerText = ''))
+  div.querySelectorAll('span.status').forEach(e => (e.outerText = ''))
+  div.querySelectorAll('div.report').forEach(e => (e.outerText = ''))
+}
+
+export function report(elem, command, html) {
+  elem.innerHTML = command + html
+}
+
+export function ago(then, now = Date.now()) {
+  let sign = then > now ? '-' : ''
+  let msec = Math.abs(now - then)
+  let sec = Math.floor(msec / 1000)
+  if (sec < 2) return `${sign}${msec} msec`
+  let min = Math.floor(sec / 60)
+  if (min < 2) return `${sign}${sec} seconds`
+  let hour = Math.floor(min / 60)
+  if (hour < 2) return `${sign}${min} minutes`
+  let day = Math.floor(hour / 24)
+  if (day < 2) return `${sign}${hour} hours`
+  let week = Math.floor(day / 7)
+  if (week < 2) return `${sign}${day} days`
+  let month = Math.floor(day / 30)
+  if (month < 2) return `${sign}${week} weeks`
+  let year = Math.floor(day / 365)
+  if (year < 2) return `${sign}${month} months`
+  return `${sign}${year} years`
+}
+
+export async function run(nest, state, initiator) {
+  const scope = nest.slice()
+  while (scope.length) {
+    const code = scope.shift()
+    if ('command' in code) {
+      const command = code.command
+      const elem = state.api ? state.api.element(code.key) : document.getElementById(code.key)
+      const [op, ...args] = code.command.split(/ +/)
+      const next = scope[0]
+      const body = next && 'command' in next ? null : scope.shift()
+      const stuff = { command, op, args, body, elem, state, initiator }
+      if (state.debug) console.log(stuff)
+      if (blocks[op]) await blocks[op].emit.apply(null, [stuff])
+      else if (op.match(/^[A-Z]+$/)) state.api.trouble(elem, `${op} doesn't name a block we know.`)
+      else if (code.command.match(/\S/)) state.api.trouble(elem, `Expected line to begin with all-caps keyword.`)
+    }
+  }
+}
+
+// B L O C K S
+
+function click_emit({ elem, body, state }) {
+  if (!body?.length) return state.api.trouble(elem, `CLICK expects indented blocks to follow.`)
+  state.api.button(elem, '▶', event => {
+    state.api.reset(elem)
+    state.debug = event.shiftKey
+    run(body, state, 'click')
+  })
+}
+
+function hello_emit({ elem, args, state }) {
+  const world = args[0] == 'world' ? ' 🌎' : ' 😀'
+  const keys = Object.keys(state).filter(key => !['context', 'api', 'debug'].includes(key))
+  for (const key of keys) state.api.inspect(elem, key, state)
+  state.api.response(elem, world)
+}
+
+async function from_emit({ elem, command, args, body, state }) {
+  if (!args[0]) return state.api.trouble(elem, `FROM expects site/slug as way to federated wiki page.`)
+  if (!body?.length) return state.api.trouble(elem, `FROM expects indented blocks to follow.`)
+  const [a, b] = args[0].split(/\//)
+  const url = b ? `//${a}/${b}.json` : `/${a}.json`
+  const page = await state.api.jfetch(url)
+  if (!page) return state.api.trouble(elem, `FROM could not fetch "${url}" `)
+  state.page = page
+  const date = page.journal?.findLast(item => item.type != 'fork' && item.date).date
+  if (date) {
+    const age = state.api.ago(date)
+    state.api.status(elem, command, ` ⇒ ${age} old`)
+  }
+  run(body, state)
+}
+
+function sensor_emit({ elem, command, args, body, state }) {
+  state.api.status(elem, command, '')
+  if (!('page' in state)) return state.api.trouble(elem, `Expect "page" as with FROM.`)
+  state.api.inspect(elem, 'page', state)
+  const datalog = state.page.story.find(item => item.type == 'datalog')
+  if (!datalog) return state.api.trouble(elem, `Expect Datalog plugin in the page.`)
+  const device = args[0]
+  if (!device) return state.api.trouble(elem, `SENSOR needs a sensor name.`)
+  const sensor = datalog.text
+    .split(/\n/)
+    .map(line => line.split(/ +/))
+    .filter(fields => fields[0] == 'SENSOR')
+    .find(fields => fields[1] == device)
+  if (!sensor) return state.api.trouble(elem, `Expect to find "${device}" in Datalog.`)
+  const url = sensor[2]
+
+  const f = c => (9 / 5) * (c / 16) + 32
+  const avg = a => a.reduce((s, e) => s + e, 0) / a.length
+  state.api.status(elem, command, ' ⏳')
+  state.api.jfetch(url).then(data => {
+    if (state.debug) console.log({ sensor, data })
+    state.api.status(elem, command, ' ⌛')
+    const value = f(avg(Object.values(data)))
+    state.temperature = `${value.toFixed(2)}°F`
+    run(body, state)
+  })
+}
+
+function report_emit({ elem, command, args, state }) {
+  const key = args[0] || 'temperature'
+  if (!(key in state)) return state.api.trouble(elem, `Expect "${key}" in state`)
+  const value = state[key]
+  const type = typeof value
+  if (!['string', 'number'].includes(type))
+    return state.api.trouble(elem, `Expect state.${key} to be a string or number`)
+  state.api.inspect(elem, key, state)
+  state.api.report(elem, command, `<div class=report>${value}</div>`)
+}
+
+function source_emit({ elem, command, args, body, state }) {
+  if (!(args && args.length)) return state.api.trouble(elem, `Expected Source topic, like "markers" for Map markers.`)
+  const topic = args[0]
+  const sources = state.api.sourceData(elem, topic)
+  if (!sources) return
+  if (state.debug) console.log({ topic, sources })
+  const count = type => {
+    const count = sources.filter(source => source.classList.includes(type)).length
+    return count ? `${count} ${type}` : null
+  }
+  const counts = [count('map'), count('image'), count('frame'), count('assets')].filter(count => count).join(', ')
+  state.api.status(elem, command, ' ⇒ ' + counts)
+  state[topic] = sources.map(({ id, result }) => ({ id, result }))
+  if (body) run(body, state)
+}
+
+function preview_emit({ elem, command, args, state }) {
+  const round = digits => (+digits).toFixed(7)
+  const story = []
+  const types = args
+  for (const type of types) {
+    switch (type) {
+      case 'map':
+        if (!('marker' in state))
+          return state.api.trouble(elem, `"map" preview expects "marker" state, like from "SOURCE marker".`)
+        state.api.inspect(elem, 'marker', state)
+        const text = state.marker
+          .map(marker => [marker.result])
+          .flat(2)
+          .map(latlon => `${round(latlon.lat)}, ${round(latlon.lon)} ${latlon.label || ''}`)
+          .filter(uniq)
+          .join('\n')
+        story.push({ type: 'map', text })
+        break
+      case 'graph':
+        if (!('aspect' in state))
+          return state.api.trouble(elem, `"graph" preview expects "aspect" state, like from "SOURCE aspect".`)
+        state.api.inspect(elem, 'aspect', state)
+        for (const { result } of state.aspect) {
+          for (const { name, graph } of result) {
+            if (state.debug) console.log({ name, graph })
+            story.push({ type: 'paragraph', text: name })
+            story.push({ type: 'graphviz', text: dotify(graph) })
+          }
+          story.push({ type: 'pagefold', text: '.' })
+        }
+        break
+      case 'items':
+        if (!('items' in state))
+          return state.api.trouble(elem, `"items" preview expects "items" state, like from "KWIC".`)
+        state.api.inspect(elem, 'items', state)
+        const beit = item => {
+          switch (typeof item) {
+            case 'object':
+              if ('type' in item) return item
+              else return beit(item.toString())
+            case 'function':
+              return beit(item())
+            case 'string':
+              if (item.charAt(0) == '<') return { type: 'html', text: item }
+              if (item.match(/^https?:/i)) return { type: 'frame', text: item }
+            default:
+              return { type: 'paragraph', text: item.toString() }
+          }
+        }
+        const items = state.items.map(beit)
+        story.push(...items)
+        break
+      case 'page':
+        if (!('page' in state)) return state.api.trouble(elem, `"page" preview expects "page" state, like from "FROM".`)
+        state.api.inspect(elem, 'page', state)
+        if (args.length == 1) return state.api.showResult(elem, state.page)
+        story.push(...state.page.story)
+        break
+      case 'synopsis':
+        const text2 = `This page created with Mech command: "${command}". See [[${state.context.title}]].`
+        story.push({ type: 'paragraph', text: text2, id: state.context.itemId })
+        break
+      default:
+        return state.api.trouble(elem, `"${type}" doesn't name an item we can preview`)
+    }
+  }
+  const title = 'Mech Preview' + (state.tick ? ` ${state.tick}` : '')
+  const page = { title, story }
+  for (const item of page.story) item.id ||= (Math.random() * 10 ** 20).toFixed(0)
+  const item = JSON.parse(JSON.stringify(page))
+  const date = Date.now()
+  page.journal = [{ type: 'create', date, item }]
+  state.api.showResult(elem, page)
+}
+
+async function neighbors_emit({ elem, command, args, body, state }) {
+  const belem = probe => state.api.element(probe.key)
+  let have = state.api.neighborhood(args[0])
+  for (let i = 1; i < args.length; i++) have.push(...state.api.neighborhood(args[i]))
+  have = have.filter((s, i) => s.length && !have.slice(0, i).find(e => e[0]?.domain == s[0]?.domain))
+  for (const probe of body || []) {
+    if (!probe.command.endsWith(' Survey')) {
+      state.api.trouble(belem(probe), `NEIGHBORS expects a Site Survey title, like Pattern Link Survey`)
+      continue
+    }
+    const todos = have.filter(sitemap => sitemap.find(info => info.title == probe.command))
+    state.api.status(belem(probe), probe.command, `⇒ ${todos.length} sites`)
+    for (const todo of todos) {
+      const url = `//${todo[0].domain}/${asSlug(probe.command)}.json`
+      const page = await state.api.jfetch(url)
+      if (!page) continue
+      const survey = page.story.find(item => item.type == 'frame')?.survey
+      if (!survey) continue
+      for (const info of todo) {
+        const extra = Object.assign(
+          {},
+          survey.find(inf => inf.slug == info.slug),
+          info,
+        )
+        Object.assign(info, extra)
+      }
+      // console.log({ url, page, survey, todo })
+    }
+  }
+  state.neighborhood = have.flat()
+  state.api.status(elem, command, `⇒ ${state.neighborhood.length} pages, ${have.length} sites`)
+}
+
+function walk_emit({ elem, command, args, state }) {
+  if (!('neighborhood' in state))
+    return state.api.trouble(elem, `WALK expects state.neighborhood, like from NEIGHBORS.`)
+  state.api.inspect(elem, 'neighborhood', state)
+  const [, count, way] =
+    command.match(/\b(\d+)? *(steps|days|weeks|months|hubs|lineup|references|topics|clicks)\b/) || []
+  if (!way && command != 'WALK') return state.api.trouble(elem, `WALK can't understand rest of this block.`)
+  const scope = {
+    host() {
+      return state.api.host()
+    },
+    lineup() {
+      return state.api.lineupPages(elem)
+    },
+    references() {
+      const key = state.api.thisLineupKey(elem)
+      const pageObject = state.api.lineupAtKey(key)
+      const story = pageObject.getRawPage().story
+      // console.log('walk references', { key, pageObject, story })
+      return story.filter(item => item.type == 'reference')
+    },
+    page() {
+      if (!state.page) state.api.trouble(elem, 'WALK expects a page, like from FROM')
+      state.api.inspect(elem, 'page', state)
+      return state.page
+    },
+  }
+  const steps = walks(count, way, state.neighborhood, scope)
+  const aspects = steps.filter(({ graph }) => graph)
+  if (state.debug) console.log({ steps })
+  const nodes = aspects.map(({ graph }) => graph.nodes).flat()
+  state.api.status(elem, command, ` ⇒ ${aspects.length} aspects, ${nodes.length} nodes`)
+  if (steps.find(({ graph }) => !graph)) state.api.trouble(elem, `WALK skipped sites with no links in sitemaps`)
+  if (aspects.length) {
+    state.aspect = state.aspect || []
+    const obj = state.aspect.find(obj => obj.id == elem.id)
+    if (obj) obj.result = aspects
+    else state.aspect.push({ id: elem.id, result: aspects, source: command })
+    // const item = elem.closest('.item')
+    // item.classList.add('aspect-source')
+    // item.aspectData = () => state.aspect.map(obj => obj.result).flat()
+    state.api.publishSourceData(elem, 'aspect', state.aspect.map(obj => obj.result).flat())
+    if (state.debug) console.log({ command, state: state.aspect })
+  }
+}
+
+function tick_emit({ elem, command, args, body, state }) {
+  // console.log({ command, args, body, state })
+  if (!body?.length) return state.api.trouble(elem, `TICK expects indented blocks to follow.`)
+  const count = args[0] || '1'
+  if (!count.match(/^[1-9][0-9]?$/)) return state.api.trouble(elem, `TICK expects a count from 1 to 99`)
+  let clock, outertick
+  if (state.tick != null) {
+    outertick = state.tick
+    start({ shiftKey: state.debug })
+    return clock
+  } else ready()
+
+  function ready() {
+    state.api.button(elem, '▶', start)
+  }
+  function status(ticks) {
+    state.api.status(elem, command, ` ⇒ ${ticks} remaining`)
+  }
+
+  function start(event) {
+    state.api.reset(elem)
+    state.debug = event.shiftKey
+    state.tick = +count
+    status(state.tick)
+    clock = state.api.ticker(async () => {
+      if (state.debug) console.log({ tick: state.tick, count })
+      if ('tick' in state && --state.tick >= 0) {
+        status(state.tick)
+        await run(body, state, 'tick')
+      } else {
+        clock = clock.api.stop()
+        state.tick = outertick
+        state.api.status(elem, command, '')
+        ready()
+      }
+    })
+  }
+}
+
+function until_emit({ elem, command, args, body, state }) {
+  if (!args.length) return state.api.trouble(elem, `UNTIL expects an argument, a word to stop running.`)
+  if (!state.tick) return state.api.trouble(elem, `UNTIL expects to indented below an iterator, like TICKS.`)
+  if (!state.aspect) return state.api.trouble(elem, `UNTIL expects "aspect", like from WALK.`)
+  inspect(elem, 'aspect', state)
+  // elem.innerHTML = command + ` ⇒ ${state.tick}`
+  state.api.status(elem, command, ` ⇒ ${state.tick}`)
+  const word = args[0]
+  for (const { div, result } of state.aspect)
+    for (const { name, graph } of result)
+      for (const node of graph.nodes)
+        if (node.type.includes(word) || node.props.name.includes(word)) {
+          if (state.debug) console.log({ div, result, name, graph, node })
+          delete state.tick
+          // elem.innerHTML += ' done'
+          state.api.response(elem, ' done')
+          if (body) run(body, state)
+          return
+        }
+}
+
+function forward_emit({ elem, command, args, state }) {
+  if (args.length < 1)
+    return state.api.trouble(elem, `FORWARD expects an argument, the number of steps to move a "turtle".`)
+  state.turtle ??= { svg: state.api.newSVG(elem), position: [200, 200], direction: 0 }
+  const steps = args[0]
+  const theta = (state.turtle.direction * 2 * Math.PI) / 360
+  const [x1, y1] = state.turtle.position
+  state.turtle.position = [x1 + steps * Math.sin(theta), y1 + steps * Math.cos(theta)]
+  state.api.SVGline(state.turtle.svg, [x1, y1], state.turtle.position)
+  state.api.status(elem, command, ` ⇒ ${state.turtle.position.map(n => (n - 200).toFixed(1)).join(', ')}`)
+}
+
+function turn_emit({ elem, command, args, state }) {
+  if (args.length < 1)
+    return state.api.trouble(elem, `TURN expects an argument, the number of degrees to turn a "turtle".`)
+  state.turtle ??= { svg: state.api.newSVG(elem), position: [200, 200], direction: 0 }
+  const degrees = +args[0]
+  state.turtle.direction += degrees
+  state.api.status(elem, command, ` ⇒ ${state.turtle.direction}°`)
+}
+
+function file_emit({ elem, command, args, body, state }) {
+  if (!('assets' in state)) return state.api.trouble(elem, `FILE expects state.assets, like from SOURCE assets.`)
+  inspect(elem, 'assets', state)
+
+  // [ { "id": "b2d5831168b4706b", "result":
+  //    { "pages/testing-file-mech":
+  //     { "//ward.dojo.fed.wiki/assets":
+  //      [ "KWIC-list+axe-files.txt", "KWIC-list-axe-files.tsv" ] } } } ]
+
+  const origin = '//' + window.location.host
+  const assets = state.assets
+    .map(({ id, result }) =>
+      Object.entries(result).map(([dir, paths]) =>
+        Object.entries(paths).map(([path, files]) =>
+          files.map(file => {
+            const assets = path.startsWith('//') ? path : `${origin}${path}`
+            const host = assets.replace(/\/assets$/, '')
+            const url = `${assets}/${dir}/${file}`
+            return { id, dir, path, host, file, url }
+          }),
+        ),
+      ),
+    )
+    .flat(3)
+  if (state.debug) console.log({ assets })
+
+  if (args.length < 1) return state.api.trouble(elem, `FILE expects an argument, the dot suffix for desired files.`)
+  if (!body?.length) return state.api.trouble(elem, 'FILE expects indented blocks to follow.')
+  const suffix = args[0]
+  const choices = assets.filter(asset => asset.file.endsWith(suffix))
+  const flag = choice => `<img width=12 src=${choices[choice].host + '/favicon.png'}>`
+  if (!choices) return state.api.trouble(elem, `FILE expects to find an asset with "${suffix}" suffix.`)
+  elem.innerHTML =
+    command +
+    `<br><div class=choices style="border:1px solid black; background-color:#f8f8f8; padding:8px;" >${choices
+      .map(
+        (choice, i) =>
+          `<span data-choice=${i} style="cursor:pointer;">
+            ${flag(i)}
+            ${choice.file} ▶
+          </span>`,
+      )
+      .join('<br>\n')}</div>`
+  elem.querySelector('.choices').addEventListener('click', event => {
+    if (!('choice' in event.target.dataset)) return
+    const url = choices[event.target.dataset.choice].url
+    // console.log(event.target)
+    // console.log(event.target.dataset.file)
+    // const url = 'http://ward.dojo.fed.wiki/assets/pages/testing-file-mech/KWIC-list-axe-files.tsv'
+    fetch(url)
+      .then(res => res.text())
+      .then(text => {
+        // elem.innerHTML = command + ` ⇒ ${text.length} bytes`
+        state.api.status(elem, command, ` ⇒ ${text.length} bytes`)
+        const prop = {}
+        prop[suffix] = text
+        run(body, Object.assign(prop, state))
+      })
+  })
+}
+
+function kwic_emit({ elem, command, args, body, state }) {
+  const template = body && body[0]?.command
+  if (template && !template.match(/\$[KW]/)) return state.api.trouble(elem, `KWIK expects $K or $W in link prototype.`)
+  if (!('tsv' in state)) return state.api.trouble(elem, `KWIC expects a .tsv file, like from ASSETS .tsv.`)
+  inspect(elem, 'tsv', state)
+  const prefix = args[0] || 1
+  const lines = state.tsv.trim().split(/\n/)
+
+  const stop = new Set(['of', 'and', 'in', 'at'])
+  const page = $(elem.closest('.page')).data('data')
+  const start = page.story.findIndex(item => item.type == 'pagefold' && item.text == 'stop')
+  if (start >= 0) {
+    const finish = page.story.findIndex((item, i) => i > start && item.type == 'pagefold')
+    page.story
+      .slice(start + 1, finish)
+      .map(item => item.text.trim().split(/\s+/))
+      .flat()
+      .forEach(word => stop.add(word))
+  }
+
+  const groups = kwic(prefix, lines, stop)
+  // elem.innerHTML = command + ` ⇒ ${lines.length} lines, ${groups.length} groups`
+  state.api.status(elem, command, ` ⇒ ${lines.length} lines, ${groups.length} groups`)
+  const link = quote => {
+    let line = quote.line
+    if (template) {
+      const substitute = template
+        .replaceAll(/\$K\+/g, quote.key.replaceAll(/ /g, '+'))
+        .replaceAll(/\$K/g, quote.key)
+        .replaceAll(/\$W/g, quote.word)
+      const target = template.match(/\$W/) ? quote.word : quote.key
+      line = line.replace(target, substitute)
+    }
+    return line
+  }
+
+  state.items = groups.map(group => {
+    const text = `# ${group.group}\n\n${group.quotes.map(quote => link(quote)).join('\n')}`
+    return { type: 'markdown', text }
+  })
+}
+
+function show_emit({ elem, command, args, state }) {
+  // elem.innerHTML = command
+  state.api.status(elem, command, '')
+  let site, slug
+  if (args.length < 1) {
+    if (state.info) {
+      inspect(elem, 'info', state)
+      site = state.info.domain
+      slug = state.info.slug
+      // elem.innerHTML = command + ` ⇒ ${state.info.title}`
+      state.api.status(elem, command, ` ⇒ ${state.info.title}`)
+    } else {
+      return state.api.trouble(elem, `SHOW expects a slug or site/slug to open in the lineup.`)
+    }
+  } else {
+    const info = args[0]
+    ;[site, slug] = info.includes('/') ? info.split(/\//) : [null, info]
+  }
+  const lineup = [...document.querySelectorAll('.page')].map(e => e.id)
+  if (lineup.includes(slug)) return state.api.trouble(elem, `SHOW expects a page not already in the lineup.`)
+  const page = elem.closest('.page')
+  wiki.doInternalLink(slug, page, site)
+}
+
+function random_emit({ elem, command, state }) {
+  if (!state.neighborhood) return state.api.trouble(elem, `RANDOM expected a neighborhood, like from NEIGHBORS.`)
+  inspect(elem, 'neighborhood', state)
+  const infos = state.neighborhood
+  const many = infos.length
+  const one = Math.floor(Math.random() * many)
+  // elem.innerHTML = command + ` ⇒ ${one} of ${many}`
+  state.api.status(elem, command, ` ⇒ ${one} of ${many}`)
+  state.info = infos[one]
+}
+
+function sleep_emit({ elem, command, args, body, state }) {
+  let count = args[0] || '1'
+  if (!count.match(/^[1-9][0-9]?$/)) return state.api.trouble(elem, `SLEEP expects seconds from 1 to 99`)
+  return new Promise(resolve => {
+    if (body)
+      run(body, state).then(result => {
+        if (state.debug) console.log(command, 'children', result)
+      })
+    // elem.innerHTML = command + ` ⇒ ${count} remain`
+    state.api.status(elem, command, ` ⇒ ${count} remain`)
+    let clock = setInterval(() => {
+      // if (--count > 0) elem.innerHTML = command + ` ⇒ ${count} remain`
+      if (--count > 0) state.api.status(elem, command, ` ⇒ ${count} remain`)
+      else {
+        clearInterval(clock)
+        // elem.innerHTML = command +
+        state.api.status(elem, command, ` ⇒ done`)
+        if (state.debug) console.log(command, 'done')
+        resolve()
+      }
+    }, 1000)
+  })
+}
+
+function together_emit({ elem, command, args, body, state }) {
+  if (!body) return state.api.trouble(elem, `TOGETHER expects indented commands to run together.`)
+  const children = body.map(child => run([child], state))
+  return Promise.all(children)
+}
+
+// http://localhost:3000/plugin/mech/run/testing-mechs-synchronization/5e269010fc81aebe?args=WyJoZWxsbyIsIndvcmxkIl0
+async function get_emit({ elem, command, args, body, state }) {
+  if (!body) return state.api.trouble(elem, `GET expects indented commands to run on the server.`)
+  let share = {}
+  let where = state.context.site
+  if (args.length) {
+    for (const arg of args) {
+      if (arg in state) {
+        inspect(elem, arg, state)
+        share[arg] = state[arg]
+      } else if (arg.match(/\./)) where = arg
+      else {
+        return state.api.trouble(elem, `GET expected "${arg}" to name state or site.`)
+      }
+    }
+  }
+  // const site = state.context.site
+  const slug = state.context.slug
+  const itemId = state.context.itemId
+  const query = `mech=${btoa(JSON.stringify(body))}&state=${btoa(JSON.stringify(share))}`
+  const url = `//${where}/plugin/mech/run/${slug}/${itemId}?${query}`
+  // elem.innerHTML = command +
+  state.api.status(elem, command, ` ⇒ in progress`)
+  const start = Date.now()
+  let result
+  try {
+    result = await fetch(url).then(res => (res.ok ? res.json() : res.status))
+    if ('err' in result) return state.api.trouble(elem, `RUN received error "${result.err}"`)
+  } catch (err) {
+    return state.api.trouble(elem, `RUN failed with "${err.message}"`)
+  }
+  state.result = result
+  for (const arg of result.mech.flat(9)) {
+    const elem = document.getElementById(arg.key)
+    // if ('status' in arg) elem.innerHTML = arg.command + ` ⇒ ${arg.status}`
+    if ('status' in arg) state.api.status(elem, arg.command, ` ⇒ ${arg.status}`)
+    if ('trouble' in arg) state.api.trouble(elem, arg.trouble)
+  }
+  if ('debug' in result.state) delete result.state.debug
+  Object.assign(state, result.state)
+  const elapsed = ((Date.now() - start) / 1000).toFixed(3)
+  // elem.innerHTML = command + ` ⇒ ${elapsed} seconds`
+  state.api.status(elem, command, ` ⇒ ${elapsed} seconds`)
+}
+
+async function plugin_emit({ elem, command, args, body, state }) {
+  if (!body) return state.api.trouble(elem, `GET expects indented commands to run on the server.`)
+  let share = {}
+  let where
+  if (args.length) {
+    where = args[0]
+    for (const arg of args.slice(1)) {
+      if (arg in state) {
+        inspect(elem, arg, state)
+        share[arg] = state[arg]
+      } else {
+        return state.api.trouble(elem, `GET expected "${arg}" to name state.`)
+      }
+    }
+  } else {
+    return state.api.trouble(elem, `PLUGIN expected a plugin as way to run commands on the server.`)
+  }
+  const itemId = state.context.itemId
+  const query = `mech=${btoa(JSON.stringify(body))}&state=${btoa(JSON.stringify(share))}`
+  const url = `/plugin/${where}/mech?${query}`
+  state.api.status(elem, command, ` ⇒ in progress`)
+  const start = Date.now()
+  let result
+  try {
+    result = await fetch(url).then(res => (res.ok ? res.json() : { err: res.status }))
+    console.log('result', result)
+    if ('err' in result) return state.api.trouble(elem, `PLUGIN received error "${result.err}"`)
+  } catch (err) {
+    return state.api.trouble(elem, `PLUGIN failed with "${err.message}"`)
+  }
+  state.result = result
+  for (const arg of result.mech.flat(9)) {
+    const elem = document.getElementById(arg.key)
+    if ('status' in arg) state.api.status(elem, arg.command, ` ⇒ ${arg.status}`)
+    if ('trouble' in arg) state.api.trouble(elem, arg.trouble)
+  }
+  if ('debug' in result.state) delete result.state.debug
+  Object.assign(state, result.state)
+  const elapsed = ((Date.now() - start) / 1000).toFixed(3)
+  state.api.status(elem, command, ` ⇒ ${elapsed} seconds`)
+}
+
+function delta_emit({ elem, command, args, body, state }) {
+  const copy = obj => JSON.parse(JSON.stringify(obj))
+  const size = obj => JSON.stringify(obj).length
+  if (args.length < 1) return state.api.trouble(elem, `DELTA expects argument, "have" or "apply" on client.`)
+  if (body) return state.api.trouble(elem, `DELTA doesn't expect indented input.`)
+  switch (args[0]) {
+    case 'have':
+      const edits = state.context.page.journal.filter(item => item.type != 'fork')
+      state.recent = edits[edits.length - 1].date
+      // elem.innerHTML = command + ` ⇒ ${new Date(state.recent).toLocaleString()}`
+      state.api.status(elem, command, ` ⇒ ${new Date(state.recent).toLocaleString()}`)
+      break
+    case 'apply':
+      if (!('actions' in state)) return state.api.trouble(elem, `DELTA apply expect "actions" as input.`)
+      inspect(elem, 'actions', state)
+      const page = copy(state.context.page)
+      const before = size(page)
+      for (const action of state.actions) apply(page, action)
+      state.page = page
+      const after = size(page)
+      // elem.innerHTML = command + ` ⇒ ∆ ${(((after - before) / before) * 100).toFixed(1)}%`
+      state.api.status(elem, command, ` ⇒ ∆ ${(((after - before) / before) * 100).toFixed(1)}%`)
+      break
+    default:
+      state.api.trouble(elem, `DELTA doesn't know "${args[0]}".`)
+  }
+}
+
+function roster_emit({ elem, command, state }) {
+  if (!state.neighborhood) return state.api.trouble(elem, `ROSTER expected a neighborhood, like from NEIGHBORS.`)
+  state.api.inspect(elem, 'neighborhood', state)
+  const infos = state.neighborhood
+  const sites = infos.map(info => info.domain).filter(uniq)
+  const any = array => array[Math.floor(Math.random() * array.length)]
+  if (state.debug) console.log(infos)
+  const items = [
+    { type: 'roster', text: 'Mech\n' + sites.join('\n') },
+    { type: 'activity', text: `ROSTER Mech\nSINCE 30 days` },
+  ]
+  state.api.status(elem, command, ` ⇒ ${sites.length} sites`)
+  state.items = items
+}
+
+function lineup_emit({ elem, command, state }) {
+  const items = state.api.lineupPages(elem).map(pageObject => {
+    const page = pageObject.getRawPage()
+    const site = pageObject.getRemoteSite(state.api.host())
+    const title = page.title || 'Empty'
+    const slug = asSlug(title)
+    const text = page.story[0]?.text || 'empty'
+    return { type: 'reference', site, slug, title, text }
+  })
+  state.api.status(elem, command, ` ⇒ ${items.length} pages`)
+  state.items = items
+}
+
+function listen_emit({ elem, command, args, state }) {
+  if (args.length < 1) return state.api.trouble(elem, `LISTEN expects argument, an action.`)
+  const topic = args[0]
+  let recent = Date.now()
+  let count = 0
+  const handler = listen
+  handler.action = 'publishSourceData'
+  handler.id = elem.id
+  window.addEventListener('message', listen)
+  $('.main').on('thumb', (evt, thumb) => console.log('jquery', { evt, thumb }))
+  // elem.innerHTML = command + ` ⇒ ready`
+  state.api.status(elem, command, ` ⇒ ready`)
+  // window.listeners = (action=null) => {
+  //   return getEventListeners(window).message
+  //     .map(t => t.listener)
+  //     .filter(f => f.name == 'listen')
+  //     .map(f => ({action:f.action,elem:document.getElementById(f.id),count:f.count}))
+  // }
+
+  function listen(event) {
+    console.log({ event })
+    const { data } = event
+    if (data.action == 'publishSourceData' && (data.name == topic || data.topic == topic)) {
+      count++
+      handler.count = count
+      if (state.debug) console.log({ count, data })
+      if (count <= 100) {
+        const now = Date.now()
+        const elapsed = now - recent
+        recent = now
+        // elem.innerHTML = command + ` ⇒ ${count} events, ${elapsed} ms`
+        state.api.status(elem, command, ` ⇒ ${count} events, ${elapsed} ms`)
+      } else {
+        window.removeEventListener('message', listen)
+      }
+    }
+  }
+}
+
+function message_emit({ elem, command, args, state }) {
+  if (args.length < 1) return state.api.trouble(elem, `MESSAGE expects argument, an action.`)
+  const topic = args[0]
+  const message = {
+    action: 'publishSourceData',
+    topic,
+    name: topic,
+  }
+  window.postMessage(message, '*')
+  // elem.innerHTML = command + ` ⇒ sent`
+  state.api.status(elem, command, ` ⇒ sent`)
+}
+
+async function solo_emit({ elem, command, state }) {
+  if (!('aspect' in state)) return state.api.trouble(elem, `"SOLO" expects "aspect" state, like from "WALK".`)
+  inspect(elem, 'aspect', state)
+  // elem.innerHTML = command
+  state.api.status(elem, command, '')
+  const todo = state.aspect.map(each => ({
+    source: each.source || each.id,
+    aspects: each.result,
+  }))
+  const aspects = todo.reduce((sum, each) => sum + each.aspects.length, 0)
+  // elem.innerHTML += ` ⇒ ${todo.length} sources, ${aspects} aspects`
+  state.api.status(elem, command, ` ⇒ ${todo.length} sources, ${aspects} aspects`)
+
+  // from Solo plugin, client/solo.js
+  const pageKey = elem.closest('.page').dataset.key
+  const doing = { type: 'batch', sources: todo, pageKey }
+  // console.log({ pageKey, doing })
+
+  if (typeof window.soloListener == 'undefined' || window.soloListener == null) {
+    console.log('**** Adding solo listener')
+    window.soloListener = soloListener
+    window.addEventListener('message', soloListener)
+  }
+
+  await delay(750)
+  const popup = window.open('/plugins/solo/dialog/#', 'solo', 'popup,height=720,width=1280')
+  if (popup.location.pathname != '/plugins/solo/dialog/') {
+    console.log('launching new dialog')
+    popup.addEventListener('load', event => {
+      console.log('launched and loaded')
+      popup.postMessage(doing, window.origin)
+    })
+  } else {
+    console.log('reusing existing dialog')
+    popup.postMessage(doing, window.origin)
+  }
+}
+
+function popup_emit({ elem, args, state }) {
+  const expand = text => text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+  const html = []
+  switch (args[0]) {
+    case 'state':
+      for (const key in state) {
+        let value = state[key]
+        if (value == null) continue
+        if (typeof value != 'string') value = JSON.stringify(state[key], null, 2)
+        html.push(
+          `<details>
+            <summary>${key}</summary>
+            <pre style="white-space: pre-wrap;">${expand(value)}</pre>
+          </details>`,
+        )
+      }
+      break
+    case 'images':
+      if (!state.commons)
+        return state.api.trouble(elem, `POPUP images expects "commons" state, like from "GET" "COMMONS"`)
+      const where = args[1] == 'all' ? state.commons.all : state.commons.here
+      for (const item of where.items) {
+        html.push(`<span><img height=200 src=/assets/plugins/image/${item}></span>`)
+      }
+      break
+    default:
+      return state.api.trouble(elem, `POPUP doesn't know "${args[0]}".`)
+  }
+  wiki.dialog(elem.innerText, html.join('\n'))
+}
+
+async function print_emit({ elem, command, args, state }) {
+  if (!['outline', 'draft'].includes(args[0])) return state.api.trouble(elem, 'Expects PRINT outline or PRINT draft.')
+  const way = args[0]
+  if (!state.aspect) return state.api.trouble(elem, `PRINT expects "aspect", like from WALK clicks.`)
+  state.api.inspect(elem, 'aspect', state)
+  if (!state.neighborhood) return state.api.trouble(elem, `PRINT expectes "neighborhood", like from NEIGHBORS.`)
+  state.api.inspect(elem, 'neighborhood', state)
+  const aspect = state.aspect
+  const neighborhood = state.neighborhood
+  console.log('print', { aspect, neighborhood })
+  const print = []
+  const tally = { missing: [], omitted: [], domains: [], forks: [], wishes: [], errors: [] }
+  const explain = {}
+  const count = (hits, what, slug) => {
+    if (!(what in hits)) hits[what] = []
+    hits[what].push(slug)
+  }
+  const report = (counter, heading) => {
+    const hits = tally[counter]
+    console.log('explain', counter, explain[counter])
+    const hash = s => Math.abs(s.split('').reduce((h, c) => c.charCodeAt(0) + (h << 6) + (h << 16) - h, 0)).toString(16)
+    const keys = Object.keys(hits).toSorted((a, b) => hits[b].length - hits[a].length)
+    if (keys.length) {
+      const details = []
+      for (const what of keys) {
+        const list = hits[what]
+          .filter(uniq)
+          .sort()
+          .map(slug => `[[${slug}]]`)
+          .join('\n')
+        details.push(`<details><summary>${what} × ${hits[what].length}</summary>
+          <pre>${list}</pre></details>`)
+      }
+      items.push({ type: 'markdown', text: `# ${heading}\n${explain[counter] || ''}`, id: hash(heading) })
+      if (keys[0].match(/\.\w+\.\w+$/)) items.push({ type: 'roster', text: keys.join('\n') })
+      items.push({ type: 'html', text: details.join('\n ') })
+    }
+  }
+  const timestamp = new Date().toString().replace(/ *\(.*\)/, '')
+  const items = [
+    { type: 'paragraph', text: `From ${timestamp}` },
+    { type: 'solo', text: 'INCLUDED', aspects: aspect[0].result },
+  ]
+
+  print.push(`<h1>Story</h1>`)
+  const clicks = aspect.find(each => each.source.match(/^WALK.*clicks/))
+  if (!clicks) return state.api.trouble(elem, `PRINT needs aspect from WALK clicks`)
+  const story = clicks.result.map(each => each.name)
+  await output(story, 'story')
+
+  print.push(`<h1>Garden</h1>`)
+  const garden = clicks.result.map(each => each.graph.nodes.map(node => node.props)).flat()
+  const uniq = (value, index, self) => self.indexOf(value) === index
+  const slugs = garden
+    .map(props => asSlug(props.name.replaceAll('\n', ' ')))
+    .filter(uniq)
+    .filter(slug => !story.includes(slug))
+    .sort()
+  await output(slugs, 'garden')
+
+  console.log({ tally, explain })
+  report('domains', 'Sourced Sites')
+  report('missing', 'Missing Pages')
+  report('omitted', 'Omitted Links')
+  report('forks', 'Omitted Forks')
+  report('wishes', 'Unusual Plugins')
+  report('errors', 'Program Errors')
+  if (items.length) state.items = items
+
+  state.api.status(elem, command, ` ⇒ ${story.length} story, ${slugs.length} garden`)
+  state.api.download(print.join('\n'), `print-${way}.html`, 'text/html')
+
+  async function output(slugs, section) {
+    const style = `style="width:640px"`
+    const expand = text => {
+      return text
+        .replaceAll(/\[\[(.*?)\]\]/g, (m, p1) => `<a href="#${asSlug(p1)}">${p1}</a>`)
+        .replaceAll(/\[.*? (.*?)\]/g, (m, p1) => `<i>${p1}</i>`)
+    }
+    for (const slug of slugs) {
+      const info = neighborhood.find(info => info.slug == slug)
+      if (!info) {
+        count(tally.missing, section, slug)
+        explain.missing = `These pages weren't found in PRINT's neighborhood.`
+        continue
+      }
+      count(tally.domains, info.domain, info.slug)
+      explain.domains = `Pages have been retrieved from these sites. Remove sites from the PRINT neighborhood if these should be found elsewhere.`
+      if (section == 'garden') {
+        for (const link in info.links) if (!slugs.includes(link)) count(tally.omitted, slug, link)
+        explain.omitted = `Garden pages with links to pages omitted from the garden. These may show up with a deeper WALK into the garden'`
+      }
+      if (way == 'outline')
+        print.push(
+          `<p id="${info.slug}" ${style}"><b title="${info.domain}">${info.title}</b> -- ${expand(info.synopsis)}</p>`,
+        )
+      else {
+        const where = slugs.indexOf(slug) + 1
+        state.api.status(elem, command, ` ⇒ ${where} of ${slugs.length} from ${section}`)
+        try {
+          console.log(info.domain, info.title)
+          const page = await state.api.jfetch(`//${info.domain}/${info.slug}.json`)
+          print.push(`<section id="${info.slug}"><h3 title="${info.domain}">${info.title}</h3>`)
+          for (const item of page.story) {
+            if (item.type != 'paragraph') count(tally.wishes, item.type, slug)
+            explain.wishes =
+              'Items of type "paragraph" are expected. Types "markdown" and "html" may show without revision. The remainder appear as only a one-line note.'
+            switch (item.type) {
+              case 'paragraph':
+                print.push(`<p ${style}>${expand(item.text)}</p>`)
+                break
+              case 'markdown':
+                print.push(expand(md(item.text)))
+                break
+              case 'html':
+                print.push(`<p ${style}>${expand(state.api.closeTags(item.text))}</p>`)
+                break
+              default:
+                print.push(`<p ${style}>Item type "${item.type}" omitted.</p>`)
+            }
+          }
+          for (const action of page.journal) {
+            if (action.site && !neighborhood.find(info => info.domain == action.site))
+              count(tally.forks, action.site, slug)
+            explain.forks =
+              'Wiki remembers where pages may once have lived but PRINT only looks for pages in the neighborhoods prvided.'
+          }
+          print.push(`</section>`)
+        } catch (err) {
+          count(tally.errors, err.message, info.slug)
+          explain.errors =
+            'Any pages that lead to program errors should be explored by developers. Until then they will be ignored.'
+        }
+      }
+    }
+  }
+}
+
+async function code_emit({ elem, command, args, body, state, initiator }) {
+  const key = state.api.thisLineupKey(elem)
+  const pageObject = state.api.lineupAtKey(key)
+  const story = pageObject.getRawPage().story
+  const codes = story.filter(item => item.type == 'code')
+  const owned = window.isOwner && !pageObject.isRemote()
+  if (!codes) return state.api.trouble(elem, `CODE expects the Code plugin in use on this page.`)
+  if (!(initiator || owned))
+    return state.api.trouble(elem, `This CODE must be run by CLICK or TICK or owned by the logged in user.`)
+  const code = codes.map(item => item.text).join('\n')
+  const way = args.length ? args[0] : 'default'
+  const api = {
+    trouble(message) {
+      state.api.trouble(elem, message)
+    },
+    response(text) {
+      state.api.response(elem, text)
+    },
+    status(text) {
+      state.api.status(elem, command, text)
+    },
+    report(text) {
+      state.api.report(elem, command, text)
+    },
+    graph(nodes = [], rels = []) {
+      return new Graph(nodes, rels)
+    },
+    body() {
+      return body
+    },
+  }
+  const handler = {
+    get(target, prop) {
+      if (prop == 'api') return api
+      state.api.inspect(elem, prop, target)
+      return target[prop]
+    },
+  }
+  try {
+    const module = await import(`data:text/javascript;base64,${btoa(code)}`)
+    if (!(way in module)) return api.trouble(`Expected export of function "${way}".`)
+    const proxy = new Proxy(state, handler)
+    const result = await module[way].apply(proxy, args.slice(1))
+    if (typeof result != 'undefined') state.api.status(elem, command, ` ⇒ ${result}`)
+  } catch (err) {
+    let lines = code.split(/\n/)
+    let listing = lines.map((line, i) => `${i + 1} ${line}`).join('\n')
+    let message = err.message
+    let ln = err.line ?? err.lineNumber
+    let cn = err.columnNumber
+    if (ln) {
+      let line = lines[ln - 1]
+      if (cn)
+        message += `<span class=code>${line.substring(0, cn - 1)}<font color=red>✖︎</font>${line.substring(cn - 1)}</span>`
+      else message += `<span class=code>${line}</span>`
+    }
+    return state.api.trouble(elem, message)
+  }
+}
+
+async function download_emit({ elem, command, args, state }) {
+  // https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/MIME_types/Common_types
+  const types = {
+    txt: 'text/plain',
+    html: 'text/html',
+    csv: 'text/csv',
+    tsv: 'text/tsv',
+    json: 'application/json',
+  }
+  if (!args.length) return state.api.trouble(elem, `DOWNLOAD expects an argument, a file name to use when downloaded.`)
+  const m = args[0].match(/^.+\.(txt|html|csv|tsv|json)$/)
+  console.log(m)
+  if (!m) return state.api.trouble(elem, `DOWNLOAD expects a familiar suffix, one of txt, html, csv, tsv, or json.`)
+  const [file, suffix] = m
+  if (!(suffix in state)) return state.api.trouble(elem, `DOWNLOAD expects to find "${suffix}" in state.`)
+  const string = suffix == 'json' ? JSON.stringify(state.json) : state[suffix]
+  state.api.status(elem, command, ` ⇒ ${string.length} bytes`)
+  state.api.download(string, file, types[suffix])
+}
+
+// C A T A L O G
+
+export const blocks = {
+  CLICK: { emit: click_emit },
+  HELLO: { emit: hello_emit },
+  FROM: { emit: from_emit },
+  SENSOR: { emit: sensor_emit },
+  REPORT: { emit: report_emit },
+  SOURCE: { emit: source_emit },
+  PREVIEW: { emit: preview_emit },
+  NEIGHBORS: { emit: neighbors_emit },
+  WALK: { emit: walk_emit },
+  TICK: { emit: tick_emit },
+  UNTIL: { emit: until_emit },
+  FORWARD: { emit: forward_emit },
+  TURN: { emit: turn_emit },
+  FILE: { emit: file_emit },
+  KWIC: { emit: kwic_emit },
+  SHOW: { emit: show_emit },
+  RANDOM: { emit: random_emit },
+  SLEEP: { emit: sleep_emit },
+  TOGETHER: { emit: together_emit },
+  PLUGIN: { emit: plugin_emit },
+  GET: { emit: get_emit },
+  DELTA: { emit: delta_emit },
+  ROSTER: { emit: roster_emit },
+  LINEUP: { emit: lineup_emit },
+  LISTEN: { emit: listen_emit },
+  MESSAGE: { emit: message_emit },
+  SOLO: { emit: solo_emit },
+  POPUP: { emit: popup_emit },
+  PRINT: { emit: print_emit },
+  CODE: { emit: code_emit },
+  DOWNLOAD: { emit: download_emit },
+}

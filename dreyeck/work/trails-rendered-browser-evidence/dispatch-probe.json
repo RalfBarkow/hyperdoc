@@ -1,0 +1,53 @@
+{
+  "kind": "source-level-dispatch-reduction",
+  "source": {
+    "file": "dreyeck/work/trails-rendered-browser-evidence/hyperdoc.blocks.js",
+    "sha256": "1b69037fda8c89a0c06f333e3b8a3bb11925b1371daf8c1dfda32835d757652b"
+  },
+  "producer": {
+    "command": "CODE trails",
+    "key": "controlled-code-block"
+  },
+  "registry": {
+    "keys": [
+      "CLICK",
+      "HELLO",
+      "FROM",
+      "SENSOR",
+      "REPORT",
+      "SOURCE",
+      "PREVIEW",
+      "NEIGHBORS",
+      "EXTRACT",
+      "EDGES",
+      "WALK",
+      "TICK",
+      "UNTIL",
+      "FORWARD",
+      "TURN",
+      "FILE",
+      "KWIC",
+      "SHOW",
+      "RANDOM",
+      "SLEEP",
+      "TOGETHER",
+      "GET",
+      "DELTA",
+      "ROSTER",
+      "LINEUP",
+      "LISTEN",
+      "MESSAGE",
+      "DEBUG",
+      "SOLO"
+    ],
+    "hasCode": false
+  },
+  "diagnostics": [
+    {
+      "element": "controlled-code-block",
+      "message": "CODE doesn't name a block we know."
+    }
+  ],
+  "handlerCalls": 0,
+  "scope": "Retained run and catalog declarations; fake element/trouble API and sentinel handlers. No browser, module import, trails(), Graph, Wiki navigation, Solo or retained-capture mutation."
+}

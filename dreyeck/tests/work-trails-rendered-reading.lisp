@@ -448,6 +448,7 @@
   (format t "~&SOLO-HOVERBOLD-PASS: observed source and installation, trusted enter/leave writes, incident edge widths, unchanged controls/child DOM/node, fresh snapshots, native inspector references and linked page.~%"))
 
 (defun run-tests ()
+  (check-original-code-browser)
   (check-trail-following)
   (check-solo-batch)
   (check-solo-beam)

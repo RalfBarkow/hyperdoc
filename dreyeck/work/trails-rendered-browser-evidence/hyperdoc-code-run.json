@@ -1,0 +1,1579 @@
+{
+  "started": "2026-10-08T11:04:31.474Z",
+  "url": "https://hyperdoc.dreyeck.ch/view/welcome-visitors/view/trails-rendered",
+  "outcome": "trouble",
+  "diagnostic": "CLICK▶\nCODE trails✖︎\nCODE doesn't name a block we know.\nCLICK▶\nSOLO\nCLICK▶\nPREVIEW synopsis items",
+  "console": [
+    {
+      "at": "2026-10-08T11:04:33.983Z",
+      "type": "log",
+      "text": "JQMIGRATE: Migrate is installed, version 3.5.0",
+      "location": {
+        "url": "https://hyperdoc.dreyeck.ch/js/jquery-migrate-3.5.0.min.js",
+        "line": 1,
+        "column": 980,
+        "lineNumber": 1,
+        "columnNumber": 980
+      }
+    },
+    {
+      "at": "2026-10-08T11:04:34.035Z",
+      "type": "log",
+      "text": "siteAdapter: loading data",
+      "location": {
+        "url": "https://hyperdoc.dreyeck.ch/client.js",
+        "line": 1,
+        "column": 36329,
+        "lineNumber": 1,
+        "columnNumber": 36329
+      }
+    },
+    {
+      "at": "2026-10-08T11:04:34.074Z",
+      "type": "log",
+      "text": "loading url: /security/security.js",
+      "location": {
+        "url": "https://hyperdoc.dreyeck.ch/client.js",
+        "line": 16,
+        "column": 2704,
+        "lineNumber": 16,
+        "columnNumber": 2704
+      }
+    },
+    {
+      "at": "2026-10-08T11:04:34.229Z",
+      "type": "log",
+      "text": "Image Plugin declares an editor, so pre-loading the plugin",
+      "location": {
+        "url": "https://hyperdoc.dreyeck.ch/client.js",
+        "line": 101,
+        "column": 375,
+        "lineNumber": 101,
+        "columnNumber": 375
+      }
+    },
+    {
+      "at": "2026-10-08T11:04:34.230Z",
+      "type": "log",
+      "text": "loading url: /plugins/image/image.js",
+      "location": {
+        "url": "https://hyperdoc.dreyeck.ch/client.js",
+        "line": 16,
+        "column": 2704,
+        "lineNumber": 16,
+        "columnNumber": 2704
+      }
+    },
+    {
+      "at": "2026-10-08T11:04:34.444Z",
+      "type": "log",
+      "text": "siteAdapter: data loaded",
+      "location": {
+        "url": "https://hyperdoc.dreyeck.ch/client.js",
+        "line": 1,
+        "column": 36455,
+        "lineNumber": 1,
+        "columnNumber": 36455
+      }
+    },
+    {
+      "at": "2026-10-08T11:04:34.445Z",
+      "type": "log",
+      "text": "siteAdapter: withCredentials data loaded",
+      "location": {
+        "url": "https://hyperdoc.dreyeck.ch/client.js",
+        "line": 1,
+        "column": 36651,
+        "lineNumber": 1,
+        "columnNumber": 36651
+      }
+    },
+    {
+      "at": "2026-10-08T11:04:34.510Z",
+      "type": "verbose",
+      "text": "[DOM] Input elements should have autocomplete attributes (suggested: \"new-password\"): (More info: https://goo.gl/9p2vKq) %o",
+      "location": {
+        "url": "https://hyperdoc.dreyeck.ch/view/welcome-visitors/view/trails-rendered",
+        "line": 0,
+        "column": 0,
+        "lineNumber": 0,
+        "columnNumber": 0
+      }
+    },
+    {
+      "at": "2026-10-08T11:04:34.520Z",
+      "type": "log",
+      "text": "loading url: /plugins/markdown/markdown.js",
+      "location": {
+        "url": "https://hyperdoc.dreyeck.ch/client.js",
+        "line": 16,
+        "column": 2704,
+        "lineNumber": 16,
+        "columnNumber": 2704
+      }
+    },
+    {
+      "at": "2026-10-08T11:04:34.668Z",
+      "type": "log",
+      "text": "delay for  hyperdoc.dreyeck.ch 30.206916666666668",
+      "location": {
+        "url": "https://hyperdoc.dreyeck.ch/client.js",
+        "line": 5,
+        "column": 25239,
+        "lineNumber": 5,
+        "columnNumber": 25239
+      }
+    },
+    {
+      "at": "2026-10-08T11:04:34.907Z",
+      "type": "log",
+      "text": "hyperdoc.dreyeck.ch index loaded",
+      "location": {
+        "url": "https://hyperdoc.dreyeck.ch/client.js",
+        "line": 5,
+        "column": 25533,
+        "lineNumber": 5,
+        "columnNumber": 25533
+      }
+    },
+    {
+      "at": "2026-10-08T11:04:34.931Z",
+      "type": "log",
+      "text": "Prefix for wiki.ralfbarkow.ch is //wiki.ralfbarkow.ch",
+      "location": {
+        "url": "https://hyperdoc.dreyeck.ch/client.js",
+        "line": 1,
+        "column": 40134,
+        "lineNumber": 1,
+        "columnNumber": 40134
+      }
+    },
+    {
+      "at": "2026-10-08T11:04:34.949Z",
+      "type": "error",
+      "text": "Failed to load resource: net::ERR_CONNECTION_REFUSED",
+      "location": {
+        "url": "http://localhost/favicon.png",
+        "line": 0,
+        "column": 0,
+        "lineNumber": 0,
+        "columnNumber": 0
+      }
+    },
+    {
+      "at": "2026-10-08T11:04:34.987Z",
+      "type": "error",
+      "text": "Failed to load resource: the server responded with a status of 403 ()",
+      "location": {
+        "url": "https://hyperdoc.dreyeck.ch/proxy/localhost/favicon.png",
+        "line": 0,
+        "column": 0,
+        "lineNumber": 0,
+        "columnNumber": 0
+      }
+    },
+    {
+      "at": "2026-10-08T11:04:34.987Z",
+      "type": "log",
+      "text": "ajax error ce.Event {readyState: 4, getResponseHeader: , getAllResponseHeaders: , setRequestHeader: , overrideMimeType: } {url: /proxy/localhost/favicon.png, type: GET, isLocal: false, global: true, processData: true}",
+      "location": {
+        "url": "https://hyperdoc.dreyeck.ch/client.js",
+        "line": 103,
+        "column": 578,
+        "lineNumber": 103,
+        "columnNumber": 578
+      }
+    },
+    {
+      "at": "2026-10-08T11:04:34.989Z",
+      "type": "log",
+      "text": "Prefix for localhost is undetermined...",
+      "location": {
+        "url": "https://hyperdoc.dreyeck.ch/client.js",
+        "line": 1,
+        "column": 40079,
+        "lineNumber": 1,
+        "columnNumber": 40079
+      }
+    },
+    {
+      "at": "2026-10-08T11:04:35.080Z",
+      "type": "log",
+      "text": "loading url: /plugins/graphviz/graphviz.js",
+      "location": {
+        "url": "https://hyperdoc.dreyeck.ch/client.js",
+        "line": 16,
+        "column": 2704,
+        "lineNumber": 16,
+        "columnNumber": 2704
+      }
+    },
+    {
+      "at": "2026-10-08T11:04:35.082Z",
+      "type": "log",
+      "text": "Prefix for wiki.khinsen.net is //wiki.khinsen.net",
+      "location": {
+        "url": "https://hyperdoc.dreyeck.ch/client.js",
+        "line": 1,
+        "column": 40134,
+        "lineNumber": 1,
+        "columnNumber": 40134
+      }
+    },
+    {
+      "at": "2026-10-08T11:04:35.083Z",
+      "type": "log",
+      "text": "Prefix for hyperdoc.wiki.khinsen.net is //hyperdoc.wiki.khinsen.net",
+      "location": {
+        "url": "https://hyperdoc.dreyeck.ch/client.js",
+        "line": 1,
+        "column": 40134,
+        "lineNumber": 1,
+        "columnNumber": 40134
+      }
+    },
+    {
+      "at": "2026-10-08T11:04:35.120Z",
+      "type": "log",
+      "text": "**** Adding graphviz listener",
+      "location": {
+        "url": "https://hyperdoc.dreyeck.ch/plugins/graphviz/graphviz.js",
+        "line": 626,
+        "column": 16,
+        "lineNumber": 626,
+        "columnNumber": 16
+      }
+    },
+    {
+      "at": "2026-10-08T11:04:35.120Z",
+      "type": "log",
+      "text": "adding style",
+      "location": {
+        "url": "https://hyperdoc.dreyeck.ch/plugins/graphviz/graphviz.js",
+        "line": 492,
+        "column": 14,
+        "lineNumber": 492,
+        "columnNumber": 14
+      }
+    },
+    {
+      "at": "2026-10-08T11:04:35.124Z",
+      "type": "log",
+      "text": "loading url: /plugins/solo/solo.js",
+      "location": {
+        "url": "https://hyperdoc.dreyeck.ch/client.js",
+        "line": 16,
+        "column": 2704,
+        "lineNumber": 16,
+        "columnNumber": 2704
+      }
+    },
+    {
+      "at": "2026-10-08T11:04:35.143Z",
+      "type": "log",
+      "text": "**** Adding solo listener",
+      "location": {
+        "url": "https://hyperdoc.dreyeck.ch/plugins/solo/solo.js",
+        "line": 11,
+        "column": 1357,
+        "lineNumber": 11,
+        "columnNumber": 1357
+      }
+    },
+    {
+      "at": "2026-10-08T11:04:35.143Z",
+      "type": "log",
+      "text": "{graphs: Array(1)}",
+      "location": {
+        "url": "https://hyperdoc.dreyeck.ch/plugins/solo/solo.js",
+        "line": 5,
+        "column": 111,
+        "lineNumber": 5,
+        "columnNumber": 111
+      }
+    },
+    {
+      "at": "2026-10-08T11:04:35.149Z",
+      "type": "log",
+      "text": "{todo: Array(1)}",
+      "location": {
+        "url": "https://hyperdoc.dreyeck.ch/plugins/solo/solo.js",
+        "line": 8,
+        "column": 53,
+        "lineNumber": 8,
+        "columnNumber": 53
+      }
+    },
+    {
+      "at": "2026-10-08T11:04:35.151Z",
+      "type": "log",
+      "text": "loading url: /plugins/mech/mech.js",
+      "location": {
+        "url": "https://hyperdoc.dreyeck.ch/client.js",
+        "line": 16,
+        "column": 2704,
+        "lineNumber": 16,
+        "columnNumber": 2704
+      }
+    },
+    {
+      "at": "2026-10-08T11:04:35.204Z",
+      "type": "error",
+      "text": "Failed to load resource: net::ERR_CONNECTION_REFUSED",
+      "location": {
+        "url": "https://ward.voices.ustawi.wiki/favicon.png",
+        "line": 0,
+        "column": 0,
+        "lineNumber": 0,
+        "columnNumber": 0
+      }
+    },
+    {
+      "at": "2026-10-08T11:04:35.205Z",
+      "type": "error",
+      "text": "Failed to load resource: net::ERR_CONNECTION_REFUSED",
+      "location": {
+        "url": "https://jan.voices.ustawi.wiki/favicon.png",
+        "line": 0,
+        "column": 0,
+        "lineNumber": 0,
+        "columnNumber": 0
+      }
+    },
+    {
+      "at": "2026-10-08T11:04:35.230Z",
+      "type": "error",
+      "text": "Failed to load resource: the server responded with a status of 403 ()",
+      "location": {
+        "url": "https://hyperdoc.dreyeck.ch/proxy/ward.voices.ustawi.wiki/favicon.png",
+        "line": 0,
+        "column": 0,
+        "lineNumber": 0,
+        "columnNumber": 0
+      }
+    },
+    {
+      "at": "2026-10-08T11:04:35.230Z",
+      "type": "log",
+      "text": "ajax error ce.Event {readyState: 4, getResponseHeader: , getAllResponseHeaders: , setRequestHeader: , overrideMimeType: } {url: /proxy/ward.voices.ustawi.wiki/favicon.png, type: GET, isLocal: false, global: true, processData: true}",
+      "location": {
+        "url": "https://hyperdoc.dreyeck.ch/client.js",
+        "line": 103,
+        "column": 578,
+        "lineNumber": 103,
+        "columnNumber": 578
+      }
+    },
+    {
+      "at": "2026-10-08T11:04:35.231Z",
+      "type": "error",
+      "text": "Failed to load resource: the server responded with a status of 403 ()",
+      "location": {
+        "url": "https://hyperdoc.dreyeck.ch/proxy/jan.voices.ustawi.wiki/favicon.png",
+        "line": 0,
+        "column": 0,
+        "lineNumber": 0,
+        "columnNumber": 0
+      }
+    },
+    {
+      "at": "2026-10-08T11:04:35.231Z",
+      "type": "log",
+      "text": "ajax error ce.Event {readyState: 4, getResponseHeader: , getAllResponseHeaders: , setRequestHeader: , overrideMimeType: } {url: /proxy/jan.voices.ustawi.wiki/favicon.png, type: GET, isLocal: false, global: true, processData: true}",
+      "location": {
+        "url": "https://hyperdoc.dreyeck.ch/client.js",
+        "line": 103,
+        "column": 578,
+        "lineNumber": 103,
+        "columnNumber": 578
+      }
+    },
+    {
+      "at": "2026-10-08T11:04:35.232Z",
+      "type": "log",
+      "text": "Prefix for ward.voices.ustawi.wiki is undetermined...",
+      "location": {
+        "url": "https://hyperdoc.dreyeck.ch/client.js",
+        "line": 1,
+        "column": 40079,
+        "lineNumber": 1,
+        "columnNumber": 40079
+      }
+    },
+    {
+      "at": "2026-10-08T11:04:35.232Z",
+      "type": "log",
+      "text": "Prefix for jan.voices.ustawi.wiki is undetermined...",
+      "location": {
+        "url": "https://hyperdoc.dreyeck.ch/client.js",
+        "line": 1,
+        "column": 40079,
+        "lineNumber": 1,
+        "columnNumber": 40079
+      }
+    },
+    {
+      "at": "2026-10-08T11:04:35.238Z",
+      "type": "info",
+      "text": "[mech] version: 0.1.32-dev.1 build: {MECH_VERSION: 0.1.32-dev.1, MECH_BUILD_TIME: 2026-03-03T15:12:15Z, MECH_GIT_COMMIT: abd88d2da6c89029515f2a456356832dffe038ab} commit: abd88d2da6c89029515f2a456356832dffe038ab",
+      "location": {
+        "url": "https://hyperdoc.dreyeck.ch/plugins/mech/mech.js",
+        "line": 17,
+        "column": 10,
+        "lineNumber": 17,
+        "columnNumber": 10
+      }
+    },
+    {
+      "at": "2026-10-08T11:04:35.239Z",
+      "type": "log",
+      "text": "loading url: /plugins/code/code.js",
+      "location": {
+        "url": "https://hyperdoc.dreyeck.ch/client.js",
+        "line": 16,
+        "column": 2704,
+        "lineNumber": 16,
+        "columnNumber": 2704
+      }
+    },
+    {
+      "at": "2026-10-08T11:04:35.488Z",
+      "type": "error",
+      "text": "Failed to load resource: net::ERR_CONNECTION_REFUSED",
+      "location": {
+        "url": "https://ward.voices.ustawi.wiki/favicon.png",
+        "line": 0,
+        "column": 0,
+        "lineNumber": 0,
+        "columnNumber": 0
+      }
+    },
+    {
+      "at": "2026-10-08T11:04:35.488Z",
+      "type": "error",
+      "text": "Failed to load resource: the server responded with a status of 403 ()",
+      "location": {
+        "url": "https://hyperdoc.dreyeck.ch/proxy/ward.voices.ustawi.wiki/favicon.png",
+        "line": 0,
+        "column": 0,
+        "lineNumber": 0,
+        "columnNumber": 0
+      }
+    },
+    {
+      "at": "2026-10-08T11:04:35.488Z",
+      "type": "log",
+      "text": "ajax error ce.Event {readyState: 4, getResponseHeader: , getAllResponseHeaders: , setRequestHeader: , overrideMimeType: } {url: /proxy/ward.voices.ustawi.wiki/favicon.png, type: GET, isLocal: false, global: true, processData: true}",
+      "location": {
+        "url": "https://hyperdoc.dreyeck.ch/client.js",
+        "line": 103,
+        "column": 578,
+        "lineNumber": 103,
+        "columnNumber": 578
+      }
+    },
+    {
+      "at": "2026-10-08T11:04:35.488Z",
+      "type": "log",
+      "text": "ward.voices.ustawi.wiki is unreachable",
+      "location": {
+        "url": "https://hyperdoc.dreyeck.ch/client.js",
+        "line": 1,
+        "column": 42059,
+        "lineNumber": 1,
+        "columnNumber": 42059
+      }
+    },
+    {
+      "at": "2026-10-08T11:04:35.488Z",
+      "type": "log",
+      "text": "Refreshing ward.voices.ustawi.wiki",
+      "location": {
+        "url": "https://hyperdoc.dreyeck.ch/client.js",
+        "line": 1,
+        "column": 43014,
+        "lineNumber": 1,
+        "columnNumber": 43014
+      }
+    },
+    {
+      "at": "2026-10-08T11:04:35.488Z",
+      "type": "warning",
+      "text": "Unable to fetch sitemap for ward.voices.ustawi.wiki",
+      "location": {
+        "url": "https://hyperdoc.dreyeck.ch/client.js",
+        "line": 5,
+        "column": 24971,
+        "lineNumber": 5,
+        "columnNumber": 24971
+      }
+    },
+    {
+      "at": "2026-10-08T11:04:36.905Z",
+      "type": "error",
+      "text": "Failed to load resource: net::ERR_CONNECTION_REFUSED",
+      "location": {
+        "url": "https://ward.voices.ustawi.wiki/favicon.png",
+        "line": 0,
+        "column": 0,
+        "lineNumber": 0,
+        "columnNumber": 0
+      }
+    },
+    {
+      "at": "2026-10-08T11:04:36.905Z",
+      "type": "log",
+      "text": "jan.voices.ustawi.wiki is unreachable",
+      "location": {
+        "url": "https://hyperdoc.dreyeck.ch/client.js",
+        "line": 1,
+        "column": 41886,
+        "lineNumber": 1,
+        "columnNumber": 41886
+      }
+    },
+    {
+      "at": "2026-10-08T11:04:36.906Z",
+      "type": "log",
+      "text": "Refreshing jan.voices.ustawi.wiki",
+      "location": {
+        "url": "https://hyperdoc.dreyeck.ch/client.js",
+        "line": 1,
+        "column": 43014,
+        "lineNumber": 1,
+        "columnNumber": 43014
+      }
+    },
+    {
+      "at": "2026-10-08T11:04:36.906Z",
+      "type": "warning",
+      "text": "Unable to fetch sitemap for jan.voices.ustawi.wiki",
+      "location": {
+        "url": "https://hyperdoc.dreyeck.ch/client.js",
+        "line": 5,
+        "column": 24971,
+        "lineNumber": 5,
+        "columnNumber": 24971
+      }
+    },
+    {
+      "at": "2026-10-08T11:04:36.988Z",
+      "type": "error",
+      "text": "Failed to load resource: the server responded with a status of 403 ()",
+      "location": {
+        "url": "https://hyperdoc.dreyeck.ch/proxy/ward.voices.ustawi.wiki/favicon.png",
+        "line": 0,
+        "column": 0,
+        "lineNumber": 0,
+        "columnNumber": 0
+      }
+    },
+    {
+      "at": "2026-10-08T11:04:36.989Z",
+      "type": "log",
+      "text": "ajax error ce.Event {readyState: 4, getResponseHeader: , getAllResponseHeaders: , setRequestHeader: , overrideMimeType: } {url: /proxy/ward.voices.ustawi.wiki/favicon.png, type: GET, isLocal: false, global: true, processData: true}",
+      "location": {
+        "url": "https://hyperdoc.dreyeck.ch/client.js",
+        "line": 103,
+        "column": 578,
+        "lineNumber": 103,
+        "columnNumber": 578
+      }
+    },
+    {
+      "at": "2026-10-08T11:04:37.363Z",
+      "type": "log",
+      "text": "Refreshed prefix for ward.voices.ustawi.wiki is undetermined...",
+      "location": {
+        "url": "https://hyperdoc.dreyeck.ch/client.js",
+        "line": 1,
+        "column": 43301,
+        "lineNumber": 1,
+        "columnNumber": 43301
+      }
+    },
+    {
+      "at": "2026-10-08T11:04:37.368Z",
+      "type": "error",
+      "text": "Failed to load resource: net::ERR_CONNECTION_REFUSED",
+      "location": {
+        "url": "https://jan.voices.ustawi.wiki/favicon.png",
+        "line": 0,
+        "column": 0,
+        "lineNumber": 0,
+        "columnNumber": 0
+      }
+    },
+    {
+      "at": "2026-10-08T11:04:37.402Z",
+      "type": "error",
+      "text": "Failed to load resource: the server responded with a status of 403 ()",
+      "location": {
+        "url": "https://hyperdoc.dreyeck.ch/proxy/jan.voices.ustawi.wiki/favicon.png",
+        "line": 0,
+        "column": 0,
+        "lineNumber": 0,
+        "columnNumber": 0
+      }
+    },
+    {
+      "at": "2026-10-08T11:04:37.404Z",
+      "type": "log",
+      "text": "ajax error ce.Event {readyState: 4, getResponseHeader: , getAllResponseHeaders: , setRequestHeader: , overrideMimeType: } {url: /proxy/jan.voices.ustawi.wiki/favicon.png, type: GET, isLocal: false, global: true, processData: true}",
+      "location": {
+        "url": "https://hyperdoc.dreyeck.ch/client.js",
+        "line": 103,
+        "column": 578,
+        "lineNumber": 103,
+        "columnNumber": 578
+      }
+    },
+    {
+      "at": "2026-10-08T11:04:37.406Z",
+      "type": "log",
+      "text": "Refreshed prefix for jan.voices.ustawi.wiki is undetermined...",
+      "location": {
+        "url": "https://hyperdoc.dreyeck.ch/client.js",
+        "line": 1,
+        "column": 43301,
+        "lineNumber": 1,
+        "columnNumber": 43301
+      }
+    }
+  ],
+  "pageErrors": [],
+  "failedRequests": [
+    {
+      "url": "http://localhost/favicon.png",
+      "failure": {
+        "errorText": "net::ERR_CONNECTION_REFUSED"
+      },
+      "type": "xhr"
+    },
+    {
+      "url": "https://ward.voices.ustawi.wiki/favicon.png",
+      "failure": {
+        "errorText": "net::ERR_CONNECTION_REFUSED"
+      },
+      "type": "xhr"
+    },
+    {
+      "url": "https://jan.voices.ustawi.wiki/favicon.png",
+      "failure": {
+        "errorText": "net::ERR_CONNECTION_REFUSED"
+      },
+      "type": "xhr"
+    },
+    {
+      "url": "https://ward.voices.ustawi.wiki/favicon.png",
+      "failure": {
+        "errorText": "net::ERR_CONNECTION_REFUSED"
+      },
+      "type": "xhr"
+    },
+    {
+      "url": "https://ward.voices.ustawi.wiki/favicon.png",
+      "failure": {
+        "errorText": "net::ERR_CONNECTION_REFUSED"
+      },
+      "type": "xhr"
+    },
+    {
+      "url": "https://jan.voices.ustawi.wiki/favicon.png",
+      "failure": {
+        "errorText": "net::ERR_CONNECTION_REFUSED"
+      },
+      "type": "xhr"
+    }
+  ],
+  "requests": [
+    {
+      "url": "https://hyperdoc.dreyeck.ch/view/welcome-visitors/view/trails-rendered",
+      "type": "document",
+      "at": "2026-10-08T11:04:33.732Z"
+    },
+    {
+      "url": "https://hyperdoc.dreyeck.ch/style/style.css",
+      "type": "stylesheet",
+      "at": "2026-10-08T11:04:33.867Z"
+    },
+    {
+      "url": "https://hyperdoc.dreyeck.ch/theme/style.css",
+      "type": "stylesheet",
+      "at": "2026-10-08T11:04:33.869Z"
+    },
+    {
+      "url": "https://hyperdoc.dreyeck.ch/js/jquery-ui/1.14.1/jquery-ui.min.css",
+      "type": "stylesheet",
+      "at": "2026-10-08T11:04:33.869Z"
+    },
+    {
+      "url": "https://hyperdoc.dreyeck.ch/js/jquery-3.7.1.min.js",
+      "type": "script",
+      "at": "2026-10-08T11:04:33.869Z"
+    },
+    {
+      "url": "https://hyperdoc.dreyeck.ch/js/jquery-migrate-3.5.0.min.js",
+      "type": "script",
+      "at": "2026-10-08T11:04:33.870Z"
+    },
+    {
+      "url": "https://hyperdoc.dreyeck.ch/js/jquery-ui/1.14.1/jquery-ui.min.js",
+      "type": "script",
+      "at": "2026-10-08T11:04:33.870Z"
+    },
+    {
+      "url": "https://hyperdoc.dreyeck.ch/js/jquery.ui.touch-punch.min.js",
+      "type": "script",
+      "at": "2026-10-08T11:04:33.870Z"
+    },
+    {
+      "url": "https://hyperdoc.dreyeck.ch/js/underscore-min.js",
+      "type": "script",
+      "at": "2026-10-08T11:04:33.870Z"
+    },
+    {
+      "url": "https://hyperdoc.dreyeck.ch/client.js",
+      "type": "script",
+      "at": "2026-10-08T11:04:33.870Z"
+    },
+    {
+      "url": "https://hyperdoc.dreyeck.ch/style/print.css",
+      "type": "stylesheet",
+      "at": "2026-10-08T11:04:33.871Z"
+    },
+    {
+      "url": "https://hyperdoc.dreyeck.ch/system/factories.json",
+      "type": "xhr",
+      "at": "2026-10-08T11:04:34.055Z"
+    },
+    {
+      "url": "https://hyperdoc.dreyeck.ch/images/crosses.png",
+      "type": "image",
+      "at": "2026-10-08T11:04:34.062Z"
+    },
+    {
+      "url": "https://hyperdoc.dreyeck.ch/security/security.js",
+      "type": "script",
+      "at": "2026-10-08T11:04:34.075Z"
+    },
+    {
+      "url": "https://hyperdoc.dreyeck.ch/images/noise.png",
+      "type": "image",
+      "at": "2026-10-08T11:04:34.175Z"
+    },
+    {
+      "url": "https://hyperdoc.dreyeck.ch/plugins/image/image.js",
+      "type": "script",
+      "at": "2026-10-08T11:04:34.231Z"
+    },
+    {
+      "url": "https://hyperdoc.dreyeck.ch/welcome-visitors.json",
+      "type": "xhr",
+      "at": "2026-10-08T11:04:34.382Z"
+    },
+    {
+      "url": "https://hyperdoc.dreyeck.ch/security/fontawesome/css/fontawesome.min.css",
+      "type": "stylesheet",
+      "at": "2026-10-08T11:04:34.388Z"
+    },
+    {
+      "url": "https://hyperdoc.dreyeck.ch/security/fontawesome/css/solid.min.css",
+      "type": "stylesheet",
+      "at": "2026-10-08T11:04:34.427Z"
+    },
+    {
+      "url": "https://hyperdoc.dreyeck.ch/security/style.css",
+      "type": "stylesheet",
+      "at": "2026-10-08T11:04:34.428Z"
+    },
+    {
+      "url": "https://hyperdoc.dreyeck.ch/favicon.png",
+      "type": "other",
+      "at": "2026-10-08T11:04:34.433Z"
+    },
+    {
+      "url": "https://hyperdoc.dreyeck.ch/security/fontawesome/webfonts/fa-solid-900.woff2",
+      "type": "font",
+      "at": "2026-10-08T11:04:34.465Z"
+    },
+    {
+      "url": "https://hyperdoc.dreyeck.ch/favicon.png",
+      "type": "image",
+      "at": "2026-10-08T11:04:34.465Z"
+    },
+    {
+      "url": "https://wiki.ralfbarkow.ch/favicon.png",
+      "type": "xhr",
+      "at": "2026-10-08T11:04:34.506Z"
+    },
+    {
+      "url": "https://hyperdoc.dreyeck.ch/plugins/markdown/markdown.js",
+      "type": "script",
+      "at": "2026-10-08T11:04:34.520Z"
+    },
+    {
+      "url": "https://hyperdoc.dreyeck.ch/system/sitemap.json",
+      "type": "xhr",
+      "at": "2026-10-08T11:04:34.555Z"
+    },
+    {
+      "url": "https://hyperdoc.dreyeck.ch/plugins/markdown/markdown.css",
+      "type": "stylesheet",
+      "at": "2026-10-08T11:04:34.635Z"
+    },
+    {
+      "url": "https://hyperdoc.dreyeck.ch/images/external-link-ltr-icon.png",
+      "type": "image",
+      "at": "2026-10-08T11:04:34.635Z"
+    },
+    {
+      "url": "https://hyperdoc.dreyeck.ch/system/site-index.json",
+      "type": "xhr",
+      "at": "2026-10-08T11:04:34.668Z"
+    },
+    {
+      "url": "https://wiki.ralfbarkow.ch/favicon.png",
+      "type": "image",
+      "at": "2026-10-08T11:04:34.931Z"
+    },
+    {
+      "url": "http://localhost/favicon.png",
+      "type": "xhr",
+      "at": "2026-10-08T11:04:34.940Z"
+    },
+    {
+      "url": "https://wiki.khinsen.net/favicon.png",
+      "type": "xhr",
+      "at": "2026-10-08T11:04:34.946Z"
+    },
+    {
+      "url": "https://hyperdoc.dreyeck.ch/proxy/localhost/favicon.png",
+      "type": "xhr",
+      "at": "2026-10-08T11:04:34.949Z"
+    },
+    {
+      "url": "https://hyperdoc.wiki.khinsen.net/favicon.png",
+      "type": "xhr",
+      "at": "2026-10-08T11:04:34.957Z"
+    },
+    {
+      "url": "https://hyperdoc.dreyeck.ch/trails-rendered.json",
+      "type": "xhr",
+      "at": "2026-10-08T11:04:34.964Z"
+    },
+    {
+      "url": "https://hyperdoc.dreyeck.ch/plugins/graphviz/graphviz.js",
+      "type": "script",
+      "at": "2026-10-08T11:04:35.080Z"
+    },
+    {
+      "url": "https://ward.voices.ustawi.wiki/favicon.png",
+      "type": "xhr",
+      "at": "2026-10-08T11:04:35.080Z"
+    },
+    {
+      "url": "https://jan.voices.ustawi.wiki/favicon.png",
+      "type": "xhr",
+      "at": "2026-10-08T11:04:35.081Z"
+    },
+    {
+      "url": "https://wiki.khinsen.net/favicon.png",
+      "type": "image",
+      "at": "2026-10-08T11:04:35.082Z"
+    },
+    {
+      "url": "https://hyperdoc.wiki.khinsen.net/favicon.png",
+      "type": "image",
+      "at": "2026-10-08T11:04:35.083Z"
+    },
+    {
+      "url": "https://hyperdoc.dreyeck.ch/plugins/graphviz/viz@3.22.0/viz-global.js",
+      "type": "script",
+      "at": "2026-10-08T11:04:35.120Z"
+    },
+    {
+      "url": "https://hyperdoc.dreyeck.ch/plugins/graphviz/graphviz.css",
+      "type": "stylesheet",
+      "at": "2026-10-08T11:04:35.124Z"
+    },
+    {
+      "url": "https://hyperdoc.dreyeck.ch/plugins/solo/solo.js",
+      "type": "script",
+      "at": "2026-10-08T11:04:35.124Z"
+    },
+    {
+      "url": "https://ward.voices.ustawi.wiki/favicon.png",
+      "type": "xhr",
+      "at": "2026-10-08T11:04:35.149Z"
+    },
+    {
+      "url": "https://hyperdoc.dreyeck.ch/plugins/mech/mech.js",
+      "type": "script",
+      "at": "2026-10-08T11:04:35.151Z"
+    },
+    {
+      "url": "https://hyperdoc.dreyeck.ch/plugins/mech/interpreter.js",
+      "type": "script",
+      "at": "2026-10-08T11:04:35.164Z"
+    },
+    {
+      "url": "https://hyperdoc.dreyeck.ch/plugins/mech/blocks.js",
+      "type": "script",
+      "at": "2026-10-08T11:04:35.164Z"
+    },
+    {
+      "url": "https://hyperdoc.dreyeck.ch/proxy/ward.voices.ustawi.wiki/favicon.png",
+      "type": "xhr",
+      "at": "2026-10-08T11:04:35.204Z"
+    },
+    {
+      "url": "https://hyperdoc.dreyeck.ch/proxy/jan.voices.ustawi.wiki/favicon.png",
+      "type": "xhr",
+      "at": "2026-10-08T11:04:35.204Z"
+    },
+    {
+      "url": "https://hyperdoc.dreyeck.ch/plugins/mech/library.js",
+      "type": "script",
+      "at": "2026-10-08T11:04:35.206Z"
+    },
+    {
+      "url": "https://hyperdoc.dreyeck.ch/plugins/code/code.js",
+      "type": "script",
+      "at": "2026-10-08T11:04:35.239Z"
+    },
+    {
+      "url": "https://cdn.jsdelivr.net/npm/highlight.js@11/styles/github.min.css",
+      "type": "stylesheet",
+      "at": "2026-10-08T11:04:35.274Z"
+    },
+    {
+      "url": "https://hyperdoc.dreyeck.ch/plugins/code/code.css",
+      "type": "stylesheet",
+      "at": "2026-10-08T11:04:35.275Z"
+    },
+    {
+      "url": "https://cdn.jsdelivr.net/npm/highlight.js@11/+esm",
+      "type": "script",
+      "at": "2026-10-08T11:04:35.276Z"
+    },
+    {
+      "url": "https://hyperdoc.dreyeck.ch/proxy/ward.voices.ustawi.wiki/favicon.png",
+      "type": "xhr",
+      "at": "2026-10-08T11:04:35.488Z"
+    },
+    {
+      "url": "https://ward.voices.ustawi.wiki/favicon.png",
+      "type": "xhr",
+      "at": "2026-10-08T11:04:35.488Z"
+    },
+    {
+      "url": "https://hyperdoc.dreyeck.ch/proxy/ward.voices.ustawi.wiki/favicon.png",
+      "type": "xhr",
+      "at": "2026-10-08T11:04:36.905Z"
+    },
+    {
+      "url": "https://jan.voices.ustawi.wiki/favicon.png",
+      "type": "xhr",
+      "at": "2026-10-08T11:04:37.132Z"
+    },
+    {
+      "url": "https://hyperdoc.dreyeck.ch/proxy/jan.voices.ustawi.wiki/favicon.png",
+      "type": "xhr",
+      "at": "2026-10-08T11:04:37.368Z"
+    }
+  ],
+  "responses": [
+    {
+      "url": "https://hyperdoc.dreyeck.ch/view/welcome-visitors/view/trails-rendered",
+      "status": 200,
+      "type": "document"
+    },
+    {
+      "url": "https://hyperdoc.dreyeck.ch/style/style.css",
+      "status": 200,
+      "type": "stylesheet"
+    },
+    {
+      "url": "https://hyperdoc.dreyeck.ch/theme/style.css",
+      "status": 200,
+      "type": "stylesheet"
+    },
+    {
+      "url": "https://hyperdoc.dreyeck.ch/js/jquery-ui/1.14.1/jquery-ui.min.css",
+      "status": 200,
+      "type": "stylesheet"
+    },
+    {
+      "url": "https://hyperdoc.dreyeck.ch/js/jquery-migrate-3.5.0.min.js",
+      "status": 200,
+      "type": "script"
+    },
+    {
+      "url": "https://hyperdoc.dreyeck.ch/js/jquery-3.7.1.min.js",
+      "status": 200,
+      "type": "script"
+    },
+    {
+      "url": "https://hyperdoc.dreyeck.ch/js/jquery.ui.touch-punch.min.js",
+      "status": 200,
+      "type": "script"
+    },
+    {
+      "url": "https://hyperdoc.dreyeck.ch/js/underscore-min.js",
+      "status": 200,
+      "type": "script"
+    },
+    {
+      "url": "https://hyperdoc.dreyeck.ch/client.js",
+      "status": 200,
+      "type": "script"
+    },
+    {
+      "url": "https://hyperdoc.dreyeck.ch/js/jquery-ui/1.14.1/jquery-ui.min.js",
+      "status": 200,
+      "type": "script"
+    },
+    {
+      "url": "https://hyperdoc.dreyeck.ch/style/print.css",
+      "status": 200,
+      "type": "stylesheet"
+    },
+    {
+      "url": "https://hyperdoc.dreyeck.ch/images/crosses.png",
+      "status": 200,
+      "type": "image"
+    },
+    {
+      "url": "https://hyperdoc.dreyeck.ch/images/noise.png",
+      "status": 200,
+      "type": "image"
+    },
+    {
+      "url": "https://hyperdoc.dreyeck.ch/system/factories.json",
+      "status": 200,
+      "type": "xhr"
+    },
+    {
+      "url": "https://hyperdoc.dreyeck.ch/security/security.js",
+      "status": 200,
+      "type": "script"
+    },
+    {
+      "url": "https://hyperdoc.dreyeck.ch/plugins/image/image.js",
+      "status": 200,
+      "type": "script"
+    },
+    {
+      "url": "https://hyperdoc.dreyeck.ch/security/fontawesome/css/fontawesome.min.css",
+      "status": 200,
+      "type": "stylesheet"
+    },
+    {
+      "url": "https://hyperdoc.dreyeck.ch/security/fontawesome/css/solid.min.css",
+      "status": 200,
+      "type": "stylesheet"
+    },
+    {
+      "url": "https://hyperdoc.dreyeck.ch/security/style.css",
+      "status": 200,
+      "type": "stylesheet"
+    },
+    {
+      "url": "https://hyperdoc.dreyeck.ch/welcome-visitors.json",
+      "status": 200,
+      "type": "xhr"
+    },
+    {
+      "url": "https://hyperdoc.dreyeck.ch/favicon.png",
+      "status": 200,
+      "type": "other"
+    },
+    {
+      "url": "https://hyperdoc.dreyeck.ch/favicon.png",
+      "status": 200,
+      "type": "image"
+    },
+    {
+      "url": "https://hyperdoc.dreyeck.ch/security/fontawesome/webfonts/fa-solid-900.woff2",
+      "status": 200,
+      "type": "font"
+    },
+    {
+      "url": "https://hyperdoc.dreyeck.ch/plugins/markdown/markdown.js",
+      "status": 200,
+      "type": "script"
+    },
+    {
+      "url": "https://hyperdoc.dreyeck.ch/system/sitemap.json",
+      "status": 200,
+      "type": "xhr"
+    },
+    {
+      "url": "https://hyperdoc.dreyeck.ch/plugins/markdown/markdown.css",
+      "status": 200,
+      "type": "stylesheet"
+    },
+    {
+      "url": "https://hyperdoc.dreyeck.ch/images/external-link-ltr-icon.png",
+      "status": 200,
+      "type": "image"
+    },
+    {
+      "url": "https://wiki.ralfbarkow.ch/favicon.png",
+      "status": 200,
+      "type": "xhr"
+    },
+    {
+      "url": "https://hyperdoc.dreyeck.ch/system/site-index.json",
+      "status": 200,
+      "type": "xhr"
+    },
+    {
+      "url": "https://hyperdoc.dreyeck.ch/proxy/localhost/favicon.png",
+      "status": 403,
+      "type": "xhr"
+    },
+    {
+      "url": "https://hyperdoc.dreyeck.ch/trails-rendered.json",
+      "status": 200,
+      "type": "xhr"
+    },
+    {
+      "url": "https://wiki.khinsen.net/favicon.png",
+      "status": 200,
+      "type": "xhr"
+    },
+    {
+      "url": "https://wiki.ralfbarkow.ch/favicon.png",
+      "status": 200,
+      "type": "image"
+    },
+    {
+      "url": "https://hyperdoc.wiki.khinsen.net/favicon.png",
+      "status": 200,
+      "type": "xhr"
+    },
+    {
+      "url": "https://hyperdoc.dreyeck.ch/plugins/graphviz/graphviz.js",
+      "status": 200,
+      "type": "script"
+    },
+    {
+      "url": "https://wiki.khinsen.net/favicon.png",
+      "status": 200,
+      "type": "image"
+    },
+    {
+      "url": "https://hyperdoc.dreyeck.ch/plugins/graphviz/graphviz.css",
+      "status": 200,
+      "type": "stylesheet"
+    },
+    {
+      "url": "https://hyperdoc.dreyeck.ch/plugins/solo/solo.js",
+      "status": 200,
+      "type": "script"
+    },
+    {
+      "url": "https://hyperdoc.wiki.khinsen.net/favicon.png",
+      "status": 200,
+      "type": "image"
+    },
+    {
+      "url": "https://hyperdoc.dreyeck.ch/plugins/mech/mech.js",
+      "status": 200,
+      "type": "script"
+    },
+    {
+      "url": "https://hyperdoc.dreyeck.ch/plugins/graphviz/viz@3.22.0/viz-global.js",
+      "status": 200,
+      "type": "script"
+    },
+    {
+      "url": "https://hyperdoc.dreyeck.ch/plugins/mech/interpreter.js",
+      "status": 200,
+      "type": "script"
+    },
+    {
+      "url": "https://hyperdoc.dreyeck.ch/plugins/mech/blocks.js",
+      "status": 200,
+      "type": "script"
+    },
+    {
+      "url": "https://hyperdoc.dreyeck.ch/proxy/ward.voices.ustawi.wiki/favicon.png",
+      "status": 403,
+      "type": "xhr"
+    },
+    {
+      "url": "https://hyperdoc.dreyeck.ch/proxy/jan.voices.ustawi.wiki/favicon.png",
+      "status": 403,
+      "type": "xhr"
+    },
+    {
+      "url": "https://hyperdoc.dreyeck.ch/plugins/mech/library.js",
+      "status": 200,
+      "type": "script"
+    },
+    {
+      "url": "https://hyperdoc.dreyeck.ch/plugins/code/code.js",
+      "status": 200,
+      "type": "script"
+    },
+    {
+      "url": "https://hyperdoc.dreyeck.ch/plugins/code/code.css",
+      "status": 200,
+      "type": "stylesheet"
+    },
+    {
+      "url": "https://hyperdoc.dreyeck.ch/proxy/ward.voices.ustawi.wiki/favicon.png",
+      "status": 403,
+      "type": "xhr"
+    },
+    {
+      "url": "https://cdn.jsdelivr.net/npm/highlight.js@11/styles/github.min.css",
+      "status": 200,
+      "type": "stylesheet"
+    },
+    {
+      "url": "https://cdn.jsdelivr.net/npm/highlight.js@11/+esm",
+      "status": 200,
+      "type": "script"
+    },
+    {
+      "url": "https://hyperdoc.dreyeck.ch/proxy/ward.voices.ustawi.wiki/favicon.png",
+      "status": 403,
+      "type": "xhr"
+    },
+    {
+      "url": "https://hyperdoc.dreyeck.ch/proxy/jan.voices.ustawi.wiki/favicon.png",
+      "status": 403,
+      "type": "xhr"
+    }
+  ],
+  "sources": [
+    {
+      "url": "https://hyperdoc.dreyeck.ch/welcome-visitors.json",
+      "status": 200,
+      "sha256": "6b57f639b2276ca7e04232416536c03e4f4c456b387941f45139ce0a7239f4d1",
+      "file": "6b57f639b2276ca7e04232416536c03e4f4c456b387941f45139ce0a7239f4d1.json",
+      "headers": {
+        "access-control-allow-origin": "*",
+        "content-encoding": "gzip",
+        "content-type": "application/json; charset=utf-8",
+        "date": "Thu, 08 Oct 2026 11:04:34 GMT",
+        "etag": "W/\"2aab-pI3nG+tCgWr0Wb9gLvrvqXR2xH4\"",
+        "server": "nginx",
+        "vary": "Accept-Encoding"
+      },
+      "bytes": 10923
+    },
+    {
+      "url": "https://hyperdoc.dreyeck.ch/trails-rendered.json",
+      "status": 200,
+      "sha256": "d0e8a03f6a864aa50b00532b8a7909c11352b739644acfe7a97b6f4df1286c7c",
+      "file": "d0e8a03f6a864aa50b00532b8a7909c11352b739644acfe7a97b6f4df1286c7c.json",
+      "headers": {
+        "access-control-allow-origin": "*",
+        "content-encoding": "gzip",
+        "content-type": "application/json; charset=utf-8",
+        "date": "Thu, 08 Oct 2026 11:04:35 GMT",
+        "etag": "W/\"13934-6k4RmdwhvKLnVW6EdzDcuYyDFnQ\"",
+        "server": "nginx",
+        "vary": "Accept-Encoding"
+      },
+      "bytes": 80180
+    },
+    {
+      "url": "https://hyperdoc.dreyeck.ch/plugins/mech/mech.js",
+      "status": 200,
+      "sha256": "5a2005522b6bb8d7ae0c4c30e2c8b6b049044315728a0c49846b0a417a5da1b7",
+      "file": "5a2005522b6bb8d7ae0c4c30e2c8b6b049044315728a0c49846b0a417a5da1b7.js",
+      "headers": {
+        "access-control-allow-origin": "https://hyperdoc.dreyeck.ch",
+        "cache-control": "public, max-age=3600",
+        "content-encoding": "gzip",
+        "content-type": "text/javascript; charset=utf-8",
+        "date": "Thu, 08 Oct 2026 11:04:35 GMT",
+        "etag": "W/\"955-3e8\"",
+        "server": "nginx",
+        "vary": "Accept-Encoding"
+      },
+      "bytes": 2389
+    },
+    {
+      "url": "https://hyperdoc.dreyeck.ch/plugins/mech/interpreter.js",
+      "status": 200,
+      "sha256": "f0a0b360496ee520072421e1b4cc9584b6e46b47df455fcd5c8406e9baa5e90f",
+      "file": "f0a0b360496ee520072421e1b4cc9584b6e46b47df455fcd5c8406e9baa5e90f.js",
+      "headers": {
+        "access-control-allow-origin": "https://hyperdoc.dreyeck.ch",
+        "cache-control": "public, max-age=3600",
+        "content-encoding": "gzip",
+        "content-type": "text/javascript; charset=utf-8",
+        "date": "Thu, 08 Oct 2026 11:04:35 GMT",
+        "etag": "W/\"50f-3e8\"",
+        "server": "nginx",
+        "vary": "Accept-Encoding"
+      },
+      "bytes": 1295
+    },
+    {
+      "url": "https://hyperdoc.dreyeck.ch/plugins/mech/blocks.js",
+      "status": 200,
+      "sha256": "1b69037fda8c89a0c06f333e3b8a3bb11925b1371daf8c1dfda32835d757652b",
+      "file": "1b69037fda8c89a0c06f333e3b8a3bb11925b1371daf8c1dfda32835d757652b.js",
+      "headers": {
+        "access-control-allow-origin": "https://hyperdoc.dreyeck.ch",
+        "cache-control": "public, max-age=3600",
+        "content-encoding": "gzip",
+        "content-type": "text/javascript; charset=utf-8",
+        "date": "Thu, 08 Oct 2026 11:04:35 GMT",
+        "etag": "W/\"a553-3e8\"",
+        "server": "nginx",
+        "vary": "Accept-Encoding"
+      },
+      "bytes": 42323
+    },
+    {
+      "url": "https://hyperdoc.dreyeck.ch/plugins/mech/library.js",
+      "status": 200,
+      "sha256": "bf1e1a2f3438d7cba322c90d4410ba4be353552256459ad32bc338050bb5e319",
+      "file": "bf1e1a2f3438d7cba322c90d4410ba4be353552256459ad32bc338050bb5e319.js",
+      "headers": {
+        "access-control-allow-origin": "https://hyperdoc.dreyeck.ch",
+        "cache-control": "public, max-age=3600",
+        "content-encoding": "gzip",
+        "content-type": "text/javascript; charset=utf-8",
+        "date": "Thu, 08 Oct 2026 11:04:35 GMT",
+        "etag": "W/\"39ad-3e8\"",
+        "server": "nginx",
+        "vary": "Accept-Encoding"
+      },
+      "bytes": 14765
+    },
+    {
+      "url": "https://hyperdoc.dreyeck.ch/plugins/code/code.js",
+      "status": 200,
+      "sha256": "91870403e4400345bb8955d9898db325dd7c1f3be1f4716329e0a3f868805a03",
+      "file": "91870403e4400345bb8955d9898db325dd7c1f3be1f4716329e0a3f868805a03.js",
+      "headers": {
+        "access-control-allow-origin": "https://hyperdoc.dreyeck.ch",
+        "cache-control": "public, max-age=3600",
+        "content-encoding": "gzip",
+        "content-type": "text/javascript; charset=utf-8",
+        "date": "Thu, 08 Oct 2026 11:04:35 GMT",
+        "etag": "W/\"3da-3e8\"",
+        "server": "nginx",
+        "vary": "Accept-Encoding"
+      },
+      "bytes": 986
+    },
+    {
+      "url": "https://hyperdoc.dreyeck.ch/plugins/code/code.css",
+      "status": 200,
+      "sha256": "862d1b83215130ecb7c77c5f8bde42cb5ab083f25853743b222a1fbab5ab6414",
+      "file": "862d1b83215130ecb7c77c5f8bde42cb5ab083f25853743b222a1fbab5ab6414.css",
+      "headers": {
+        "accept-ranges": "bytes",
+        "access-control-allow-origin": "*",
+        "cache-control": "public, max-age=3600",
+        "content-length": "84",
+        "content-type": "text/css; charset=utf-8",
+        "date": "Thu, 08 Oct 2026 11:04:35 GMT",
+        "etag": "W/\"54-3e8\"",
+        "server": "nginx"
+      },
+      "bytes": 84
+    }
+  ],
+  "browser": "154.0.8037.98",
+  "navigation": {
+    "url": "https://hyperdoc.dreyeck.ch/view/welcome-visitors/view/trails-rendered",
+    "status": 200,
+    "headers": {
+      "access-control-allow-origin": "*",
+      "content-encoding": "gzip",
+      "content-type": "text/html; charset=utf-8",
+      "date": "Thu, 08 Oct 2026 11:04:33 GMT",
+      "etag": "W/\"8b6-Q99f/KXNFN8V6jIcQpv2o943diU\"",
+      "server": "nginx",
+      "vary": "Accept-Encoding"
+    }
+  },
+  "before": {
+    "url": "https://hyperdoc.dreyeck.ch/view/welcome-visitors/view/trails-rendered",
+    "isOwner": false,
+    "items": [
+      {
+        "page": "welcome-visitors",
+        "id": "7b56f22a4b9ee974",
+        "type": "item paragraph",
+        "text": "Welcome to this Federated Wiki site. From this page you can find who we are and what we do. New sites provide this information and then claim the site as their own. You will need your own site to part"
+      },
+      {
+        "page": "welcome-visitors",
+        "id": "821827c99b90cfd1",
+        "type": "item paragraph",
+        "text": "Pages about us."
+      },
+      {
+        "page": "welcome-visitors",
+        "id": "63ad2e58eecdd9e5",
+        "type": "item reference",
+        "text": " Ralf Barkow — See How I Use My Wiki"
+      },
+      {
+        "page": "welcome-visitors",
+        "id": "2bbd646ff3f44b51",
+        "type": "item paragraph",
+        "text": "Pages where we do and share."
+      },
+      {
+        "page": "welcome-visitors",
+        "id": "93e830ff69f68cc4",
+        "type": "item markdown",
+        "text": "⚠ WARNING: Chrome is introducing/rolling out Local Network Access permission behavior for pages that attempt connections to local network targets. blog , docs , draft "
+      },
+      {
+        "page": "welcome-visitors",
+        "id": "8c6539698b040279",
+        "type": "item markdown",
+        "text": "The following reference is to a local network target."
+      },
+      {
+        "page": "welcome-visitors",
+        "id": "05e2fa92643677ca",
+        "type": "item reference",
+        "text": " Getting Started with HyperDoc on macOS (Nix, direnv, SBCL) — HyperDoc is a Common Lisp system for serving hypertext documents with interactive CLOG-based inspectors."
+      },
+      {
+        "page": "welcome-visitors",
+        "id": "6de0cf7d14de4f54",
+        "type": "item reference",
+        "text": " Running a private Wiki on your computer — explains that if private pages with localhost in fork history get published, other users’ browsers may attempt local connections and show security warnings; "
+      },
+      {
+        "page": "welcome-visitors",
+        "id": "5bb4d706496fa020",
+        "type": "item reference",
+        "text": " HyperDoc Tutorial — HyperDoc Navigation Basics"
+      },
+      {
+        "page": "welcome-visitors",
+        "id": "305c2d536ffae417",
+        "type": "item reference",
+        "text": " Focused Semantic Source Stations — Focused semantic source stations is a reusable view type for rendering semantically meaningful stations inside source so users can lay durable routes from source to"
+      },
+      {
+        "page": "welcome-visitors",
+        "id": "ee416d431ebf4fb4",
+        "type": "item paragraph",
+        "text": "You can edit your copy of these pages. Press [+] to add more writing spaces. Read How to Wiki for more ideas. Follow Recent Changes here and nearby."
+      },
+      {
+        "page": "trails-rendered",
+        "id": "16917360196332109824",
+        "type": "item paragraph",
+        "text": "Here we work out an example to use as a test case. This page saved from Pattern Machinery."
+      },
+      {
+        "page": "trails-rendered",
+        "id": "49488010256113991680",
+        "type": "item graphviz aspect-source",
+        "text": "Howard\nBecker\nEveryday\nDonald\nSchön\nJohn\nDewey\nSusan\nLeigh\nStar\nReflective\nPractice\nInteraction\nDesign\nHenrik\nGedenryd\nSusan\nKare\nAlan\nCooper\nInteresting\nPeople\nAndrew\nAbbott\nClose\nAt\nHand\nDorothy\nSmi"
+      },
+      {
+        "page": "trails-rendered",
+        "id": "29487849520185925632",
+        "type": "item solo aspect-source",
+        "text": "INCLUDED\n  3 aspects\n\nview in solo"
+      },
+      {
+        "page": "trails-rendered",
+        "id": "02a6f8340521e129",
+        "type": "item paragraph",
+        "text": "We will add two trails by hand then explore how they interact while browsing aspects."
+      },
+      {
+        "page": "trails-rendered",
+        "id": "93cd119d6286888a",
+        "type": "item paragraph",
+        "text": "Susan Kare ⇒ John Dewey ⇒ Reflective Practice"
+      },
+      {
+        "page": "trails-rendered",
+        "id": "fc6c7d06e5bce7d3",
+        "type": "item paragraph",
+        "text": "Jean Lave ⇒ Dorothy Smith ⇒ Reflective Practice"
+      },
+      {
+        "page": "trails-rendered",
+        "id": "6405b752d1739af0",
+        "type": "item mech",
+        "text": "CLICK▶\nCODE trails\nCLICK\nSOLO\nCLICK\nPREVIEW synopsis items"
+      },
+      {
+        "page": "trails-rendered",
+        "id": "17a5b123160ef0d9",
+        "type": "item code",
+        "text": "import {Graph} from 'https://wardcunningham.github.io/graph/graph.js'"
+      },
+      {
+        "page": "trails-rendered",
+        "id": "cc6a77771de7edbd",
+        "type": "item code",
+        "text": "export function trails () {\n let context = this.context\n let page = context.page\n let result = page.story\n  .filter(item => item.type == \"paragraph\")\n  .map(item => item.text)\n  .filter(text => text.s"
+      },
+      {
+        "page": "trails-rendered",
+        "id": "c2706793c45f5631",
+        "type": "item paragraph",
+        "text": "See Increment of Progress, Eigenmode Patterns"
+      },
+      {
+        "page": "trails-rendered",
+        "id": "84da00fa76850971",
+        "type": "item code",
+        "text": "function trail(names) {\n let graph = new Graph()\n let prev = null\n for (let each of names) {\n  let name = each\n   .replaceAll(/[\\[\\]]/g,\"\")\n   .replaceAll(/ +/g,\"\\n\")\n  let nid = graph.addNode(\"\",{nam"
+      }
+    ],
+    "scripts": [
+      "https://hyperdoc.dreyeck.ch/js/jquery-3.7.1.min.js",
+      "https://hyperdoc.dreyeck.ch/js/jquery-migrate-3.5.0.min.js",
+      "https://hyperdoc.dreyeck.ch/js/jquery-ui/1.14.1/jquery-ui.min.js",
+      "https://hyperdoc.dreyeck.ch/js/jquery.ui.touch-punch.min.js",
+      "https://hyperdoc.dreyeck.ch/js/underscore-min.js",
+      "https://hyperdoc.dreyeck.ch/client.js",
+      ""
+    ],
+    "mechLoaded": true,
+    "codeLoaded": true,
+    "mechBuild": {
+      "MECH_VERSION": "0.1.32-dev.1",
+      "MECH_BUILD_TIME": "2026-03-03T15:12:15Z",
+      "MECH_GIT_COMMIT": "abd88d2da6c89029515f2a456356832dffe038ab"
+    },
+    "lineup": [
+      {
+        "slug": "welcome-visitors",
+        "site": "hyperdoc.dreyeck.ch",
+        "key": "c9892f94",
+        "title": "Welcome Visitors",
+        "remote": false
+      },
+      {
+        "slug": "trails-rendered",
+        "site": "hyperdoc.dreyeck.ch",
+        "key": "23df4054",
+        "title": "Trails Rendered",
+        "remote": false
+      }
+    ]
+  },
+  "clickStarted": "2026-10-08T11:04:37.989Z",
+  "after": "CLICK▶\nCODE trails✖︎\nCLICK▶\nSOLO\nCLICK▶\nPREVIEW synopsis items",
+  "troubleClicked": "2026-10-08T11:04:38.222Z",
+  "diagnosticMessage": "CODE doesn't name a block we know.",
+  "dom": "<div style=\"background-color:#eee;padding:15px;border-top:8px;\"><font color=\"gray\" size=\"small\"></font><span style=\"display: block;\" id=\"443480.0\">CLICK<button style=\"border-width:0;\">▶</button></span>\n<div id=\"443480.1\" style=\"padding-left:15px\"><font color=\"gray\" size=\"small\"></font><span style=\"display: block;\" id=\"443480.1.0\">CODE trails<button style=\"border-width:0;color:red;\">✖︎</button></span><span style=\"width:80%;color:gray;\">CODE doesn't name a block we know.</span>\n<font color=\"gray\" size=\"small\"></font><span style=\"display: block;\" id=\"443480.1.1\">CLICK<button style=\"border-width:0;\">▶</button></span>\n<div id=\"443480.1.2\" style=\"padding-left:15px\"><font color=\"gray\" size=\"small\"></font><span style=\"display: block;\" id=\"443480.1.2.0\">SOLO</span></div>\n<font color=\"gray\" size=\"small\"></font><span style=\"display: block;\" id=\"443480.1.3\">CLICK<button style=\"border-width:0;\">▶</button></span>\n<div id=\"443480.1.4\" style=\"padding-left:15px\"><font color=\"gray\" size=\"small\"></font><span style=\"display: block;\" id=\"443480.1.4.0\">PREVIEW synopsis items</span></div></div></div>",
+  "finished": "2026-10-08T11:04:38.433Z"
+}

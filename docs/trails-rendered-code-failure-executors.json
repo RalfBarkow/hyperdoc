@@ -1,0 +1,81 @@
+[
+  {
+    "executor": "Read-only checkout/index observation",
+    "entry": "git rev-parse --show-toplevel --git-dir --git-common-dir; branch/HEAD/status; inspect existing Trails reading and controlled witness",
+    "observed": "dreyeck.ch at 4faefddd76234cbba353fb745bce3f20f1fbd83b; clean index; only untracked .DS_Store",
+    "assimilation": "Preserve .DS_Store and the already committed user Trails link; do not repeat the source-to-render slice"
+  },
+  {
+    "executor": "Initial isolated public browser run",
+    "entry": "Fresh Playwright Chrome against Ward HTTP /view/trails-rendered; original CLICK -> CODE",
+    "observed": "2 aspects, no trouble or errors; canonical bare path separately 404",
+    "assimilation": "Success on this runtime did not locate the user-reported failure",
+    "replan": "Ask for failing origin; continue retaining actual loaded response identities"
+  },
+  {
+    "executor": "User-origin clarification and failing-runtime reproduction",
+    "entry": "https://hyperdoc.dreyeck.ch/view/welcome-visitors/view/trails-rendered",
+    "observed": "Initial newer-button-class harness timed out before click; served older Mech uses native unclassed buttons",
+    "assimilation": "Automation mismatch is not the CODE diagnostic",
+    "replan": "Use observed button labels scoped to the Trails page"
+  },
+  {
+    "executor": "Final original browser comparison",
+    "entry": "node dreyeck/work/trails-rendered-browser-repro.mjs <output> <URL>; TRAILS_PLAYWRIGHT_MODULE supplied from bundled dependencies",
+    "observed": "Failing full lineup and single-page control both reveal CODE doesn't name a block we know.; Ward returns 2 aspects. Chrome 154.0.8037.98; Graph/Cypher requested only on Ward. Incidental favicon failures and proxy 403s retained on failing host.",
+    "evidence": [
+      "dreyeck/work/trails-rendered-browser-evidence/hyperdoc-code-run.json",
+      "dreyeck/work/trails-rendered-browser-evidence/hyperdoc-single-page-run.json",
+      "dreyeck/work/trails-rendered-browser-evidence/public-code-run.json"
+    ],
+    "assimilation": "Different implementation capabilities, not a trails-function error or a required Welcome Visitors context"
+  },
+  {
+    "executor": "Runtime/source revision matching",
+    "entry": "Actual response bodies/build stamp; separately fetched explicit Ward source maps; git show exact OIDs in established local authorities",
+    "observed": "Failing Mech 0.1.32-dev.1 abd88d2...; blocks/interpreter/library byte-identical, generated-stamp + exact mech source. Ward 0.1.48-3 mapped blocks equals a028b4b...; only newer registry has CODE. Code bundle version on Ward 0.6.1; failing Code package/Git revision unavailable.",
+    "assimilation": "First-class repository/full-OID references for verified source; runtime digests elsewhere; no main or whole-server-HEAD inference"
+  },
+  {
+    "executor": "Source-level dispatcher reduction",
+    "entry": "node dreyeck/work/trails-rendered-dispatch-probe.mjs <root>",
+    "observed": "Actual retained run/catalog, 29 keys, hasCode=false, one exact diagnostic, 0 handlers invoked; standalone output equals retained fixture",
+    "assimilation": "Separate structured reduction, not a plugin replacement or original browser run"
+  },
+  {
+    "executor": "Pinned structural and HTML authoring",
+    "entry": "Fresh .#workflow-authoring SBCL scripts /private/tmp/trails-code-browser-*-author.lisp and trails-code-location-author.lisp",
+    "observed": "All structural/form-equality and HTML reparse guards pass. Focused existing-source formatting restored. Test lexical scope corrected before acceptance. Exact source ranges audited.",
+    "assimilation": "Add evidence/reading/navigation/tests only; preserve trails, helper, original witness, captures and 46/69 projection"
+  },
+  {
+    "executor": "Fresh Work Reading full TEST-OP",
+    "entry": "nix develop .#tala --command sbcl --noinform --no-userinit --non-interactive --eval (require :asdf) --eval (asdf:load-system dreyeck/work/reading :force t) --eval (asdf:test-system dreyeck/work/reading/tests :force t)",
+    "observed": "Exit 0; ORIGINAL-CODE-BROWSER-EVIDENCE-PASS and all existing Trails/context/Workspace/native/Shift-click contracts",
+    "evidence": "/private/tmp/trails-code-reading-final.log"
+  },
+  {
+    "executor": "Final source-location acceptance",
+    "entry": "Fresh .#tala SBCL, load dreyeck/work/reading/tests :force t, check-original-code-browser",
+    "observed": "Exit 0; ORIGINAL-CODE-BROWSER-EVIDENCE-PASS; exact declared start/end lines, runtime provenance, pure inspection, all navigation and isolated dispatcher result verified",
+    "evidence": "/private/tmp/trails-code-location-final.log"
+  },
+  {
+    "executor": "Fresh Topicmap/navigation/TALA regressions",
+    "entry": "asdf:test-system dreyeck/topicmap/tests, dreyeck/topicmap/gesture/tests, dreyeck/topicmap/tala/tests, dreyeck/topicmap/tala/reading/tests, dreyeck/wiki-link/tests",
+    "observed": "Exit 0; includes Workspace/TALA/native navigation, journal debugger and story transfer",
+    "evidence": "/private/tmp/trails-code-topicmap-navigation-final.log"
+  },
+  {
+    "executor": "Fresh Catalog regressions",
+    "entry": "Fresh default nix develop SBCL; asdf:test-system dreyeck/catalog/tests",
+    "observed": "Exit 0; 20 books; Catalog startup/curation contracts pass",
+    "evidence": "/private/tmp/trails-code-catalog-final.log"
+  },
+  {
+    "executor": "Final selective local commit",
+    "entry": "Exact slice file set, initial HEAD/branch/index guards; authored whitespace and retained-artifact digests; git commit; final index/status assertions",
+    "observed": "Hash and status returned by /private/tmp/trails-code-commit.log and final response",
+    "assimilation": "Only .DS_Store may remain untracked; no SSH/deployment/server reload or external issue posting"
+  }
+]

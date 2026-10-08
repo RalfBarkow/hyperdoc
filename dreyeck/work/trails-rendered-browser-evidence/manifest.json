@@ -1,0 +1,264 @@
+{
+  "warrant": "Observed original browser diagnostic and exact runtime source; derived localization to unsupported command dispatch",
+  "reported-failure-status": "explained",
+  "reported-error": "CODE doesn't name a block we know.",
+  "failing-runtime-revision": {
+    "authority": "https://github.com/RalfBarkow/wiki-plugin-mech",
+    "oid": "abd88d2da6c89029515f2a456356832dffe038ab",
+    "display": "abd88d2",
+    "role": "runtime build stamp plus exact served-source/Git-file matches"
+  },
+  "scope": "Original unauthenticated CLICK -> CODE only. No SOLO action, page save, injected implementation or mocked dependency.",
+  "page": {
+    "file": "dreyeck/work/trails-rendered-evidence/ward.voices.ustawi.wiki--trails-rendered.json",
+    "sha256": "5fdba40fd3a68eddee00497af4dadb3847500356a2f131dbc0745afb86de9810",
+    "url": "http://ward.voices.ustawi.wiki/trails-rendered.json",
+    "mech-item": "6405b752d1739af0",
+    "code-items": [
+      "17a5b123160ef0d9",
+      "cc6a77771de7edbd",
+      "84da00fa76850971"
+    ]
+  },
+  "capture": {
+    "file": "dreyeck/work/trails-rendered-browser-evidence/public-code-run.json",
+    "sha256": "5dc13804bcb803e20bac095bf0abf0cc6392aca7b8f582792b8d09b4a98d6d08",
+    "bytes": 29001,
+    "retention": "Raw capture file fields name body files in the original Playwright output directory. Only the separately listed source/artifact records are packaged here; CSS and full Ward Code bundle body are not retained here."
+  },
+  "procedure": {
+    "file": "dreyeck/work/trails-rendered-browser-repro.mjs",
+    "browser": "Fresh Playwright chromium.launch({headless:true,channel:chrome}), isolated context, no storage state",
+    "action": "In #trails-rendered .item.mech, click button named \u25b6. If present click button named \u2716\ufe0e; retain its revealed next-sibling text and full item text. Both current and older native button markup supported."
+  },
+  "mech-source-map": {
+    "file": "dreyeck/work/trails-rendered-browser-evidence/mech.js.map",
+    "sha256": "cbadc36c88c8c70cc1ac6738144bd6aefa3d2865bec5eb41d53fcf0db9a72323",
+    "bytes": 315377,
+    "url": "http://ward.voices.ustawi.wiki/plugins/mech/mech.js.map",
+    "method": "Auxiliary read-only HTTP GET after browser run; URL was named by the loaded bundle sourceMappingURL; not a browser-executed script."
+  },
+  "code-source-map": {
+    "url": "http://ward.voices.ustawi.wiki/plugins/code/code.js.map",
+    "sha256": "d5b04eae3012ce56a6b755522becf274a840829197273851326ac03f09778e9e",
+    "retention": "Full map not retained here; its ../src/client/code.js source was retained. No deployed Git OID established."
+  },
+  "comparison": {
+    "original-public-browser": "Ward succeeds using the actual remote Graph/Cypher. The hyperdoc.dreyeck.ch local fork rejects CODE at dispatcher/catalog lookup; no Graph/Cypher request occurs.",
+    "controlled-javascript": "Retained Ward functions executed by a Node VM with export removed and Solo embedded Graph substituted; bypasses original Mech, browser import/permissions and remote dependencies.",
+    "historical-captures": "Unmodified 2026-10-04 local browser, batch/beam/render evidence. Their original imported Graph body was not retained.",
+    "hyperdoc": "Retained successful/failing runs, source objects and warranted correspondences; pure inspection does not rerun browser/Node/Git or update Workspace.",
+    "lineup": "Failing full lineup welcome-visitors -> trails-rendered and separate trails-rendered-only control both show the same diagnostic. Both are unauthenticated, Trails page isRemote() false. Page/Code ownership checks in modern code_emit are never reached by the old dispatcher."
+  },
+  "sources": [
+    {
+      "file": "dreyeck/work/trails-rendered-browser-evidence/mech.loaded.js",
+      "sha256": "36e993b390481ce2efbd6d9041b2553d142944e0869cb71cf5317b2d094a260b",
+      "bytes": 87879,
+      "key": "mech-loaded-bundle",
+      "url": "http://ward.voices.ustawi.wiki/plugins/mech/mech.js",
+      "loaded-response": true,
+      "warrant": "observed-browser-response",
+      "revision-status": "Runtime URL + response digest; deployed repository checkout/OID not established.",
+      "runtime": "ward"
+    },
+    {
+      "file": "dreyeck/work/trails-rendered-browser-evidence/graph.loaded.js",
+      "sha256": "8a137c3d51d49f7233ea10e7c067aab7871b8dc605a171a16de36a03624ff852",
+      "bytes": 7357,
+      "key": "graph-loaded-module",
+      "url": "https://wardcunningham.github.io/graph/graph.js",
+      "loaded-response": true,
+      "warrant": "observed-browser-response",
+      "revision-status": "Runtime URL + response digest; deployed repository checkout/OID not established.",
+      "runtime": "ward"
+    },
+    {
+      "file": "dreyeck/work/trails-rendered-browser-evidence/cypher.loaded.js",
+      "sha256": "952768e094d5eb61e5a56a5857fd30e0bd7a110af6acd9d65877fc35c101c1bd",
+      "bytes": 5361,
+      "key": "cypher-loaded-module",
+      "url": "https://wardcunningham.github.io/graph/cypher.js",
+      "loaded-response": true,
+      "warrant": "observed-browser-response",
+      "revision-status": "Runtime URL + response digest; deployed repository checkout/OID not established.",
+      "runtime": "ward"
+    },
+    {
+      "file": "dreyeck/work/trails-rendered-browser-evidence/mech.mapped-blocks.js",
+      "sha256": "388ee024299ce3674c607b83ec671f8d3df0cb9ba9e584960768fd359fff6d9d",
+      "bytes": 48527,
+      "key": "mech-mapped-blocks",
+      "url": "http://ward.voices.ustawi.wiki/plugins/mech/mech.js.map",
+      "path": "src/client/blocks.js",
+      "authority": "https://github.com/WardCunningham/wiki-plugin-mech",
+      "revision": "a028b4bba04e539dcaa090423d38a00a0050489d",
+      "display": "a028b4b",
+      "warrant": "observed-source-map-content + byte comparison with exact local Git blob",
+      "method": "sourcesContent at ../src/client/blocks.js. Entire text byte-identical to git show a028b4bba04e539dcaa090423d38a00a0050489d:src/client/blocks.js. This establishes this file match, not the entire deployed checkout revision.",
+      "definitions": {
+        "trouble": [
+          34,
+          40
+        ],
+        "run": [
+          224,
+          241
+        ],
+        "click_emit": [
+          245,
+          252
+        ],
+        "code_emit": [
+          1137,
+          1195
+        ]
+      },
+      "retention": "Full source-map file content retained; not represented as a freshly verified full Git blob at the inspection host.",
+      "runtime": "ward"
+    },
+    {
+      "file": "dreyeck/work/trails-rendered-browser-evidence/code.mapped-source.js",
+      "sha256": "9d96a2d7e5fd7e5f13507145fd2eae1d742c926570ebc02fcf37b9a5604486c9",
+      "bytes": 3779,
+      "key": "code-mapped-source",
+      "url": "http://ward.voices.ustawi.wiki/plugins/code/code.js.map",
+      "path": "src/client/code.js",
+      "authority": "https://github.com/fedwiki/wiki-plugin-code",
+      "warrant": "observed-auxiliary-source-map-content",
+      "revision-status": "Loaded bundle banner version 0.6.1; no verified Git OID. Full bundle digest is in the browser record; full bundle and full map not retained here.",
+      "method": "Retained ../src/client/code.js from sourcesContent of the auxiliary map. Code emit highlights source; execution is in Mech code_emit.",
+      "runtime": "ward"
+    },
+    {
+      "file": "dreyeck/work/trails-rendered-browser-evidence/hyperdoc.mech.js",
+      "sha256": "5a2005522b6bb8d7ae0c4c30e2c8b6b049044315728a0c49846b0a417a5da1b7",
+      "bytes": 2389,
+      "key": "hyperdoc-mech.js",
+      "url": "https://hyperdoc.dreyeck.ch/plugins/mech/mech.js",
+      "runtime": "hyperdoc",
+      "loaded-response": true,
+      "warrant": "observed-browser-response",
+      "revision-status": "Generated build-stamp first line followed by byte-identical src/client/mech.js at abd88d2; served file is a build artifact."
+    },
+    {
+      "file": "dreyeck/work/trails-rendered-browser-evidence/hyperdoc.blocks.js",
+      "sha256": "1b69037fda8c89a0c06f333e3b8a3bb11925b1371daf8c1dfda32835d757652b",
+      "bytes": 42323,
+      "key": "hyperdoc-blocks.js",
+      "url": "https://hyperdoc.dreyeck.ch/plugins/mech/blocks.js",
+      "runtime": "hyperdoc",
+      "loaded-response": true,
+      "warrant": "observed-browser-response",
+      "authority": "https://github.com/RalfBarkow/wiki-plugin-mech",
+      "revision": "abd88d2da6c89029515f2a456356832dffe038ab",
+      "display": "abd88d2",
+      "path": "src/client/blocks.js",
+      "revision-status": "Served complete file byte-identical to exact local Git revision; authority from that checkout origin. Runtime build stamp independently reports the same OID.",
+      "definitions": {
+        "trouble": [
+          21,
+          27
+        ],
+        "run": [
+          254,
+          271
+        ],
+        "click_emit": [
+          275,
+          281
+        ],
+        "blocks": [
+          1124,
+          1154
+        ]
+      }
+    },
+    {
+      "file": "dreyeck/work/trails-rendered-browser-evidence/hyperdoc.interpreter.js",
+      "sha256": "f0a0b360496ee520072421e1b4cc9584b6e46b47df455fcd5c8406e9baa5e90f",
+      "bytes": 1295,
+      "key": "hyperdoc-interpreter.js",
+      "url": "https://hyperdoc.dreyeck.ch/plugins/mech/interpreter.js",
+      "runtime": "hyperdoc",
+      "loaded-response": true,
+      "warrant": "observed-browser-response",
+      "authority": "https://github.com/RalfBarkow/wiki-plugin-mech",
+      "revision": "abd88d2da6c89029515f2a456356832dffe038ab",
+      "display": "abd88d2",
+      "path": "src/client/interpreter.js",
+      "revision-status": "Served complete file byte-identical to exact local Git revision; authority from that checkout origin. Runtime build stamp independently reports the same OID."
+    },
+    {
+      "file": "dreyeck/work/trails-rendered-browser-evidence/hyperdoc.library.js",
+      "sha256": "bf1e1a2f3438d7cba322c90d4410ba4be353552256459ad32bc338050bb5e319",
+      "bytes": 14765,
+      "key": "hyperdoc-library.js",
+      "url": "https://hyperdoc.dreyeck.ch/plugins/mech/library.js",
+      "runtime": "hyperdoc",
+      "loaded-response": true,
+      "warrant": "observed-browser-response",
+      "authority": "https://github.com/RalfBarkow/wiki-plugin-mech",
+      "revision": "abd88d2da6c89029515f2a456356832dffe038ab",
+      "display": "abd88d2",
+      "path": "src/client/library.js",
+      "revision-status": "Served complete file byte-identical to exact local Git revision; authority from that checkout origin. Runtime build stamp independently reports the same OID."
+    },
+    {
+      "file": "dreyeck/work/trails-rendered-browser-evidence/hyperdoc.code.js",
+      "sha256": "91870403e4400345bb8955d9898db325dd7c1f3be1f4716329e0a3f868805a03",
+      "bytes": 986,
+      "key": "hyperdoc-code-plugin",
+      "url": "https://hyperdoc.dreyeck.ch/plugins/code/code.js",
+      "runtime": "hyperdoc",
+      "authority": "https://github.com/fedwiki/wiki-plugin-code",
+      "loaded-response": true,
+      "warrant": "observed-browser-response",
+      "revision-status": "No deployed package version or Git OID is exposed by this served file. Runtime URL/digest is verified; do not infer it from local package state."
+    },
+    {
+      "key": "portable-browser-harness",
+      "runtime": "explicit-local-tool",
+      "file": "dreyeck/work/trails-rendered-browser-repro.mjs",
+      "sha256": "9c8fee485270d4cb60364e5e9e2183e28c0f4b55fede6e28d2a550ff0101a9b8",
+      "warrant": "authored explicit reproduction harness; never run by rendering",
+      "retention": "Complete tool source; execution results are independently retained in capture/probe objects."
+    },
+    {
+      "key": "dispatch-reduction-harness",
+      "runtime": "explicit-local-tool",
+      "file": "dreyeck/work/trails-rendered-dispatch-probe.mjs",
+      "sha256": "c8b583f3bb4d98e26a3cceb8e4ff7cfc729217a9bc5e9937e707380973442db5",
+      "warrant": "authored explicit reproduction harness; never run by rendering",
+      "retention": "Complete tool source; execution results are independently retained in capture/probe objects."
+    }
+  ],
+  "failing-capture": {
+    "file": "dreyeck/work/trails-rendered-browser-evidence/hyperdoc-code-run.json",
+    "sha256": "4bbc281849862d45325bf40792d3fb2fa0a58efb69b72738f9d29738094201a2",
+    "bytes": 49088
+  },
+  "single-page-control": {
+    "file": "dreyeck/work/trails-rendered-browser-evidence/hyperdoc-single-page-run.json",
+    "sha256": "e8f383afab39ec004175f7998dfd4c2d324b349a681e27b8163dc2596a78f23d",
+    "bytes": 41228
+  },
+  "failing-page": {
+    "file": "dreyeck/work/trails-rendered-browser-evidence/hyperdoc.trails-rendered.json",
+    "sha256": "d0e8a03f6a864aa50b00532b8a7909c11352b739644acfe7a97b6f4df1286c7c",
+    "bytes": 80180,
+    "url": "https://hyperdoc.dreyeck.ch/trails-rendered.json"
+  },
+  "remaining-boundary": "No source/deployment change has been applied. Any upgrade or feature integration must preserve the custom fork and validate its release process. Code plugin OIDs and complete deployed checkout HEAD are not inferred.",
+  "page-comparison": {
+    "same-Code-and-Mech-IDs-text-and-Code-order": true,
+    "raw-pages-byte-identical": false,
+    "notes": "Helper item moved past a paragraph in fork story; all selected Code/Mech texts and their relevant ordering are unchanged. Journals contain different fork records."
+  },
+  "dispatch-probe": {
+    "file": "dreyeck/work/trails-rendered-browser-evidence/dispatch-probe.json",
+    "sha256": "f1adf27cfb76427b5cfdbc2d109b6ce15e1219f78753f0d5131a9db2db3afce0",
+    "warrant": "executed-source-level-reduction; not original browser execution",
+    "script": "dreyeck/work/trails-rendered-dispatch-probe.mjs"
+  }
+}

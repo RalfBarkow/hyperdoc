@@ -6,7 +6,7 @@
                      #:hoverbold-observation #:context-events
                      #:context-state-at #:context-delta "TRAIL-FOLLOWING"
                      "TRAIL-COMPOSITION-WITNESS" "EXECUTE-TRAIL-WITNESS"
-                     "TRAIL-WORKSPACE"))
+                     "TRAIL-WORKSPACE" "ORIGINAL-CODE-BROWSER-CHECK"))
 (in-package #:dreyeck/work/trails-rendered-reading)
 
 (hyperdoc:see (hyperdoc:page "Trails Rendered public reproduction"))

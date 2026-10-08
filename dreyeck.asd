@@ -2525,6 +2525,7 @@
                                                     (:file "trails-rendered-reading")
                                                     (:file "trails-rendered-federated-context")
                                                     (:file "trails-rendered-following")
+                                                    (:file "trails-rendered-browser-check")
                                                     (:file "shift-click" :depends-on ("trails-rendered-federated-context"))
                                                     (:static-file "trails-rendered-solo-batch.json")
                                                     (:static-file "trails-rendered-solo-beam.json")
@@ -2545,7 +2546,19 @@
                                                     (:static-file "trails-rendered-runtime-evidence.json")
                                                     (:static-file "trails-rendered-result.png")
                                                     (:static-file "trails-rendered-witness.mjs")
-                                                    (:static-file "trails-rendered-witness.json")))
+                                                    (:static-file "trails-rendered-witness.json")
+                                                    (:static-file "trails-rendered-browser-repro.mjs")
+                                                    (:module "trails-rendered-browser-evidence" :components
+                                                     ((:static-file "manifest.json") (:static-file "public-code-run.json")
+                                                      (:static-file "mech.js.map") (:static-file "mech.loaded.js")
+                                                      (:static-file "graph.loaded.js") (:static-file "cypher.loaded.js")
+                                                      (:static-file "mech.mapped-blocks.js") (:static-file "code.mapped-source.js")
+                                                      (:static-file "hyperdoc-code-run.json") (:static-file "hyperdoc-single-page-run.json")
+                                                      (:static-file "hyperdoc.trails-rendered.json") (:static-file "hyperdoc.mech.js")
+                                                      (:static-file "hyperdoc.blocks.js") (:static-file "hyperdoc.interpreter.js")
+                                                      (:static-file "hyperdoc.library.js") (:static-file "hyperdoc.code.js")
+                                                      (:static-file "dispatch-probe.json")))
+                                                    (:static-file "trails-rendered-dispatch-probe.mjs")))
                (:module "dreyeck/pages/work" :components
                 ((:static-file "Work Breakdown.html")
                  (:static-file "Interaction.html")
@@ -2565,7 +2578,8 @@
                  (:static-file "Trails Rendered public reproduction.html")
                  (:static-file "Solo hoverbold.html")
                  (:static-file "Shift-click Is Pane Policy.html")
-                 (:static-file "Following One Recorded Trail.html")))))
+                 (:static-file "Following One Recorded Trail.html")
+                 (:static-file "Original CODE Browser Check.html")))))
 
 (defsystem "dreyeck/work/reading/tests"
   :depends-on ("dreyeck/work/reading" "clog-moldable-inspector" "fset"
@@ -2579,7 +2593,8 @@
                (:file "dreyeck/tests/work-trails-rendered-reading")
                (:file "dreyeck/tests/work-trails-rendered-federated-context")
                (:file "dreyeck/tests/work-trails-rendered-following")
-               (:file "dreyeck/tests/work-shift-click"))
+               (:file "dreyeck/tests/work-shift-click")
+               (:file "dreyeck/tests/work-trails-rendered-browser-check"))
   :perform (test-op (op component)
              (declare (ignore op component))
              (uiop:symbol-call :dreyeck/work/tests :run-tests)

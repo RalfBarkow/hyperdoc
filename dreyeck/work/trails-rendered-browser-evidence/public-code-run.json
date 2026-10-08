@@ -1,0 +1,919 @@
+{
+  "started": "2026-10-08T11:04:34.039Z",
+  "url": "http://ward.voices.ustawi.wiki/view/trails-rendered",
+  "outcome": "success",
+  "diagnostic": null,
+  "console": [
+    {
+      "at": "2026-10-08T11:04:39.992Z",
+      "type": "log",
+      "text": "JQMIGRATE: Migrate is installed with logging active, version 4.0.2",
+      "location": {
+        "url": "http://ward.voices.ustawi.wiki/js/jquery-migrate-4.0.2.js",
+        "line": 98,
+        "column": 15,
+        "lineNumber": 98,
+        "columnNumber": 15
+      }
+    },
+    {
+      "at": "2026-10-08T11:04:40.024Z",
+      "type": "log",
+      "text": "siteAdapter: loading data",
+      "location": {
+        "url": "http://ward.voices.ustawi.wiki/client.js",
+        "line": 1,
+        "column": 36362,
+        "lineNumber": 1,
+        "columnNumber": 36362
+      }
+    },
+    {
+      "at": "2026-10-08T11:04:40.036Z",
+      "type": "log",
+      "text": "loading url: /security/security.js",
+      "location": {
+        "url": "http://ward.voices.ustawi.wiki/client.js",
+        "line": 16,
+        "column": 2704,
+        "lineNumber": 16,
+        "columnNumber": 2704
+      }
+    },
+    {
+      "at": "2026-10-08T11:04:41.231Z",
+      "type": "log",
+      "text": "Code Plugin declares an editor, so pre-loading the plugin",
+      "location": {
+        "url": "http://ward.voices.ustawi.wiki/client.js",
+        "line": 101,
+        "column": 375,
+        "lineNumber": 101,
+        "columnNumber": 375
+      }
+    },
+    {
+      "at": "2026-10-08T11:04:41.231Z",
+      "type": "log",
+      "text": "loading url: /plugins/code/code.js",
+      "location": {
+        "url": "http://ward.voices.ustawi.wiki/client.js",
+        "line": 16,
+        "column": 2704,
+        "lineNumber": 16,
+        "columnNumber": 2704
+      }
+    },
+    {
+      "at": "2026-10-08T11:04:41.231Z",
+      "type": "log",
+      "text": "Image Plugin declares an editor, so pre-loading the plugin",
+      "location": {
+        "url": "http://ward.voices.ustawi.wiki/client.js",
+        "line": 101,
+        "column": 375,
+        "lineNumber": 101,
+        "columnNumber": 375
+      }
+    },
+    {
+      "at": "2026-10-08T11:04:41.231Z",
+      "type": "log",
+      "text": "loading url: /plugins/image/image.js",
+      "location": {
+        "url": "http://ward.voices.ustawi.wiki/client.js",
+        "line": 16,
+        "column": 2704,
+        "lineNumber": 16,
+        "columnNumber": 2704
+      }
+    },
+    {
+      "at": "2026-10-08T11:04:41.283Z",
+      "type": "log",
+      "text": "siteAdapter: data loaded",
+      "location": {
+        "url": "http://ward.voices.ustawi.wiki/client.js",
+        "line": 1,
+        "column": 36488,
+        "lineNumber": 1,
+        "columnNumber": 36488
+      }
+    },
+    {
+      "at": "2026-10-08T11:04:41.283Z",
+      "type": "log",
+      "text": "siteAdapter: withCredentials data loaded",
+      "location": {
+        "url": "http://ward.voices.ustawi.wiki/client.js",
+        "line": 1,
+        "column": 36684,
+        "lineNumber": 1,
+        "columnNumber": 36684
+      }
+    },
+    {
+      "at": "2026-10-08T11:04:41.380Z",
+      "type": "verbose",
+      "text": "[DOM] Input elements should have autocomplete attributes (suggested: \"new-password\"): (More info: https://goo.gl/9p2vKq) %o",
+      "location": {
+        "url": "http://ward.voices.ustawi.wiki/view/trails-rendered",
+        "line": 0,
+        "column": 0,
+        "lineNumber": 0,
+        "columnNumber": 0
+      }
+    },
+    {
+      "at": "2026-10-08T11:04:41.716Z",
+      "type": "log",
+      "text": "loading url: /plugins/graphviz/graphviz.js",
+      "location": {
+        "url": "http://ward.voices.ustawi.wiki/client.js",
+        "line": 16,
+        "column": 2704,
+        "lineNumber": 16,
+        "columnNumber": 2704
+      }
+    },
+    {
+      "at": "2026-10-08T11:04:41.875Z",
+      "type": "log",
+      "text": "**** Adding graphviz listener",
+      "location": {
+        "url": "http://ward.voices.ustawi.wiki/plugins/graphviz/graphviz.js",
+        "line": 626,
+        "column": 16,
+        "lineNumber": 626,
+        "columnNumber": 16
+      }
+    },
+    {
+      "at": "2026-10-08T11:04:41.875Z",
+      "type": "log",
+      "text": "adding style",
+      "location": {
+        "url": "http://ward.voices.ustawi.wiki/plugins/graphviz/graphviz.js",
+        "line": 492,
+        "column": 14,
+        "lineNumber": 492,
+        "columnNumber": 14
+      }
+    },
+    {
+      "at": "2026-10-08T11:04:41.875Z",
+      "type": "log",
+      "text": "loading url: /plugins/solo/solo.js",
+      "location": {
+        "url": "http://ward.voices.ustawi.wiki/client.js",
+        "line": 16,
+        "column": 2704,
+        "lineNumber": 16,
+        "columnNumber": 2704
+      }
+    },
+    {
+      "at": "2026-10-08T11:04:41.968Z",
+      "type": "log",
+      "text": "delay for  ward.voices.ustawi.wiki 720",
+      "location": {
+        "url": "http://ward.voices.ustawi.wiki/client.js",
+        "line": 5,
+        "column": 25246,
+        "lineNumber": 5,
+        "columnNumber": 25246
+      }
+    },
+    {
+      "at": "2026-10-08T11:04:42.041Z",
+      "type": "log",
+      "text": "**** Adding solo listener",
+      "location": {
+        "url": "http://ward.voices.ustawi.wiki/plugins/solo/solo.js",
+        "line": 11,
+        "column": 1357,
+        "lineNumber": 11,
+        "columnNumber": 1357
+      }
+    },
+    {
+      "at": "2026-10-08T11:04:42.041Z",
+      "type": "log",
+      "text": "{graphs: Array(1)}",
+      "location": {
+        "url": "http://ward.voices.ustawi.wiki/plugins/solo/solo.js",
+        "line": 5,
+        "column": 111,
+        "lineNumber": 5,
+        "columnNumber": 111
+      }
+    },
+    {
+      "at": "2026-10-08T11:04:42.041Z",
+      "type": "log",
+      "text": "{todo: Array(1)}",
+      "location": {
+        "url": "http://ward.voices.ustawi.wiki/plugins/solo/solo.js",
+        "line": 8,
+        "column": 53,
+        "lineNumber": 8,
+        "columnNumber": 53
+      }
+    },
+    {
+      "at": "2026-10-08T11:04:42.043Z",
+      "type": "log",
+      "text": "loading url: /plugins/mech/mech.js",
+      "location": {
+        "url": "http://ward.voices.ustawi.wiki/client.js",
+        "line": 16,
+        "column": 2704,
+        "lineNumber": 16,
+        "columnNumber": 2704
+      }
+    },
+    {
+      "at": "2026-10-08T11:04:42.303Z",
+      "type": "log",
+      "text": "ward.voices.ustawi.wiki index loaded",
+      "location": {
+        "url": "http://ward.voices.ustawi.wiki/client.js",
+        "line": 5,
+        "column": 25540,
+        "lineNumber": 5,
+        "columnNumber": 25540
+      }
+    },
+    {
+      "at": "2026-10-08T11:04:42.653Z",
+      "type": "info",
+      "text": "JQMIGRATE: jQuery.fn.dblclick() event shorthand is deprecated",
+      "location": {
+        "url": "http://ward.voices.ustawi.wiki/js/jquery-migrate-4.0.2.js",
+        "line": 135,
+        "column": 27,
+        "lineNumber": 135,
+        "columnNumber": 27
+      }
+    },
+    {
+      "at": "2026-10-08T11:04:42.653Z",
+      "type": "trace",
+      "text": "JQMIGRATE: jQuery.fn.dblclick() event shorthand is deprecated",
+      "location": {
+        "url": "http://ward.voices.ustawi.wiki/js/jquery-migrate-4.0.2.js",
+        "line": 141,
+        "column": 12,
+        "lineNumber": 141,
+        "columnNumber": 12
+      }
+    }
+  ],
+  "pageErrors": [],
+  "failedRequests": [],
+  "requests": [
+    {
+      "url": "http://ward.voices.ustawi.wiki/view/trails-rendered",
+      "type": "document",
+      "at": "2026-10-08T11:04:37.452Z"
+    },
+    {
+      "url": "http://ward.voices.ustawi.wiki/style/style.css",
+      "type": "stylesheet",
+      "at": "2026-10-08T11:04:39.039Z"
+    },
+    {
+      "url": "http://ward.voices.ustawi.wiki/theme/style.css",
+      "type": "stylesheet",
+      "at": "2026-10-08T11:04:39.040Z"
+    },
+    {
+      "url": "http://ward.voices.ustawi.wiki/js/jquery-ui/1.14.2/jquery-ui.min.css",
+      "type": "stylesheet",
+      "at": "2026-10-08T11:04:39.042Z"
+    },
+    {
+      "url": "http://ward.voices.ustawi.wiki/js/jquery-4.0.0.js",
+      "type": "script",
+      "at": "2026-10-08T11:04:39.042Z"
+    },
+    {
+      "url": "http://ward.voices.ustawi.wiki/js/jquery-migrate-4.0.2.js",
+      "type": "script",
+      "at": "2026-10-08T11:04:39.042Z"
+    },
+    {
+      "url": "http://ward.voices.ustawi.wiki/js/jquery-ui/1.14.2/jquery-ui.min.js",
+      "type": "script",
+      "at": "2026-10-08T11:04:39.042Z"
+    },
+    {
+      "url": "http://ward.voices.ustawi.wiki/js/jquery.ui.touch-punch.min.js",
+      "type": "script",
+      "at": "2026-10-08T11:04:39.042Z"
+    },
+    {
+      "url": "http://ward.voices.ustawi.wiki/js/underscore-min.js",
+      "type": "script",
+      "at": "2026-10-08T11:04:39.042Z"
+    },
+    {
+      "url": "http://ward.voices.ustawi.wiki/client.js",
+      "type": "script",
+      "at": "2026-10-08T11:04:39.043Z"
+    },
+    {
+      "url": "http://ward.voices.ustawi.wiki/style/print.css",
+      "type": "stylesheet",
+      "at": "2026-10-08T11:04:39.045Z"
+    },
+    {
+      "url": "http://ward.voices.ustawi.wiki/system/factories.json",
+      "type": "xhr",
+      "at": "2026-10-08T11:04:40.035Z"
+    },
+    {
+      "url": "http://ward.voices.ustawi.wiki/security/security.js",
+      "type": "script",
+      "at": "2026-10-08T11:04:40.036Z"
+    },
+    {
+      "url": "http://ward.voices.ustawi.wiki/images/crosses.png",
+      "type": "image",
+      "at": "2026-10-08T11:04:41.221Z"
+    },
+    {
+      "url": "http://ward.voices.ustawi.wiki/images/noise.png",
+      "type": "image",
+      "at": "2026-10-08T11:04:41.221Z"
+    },
+    {
+      "url": "http://ward.voices.ustawi.wiki/plugins/code/code.js",
+      "type": "script",
+      "at": "2026-10-08T11:04:41.231Z"
+    },
+    {
+      "url": "http://ward.voices.ustawi.wiki/plugins/image/image.js",
+      "type": "script",
+      "at": "2026-10-08T11:04:41.231Z"
+    },
+    {
+      "url": "http://ward.voices.ustawi.wiki/security/fontawesome/css/fontawesome.min.css",
+      "type": "stylesheet",
+      "at": "2026-10-08T11:04:41.275Z"
+    },
+    {
+      "url": "http://ward.voices.ustawi.wiki/security/fontawesome/css/solid.min.css",
+      "type": "stylesheet",
+      "at": "2026-10-08T11:04:41.276Z"
+    },
+    {
+      "url": "http://ward.voices.ustawi.wiki/security/style.css",
+      "type": "stylesheet",
+      "at": "2026-10-08T11:04:41.276Z"
+    },
+    {
+      "url": "http://ward.voices.ustawi.wiki/trails-rendered.json",
+      "type": "xhr",
+      "at": "2026-10-08T11:04:41.280Z"
+    },
+    {
+      "url": "http://ward.voices.ustawi.wiki/security/fontawesome/webfonts/fa-solid-900.woff2",
+      "type": "font",
+      "at": "2026-10-08T11:04:41.713Z"
+    },
+    {
+      "url": "http://ward.voices.ustawi.wiki/favicon.png",
+      "type": "image",
+      "at": "2026-10-08T11:04:41.716Z"
+    },
+    {
+      "url": "http://ward.voices.ustawi.wiki/plugins/graphviz/graphviz.js",
+      "type": "script",
+      "at": "2026-10-08T11:04:41.716Z"
+    },
+    {
+      "url": "http://ward.voices.ustawi.wiki/system/sitemap.json",
+      "type": "xhr",
+      "at": "2026-10-08T11:04:41.804Z"
+    },
+    {
+      "url": "http://ward.voices.ustawi.wiki/plugins/graphviz/viz@3.22.0/viz-global.js",
+      "type": "script",
+      "at": "2026-10-08T11:04:41.874Z"
+    },
+    {
+      "url": "http://ward.voices.ustawi.wiki/plugins/graphviz/graphviz.css",
+      "type": "stylesheet",
+      "at": "2026-10-08T11:04:41.875Z"
+    },
+    {
+      "url": "http://ward.voices.ustawi.wiki/plugins/solo/solo.js",
+      "type": "script",
+      "at": "2026-10-08T11:04:41.875Z"
+    },
+    {
+      "url": "http://ward.voices.ustawi.wiki/system/site-index.json",
+      "type": "xhr",
+      "at": "2026-10-08T11:04:41.968Z"
+    },
+    {
+      "url": "http://ward.voices.ustawi.wiki/plugins/mech/mech.js",
+      "type": "script",
+      "at": "2026-10-08T11:04:42.043Z"
+    },
+    {
+      "url": "http://ward.voices.ustawi.wiki/favicon.png",
+      "type": "other",
+      "at": "2026-10-08T11:04:42.044Z"
+    },
+    {
+      "url": "http://ward.voices.ustawi.wiki/plugins/mech/mech.css",
+      "type": "stylesheet",
+      "at": "2026-10-08T11:04:42.221Z"
+    },
+    {
+      "url": "http://ward.voices.ustawi.wiki/plugins/code/highlight.css",
+      "type": "stylesheet",
+      "at": "2026-10-08T11:04:42.522Z"
+    },
+    {
+      "url": "http://ward.voices.ustawi.wiki/plugins/code/code.css",
+      "type": "stylesheet",
+      "at": "2026-10-08T11:04:42.524Z"
+    },
+    {
+      "url": "https://wardcunningham.github.io/graph/graph.js",
+      "type": "script",
+      "at": "2026-10-08T11:04:44.585Z"
+    },
+    {
+      "url": "https://wardcunningham.github.io/graph/cypher.js",
+      "type": "script",
+      "at": "2026-10-08T11:04:44.816Z"
+    }
+  ],
+  "responses": [
+    {
+      "url": "http://ward.voices.ustawi.wiki/view/trails-rendered",
+      "status": 200,
+      "type": "document"
+    },
+    {
+      "url": "http://ward.voices.ustawi.wiki/style/style.css",
+      "status": 200,
+      "type": "stylesheet"
+    },
+    {
+      "url": "http://ward.voices.ustawi.wiki/theme/style.css",
+      "status": 200,
+      "type": "stylesheet"
+    },
+    {
+      "url": "http://ward.voices.ustawi.wiki/js/jquery-ui/1.14.2/jquery-ui.min.css",
+      "status": 200,
+      "type": "stylesheet"
+    },
+    {
+      "url": "http://ward.voices.ustawi.wiki/js/jquery.ui.touch-punch.min.js",
+      "status": 200,
+      "type": "script"
+    },
+    {
+      "url": "http://ward.voices.ustawi.wiki/js/jquery-migrate-4.0.2.js",
+      "status": 200,
+      "type": "script"
+    },
+    {
+      "url": "http://ward.voices.ustawi.wiki/js/underscore-min.js",
+      "status": 200,
+      "type": "script"
+    },
+    {
+      "url": "http://ward.voices.ustawi.wiki/js/jquery-4.0.0.js",
+      "status": 200,
+      "type": "script"
+    },
+    {
+      "url": "http://ward.voices.ustawi.wiki/client.js",
+      "status": 200,
+      "type": "script"
+    },
+    {
+      "url": "http://ward.voices.ustawi.wiki/js/jquery-ui/1.14.2/jquery-ui.min.js",
+      "status": 200,
+      "type": "script"
+    },
+    {
+      "url": "http://ward.voices.ustawi.wiki/style/print.css",
+      "status": 200,
+      "type": "stylesheet"
+    },
+    {
+      "url": "http://ward.voices.ustawi.wiki/system/factories.json",
+      "status": 200,
+      "type": "xhr"
+    },
+    {
+      "url": "http://ward.voices.ustawi.wiki/security/security.js",
+      "status": 200,
+      "type": "script"
+    },
+    {
+      "url": "http://ward.voices.ustawi.wiki/images/crosses.png",
+      "status": 200,
+      "type": "image"
+    },
+    {
+      "url": "http://ward.voices.ustawi.wiki/images/noise.png",
+      "status": 200,
+      "type": "image"
+    },
+    {
+      "url": "http://ward.voices.ustawi.wiki/security/fontawesome/css/fontawesome.min.css",
+      "status": 200,
+      "type": "stylesheet"
+    },
+    {
+      "url": "http://ward.voices.ustawi.wiki/security/fontawesome/css/solid.min.css",
+      "status": 200,
+      "type": "stylesheet"
+    },
+    {
+      "url": "http://ward.voices.ustawi.wiki/security/style.css",
+      "status": 200,
+      "type": "stylesheet"
+    },
+    {
+      "url": "http://ward.voices.ustawi.wiki/trails-rendered.json",
+      "status": 200,
+      "type": "xhr"
+    },
+    {
+      "url": "http://ward.voices.ustawi.wiki/plugins/image/image.js",
+      "status": 200,
+      "type": "script"
+    },
+    {
+      "url": "http://ward.voices.ustawi.wiki/favicon.png",
+      "status": 200,
+      "type": "image"
+    },
+    {
+      "url": "http://ward.voices.ustawi.wiki/plugins/graphviz/graphviz.js",
+      "status": 200,
+      "type": "script"
+    },
+    {
+      "url": "http://ward.voices.ustawi.wiki/security/fontawesome/webfonts/fa-solid-900.woff2",
+      "status": 200,
+      "type": "font"
+    },
+    {
+      "url": "http://ward.voices.ustawi.wiki/system/sitemap.json",
+      "status": 200,
+      "type": "xhr"
+    },
+    {
+      "url": "http://ward.voices.ustawi.wiki/plugins/solo/solo.js",
+      "status": 200,
+      "type": "script"
+    },
+    {
+      "url": "http://ward.voices.ustawi.wiki/plugins/graphviz/graphviz.css",
+      "status": 200,
+      "type": "stylesheet"
+    },
+    {
+      "url": "http://ward.voices.ustawi.wiki/system/site-index.json",
+      "status": 200,
+      "type": "xhr"
+    },
+    {
+      "url": "http://ward.voices.ustawi.wiki/favicon.png",
+      "status": 200,
+      "type": "other"
+    },
+    {
+      "url": "http://ward.voices.ustawi.wiki/plugins/mech/mech.js",
+      "status": 200,
+      "type": "script"
+    },
+    {
+      "url": "http://ward.voices.ustawi.wiki/plugins/code/code.js",
+      "status": 200,
+      "type": "script"
+    },
+    {
+      "url": "http://ward.voices.ustawi.wiki/plugins/mech/mech.css",
+      "status": 200,
+      "type": "stylesheet"
+    },
+    {
+      "url": "http://ward.voices.ustawi.wiki/plugins/graphviz/viz@3.22.0/viz-global.js",
+      "status": 200,
+      "type": "script"
+    },
+    {
+      "url": "http://ward.voices.ustawi.wiki/plugins/code/highlight.css",
+      "status": 200,
+      "type": "stylesheet"
+    },
+    {
+      "url": "http://ward.voices.ustawi.wiki/plugins/code/code.css",
+      "status": 200,
+      "type": "stylesheet"
+    },
+    {
+      "url": "https://wardcunningham.github.io/graph/graph.js",
+      "status": 200,
+      "type": "script"
+    },
+    {
+      "url": "https://wardcunningham.github.io/graph/cypher.js",
+      "status": 200,
+      "type": "script"
+    }
+  ],
+  "sources": [
+    {
+      "url": "http://ward.voices.ustawi.wiki/trails-rendered.json",
+      "status": 200,
+      "sha256": "5fdba40fd3a68eddee00497af4dadb3847500356a2f131dbc0745afb86de9810",
+      "file": "5fdba40fd3a68eddee00497af4dadb3847500356a2f131dbc0745afb86de9810.json",
+      "headers": {
+        "access-control-allow-origin": "*",
+        "connection": "keep-alive",
+        "content-length": "79749",
+        "content-type": "application/json; charset=utf-8",
+        "date": "Thu, 08 Oct 2026 11:04:41 GMT",
+        "etag": "W/\"13785-FuDmqWgkf4cnIGAAIjjyUri9ecY\"",
+        "keep-alive": "timeout=5"
+      },
+      "bytes": 79749
+    },
+    {
+      "url": "http://ward.voices.ustawi.wiki/plugins/mech/mech.js",
+      "status": 200,
+      "sha256": "36e993b390481ce2efbd6d9041b2553d142944e0869cb71cf5317b2d094a260b",
+      "file": "36e993b390481ce2efbd6d9041b2553d142944e0869cb71cf5317b2d094a260b.js",
+      "headers": {
+        "accept-ranges": "bytes",
+        "access-control-allow-origin": "http://ward.voices.ustawi.wiki",
+        "cache-control": "public, max-age=3600",
+        "connection": "keep-alive",
+        "content-length": "87879",
+        "content-type": "text/javascript; charset=utf-8",
+        "date": "Thu, 08 Oct 2026 11:04:42 GMT",
+        "etag": "W/\"15747-1a0f8c59584\"",
+        "keep-alive": "timeout=5"
+      },
+      "bytes": 87879
+    },
+    {
+      "url": "http://ward.voices.ustawi.wiki/plugins/code/code.js",
+      "status": 200,
+      "sha256": "2d1eb418f370e775a05cbf33c46ff505d73df9f1d1460fd2cf3485bf60855281",
+      "file": "2d1eb418f370e775a05cbf33c46ff505d73df9f1d1460fd2cf3485bf60855281.js",
+      "headers": {
+        "accept-ranges": "bytes",
+        "access-control-allow-origin": "http://ward.voices.ustawi.wiki",
+        "cache-control": "public, max-age=3600",
+        "connection": "keep-alive",
+        "content-length": "1092430",
+        "content-type": "text/javascript; charset=utf-8",
+        "date": "Thu, 08 Oct 2026 11:04:41 GMT",
+        "etag": "W/\"10ab4e-1a0f8c27399\"",
+        "keep-alive": "timeout=5"
+      },
+      "bytes": 1092430
+    },
+    {
+      "url": "http://ward.voices.ustawi.wiki/plugins/mech/mech.css",
+      "status": 200,
+      "sha256": "9d930c433a2cdb14c532cfe7c271720df81a1010adeb05cf734fdae7b0608f27",
+      "file": "9d930c433a2cdb14c532cfe7c271720df81a1010adeb05cf734fdae7b0608f27.css",
+      "headers": {
+        "accept-ranges": "bytes",
+        "access-control-allow-origin": "*",
+        "cache-control": "public, max-age=3600",
+        "connection": "keep-alive",
+        "content-length": "747",
+        "content-type": "text/css; charset=utf-8",
+        "date": "Thu, 08 Oct 2026 11:04:42 GMT",
+        "etag": "W/\"2eb-1a0f8c59584\"",
+        "keep-alive": "timeout=5"
+      },
+      "bytes": 747
+    },
+    {
+      "url": "http://ward.voices.ustawi.wiki/plugins/code/highlight.css",
+      "status": 200,
+      "sha256": "fbde0ac0921d86c356c41532e7319c887a23bd1b8ff00060cab447249f03c7cf",
+      "file": "fbde0ac0921d86c356c41532e7319c887a23bd1b8ff00060cab447249f03c7cf.css",
+      "headers": {
+        "accept-ranges": "bytes",
+        "access-control-allow-origin": "*",
+        "cache-control": "public, max-age=3600",
+        "connection": "keep-alive",
+        "content-length": "1144",
+        "content-type": "text/css; charset=utf-8",
+        "date": "Thu, 08 Oct 2026 11:04:42 GMT",
+        "etag": "W/\"478-1a0f8c26f1d\"",
+        "keep-alive": "timeout=5"
+      },
+      "bytes": 1144
+    },
+    {
+      "url": "http://ward.voices.ustawi.wiki/plugins/code/code.css",
+      "status": 200,
+      "sha256": "8e3a72d7e5c1a8731033f862b33f0d0b62847d0fd8c7db383e42515546842c91",
+      "file": "8e3a72d7e5c1a8731033f862b33f0d0b62847d0fd8c7db383e42515546842c91.css",
+      "headers": {
+        "accept-ranges": "bytes",
+        "access-control-allow-origin": "*",
+        "cache-control": "public, max-age=3600",
+        "connection": "keep-alive",
+        "content-length": "126",
+        "content-type": "text/css; charset=utf-8",
+        "date": "Thu, 08 Oct 2026 11:04:42 GMT",
+        "etag": "W/\"7e-1a0f8c26ebd\"",
+        "keep-alive": "timeout=5"
+      },
+      "bytes": 126
+    },
+    {
+      "url": "https://wardcunningham.github.io/graph/graph.js",
+      "status": 200,
+      "sha256": "8a137c3d51d49f7233ea10e7c067aab7871b8dc605a171a16de36a03624ff852",
+      "file": "8a137c3d51d49f7233ea10e7c067aab7871b8dc605a171a16de36a03624ff852.js",
+      "headers": {
+        "accept-ranges": "bytes",
+        "access-control-allow-origin": "*",
+        "age": "0",
+        "cache-control": "max-age=600",
+        "content-encoding": "gzip",
+        "content-length": "1822",
+        "content-type": "application/javascript; charset=utf-8",
+        "date": "Thu, 08 Oct 2026 11:04:44 GMT",
+        "etag": "W/\"66d9fd57-1cbd\"",
+        "expires": "Thu, 08 Oct 2026 10:58:40 GMT",
+        "last-modified": "Thu, 05 Sep 2024 18:49:59 GMT",
+        "server": "GitHub.com",
+        "vary": "Accept-Encoding",
+        "via": "1.1 varnish",
+        "x-cache": "HIT",
+        "x-cache-hits": "0",
+        "x-fastly-request-id": "5757e784985648db2e5584850ec5bde6e633a793",
+        "x-github-edge-region": "switzerlandnorth",
+        "x-github-request-id": "5A30:10E9A5:130B5:1524C:6AC77507",
+        "x-proxy-cache": "MISS",
+        "x-served-by": "cache-vie6357-VIE",
+        "x-timer": "S1791457485.756042,VS0,VE151"
+      },
+      "bytes": 7357
+    },
+    {
+      "url": "https://wardcunningham.github.io/graph/cypher.js",
+      "status": 200,
+      "sha256": "952768e094d5eb61e5a56a5857fd30e0bd7a110af6acd9d65877fc35c101c1bd",
+      "file": "952768e094d5eb61e5a56a5857fd30e0bd7a110af6acd9d65877fc35c101c1bd.js",
+      "headers": {
+        "accept-ranges": "bytes",
+        "access-control-allow-origin": "*",
+        "age": "0",
+        "cache-control": "max-age=600",
+        "content-encoding": "gzip",
+        "content-length": "1673",
+        "content-type": "application/javascript; charset=utf-8",
+        "date": "Thu, 08 Oct 2026 11:04:45 GMT",
+        "etag": "W/\"66d9fd57-14f1\"",
+        "expires": "Thu, 08 Oct 2026 10:58:40 GMT",
+        "last-modified": "Thu, 05 Sep 2024 18:49:59 GMT",
+        "server": "GitHub.com",
+        "vary": "Accept-Encoding",
+        "via": "1.1 varnish",
+        "x-cache": "HIT",
+        "x-cache-hits": "0",
+        "x-fastly-request-id": "c6c7083b3168dde15baed6837c4448e7b0d8949f",
+        "x-github-edge-region": "switzerlandnorth",
+        "x-github-request-id": "5A30:10E9A5:130C4:15257:6AC77508",
+        "x-proxy-cache": "MISS",
+        "x-served-by": "cache-vie6357-VIE",
+        "x-timer": "S1791457485.928158,VS0,VE139"
+      },
+      "bytes": 5361
+    }
+  ],
+  "browser": "154.0.8037.98",
+  "navigation": {
+    "url": "http://ward.voices.ustawi.wiki/view/trails-rendered",
+    "status": 200,
+    "headers": {
+      "access-control-allow-origin": "*",
+      "connection": "keep-alive",
+      "content-length": "2058",
+      "content-type": "text/html; charset=utf-8",
+      "date": "Thu, 08 Oct 2026 11:04:37 GMT",
+      "etag": "W/\"80a-20YkLKbBd1WhLojKwtkqkQEqqAM\"",
+      "keep-alive": "timeout=5"
+    }
+  },
+  "before": {
+    "url": "http://ward.voices.ustawi.wiki/view/trails-rendered",
+    "isOwner": false,
+    "items": [
+      {
+        "page": "trails-rendered",
+        "id": "16917360196332109824",
+        "type": "item paragraph",
+        "text": "Here we work out an example to use as a test case. This page saved from Pattern Machinery."
+      },
+      {
+        "page": "trails-rendered",
+        "id": "49488010256113991680",
+        "type": "item graphviz aspect-source",
+        "text": "Howard\nBecker\nEveryday\nDonald\nSchön\nJohn\nDewey\nSusan\nLeigh\nStar\nReflective\nPractice\nInteraction\nDesign\nHenrik\nGedenryd\nSusan\nKare\nAlan\nCooper\nInteresting\nPeople\nAndrew\nAbbott\nClose\nAt\nHand\nDorothy\nSmi"
+      },
+      {
+        "page": "trails-rendered",
+        "id": "29487849520185925632",
+        "type": "item solo aspect-source",
+        "text": "INCLUDED\n  3 aspects\n\nview in solo"
+      },
+      {
+        "page": "trails-rendered",
+        "id": "02a6f8340521e129",
+        "type": "item paragraph",
+        "text": "We will add two trails by hand then explore how they interact while browsing aspects."
+      },
+      {
+        "page": "trails-rendered",
+        "id": "93cd119d6286888a",
+        "type": "item paragraph",
+        "text": "Susan Kare ⇒ John Dewey ⇒ Reflective Practice"
+      },
+      {
+        "page": "trails-rendered",
+        "id": "fc6c7d06e5bce7d3",
+        "type": "item paragraph",
+        "text": "Jean Lave ⇒ Dorothy Smith ⇒ Reflective Practice"
+      },
+      {
+        "page": "trails-rendered",
+        "id": "6405b752d1739af0",
+        "type": "item mech",
+        "text": "CLICK▶\nCODE trails\nCLICK\nSOLO\nCLICK\nPREVIEW synopsis items"
+      },
+      {
+        "page": "trails-rendered",
+        "id": "17a5b123160ef0d9",
+        "type": "item code",
+        "text": "import {Graph} from 'https://wardcunningham.github.io/graph/graph.js'"
+      },
+      {
+        "page": "trails-rendered",
+        "id": "cc6a77771de7edbd",
+        "type": "item code",
+        "text": "export function trails () {\n let context = this.context\n let page = context.page\n let result = page.story\n  .filter(item => item.type == \"paragraph\")\n  .map(item => item.text)\n  .filter(text => text.s"
+      },
+      {
+        "page": "trails-rendered",
+        "id": "84da00fa76850971",
+        "type": "item code",
+        "text": "function trail(names) {\n let graph = new Graph()\n let prev = null\n for (let each of names) {\n  let name = each\n   .replaceAll(/[\\[\\]]/g,\"\")\n   .replaceAll(/ +/g,\"\\n\")\n  let nid = graph.addNode(\"\",{nam"
+      },
+      {
+        "page": "trails-rendered",
+        "id": "c2706793c45f5631",
+        "type": "item paragraph",
+        "text": "See Increment of Progress, Eigenmode Patterns"
+      }
+    ],
+    "scripts": [
+      "http://ward.voices.ustawi.wiki/js/jquery-4.0.0.js",
+      "http://ward.voices.ustawi.wiki/js/jquery-migrate-4.0.2.js",
+      "http://ward.voices.ustawi.wiki/js/jquery-ui/1.14.2/jquery-ui.min.js",
+      "http://ward.voices.ustawi.wiki/js/jquery.ui.touch-punch.min.js",
+      "http://ward.voices.ustawi.wiki/js/underscore-min.js",
+      "http://ward.voices.ustawi.wiki/client.js",
+      ""
+    ],
+    "mechLoaded": true,
+    "codeLoaded": true,
+    "mechBuild": null,
+    "lineup": [
+      {
+        "slug": "trails-rendered",
+        "site": "ward.voices.ustawi.wiki",
+        "key": "a769ca59",
+        "title": "Trails Rendered",
+        "remote": false
+      }
+    ]
+  },
+  "clickStarted": "2026-10-08T11:04:43.234Z",
+  "after": "CLICK▶\nCODE trails ⇒ 2 aspects\nCLICK▶\nSOLO\nCLICK▶\nPREVIEW synopsis items",
+  "dom": "<div style=\"background-color:#eee;padding:15px;border-top:8px;\"><div></div><span id=\"787396.0\" class=\"block\">CLICK<button class=\"button\">▶</button></span>\n<div id=\"787396.1\" class=\"body\"><div></div><span id=\"787396.1.0\" class=\"block\">CODE trails<span class=\"status\"> ⇒ 2 aspects</span></span>\n<div></div><span id=\"787396.1.1\" class=\"block\">CLICK<button class=\"button\">▶</button></span>\n<div id=\"787396.1.2\" class=\"body\"><div></div><span id=\"787396.1.2.0\" class=\"block\">SOLO</span></div>\n<div></div><span id=\"787396.1.3\" class=\"block\">CLICK<button class=\"button\">▶</button></span>\n<div id=\"787396.1.4\" class=\"body\"><div></div><span id=\"787396.1.4.0\" class=\"block\">PREVIEW synopsis items</span></div></div></div>",
+  "finished": "2026-10-08T11:04:48.843Z"
+}
