@@ -384,44 +384,38 @@
    (DECLARE (IGNORE OPERATION COMPONENT))
    (UIOP/PACKAGE:SYMBOL-CALL :DREYECK/ASDF-SOURCE/TESTS :RUN-TESTS)))
 
-(ASDF/PARSE-DEFSYSTEM:DEFSYSTEM #:DREYECK/GIT
-  :DESCRIPTION
-  "Experimental Git-backed inspection objects incubated by Dreyeck"
-  :LICENSE
-  "BSD"
-  :VERSION
-  "0.0.1"
-  :PATHNAME
-  "dreyeck/src/"
-  :SERIAL
-  T
-  :DEPENDS-ON
-  (#:DREYECK/TOPICMAP #:ASDF #:UIOP "dreyeck/asdf-source")
-  :COMPONENTS
-  ((:FILE "git-package") (:FILE "git-repository-checkout")
-   (:FILE "git-commit-inspection") (:FILE "git-source-slice")
-   (:FILE "git-repository-topicmap") (:FILE "git-asdf-references")
-   (:FILE "git-asdf-reference-topicmap"))
-  :IN-ORDER-TO
-  ((ASDF/LISP-ACTION:TEST-OP (ASDF/LISP-ACTION:TEST-OP "dreyeck/git/tests"))))
+(ASDF/PARSE-DEFSYSTEM:DEFSYSTEM #:DREYECK/GIT :DESCRIPTION
+                                "Experimental Git-backed inspection objects incubated by Dreyeck"
+                                :LICENSE "BSD" :VERSION "0.0.1" :PATHNAME
+                                "dreyeck/src/" :SERIAL T :DEPENDS-ON
+                                (#:DREYECK/TOPICMAP #:ASDF #:UIOP
+                                                    "dreyeck/asdf-source")
+                                :COMPONENTS
+                                ((:FILE "git-package")
+                                 (:FILE "git-repository-checkout")
+                                 (:FILE "git-commit-inspection")
+                                 (:FILE "git-revision-reference")
+                                 (:FILE "git-source-slice")
+                                 (:FILE "git-repository-topicmap")
+                                 (:FILE "git-asdf-references")
+                                 (:FILE "git-asdf-reference-topicmap"))
+                                :IN-ORDER-TO
+                                ((ASDF/LISP-ACTION:TEST-OP
+                                                           (ASDF/LISP-ACTION:TEST-OP
+                                                                                     "dreyeck/git/tests"))))
 
-(ASDF/PARSE-DEFSYSTEM:DEFSYSTEM #:DREYECK/INSPECTOR/GIT
-  :DESCRIPTION
-  "Dreyeck inspector views for experimental Git objects"
-  :LICENSE
-  "BSD"
-  :VERSION
-  "0.0.1"
-  :PATHNAME
-  "dreyeck/src/"
-  :SERIAL
-  T
-  :DEPENDS-ON
-  (#:DREYECK/GIT #:DREYECK/INSPECTOR/TOPICMAP #:HYPERDOC/INSPECTOR
-   #:HTML-INSPECTOR-VIEWS)
-  :COMPONENTS
-  ((:FILE "git-inspector-package") (:FILE "git-commit-inspection-views")
-   (:FILE "git-asdf-reference-views")))
+(ASDF/PARSE-DEFSYSTEM:DEFSYSTEM #:DREYECK/INSPECTOR/GIT :DESCRIPTION
+                                "Dreyeck inspector views for experimental Git objects"
+                                :LICENSE "BSD" :VERSION "0.0.1" :PATHNAME
+                                "dreyeck/src/" :SERIAL T :DEPENDS-ON
+                                (#:DREYECK/GIT #:DREYECK/INSPECTOR/TOPICMAP
+                                               #:HYPERDOC/INSPECTOR
+                                               #:HTML-INSPECTOR-VIEWS)
+                                :COMPONENTS
+                                ((:FILE "git-inspector-package")
+                                 (:FILE "git-commit-inspection-views")
+                                 (:FILE "git-asdf-reference-views")
+                                 (:FILE "git-revision-reference-views")))
 
 (ASDF/PARSE-DEFSYSTEM:DEFSYSTEM "dreyeck/workflow/upstream-intake"
   :DESCRIPTION
@@ -538,13 +532,16 @@
                                  "dreyeck/authority-policy"
                                  "dreyeck/inspector/topicmap/tala"
                                  "shasht"
-                                 "ironclad")
+                                 "ironclad"
+                                 "dreyeck/inspector/git")
                                 :COMPONENTS
                                 ((:MODULE "dreyeck/nested-actions" :COMPONENTS
                                           ((:FILE "action-tree")
                                            (:FILE "probes")
                                            (:FILE "message-path")
+                                           (:FILE "source-revisions")
                                            (:FILE "input-path")
+                                           (:FILE "solo-history")
                                            (:FILE "reading")
                                            (:STATIC-FILE
                                                          "message-witness.json")
@@ -564,7 +561,27 @@
                                                      (:STATIC-FILE
                                                                    "LICENSE-Mech")
                                                      (:STATIC-FILE
-                                                                   "local-input-source-inventory.json")))
+                                                                   "local-input-source-inventory.json")
+                                                     (:STATIC-FILE
+                                                                   "revision-provenance.json")
+                                                     (:STATIC-FILE
+                                                                   "historical-provenance.json")
+                                                     (:STATIC-FILE
+                                                                   "solo-append-sender.js")
+                                                     (:STATIC-FILE
+                                                                   "solo-fetch-barrier.js")
+                                                     (:STATIC-FILE
+                                                                   "solo-append-receiver.js")
+                                                     (:STATIC-FILE
+                                                                   "solo-refresh.js")
+                                                     (:STATIC-FILE
+                                                                   "solo-replace-receiver.js")
+                                                     (:STATIC-FILE
+                                                                   "speed-getfrom-earlier.js")
+                                                     (:STATIC-FILE
+                                                                   "speed-getfrom.js")
+                                                     (:STATIC-FILE
+                                                                   "speed-run.js")))
                                            (:STATIC-FILE "input-witness.html")
                                            (:STATIC-FILE "input-witness.json")
                                            (:STATIC-FILE "input-witness.cjs")))
@@ -577,7 +594,9 @@
                                            (:STATIC-FILE
                                                          "Two Relations Hidden in One Nest.html")
                                            (:STATIC-FILE
-                                                         "From Message to Nested Input.html"))))
+                                                         "From Message to Nested Input.html")
+                                           (:STATIC-FILE
+                                                         "Adding to an Already Rendered Solo Popup.html"))))
                                 :IN-ORDER-TO
                                 ((ASDF/LISP-ACTION:TEST-OP
                                                            (ASDF/LISP-ACTION:TEST-OP

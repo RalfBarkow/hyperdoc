@@ -1,5 +1,7 @@
 # Received message to nested input: executor report
 
+This is the completed input-boundary slice. The subsequent Git provenance and historical Solo investigation is reported in [nested-actions-revision-provenance-report.md](nested-actions-revision-provenance-report.md).
+
 The retained implementation establishes **MessageEvent → event.data alias → LISTEN action/topic match → count/status**, but the transition from that matched payload to **Ward's current nested REPORT lookup target remains unavailable locally**. Retained REPORT independently reads its supplied `state[key]`; this slice does not invent the missing caller.
 
 1. **Observed starting coordinates and index.** The checkout was `/Users/rgb/workspace/hyperdoc-dreyeck-ch`, branch `dreyeck.ch`, HEAD `6198f2546f4bbfdd26b7c4f7e9b167c2ae27317f`. It is the linked worktree whose Git directory is `/Users/rgb/workspace/hyperdoc/.git/worktrees/hyperdoc-upstream-intake-cut`, common directory `/Users/rgb/workspace/hyperdoc/.git`. The sole dirty item was the staged `dreyeck/pages/work/Trails Rendered public reproduction.html`; there were no other working-tree edits. Its staged diff was saved before writing to `/private/tmp/nested-input-trails-staged-before.patch`.

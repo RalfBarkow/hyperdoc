@@ -1,0 +1,111 @@
+[
+  {
+    "operator": "Codex",
+    "executor": "Read-only Git / source reconnaissance",
+    "entry": "git rev-parse --show-toplevel --git-dir --git-common-dir; git branch --show-current; git rev-parse HEAD; git status --short; git diff --cached --name-status",
+    "expected": "Observe base/index before editing",
+    "observed": "HEAD fab214334279bc5d3df0f2f624d34e6a1bdc1897, dreyeck.ch linked worktree; only Trails Rendered staged",
+    "assimilation": "Preserve that exact patch and file/index blob",
+    "replan": "Reuse committed slice and existing Git/source interfaces"
+  },
+  {
+    "operator": "Codex",
+    "executor": "Existing model/view inspection",
+    "entry": "Read git-repository-checkout.lisp, git-commit-inspection.lisp, Git views/source slice/ASDF reference readers, source-fragment evidence, HyperDoc EXPR reference conventions",
+    "expected": "Find reusable repository/commit/source identities rather than invent SHA recognition",
+    "observed": "Existing commit/file objects and readers available; message-source already keeps hash-verified excerpts; no Git text parser needed",
+    "assimilation": "Extend existing Git and source objects and native expression links",
+    "replan": "Explicit authority/full-OID class, abbreviated display only"
+  },
+  {
+    "operator": "Codex",
+    "executor": "Local history inspection / authority verification",
+    "entry": "git -C <local Solo/assets root> log --all; git show <full-oid>:<path>; remote get-url; cat-file -t; merge-base --is-ancestor <oid> <recorded remote ref>",
+    "expected": "Find exact popup/fetch mechanisms with repository authority",
+    "observed": "Early Solo graph append and later beam replacement; Promise.all fetch barrier; separate Speed Bot sitemap concurrency/hop result append; authorities/ref containment confirmed",
+    "assimilation": "Do not equate async fetch, popup mutation and current nested input; record source-only conclusions",
+    "replan": "Retain eight exact excerpts and first-class revision references"
+  },
+  {
+    "operator": "Codex",
+    "executor": "Pinned structural writer",
+    "entry": "nix develop .#workflow-authoring --command sbcl --noinform --no-userinit --non-interactive --load /private/tmp/nested-provenance-author.lisp; --load /private/tmp/nested-provenance-author-resume.lisp; --load /private/tmp/nested-provenance-author-resume2.lisp",
+    "expected": "Persist/reparse reusable Git identity and typed source fields",
+    "observed": "First attempt completed core model then refused absent Inspector reader package; resume completed views then refused upper-case system key; resume2 exited 0 with REVISION-SOURCE-MODEL-STRUCTURAL-REPARSE-PASS",
+    "assimilation": "Load existing Inspector context, normalize owned system keys, resume only unapplied operations",
+    "replan": "Author native claim/revision/file/definition routes"
+  },
+  {
+    "operator": "Codex",
+    "executor": "Pinned structural writer / HTML DSL",
+    "entry": "nix develop .#workflow-authoring --command sbcl --noinform --no-userinit --non-interactive --load /private/tmp/nested-provenance-navigation-author.lisp; --load /private/tmp/nested-provenance-navigation-finish.lisp; --load /private/tmp/nested-provenance-labels-author.lisp",
+    "expected": "Write provenance/history Topics, actual source warrants and navigable reading",
+    "observed": "Guarded source/model edits and first paragraphs verified; temporary HTML proposal had one extra close; finish and label passes exited 0; intended/surrounding forms and HTML metadata reparsed",
+    "assimilation": "Correct temporary DSL form and preserve verified writes; authority visible in default labels; historical sources link to historical paths",
+    "replan": "Extend existing acceptance, preserve all old gap/proposal contracts"
+  },
+  {
+    "operator": "Codex",
+    "executor": "Pinned structural acceptance authoring",
+    "entry": "nix develop .#workflow-authoring --command sbcl --noinform --no-userinit --non-interactive --load /private/tmp/nested-provenance-tests-author.lisp",
+    "expected": "Test identity, exact blobs, native navigation, typed warrants and history boundaries",
+    "observed": "Exit 0; PROVENANCE-HISTORY-TESTS-STRUCTURAL-REPARSE-PASS",
+    "assimilation": "Use actual Inspector references and immutable Git contents, not only text labels",
+    "replan": "Force fresh reading/Git and regression matrix"
+  },
+  {
+    "operator": "Codex",
+    "executor": "Fresh ASDF acceptance, diagnostic runs",
+    "entry": "nix develop --command sbcl --noinform --no-userinit --non-interactive --eval '(require :asdf)' --eval '(asdf:load-system \"dreyeck/nested-actions/reading\" :force t)' --eval '(asdf:test-system \"dreyeck/nested-actions/reading/tests\" :force t)' --eval '(asdf:test-system \"dreyeck/git/tests\")' > /private/tmp/nested-provenance-reading-git-final.log 2>&1\nnix develop .#tala --command sbcl --noinform --no-userinit --non-interactive --eval '(require :asdf)' --eval '(asdf:load-system \"dreyeck/nested-actions/reading\" :force t)' --eval '(asdf:load-system \"dreyeck/nested-actions/reading/tests\" :force t)' --eval '(asdf:test-system \"dreyeck/nested-actions/tala/tests\")' --eval '(asdf:test-system \"dreyeck/topicmap/tests\")' --eval '(asdf:test-system \"dreyeck/topicmap/tala/tests\")' --eval '(asdf:test-system \"dreyeck/topicmap/tala/reading/tests\")' --eval '(asdf:test-system \"dreyeck/catalog/tests\")' > /private/tmp/nested-provenance-regressions-final.log 2>&1",
+    "expected": "All source and navigation contracts pass",
+    "observed": "Attempt1 failed on name collision between retained context-hypothesis list and new Solo history; attempt2 failed on a missing native current-input code link on added historical page",
+    "assimilation": "Both failures identify concrete navigation/model defects; keep contracts intact",
+    "replan": "Separate bindings and add the missing code-page edge; failed stdout retained under attempt1/attempt2 names"
+  },
+  {
+    "operator": "Codex",
+    "executor": "Pinned structural fixes",
+    "entry": "nix develop .#workflow-authoring --command sbcl --noinform --no-userinit --non-interactive --load /private/tmp/nested-provenance-history-variable-fix.lisp; --load /private/tmp/nested-provenance-link-fix.lisp",
+    "expected": "Correct only diagnosed model/link defects",
+    "observed": "Exit 0; HISTORY-OBJECT-AND-HYPOTHESES-SEPARATION-PASS and HISTORICAL-READING-CURRENT-SOURCE-LINK-PASS",
+    "assimilation": "Earlier hypotheses stay intact; new history object has distinct binding; no test weakened",
+    "replan": "Rerun identical current-source tests"
+  },
+  {
+    "operator": "Codex",
+    "executor": "Fresh ASDF TEST-OP",
+    "entry": "nix develop --command sbcl --noinform --no-userinit --non-interactive --eval '(require :asdf)' --eval '(asdf:load-system \"dreyeck/nested-actions/reading\" :force t)' --eval '(asdf:test-system \"dreyeck/nested-actions/reading/tests\" :force t)' --eval '(asdf:test-system \"dreyeck/git/tests\")' > /private/tmp/nested-provenance-reading-git-final.log 2>&1",
+    "expected": "Reading and reusable Git regression suites pass",
+    "observed": "Exit 0; REVISION-PROVENANCE-HISTORY-PASS, old Ward/input contracts, 5 text/7 code pages and 39 Topics/52 edges; Git commit/source-slice/repository/ASDF reference tests passed",
+    "evidence": "/private/tmp/nested-provenance-reading-git-final.log",
+    "assimilation": "Native source routes and exact historical blobs verified; no historical runtime or current continuity claimed",
+    "replan": "Complete TALA/Catalog and selective commit"
+  },
+  {
+    "operator": "Codex",
+    "executor": "Fresh ASDF TEST-OP",
+    "entry": "nix develop .#tala --command sbcl --noinform --no-userinit --non-interactive --eval '(require :asdf)' --eval '(asdf:load-system \"dreyeck/nested-actions/reading\" :force t)' --eval '(asdf:load-system \"dreyeck/nested-actions/reading/tests\" :force t)' --eval '(asdf:test-system \"dreyeck/nested-actions/tala/tests\")' --eval '(asdf:test-system \"dreyeck/topicmap/tests\")' --eval '(asdf:test-system \"dreyeck/topicmap/tala/tests\")' --eval '(asdf:test-system \"dreyeck/topicmap/tala/reading/tests\")' --eval '(asdf:test-system \"dreyeck/catalog/tests\")' > /private/tmp/nested-provenance-regressions-final.log 2>&1",
+    "expected": "Nested TALA, Topicmap, TALA Reading and fresh Catalog pass",
+    "observed": "Exit 0; Nested Actions TALA, Topicmap, TALA integration/reading, source widgets/checkout/dispatch/reference, and fresh 20-book Catalog passed",
+    "assimilation": "Layout keeps actual objects/warrants and native actions",
+    "replan": "Commit after full matrix pass"
+  },
+  {
+    "operator": "Codex",
+    "executor": "Existing Git primitive / staged whitespace guard",
+    "entry": "First --load /private/tmp/nested-provenance-commit.lisp; process-local -c core.whitespace=-blank-at-eol check for speed-run.js only",
+    "expected": "Validate authored changes while preserving exact historical evidence",
+    "observed": "First attempt refused the verbatim historical trailing space; all source and tests unchanged",
+    "assimilation": "Preserve original excerpt/hash; standard check for all other files, narrow per-process historical-excerpt check",
+    "replan": "Retry identical selective commit; no persistent Git config change"
+  },
+  {
+    "operator": "Codex",
+    "executor": "Existing Git primitive",
+    "entry": "nix develop --command sbcl --noinform --no-userinit --non-interactive --load /private/tmp/nested-provenance-commit.lisp",
+    "expected": "Commit only this slice and preserve unrelated staged Trails bytes",
+    "observed": "Commit hash/status and byte-identical diff/blob/file assertions emitted to /private/tmp/nested-provenance-commit.log; final response provides measured result",
+    "assimilation": "Use commit --only because high-level slice helper requires an empty index",
+    "replan": "Return report, exact outcomes and new commit identity"
+  }
+]

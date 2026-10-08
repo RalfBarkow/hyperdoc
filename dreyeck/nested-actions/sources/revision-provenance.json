@@ -1,0 +1,67 @@
+[
+  {
+    "key": "mech-witness",
+    "root": "/Users/rgb/workspace/wiki-plugin-mech-upstream",
+    "authority": "https://github.com/WardCunningham/wiki-plugin-mech",
+    "oid": "a028b4bba04e539dcaa090423d38a00a0050489d",
+    "display": "a028b4b",
+    "role": "locally-retained-witness-source",
+    "webUrl": "https://github.com/WardCunningham/wiki-plugin-mech/commit/a028b4bba04e539dcaa090423d38a00a0050489d",
+    "remote": "origin",
+    "observedRemote": "https://github.com/WardCunningham/wiki-plugin-mech.git",
+    "containingRef": "refs/remotes/origin/main",
+    "subject": "update dev dependencies"
+  },
+  {
+    "key": "solo-append",
+    "root": "/Users/rgb/workspace/wiki-plugin-solo",
+    "authority": "https://github.com/WardCunningham/wiki-plugin-solo",
+    "oid": "19ebc93886703c8d9b23ce66882d8c893ddd7928",
+    "display": "19ebc93",
+    "role": "historical-popup-append",
+    "webUrl": "https://github.com/WardCunningham/wiki-plugin-solo/commit/19ebc93886703c8d9b23ce66882d8c893ddd7928",
+    "remote": "upstream",
+    "observedRemote": "https://github.com/WardCunningham/wiki-plugin-solo.git",
+    "containingRef": "refs/remotes/upstream/main",
+    "subject": "reliable messaging with popup"
+  },
+  {
+    "key": "solo-replace",
+    "root": "/Users/rgb/workspace/wiki-plugin-solo",
+    "authority": "https://github.com/WardCunningham/wiki-plugin-solo",
+    "oid": "4a940c7021c38c3d63f3b4729f6e1fb0770071a1",
+    "display": "4a940c7",
+    "role": "historical-popup-replacement",
+    "webUrl": "https://github.com/WardCunningham/wiki-plugin-solo/commit/4a940c7021c38c3d63f3b4729f6e1fb0770071a1",
+    "remote": "upstream",
+    "observedRemote": "https://github.com/WardCunningham/wiki-plugin-solo.git",
+    "containingRef": "refs/remotes/upstream/main",
+    "subject": "batch all sources at once"
+  },
+  {
+    "key": "speed-fetch-earlier",
+    "root": "/Users/rgb/.wiki/wiki.ralfbarkow.ch/assets",
+    "authority": "https://github.com/WardCunningham/assets",
+    "oid": "5dc2f4e8ab130e4d74de2d27eb36eb869dae7c4b",
+    "display": "5dc2f4e",
+    "role": "historical-getfrom",
+    "webUrl": "https://github.com/WardCunningham/assets/commit/5dc2f4e8ab130e4d74de2d27eb36eb869dae7c4b",
+    "remote": "ward",
+    "observedRemote": "https://github.com/WardCunningham/assets.git",
+    "containingRef": "refs/remotes/ward/master",
+    "subject": "fuzz-test getfrom"
+  },
+  {
+    "key": "speed-bot",
+    "root": "/Users/rgb/.wiki/wiki.ralfbarkow.ch/assets",
+    "authority": "https://github.com/WardCunningham/assets",
+    "oid": "ddd2b29a5e7304d422a19e9a2781f7d32c0d0937",
+    "display": "ddd2b29",
+    "role": "historical-speed-bot",
+    "webUrl": "https://github.com/WardCunningham/assets/commit/ddd2b29a5e7304d422a19e9a2781f7d32c0d0937",
+    "remote": "ward",
+    "observedRemote": "https://github.com/WardCunningham/assets.git",
+    "containingRef": "refs/remotes/ward/master",
+    "subject": "button to start race"
+  }
+]

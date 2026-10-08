@@ -18,10 +18,31 @@
   (HYPERDOC:PAGE "From Message to Nested Input" :HYPERBOOK
                  "dreyeck/nested-actions/reading"))
 
+(HYPERDOC:SEE
+  (HYPERDOC:PAGE "Adding to an Already Rendered Solo Popup" :HYPERBOOK
+                 "dreyeck/nested-actions/reading"))
+
 (DEFUN READING-PAGE (TITLE)
   (HYPERBOOK:FIND-PAGE
    (HYPERBOOK:FIND-HYPERBOOK "dreyeck/nested-actions/reading" :SIGNAL-ERROR? T)
    TITLE :SIGNAL-ERROR? T))
+
+(DEFUN RELATION-SOURCE-OBJECT (SOURCE MECH-SOURCES HISTORY)
+  (LET ((MECH-ROLE
+         (CASE SOURCE
+           (:MECH-A028-LISTEN "listen")
+           (:MECH-A028-REPORT "report")
+           (:WARD-SUPPLIED-PRODUCER "producer")))
+        (HISTORY-ROLE
+         (CASE SOURCE
+           (:SOLO-APPEND-SENDER "solo-append-sender")
+           (:SOLO-REPLACE-RECEIVER "solo-replace-receiver")
+           (:SPEED-RUN "speed-run"))))
+    (COND
+     (MECH-ROLE
+      (FIND MECH-ROLE MECH-SOURCES :KEY
+            (LAMBDA (S) (GETHASH "role" (SOURCE-METADATA S))) :TEST #'EQUAL))
+     (HISTORY-ROLE (HISTORICAL-SOURCE HISTORY HISTORY-ROLE)) (T SOURCE))))
 
 (HYPERDOC:DEFEXAMPLE READING-PROJECTION
   "Three independent concerns: subordination, event reach, and payload-to-input; exact revision and runtime warrants."
@@ -33,6 +54,8 @@
          (WITNESS (EMITTED-MESSAGE-WITNESS))
          (WARD (WARD-PROPAGATION-EVIDENCE))
          (INPUT (RECEIVED-INPUT-TRACE))
+         (SOLO-HISTORY (HISTORICAL-INVESTIGATION))
+         (SOURCES (WITNESS-SOURCES WITNESS))
          (SPECS
           (LIST
            (LIST "experiment" "Ward's nested-action experiment"
@@ -109,7 +132,31 @@
                  "Independent retained value: Prior Title"
                  (INPUT-STAGE INPUT "retained-title-value") :RUNTIME-OBSERVED)
            (LIST "input-path" "Message → nested input: exact boundary" INPUT
-                 :DERIVED)))
+                 :DERIVED)
+           (LIST "evidence-revision" "Mech witness: repository + full OID"
+                 (SOURCE-REVISION
+                  (FIND "listen" SOURCES :KEY
+                        (LAMBDA (S) (GETHASH "role" (SOURCE-METADATA S))) :TEST
+                        #'EQUAL))
+                 :SOURCE-OBSERVED)
+           (LIST "solo-append-batch" "Historical Solo batch sender"
+                 (HISTORICAL-SOURCE SOLO-HISTORY "solo-append-sender")
+                 :SOURCE-OBSERVED)
+           (LIST "solo-popup-beam" "Historical popup appends to beam"
+                 (HISTORICAL-SOURCE SOLO-HISTORY "solo-append-receiver")
+                 :SOURCE-OBSERVED)
+           (LIST "solo-replace-batch" "Later Solo replaces beam"
+                 (HISTORICAL-SOURCE SOLO-HISTORY "solo-replace-receiver")
+                 :SOURCE-OBSERVED)
+           (LIST "speed-fetch" "Speed Bot concurrent sitemap fetch"
+                 (HISTORICAL-SOURCE SOLO-HISTORY "speed-getfrom")
+                 :SOURCE-OBSERVED)
+           (LIST "speed-result-loop" "Speed Bot awaited hop/result append"
+                 (HISTORICAL-SOURCE SOLO-HISTORY "speed-run") :SOURCE-OBSERVED)
+           (LIST "historical-ancestor" "Current LISTEN ancestor? hypothesis"
+                 (FIND :HISTORICAL-ANCESTOR (HISTORICAL-CLAIMS SOLO-HISTORY)
+                       :KEY (LAMBDA (C) (GETF C :ID)))
+                 :HYPOTHESIZED)))
          (TOPICS
           (LOOP FOR (ID LABEL OBJECT STATUS) IN SPECS
                 FOR I FROM 0
@@ -248,7 +295,31 @@
              :PAYLOAD-TO-INPUT :DERIVED :READING-NAVIGATION)
             ("input-path" "received-message"
              "trace begins at native reception; current handoff gap explicit"
-             :PAYLOAD-TO-INPUT :DERIVED :REVISION-BOUNDED-TRACE))))
+             :PAYLOAD-TO-INPUT :DERIVED :REVISION-BOUNDED-TRACE)
+            ("listen" "evidence-revision"
+             "claim → witness revision/source (provenance)"
+             :EVIDENCE-PROVENANCE :DERIVED :MECH-A028-LISTEN)
+            ("report" "evidence-revision"
+             "lookup claim → witness revision/source (provenance)"
+             :EVIDENCE-PROVENANCE :DERIVED :MECH-A028-REPORT)
+            ("solo-append-batch" "solo-popup-beam"
+             "posts batch to existing dialog; receiver appends graphs"
+             :HISTORICAL-POPUP-UPDATE :SOURCE-OBSERVED :SOLO-APPEND-SENDER)
+            ("solo-popup-beam" "solo-replace-batch"
+             "later batch convention clears/replaces earlier beam"
+             :HISTORICAL-POPUP-UPDATE :SOURCE-OBSERVED :SOLO-REPLACE-RECEIVER)
+            ("speed-fetch" "speed-result-loop"
+             "runner awaits getfrom then appends journey result"
+             :HISTORICAL-POPUP-UPDATE :SOURCE-OBSERVED :SPEED-RUN)
+            ("speed-result-loop" "solo-popup-beam"
+             "fetch-result → Solo append sender not located"
+             :HISTORICAL-POPUP-UPDATE :OPEN :HISTORICAL-SOURCE-GAP)
+            ("solo-popup-beam" "historical-ancestor"
+             "persistent receiver/update suggests an analogy"
+             :HISTORICAL-POPUP-UPDATE :DERIVED :WARD-HISTORICAL-CLUE)
+            ("historical-ancestor" "input-path"
+             "continuity to current nested input remains a hypothesis"
+             :HISTORICAL-POPUP-UPDATE :HYPOTHESIZED :WARD-HISTORICAL-CLUE))))
     (TM:MAKE-TOPICMAP-PROJECTION :SOURCE WARD :TOPICS TOPICS :ASSOCIATIONS
                                  (LOOP FOR (FROM TO LABEL KIND STATUS
                                             SOURCE) IN RELATIONS
@@ -259,18 +330,27 @@
                                                         "nested-relation-~D" I)
                                                 :TYPE LABEL :FROM FROM :TO TO
                                                 :PROPERTIES
-                                                (LIST :RELATION-KIND KIND
-                                                      :EVIDENCE-STATUS STATUS
-                                                      :WARRANT
-                                                      (LIST :STATUS STATUS
-                                                            :SOURCE SOURCE)
-                                                      :REVISION-BOUNDARY
-                                                      (WHEN
-                                                          (MEMBER SOURCE
-                                                                  '(:MECH-A028-LISTEN
-                                                                    :MECH-A028-REPORT))
-                                                        "Retained a028b4b; current nested implementation not established."))))
-                                 :VIEW-PROPERTIES '(:WIDTH 1300 :HEIGHT 1110))))
+                                                (LET ((EVIDENCE
+                                                       (RELATION-SOURCE-OBJECT
+                                                        SOURCE SOURCES
+                                                        SOLO-HISTORY)))
+                                                  (LIST :RELATION-KIND KIND
+                                                        :EVIDENCE-STATUS STATUS
+                                                        :WARRANT
+                                                        (LIST :STATUS STATUS
+                                                              :SOURCE EVIDENCE
+                                                              :SOURCE-KEY
+                                                              SOURCE)
+                                                        :REVISION-BOUNDARY
+                                                        (WHEN
+                                                            (TYPEP EVIDENCE
+                                                                   'MESSAGE-SOURCE)
+                                                          (LIST :REVISION
+                                                                (SOURCE-REVISION
+                                                                 EVIDENCE)
+                                                                :CURRENT-IMPLEMENTATION
+                                                                :NOT-ESTABLISHED))))))
+                                 :VIEW-PROPERTIES '(:WIDTH 1300 :HEIGHT 1300))))
 
 (HYPERDOC:DEFEXAMPLE READING-WORKSPACE
   (TM:MAKE-TOPICMAP-WORKSPACE (READING-PROJECTION) "tree"))
@@ -310,7 +390,9 @@
                            PRODUCER-SOURCE EMITTED-MESSAGE-WITNESS
                            WARD-PROPAGATION-EVIDENCE
                            HISTORICAL-CONTEXT-HYPOTHESES RECEIVED-INPUT-TRACE
-                           INPUT-HYPOTHESES))
+                           INPUT-HYPOTHESES MECH-EVIDENCE-REVISION
+                           HISTORICAL-SOURCE-OBSERVATIONS
+                           HISTORICAL-INVESTIGATION))
   (DREYECK/AUTHORITY-POLICY:REGISTER-OPERATION-CONTRACT :IDENTITY
                                                         (FORMAT NIL
                                                                 "nested-actions/~A"

@@ -41,7 +41,8 @@
     (DOLIST
         (TITLE
          '("Nested Actions in Solo" "What Does a Nested Action Inherit?"
-           "Two Relations Hidden in One Nest" "From Message to Nested Input"))
+           "Two Relations Hidden in One Nest" "From Message to Nested Input"
+           "Adding to an Already Rendered Solo Popup"))
       (LET* ((P (PAGE TITLE))
              (VIEW (RENDER P "Content"))
              (OBJECTS (MAPCAR #'CDR (V:VIEW-REFERENCES VIEW)))
@@ -71,7 +72,9 @@
             (CODE-TITLE
              '("Inspecting the Observed Nested Action Tree"
                "Proposed Nested Action Probes" "Following One Node Message"
-               "Tracing the Received Message Boundary"))
+               "Tracing the Received Message Boundary"
+               "Git Revisions Behind the Source"
+               "Tracing Historical Popup Additions"))
           (ASSERT (MEMBER (PAGE CODE-TITLE) OBJECTS :TEST #'EQ)))
         (ASSERT (FIND-IF (LAMBDA (O) (TYPEP O 'R:NESTED-ACTION)) OBJECTS))
         (ASSERT
@@ -82,8 +85,9 @@
          '("Inspecting the Observed Nested Action Tree"
            "Proposed Nested Action Probes"
            "Navigating the Nested Actions Investigation"
-           "Following One Node Message"
-           "Tracing the Received Message Boundary"))
+           "Following One Node Message" "Tracing the Received Message Boundary"
+           "Git Revisions Behind the Source"
+           "Tracing Historical Popup Additions"))
       (LET ((P (PAGE TITLE)))
         (HYPERDOC:LOAD-PAGE P)
         (LET ((LINKS (HYPERBOOK:PAGE-LINKS-OF (HYPERBOOK:LINKS-OF P))))
@@ -91,7 +95,8 @@
               (TARGET
                '("Nested Actions in Solo" "What Does a Nested Action Inherit?"
                  "Two Relations Hidden in One Nest"
-                 "From Message to Nested Input"))
+                 "From Message to Nested Input"
+                 "Adding to an Already Rendered Solo Popup"))
             (LET ((LINK
                    (FIND TARGET LINKS :KEY #'HYPERBOOK:TARGET-PAGE-OF :TEST
                          #'EQUAL)))
@@ -170,163 +175,97 @@
       (ASSERT (NULL (GETF PROBE :RESULT)))
       (ASSERT (GETF PROBE :REQUIRED-EVIDENCE)))))
 
-(DEFUN CHECK-WORKSPACE NIL
-       (LET*
-             ((WORKSPACE (R:READING-WORKSPACE))
-              (PROJECTION (TM:TOPICMAP-PROJECTION-OF WORKSPACE))
-              (TOPICS (TM:TOPICMAP-PROJECTION-TOPICS-OF PROJECTION))
-              (RELATIONS (TM:TOPICMAP-PROJECTION-ASSOCIATIONS-OF PROJECTION)))
-             (ASSERT (EQUAL "tree" (TM:TOPICMAP-WORKSPACE-POINT-OF WORKSPACE)))
-             (ASSERT (= 32 (LENGTH TOPICS)))
-             (DOLIST
-                     (ID
-                         (QUOTE
-                                ("experiment"
-                                 "tree"
-                                 "syntax"
-                                 "solo"
-                                 "nested-statement"
-                                 "listen"
-                                 "event"
-                                 "report"
-                                 "title"
-                                 "enclosing-context"
-                                 "inherited-context"
-                                 "event-context"
-                                 "lifetime"
-                                 "probes"
-                                 "solo-popup-click"
-                                 "publish-source-data-message"
-                                 "node-topic"
-                                 "title-payload"
-                                 "window-event-emitter"
-                                 "broadcast-event-reach"
-                                 "subordinate-execution"
-                                 "scoped-event-emitter-proposal"
-                                 "nested-action-input"
-                                 "report-lookup-target"
-                                 "witness"
-                                 "received-message"
-                                 "message-data"
-                                 "listen-match"
-                                 "title-value"
-                                 "retained-report-state"
-                                 "retained-title-value"
-                                 "input-path")))
-                     (ASSERT
-                             (TM:TOPICMAP-PROJECTION-TOPIC-BY-ID PROJECTION
-                                                                 ID)))
-             (ASSERT (= 44 (LENGTH RELATIONS)))
-             (DOLIST (A RELATIONS)
-                     (ASSERT
-                             (TM:TOPICMAP-PROJECTION-TOPIC-BY-ID PROJECTION
-                                                                 (TM:TOPICMAP-ASSOCIATION-FROM-OF
-                                                                                                  A)))
-                     (ASSERT
-                             (TM:TOPICMAP-PROJECTION-TOPIC-BY-ID PROJECTION
-                                                                 (TM:TOPICMAP-ASSOCIATION-TO-OF
-                                                                                                A)))
-                     (LET*
-                           ((PROPS (TM:TOPICMAP-ASSOCIATION-PROPERTIES-OF A))
-                            (STATUS (GETF PROPS :EVIDENCE-STATUS)))
-                           (ASSERT
-                                   (MEMBER STATUS
-                                           (QUOTE
-                                                  (:OBSERVED :DERIVED
-                                                             :SOURCE-OBSERVED
-                                                             :AUTHOR-REPORTED
-                                                             :DESIGN-PROPOSAL
-                                                             :OPEN
-                                                             :RUNTIME-OBSERVED
-                                                             :HYPOTHESIZED))))
-                           (ASSERT
-                                   (EQ STATUS
-                                       (GETF (GETF PROPS :WARRANT) :STATUS)))
-                           (ASSERT (GETF (GETF PROPS :WARRANT) :SOURCE))))
-             (DOLIST (PAIR (QUOTE (("solo" "listen") ("listen" "report"))))
-                     (LET
-                          ((A
-                              (FIND-IF
-                                       (LAMBDA (A)
-                                               (AND
-                                                    (EQUAL (FIRST PAIR)
-                                                           (TM:TOPICMAP-ASSOCIATION-FROM-OF
-                                                                                            A))
-                                                    (EQUAL (SECOND PAIR)
-                                                           (TM:TOPICMAP-ASSOCIATION-TO-OF
-                                                                                          A))))
-                                       RELATIONS)))
-                          (ASSERT
-                                  (EQ :SUBORDINATE-EXECUTION
-                                      (GETF
-                                            (TM:TOPICMAP-ASSOCIATION-PROPERTIES-OF
-                                                                                   A)
-                                            :RELATION-KIND)))
-                          (ASSERT
-                                  (EQ :OBSERVED
-                                      (GETF
-                                            (TM:TOPICMAP-ASSOCIATION-PROPERTIES-OF
-                                                                                   A)
-                                            :EVIDENCE-STATUS)))))
-             (LET
-                  ((A
-                      (FIND "enclosing-context" RELATIONS :KEY
-                            (FUNCTION TM:TOPICMAP-ASSOCIATION-TO-OF) :TEST
-                            (FUNCTION EQUAL))))
-                  (ASSERT
-                          (EQ :DERIVED
-                              (GETF (TM:TOPICMAP-ASSOCIATION-PROPERTIES-OF A)
-                                    :EVIDENCE-STATUS))))
-             (LET*
-                   ((VIEW (RENDER WORKSPACE "Topicmap"))
-                    (HTML (V:VIEW-HTML VIEW))
-                    (ACTIONS
-                             (REMOVE-IF-NOT
-                                            (LAMBDA (REF)
-                                                    (AND
-                                                         (TYPEP (CDR REF)
-                                                                (QUOTE
-                                                                       V:THUNK))
-                                                         (SEARCH
-                                                                 (FORMAT NIL
-                                                                         "id='~A' class='dreyeck-topicmap-workspace-action "
-                                                                         (CAR
-                                                                              REF))
-                                                                 HTML)))
-                                            (V:VIEW-REFERENCES VIEW))))
-                   (ASSERT (= 32 (LENGTH ACTIONS)))
-                   (DOLIST (REF ACTIONS)
-                           (LET*
-                                 ((OLD
-                                       (TM:TOPICMAP-WORKSPACE-POINT-OF
-                                                                       WORKSPACE))
-                                  (HISTORY
-                                           (COPY-LIST
-                                                      (TM:TOPICMAP-WORKSPACE-HISTORY-OF
-                                                                                        WORKSPACE)))
-                                  (TOPIC (V:EVAL-THUNK (CDR REF)))
-                                  (ID (TM:TOPICMAP-TOPIC-ID-OF TOPIC)))
-                                 (ASSERT
-                                         (EQ TOPIC
-                                             (TM:TOPICMAP-WORKSPACE-CURRENT-TOPIC
-                                                                                  WORKSPACE)))
-                                 (ASSERT
-                                         (EQ
-                                             (TM:TOPICMAP-TOPIC-OBJECT-OF
-                                                                          TOPIC)
-                                             (TM:TOPICMAP-WORKSPACE-CURRENT-OBJECT
-                                                                                   WORKSPACE)))
-                                 (ASSERT
-                                         (EQUAL
-                                                (IF (EQUAL OLD ID) HISTORY
-                                                    (CONS OLD HISTORY))
-                                                (TM:TOPICMAP-WORKSPACE-HISTORY-OF
-                                                                                  WORKSPACE))))))
-             (LET ((AT (R:TOPIC-WORKSPACE "title")))
-                  (ASSERT (EQUAL "title" (TM:TOPICMAP-WORKSPACE-POINT-OF AT)))
-                  (ASSERT
-                          (EQUAL (QUOTE ("tree"))
-                                 (TM:TOPICMAP-WORKSPACE-HISTORY-OF AT))))))
+(DEFUN CHECK-WORKSPACE ()
+  (LET* ((WORKSPACE (R:READING-WORKSPACE))
+         (PROJECTION (TM:TOPICMAP-PROJECTION-OF WORKSPACE))
+         (TOPICS (TM:TOPICMAP-PROJECTION-TOPICS-OF PROJECTION))
+         (RELATIONS (TM:TOPICMAP-PROJECTION-ASSOCIATIONS-OF PROJECTION)))
+    (ASSERT (EQUAL "tree" (TM:TOPICMAP-WORKSPACE-POINT-OF WORKSPACE)))
+    (ASSERT (= 39 (LENGTH TOPICS)))
+    (DOLIST
+        (ID
+         '("experiment" "tree" "syntax" "solo" "nested-statement" "listen"
+           "event" "report" "title" "enclosing-context" "inherited-context"
+           "event-context" "lifetime" "probes" "solo-popup-click"
+           "publish-source-data-message" "node-topic" "title-payload"
+           "window-event-emitter" "broadcast-event-reach"
+           "subordinate-execution" "scoped-event-emitter-proposal"
+           "nested-action-input" "report-lookup-target" "witness"
+           "received-message" "message-data" "listen-match" "title-value"
+           "retained-report-state" "retained-title-value" "input-path"
+           "evidence-revision" "solo-append-batch" "solo-popup-beam"
+           "solo-replace-batch" "speed-fetch" "speed-result-loop"
+           "historical-ancestor"))
+      (ASSERT (TM:TOPICMAP-PROJECTION-TOPIC-BY-ID PROJECTION ID)))
+    (ASSERT (= 52 (LENGTH RELATIONS)))
+    (DOLIST (A RELATIONS)
+      (ASSERT
+       (TM:TOPICMAP-PROJECTION-TOPIC-BY-ID PROJECTION
+                                           (TM:TOPICMAP-ASSOCIATION-FROM-OF
+                                            A)))
+      (ASSERT
+       (TM:TOPICMAP-PROJECTION-TOPIC-BY-ID PROJECTION
+                                           (TM:TOPICMAP-ASSOCIATION-TO-OF A)))
+      (LET* ((PROPS (TM:TOPICMAP-ASSOCIATION-PROPERTIES-OF A))
+             (STATUS (GETF PROPS :EVIDENCE-STATUS)))
+        (ASSERT
+         (MEMBER STATUS
+                 '(:OBSERVED :DERIVED :SOURCE-OBSERVED :AUTHOR-REPORTED
+                   :DESIGN-PROPOSAL :OPEN :RUNTIME-OBSERVED :HYPOTHESIZED)))
+        (ASSERT (EQ STATUS (GETF (GETF PROPS :WARRANT) :STATUS)))
+        (ASSERT (GETF (GETF PROPS :WARRANT) :SOURCE))))
+    (DOLIST (PAIR '(("solo" "listen") ("listen" "report")))
+      (LET ((A
+             (FIND-IF
+              (LAMBDA (A)
+                (AND (EQUAL (FIRST PAIR) (TM:TOPICMAP-ASSOCIATION-FROM-OF A))
+                     (EQUAL (SECOND PAIR) (TM:TOPICMAP-ASSOCIATION-TO-OF A))))
+              RELATIONS)))
+        (ASSERT
+         (EQ :SUBORDINATE-EXECUTION
+             (GETF (TM:TOPICMAP-ASSOCIATION-PROPERTIES-OF A) :RELATION-KIND)))
+        (ASSERT
+         (EQ :OBSERVED
+             (GETF (TM:TOPICMAP-ASSOCIATION-PROPERTIES-OF A)
+                   :EVIDENCE-STATUS)))))
+    (LET ((A
+           (FIND "enclosing-context" RELATIONS :KEY
+                 #'TM:TOPICMAP-ASSOCIATION-TO-OF :TEST #'EQUAL)))
+      (ASSERT
+       (EQ :DERIVED
+           (GETF (TM:TOPICMAP-ASSOCIATION-PROPERTIES-OF A) :EVIDENCE-STATUS))))
+    (LET* ((VIEW (RENDER WORKSPACE "Topicmap"))
+           (HTML (V:VIEW-HTML VIEW))
+           (ACTIONS
+            (REMOVE-IF-NOT
+             (LAMBDA (REF)
+               (AND (TYPEP (CDR REF) 'V:THUNK)
+                    (SEARCH
+                     (FORMAT NIL
+                             "id='~A' class='dreyeck-topicmap-workspace-action "
+                             (CAR REF))
+                     HTML)))
+             (V:VIEW-REFERENCES VIEW))))
+      (ASSERT (= 39 (LENGTH ACTIONS)))
+      (DOLIST (REF ACTIONS)
+        (LET* ((OLD (TM:TOPICMAP-WORKSPACE-POINT-OF WORKSPACE))
+               (HISTORY
+                (COPY-LIST (TM:TOPICMAP-WORKSPACE-HISTORY-OF WORKSPACE)))
+               (TOPIC (V:EVAL-THUNK (CDR REF)))
+               (ID (TM:TOPICMAP-TOPIC-ID-OF TOPIC)))
+          (ASSERT (EQ TOPIC (TM:TOPICMAP-WORKSPACE-CURRENT-TOPIC WORKSPACE)))
+          (ASSERT
+           (EQ (TM:TOPICMAP-TOPIC-OBJECT-OF TOPIC)
+               (TM:TOPICMAP-WORKSPACE-CURRENT-OBJECT WORKSPACE)))
+          (ASSERT
+           (EQUAL
+            (IF (EQUAL OLD ID)
+                HISTORY
+                (CONS OLD HISTORY))
+            (TM:TOPICMAP-WORKSPACE-HISTORY-OF WORKSPACE))))))
+    (LET ((AT (R:TOPIC-WORKSPACE "title")))
+      (ASSERT (EQUAL "title" (TM:TOPICMAP-WORKSPACE-POINT-OF AT)))
+      (ASSERT (EQUAL '("tree") (TM:TOPICMAP-WORKSPACE-HISTORY-OF AT))))))
 
 (DEFUN CHECK-MESSAGE-PATH ()
   (LET* ((WITNESS (R:EMITTED-MESSAGE-WITNESS))
@@ -420,7 +359,7 @@
                 (GETF (TM:TOPICMAP-ASSOCIATION-PROPERTIES-OF A)
                       :RELATION-KIND))
               RELATIONS))))
-      (ASSERT (= 3 (LENGTH KINDS)))
+      (ASSERT (= 5 (LENGTH KINDS)))
       (ASSERT (MEMBER :SUBORDINATE-EXECUTION KINDS))
       (ASSERT (MEMBER :EVENT-PROPAGATION KINDS))
       (DOLIST (A RELATIONS)
@@ -728,7 +667,8 @@ emitter to be used in place of window.")
                  (EQ (THIRD REQUIRED) (GETF P :RELATION-KIND))
                  (EQ (FOURTH REQUIRED) (GETF P :EVIDENCE-STATUS))
                  (EQ (FOURTH REQUIRED) (GETF W :STATUS))
-                 (EQ (FIFTH REQUIRED) (GETF W :SOURCE)))))
+                 (EQ (FIFTH REQUIRED)
+                     (OR (GETF W :SOURCE-KEY) (GETF W :SOURCE))))))
         RELATIONS)))
     (DOLIST (A RELATIONS)
       (WHEN
@@ -782,6 +722,209 @@ emitter to be used in place of window.")
   (FORMAT T
           "~&MESSAGE-INPUT-TRACE-PASS: live identity capture, counter-only retained listener, independent REPORT lookup, three relation kinds, precise open boundary and native REPORT/title navigation.~%"))
 
+(DEFUN CHECK-REVISION-PROVENANCE ()
+  (LET* ((REVISION (R:MECH-EVIDENCE-REVISION))
+         (ROOT (DREYECK/GIT:GIT-COMMIT-REPOSITORY-OF REVISION))
+         (OID "a028b4bba04e539dcaa090423d38a00a0050489d")
+         (VIEW (RENDER REVISION "Evidence revision"))
+         (FILES
+          (REMOVE-IF-NOT (LAMBDA (O) (TYPEP O 'DREYECK/GIT:GIT-EVIDENCE-FILE))
+                         (MAPCAR #'CDR (V:VIEW-REFERENCES VIEW)))))
+    (ASSERT (TYPEP REVISION 'DREYECK/GIT:GIT-COMMIT))
+    (ASSERT (EQUAL OID (DREYECK/GIT:GIT-COMMIT-HASH-OF REVISION)))
+    (ASSERT
+     (EQUAL "a028b4b" (DREYECK/GIT:GIT-REVISION-DISPLAY-ID-OF REVISION)))
+    (ASSERT
+     (EQUAL "https://github.com/WardCunningham/wiki-plugin-mech"
+            (DREYECK/GIT:GIT-REVISION-AUTHORITY-OF REVISION)))
+    (ASSERT
+     (EQ :COMMIT-PRESENT (DREYECK/GIT:GIT-REVISION-LOCAL-STATUS REVISION)))
+    (ASSERT (MEMBER ROOT (MAPCAR #'CDR (V:VIEW-REFERENCES VIEW)) :TEST #'EQ))
+    (ASSERT (= 2 (LENGTH FILES)))
+    (ASSERT
+     (EQUAL (LIST "https://github.com/WardCunningham/wiki-plugin-mech" OID)
+            (DREYECK/GIT:GIT-REVISION-IDENTITY REVISION)))
+    (LET ((OTHER
+           (DREYECK/GIT:MAKE-GIT-REVISION-REFERENCE :REPOSITORY ROOT :AUTHORITY
+                                                    "https://example.test/another-repository"
+                                                    :OID OID :DISPLAY-ID
+                                                    "a028b4b" :ROLE :TEST)))
+      (ASSERT
+       (NOT
+        (EQUAL (DREYECK/GIT:GIT-REVISION-IDENTITY REVISION)
+               (DREYECK/GIT:GIT-REVISION-IDENTITY OTHER)))))
+    (DOLIST (INVALID '("a028b4b" "deadbeef" "HEAD"))
+      (ASSERT
+       (HANDLER-CASE
+        (PROGN
+         (DREYECK/GIT:MAKE-GIT-REVISION-REFERENCE :REPOSITORY ROOT :AUTHORITY
+                                                  "test" :OID INVALID)
+         NIL)
+        (ERROR NIL T))))
+    (ASSERT
+     (HANDLER-CASE
+      (PROGN
+       (DREYECK/GIT:MAKE-GIT-REVISION-REFERENCE :REPOSITORY ROOT :AUTHORITY ""
+                                                :OID OID)
+       NIL)
+      (ERROR NIL T)))
+    (ASSERT
+     (HANDLER-CASE
+      (PROGN
+       (DREYECK/GIT:MAKE-GIT-REVISION-REFERENCE :REPOSITORY ROOT :AUTHORITY
+                                                "test" :OID OID :DISPLAY-ID
+                                                "1234567")
+       NIL)
+      (ERROR NIL T)))
+    (LET* ((FILE
+            (FIND "src/client/blocks.js" FILES :KEY
+                  #'DREYECK/GIT:GIT-FILE-PATH-OF :TEST #'EQUAL))
+           (LOCATIONS
+            (MAPCAR #'CDR
+                    (V:VIEW-REFERENCES (RENDER FILE "Evidence locations")))))
+      (ASSERT FILE)
+      (DOLIST (ROLE '("listen" "report"))
+        (LET* ((SOURCE
+                (FIND-IF
+                 (LAMBDA (O)
+                   (AND (TYPEP O 'R:MESSAGE-SOURCE)
+                        (EQUAL ROLE (GETHASH "role" (R:SOURCE-METADATA O)))))
+                 LOCATIONS))
+               (SOURCE-VIEW (RENDER SOURCE "Source evidence"))
+               (REFS (MAPCAR #'CDR (V:VIEW-REFERENCES SOURCE-VIEW))))
+          (ASSERT SOURCE)
+          (ASSERT (EQ REVISION (R:SOURCE-REVISION SOURCE)))
+          (ASSERT (EQ FILE (R:SOURCE-REVISION-FILE SOURCE)))
+          (ASSERT (EQ REVISION (DREYECK/GIT:GIT-FILE-COMMIT-OF FILE)))
+          (ASSERT (MEMBER REVISION REFS :TEST #'EQ))
+          (ASSERT (MEMBER FILE REFS :TEST #'EQ))
+          (ASSERT (R:SOURCE-DEFINITION SOURCE))
+          (ASSERT
+           (SEARCH (R:SOURCE-TEXT SOURCE)
+                   (DREYECK/GIT:GIT-FILE-CONTENTS FILE))))))
+    (LET* ((READING (RENDER (PAGE "From Message to Nested Input") "Content"))
+           (OBJECTS (MAPCAR #'CDR (V:VIEW-REFERENCES READING))))
+      (ASSERT
+       (FIND-IF (LAMBDA (O) (TYPEP O 'DREYECK/GIT:GIT-REVISION-REFERENCE))
+                OBJECTS))
+      (DOLIST (ROLE '("listen" "report"))
+        (ASSERT
+         (FIND-IF
+          (LAMBDA (O)
+            (AND (TYPEP O 'R:MESSAGE-SOURCE)
+                 (EQUAL ROLE (GETHASH "role" (R:SOURCE-METADATA O)))))
+          OBJECTS))))
+    (ASSERT (NULL (R:SOURCE-REVISION (R:PRODUCER-SOURCE)))))
+  (LET* ((HISTORY (R:HISTORICAL-INVESTIGATION))
+         (SOURCES (R:HISTORICAL-SOURCES HISTORY))
+         (CLAIMS (R:HISTORICAL-CLAIMS HISTORY))
+         (ANCESTOR
+          (FIND :HISTORICAL-ANCESTOR CLAIMS :KEY (LAMBDA (C) (GETF C :ID)))))
+    (ASSERT (= 8 (LENGTH SOURCES)))
+    (DOLIST (SOURCE SOURCES)
+      (LET ((REVISION (R:SOURCE-REVISION SOURCE))
+            (FILE (R:SOURCE-REVISION-FILE SOURCE)))
+        (ASSERT (TYPEP REVISION 'DREYECK/GIT:GIT-REVISION-REFERENCE))
+        (ASSERT (TYPEP FILE 'DREYECK/GIT:GIT-FILE-AT-COMMIT))
+        (ASSERT (EQ REVISION (DREYECK/GIT:GIT-FILE-COMMIT-OF FILE)))
+        (ASSERT
+         (EQUAL (GETHASH "repository" (R:SOURCE-METADATA SOURCE))
+                (DREYECK/GIT:GIT-REVISION-AUTHORITY-OF REVISION)))
+        (ASSERT
+         (EQUAL (GETHASH "revision" (R:SOURCE-METADATA SOURCE))
+                (DREYECK/GIT:GIT-COMMIT-HASH-OF REVISION)))
+        (ASSERT
+         (EQ :COMMIT-PRESENT (DREYECK/GIT:GIT-REVISION-LOCAL-STATUS REVISION)))
+        (ASSERT
+         (SEARCH (R:SOURCE-TEXT SOURCE) (DREYECK/GIT:GIT-FILE-CONTENTS FILE)))
+        (ASSERT
+         (MEMBER SOURCE (DREYECK/GIT:GIT-EVIDENCE-FILE-LOCATIONS-OF FILE) :TEST
+                 #'EQ))))
+    (ASSERT
+     (EQ :AUTHOR-REPORTED
+         (GETF (FIND :WARD-CLUE CLAIMS :KEY (LAMBDA (C) (GETF C :ID)))
+               :STATUS)))
+    (DOLIST
+        (ID
+         '(:POPUP-APPEND :FETCH-BARRIER :POPUP-REPLACEMENT :SPEED-FETCH
+           :SPEED-RESULTS))
+      (LET ((CLAIM (FIND ID CLAIMS :KEY (LAMBDA (C) (GETF C :ID)))))
+        (ASSERT (EQ :SOURCE-OBSERVED (GETF CLAIM :STATUS)))
+        (ASSERT (TYPEP (GETF CLAIM :SOURCE) 'R:MESSAGE-SOURCE))))
+    (ASSERT (EQ :HYPOTHESIZED (GETF ANCESTOR :STATUS)))
+    (ASSERT (NULL (GETF ANCESTOR :ANSWER)))
+    (ASSERT (NOT (GETF ANCESTOR :RUNTIME-CLAIM)))
+    (ASSERT (EQ :OPEN (GETF ANCESTOR :CURRENT-LISTEN-HANDOFF)))
+    (ASSERT
+     (EQ :NOT-ESTABLISHED
+         (GETF (FIND :POPUP-APPEND CLAIMS :KEY (LAMBDA (C) (GETF C :ID)))
+               :AUTOMATIC-FETCH-TRIGGER)))
+    (ASSERT
+     (SEARCH "beam.push(...data.graphs)"
+             (R:SOURCE-TEXT
+              (R:HISTORICAL-SOURCE HISTORY "solo-append-receiver"))))
+    (ASSERT
+     (SEARCH "beam.splice(0)"
+             (R:SOURCE-TEXT
+              (R:HISTORICAL-SOURCE HISTORY "solo-replace-receiver"))))
+    (ASSERT
+     (SEARCH "Promise.all(parsed.graphs)"
+             (R:SOURCE-TEXT
+              (R:HISTORICAL-SOURCE HISTORY "solo-fetch-barrier"))))
+    (ASSERT
+     (SEARCH "await getfrom"
+             (R:SOURCE-TEXT (R:HISTORICAL-SOURCE HISTORY "speed-run"))))
+    (ASSERT
+     (NOT
+      (SEARCH "solo"
+              (R:SOURCE-TEXT (R:HISTORICAL-SOURCE HISTORY "speed-run")))))
+    (LET* ((READING
+            (RENDER (PAGE "Adding to an Already Rendered Solo Popup")
+                    "Content"))
+           (LINKED
+            (FIND-IF (LAMBDA (O) (TYPEP O 'R:SOLO-HISTORY))
+                     (MAPCAR #'CDR (V:VIEW-REFERENCES READING))))
+           (PATH (RENDER LINKED "Historical paths"))
+           (REFS (MAPCAR #'CDR (V:VIEW-REFERENCES PATH))))
+      (ASSERT LINKED)
+      (ASSERT
+       (FIND-IF (LAMBDA (O) (TYPEP O 'DREYECK/GIT:GIT-REVISION-REFERENCE))
+                REFS))
+      (ASSERT (FIND-IF (LAMBDA (O) (TYPEP O 'R:MESSAGE-SOURCE)) REFS))
+      (ASSERT (FIND-IF (LAMBDA (O) (TYPEP O 'TM:TOPICMAP-WORKSPACE)) REFS))))
+  (LET* ((PROJECTION (R:READING-PROJECTION))
+         (RELATIONS (TM:TOPICMAP-PROJECTION-ASSOCIATIONS-OF PROJECTION)))
+    (DOLIST (A RELATIONS)
+      (LET* ((P (TM:TOPICMAP-ASSOCIATION-PROPERTIES-OF A))
+             (W (GETF P :WARRANT))
+             (KEY (GETF W :SOURCE-KEY))
+             (SOURCE (GETF W :SOURCE)))
+        (WHEN
+            (MEMBER KEY
+                    '(:MECH-A028-LISTEN :MECH-A028-REPORT
+                      :WARD-SUPPLIED-PRODUCER :SOLO-APPEND-SENDER
+                      :SOLO-REPLACE-RECEIVER :SPEED-RUN))
+          (ASSERT (TYPEP SOURCE 'R:MESSAGE-SOURCE))
+          (UNLESS (EQ KEY :WARD-SUPPLIED-PRODUCER)
+            (ASSERT
+             (TYPEP (R:SOURCE-REVISION SOURCE)
+                    'DREYECK/GIT:GIT-REVISION-REFERENCE))
+            (ASSERT
+             (EQ (R:SOURCE-REVISION SOURCE)
+                 (GETF (GETF P :REVISION-BOUNDARY) :REVISION)))))
+        (WHEN
+            (AND
+             (EQUAL "historical-ancestor" (TM:TOPICMAP-ASSOCIATION-FROM-OF A))
+             (EQUAL "input-path" (TM:TOPICMAP-ASSOCIATION-TO-OF A)))
+          (ASSERT (EQ :HYPOTHESIZED (GETF P :EVIDENCE-STATUS))))
+        (WHEN
+            (AND
+             (EQUAL "speed-result-loop" (TM:TOPICMAP-ASSOCIATION-FROM-OF A))
+             (EQUAL "solo-popup-beam" (TM:TOPICMAP-ASSOCIATION-TO-OF A)))
+          (ASSERT (EQ :OPEN (GETF P :EVIDENCE-STATUS)))))))
+  (FORMAT T
+          "~&REVISION-PROVENANCE-HISTORY-PASS: repository/full-OID identity, native claim/revision/file/definition routes, exact local blobs, append versus replacement, fetch barrier and open historical/current bridges.~%"))
+
 (DEFUN RUN-TESTS ()
   (CHECK-PAGES)
   (CHECK-TREE)
@@ -790,6 +933,7 @@ emitter to be used in place of window.")
   (CHECK-MESSAGE-PATH)
   (CHECK-WARD-FOLLOW-UP-CONTRACT)
   (CHECK-INPUT-TRACE)
+  (CHECK-REVISION-PROVENANCE)
   (DOLIST
       (NAME
        '(R:EXPERIMENT-EVIDENCE R:OBSERVED-ACTION-TREE R:SEMANTIC-QUESTIONS
@@ -799,10 +943,13 @@ emitter to be used in place of window.")
                                R:EMITTED-MESSAGE-WITNESS
                                R:WARD-PROPAGATION-EVIDENCE
                                R:HISTORICAL-CONTEXT-HYPOTHESES
-                               R:RECEIVED-INPUT-TRACE R:INPUT-HYPOTHESES))
+                               R:RECEIVED-INPUT-TRACE R:INPUT-HYPOTHESES
+                               R:MECH-EVIDENCE-REVISION
+                               R:HISTORICAL-SOURCE-OBSERVATIONS
+                               R:HISTORICAL-INVESTIGATION))
     (ASSERT (DREYECK/AUTHORITY-POLICY:FIND-EXAMPLE-CONTRACT NAME)))
   (FORMAT T
-          "~&NESTED-ACTIONS-READING-PASS: 4 text/5 code pages; 32 Topics/44 warranted relations; three independent concerns; native input identity capture, independent retained REPORT lookup, exact current dispatch gap; proposal-only scoped emitter and native Point/history.~%")
+          "~&NESTED-ACTIONS-READING-PASS: 5 text/7 code pages; 39 Topics/52 warranted relations; explicit Git provenance; historical append/replacement and separate async fetch; current handoff unchanged, proposal-only scoped emitter; native navigation.~%")
   T)
 
 (DEFUN RUN-TALA-TESTS ()

@@ -18,6 +18,10 @@
   (HYPERDOC:PAGE "From Message to Nested Input" :HYPERBOOK
                  "dreyeck/nested-actions/reading"))
 
+(HYPERDOC:SEE
+  (HYPERDOC:PAGE "Adding to an Already Rendered Solo Popup" :HYPERBOOK
+                 "dreyeck/nested-actions/reading"))
+
 (HYPERDOC:DEFEXAMPLE SEMANTIC-QUESTIONS
   "Questions left open after distinguishing subordinate execution and window event reach."
   (LOOP FOR (ID

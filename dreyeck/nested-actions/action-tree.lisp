@@ -37,7 +37,18 @@
            "INPUT-SOURCES"
            "INPUT-INVENTORY"
            "INPUT-HYPOTHESES"
-           "RECEIVED-INPUT-TRACE"))
+           "RECEIVED-INPUT-TRACE"
+           "SOURCE-REVISION"
+           "SOURCE-REVISION-FILE"
+           "SOURCE-DEFINITION"
+           "MECH-EVIDENCE-REVISION"
+           "EVIDENCE-SOURCE"
+           "HISTORICAL-SOURCE-OBSERVATIONS"
+           "SOLO-HISTORY"
+           "HISTORICAL-SOURCES"
+           "HISTORICAL-CLAIMS"
+           "HISTORICAL-SOURCE"
+           "HISTORICAL-INVESTIGATION"))
 
 (IN-PACKAGE #:DREYECK/NESTED-ACTIONS)
 
@@ -55,6 +66,10 @@
 
 (HYPERDOC:SEE
   (HYPERDOC:PAGE "From Message to Nested Input" :HYPERBOOK
+                 "dreyeck/nested-actions/reading"))
+
+(HYPERDOC:SEE
+  (HYPERDOC:PAGE "Adding to an Already Rendered Solo Popup" :HYPERBOOK
                  "dreyeck/nested-actions/reading"))
 
 (DEFCLASS NESTED-ACTION NIL

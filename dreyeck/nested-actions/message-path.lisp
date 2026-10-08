@@ -18,6 +18,10 @@
   (HYPERDOC:PAGE "From Message to Nested Input" :HYPERBOOK
                  "dreyeck/nested-actions/reading"))
 
+(HYPERDOC:SEE
+  (HYPERDOC:PAGE "Adding to an Already Rendered Solo Popup" :HYPERBOOK
+                 "dreyeck/nested-actions/reading"))
+
 (DEFUN READ-MESSAGE-JSON (FILE)
   (WITH-OPEN-FILE
       (IN
@@ -31,25 +35,21 @@
 (DEFCLASS MESSAGE-SOURCE NIL
           ((METADATA :INITARG :METADATA :READER SOURCE-METADATA)
            (TEXT :INITARG :TEXT :READER SOURCE-TEXT)
-           (FILE :INITARG :FILE :READER SOURCE-FILE))
+           (FILE :INITARG :FILE :READER SOURCE-FILE)
+           (REVISION :INITARG :REVISION :INITFORM NIL :READER SOURCE-REVISION)
+           (REVISION-FILE :INITARG :REVISION-FILE :INITFORM NIL :READER
+            SOURCE-REVISION-FILE)
+           (DEFINITION :INITARG :DEFINITION :INITFORM NIL :READER
+            SOURCE-DEFINITION))
           (:DOCUMENTATION
            "Exact supplied or revision-backed source, with its own warrant and boundary."))
 
 (HYPERDOC:DEFEXAMPLE MESSAGE-SOURCE-OBSERVATIONS
   "Read six retained source excerpts; verify their hashes before exposing their code."
-  (MAP 'LIST
-       (LAMBDA (METADATA)
-         (LET* ((FILE
-                 (ASDF/SYSTEM:SYSTEM-RELATIVE-PATHNAME
-                  "dreyeck/nested-actions/reading" (GETHASH "file" METADATA)))
-                (DIGEST
-                 (IRONCLAD:BYTE-ARRAY-TO-HEX-STRING
-                  (IRONCLAD:DIGEST-FILE :SHA256 FILE))))
-           (UNLESS (EQUAL DIGEST (GETHASH "sha256" METADATA))
-             (ERROR "Source observation hash mismatch: ~A" FILE))
-           (MAKE-INSTANCE 'MESSAGE-SOURCE :METADATA METADATA :FILE FILE :TEXT
-                          (UIOP/STREAM:READ-FILE-STRING FILE))))
-       (READ-MESSAGE-JSON "dreyeck/nested-actions/sources/provenance.json")))
+  (LET ((INDEX (REVISION-REFERENCE-INDEX)))
+    (MAP 'LIST
+         (LAMBDA (METADATA) (MESSAGE-SOURCE-FROM-METADATA METADATA INDEX))
+         (READ-MESSAGE-JSON "dreyeck/nested-actions/sources/provenance.json"))))
 
 (HYPERDOC:DEFEXAMPLE PRODUCER-SOURCE
   (FIRST (MESSAGE-SOURCE-OBSERVATIONS)))
@@ -127,6 +127,12 @@ emitter to be used in place of window."))
               :RETAINED-LISTEN
               "Registers and filters on window; counts events; does not construct nested input.")))
 
+(DEFMETHOD V:TEXT-REPRESENTATION ((SOURCE MESSAGE-SOURCE))
+  (FORMAT NIL "~A: ~A~@[ @ ~A~]" (GETHASH "role" (SOURCE-METADATA SOURCE))
+          (SOURCE-DEFINITION SOURCE)
+          (WHEN (SOURCE-REVISION SOURCE)
+            (V:TEXT-REPRESENTATION (SOURCE-REVISION SOURCE)))))
+
 (V:DEFVIEW MESSAGE-SOURCE-VIEW (SOURCE MESSAGE-SOURCE)
            (V:HTML-VIEW :TITLE "Source evidence" :PRIORITY 1
                         (V:HTML
@@ -147,16 +153,49 @@ emitter to be used in place of window."))
                            (CL-WHO:ESC
                             (GETHASH "limitation" (SOURCE-METADATA SOURCE))))
                           (:P
-                           (V:OBJECT-REF (EMITTED-MESSAGE-WITNESS) :DISPLAY
-                                         "Follow the recorded emitted message"
-                                         :SELECT "Message path"))
+                           (V:OBJECT-REF
+                            (IF (GETHASH "revisionKey"
+                                         (SOURCE-METADATA SOURCE))
+                                (HISTORICAL-INVESTIGATION)
+                                (EMITTED-MESSAGE-WITNESS))
+                            :DISPLAY
+                            (IF (GETHASH "revisionKey"
+                                         (SOURCE-METADATA SOURCE))
+                                "Inspect the separate historical source paths"
+                                "Follow the recorded emitted message")
+                            :SELECT
+                            (IF (GETHASH "revisionKey"
+                                         (SOURCE-METADATA SOURCE))
+                                "Historical paths"
+                                "Message path")))
                           (:P
                            (V:OBJECT-REF
                             (HYPERDOC:PAGE "Two Relations Hidden in One Nest"
                                            :HYPERBOOK
                                            "dreyeck/nested-actions/reading")
                             :DISPLAY "Read the two relations" :SELECT
-                            "Content")))))
+                            "Content"))
+                          (WHEN (SOURCE-REVISION SOURCE)
+                            (V:HTML
+                              (:H3 (CL-WHO:ESC (SOURCE-DEFINITION SOURCE)))
+                              (:P
+                               (V:OBJECT-REF (SOURCE-REVISION SOURCE) :DISPLAY
+                                             "Repository authority and exact revision"
+                                             :SELECT "Evidence revision")
+                               " · "
+                               (V:OBJECT-REF (SOURCE-REVISION-FILE SOURCE)
+                                             :DISPLAY
+                                             "Source file and relevant definitions at that revision"
+                                             :SELECT "Evidence locations"))
+                              (:P
+                               (CL-WHO:ESC
+                                (FORMAT NIL
+                                        "Verified excerpt, lines ~D–~D; retained in ~A."
+                                        (GETHASH "startLine"
+                                                 (SOURCE-METADATA SOURCE))
+                                        (GETHASH "endLine"
+                                                 (SOURCE-METADATA SOURCE))
+                                        (SOURCE-FILE SOURCE)))))))))
 
 (V:DEFVIEW MESSAGE-PATH-VIEW (WITNESS MESSAGE-WITNESS)
            (V:HTML-VIEW :TITLE "Message path" :PRIORITY 1

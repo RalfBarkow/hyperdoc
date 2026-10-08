@@ -18,6 +18,10 @@
   (HYPERDOC:PAGE "What Does a Nested Action Inherit?" :HYPERBOOK
                  "dreyeck/nested-actions/reading"))
 
+(HYPERDOC:SEE
+  (HYPERDOC:PAGE "Adding to an Already Rendered Solo Popup" :HYPERBOOK
+                 "dreyeck/nested-actions/reading"))
+
 (DEFCLASS MESSAGE-INPUT-TRACE NIL
           ((STAGES :INITARG :STAGES :READER INPUT-STAGES)
            (CAPTURE :INITARG :CAPTURE :READER INPUT-CAPTURE)
@@ -49,137 +53,73 @@
                       "Retained LISTEN counts/statuses only. No nested input or REPORT dispatch follows its match.")))
 
 (HYPERDOC:DEFEXAMPLE RECEIVED-INPUT-TRACE
-                     "Read the bounded native capture and expose precise source/runtime stages plus explicit unknown current input."
-                     (LET*
-                           ((CAPTURE
-                                     (READ-MESSAGE-JSON
-                                                        "dreyeck/nested-actions/input-witness.json"))
-                            (EVENT (AREF (GETHASH "events" CAPTURE) 0))
-                            (INVENTORY
-                                       (READ-MESSAGE-JSON
-                                                          "dreyeck/nested-actions/sources/local-input-source-inventory.json"))
-                            (REVISION
-                                      "Mech a028b4bba04e539dcaa090423d38a00a0050489d"))
-                           (MAKE-INSTANCE (QUOTE MESSAGE-INPUT-TRACE) :CAPTURE
-                                          CAPTURE :SOURCES
-                                          (MESSAGE-SOURCE-OBSERVATIONS)
-                                          :INVENTORY INVENTORY :STAGES
-                                          (LIST
-                                                (LIST :ID "received-message"
-                                                      :STATUS :RUNTIME-OBSERVED
-                                                      :TYPE "MessageEvent"
-                                                      :OBJECT
-                                                      (GETHASH "reception"
-                                                               EVENT)
-                                                      :SOURCE
-                                                      "Native opener window message callback; bounded fixture"
-                                                      :OPERATION
-                                                      "Native delivery; received payload is distinct from producer object."
-                                                      :PREVIOUS-INPUT
-                                                      "Not involved in transport.")
-                                                (LIST :ID "message-data"
-                                                      :STATUS :SOURCE-OBSERVED
-                                                      :RUNTIME-STATUS
-                                                      :RUNTIME-OBSERVED :TYPE
-                                                      "JavaScript Object"
-                                                      :OBJECT
-                                                      (GETHASH
-                                                               "receivedPayload"
-                                                               EVENT)
-                                                      :SOURCE
-                                                      (LIST REVISION
-                                                            "src/client/blocks.js:899"
-                                                            "listen_emit.listen"
-                                                            "const { data } = event")
-                                                      :OPERATION
-                                                      "Local data aliases event.data; no copy, wrap, merge or assignment to state."
-                                                      :IDENTITY-EVIDENCE
-                                                      (GETHASH
-                                                               "listenSelection"
-                                                               EVENT)
-                                                      :PREVIOUS-INPUT
-                                                      "LISTEN retains its separately supplied state argument; data is not that object in this witness.")
-                                                (LIST :ID "listen-match"
-                                                      :STATUS :SOURCE-OBSERVED
-                                                      :RUNTIME-STATUS
-                                                      :RUNTIME-OBSERVED :TYPE
-                                                      "Boolean predicate over action/topic/name; payload remains an Object"
-                                                      :OBJECT
-                                                      (GETHASH
-                                                               "listenSelection"
-                                                               EVENT)
-                                                      :SOURCE
-                                                      (LIST REVISION
-                                                            "src/client/blocks.js:900-913"
-                                                            "listen_emit.listen")
-                                                      :OPERATION
-                                                      "Inline publishSourceData/action + topic/name filter, not a separate dispatch registry. Count/status update only."
-                                                      :PREVIOUS-INPUT
-                                                      "Prior state object/title/context remain accessible and unchanged in this retained witness.")
-                                                (LIST :ID "nested-action-input"
-                                                      :STATUS :OPEN :TYPE
-                                                      :UNKNOWN :OBJECT NIL
-                                                      :SOURCE
-                                                      :MATCHING-CURRENT-LISTEN-DISPATCH-UNAVAILABLE
-                                                      :OPERATION
-                                                      "No construction/replacement/extension or nested invocation in retained LISTEN."
-                                                      :PREVIOUS-INPUT
-                                                      :UNKNOWN-FOR-CURRENT-EXPERIMENT)
-                                                (LIST :ID
-                                                      "report-lookup-target"
-                                                      :STATUS :OPEN :TYPE
-                                                      :UNKNOWN :OBJECT NIL
-                                                      :SOURCE
-                                                      :MATCHING-CURRENT-REPORT-CALL-UNAVAILABLE
-                                                      :OPERATION
-                                                      "Current nested REPORT caller/argument unavailable; cannot equate target with payload or prior state."
-                                                      :PREVIOUS-INPUT
-                                                      :UNKNOWN-FOR-CURRENT-EXPERIMENT)
-                                                (LIST :ID "title-value" :STATUS
-                                                      :OPEN :TYPE :UNKNOWN
-                                                      :OBJECT NIL :SOURCE
-                                                      :CURRENT-NESTED-REPORT-RESULT-UNAVAILABLE
-                                                      :OPERATION
-                                                      "Current nested result unknown. Retained report_emit separately uses args[0] || temperature, key in state, then state[key]."
-                                                      :PREVIOUS-INPUT
-                                                      :UNKNOWN-FOR-CURRENT-EXPERIMENT)
-                                                (LIST :ID
-                                                      "retained-report-state"
-                                                      :STATUS :RUNTIME-OBSERVED
-                                                      :TYPE "JavaScript Object"
-                                                      :OBJECT
-                                                      (GETHASH "priorState"
-                                                               EVENT)
-                                                      :SOURCE
-                                                      (LIST REVISION
-                                                            "src/client/blocks.js:305-314"
-                                                            "report_emit"
-                                                            "Independent explicit fixture caller")
-                                                      :OPERATION
-                                                      "Passed directly as state to independent retained REPORT; inspect receives same state object. No LISTEN connection."
-                                                      :IDENTITY-EVIDENCE
-                                                      (GETHASH
-                                                               "independentReportProbe"
-                                                               EVENT)
-                                                      :PREVIOUS-INPUT
-                                                      "Original title/context accessible; state is distinct from event.data.")
-                                                (LIST :ID
-                                                      "retained-title-value"
-                                                      :STATUS :RUNTIME-OBSERVED
-                                                      :TYPE "JavaScript string"
-                                                      :OBJECT
-                                                      (GETHASH "value"
-                                                               (GETHASH
-                                                                        "independentReportProbe"
-                                                                        EVENT))
-                                                      :SOURCE
-                                                      (LIST REVISION
-                                                            "report_emit: const value = state[key]"
-                                                            "Independent probe only")
-                                                      :OPERATION
-                                                      "REPORT title reads Prior Title from supplied prior state, renders report and inspects state."
-                                                      :PREVIOUS-INPUT
-                                                      "This independent result does not establish Ward's nested REPORT target.")))))
+  "Read the bounded native capture and expose precise source/runtime stages plus explicit unknown current input."
+  (LET* ((CAPTURE
+          (READ-MESSAGE-JSON "dreyeck/nested-actions/input-witness.json"))
+         (EVENT (AREF (GETHASH "events" CAPTURE) 0))
+         (INVENTORY
+          (READ-MESSAGE-JSON
+           "dreyeck/nested-actions/sources/local-input-source-inventory.json")))
+    (MAKE-INSTANCE 'MESSAGE-INPUT-TRACE :CAPTURE CAPTURE :SOURCES
+                   (MESSAGE-SOURCE-OBSERVATIONS) :INVENTORY INVENTORY :STAGES
+                   (LIST
+                    (LIST :ID "received-message" :STATUS :RUNTIME-OBSERVED
+                          :TYPE "MessageEvent" :OBJECT
+                          (GETHASH "reception" EVENT) :SOURCE
+                          "Native opener window message callback; bounded fixture"
+                          :OPERATION
+                          "Native delivery; received payload is distinct from producer object."
+                          :PREVIOUS-INPUT "Not involved in transport.")
+                    (LIST :ID "message-data" :STATUS :SOURCE-OBSERVED
+                          :RUNTIME-STATUS :RUNTIME-OBSERVED :TYPE
+                          "JavaScript Object" :OBJECT
+                          (GETHASH "receivedPayload" EVENT) :SOURCE
+                          (EVIDENCE-SOURCE "listen") :OPERATION
+                          "Local data aliases event.data; no copy, wrap, merge or assignment to state."
+                          :IDENTITY-EVIDENCE (GETHASH "listenSelection" EVENT)
+                          :PREVIOUS-INPUT
+                          "LISTEN retains its separately supplied state argument; data is not that object in this witness.")
+                    (LIST :ID "listen-match" :STATUS :SOURCE-OBSERVED
+                          :RUNTIME-STATUS :RUNTIME-OBSERVED :TYPE
+                          "Boolean predicate over action/topic/name; payload remains an Object"
+                          :OBJECT (GETHASH "listenSelection" EVENT) :SOURCE
+                          (EVIDENCE-SOURCE "listen") :OPERATION
+                          "Inline publishSourceData/action + topic/name filter, not a separate dispatch registry. Count/status update only."
+                          :PREVIOUS-INPUT
+                          "Prior state object/title/context remain accessible and unchanged in this retained witness.")
+                    (LIST :ID "nested-action-input" :STATUS :OPEN :TYPE
+                          :UNKNOWN :OBJECT NIL :SOURCE
+                          :MATCHING-CURRENT-LISTEN-DISPATCH-UNAVAILABLE
+                          :OPERATION
+                          "No construction/replacement/extension or nested invocation in retained LISTEN."
+                          :PREVIOUS-INPUT :UNKNOWN-FOR-CURRENT-EXPERIMENT)
+                    (LIST :ID "report-lookup-target" :STATUS :OPEN :TYPE
+                          :UNKNOWN :OBJECT NIL :SOURCE
+                          :MATCHING-CURRENT-REPORT-CALL-UNAVAILABLE :OPERATION
+                          "Current nested REPORT caller/argument unavailable; cannot equate target with payload or prior state."
+                          :PREVIOUS-INPUT :UNKNOWN-FOR-CURRENT-EXPERIMENT)
+                    (LIST :ID "title-value" :STATUS :OPEN :TYPE :UNKNOWN
+                          :OBJECT NIL :SOURCE
+                          :CURRENT-NESTED-REPORT-RESULT-UNAVAILABLE :OPERATION
+                          "Current nested result unknown. Retained report_emit separately uses args[0] || temperature, key in state, then state[key]."
+                          :PREVIOUS-INPUT :UNKNOWN-FOR-CURRENT-EXPERIMENT)
+                    (LIST :ID "retained-report-state" :STATUS :RUNTIME-OBSERVED
+                          :TYPE "JavaScript Object" :OBJECT
+                          (GETHASH "priorState" EVENT) :SOURCE
+                          (EVIDENCE-SOURCE "report") :OPERATION
+                          "Passed directly as state to independent retained REPORT; inspect receives same state object. No LISTEN connection."
+                          :IDENTITY-EVIDENCE
+                          (GETHASH "independentReportProbe" EVENT)
+                          :PREVIOUS-INPUT
+                          "Original title/context accessible; state is distinct from event.data.")
+                    (LIST :ID "retained-title-value" :STATUS :RUNTIME-OBSERVED
+                          :TYPE "JavaScript string" :OBJECT
+                          (GETHASH "value"
+                                   (GETHASH "independentReportProbe" EVENT))
+                          :SOURCE (EVIDENCE-SOURCE "report") :OPERATION
+                          "REPORT title reads Prior Title from supplied prior state, renders report and inspects state."
+                          :PREVIOUS-INPUT
+                          "This independent result does not establish Ward's nested REPORT target.")))))
 
 (V:DEFVIEW MESSAGE-INPUT-TRACE-VIEW (TRACE MESSAGE-INPUT-TRACE)
            (V:HTML-VIEW :TITLE "Input path" :PRIORITY 1
