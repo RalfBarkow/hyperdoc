@@ -641,10 +641,101 @@
                                                                                     :DREYECK/NESTED-ACTIONS/TESTS
                                                                                     :RUN-TALA-TESTS)))
 
+(ASDF/PARSE-DEFSYSTEM:DEFSYSTEM "dreyeck/mech-intake/reading" :DESCRIPTION
+                                "A retained, source-qualified reading of maintained Mech composition"
+                                :SERIAL T :DEPENDS-ON
+                                ("dreyeck/upstream-intake"
+                                 "dreyeck/nested-actions/reading"
+                                 "dreyeck/authority-policy"
+                                 "dreyeck/inspector/topicmap/tala"
+                                 "babel")
+                                :COMPONENTS
+                                ((:MODULE "dreyeck/mech-intake" :SERIAL T
+                                          :COMPONENTS
+                                          ((:FILE "catalog")
+                                           (:FILE "execution")
+                                           (:FILE "acceptance")
+                                           (:FILE "reading")
+                                           (:MODULE "evidence" :COMPONENTS
+                                                    ((:STATIC-FILE
+                                                                   "LICENSE-Mech")
+                                                     (:STATIC-FILE
+                                                                   "acceptance.json")
+                                                     (:STATIC-FILE
+                                                                   "prior-acceptance.json")
+                                                     (:STATIC-FILE
+                                                                   "twins-results.json")
+                                                     (:STATIC-FILE
+                                                                   "behavioral-equivalence.json")
+                                                     (:STATIC-FILE
+                                                                   "selected-contracts.json")
+                                                     (:STATIC-FILE
+                                                                   "browser-results.json")
+                                                     (:STATIC-FILE
+                                                                   "sources.json")
+                                                     (:STATIC-FILE
+                                                                   "ward-listen.md")
+                                                     (:STATIC-FILE
+                                                                   "twins-input.json")
+                                                     (:STATIC-FILE
+                                                                   "review-request.txt")
+                                                     (:STATIC-FILE
+                                                                   "baseline-blocks.js")
+                                                     (:STATIC-FILE
+                                                                   "upstream-blocks.js")
+                                                     (:STATIC-FILE
+                                                                   "upstream-interpreter.js")
+                                                     (:STATIC-FILE
+                                                                   "upstream-graph.js")
+                                                     (:STATIC-FILE
+                                                                   "owned-discourse.mjs")
+                                                     (:STATIC-FILE
+                                                                   "discourse-entry.mjs")
+                                                     (:STATIC-FILE
+                                                                   "upstream-entry.mjs")
+                                                     (:STATIC-FILE "build.mjs")
+                                                     (:STATIC-FILE
+                                                                   "twins-fixture.mjs")
+                                                     (:STATIC-FILE
+                                                                   "browser-contracts.mjs")
+                                                     (:STATIC-FILE
+                                                                   "manifest.json")))))
+                                 (:MODULE "dreyeck/pages/mech-intake"
+                                          :COMPONENTS
+                                          ((:STATIC-FILE
+                                                         "Reading a Maintained Mech Composition.html")
+                                           (:STATIC-FILE
+                                                         "From Upstream Mech to an Owned Extension.html")
+                                           (:STATIC-FILE
+                                                         "Which Graph Does WALK Produce?.html")
+                                           (:STATIC-FILE
+                                                         "Evidence, Deviations and Acceptance.html"))))
+                                :IN-ORDER-TO
+                                ((ASDF/LISP-ACTION:TEST-OP
+                                                           (ASDF/LISP-ACTION:TEST-OP
+                                                                                     "dreyeck/mech-intake/reading/tests"))))
+
+(ASDF/PARSE-DEFSYSTEM:DEFSYSTEM "dreyeck/mech-intake/reading/tests"
+  :DEPENDS-ON
+  ("dreyeck/mech-intake/reading" "dreyeck/topicmap/tests")
+  :COMPONENTS
+  ((:FILE "dreyeck/tests/mech-intake-reading"))
+  :PERFORM
+  (ASDF/LISP-ACTION:TEST-OP (OP COMPONENT) (DECLARE (IGNORE OP COMPONENT))
+   (UIOP/PACKAGE:SYMBOL-CALL :DREYECK/MECH-INTAKE/TESTS :RUN-TESTS)))
+
+(ASDF/PARSE-DEFSYSTEM:DEFSYSTEM "dreyeck/mech-intake/tala/tests"
+  :DEPENDS-ON
+  ("dreyeck/mech-intake/reading/tests")
+  :PERFORM
+  (ASDF/LISP-ACTION:TEST-OP (OP COMPONENT) (DECLARE (IGNORE OP COMPONENT))
+   (UIOP/PACKAGE:SYMBOL-CALL :DREYECK/MECH-INTAKE/TESTS :RUN-TALA-TESTS)))
+
 (ASDF/PARSE-DEFSYSTEM:DEFSYSTEM #:DREYECK/CATALOG :DESCRIPTION
                                 "Explicit membership and runtime support for the dreyeck.ch HyperBook catalog"
                                 :LICENSE "BSD" :VERSION "0.0.1" :DEPENDS-ON
-                                ("dreyeck/nested-actions/reading"
+                                ("dreyeck/mech-intake/reading"
+                                 "dreyeck/nested-actions/reading"
                                  "dreyeck/hyperspec"
                                  "dreyeck/authority-policy"
                                  "dreyeck/wikipedia-title-bar"

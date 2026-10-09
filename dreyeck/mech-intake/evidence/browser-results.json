@@ -1,0 +1,4978 @@
+{
+  "started": "2026-10-09T04:37:06.398Z",
+  "pin": "a028b4bba04e539dcaa090423d38a00a0050489d",
+  "moduleIdentity": {
+    "authority": "https://github.com/RalfBarkow/wiki",
+    "baseCommitOid": "8e6c2e53a47f038f4b0c6d2ef35576cc1d4f456c",
+    "modulePath": "integrations/mech",
+    "moduleVersion": "0.1.0",
+    "extensionCommitOid": null,
+    "workingTree": true,
+    "sourceContentSha256": "dc5edee13803ef230f3f6e2611d3700573e6216685cb95b3938bc92ccf6b358f",
+    "sourceDigestExcludes": [
+      "evidence/acceptance/"
+    ],
+    "lockfileSha256": "a270bbc60832486c1bbf5ba8bfb957e7fd9b9bbe9be11e0c790e44dc1820a103"
+  },
+  "baseline": "abd88d2da6c89029515f2a456356832dffe038ab",
+  "artifacts": {
+    "baseline": "9fc3596f6690275c6934451363eb5b06bec59ca361ab2cfecdd52f99b592e56b",
+    "upstream": "db6f746b60af54481fa2f2cc6a6b53c69d34ee32a86e48f2810d9baeda220e67",
+    "composite": "ba933fe338b7938e5fd5f81399325c9335d4bb710c7600b0b7148cf220aa3543"
+  },
+  "configurations": {
+    "upstream": {
+      "requests": [
+        {
+          "url": "https://alpha.fixture.test/",
+          "method": "GET",
+          "status": 200,
+          "sha256": "1bc72259103cc1a3e4a34bdec5eb803d2a97c7250eae5f8b1213af9cde317969",
+          "bytes": 196
+        },
+        {
+          "url": "https://alpha.fixture.test/jquery.js",
+          "method": "GET",
+          "status": 200,
+          "sha256": "fc9a93dd241f6b045cbff0481cf4e1901becd0e12fb45166a8f17f95823f0b1a",
+          "bytes": 87533
+        },
+        {
+          "url": "https://alpha.fixture.test/fixture.js",
+          "method": "GET",
+          "status": 200,
+          "sha256": "2ead865d99224521f6b9df9a86015a35783dfe59e5d55206365c983bcf256c5f",
+          "bytes": 4581
+        },
+        {
+          "url": "https://alpha.fixture.test/bundle.mjs",
+          "method": "GET",
+          "status": 200,
+          "sha256": "db6f746b60af54481fa2f2cc6a6b53c69d34ee32a86e48f2810d9baeda220e67",
+          "bytes": 134254
+        },
+        {
+          "url": "https://alpha.fixture.test/plugins/mech/mech.css",
+          "method": "GET",
+          "status": 200,
+          "sha256": "9d930c433a2cdb14c532cfe7c271720df81a1010adeb05cf734fdae7b0608f27",
+          "bytes": 747
+        }
+      ],
+      "pageErrors": [],
+      "consoleErrors": []
+    },
+    "composite": {
+      "requests": [
+        {
+          "url": "https://alpha.fixture.test/",
+          "method": "GET",
+          "status": 200,
+          "sha256": "1bc72259103cc1a3e4a34bdec5eb803d2a97c7250eae5f8b1213af9cde317969",
+          "bytes": 196
+        },
+        {
+          "url": "https://alpha.fixture.test/jquery.js",
+          "method": "GET",
+          "status": 200,
+          "sha256": "fc9a93dd241f6b045cbff0481cf4e1901becd0e12fb45166a8f17f95823f0b1a",
+          "bytes": 87533
+        },
+        {
+          "url": "https://alpha.fixture.test/fixture.js",
+          "method": "GET",
+          "status": 200,
+          "sha256": "2ead865d99224521f6b9df9a86015a35783dfe59e5d55206365c983bcf256c5f",
+          "bytes": 4581
+        },
+        {
+          "url": "https://alpha.fixture.test/bundle.mjs",
+          "method": "GET",
+          "status": 200,
+          "sha256": "ba933fe338b7938e5fd5f81399325c9335d4bb710c7600b0b7148cf220aa3543",
+          "bytes": 152650
+        },
+        {
+          "url": "https://alpha.fixture.test/plugins/mech/mech.css",
+          "method": "GET",
+          "status": 200,
+          "sha256": "9d930c433a2cdb14c532cfe7c271720df81a1010adeb05cf734fdae7b0608f27",
+          "bytes": 747
+        },
+        {
+          "url": "https://alpha.fixture.test/question-root.json",
+          "method": "GET",
+          "status": 200,
+          "sha256": "b12fbba7d1380b4b2c9796fa7ec44f963e281a2fa9fff05a52c024fcbda53d34",
+          "bytes": 165
+        },
+        {
+          "url": "https://alpha.fixture.test/claim-root.json",
+          "method": "GET",
+          "status": 200,
+          "sha256": "9f4c2ce79e4ddca889e040b26abcc910d57bd5f7af7caecbd87a6b680aef9ca4",
+          "bytes": 153
+        },
+        {
+          "url": "https://alpha.fixture.test/support-root.json",
+          "method": "GET",
+          "status": 200,
+          "sha256": "6170662ec44495048d727e2cbd8afcf502ba51f7c665c01bdc0b274ff7e5fd18",
+          "bytes": 161
+        },
+        {
+          "url": "https://alpha.fixture.test/oppose-root.json",
+          "method": "GET",
+          "status": 200,
+          "sha256": "5526fb30cff65ed7e7a7c9d2f88cb8d57eac5ed16a700aee7f32835e2d9681dd",
+          "bytes": 157
+        },
+        {
+          "url": "https://alpha.fixture.test/target-page.json",
+          "method": "GET",
+          "status": 200,
+          "sha256": "c80860a613b8ff31ef7a7fc2064ebad14804ecd82aa53a4d3f4718192f5db5dd",
+          "bytes": 104
+        },
+        {
+          "url": "https://alpha.fixture.test/question-root.json",
+          "method": "GET",
+          "status": 200,
+          "sha256": "b12fbba7d1380b4b2c9796fa7ec44f963e281a2fa9fff05a52c024fcbda53d34",
+          "bytes": 165
+        },
+        {
+          "url": "https://alpha.fixture.test/claim-root.json",
+          "method": "GET",
+          "status": 200,
+          "sha256": "9f4c2ce79e4ddca889e040b26abcc910d57bd5f7af7caecbd87a6b680aef9ca4",
+          "bytes": 153
+        },
+        {
+          "url": "https://alpha.fixture.test/support-root.json",
+          "method": "GET",
+          "status": 200,
+          "sha256": "6170662ec44495048d727e2cbd8afcf502ba51f7c665c01bdc0b274ff7e5fd18",
+          "bytes": 161
+        },
+        {
+          "url": "https://alpha.fixture.test/oppose-root.json",
+          "method": "GET",
+          "status": 200,
+          "sha256": "5526fb30cff65ed7e7a7c9d2f88cb8d57eac5ed16a700aee7f32835e2d9681dd",
+          "bytes": 157
+        },
+        {
+          "url": "https://alpha.fixture.test/target-page.json",
+          "method": "GET",
+          "status": 200,
+          "sha256": "c80860a613b8ff31ef7a7fc2064ebad14804ecd82aa53a4d3f4718192f5db5dd",
+          "bytes": 104
+        },
+        {
+          "url": "https://alpha.fixture.test/question-root.json",
+          "method": "GET",
+          "status": 200,
+          "sha256": "b12fbba7d1380b4b2c9796fa7ec44f963e281a2fa9fff05a52c024fcbda53d34",
+          "bytes": 165
+        },
+        {
+          "url": "https://alpha.fixture.test/claim-root.json",
+          "method": "GET",
+          "status": 200,
+          "sha256": "9f4c2ce79e4ddca889e040b26abcc910d57bd5f7af7caecbd87a6b680aef9ca4",
+          "bytes": 153
+        },
+        {
+          "url": "https://alpha.fixture.test/support-root.json",
+          "method": "GET",
+          "status": 200,
+          "sha256": "6170662ec44495048d727e2cbd8afcf502ba51f7c665c01bdc0b274ff7e5fd18",
+          "bytes": 161
+        },
+        {
+          "url": "https://alpha.fixture.test/oppose-root.json",
+          "method": "GET",
+          "status": 200,
+          "sha256": "5526fb30cff65ed7e7a7c9d2f88cb8d57eac5ed16a700aee7f32835e2d9681dd",
+          "bytes": 157
+        },
+        {
+          "url": "https://alpha.fixture.test/target-page.json",
+          "method": "GET",
+          "status": 200,
+          "sha256": "c80860a613b8ff31ef7a7fc2064ebad14804ecd82aa53a4d3f4718192f5db5dd",
+          "bytes": 104
+        },
+        {
+          "url": "https://alpha.fixture.test/question-root.json",
+          "method": "GET",
+          "status": 200,
+          "sha256": "b12fbba7d1380b4b2c9796fa7ec44f963e281a2fa9fff05a52c024fcbda53d34",
+          "bytes": 165
+        },
+        {
+          "url": "https://alpha.fixture.test/claim-root.json",
+          "method": "GET",
+          "status": 200,
+          "sha256": "9f4c2ce79e4ddca889e040b26abcc910d57bd5f7af7caecbd87a6b680aef9ca4",
+          "bytes": 153
+        },
+        {
+          "url": "https://alpha.fixture.test/support-root.json",
+          "method": "GET",
+          "status": 200,
+          "sha256": "6170662ec44495048d727e2cbd8afcf502ba51f7c665c01bdc0b274ff7e5fd18",
+          "bytes": 161
+        },
+        {
+          "url": "https://alpha.fixture.test/oppose-root.json",
+          "method": "GET",
+          "status": 200,
+          "sha256": "5526fb30cff65ed7e7a7c9d2f88cb8d57eac5ed16a700aee7f32835e2d9681dd",
+          "bytes": 157
+        },
+        {
+          "url": "https://alpha.fixture.test/target-page.json",
+          "method": "GET",
+          "status": 200,
+          "sha256": "c80860a613b8ff31ef7a7fc2064ebad14804ecd82aa53a4d3f4718192f5db5dd",
+          "bytes": 104
+        },
+        {
+          "url": "https://alpha.fixture.test/question-root.json",
+          "method": "GET",
+          "status": 200,
+          "sha256": "b12fbba7d1380b4b2c9796fa7ec44f963e281a2fa9fff05a52c024fcbda53d34",
+          "bytes": 165
+        },
+        {
+          "url": "https://alpha.fixture.test/claim-root.json",
+          "method": "GET",
+          "status": 200,
+          "sha256": "9f4c2ce79e4ddca889e040b26abcc910d57bd5f7af7caecbd87a6b680aef9ca4",
+          "bytes": 153
+        },
+        {
+          "url": "https://alpha.fixture.test/support-root.json",
+          "method": "GET",
+          "status": 200,
+          "sha256": "6170662ec44495048d727e2cbd8afcf502ba51f7c665c01bdc0b274ff7e5fd18",
+          "bytes": 161
+        },
+        {
+          "url": "https://alpha.fixture.test/oppose-root.json",
+          "method": "GET",
+          "status": 200,
+          "sha256": "5526fb30cff65ed7e7a7c9d2f88cb8d57eac5ed16a700aee7f32835e2d9681dd",
+          "bytes": 157
+        },
+        {
+          "url": "https://alpha.fixture.test/target-page.json",
+          "method": "GET",
+          "status": 200,
+          "sha256": "c80860a613b8ff31ef7a7fc2064ebad14804ecd82aa53a4d3f4718192f5db5dd",
+          "bytes": 104
+        },
+        {
+          "url": "https://alpha.fixture.test/plugins/solo/dialog/",
+          "method": "GET",
+          "status": 200,
+          "sha256": "79cbe2af898a671f067b282277d301e4a826cd743daceb39655aef0ae2008acf",
+          "bytes": 483
+        }
+      ],
+      "pageErrors": [],
+      "consoleErrors": []
+    },
+    "baseline": {
+      "requests": [
+        {
+          "url": "https://alpha.fixture.test/",
+          "method": "GET",
+          "status": 200,
+          "sha256": "1bc72259103cc1a3e4a34bdec5eb803d2a97c7250eae5f8b1213af9cde317969",
+          "bytes": 196
+        },
+        {
+          "url": "https://alpha.fixture.test/jquery.js",
+          "method": "GET",
+          "status": 200,
+          "sha256": "fc9a93dd241f6b045cbff0481cf4e1901becd0e12fb45166a8f17f95823f0b1a",
+          "bytes": 87533
+        },
+        {
+          "url": "https://alpha.fixture.test/fixture.js",
+          "method": "GET",
+          "status": 200,
+          "sha256": "2ead865d99224521f6b9df9a86015a35783dfe59e5d55206365c983bcf256c5f",
+          "bytes": 4581
+        },
+        {
+          "url": "https://alpha.fixture.test/bundle.mjs",
+          "method": "GET",
+          "status": 200,
+          "sha256": "9fc3596f6690275c6934451363eb5b06bec59ca361ab2cfecdd52f99b592e56b",
+          "bytes": 57091
+        },
+        {
+          "url": "https://alpha.fixture.test/plugins/solo/dialog/",
+          "method": "GET",
+          "status": 200,
+          "sha256": "79cbe2af898a671f067b282277d301e4a826cd743daceb39655aef0ae2008acf",
+          "bytes": 483
+        }
+      ],
+      "pageErrors": [],
+      "consoleErrors": []
+    }
+  },
+  "tests": [
+    {
+      "name": "Bundle loaded with expected plugin entry",
+      "configuration": "upstream",
+      "status": "PASS",
+      "evidence": {
+        "pluginEmitMatches": true,
+        "pluginBindMatches": true,
+        "oneModuleInstance": true,
+        "catalog": [
+          "CLICK",
+          "HELLO",
+          "FROM",
+          "SENSOR",
+          "REPORT",
+          "SOURCE",
+          "PREVIEW",
+          "NEIGHBORS",
+          "WALK",
+          "TICK",
+          "UNTIL",
+          "FORWARD",
+          "TURN",
+          "FILE",
+          "KWIC",
+          "SHOW",
+          "RANDOM",
+          "SLEEP",
+          "TOGETHER",
+          "PLUGIN",
+          "GET",
+          "DELTA",
+          "ROSTER",
+          "LINEUP",
+          "LISTEN",
+          "MESSAGE",
+          "SOLO",
+          "POPUP",
+          "PRINT",
+          "CODE",
+          "DOWNLOAD"
+        ],
+        "run": "async function run(nest, state, initiator) {\n  const scope = nest.slice();\n  while (scope.length) {\n    const code = scope.shift();\n    if (\"command\" in code) {\n      const command = code.command;\n      const elem = state.api ? state.api.element(code.key) : document.getElementById(code.key);\n      const [op, ...args] = code.command.split(/ +/);\n      const next = scope[0];\n      const body = next && \"command\" in next ? null : scope.shift();\n      const stuff = { command, op, args, body, elem, state, initiator };\n      if (state.debug) console.log(stuff);\n      if (blocks[op]) await blocks[op].emit.apply(null, [stuff]);\n      else if (op.match(/^[A-Z]+$/)) state.api.trouble(elem, `${op} doesn't name a block we know.`);\n      else if (code.command.match(/\\S/)) state.api.trouble(elem, `Expected line to begin with all-caps keyword.`);\n    }\n  }\n}",
+        "tree": "function tree(lines, here, indent) {\n  while (lines.length) {\n    let m2 = lines[0].match(/( *)(.*)/);\n    let spaces = m2[1].length;\n    let command = m2[2];\n    if (spaces == indent) {\n      here.push({ command });\n      lines.shift();\n    } else if (spaces > indent) {\n      var more = [];\n      here.push(more);\n      tree(lines, more, spaces);\n    } else {\n      return here;\n    }\n  }\n  return here;\n}",
+        "jquery": "3.7.1"
+      }
+    },
+    {
+      "name": "Unmodified upstream rejects extension command",
+      "configuration": "upstream",
+      "status": "PASS",
+      "evidence": [
+        "EXTRACT doesn't name a block we know."
+      ]
+    },
+    {
+      "name": "CODE named export through actual CLICK emission",
+      "configuration": "upstream",
+      "status": "PASS",
+      "evidence": {
+        "text": "CLICK▶\nCODE named accepted ⇒ trusted:accepted",
+        "evaluations": 1,
+        "catalog": true
+      }
+    },
+    {
+      "name": "CODE named export through actual TICK",
+      "configuration": "upstream",
+      "status": "PASS",
+      "evidence": {
+        "state": {
+          "context": {
+            "item": {
+              "id": "trusted-mech-item",
+              "type": "mech",
+              "text": "TICK 1\n  CODE named tick"
+            },
+            "itemId": "trusted-mech-item",
+            "pageKey": "current",
+            "page": {
+              "title": "Trusted Browser Fixture",
+              "story": [
+                {
+                  "id": "question-fold",
+                  "type": "pagefold",
+                  "text": "question"
+                },
+                {
+                  "id": "question-link",
+                  "type": "paragraph",
+                  "text": "See [[Target Page]]"
+                },
+                {
+                  "id": "trusted-code-0",
+                  "type": "code",
+                  "text": "globalThis.codeFixtureEvaluations++; export function named(value) { this.trustedValue={value}; return \"trusted:\"+value; }"
+                }
+              ]
+            },
+            "origin": "https://alpha.fixture.test",
+            "site": "alpha.fixture.test",
+            "slug": "question-root",
+            "title": "Trusted Browser Fixture",
+            "blocks": [
+              "CLICK",
+              "HELLO",
+              "FROM",
+              "SENSOR",
+              "REPORT",
+              "SOURCE",
+              "PREVIEW",
+              "NEIGHBORS",
+              "WALK",
+              "TICK",
+              "UNTIL",
+              "FORWARD",
+              "TURN",
+              "FILE",
+              "KWIC",
+              "SHOW",
+              "RANDOM",
+              "SLEEP",
+              "TOGETHER",
+              "PLUGIN",
+              "GET",
+              "DELTA",
+              "ROSTER",
+              "LINEUP",
+              "LISTEN",
+              "MESSAGE",
+              "SOLO",
+              "POPUP",
+              "PRINT",
+              "CODE",
+              "DOWNLOAD"
+            ]
+          },
+          "debug": false,
+          "trustedValue": {
+            "value": "tick"
+          }
+        },
+        "visits": [
+          "53793.0",
+          "53793.1.0"
+        ],
+        "blocks": [
+          {
+            "id": "53793.0",
+            "text": "TICK 1▶",
+            "html": "TICK 1<span class=\"status\"></span><button class=\"button\">▶</button>"
+          },
+          {
+            "id": "53793.1.0",
+            "text": "CODE named tick ⇒ trusted:tick",
+            "html": "CODE named tick<span class=\"status\"> ⇒ trusted:tick</span>"
+          }
+        ],
+        "aspectSource": null
+      }
+    },
+    {
+      "name": "CODE guard: unowned direct",
+      "configuration": "upstream",
+      "status": "PASS",
+      "evidence": {
+        "options": {
+          "owner": false,
+          "remote": false
+        },
+        "permitted": false,
+        "result": {
+          "state": {
+            "context": {
+              "item": {
+                "id": "trusted-mech-item",
+                "type": "mech",
+                "text": "CODE named guarded"
+              },
+              "itemId": "trusted-mech-item",
+              "pageKey": "current",
+              "page": {
+                "title": "Trusted Browser Fixture",
+                "story": [
+                  {
+                    "id": "question-fold",
+                    "type": "pagefold",
+                    "text": "question"
+                  },
+                  {
+                    "id": "question-link",
+                    "type": "paragraph",
+                    "text": "See [[Target Page]]"
+                  },
+                  {
+                    "id": "trusted-code-0",
+                    "type": "code",
+                    "text": "globalThis.codeFixtureEvaluations++; export function named(value) { this.trustedValue={value}; return \"trusted:\"+value; }"
+                  }
+                ]
+              },
+              "origin": "https://alpha.fixture.test",
+              "site": "alpha.fixture.test",
+              "slug": "question-root",
+              "title": "Trusted Browser Fixture",
+              "blocks": [
+                "CLICK",
+                "HELLO",
+                "FROM",
+                "SENSOR",
+                "REPORT",
+                "SOURCE",
+                "PREVIEW",
+                "NEIGHBORS",
+                "WALK",
+                "TICK",
+                "UNTIL",
+                "FORWARD",
+                "TURN",
+                "FILE",
+                "KWIC",
+                "SHOW",
+                "RANDOM",
+                "SLEEP",
+                "TOGETHER",
+                "PLUGIN",
+                "GET",
+                "DELTA",
+                "ROSTER",
+                "LINEUP",
+                "LISTEN",
+                "MESSAGE",
+                "SOLO",
+                "POPUP",
+                "PRINT",
+                "CODE",
+                "DOWNLOAD"
+              ]
+            }
+          },
+          "visits": [
+            "956542.0"
+          ],
+          "blocks": [
+            {
+              "id": "956542.0",
+              "text": "CODE named guarded✖︎",
+              "html": "CODE named guarded<button class=\"trouble\">✖︎</button>"
+            }
+          ],
+          "aspectSource": null
+        },
+        "diagnostics": [
+          "This CODE must be run by CLICK or TICK or owned by the logged in user."
+        ],
+        "evaluationsBefore": 1,
+        "evaluationsAfter": 1
+      }
+    },
+    {
+      "name": "CODE guard: owned local",
+      "configuration": "upstream",
+      "status": "PASS",
+      "evidence": {
+        "options": {
+          "owner": true,
+          "remote": false
+        },
+        "permitted": true,
+        "result": {
+          "state": {
+            "context": {
+              "item": {
+                "id": "trusted-mech-item",
+                "type": "mech",
+                "text": "CODE named guarded"
+              },
+              "itemId": "trusted-mech-item",
+              "pageKey": "current",
+              "page": {
+                "title": "Trusted Browser Fixture",
+                "story": [
+                  {
+                    "id": "question-fold",
+                    "type": "pagefold",
+                    "text": "question"
+                  },
+                  {
+                    "id": "question-link",
+                    "type": "paragraph",
+                    "text": "See [[Target Page]]"
+                  },
+                  {
+                    "id": "trusted-code-0",
+                    "type": "code",
+                    "text": "globalThis.codeFixtureEvaluations++; export function named(value) { this.trustedValue={value}; return \"trusted:\"+value; }"
+                  }
+                ]
+              },
+              "origin": "https://alpha.fixture.test",
+              "site": "alpha.fixture.test",
+              "slug": "question-root",
+              "title": "Trusted Browser Fixture",
+              "blocks": [
+                "CLICK",
+                "HELLO",
+                "FROM",
+                "SENSOR",
+                "REPORT",
+                "SOURCE",
+                "PREVIEW",
+                "NEIGHBORS",
+                "WALK",
+                "TICK",
+                "UNTIL",
+                "FORWARD",
+                "TURN",
+                "FILE",
+                "KWIC",
+                "SHOW",
+                "RANDOM",
+                "SLEEP",
+                "TOGETHER",
+                "PLUGIN",
+                "GET",
+                "DELTA",
+                "ROSTER",
+                "LINEUP",
+                "LISTEN",
+                "MESSAGE",
+                "SOLO",
+                "POPUP",
+                "PRINT",
+                "CODE",
+                "DOWNLOAD"
+              ]
+            },
+            "trustedValue": {
+              "value": "guarded"
+            }
+          },
+          "visits": [
+            "228800.0"
+          ],
+          "blocks": [
+            {
+              "id": "228800.0",
+              "text": "CODE named guarded ⇒ trusted:guarded",
+              "html": "CODE named guarded<span class=\"status\"> ⇒ trusted:guarded</span>"
+            }
+          ],
+          "aspectSource": null
+        },
+        "diagnostics": [],
+        "evaluationsBefore": 1,
+        "evaluationsAfter": 1
+      }
+    },
+    {
+      "name": "CODE guard: owned remote",
+      "configuration": "upstream",
+      "status": "PASS",
+      "evidence": {
+        "options": {
+          "owner": true,
+          "remote": true
+        },
+        "permitted": false,
+        "result": {
+          "state": {
+            "context": {
+              "item": {
+                "id": "trusted-mech-item",
+                "type": "mech",
+                "text": "CODE named guarded"
+              },
+              "itemId": "trusted-mech-item",
+              "pageKey": "current",
+              "page": {
+                "title": "Trusted Browser Fixture",
+                "story": [
+                  {
+                    "id": "question-fold",
+                    "type": "pagefold",
+                    "text": "question"
+                  },
+                  {
+                    "id": "question-link",
+                    "type": "paragraph",
+                    "text": "See [[Target Page]]"
+                  },
+                  {
+                    "id": "trusted-code-0",
+                    "type": "code",
+                    "text": "globalThis.codeFixtureEvaluations++; export function named(value) { this.trustedValue={value}; return \"trusted:\"+value; }"
+                  }
+                ]
+              },
+              "origin": "https://alpha.fixture.test",
+              "site": "alpha.fixture.test",
+              "slug": "question-root",
+              "title": "Trusted Browser Fixture",
+              "blocks": [
+                "CLICK",
+                "HELLO",
+                "FROM",
+                "SENSOR",
+                "REPORT",
+                "SOURCE",
+                "PREVIEW",
+                "NEIGHBORS",
+                "WALK",
+                "TICK",
+                "UNTIL",
+                "FORWARD",
+                "TURN",
+                "FILE",
+                "KWIC",
+                "SHOW",
+                "RANDOM",
+                "SLEEP",
+                "TOGETHER",
+                "PLUGIN",
+                "GET",
+                "DELTA",
+                "ROSTER",
+                "LINEUP",
+                "LISTEN",
+                "MESSAGE",
+                "SOLO",
+                "POPUP",
+                "PRINT",
+                "CODE",
+                "DOWNLOAD"
+              ]
+            }
+          },
+          "visits": [
+            "542449.0"
+          ],
+          "blocks": [
+            {
+              "id": "542449.0",
+              "text": "CODE named guarded✖︎",
+              "html": "CODE named guarded<button class=\"trouble\">✖︎</button>"
+            }
+          ],
+          "aspectSource": null
+        },
+        "diagnostics": [
+          "This CODE must be run by CLICK or TICK or owned by the logged in user."
+        ],
+        "evaluationsBefore": 1,
+        "evaluationsAfter": 1
+      }
+    },
+    {
+      "name": "CODE guard: truthy internal initiator",
+      "configuration": "upstream",
+      "status": "PASS",
+      "evidence": {
+        "options": {
+          "owner": false,
+          "remote": false,
+          "initiator": "not-a-click-token"
+        },
+        "permitted": true,
+        "result": {
+          "state": {
+            "context": {
+              "item": {
+                "id": "trusted-mech-item",
+                "type": "mech",
+                "text": "CODE named guarded"
+              },
+              "itemId": "trusted-mech-item",
+              "pageKey": "current",
+              "page": {
+                "title": "Trusted Browser Fixture",
+                "story": [
+                  {
+                    "id": "question-fold",
+                    "type": "pagefold",
+                    "text": "question"
+                  },
+                  {
+                    "id": "question-link",
+                    "type": "paragraph",
+                    "text": "See [[Target Page]]"
+                  },
+                  {
+                    "id": "trusted-code-0",
+                    "type": "code",
+                    "text": "globalThis.codeFixtureEvaluations++; export function named(value) { this.trustedValue={value}; return \"trusted:\"+value; }"
+                  }
+                ]
+              },
+              "origin": "https://alpha.fixture.test",
+              "site": "alpha.fixture.test",
+              "slug": "question-root",
+              "title": "Trusted Browser Fixture",
+              "blocks": [
+                "CLICK",
+                "HELLO",
+                "FROM",
+                "SENSOR",
+                "REPORT",
+                "SOURCE",
+                "PREVIEW",
+                "NEIGHBORS",
+                "WALK",
+                "TICK",
+                "UNTIL",
+                "FORWARD",
+                "TURN",
+                "FILE",
+                "KWIC",
+                "SHOW",
+                "RANDOM",
+                "SLEEP",
+                "TOGETHER",
+                "PLUGIN",
+                "GET",
+                "DELTA",
+                "ROSTER",
+                "LINEUP",
+                "LISTEN",
+                "MESSAGE",
+                "SOLO",
+                "POPUP",
+                "PRINT",
+                "CODE",
+                "DOWNLOAD"
+              ]
+            },
+            "trustedValue": {
+              "value": "guarded"
+            }
+          },
+          "visits": [
+            "598499.0"
+          ],
+          "blocks": [
+            {
+              "id": "598499.0",
+              "text": "CODE named guarded ⇒ trusted:guarded",
+              "html": "CODE named guarded<span class=\"status\"> ⇒ trusted:guarded</span>"
+            }
+          ],
+          "aspectSource": null
+        },
+        "diagnostics": [],
+        "evaluationsBefore": 1,
+        "evaluationsAfter": 1
+      }
+    },
+    {
+      "name": "CODE diagnostic: missing export",
+      "configuration": "upstream",
+      "status": "PASS",
+      "evidence": [
+        "Expected export of function \"absent\"."
+      ]
+    },
+    {
+      "name": "CODE diagnostic: trusted throw",
+      "configuration": "upstream",
+      "status": "PASS",
+      "evidence": [
+        "trusted fixture failure"
+      ]
+    },
+    {
+      "name": "CODE diagnostic: syntax failure",
+      "configuration": "upstream",
+      "status": "PASS",
+      "evidence": [
+        "Unexpected end of input"
+      ]
+    },
+    {
+      "name": "Bundle loaded with expected plugin entry",
+      "configuration": "composite",
+      "status": "PASS",
+      "evidence": {
+        "pluginEmitMatches": true,
+        "pluginBindMatches": true,
+        "oneModuleInstance": true,
+        "catalog": [
+          "CLICK",
+          "HELLO",
+          "FROM",
+          "SENSOR",
+          "REPORT",
+          "SOURCE",
+          "PREVIEW",
+          "NEIGHBORS",
+          "WALK",
+          "TICK",
+          "UNTIL",
+          "FORWARD",
+          "TURN",
+          "FILE",
+          "KWIC",
+          "SHOW",
+          "RANDOM",
+          "SLEEP",
+          "TOGETHER",
+          "PLUGIN",
+          "GET",
+          "DELTA",
+          "ROSTER",
+          "LINEUP",
+          "LISTEN",
+          "MESSAGE",
+          "SOLO",
+          "POPUP",
+          "PRINT",
+          "CODE",
+          "DOWNLOAD",
+          "EXTRACT",
+          "EDGES",
+          "DEBUG"
+        ],
+        "run": "async function run(nest, state, initiator) {\n  const scope = nest.slice();\n  while (scope.length) {\n    const code = scope.shift();\n    if (\"command\" in code) {\n      const command = code.command;\n      const elem = state.api ? state.api.element(code.key) : document.getElementById(code.key);\n      const [op, ...args] = code.command.split(/ +/);\n      const next = scope[0];\n      const body = next && \"command\" in next ? null : scope.shift();\n      const stuff = { command, op, args, body, elem, state, initiator };\n      if (state.debug) console.log(stuff);\n      if (blocks[op]) await blocks[op].emit.apply(null, [stuff]);\n      else if (op.match(/^[A-Z]+$/)) state.api.trouble(elem, `${op} doesn't name a block we know.`);\n      else if (code.command.match(/\\S/)) state.api.trouble(elem, `Expected line to begin with all-caps keyword.`);\n    }\n  }\n}",
+        "tree": "function tree(lines, here, indent) {\n  while (lines.length) {\n    let m2 = lines[0].match(/( *)(.*)/);\n    let spaces = m2[1].length;\n    let command = m2[2];\n    if (spaces == indent) {\n      here.push({ command });\n      lines.shift();\n    } else if (spaces > indent) {\n      var more = [];\n      here.push(more);\n      tree(lines, more, spaces);\n    } else {\n      return here;\n    }\n  }\n  return here;\n}",
+        "jquery": "3.7.1"
+      }
+    },
+    {
+      "name": "Extensions installed before first plugin emission",
+      "configuration": "composite",
+      "status": "PASS",
+      "evidence": {
+        "html": "<div style=\"background-color:#eee;padding:15px;border-top:8px;\"><div></div><span id=\"876405.0\" class=\"block\"></span></div><div style=\"background-color:#eee;padding:15px;border-top:8px;\"><div></div><span id=\"228411.0\" class=\"block\">DEBUG on<span class=\"status\"> ⇒ on</span></span></div>",
+        "catalog": [
+          "CLICK",
+          "HELLO",
+          "FROM",
+          "SENSOR",
+          "REPORT",
+          "SOURCE",
+          "PREVIEW",
+          "NEIGHBORS",
+          "WALK",
+          "TICK",
+          "UNTIL",
+          "FORWARD",
+          "TURN",
+          "FILE",
+          "KWIC",
+          "SHOW",
+          "RANDOM",
+          "SLEEP",
+          "TOGETHER",
+          "PLUGIN",
+          "GET",
+          "DELTA",
+          "ROSTER",
+          "LINEUP",
+          "LISTEN",
+          "MESSAGE",
+          "SOLO",
+          "POPUP",
+          "PRINT",
+          "CODE",
+          "DOWNLOAD",
+          "EXTRACT",
+          "EDGES",
+          "DEBUG"
+        ],
+        "text": "DEBUG on ⇒ on"
+      }
+    },
+    {
+      "name": "Exactly one catalog and preserved upstream emitters",
+      "configuration": "composite",
+      "status": "PASS",
+      "evidence": {
+        "preserved": true,
+        "names": [
+          "CLICK",
+          "HELLO",
+          "FROM",
+          "SENSOR",
+          "REPORT",
+          "SOURCE",
+          "PREVIEW",
+          "NEIGHBORS",
+          "WALK",
+          "TICK",
+          "UNTIL",
+          "FORWARD",
+          "TURN",
+          "FILE",
+          "KWIC",
+          "SHOW",
+          "RANDOM",
+          "SLEEP",
+          "TOGETHER",
+          "PLUGIN",
+          "GET",
+          "DELTA",
+          "ROSTER",
+          "LINEUP",
+          "LISTEN",
+          "MESSAGE",
+          "SOLO",
+          "POPUP",
+          "PRINT",
+          "CODE",
+          "DOWNLOAD",
+          "EXTRACT",
+          "EDGES",
+          "DEBUG"
+        ],
+        "upstreamCatalogModulesInBuild": 1
+      }
+    },
+    {
+      "name": "Duplicate, collision and incompatible catalog rejection",
+      "configuration": "composite",
+      "status": "PASS",
+      "evidence": {
+        "results": [
+          "Already installed",
+          "Command collision: EXTRACT",
+          "Incompatible emitter: WALK"
+        ],
+        "catalogStillInstalled": true
+      }
+    },
+    {
+      "name": "EXTRACT EDGES DEBUG dispatch with real DOM",
+      "configuration": "composite",
+      "status": "PASS",
+      "evidence": {
+        "state": {
+          "context": {
+            "item": {
+              "id": "trusted-mech-item",
+              "type": "mech",
+              "text": "NEIGHBORS\nEXTRACT\nEDGES\nDEBUG on"
+            },
+            "itemId": "trusted-mech-item",
+            "pageKey": "current",
+            "page": {
+              "title": "Trusted Browser Fixture",
+              "story": [
+                {
+                  "id": "question-fold",
+                  "type": "pagefold",
+                  "text": "question"
+                },
+                {
+                  "id": "question-link",
+                  "type": "paragraph",
+                  "text": "See [[Target Page]]"
+                }
+              ]
+            },
+            "origin": "https://alpha.fixture.test",
+            "site": "alpha.fixture.test",
+            "slug": "question-root",
+            "title": "Trusted Browser Fixture",
+            "blocks": [
+              "CLICK",
+              "HELLO",
+              "FROM",
+              "SENSOR",
+              "REPORT",
+              "SOURCE",
+              "PREVIEW",
+              "NEIGHBORS",
+              "WALK",
+              "TICK",
+              "UNTIL",
+              "FORWARD",
+              "TURN",
+              "FILE",
+              "KWIC",
+              "SHOW",
+              "RANDOM",
+              "SLEEP",
+              "TOGETHER",
+              "PLUGIN",
+              "GET",
+              "DELTA",
+              "ROSTER",
+              "LINEUP",
+              "LISTEN",
+              "MESSAGE",
+              "SOLO",
+              "POPUP",
+              "PRINT",
+              "CODE",
+              "DOWNLOAD",
+              "EXTRACT",
+              "EDGES",
+              "DEBUG"
+            ]
+          },
+          "neighborhood": [
+            {
+              "domain": "alpha.fixture.test",
+              "slug": "question-root",
+              "title": "Question Root",
+              "date": 500,
+              "links": {
+                "target-page": 1
+              }
+            },
+            {
+              "domain": "alpha.fixture.test",
+              "slug": "claim-root",
+              "title": "Claim Root",
+              "date": 400,
+              "links": {
+                "target-page": 1
+              }
+            },
+            {
+              "domain": "alpha.fixture.test",
+              "slug": "support-root",
+              "title": "Support Root",
+              "date": 300,
+              "links": {
+                "target-page": 1
+              }
+            },
+            {
+              "domain": "alpha.fixture.test",
+              "slug": "oppose-root",
+              "title": "Oppose Root",
+              "date": 200,
+              "links": {
+                "target-page": 1
+              }
+            },
+            {
+              "domain": "alpha.fixture.test",
+              "slug": "target-page",
+              "title": "Target Page",
+              "date": 100,
+              "links": {}
+            }
+          ],
+          "discourse": {
+            "identity": "domain+slug",
+            "edges": [
+              {
+                "fromId": "alpha.fixture.test+question-root",
+                "toId": "alpha.fixture.test+target-page",
+                "role": "question",
+                "source": {
+                  "pageId": "alpha.fixture.test+question-root",
+                  "fold": "question",
+                  "extractorVersion": "extract-fold-aware-v1"
+                }
+              },
+              {
+                "fromId": "alpha.fixture.test+claim-root",
+                "toId": "alpha.fixture.test+target-page",
+                "role": "claim",
+                "source": {
+                  "pageId": "alpha.fixture.test+claim-root",
+                  "fold": "claim",
+                  "extractorVersion": "extract-fold-aware-v1"
+                }
+              },
+              {
+                "fromId": "alpha.fixture.test+support-root",
+                "toId": "alpha.fixture.test+target-page",
+                "role": "support",
+                "source": {
+                  "pageId": "alpha.fixture.test+support-root",
+                  "fold": "support",
+                  "extractorVersion": "extract-fold-aware-v1"
+                }
+              },
+              {
+                "fromId": "alpha.fixture.test+oppose-root",
+                "toId": "alpha.fixture.test+target-page",
+                "role": "oppose",
+                "source": {
+                  "pageId": "alpha.fixture.test+oppose-root",
+                  "fold": "oppose",
+                  "extractorVersion": "extract-fold-aware-v1"
+                }
+              }
+            ],
+            "metadata": {
+              "extractorVersion": "extract-fold-aware-v1",
+              "timestamp": "2026-10-09T04:37:11.717Z",
+              "pagesInScope": 5,
+              "pagesFetched": 5,
+              "pagesParsed": 5,
+              "fetchFailures": 0,
+              "parseFailures": 0,
+              "unparsedPages": [],
+              "edgesExtracted": 4,
+              "edgesByRole": {
+                "question": 1,
+                "claim": 1,
+                "support": 1,
+                "oppose": 1
+              },
+              "foldsEncountered": {
+                "question": 1,
+                "claim": 1,
+                "support": 1,
+                "oppose": 1
+              },
+              "foldsUnknown": {},
+              "note": "fetch"
+            }
+          },
+          "debug": true
+        },
+        "visits": [
+          "751439.0",
+          "751439.1",
+          "751439.2",
+          "751439.3"
+        ],
+        "blocks": [
+          {
+            "id": "751439.0",
+            "text": "NEIGHBORS⇒ 5 pages, 1 sites",
+            "html": "NEIGHBORS<span class=\"status\">⇒ 5 pages, 1 sites</span>"
+          },
+          {
+            "id": "751439.1",
+            "text": "EXTRACT ⇒ parsed 5/5 pages, 4 typed edges (claim: 1; unknown folds: 0)",
+            "html": "EXTRACT<span class=\"status\"> ⇒ parsed 5/5 pages, 4 typed edges (claim: 1; unknown folds: 0)</span>"
+          },
+          {
+            "id": "751439.2",
+            "text": "EDGES ⇒ 4/4 edges (claim: 1, support: 1, oppose: 1, question: 1)claim (1)\nfromto\nclaim-roottarget-page\n\nsupport (1)\nfromto\nsupport-roottarget-page\n\noppose (1)\nfromto\noppose-roottarget-page\n\nquestion (1)\nfromto\nquestion-roottarget-page\n",
+            "html": "EDGES ⇒ 4/4 edges (claim: 1, support: 1, oppose: 1, question: 1)<details><summary>claim (1)</summary><hr><table>\n<tbody><tr><th>from</th><th>to</th></tr>\n<tr><td><a href=\"//alpha.fixture.test/view/claim-root\">claim-root</a></td><td><a href=\"//alpha.fixture.test/view/target-page\">target-page</a></td></tr>\n</tbody></table><hr></details>\n<details><summary>support (1)</summary><hr><table>\n<tbody><tr><th>from</th><th>to</th></tr>\n<tr><td><a href=\"//alpha.fixture.test/view/support-root\">support-root</a></td><td><a href=\"//alpha.fixture.test/view/target-page\">target-page</a></td></tr>\n</tbody></table><hr></details>\n<details><summary>oppose (1)</summary><hr><table>\n<tbody><tr><th>from</th><th>to</th></tr>\n<tr><td><a href=\"//alpha.fixture.test/view/oppose-root\">oppose-root</a></td><td><a href=\"//alpha.fixture.test/view/target-page\">target-page</a></td></tr>\n</tbody></table><hr></details>\n<details><summary>question (1)</summary><hr><table>\n<tbody><tr><th>from</th><th>to</th></tr>\n<tr><td><a href=\"//alpha.fixture.test/view/question-root\">question-root</a></td><td><a href=\"//alpha.fixture.test/view/target-page\">target-page</a></td></tr>\n</tbody></table><hr></details>"
+          },
+          {
+            "id": "751439.3",
+            "text": "DEBUG on ⇒ on",
+            "html": "DEBUG on<span class=\"status\"> ⇒ on</span>"
+          }
+        ],
+        "aspectSource": null
+      }
+    },
+    {
+      "name": "EDGES destinations are safe in detached DOM",
+      "configuration": "composite",
+      "status": "PASS",
+      "evidence": {
+        "connected": false,
+        "anchors": [
+          "/view/local",
+          "//normal.fixture.test:8080/view/target",
+          "/view/local",
+          "/view/local",
+          "/view/local",
+          "/view/local",
+          "/view/local",
+          "/view/local"
+        ],
+        "invalid": 6,
+        "eventAttributes": []
+      }
+    },
+    {
+      "name": "Role WALK question",
+      "configuration": "composite",
+      "status": "PASS",
+      "evidence": {
+        "state": {
+          "context": {
+            "item": {
+              "id": "trusted-mech-item",
+              "type": "mech",
+              "text": "NEIGHBORS\nEXTRACT\nWALK 1 question"
+            },
+            "itemId": "trusted-mech-item",
+            "pageKey": "current",
+            "page": {
+              "title": "Trusted Browser Fixture",
+              "story": [
+                {
+                  "id": "question-fold",
+                  "type": "pagefold",
+                  "text": "question"
+                },
+                {
+                  "id": "question-link",
+                  "type": "paragraph",
+                  "text": "See [[Target Page]]"
+                }
+              ]
+            },
+            "origin": "https://alpha.fixture.test",
+            "site": "alpha.fixture.test",
+            "slug": "question-root",
+            "title": "Trusted Browser Fixture",
+            "blocks": [
+              "CLICK",
+              "HELLO",
+              "FROM",
+              "SENSOR",
+              "REPORT",
+              "SOURCE",
+              "PREVIEW",
+              "NEIGHBORS",
+              "WALK",
+              "TICK",
+              "UNTIL",
+              "FORWARD",
+              "TURN",
+              "FILE",
+              "KWIC",
+              "SHOW",
+              "RANDOM",
+              "SLEEP",
+              "TOGETHER",
+              "PLUGIN",
+              "GET",
+              "DELTA",
+              "ROSTER",
+              "LINEUP",
+              "LISTEN",
+              "MESSAGE",
+              "SOLO",
+              "POPUP",
+              "PRINT",
+              "CODE",
+              "DOWNLOAD",
+              "EXTRACT",
+              "EDGES",
+              "DEBUG"
+            ]
+          },
+          "neighborhood": [
+            {
+              "domain": "alpha.fixture.test",
+              "slug": "question-root",
+              "title": "Question Root",
+              "date": 500,
+              "links": {
+                "target-page": 1
+              }
+            },
+            {
+              "domain": "alpha.fixture.test",
+              "slug": "claim-root",
+              "title": "Claim Root",
+              "date": 400,
+              "links": {
+                "target-page": 1
+              }
+            },
+            {
+              "domain": "alpha.fixture.test",
+              "slug": "support-root",
+              "title": "Support Root",
+              "date": 300,
+              "links": {
+                "target-page": 1
+              }
+            },
+            {
+              "domain": "alpha.fixture.test",
+              "slug": "oppose-root",
+              "title": "Oppose Root",
+              "date": 200,
+              "links": {
+                "target-page": 1
+              }
+            },
+            {
+              "domain": "alpha.fixture.test",
+              "slug": "target-page",
+              "title": "Target Page",
+              "date": 100,
+              "links": {}
+            }
+          ],
+          "discourse": {
+            "identity": "domain+slug",
+            "edges": [
+              {
+                "fromId": "alpha.fixture.test+question-root",
+                "toId": "alpha.fixture.test+target-page",
+                "role": "question",
+                "source": {
+                  "pageId": "alpha.fixture.test+question-root",
+                  "fold": "question",
+                  "extractorVersion": "extract-fold-aware-v1"
+                }
+              },
+              {
+                "fromId": "alpha.fixture.test+claim-root",
+                "toId": "alpha.fixture.test+target-page",
+                "role": "claim",
+                "source": {
+                  "pageId": "alpha.fixture.test+claim-root",
+                  "fold": "claim",
+                  "extractorVersion": "extract-fold-aware-v1"
+                }
+              },
+              {
+                "fromId": "alpha.fixture.test+support-root",
+                "toId": "alpha.fixture.test+target-page",
+                "role": "support",
+                "source": {
+                  "pageId": "alpha.fixture.test+support-root",
+                  "fold": "support",
+                  "extractorVersion": "extract-fold-aware-v1"
+                }
+              },
+              {
+                "fromId": "alpha.fixture.test+oppose-root",
+                "toId": "alpha.fixture.test+target-page",
+                "role": "oppose",
+                "source": {
+                  "pageId": "alpha.fixture.test+oppose-root",
+                  "fold": "oppose",
+                  "extractorVersion": "extract-fold-aware-v1"
+                }
+              }
+            ],
+            "metadata": {
+              "extractorVersion": "extract-fold-aware-v1",
+              "timestamp": "2026-10-09T04:37:11.756Z",
+              "pagesInScope": 5,
+              "pagesFetched": 5,
+              "pagesParsed": 5,
+              "fetchFailures": 0,
+              "parseFailures": 0,
+              "unparsedPages": [],
+              "edgesExtracted": 4,
+              "edgesByRole": {
+                "question": 1,
+                "claim": 1,
+                "support": 1,
+                "oppose": 1
+              },
+              "foldsEncountered": {
+                "question": 1,
+                "claim": 1,
+                "support": 1,
+                "oppose": 1
+              },
+              "foldsUnknown": {},
+              "note": "fetch"
+            }
+          },
+          "aspect": [
+            {
+              "id": "917283.2",
+              "result": [
+                {
+                  "name": "Question Root",
+                  "graph": {
+                    "nodes": [
+                      {
+                        "type": "",
+                        "in": [],
+                        "out": [
+                          0,
+                          1
+                        ],
+                        "props": {
+                          "name": "Question\nRoot",
+                          "title": "Question Root",
+                          "site": "alpha.fixture.test"
+                        }
+                      },
+                      {
+                        "type": "",
+                        "in": [
+                          0,
+                          1,
+                          2,
+                          3
+                        ],
+                        "out": [],
+                        "props": {
+                          "name": "Target\nPage",
+                          "title": "Target Page",
+                          "site": "alpha.fixture.test"
+                        }
+                      },
+                      {
+                        "type": "",
+                        "in": [],
+                        "out": [
+                          2
+                        ],
+                        "props": {
+                          "name": "Claim\nRoot",
+                          "title": "Claim Root",
+                          "site": "alpha.fixture.test"
+                        }
+                      },
+                      {
+                        "type": "",
+                        "in": [],
+                        "out": [
+                          3
+                        ],
+                        "props": {
+                          "name": "Support\nRoot",
+                          "title": "Support Root",
+                          "site": "alpha.fixture.test"
+                        }
+                      }
+                    ],
+                    "rels": [
+                      {
+                        "type": "",
+                        "from": 0,
+                        "to": 1,
+                        "props": {}
+                      },
+                      {
+                        "type": "",
+                        "from": 0,
+                        "to": 1,
+                        "props": {}
+                      },
+                      {
+                        "type": "",
+                        "from": 2,
+                        "to": 1,
+                        "props": {}
+                      },
+                      {
+                        "type": "",
+                        "from": 3,
+                        "to": 1,
+                        "props": {}
+                      }
+                    ]
+                  }
+                }
+              ],
+              "source": "WALK 1 question"
+            }
+          ]
+        },
+        "visits": [
+          "917283.0",
+          "917283.1",
+          "917283.2"
+        ],
+        "blocks": [
+          {
+            "id": "917283.0",
+            "text": "NEIGHBORS⇒ 5 pages, 1 sites",
+            "html": "NEIGHBORS<span class=\"status\">⇒ 5 pages, 1 sites</span>"
+          },
+          {
+            "id": "917283.1",
+            "text": "EXTRACT ⇒ parsed 5/5 pages, 4 typed edges (claim: 1; unknown folds: 0)",
+            "html": "EXTRACT<span class=\"status\"> ⇒ parsed 5/5 pages, 4 typed edges (claim: 1; unknown folds: 0)</span>"
+          },
+          {
+            "id": "917283.2",
+            "text": "WALK 1 question ⇒ 1 aspects, 4 nodes",
+            "html": "WALK 1 question<span class=\"status\"> ⇒ 1 aspects, 4 nodes</span>"
+          }
+        ],
+        "aspectSource": [
+          {
+            "name": "Question Root",
+            "graph": {
+              "nodes": [
+                {
+                  "type": "",
+                  "in": [],
+                  "out": [
+                    0,
+                    1
+                  ],
+                  "props": {
+                    "name": "Question\nRoot",
+                    "title": "Question Root",
+                    "site": "alpha.fixture.test"
+                  }
+                },
+                {
+                  "type": "",
+                  "in": [
+                    0,
+                    1,
+                    2,
+                    3
+                  ],
+                  "out": [],
+                  "props": {
+                    "name": "Target\nPage",
+                    "title": "Target Page",
+                    "site": "alpha.fixture.test"
+                  }
+                },
+                {
+                  "type": "",
+                  "in": [],
+                  "out": [
+                    2
+                  ],
+                  "props": {
+                    "name": "Claim\nRoot",
+                    "title": "Claim Root",
+                    "site": "alpha.fixture.test"
+                  }
+                },
+                {
+                  "type": "",
+                  "in": [],
+                  "out": [
+                    3
+                  ],
+                  "props": {
+                    "name": "Support\nRoot",
+                    "title": "Support Root",
+                    "site": "alpha.fixture.test"
+                  }
+                }
+              ],
+              "rels": [
+                {
+                  "type": "",
+                  "from": 0,
+                  "to": 1,
+                  "props": {}
+                },
+                {
+                  "type": "",
+                  "from": 0,
+                  "to": 1,
+                  "props": {}
+                },
+                {
+                  "type": "",
+                  "from": 2,
+                  "to": 1,
+                  "props": {}
+                },
+                {
+                  "type": "",
+                  "from": 3,
+                  "to": 1,
+                  "props": {}
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "Role WALK claim",
+      "configuration": "composite",
+      "status": "PASS",
+      "evidence": {
+        "state": {
+          "context": {
+            "item": {
+              "id": "trusted-mech-item",
+              "type": "mech",
+              "text": "NEIGHBORS\nEXTRACT\nWALK 1 claim"
+            },
+            "itemId": "trusted-mech-item",
+            "pageKey": "current",
+            "page": {
+              "title": "Trusted Browser Fixture",
+              "story": [
+                {
+                  "id": "question-fold",
+                  "type": "pagefold",
+                  "text": "question"
+                },
+                {
+                  "id": "question-link",
+                  "type": "paragraph",
+                  "text": "See [[Target Page]]"
+                }
+              ]
+            },
+            "origin": "https://alpha.fixture.test",
+            "site": "alpha.fixture.test",
+            "slug": "question-root",
+            "title": "Trusted Browser Fixture",
+            "blocks": [
+              "CLICK",
+              "HELLO",
+              "FROM",
+              "SENSOR",
+              "REPORT",
+              "SOURCE",
+              "PREVIEW",
+              "NEIGHBORS",
+              "WALK",
+              "TICK",
+              "UNTIL",
+              "FORWARD",
+              "TURN",
+              "FILE",
+              "KWIC",
+              "SHOW",
+              "RANDOM",
+              "SLEEP",
+              "TOGETHER",
+              "PLUGIN",
+              "GET",
+              "DELTA",
+              "ROSTER",
+              "LINEUP",
+              "LISTEN",
+              "MESSAGE",
+              "SOLO",
+              "POPUP",
+              "PRINT",
+              "CODE",
+              "DOWNLOAD",
+              "EXTRACT",
+              "EDGES",
+              "DEBUG"
+            ]
+          },
+          "neighborhood": [
+            {
+              "domain": "alpha.fixture.test",
+              "slug": "question-root",
+              "title": "Question Root",
+              "date": 500,
+              "links": {
+                "target-page": 1
+              }
+            },
+            {
+              "domain": "alpha.fixture.test",
+              "slug": "claim-root",
+              "title": "Claim Root",
+              "date": 400,
+              "links": {
+                "target-page": 1
+              }
+            },
+            {
+              "domain": "alpha.fixture.test",
+              "slug": "support-root",
+              "title": "Support Root",
+              "date": 300,
+              "links": {
+                "target-page": 1
+              }
+            },
+            {
+              "domain": "alpha.fixture.test",
+              "slug": "oppose-root",
+              "title": "Oppose Root",
+              "date": 200,
+              "links": {
+                "target-page": 1
+              }
+            },
+            {
+              "domain": "alpha.fixture.test",
+              "slug": "target-page",
+              "title": "Target Page",
+              "date": 100,
+              "links": {}
+            }
+          ],
+          "discourse": {
+            "identity": "domain+slug",
+            "edges": [
+              {
+                "fromId": "alpha.fixture.test+question-root",
+                "toId": "alpha.fixture.test+target-page",
+                "role": "question",
+                "source": {
+                  "pageId": "alpha.fixture.test+question-root",
+                  "fold": "question",
+                  "extractorVersion": "extract-fold-aware-v1"
+                }
+              },
+              {
+                "fromId": "alpha.fixture.test+claim-root",
+                "toId": "alpha.fixture.test+target-page",
+                "role": "claim",
+                "source": {
+                  "pageId": "alpha.fixture.test+claim-root",
+                  "fold": "claim",
+                  "extractorVersion": "extract-fold-aware-v1"
+                }
+              },
+              {
+                "fromId": "alpha.fixture.test+support-root",
+                "toId": "alpha.fixture.test+target-page",
+                "role": "support",
+                "source": {
+                  "pageId": "alpha.fixture.test+support-root",
+                  "fold": "support",
+                  "extractorVersion": "extract-fold-aware-v1"
+                }
+              },
+              {
+                "fromId": "alpha.fixture.test+oppose-root",
+                "toId": "alpha.fixture.test+target-page",
+                "role": "oppose",
+                "source": {
+                  "pageId": "alpha.fixture.test+oppose-root",
+                  "fold": "oppose",
+                  "extractorVersion": "extract-fold-aware-v1"
+                }
+              }
+            ],
+            "metadata": {
+              "extractorVersion": "extract-fold-aware-v1",
+              "timestamp": "2026-10-09T04:37:11.789Z",
+              "pagesInScope": 5,
+              "pagesFetched": 5,
+              "pagesParsed": 5,
+              "fetchFailures": 0,
+              "parseFailures": 0,
+              "unparsedPages": [],
+              "edgesExtracted": 4,
+              "edgesByRole": {
+                "question": 1,
+                "claim": 1,
+                "support": 1,
+                "oppose": 1
+              },
+              "foldsEncountered": {
+                "question": 1,
+                "claim": 1,
+                "support": 1,
+                "oppose": 1
+              },
+              "foldsUnknown": {},
+              "note": "fetch"
+            }
+          },
+          "aspect": [
+            {
+              "id": "256422.2",
+              "result": [
+                {
+                  "name": "Claim Root",
+                  "graph": {
+                    "nodes": [
+                      {
+                        "type": "",
+                        "in": [],
+                        "out": [
+                          0,
+                          2
+                        ],
+                        "props": {
+                          "name": "Claim\nRoot",
+                          "title": "Claim Root",
+                          "site": "alpha.fixture.test"
+                        }
+                      },
+                      {
+                        "type": "",
+                        "in": [
+                          0,
+                          1,
+                          2,
+                          3
+                        ],
+                        "out": [],
+                        "props": {
+                          "name": "Target\nPage",
+                          "title": "Target Page",
+                          "site": "alpha.fixture.test"
+                        }
+                      },
+                      {
+                        "type": "",
+                        "in": [],
+                        "out": [
+                          1
+                        ],
+                        "props": {
+                          "name": "Question\nRoot",
+                          "title": "Question Root",
+                          "site": "alpha.fixture.test"
+                        }
+                      },
+                      {
+                        "type": "",
+                        "in": [],
+                        "out": [
+                          3
+                        ],
+                        "props": {
+                          "name": "Support\nRoot",
+                          "title": "Support Root",
+                          "site": "alpha.fixture.test"
+                        }
+                      }
+                    ],
+                    "rels": [
+                      {
+                        "type": "",
+                        "from": 0,
+                        "to": 1,
+                        "props": {}
+                      },
+                      {
+                        "type": "",
+                        "from": 2,
+                        "to": 1,
+                        "props": {}
+                      },
+                      {
+                        "type": "",
+                        "from": 0,
+                        "to": 1,
+                        "props": {}
+                      },
+                      {
+                        "type": "",
+                        "from": 3,
+                        "to": 1,
+                        "props": {}
+                      }
+                    ]
+                  }
+                }
+              ],
+              "source": "WALK 1 claim"
+            }
+          ]
+        },
+        "visits": [
+          "256422.0",
+          "256422.1",
+          "256422.2"
+        ],
+        "blocks": [
+          {
+            "id": "256422.0",
+            "text": "NEIGHBORS⇒ 5 pages, 1 sites",
+            "html": "NEIGHBORS<span class=\"status\">⇒ 5 pages, 1 sites</span>"
+          },
+          {
+            "id": "256422.1",
+            "text": "EXTRACT ⇒ parsed 5/5 pages, 4 typed edges (claim: 1; unknown folds: 0)",
+            "html": "EXTRACT<span class=\"status\"> ⇒ parsed 5/5 pages, 4 typed edges (claim: 1; unknown folds: 0)</span>"
+          },
+          {
+            "id": "256422.2",
+            "text": "WALK 1 claim ⇒ 1 aspects, 4 nodes",
+            "html": "WALK 1 claim<span class=\"status\"> ⇒ 1 aspects, 4 nodes</span>"
+          }
+        ],
+        "aspectSource": [
+          {
+            "name": "Claim Root",
+            "graph": {
+              "nodes": [
+                {
+                  "type": "",
+                  "in": [],
+                  "out": [
+                    0,
+                    2
+                  ],
+                  "props": {
+                    "name": "Claim\nRoot",
+                    "title": "Claim Root",
+                    "site": "alpha.fixture.test"
+                  }
+                },
+                {
+                  "type": "",
+                  "in": [
+                    0,
+                    1,
+                    2,
+                    3
+                  ],
+                  "out": [],
+                  "props": {
+                    "name": "Target\nPage",
+                    "title": "Target Page",
+                    "site": "alpha.fixture.test"
+                  }
+                },
+                {
+                  "type": "",
+                  "in": [],
+                  "out": [
+                    1
+                  ],
+                  "props": {
+                    "name": "Question\nRoot",
+                    "title": "Question Root",
+                    "site": "alpha.fixture.test"
+                  }
+                },
+                {
+                  "type": "",
+                  "in": [],
+                  "out": [
+                    3
+                  ],
+                  "props": {
+                    "name": "Support\nRoot",
+                    "title": "Support Root",
+                    "site": "alpha.fixture.test"
+                  }
+                }
+              ],
+              "rels": [
+                {
+                  "type": "",
+                  "from": 0,
+                  "to": 1,
+                  "props": {}
+                },
+                {
+                  "type": "",
+                  "from": 2,
+                  "to": 1,
+                  "props": {}
+                },
+                {
+                  "type": "",
+                  "from": 0,
+                  "to": 1,
+                  "props": {}
+                },
+                {
+                  "type": "",
+                  "from": 3,
+                  "to": 1,
+                  "props": {}
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "Role WALK support",
+      "configuration": "composite",
+      "status": "PASS",
+      "evidence": {
+        "state": {
+          "context": {
+            "item": {
+              "id": "trusted-mech-item",
+              "type": "mech",
+              "text": "NEIGHBORS\nEXTRACT\nWALK 1 support"
+            },
+            "itemId": "trusted-mech-item",
+            "pageKey": "current",
+            "page": {
+              "title": "Trusted Browser Fixture",
+              "story": [
+                {
+                  "id": "question-fold",
+                  "type": "pagefold",
+                  "text": "question"
+                },
+                {
+                  "id": "question-link",
+                  "type": "paragraph",
+                  "text": "See [[Target Page]]"
+                }
+              ]
+            },
+            "origin": "https://alpha.fixture.test",
+            "site": "alpha.fixture.test",
+            "slug": "question-root",
+            "title": "Trusted Browser Fixture",
+            "blocks": [
+              "CLICK",
+              "HELLO",
+              "FROM",
+              "SENSOR",
+              "REPORT",
+              "SOURCE",
+              "PREVIEW",
+              "NEIGHBORS",
+              "WALK",
+              "TICK",
+              "UNTIL",
+              "FORWARD",
+              "TURN",
+              "FILE",
+              "KWIC",
+              "SHOW",
+              "RANDOM",
+              "SLEEP",
+              "TOGETHER",
+              "PLUGIN",
+              "GET",
+              "DELTA",
+              "ROSTER",
+              "LINEUP",
+              "LISTEN",
+              "MESSAGE",
+              "SOLO",
+              "POPUP",
+              "PRINT",
+              "CODE",
+              "DOWNLOAD",
+              "EXTRACT",
+              "EDGES",
+              "DEBUG"
+            ]
+          },
+          "neighborhood": [
+            {
+              "domain": "alpha.fixture.test",
+              "slug": "question-root",
+              "title": "Question Root",
+              "date": 500,
+              "links": {
+                "target-page": 1
+              }
+            },
+            {
+              "domain": "alpha.fixture.test",
+              "slug": "claim-root",
+              "title": "Claim Root",
+              "date": 400,
+              "links": {
+                "target-page": 1
+              }
+            },
+            {
+              "domain": "alpha.fixture.test",
+              "slug": "support-root",
+              "title": "Support Root",
+              "date": 300,
+              "links": {
+                "target-page": 1
+              }
+            },
+            {
+              "domain": "alpha.fixture.test",
+              "slug": "oppose-root",
+              "title": "Oppose Root",
+              "date": 200,
+              "links": {
+                "target-page": 1
+              }
+            },
+            {
+              "domain": "alpha.fixture.test",
+              "slug": "target-page",
+              "title": "Target Page",
+              "date": 100,
+              "links": {}
+            }
+          ],
+          "discourse": {
+            "identity": "domain+slug",
+            "edges": [
+              {
+                "fromId": "alpha.fixture.test+question-root",
+                "toId": "alpha.fixture.test+target-page",
+                "role": "question",
+                "source": {
+                  "pageId": "alpha.fixture.test+question-root",
+                  "fold": "question",
+                  "extractorVersion": "extract-fold-aware-v1"
+                }
+              },
+              {
+                "fromId": "alpha.fixture.test+claim-root",
+                "toId": "alpha.fixture.test+target-page",
+                "role": "claim",
+                "source": {
+                  "pageId": "alpha.fixture.test+claim-root",
+                  "fold": "claim",
+                  "extractorVersion": "extract-fold-aware-v1"
+                }
+              },
+              {
+                "fromId": "alpha.fixture.test+support-root",
+                "toId": "alpha.fixture.test+target-page",
+                "role": "support",
+                "source": {
+                  "pageId": "alpha.fixture.test+support-root",
+                  "fold": "support",
+                  "extractorVersion": "extract-fold-aware-v1"
+                }
+              },
+              {
+                "fromId": "alpha.fixture.test+oppose-root",
+                "toId": "alpha.fixture.test+target-page",
+                "role": "oppose",
+                "source": {
+                  "pageId": "alpha.fixture.test+oppose-root",
+                  "fold": "oppose",
+                  "extractorVersion": "extract-fold-aware-v1"
+                }
+              }
+            ],
+            "metadata": {
+              "extractorVersion": "extract-fold-aware-v1",
+              "timestamp": "2026-10-09T04:37:11.819Z",
+              "pagesInScope": 5,
+              "pagesFetched": 5,
+              "pagesParsed": 5,
+              "fetchFailures": 0,
+              "parseFailures": 0,
+              "unparsedPages": [],
+              "edgesExtracted": 4,
+              "edgesByRole": {
+                "question": 1,
+                "claim": 1,
+                "support": 1,
+                "oppose": 1
+              },
+              "foldsEncountered": {
+                "question": 1,
+                "claim": 1,
+                "support": 1,
+                "oppose": 1
+              },
+              "foldsUnknown": {},
+              "note": "fetch"
+            }
+          },
+          "aspect": [
+            {
+              "id": "440567.2",
+              "result": [
+                {
+                  "name": "Support Root",
+                  "graph": {
+                    "nodes": [
+                      {
+                        "type": "",
+                        "in": [],
+                        "out": [
+                          0,
+                          3
+                        ],
+                        "props": {
+                          "name": "Support\nRoot",
+                          "title": "Support Root",
+                          "site": "alpha.fixture.test"
+                        }
+                      },
+                      {
+                        "type": "",
+                        "in": [
+                          0,
+                          1,
+                          2,
+                          3
+                        ],
+                        "out": [],
+                        "props": {
+                          "name": "Target\nPage",
+                          "title": "Target Page",
+                          "site": "alpha.fixture.test"
+                        }
+                      },
+                      {
+                        "type": "",
+                        "in": [],
+                        "out": [
+                          1
+                        ],
+                        "props": {
+                          "name": "Question\nRoot",
+                          "title": "Question Root",
+                          "site": "alpha.fixture.test"
+                        }
+                      },
+                      {
+                        "type": "",
+                        "in": [],
+                        "out": [
+                          2
+                        ],
+                        "props": {
+                          "name": "Claim\nRoot",
+                          "title": "Claim Root",
+                          "site": "alpha.fixture.test"
+                        }
+                      }
+                    ],
+                    "rels": [
+                      {
+                        "type": "",
+                        "from": 0,
+                        "to": 1,
+                        "props": {}
+                      },
+                      {
+                        "type": "",
+                        "from": 2,
+                        "to": 1,
+                        "props": {}
+                      },
+                      {
+                        "type": "",
+                        "from": 3,
+                        "to": 1,
+                        "props": {}
+                      },
+                      {
+                        "type": "",
+                        "from": 0,
+                        "to": 1,
+                        "props": {}
+                      }
+                    ]
+                  }
+                }
+              ],
+              "source": "WALK 1 support"
+            }
+          ]
+        },
+        "visits": [
+          "440567.0",
+          "440567.1",
+          "440567.2"
+        ],
+        "blocks": [
+          {
+            "id": "440567.0",
+            "text": "NEIGHBORS⇒ 5 pages, 1 sites",
+            "html": "NEIGHBORS<span class=\"status\">⇒ 5 pages, 1 sites</span>"
+          },
+          {
+            "id": "440567.1",
+            "text": "EXTRACT ⇒ parsed 5/5 pages, 4 typed edges (claim: 1; unknown folds: 0)",
+            "html": "EXTRACT<span class=\"status\"> ⇒ parsed 5/5 pages, 4 typed edges (claim: 1; unknown folds: 0)</span>"
+          },
+          {
+            "id": "440567.2",
+            "text": "WALK 1 support ⇒ 1 aspects, 4 nodes",
+            "html": "WALK 1 support<span class=\"status\"> ⇒ 1 aspects, 4 nodes</span>"
+          }
+        ],
+        "aspectSource": [
+          {
+            "name": "Support Root",
+            "graph": {
+              "nodes": [
+                {
+                  "type": "",
+                  "in": [],
+                  "out": [
+                    0,
+                    3
+                  ],
+                  "props": {
+                    "name": "Support\nRoot",
+                    "title": "Support Root",
+                    "site": "alpha.fixture.test"
+                  }
+                },
+                {
+                  "type": "",
+                  "in": [
+                    0,
+                    1,
+                    2,
+                    3
+                  ],
+                  "out": [],
+                  "props": {
+                    "name": "Target\nPage",
+                    "title": "Target Page",
+                    "site": "alpha.fixture.test"
+                  }
+                },
+                {
+                  "type": "",
+                  "in": [],
+                  "out": [
+                    1
+                  ],
+                  "props": {
+                    "name": "Question\nRoot",
+                    "title": "Question Root",
+                    "site": "alpha.fixture.test"
+                  }
+                },
+                {
+                  "type": "",
+                  "in": [],
+                  "out": [
+                    2
+                  ],
+                  "props": {
+                    "name": "Claim\nRoot",
+                    "title": "Claim Root",
+                    "site": "alpha.fixture.test"
+                  }
+                }
+              ],
+              "rels": [
+                {
+                  "type": "",
+                  "from": 0,
+                  "to": 1,
+                  "props": {}
+                },
+                {
+                  "type": "",
+                  "from": 2,
+                  "to": 1,
+                  "props": {}
+                },
+                {
+                  "type": "",
+                  "from": 3,
+                  "to": 1,
+                  "props": {}
+                },
+                {
+                  "type": "",
+                  "from": 0,
+                  "to": 1,
+                  "props": {}
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "Role WALK oppose",
+      "configuration": "composite",
+      "status": "PASS",
+      "evidence": {
+        "state": {
+          "context": {
+            "item": {
+              "id": "trusted-mech-item",
+              "type": "mech",
+              "text": "NEIGHBORS\nEXTRACT\nWALK 1 oppose"
+            },
+            "itemId": "trusted-mech-item",
+            "pageKey": "current",
+            "page": {
+              "title": "Trusted Browser Fixture",
+              "story": [
+                {
+                  "id": "question-fold",
+                  "type": "pagefold",
+                  "text": "question"
+                },
+                {
+                  "id": "question-link",
+                  "type": "paragraph",
+                  "text": "See [[Target Page]]"
+                }
+              ]
+            },
+            "origin": "https://alpha.fixture.test",
+            "site": "alpha.fixture.test",
+            "slug": "question-root",
+            "title": "Trusted Browser Fixture",
+            "blocks": [
+              "CLICK",
+              "HELLO",
+              "FROM",
+              "SENSOR",
+              "REPORT",
+              "SOURCE",
+              "PREVIEW",
+              "NEIGHBORS",
+              "WALK",
+              "TICK",
+              "UNTIL",
+              "FORWARD",
+              "TURN",
+              "FILE",
+              "KWIC",
+              "SHOW",
+              "RANDOM",
+              "SLEEP",
+              "TOGETHER",
+              "PLUGIN",
+              "GET",
+              "DELTA",
+              "ROSTER",
+              "LINEUP",
+              "LISTEN",
+              "MESSAGE",
+              "SOLO",
+              "POPUP",
+              "PRINT",
+              "CODE",
+              "DOWNLOAD",
+              "EXTRACT",
+              "EDGES",
+              "DEBUG"
+            ]
+          },
+          "neighborhood": [
+            {
+              "domain": "alpha.fixture.test",
+              "slug": "question-root",
+              "title": "Question Root",
+              "date": 500,
+              "links": {
+                "target-page": 1
+              }
+            },
+            {
+              "domain": "alpha.fixture.test",
+              "slug": "claim-root",
+              "title": "Claim Root",
+              "date": 400,
+              "links": {
+                "target-page": 1
+              }
+            },
+            {
+              "domain": "alpha.fixture.test",
+              "slug": "support-root",
+              "title": "Support Root",
+              "date": 300,
+              "links": {
+                "target-page": 1
+              }
+            },
+            {
+              "domain": "alpha.fixture.test",
+              "slug": "oppose-root",
+              "title": "Oppose Root",
+              "date": 200,
+              "links": {
+                "target-page": 1
+              }
+            },
+            {
+              "domain": "alpha.fixture.test",
+              "slug": "target-page",
+              "title": "Target Page",
+              "date": 100,
+              "links": {}
+            }
+          ],
+          "discourse": {
+            "identity": "domain+slug",
+            "edges": [
+              {
+                "fromId": "alpha.fixture.test+question-root",
+                "toId": "alpha.fixture.test+target-page",
+                "role": "question",
+                "source": {
+                  "pageId": "alpha.fixture.test+question-root",
+                  "fold": "question",
+                  "extractorVersion": "extract-fold-aware-v1"
+                }
+              },
+              {
+                "fromId": "alpha.fixture.test+claim-root",
+                "toId": "alpha.fixture.test+target-page",
+                "role": "claim",
+                "source": {
+                  "pageId": "alpha.fixture.test+claim-root",
+                  "fold": "claim",
+                  "extractorVersion": "extract-fold-aware-v1"
+                }
+              },
+              {
+                "fromId": "alpha.fixture.test+support-root",
+                "toId": "alpha.fixture.test+target-page",
+                "role": "support",
+                "source": {
+                  "pageId": "alpha.fixture.test+support-root",
+                  "fold": "support",
+                  "extractorVersion": "extract-fold-aware-v1"
+                }
+              },
+              {
+                "fromId": "alpha.fixture.test+oppose-root",
+                "toId": "alpha.fixture.test+target-page",
+                "role": "oppose",
+                "source": {
+                  "pageId": "alpha.fixture.test+oppose-root",
+                  "fold": "oppose",
+                  "extractorVersion": "extract-fold-aware-v1"
+                }
+              }
+            ],
+            "metadata": {
+              "extractorVersion": "extract-fold-aware-v1",
+              "timestamp": "2026-10-09T04:37:11.849Z",
+              "pagesInScope": 5,
+              "pagesFetched": 5,
+              "pagesParsed": 5,
+              "fetchFailures": 0,
+              "parseFailures": 0,
+              "unparsedPages": [],
+              "edgesExtracted": 4,
+              "edgesByRole": {
+                "question": 1,
+                "claim": 1,
+                "support": 1,
+                "oppose": 1
+              },
+              "foldsEncountered": {
+                "question": 1,
+                "claim": 1,
+                "support": 1,
+                "oppose": 1
+              },
+              "foldsUnknown": {},
+              "note": "fetch"
+            }
+          },
+          "aspect": [
+            {
+              "id": "74177.2",
+              "result": [
+                {
+                  "name": "Oppose Root",
+                  "graph": {
+                    "nodes": [
+                      {
+                        "type": "",
+                        "in": [],
+                        "out": [
+                          0
+                        ],
+                        "props": {
+                          "name": "Oppose\nRoot",
+                          "title": "Oppose Root",
+                          "site": "alpha.fixture.test"
+                        }
+                      },
+                      {
+                        "type": "",
+                        "in": [
+                          0,
+                          1,
+                          2,
+                          3
+                        ],
+                        "out": [],
+                        "props": {
+                          "name": "Target\nPage",
+                          "title": "Target Page",
+                          "site": "alpha.fixture.test"
+                        }
+                      },
+                      {
+                        "type": "",
+                        "in": [],
+                        "out": [
+                          1
+                        ],
+                        "props": {
+                          "name": "Question\nRoot",
+                          "title": "Question Root",
+                          "site": "alpha.fixture.test"
+                        }
+                      },
+                      {
+                        "type": "",
+                        "in": [],
+                        "out": [
+                          2
+                        ],
+                        "props": {
+                          "name": "Claim\nRoot",
+                          "title": "Claim Root",
+                          "site": "alpha.fixture.test"
+                        }
+                      },
+                      {
+                        "type": "",
+                        "in": [],
+                        "out": [
+                          3
+                        ],
+                        "props": {
+                          "name": "Support\nRoot",
+                          "title": "Support Root",
+                          "site": "alpha.fixture.test"
+                        }
+                      }
+                    ],
+                    "rels": [
+                      {
+                        "type": "",
+                        "from": 0,
+                        "to": 1,
+                        "props": {}
+                      },
+                      {
+                        "type": "",
+                        "from": 2,
+                        "to": 1,
+                        "props": {}
+                      },
+                      {
+                        "type": "",
+                        "from": 3,
+                        "to": 1,
+                        "props": {}
+                      },
+                      {
+                        "type": "",
+                        "from": 4,
+                        "to": 1,
+                        "props": {}
+                      }
+                    ]
+                  }
+                }
+              ],
+              "source": "WALK 1 oppose"
+            }
+          ]
+        },
+        "visits": [
+          "74177.0",
+          "74177.1",
+          "74177.2"
+        ],
+        "blocks": [
+          {
+            "id": "74177.0",
+            "text": "NEIGHBORS⇒ 5 pages, 1 sites",
+            "html": "NEIGHBORS<span class=\"status\">⇒ 5 pages, 1 sites</span>"
+          },
+          {
+            "id": "74177.1",
+            "text": "EXTRACT ⇒ parsed 5/5 pages, 4 typed edges (claim: 1; unknown folds: 0)",
+            "html": "EXTRACT<span class=\"status\"> ⇒ parsed 5/5 pages, 4 typed edges (claim: 1; unknown folds: 0)</span>"
+          },
+          {
+            "id": "74177.2",
+            "text": "WALK 1 oppose ⇒ 1 aspects, 5 nodes",
+            "html": "WALK 1 oppose<span class=\"status\"> ⇒ 1 aspects, 5 nodes</span>"
+          }
+        ],
+        "aspectSource": [
+          {
+            "name": "Oppose Root",
+            "graph": {
+              "nodes": [
+                {
+                  "type": "",
+                  "in": [],
+                  "out": [
+                    0
+                  ],
+                  "props": {
+                    "name": "Oppose\nRoot",
+                    "title": "Oppose Root",
+                    "site": "alpha.fixture.test"
+                  }
+                },
+                {
+                  "type": "",
+                  "in": [
+                    0,
+                    1,
+                    2,
+                    3
+                  ],
+                  "out": [],
+                  "props": {
+                    "name": "Target\nPage",
+                    "title": "Target Page",
+                    "site": "alpha.fixture.test"
+                  }
+                },
+                {
+                  "type": "",
+                  "in": [],
+                  "out": [
+                    1
+                  ],
+                  "props": {
+                    "name": "Question\nRoot",
+                    "title": "Question Root",
+                    "site": "alpha.fixture.test"
+                  }
+                },
+                {
+                  "type": "",
+                  "in": [],
+                  "out": [
+                    2
+                  ],
+                  "props": {
+                    "name": "Claim\nRoot",
+                    "title": "Claim Root",
+                    "site": "alpha.fixture.test"
+                  }
+                },
+                {
+                  "type": "",
+                  "in": [],
+                  "out": [
+                    3
+                  ],
+                  "props": {
+                    "name": "Support\nRoot",
+                    "title": "Support Root",
+                    "site": "alpha.fixture.test"
+                  }
+                }
+              ],
+              "rels": [
+                {
+                  "type": "",
+                  "from": 0,
+                  "to": 1,
+                  "props": {}
+                },
+                {
+                  "type": "",
+                  "from": 2,
+                  "to": 1,
+                  "props": {}
+                },
+                {
+                  "type": "",
+                  "from": 3,
+                  "to": 1,
+                  "props": {}
+                },
+                {
+                  "type": "",
+                  "from": 4,
+                  "to": 1,
+                  "props": {}
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "Extension error diagnostics",
+      "configuration": "composite",
+      "status": "PASS",
+      "evidence": [
+        {
+          "command": "EXTRACT",
+          "diagnostic": [
+            "EXTRACT requires NEIGHBORS first"
+          ]
+        },
+        {
+          "command": "EDGES",
+          "diagnostic": [
+            "EDGES requires EXTRACT first"
+          ]
+        },
+        {
+          "command": "DEBUG invalid",
+          "diagnostic": [
+            "DEBUG expects \"on\" or \"off\"."
+          ]
+        },
+        {
+          "command": "WALK questions",
+          "diagnostic": [
+            "WALK expects state.neighborhood, like from NEIGHBORS."
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Ordinary WALK and HELLO match upstream control",
+      "configuration": "composite",
+      "status": "PASS",
+      "evidence": [
+        {
+          "state": {
+            "context": {
+              "item": {
+                "id": "trusted-mech-item",
+                "type": "mech",
+                "text": "HELLO world"
+              },
+              "itemId": "trusted-mech-item",
+              "pageKey": "current",
+              "page": {
+                "title": "Trusted Browser Fixture",
+                "story": [
+                  {
+                    "id": "question-fold",
+                    "type": "pagefold",
+                    "text": "question"
+                  },
+                  {
+                    "id": "question-link",
+                    "type": "paragraph",
+                    "text": "See [[Target Page]]"
+                  }
+                ]
+              },
+              "origin": "https://alpha.fixture.test",
+              "site": "alpha.fixture.test",
+              "slug": "question-root",
+              "title": "Trusted Browser Fixture"
+            }
+          },
+          "blocks": [
+            {
+              "text": "HELLO world 🌎",
+              "html": "HELLO world 🌎"
+            }
+          ],
+          "aspectSource": null
+        },
+        {
+          "state": {
+            "context": {
+              "item": {
+                "id": "trusted-mech-item",
+                "type": "mech",
+                "text": "NEIGHBORS\nWALK 2 hubs"
+              },
+              "itemId": "trusted-mech-item",
+              "pageKey": "current",
+              "page": {
+                "title": "Trusted Browser Fixture",
+                "story": [
+                  {
+                    "id": "question-fold",
+                    "type": "pagefold",
+                    "text": "question"
+                  },
+                  {
+                    "id": "question-link",
+                    "type": "paragraph",
+                    "text": "See [[Target Page]]"
+                  }
+                ]
+              },
+              "origin": "https://alpha.fixture.test",
+              "site": "alpha.fixture.test",
+              "slug": "question-root",
+              "title": "Trusted Browser Fixture"
+            },
+            "neighborhood": [
+              {
+                "domain": "alpha.fixture.test",
+                "slug": "question-root",
+                "title": "Question Root",
+                "date": 500,
+                "links": {
+                  "target-page": 1
+                }
+              },
+              {
+                "domain": "alpha.fixture.test",
+                "slug": "claim-root",
+                "title": "Claim Root",
+                "date": 400,
+                "links": {
+                  "target-page": 1
+                }
+              },
+              {
+                "domain": "alpha.fixture.test",
+                "slug": "support-root",
+                "title": "Support Root",
+                "date": 300,
+                "links": {
+                  "target-page": 1
+                }
+              },
+              {
+                "domain": "alpha.fixture.test",
+                "slug": "oppose-root",
+                "title": "Oppose Root",
+                "date": 200,
+                "links": {
+                  "target-page": 1
+                }
+              },
+              {
+                "domain": "alpha.fixture.test",
+                "slug": "target-page",
+                "title": "Target Page",
+                "date": 100,
+                "links": {}
+              }
+            ],
+            "aspect": [
+              {
+                "id": "81740.1",
+                "result": [
+                  {
+                    "name": "hub 4 target-page",
+                    "graph": {
+                      "nodes": [
+                        {
+                          "type": "",
+                          "in": [
+                            0,
+                            1,
+                            2
+                          ],
+                          "out": [],
+                          "props": {
+                            "name": "Target\nPage",
+                            "title": "Target Page",
+                            "site": "alpha.fixture.test"
+                          }
+                        },
+                        {
+                          "type": "",
+                          "in": [],
+                          "out": [
+                            0
+                          ],
+                          "props": {
+                            "name": "Question\nRoot",
+                            "title": "Question Root",
+                            "site": "alpha.fixture.test"
+                          }
+                        },
+                        {
+                          "type": "",
+                          "in": [],
+                          "out": [
+                            1
+                          ],
+                          "props": {
+                            "name": "Claim\nRoot",
+                            "title": "Claim Root",
+                            "site": "alpha.fixture.test"
+                          }
+                        },
+                        {
+                          "type": "",
+                          "in": [],
+                          "out": [
+                            2
+                          ],
+                          "props": {
+                            "name": "Support\nRoot",
+                            "title": "Support Root",
+                            "site": "alpha.fixture.test"
+                          }
+                        }
+                      ],
+                      "rels": [
+                        {
+                          "type": "",
+                          "from": 1,
+                          "to": 0,
+                          "props": {}
+                        },
+                        {
+                          "type": "",
+                          "from": 2,
+                          "to": 0,
+                          "props": {}
+                        },
+                        {
+                          "type": "",
+                          "from": 3,
+                          "to": 0,
+                          "props": {}
+                        }
+                      ]
+                    }
+                  }
+                ],
+                "source": "WALK 2 hubs"
+              }
+            ]
+          },
+          "blocks": [
+            {
+              "text": "NEIGHBORS⇒ 5 pages, 1 sites",
+              "html": "NEIGHBORS<span class=\"status\">⇒ 5 pages, 1 sites</span>"
+            },
+            {
+              "text": "WALK 2 hubs ⇒ 1 aspects, 4 nodes",
+              "html": "WALK 2 hubs<span class=\"status\"> ⇒ 1 aspects, 4 nodes</span>"
+            }
+          ],
+          "aspectSource": [
+            {
+              "name": "hub 4 target-page",
+              "graph": {
+                "nodes": [
+                  {
+                    "type": "",
+                    "in": [
+                      0,
+                      1,
+                      2
+                    ],
+                    "out": [],
+                    "props": {
+                      "name": "Target\nPage",
+                      "title": "Target Page",
+                      "site": "alpha.fixture.test"
+                    }
+                  },
+                  {
+                    "type": "",
+                    "in": [],
+                    "out": [
+                      0
+                    ],
+                    "props": {
+                      "name": "Question\nRoot",
+                      "title": "Question Root",
+                      "site": "alpha.fixture.test"
+                    }
+                  },
+                  {
+                    "type": "",
+                    "in": [],
+                    "out": [
+                      1
+                    ],
+                    "props": {
+                      "name": "Claim\nRoot",
+                      "title": "Claim Root",
+                      "site": "alpha.fixture.test"
+                    }
+                  },
+                  {
+                    "type": "",
+                    "in": [],
+                    "out": [
+                      2
+                    ],
+                    "props": {
+                      "name": "Support\nRoot",
+                      "title": "Support Root",
+                      "site": "alpha.fixture.test"
+                    }
+                  }
+                ],
+                "rels": [
+                  {
+                    "type": "",
+                    "from": 1,
+                    "to": 0,
+                    "props": {}
+                  },
+                  {
+                    "type": "",
+                    "from": 2,
+                    "to": 0,
+                    "props": {}
+                  },
+                  {
+                    "type": "",
+                    "from": 3,
+                    "to": 0,
+                    "props": {}
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "CODE named export through actual CLICK emission",
+      "configuration": "composite",
+      "status": "PASS",
+      "evidence": {
+        "text": "CLICK▶\nCODE named accepted ⇒ trusted:accepted",
+        "evaluations": 1,
+        "catalog": true
+      }
+    },
+    {
+      "name": "CODE named export through actual TICK",
+      "configuration": "composite",
+      "status": "PASS",
+      "evidence": {
+        "state": {
+          "context": {
+            "item": {
+              "id": "trusted-mech-item",
+              "type": "mech",
+              "text": "TICK 1\n  CODE named tick"
+            },
+            "itemId": "trusted-mech-item",
+            "pageKey": "current",
+            "page": {
+              "title": "Trusted Browser Fixture",
+              "story": [
+                {
+                  "id": "question-fold",
+                  "type": "pagefold",
+                  "text": "question"
+                },
+                {
+                  "id": "question-link",
+                  "type": "paragraph",
+                  "text": "See [[Target Page]]"
+                },
+                {
+                  "id": "trusted-code-0",
+                  "type": "code",
+                  "text": "globalThis.codeFixtureEvaluations++; export function named(value) { this.trustedValue={value}; return \"trusted:\"+value; }"
+                }
+              ]
+            },
+            "origin": "https://alpha.fixture.test",
+            "site": "alpha.fixture.test",
+            "slug": "question-root",
+            "title": "Trusted Browser Fixture",
+            "blocks": [
+              "CLICK",
+              "HELLO",
+              "FROM",
+              "SENSOR",
+              "REPORT",
+              "SOURCE",
+              "PREVIEW",
+              "NEIGHBORS",
+              "WALK",
+              "TICK",
+              "UNTIL",
+              "FORWARD",
+              "TURN",
+              "FILE",
+              "KWIC",
+              "SHOW",
+              "RANDOM",
+              "SLEEP",
+              "TOGETHER",
+              "PLUGIN",
+              "GET",
+              "DELTA",
+              "ROSTER",
+              "LINEUP",
+              "LISTEN",
+              "MESSAGE",
+              "SOLO",
+              "POPUP",
+              "PRINT",
+              "CODE",
+              "DOWNLOAD",
+              "EXTRACT",
+              "EDGES",
+              "DEBUG"
+            ]
+          },
+          "debug": false,
+          "trustedValue": {
+            "value": "tick"
+          }
+        },
+        "visits": [
+          "471937.0",
+          "471937.1.0"
+        ],
+        "blocks": [
+          {
+            "id": "471937.0",
+            "text": "TICK 1▶",
+            "html": "TICK 1<span class=\"status\"></span><button class=\"button\">▶</button>"
+          },
+          {
+            "id": "471937.1.0",
+            "text": "CODE named tick ⇒ trusted:tick",
+            "html": "CODE named tick<span class=\"status\"> ⇒ trusted:tick</span>"
+          }
+        ],
+        "aspectSource": null
+      }
+    },
+    {
+      "name": "CODE guard: unowned direct",
+      "configuration": "composite",
+      "status": "PASS",
+      "evidence": {
+        "options": {
+          "owner": false,
+          "remote": false
+        },
+        "permitted": false,
+        "result": {
+          "state": {
+            "context": {
+              "item": {
+                "id": "trusted-mech-item",
+                "type": "mech",
+                "text": "CODE named guarded"
+              },
+              "itemId": "trusted-mech-item",
+              "pageKey": "current",
+              "page": {
+                "title": "Trusted Browser Fixture",
+                "story": [
+                  {
+                    "id": "question-fold",
+                    "type": "pagefold",
+                    "text": "question"
+                  },
+                  {
+                    "id": "question-link",
+                    "type": "paragraph",
+                    "text": "See [[Target Page]]"
+                  },
+                  {
+                    "id": "trusted-code-0",
+                    "type": "code",
+                    "text": "globalThis.codeFixtureEvaluations++; export function named(value) { this.trustedValue={value}; return \"trusted:\"+value; }"
+                  }
+                ]
+              },
+              "origin": "https://alpha.fixture.test",
+              "site": "alpha.fixture.test",
+              "slug": "question-root",
+              "title": "Trusted Browser Fixture",
+              "blocks": [
+                "CLICK",
+                "HELLO",
+                "FROM",
+                "SENSOR",
+                "REPORT",
+                "SOURCE",
+                "PREVIEW",
+                "NEIGHBORS",
+                "WALK",
+                "TICK",
+                "UNTIL",
+                "FORWARD",
+                "TURN",
+                "FILE",
+                "KWIC",
+                "SHOW",
+                "RANDOM",
+                "SLEEP",
+                "TOGETHER",
+                "PLUGIN",
+                "GET",
+                "DELTA",
+                "ROSTER",
+                "LINEUP",
+                "LISTEN",
+                "MESSAGE",
+                "SOLO",
+                "POPUP",
+                "PRINT",
+                "CODE",
+                "DOWNLOAD",
+                "EXTRACT",
+                "EDGES",
+                "DEBUG"
+              ]
+            }
+          },
+          "visits": [
+            "653325.0"
+          ],
+          "blocks": [
+            {
+              "id": "653325.0",
+              "text": "CODE named guarded✖︎",
+              "html": "CODE named guarded<button class=\"trouble\">✖︎</button>"
+            }
+          ],
+          "aspectSource": null
+        },
+        "diagnostics": [
+          "This CODE must be run by CLICK or TICK or owned by the logged in user."
+        ],
+        "evaluationsBefore": 1,
+        "evaluationsAfter": 1
+      }
+    },
+    {
+      "name": "CODE guard: owned local",
+      "configuration": "composite",
+      "status": "PASS",
+      "evidence": {
+        "options": {
+          "owner": true,
+          "remote": false
+        },
+        "permitted": true,
+        "result": {
+          "state": {
+            "context": {
+              "item": {
+                "id": "trusted-mech-item",
+                "type": "mech",
+                "text": "CODE named guarded"
+              },
+              "itemId": "trusted-mech-item",
+              "pageKey": "current",
+              "page": {
+                "title": "Trusted Browser Fixture",
+                "story": [
+                  {
+                    "id": "question-fold",
+                    "type": "pagefold",
+                    "text": "question"
+                  },
+                  {
+                    "id": "question-link",
+                    "type": "paragraph",
+                    "text": "See [[Target Page]]"
+                  },
+                  {
+                    "id": "trusted-code-0",
+                    "type": "code",
+                    "text": "globalThis.codeFixtureEvaluations++; export function named(value) { this.trustedValue={value}; return \"trusted:\"+value; }"
+                  }
+                ]
+              },
+              "origin": "https://alpha.fixture.test",
+              "site": "alpha.fixture.test",
+              "slug": "question-root",
+              "title": "Trusted Browser Fixture",
+              "blocks": [
+                "CLICK",
+                "HELLO",
+                "FROM",
+                "SENSOR",
+                "REPORT",
+                "SOURCE",
+                "PREVIEW",
+                "NEIGHBORS",
+                "WALK",
+                "TICK",
+                "UNTIL",
+                "FORWARD",
+                "TURN",
+                "FILE",
+                "KWIC",
+                "SHOW",
+                "RANDOM",
+                "SLEEP",
+                "TOGETHER",
+                "PLUGIN",
+                "GET",
+                "DELTA",
+                "ROSTER",
+                "LINEUP",
+                "LISTEN",
+                "MESSAGE",
+                "SOLO",
+                "POPUP",
+                "PRINT",
+                "CODE",
+                "DOWNLOAD",
+                "EXTRACT",
+                "EDGES",
+                "DEBUG"
+              ]
+            },
+            "trustedValue": {
+              "value": "guarded"
+            }
+          },
+          "visits": [
+            "333691.0"
+          ],
+          "blocks": [
+            {
+              "id": "333691.0",
+              "text": "CODE named guarded ⇒ trusted:guarded",
+              "html": "CODE named guarded<span class=\"status\"> ⇒ trusted:guarded</span>"
+            }
+          ],
+          "aspectSource": null
+        },
+        "diagnostics": [],
+        "evaluationsBefore": 1,
+        "evaluationsAfter": 1
+      }
+    },
+    {
+      "name": "CODE guard: owned remote",
+      "configuration": "composite",
+      "status": "PASS",
+      "evidence": {
+        "options": {
+          "owner": true,
+          "remote": true
+        },
+        "permitted": false,
+        "result": {
+          "state": {
+            "context": {
+              "item": {
+                "id": "trusted-mech-item",
+                "type": "mech",
+                "text": "CODE named guarded"
+              },
+              "itemId": "trusted-mech-item",
+              "pageKey": "current",
+              "page": {
+                "title": "Trusted Browser Fixture",
+                "story": [
+                  {
+                    "id": "question-fold",
+                    "type": "pagefold",
+                    "text": "question"
+                  },
+                  {
+                    "id": "question-link",
+                    "type": "paragraph",
+                    "text": "See [[Target Page]]"
+                  },
+                  {
+                    "id": "trusted-code-0",
+                    "type": "code",
+                    "text": "globalThis.codeFixtureEvaluations++; export function named(value) { this.trustedValue={value}; return \"trusted:\"+value; }"
+                  }
+                ]
+              },
+              "origin": "https://alpha.fixture.test",
+              "site": "alpha.fixture.test",
+              "slug": "question-root",
+              "title": "Trusted Browser Fixture",
+              "blocks": [
+                "CLICK",
+                "HELLO",
+                "FROM",
+                "SENSOR",
+                "REPORT",
+                "SOURCE",
+                "PREVIEW",
+                "NEIGHBORS",
+                "WALK",
+                "TICK",
+                "UNTIL",
+                "FORWARD",
+                "TURN",
+                "FILE",
+                "KWIC",
+                "SHOW",
+                "RANDOM",
+                "SLEEP",
+                "TOGETHER",
+                "PLUGIN",
+                "GET",
+                "DELTA",
+                "ROSTER",
+                "LINEUP",
+                "LISTEN",
+                "MESSAGE",
+                "SOLO",
+                "POPUP",
+                "PRINT",
+                "CODE",
+                "DOWNLOAD",
+                "EXTRACT",
+                "EDGES",
+                "DEBUG"
+              ]
+            }
+          },
+          "visits": [
+            "608468.0"
+          ],
+          "blocks": [
+            {
+              "id": "608468.0",
+              "text": "CODE named guarded✖︎",
+              "html": "CODE named guarded<button class=\"trouble\">✖︎</button>"
+            }
+          ],
+          "aspectSource": null
+        },
+        "diagnostics": [
+          "This CODE must be run by CLICK or TICK or owned by the logged in user."
+        ],
+        "evaluationsBefore": 1,
+        "evaluationsAfter": 1
+      }
+    },
+    {
+      "name": "CODE guard: truthy internal initiator",
+      "configuration": "composite",
+      "status": "PASS",
+      "evidence": {
+        "options": {
+          "owner": false,
+          "remote": false,
+          "initiator": "not-a-click-token"
+        },
+        "permitted": true,
+        "result": {
+          "state": {
+            "context": {
+              "item": {
+                "id": "trusted-mech-item",
+                "type": "mech",
+                "text": "CODE named guarded"
+              },
+              "itemId": "trusted-mech-item",
+              "pageKey": "current",
+              "page": {
+                "title": "Trusted Browser Fixture",
+                "story": [
+                  {
+                    "id": "question-fold",
+                    "type": "pagefold",
+                    "text": "question"
+                  },
+                  {
+                    "id": "question-link",
+                    "type": "paragraph",
+                    "text": "See [[Target Page]]"
+                  },
+                  {
+                    "id": "trusted-code-0",
+                    "type": "code",
+                    "text": "globalThis.codeFixtureEvaluations++; export function named(value) { this.trustedValue={value}; return \"trusted:\"+value; }"
+                  }
+                ]
+              },
+              "origin": "https://alpha.fixture.test",
+              "site": "alpha.fixture.test",
+              "slug": "question-root",
+              "title": "Trusted Browser Fixture",
+              "blocks": [
+                "CLICK",
+                "HELLO",
+                "FROM",
+                "SENSOR",
+                "REPORT",
+                "SOURCE",
+                "PREVIEW",
+                "NEIGHBORS",
+                "WALK",
+                "TICK",
+                "UNTIL",
+                "FORWARD",
+                "TURN",
+                "FILE",
+                "KWIC",
+                "SHOW",
+                "RANDOM",
+                "SLEEP",
+                "TOGETHER",
+                "PLUGIN",
+                "GET",
+                "DELTA",
+                "ROSTER",
+                "LINEUP",
+                "LISTEN",
+                "MESSAGE",
+                "SOLO",
+                "POPUP",
+                "PRINT",
+                "CODE",
+                "DOWNLOAD",
+                "EXTRACT",
+                "EDGES",
+                "DEBUG"
+              ]
+            },
+            "trustedValue": {
+              "value": "guarded"
+            }
+          },
+          "visits": [
+            "662012.0"
+          ],
+          "blocks": [
+            {
+              "id": "662012.0",
+              "text": "CODE named guarded ⇒ trusted:guarded",
+              "html": "CODE named guarded<span class=\"status\"> ⇒ trusted:guarded</span>"
+            }
+          ],
+          "aspectSource": null
+        },
+        "diagnostics": [],
+        "evaluationsBefore": 1,
+        "evaluationsAfter": 1
+      }
+    },
+    {
+      "name": "CODE diagnostic: missing export",
+      "configuration": "composite",
+      "status": "PASS",
+      "evidence": [
+        "Expected export of function \"absent\"."
+      ]
+    },
+    {
+      "name": "CODE diagnostic: trusted throw",
+      "configuration": "composite",
+      "status": "PASS",
+      "evidence": [
+        "trusted fixture failure"
+      ]
+    },
+    {
+      "name": "CODE diagnostic: syntax failure",
+      "configuration": "composite",
+      "status": "PASS",
+      "evidence": [
+        "Unexpected end of input"
+      ]
+    },
+    {
+      "name": "SOLO batch delivery and real status/reset lifecycle",
+      "configuration": "composite",
+      "status": "PASS",
+      "evidence": {
+        "batch": {
+          "type": "batch",
+          "sources": [
+            {
+              "source": "WALK 60 questions",
+              "aspects": [
+                {
+                  "name": "New Root",
+                  "graph": {
+                    "nodes": [
+                      {
+                        "type": "",
+                        "in": [
+                          0
+                        ],
+                        "out": [
+                          1,
+                          2
+                        ],
+                        "props": {
+                          "name": "New\nRoot",
+                          "title": "New Root",
+                          "site": "alpha.fixture.test"
+                        }
+                      },
+                      {
+                        "type": "",
+                        "in": [
+                          1,
+                          2,
+                          3
+                        ],
+                        "out": [
+                          0
+                        ],
+                        "props": {
+                          "name": "Old\nRoot",
+                          "title": "Old Root",
+                          "site": "alpha.fixture.test"
+                        }
+                      },
+                      {
+                        "type": "",
+                        "in": [],
+                        "out": [
+                          3
+                        ],
+                        "props": {
+                          "name": "Target\nPage",
+                          "title": "Target Page",
+                          "site": "alpha.fixture.test"
+                        }
+                      }
+                    ],
+                    "rels": [
+                      {
+                        "type": "",
+                        "from": 1,
+                        "to": 0,
+                        "props": {}
+                      },
+                      {
+                        "type": "",
+                        "from": 0,
+                        "to": 1,
+                        "props": {}
+                      },
+                      {
+                        "type": "",
+                        "from": 0,
+                        "to": 1,
+                        "props": {}
+                      },
+                      {
+                        "type": "",
+                        "from": 2,
+                        "to": 1,
+                        "props": {}
+                      }
+                    ]
+                  }
+                },
+                {
+                  "name": "Old Root",
+                  "graph": {
+                    "nodes": [
+                      {
+                        "type": "",
+                        "in": [
+                          0,
+                          1
+                        ],
+                        "out": [
+                          2,
+                          3,
+                          4,
+                          5
+                        ],
+                        "props": {
+                          "name": "Old\nRoot",
+                          "title": "Old Root",
+                          "site": "alpha.fixture.test"
+                        }
+                      },
+                      {
+                        "type": "",
+                        "in": [
+                          4,
+                          5
+                        ],
+                        "out": [
+                          0
+                        ],
+                        "props": {
+                          "name": "New\nRoot",
+                          "title": "New Root",
+                          "site": "alpha.fixture.test"
+                        }
+                      },
+                      {
+                        "type": "",
+                        "in": [
+                          2,
+                          3
+                        ],
+                        "out": [
+                          1
+                        ],
+                        "props": {
+                          "name": "Target\nPage",
+                          "title": "Target Page",
+                          "site": "alpha.fixture.test"
+                        }
+                      }
+                    ],
+                    "rels": [
+                      {
+                        "type": "",
+                        "from": 1,
+                        "to": 0,
+                        "props": {}
+                      },
+                      {
+                        "type": "",
+                        "from": 2,
+                        "to": 0,
+                        "props": {}
+                      },
+                      {
+                        "type": "",
+                        "from": 0,
+                        "to": 2,
+                        "props": {}
+                      },
+                      {
+                        "type": "",
+                        "from": 0,
+                        "to": 2,
+                        "props": {}
+                      },
+                      {
+                        "type": "",
+                        "from": 0,
+                        "to": 1,
+                        "props": {}
+                      },
+                      {
+                        "type": "",
+                        "from": 0,
+                        "to": 1,
+                        "props": {}
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "source": "WALK 30 claims",
+              "aspects": [
+                {
+                  "name": "New Root",
+                  "graph": {
+                    "nodes": [
+                      {
+                        "type": "",
+                        "in": [
+                          0
+                        ],
+                        "out": [
+                          1,
+                          2
+                        ],
+                        "props": {
+                          "name": "New\nRoot",
+                          "title": "New Root",
+                          "site": "alpha.fixture.test"
+                        }
+                      },
+                      {
+                        "type": "",
+                        "in": [
+                          1,
+                          2,
+                          3
+                        ],
+                        "out": [
+                          0
+                        ],
+                        "props": {
+                          "name": "Old\nRoot",
+                          "title": "Old Root",
+                          "site": "alpha.fixture.test"
+                        }
+                      },
+                      {
+                        "type": "",
+                        "in": [],
+                        "out": [
+                          3
+                        ],
+                        "props": {
+                          "name": "Target\nPage",
+                          "title": "Target Page",
+                          "site": "alpha.fixture.test"
+                        }
+                      }
+                    ],
+                    "rels": [
+                      {
+                        "type": "",
+                        "from": 1,
+                        "to": 0,
+                        "props": {}
+                      },
+                      {
+                        "type": "",
+                        "from": 0,
+                        "to": 1,
+                        "props": {}
+                      },
+                      {
+                        "type": "",
+                        "from": 0,
+                        "to": 1,
+                        "props": {}
+                      },
+                      {
+                        "type": "",
+                        "from": 2,
+                        "to": 1,
+                        "props": {}
+                      }
+                    ]
+                  }
+                },
+                {
+                  "name": "Old Root",
+                  "graph": {
+                    "nodes": [
+                      {
+                        "type": "",
+                        "in": [
+                          0,
+                          1
+                        ],
+                        "out": [
+                          2,
+                          3,
+                          4,
+                          5
+                        ],
+                        "props": {
+                          "name": "Old\nRoot",
+                          "title": "Old Root",
+                          "site": "alpha.fixture.test"
+                        }
+                      },
+                      {
+                        "type": "",
+                        "in": [
+                          4,
+                          5
+                        ],
+                        "out": [
+                          0
+                        ],
+                        "props": {
+                          "name": "New\nRoot",
+                          "title": "New Root",
+                          "site": "alpha.fixture.test"
+                        }
+                      },
+                      {
+                        "type": "",
+                        "in": [
+                          2,
+                          3
+                        ],
+                        "out": [
+                          1
+                        ],
+                        "props": {
+                          "name": "Target\nPage",
+                          "title": "Target Page",
+                          "site": "alpha.fixture.test"
+                        }
+                      }
+                    ],
+                    "rels": [
+                      {
+                        "type": "",
+                        "from": 1,
+                        "to": 0,
+                        "props": {}
+                      },
+                      {
+                        "type": "",
+                        "from": 2,
+                        "to": 0,
+                        "props": {}
+                      },
+                      {
+                        "type": "",
+                        "from": 0,
+                        "to": 2,
+                        "props": {}
+                      },
+                      {
+                        "type": "",
+                        "from": 0,
+                        "to": 2,
+                        "props": {}
+                      },
+                      {
+                        "type": "",
+                        "from": 0,
+                        "to": 1,
+                        "props": {}
+                      },
+                      {
+                        "type": "",
+                        "from": 0,
+                        "to": 1,
+                        "props": {}
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          ],
+          "pageKey": "current"
+        },
+        "matchesRetainedBaseline": true,
+        "lifecycle": {
+          "initial": {
+            "html": "SOLO<span class=\"status\"> ⇒ 2 sources, 4 aspects</span>",
+            "status": " ⇒ 2 sources, 4 aspects"
+          },
+          "reset": {
+            "previousConnected": false,
+            "currentStatus": null,
+            "text": "SOLO"
+          },
+          "repeated": {
+            "html": "SOLO<span class=\"status\"> ⇒ 2 sources, 4 aspects</span>",
+            "newStatus": true
+          },
+          "receiverReused": true,
+          "deliveries": 2
+        }
+      }
+    },
+    {
+      "name": "SOLO missing-aspect diagnostic",
+      "configuration": "composite",
+      "status": "PASS",
+      "evidence": [
+        "\"SOLO\" expects \"aspect\" state, like from \"WALK\"."
+      ]
+    },
+    {
+      "name": "Bundle loaded with expected plugin entry",
+      "configuration": "baseline",
+      "status": "PASS",
+      "evidence": {
+        "pluginEmitMatches": true,
+        "pluginBindMatches": true,
+        "oneModuleInstance": true,
+        "catalog": [
+          "CLICK",
+          "HELLO",
+          "FROM",
+          "SENSOR",
+          "REPORT",
+          "SOURCE",
+          "PREVIEW",
+          "NEIGHBORS",
+          "EXTRACT",
+          "EDGES",
+          "WALK",
+          "TICK",
+          "UNTIL",
+          "FORWARD",
+          "TURN",
+          "FILE",
+          "KWIC",
+          "SHOW",
+          "RANDOM",
+          "SLEEP",
+          "TOGETHER",
+          "GET",
+          "DELTA",
+          "ROSTER",
+          "LINEUP",
+          "LISTEN",
+          "MESSAGE",
+          "DEBUG",
+          "SOLO"
+        ],
+        "run": "async function run(nest, state) {\n  const scope = nest.slice();\n  while (scope.length) {\n    const code = scope.shift();\n    if (\"command\" in code) {\n      const command = code.command;\n      const elem = state.api ? state.api.element(code.key) : document.getElementById(code.key);\n      const [op, ...args] = code.command.split(/ +/);\n      const next = scope[0];\n      const body = next && \"command\" in next ? null : scope.shift();\n      const stuff = { command, op, args, body, elem, state };\n      if (state.debug) console.log(stuff);\n      if (blocks[op]) await blocks[op].emit.apply(null, [stuff]);\n      else if (op.match(/^[A-Z]+$/)) state.api.trouble(elem, `${op} doesn't name a block we know.`);\n      else if (code.command.match(/\\S/)) state.api.trouble(elem, `Expected line to begin with all-caps keyword.`);\n    }\n  }\n}",
+        "tree": "function tree(lines, here, indent) {\n  while (lines.length) {\n    let m = lines[0].match(/( *)(.*)/);\n    let spaces = m[1].length;\n    let command = m[2];\n    if (spaces == indent) {\n      here.push({ command });\n      lines.shift();\n    } else if (spaces > indent) {\n      var more = [];\n      here.push(more);\n      tree(lines, more, spaces);\n    } else {\n      return here;\n    }\n  }\n  return here;\n}",
+        "jquery": "3.7.1"
+      }
+    },
+    {
+      "name": "SOLO batch delivery",
+      "configuration": "baseline",
+      "status": "PASS",
+      "evidence": {
+        "batch": {
+          "type": "batch",
+          "sources": [
+            {
+              "source": "WALK 60 questions",
+              "aspects": [
+                {
+                  "name": "New Root",
+                  "graph": {
+                    "nodes": [
+                      {
+                        "type": "",
+                        "in": [
+                          0
+                        ],
+                        "out": [
+                          1,
+                          2
+                        ],
+                        "props": {
+                          "name": "New\nRoot",
+                          "title": "New Root",
+                          "site": "alpha.fixture.test"
+                        }
+                      },
+                      {
+                        "type": "",
+                        "in": [
+                          1,
+                          2,
+                          3
+                        ],
+                        "out": [
+                          0
+                        ],
+                        "props": {
+                          "name": "Old\nRoot",
+                          "title": "Old Root",
+                          "site": "alpha.fixture.test"
+                        }
+                      },
+                      {
+                        "type": "",
+                        "in": [],
+                        "out": [
+                          3
+                        ],
+                        "props": {
+                          "name": "Target\nPage",
+                          "title": "Target Page",
+                          "site": "alpha.fixture.test"
+                        }
+                      }
+                    ],
+                    "rels": [
+                      {
+                        "type": "",
+                        "from": 1,
+                        "to": 0,
+                        "props": {}
+                      },
+                      {
+                        "type": "",
+                        "from": 0,
+                        "to": 1,
+                        "props": {}
+                      },
+                      {
+                        "type": "",
+                        "from": 0,
+                        "to": 1,
+                        "props": {}
+                      },
+                      {
+                        "type": "",
+                        "from": 2,
+                        "to": 1,
+                        "props": {}
+                      }
+                    ]
+                  }
+                },
+                {
+                  "name": "Old Root",
+                  "graph": {
+                    "nodes": [
+                      {
+                        "type": "",
+                        "in": [
+                          0,
+                          1
+                        ],
+                        "out": [
+                          2,
+                          3,
+                          4,
+                          5
+                        ],
+                        "props": {
+                          "name": "Old\nRoot",
+                          "title": "Old Root",
+                          "site": "alpha.fixture.test"
+                        }
+                      },
+                      {
+                        "type": "",
+                        "in": [
+                          4,
+                          5
+                        ],
+                        "out": [
+                          0
+                        ],
+                        "props": {
+                          "name": "New\nRoot",
+                          "title": "New Root",
+                          "site": "alpha.fixture.test"
+                        }
+                      },
+                      {
+                        "type": "",
+                        "in": [
+                          2,
+                          3
+                        ],
+                        "out": [
+                          1
+                        ],
+                        "props": {
+                          "name": "Target\nPage",
+                          "title": "Target Page",
+                          "site": "alpha.fixture.test"
+                        }
+                      }
+                    ],
+                    "rels": [
+                      {
+                        "type": "",
+                        "from": 1,
+                        "to": 0,
+                        "props": {}
+                      },
+                      {
+                        "type": "",
+                        "from": 2,
+                        "to": 0,
+                        "props": {}
+                      },
+                      {
+                        "type": "",
+                        "from": 0,
+                        "to": 2,
+                        "props": {}
+                      },
+                      {
+                        "type": "",
+                        "from": 0,
+                        "to": 2,
+                        "props": {}
+                      },
+                      {
+                        "type": "",
+                        "from": 0,
+                        "to": 1,
+                        "props": {}
+                      },
+                      {
+                        "type": "",
+                        "from": 0,
+                        "to": 1,
+                        "props": {}
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "source": "WALK 30 claims",
+              "aspects": [
+                {
+                  "name": "New Root",
+                  "graph": {
+                    "nodes": [
+                      {
+                        "type": "",
+                        "in": [
+                          0
+                        ],
+                        "out": [
+                          1,
+                          2
+                        ],
+                        "props": {
+                          "name": "New\nRoot",
+                          "title": "New Root",
+                          "site": "alpha.fixture.test"
+                        }
+                      },
+                      {
+                        "type": "",
+                        "in": [
+                          1,
+                          2,
+                          3
+                        ],
+                        "out": [
+                          0
+                        ],
+                        "props": {
+                          "name": "Old\nRoot",
+                          "title": "Old Root",
+                          "site": "alpha.fixture.test"
+                        }
+                      },
+                      {
+                        "type": "",
+                        "in": [],
+                        "out": [
+                          3
+                        ],
+                        "props": {
+                          "name": "Target\nPage",
+                          "title": "Target Page",
+                          "site": "alpha.fixture.test"
+                        }
+                      }
+                    ],
+                    "rels": [
+                      {
+                        "type": "",
+                        "from": 1,
+                        "to": 0,
+                        "props": {}
+                      },
+                      {
+                        "type": "",
+                        "from": 0,
+                        "to": 1,
+                        "props": {}
+                      },
+                      {
+                        "type": "",
+                        "from": 0,
+                        "to": 1,
+                        "props": {}
+                      },
+                      {
+                        "type": "",
+                        "from": 2,
+                        "to": 1,
+                        "props": {}
+                      }
+                    ]
+                  }
+                },
+                {
+                  "name": "Old Root",
+                  "graph": {
+                    "nodes": [
+                      {
+                        "type": "",
+                        "in": [
+                          0,
+                          1
+                        ],
+                        "out": [
+                          2,
+                          3,
+                          4,
+                          5
+                        ],
+                        "props": {
+                          "name": "Old\nRoot",
+                          "title": "Old Root",
+                          "site": "alpha.fixture.test"
+                        }
+                      },
+                      {
+                        "type": "",
+                        "in": [
+                          4,
+                          5
+                        ],
+                        "out": [
+                          0
+                        ],
+                        "props": {
+                          "name": "New\nRoot",
+                          "title": "New Root",
+                          "site": "alpha.fixture.test"
+                        }
+                      },
+                      {
+                        "type": "",
+                        "in": [
+                          2,
+                          3
+                        ],
+                        "out": [
+                          1
+                        ],
+                        "props": {
+                          "name": "Target\nPage",
+                          "title": "Target Page",
+                          "site": "alpha.fixture.test"
+                        }
+                      }
+                    ],
+                    "rels": [
+                      {
+                        "type": "",
+                        "from": 1,
+                        "to": 0,
+                        "props": {}
+                      },
+                      {
+                        "type": "",
+                        "from": 2,
+                        "to": 0,
+                        "props": {}
+                      },
+                      {
+                        "type": "",
+                        "from": 0,
+                        "to": 2,
+                        "props": {}
+                      },
+                      {
+                        "type": "",
+                        "from": 0,
+                        "to": 2,
+                        "props": {}
+                      },
+                      {
+                        "type": "",
+                        "from": 0,
+                        "to": 1,
+                        "props": {}
+                      },
+                      {
+                        "type": "",
+                        "from": 0,
+                        "to": 1,
+                        "props": {}
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          ],
+          "pageKey": "current"
+        },
+        "matchesRetainedBaseline": true
+      }
+    }
+  ],
+  "unexpectedRequests": [],
+  "browser": "154.0.8037.98",
+  "cleanup": [
+    {
+      "configuration": "upstream",
+      "closed": true,
+      "closeObserved": true,
+      "attempts": [
+        {
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "configuration": "composite",
+      "closed": true,
+      "closeObserved": true,
+      "attempts": [
+        {
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "configuration": "baseline",
+      "closed": true,
+      "closeObserved": true,
+      "attempts": [
+        {
+          "status": "PASS"
+        }
+      ]
+    }
+  ],
+  "node": "v24.10.0",
+  "fault": null,
+  "ordinaryControl": [
+    {
+      "state": {
+        "context": {
+          "item": {
+            "id": "trusted-mech-item",
+            "type": "mech",
+            "text": "HELLO world"
+          },
+          "itemId": "trusted-mech-item",
+          "pageKey": "current",
+          "page": {
+            "title": "Trusted Browser Fixture",
+            "story": [
+              {
+                "id": "question-fold",
+                "type": "pagefold",
+                "text": "question"
+              },
+              {
+                "id": "question-link",
+                "type": "paragraph",
+                "text": "See [[Target Page]]"
+              }
+            ]
+          },
+          "origin": "https://alpha.fixture.test",
+          "site": "alpha.fixture.test",
+          "slug": "question-root",
+          "title": "Trusted Browser Fixture"
+        }
+      },
+      "blocks": [
+        {
+          "text": "HELLO world 🌎",
+          "html": "HELLO world 🌎"
+        }
+      ],
+      "aspectSource": null
+    },
+    {
+      "state": {
+        "context": {
+          "item": {
+            "id": "trusted-mech-item",
+            "type": "mech",
+            "text": "NEIGHBORS\nWALK 2 hubs"
+          },
+          "itemId": "trusted-mech-item",
+          "pageKey": "current",
+          "page": {
+            "title": "Trusted Browser Fixture",
+            "story": [
+              {
+                "id": "question-fold",
+                "type": "pagefold",
+                "text": "question"
+              },
+              {
+                "id": "question-link",
+                "type": "paragraph",
+                "text": "See [[Target Page]]"
+              }
+            ]
+          },
+          "origin": "https://alpha.fixture.test",
+          "site": "alpha.fixture.test",
+          "slug": "question-root",
+          "title": "Trusted Browser Fixture"
+        },
+        "neighborhood": [
+          {
+            "domain": "alpha.fixture.test",
+            "slug": "question-root",
+            "title": "Question Root",
+            "date": 500,
+            "links": {
+              "target-page": 1
+            }
+          },
+          {
+            "domain": "alpha.fixture.test",
+            "slug": "claim-root",
+            "title": "Claim Root",
+            "date": 400,
+            "links": {
+              "target-page": 1
+            }
+          },
+          {
+            "domain": "alpha.fixture.test",
+            "slug": "support-root",
+            "title": "Support Root",
+            "date": 300,
+            "links": {
+              "target-page": 1
+            }
+          },
+          {
+            "domain": "alpha.fixture.test",
+            "slug": "oppose-root",
+            "title": "Oppose Root",
+            "date": 200,
+            "links": {
+              "target-page": 1
+            }
+          },
+          {
+            "domain": "alpha.fixture.test",
+            "slug": "target-page",
+            "title": "Target Page",
+            "date": 100,
+            "links": {}
+          }
+        ],
+        "aspect": [
+          {
+            "id": "81740.1",
+            "result": [
+              {
+                "name": "hub 4 target-page",
+                "graph": {
+                  "nodes": [
+                    {
+                      "type": "",
+                      "in": [
+                        0,
+                        1,
+                        2
+                      ],
+                      "out": [],
+                      "props": {
+                        "name": "Target\nPage",
+                        "title": "Target Page",
+                        "site": "alpha.fixture.test"
+                      }
+                    },
+                    {
+                      "type": "",
+                      "in": [],
+                      "out": [
+                        0
+                      ],
+                      "props": {
+                        "name": "Question\nRoot",
+                        "title": "Question Root",
+                        "site": "alpha.fixture.test"
+                      }
+                    },
+                    {
+                      "type": "",
+                      "in": [],
+                      "out": [
+                        1
+                      ],
+                      "props": {
+                        "name": "Claim\nRoot",
+                        "title": "Claim Root",
+                        "site": "alpha.fixture.test"
+                      }
+                    },
+                    {
+                      "type": "",
+                      "in": [],
+                      "out": [
+                        2
+                      ],
+                      "props": {
+                        "name": "Support\nRoot",
+                        "title": "Support Root",
+                        "site": "alpha.fixture.test"
+                      }
+                    }
+                  ],
+                  "rels": [
+                    {
+                      "type": "",
+                      "from": 1,
+                      "to": 0,
+                      "props": {}
+                    },
+                    {
+                      "type": "",
+                      "from": 2,
+                      "to": 0,
+                      "props": {}
+                    },
+                    {
+                      "type": "",
+                      "from": 3,
+                      "to": 0,
+                      "props": {}
+                    }
+                  ]
+                }
+              }
+            ],
+            "source": "WALK 2 hubs"
+          }
+        ]
+      },
+      "blocks": [
+        {
+          "text": "NEIGHBORS⇒ 5 pages, 1 sites",
+          "html": "NEIGHBORS<span class=\"status\">⇒ 5 pages, 1 sites</span>"
+        },
+        {
+          "text": "WALK 2 hubs ⇒ 1 aspects, 4 nodes",
+          "html": "WALK 2 hubs<span class=\"status\"> ⇒ 1 aspects, 4 nodes</span>"
+        }
+      ],
+      "aspectSource": [
+        {
+          "name": "hub 4 target-page",
+          "graph": {
+            "nodes": [
+              {
+                "type": "",
+                "in": [
+                  0,
+                  1,
+                  2
+                ],
+                "out": [],
+                "props": {
+                  "name": "Target\nPage",
+                  "title": "Target Page",
+                  "site": "alpha.fixture.test"
+                }
+              },
+              {
+                "type": "",
+                "in": [],
+                "out": [
+                  0
+                ],
+                "props": {
+                  "name": "Question\nRoot",
+                  "title": "Question Root",
+                  "site": "alpha.fixture.test"
+                }
+              },
+              {
+                "type": "",
+                "in": [],
+                "out": [
+                  1
+                ],
+                "props": {
+                  "name": "Claim\nRoot",
+                  "title": "Claim Root",
+                  "site": "alpha.fixture.test"
+                }
+              },
+              {
+                "type": "",
+                "in": [],
+                "out": [
+                  2
+                ],
+                "props": {
+                  "name": "Support\nRoot",
+                  "title": "Support Root",
+                  "site": "alpha.fixture.test"
+                }
+              }
+            ],
+            "rels": [
+              {
+                "type": "",
+                "from": 1,
+                "to": 0,
+                "props": {}
+              },
+              {
+                "type": "",
+                "from": 2,
+                "to": 0,
+                "props": {}
+              },
+              {
+                "type": "",
+                "from": 3,
+                "to": 0,
+                "props": {}
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "sourceIntegrity": true,
+  "finished": "2026-10-09T04:37:21.834Z",
+  "artifactDigests": {
+    "fixture": "2ead865d99224521f6b9df9a86015a35783dfe59e5d55206365c983bcf256c5f",
+    "receiver": "79cbe2af898a671f067b282277d301e4a826cd743daceb39655aef0ae2008acf",
+    "runner": "37f9e86286818371915e423ae9d154c57c55c5624f727c5e6e309960c7d9c006",
+    "jquery": "fc9a93dd241f6b045cbff0481cf4e1901becd0e12fb45166a8f17f95823f0b1a"
+  },
+  "dependencies": {
+    "esbuild": "0.28.2",
+    "acorn": "8.18.0",
+    "marked": "18.0.12",
+    "universal-ticker": "0.1.1"
+  },
+  "playwright": "1.62.1",
+  "externalTools": {
+    "playwright": {
+      "version": "1.62.1",
+      "contentSha256": "77aee230be115c6562f14fc7687f397644e701f1f26a04f349dca2ccd8097fe1"
+    },
+    "browser": {
+      "version": "154.0.8037.98",
+      "executableSha256": "ccffd5c5fe77ba3212e07c2c69091f8048b73c396b4647ecaa150e1e01a04954"
+    },
+    "jquery": {
+      "version": "3.7.1",
+      "sha256": "fc9a93dd241f6b045cbff0481cf4e1901becd0e12fb45166a8f17f95823f0b1a"
+    }
+  },
+  "acceptance": {
+    "T1": {
+      "status": "PASS",
+      "supportingTests": [
+        "Bundle loaded with expected plugin entry"
+      ]
+    },
+    "T2": {
+      "status": "PASS",
+      "supportingTests": [
+        "Exactly one catalog and preserved upstream emitters",
+        "Bundle loaded with expected plugin entry"
+      ]
+    },
+    "T3": {
+      "status": "PASS",
+      "supportingTests": [
+        "Extensions installed before first plugin emission",
+        "Duplicate, collision and incompatible catalog rejection"
+      ]
+    },
+    "T4": {
+      "status": "PASS",
+      "supportingTests": [
+        "EXTRACT EDGES DEBUG dispatch with real DOM",
+        "EDGES destinations are safe in detached DOM",
+        "Role WALK question",
+        "Role WALK claim",
+        "Role WALK support",
+        "Role WALK oppose",
+        "Extension error diagnostics"
+      ]
+    },
+    "T5": {
+      "status": "PASS",
+      "supportingTests": [
+        "Ordinary WALK and HELLO match upstream control"
+      ]
+    },
+    "T6": {
+      "status": "PASS",
+      "supportingTests": [
+        "CODE named export through actual CLICK emission",
+        "CODE named export through actual TICK",
+        "CODE guard: unowned direct",
+        "CODE guard: owned local",
+        "CODE guard: owned remote",
+        "CODE guard: truthy internal initiator",
+        "CODE diagnostic: missing export",
+        "CODE diagnostic: trusted throw",
+        "CODE diagnostic: syntax failure"
+      ]
+    },
+    "T7": {
+      "status": "PASS",
+      "supportingTests": [
+        "SOLO batch delivery and real status/reset lifecycle",
+        "SOLO missing-aspect diagnostic"
+      ]
+    },
+    "T8": {
+      "status": "PASS",
+      "supportingTests": [
+        "SOLO batch delivery and real status/reset lifecycle"
+      ]
+    },
+    "T9": {
+      "status": "PASS"
+    }
+  },
+  "aggregateAcceptance": "PASS",
+  "missingOrFailed": [],
+  "ownedContextsClosed": true,
+  "cleanupSatisfied": true,
+  "exitCode": 0,
+  "priorBehavioralAcceptance": "FAIL",
+  "diagnosticRecord": ".artifacts/browser/run-PNzWEq/results.json"
+}

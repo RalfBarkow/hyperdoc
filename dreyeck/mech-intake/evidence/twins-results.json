@@ -1,0 +1,1626 @@
+{
+  "experiment": "Offline NEIGHBORS twin-slug graph resolution",
+  "startedSources": {
+    "baseline/client/mech.js": "9fc3596f6690275c6934451363eb5b06bec59ca361ab2cfecdd52f99b592e56b",
+    "discourse/client/mech.js": "ba933fe338b7938e5fd5f81399325c9335d4bb710c7600b0b7148cf220aa3543"
+  },
+  "sourceProvenance": [
+    {
+      "id": "alpha.fixture.test+question-root",
+      "site": "alpha.fixture.test",
+      "slug": "question-root",
+      "date": 200,
+      "title": "Question Root",
+      "storyItemIds": [
+        "root-question-fold",
+        "root-link"
+      ],
+      "source": "trusted twins-fixture.mjs",
+      "sha256": "73332963725b11882275d6ff317a3ac069104facdc45a0ca97b473f12b21eb56"
+    },
+    {
+      "id": "alpha.fixture.test+shared-page",
+      "site": "alpha.fixture.test",
+      "slug": "shared-page",
+      "date": 100,
+      "title": "Alpha Older Interpretation",
+      "storyItemIds": [
+        "alpha-content"
+      ],
+      "source": "trusted twins-fixture.mjs",
+      "sha256": "77e57fa8c50df8e740b770f8ddca9558605133499388026a697cb3f67d420389"
+    },
+    {
+      "id": "beta.fixture.test+shared-page",
+      "site": "beta.fixture.test",
+      "slug": "shared-page",
+      "date": 300,
+      "title": "Beta Newer Interpretation",
+      "storyItemIds": [
+        "beta-content"
+      ],
+      "source": "trusted twins-fixture.mjs",
+      "sha256": "1cebb374334321ccda7ac6d2698e78b04545847825c8ccec3bf264890167be0c"
+    }
+  ],
+  "testedRevisions": {
+    "baseline": "abd88d2da6c89029515f2a456356832dffe038ab",
+    "upstream": "a028b4bba04e539dcaa090423d38a00a0050489d"
+  },
+  "node": "v22.18.0",
+  "networkAttempts": 0,
+  "browserExecuted": false,
+  "cases": 4,
+  "untracedControls": 4,
+  "semantics": {
+    "extractedEqualAcrossCases": true,
+    "baselineSiteOrderInvariant": true,
+    "compositeSiteOrderInvariant": false,
+    "alphaFirstAspectsEqual": false,
+    "betaFirstAspectsEqual": true,
+    "alphaFirstBatchesEqual": false,
+    "betaFirstBatchesEqual": true
+  },
+  "results": [
+    {
+      "implementation": "baseline",
+      "siteOrder": [
+        "alpha.fixture.test",
+        "beta.fixture.test"
+      ],
+      "tracingMatchesUninstrumented": true,
+      "neighborhood": [
+        {
+          "domain": "beta.fixture.test",
+          "slug": "shared-page",
+          "date": 300,
+          "title": "Beta Newer Interpretation",
+          "links": {}
+        },
+        {
+          "domain": "alpha.fixture.test",
+          "slug": "question-root",
+          "date": 200,
+          "title": "Question Root",
+          "links": {
+            "shared-page": 1
+          }
+        },
+        {
+          "domain": "alpha.fixture.test",
+          "slug": "shared-page",
+          "date": 100,
+          "title": "Alpha Older Interpretation",
+          "links": {}
+        }
+      ],
+      "extracted": {
+        "identity": "domain+slug",
+        "edges": [
+          {
+            "fromId": "alpha.fixture.test+question-root",
+            "toId": "alpha.fixture.test+shared-page",
+            "role": "question",
+            "source": {
+              "pageId": "alpha.fixture.test+question-root",
+              "fold": "question",
+              "extractorVersion": "extract-fold-aware-v1"
+            }
+          }
+        ],
+        "metadata": {
+          "extractorVersion": "extract-fold-aware-v1",
+          "timestamp": "2026-10-08T10:00:00.000Z",
+          "pagesInScope": 3,
+          "pagesFetched": 3,
+          "pagesParsed": 3,
+          "fetchFailures": 0,
+          "parseFailures": 0,
+          "unparsedPages": [],
+          "edgesExtracted": 1,
+          "edgesByRole": {
+            "question": 1,
+            "claim": 0,
+            "support": 0,
+            "oppose": 0
+          },
+          "foldsEncountered": {
+            "question": 1
+          },
+          "foldsUnknown": {},
+          "note": "fetch"
+        }
+      },
+      "aspects": [
+        {
+          "id": "op2",
+          "result": [
+            {
+              "name": "Question Root",
+              "graph": {
+                "nodes": [
+                  {
+                    "type": "",
+                    "in": [],
+                    "out": [
+                      0,
+                      1
+                    ],
+                    "props": {
+                      "name": "Question\nRoot",
+                      "title": "Question Root",
+                      "site": "alpha.fixture.test"
+                    }
+                  },
+                  {
+                    "type": "",
+                    "in": [
+                      0,
+                      1
+                    ],
+                    "out": [],
+                    "props": {
+                      "name": "Beta\nNewer\nInterpretation",
+                      "title": "Beta Newer Interpretation",
+                      "site": "beta.fixture.test"
+                    }
+                  }
+                ],
+                "rels": [
+                  {
+                    "type": "",
+                    "from": 0,
+                    "to": 1,
+                    "props": {}
+                  },
+                  {
+                    "type": "",
+                    "from": 0,
+                    "to": 1,
+                    "props": {}
+                  }
+                ]
+              }
+            }
+          ],
+          "source": "WALK 60 questions"
+        }
+      ],
+      "publications": [
+        {
+          "id": "op2",
+          "topic": "aspect",
+          "data": [
+            {
+              "name": "Question Root",
+              "graph": {
+                "nodes": [
+                  {
+                    "type": "",
+                    "in": [],
+                    "out": [
+                      0,
+                      1
+                    ],
+                    "props": {
+                      "name": "Question\nRoot",
+                      "title": "Question Root",
+                      "site": "alpha.fixture.test"
+                    }
+                  },
+                  {
+                    "type": "",
+                    "in": [
+                      0,
+                      1
+                    ],
+                    "out": [],
+                    "props": {
+                      "name": "Beta\nNewer\nInterpretation",
+                      "title": "Beta Newer Interpretation",
+                      "site": "beta.fixture.test"
+                    }
+                  }
+                ],
+                "rels": [
+                  {
+                    "type": "",
+                    "from": 0,
+                    "to": 1,
+                    "props": {}
+                  },
+                  {
+                    "type": "",
+                    "from": 0,
+                    "to": 1,
+                    "props": {}
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      ],
+      "batches": [
+        {
+          "data": {
+            "type": "batch",
+            "sources": [
+              {
+                "source": "WALK 60 questions",
+                "aspects": [
+                  {
+                    "name": "Question Root",
+                    "graph": {
+                      "nodes": [
+                        {
+                          "type": "",
+                          "in": [],
+                          "out": [
+                            0,
+                            1
+                          ],
+                          "props": {
+                            "name": "Question\nRoot",
+                            "title": "Question Root",
+                            "site": "alpha.fixture.test"
+                          }
+                        },
+                        {
+                          "type": "",
+                          "in": [
+                            0,
+                            1
+                          ],
+                          "out": [],
+                          "props": {
+                            "name": "Beta\nNewer\nInterpretation",
+                            "title": "Beta Newer Interpretation",
+                            "site": "beta.fixture.test"
+                          }
+                        }
+                      ],
+                      "rels": [
+                        {
+                          "type": "",
+                          "from": 0,
+                          "to": 1,
+                          "props": {}
+                        },
+                        {
+                          "type": "",
+                          "from": 0,
+                          "to": 1,
+                          "props": {}
+                        }
+                      ]
+                    }
+                  }
+                ]
+              }
+            ],
+            "pageKey": "root-page"
+          },
+          "origin": "https://alpha.fixture.test"
+        }
+      ],
+      "errors": [],
+      "fetches": [
+        "//beta.fixture.test/shared-page.json",
+        "//alpha.fixture.test/question-root.json",
+        "//alpha.fixture.test/shared-page.json"
+      ],
+      "listeners": [
+        {
+          "event": "message",
+          "function": "soloListener"
+        }
+      ],
+      "statuses": [
+        {
+          "id": "op0",
+          "command": "NEIGHBORS",
+          "text": "⇒ 3 pages, 2 sites"
+        },
+        {
+          "id": "op1",
+          "command": "EXTRACT",
+          "text": " ⇒ parsed 3/3 pages, 1 typed edges (claim: 0; unknown folds: 0)"
+        },
+        {
+          "id": "op2",
+          "command": "WALK 60 questions",
+          "text": " ⇒ 1 aspects, 2 nodes"
+        }
+      ],
+      "rootSelection": {
+        "mode": "question",
+        "lineupIds": [
+          "alpha.fixture.test+question-root"
+        ],
+        "eligibleSourceIds": [
+          "alpha.fixture.test+question-root"
+        ],
+        "firstGraphNode": {
+          "type": "",
+          "in": [],
+          "out": [
+            0,
+            1
+          ],
+          "props": {
+            "name": "Question\nRoot",
+            "title": "Question Root",
+            "site": "alpha.fixture.test"
+          }
+        },
+        "qualifiedLookup": {
+          "id": "alpha.fixture.test+question-root",
+          "site": "alpha.fixture.test",
+          "slug": "question-root",
+          "date": 200,
+          "title": "Question Root"
+        }
+      },
+      "lookups": [
+        {
+          "caller": "roleWalk root selection",
+          "stack": [
+            "    at Proxy.<anonymous> (file:///Users/rgb/workspace/wiki-mech-maintained/integrations/mech/test/ambiguity.mjs:57:23)",
+            "    at find (file:///Users/rgb/workspace/wiki-mech-maintained/integrations/mech/.artifacts/ambiguity/baseline/client/mech.js:116:46)",
+            "    at file:///Users/rgb/workspace/wiki-mech-maintained/integrations/mech/.artifacts/ambiguity/baseline/client/mech.js:334:14",
+            "    at Array.map (<anonymous>)",
+            "    at roleWalk (file:///Users/rgb/workspace/wiki-mech-maintained/integrations/mech/.artifacts/ambiguity/baseline/client/mech.js:331:32)",
+            "    at walks (file:///Users/rgb/workspace/wiki-mech-maintained/integrations/mech/.artifacts/ambiguity/baseline/client/mech.js:171:14)",
+            "    at walk_emit (file:///Users/rgb/workspace/wiki-mech-maintained/integrations/mech/.artifacts/ambiguity/baseline/client/mech.js:1040:17)",
+            "    at Module.run (file:///Users/rgb/workspace/wiki-mech-maintained/integrations/mech/.artifacts/ambiguity/baseline/client/mech.js:686:45)",
+            "    at run (file:///Users/rgb/workspace/wiki-mech-maintained/integrations/mech/test/ambiguity.mjs:176:24)",
+            "    at async file:///Users/rgb/workspace/wiki-mech-maintained/integrations/mech/test/ambiguity.mjs:216:22"
+          ],
+          "candidates": [
+            {
+              "id": "beta.fixture.test+shared-page",
+              "date": 300,
+              "propertiesRead": [
+                "slug"
+              ],
+              "matches": false
+            },
+            {
+              "id": "alpha.fixture.test+question-root",
+              "date": 200,
+              "propertiesRead": [
+                "slug",
+                "domain"
+              ],
+              "matches": true
+            }
+          ],
+          "result": {
+            "id": "alpha.fixture.test+question-root",
+            "site": "alpha.fixture.test",
+            "slug": "question-root",
+            "date": 200,
+            "title": "Question Root"
+          },
+          "siteConstraintEvaluated": true
+        },
+        {
+          "caller": "blanket graph construction",
+          "stack": [
+            "    at Proxy.<anonymous> (file:///Users/rgb/workspace/wiki-mech-maintained/integrations/mech/test/ambiguity.mjs:57:23)",
+            "    at find (file:///Users/rgb/workspace/wiki-mech-maintained/integrations/mech/.artifacts/ambiguity/baseline/client/mech.js:116:46)",
+            "    at blanket (file:///Users/rgb/workspace/wiki-mech-maintained/integrations/mech/.artifacts/ambiguity/baseline/client/mech.js:141:21)",
+            "    at file:///Users/rgb/workspace/wiki-mech-maintained/integrations/mech/.artifacts/ambiguity/baseline/client/mech.js:336:60",
+            "    at Array.map (<anonymous>)",
+            "    at roleWalk (file:///Users/rgb/workspace/wiki-mech-maintained/integrations/mech/.artifacts/ambiguity/baseline/client/mech.js:336:18)",
+            "    at walks (file:///Users/rgb/workspace/wiki-mech-maintained/integrations/mech/.artifacts/ambiguity/baseline/client/mech.js:171:14)",
+            "    at walk_emit (file:///Users/rgb/workspace/wiki-mech-maintained/integrations/mech/.artifacts/ambiguity/baseline/client/mech.js:1040:17)",
+            "    at Module.run (file:///Users/rgb/workspace/wiki-mech-maintained/integrations/mech/.artifacts/ambiguity/baseline/client/mech.js:686:45)",
+            "    at run (file:///Users/rgb/workspace/wiki-mech-maintained/integrations/mech/test/ambiguity.mjs:176:24)"
+          ],
+          "candidates": [
+            {
+              "id": "beta.fixture.test+shared-page",
+              "date": 300,
+              "propertiesRead": [
+                "slug"
+              ],
+              "matches": true
+            }
+          ],
+          "result": {
+            "id": "beta.fixture.test+shared-page",
+            "site": "beta.fixture.test",
+            "slug": "shared-page",
+            "date": 300,
+            "title": "Beta Newer Interpretation"
+          },
+          "siteConstraintEvaluated": false
+        }
+      ],
+      "tracedGraphTarget": {
+        "id": "beta.fixture.test+shared-page",
+        "site": "beta.fixture.test",
+        "slug": "shared-page",
+        "date": 300,
+        "title": "Beta Newer Interpretation"
+      }
+    },
+    {
+      "implementation": "composite",
+      "siteOrder": [
+        "alpha.fixture.test",
+        "beta.fixture.test"
+      ],
+      "tracingMatchesUninstrumented": true,
+      "neighborhood": [
+        {
+          "domain": "alpha.fixture.test",
+          "slug": "question-root",
+          "date": 200,
+          "title": "Question Root",
+          "links": {
+            "shared-page": 1
+          }
+        },
+        {
+          "domain": "alpha.fixture.test",
+          "slug": "shared-page",
+          "date": 100,
+          "title": "Alpha Older Interpretation",
+          "links": {}
+        },
+        {
+          "domain": "beta.fixture.test",
+          "slug": "shared-page",
+          "date": 300,
+          "title": "Beta Newer Interpretation",
+          "links": {}
+        }
+      ],
+      "extracted": {
+        "identity": "domain+slug",
+        "edges": [
+          {
+            "fromId": "alpha.fixture.test+question-root",
+            "toId": "alpha.fixture.test+shared-page",
+            "role": "question",
+            "source": {
+              "pageId": "alpha.fixture.test+question-root",
+              "fold": "question",
+              "extractorVersion": "extract-fold-aware-v1"
+            }
+          }
+        ],
+        "metadata": {
+          "extractorVersion": "extract-fold-aware-v1",
+          "timestamp": "2026-10-08T10:00:00.000Z",
+          "pagesInScope": 3,
+          "pagesFetched": 3,
+          "pagesParsed": 3,
+          "fetchFailures": 0,
+          "parseFailures": 0,
+          "unparsedPages": [],
+          "edgesExtracted": 1,
+          "edgesByRole": {
+            "question": 1,
+            "claim": 0,
+            "support": 0,
+            "oppose": 0
+          },
+          "foldsEncountered": {
+            "question": 1
+          },
+          "foldsUnknown": {},
+          "note": "fetch"
+        }
+      },
+      "aspects": [
+        {
+          "id": "op2",
+          "result": [
+            {
+              "name": "Question Root",
+              "graph": {
+                "nodes": [
+                  {
+                    "type": "",
+                    "in": [],
+                    "out": [
+                      0,
+                      1
+                    ],
+                    "props": {
+                      "name": "Question\nRoot",
+                      "title": "Question Root",
+                      "site": "alpha.fixture.test"
+                    }
+                  },
+                  {
+                    "type": "",
+                    "in": [
+                      0,
+                      1
+                    ],
+                    "out": [],
+                    "props": {
+                      "name": "Alpha\nOlder\nInterpretation",
+                      "title": "Alpha Older Interpretation",
+                      "site": "alpha.fixture.test"
+                    }
+                  }
+                ],
+                "rels": [
+                  {
+                    "type": "",
+                    "from": 0,
+                    "to": 1,
+                    "props": {}
+                  },
+                  {
+                    "type": "",
+                    "from": 0,
+                    "to": 1,
+                    "props": {}
+                  }
+                ]
+              }
+            }
+          ],
+          "source": "WALK 60 questions"
+        }
+      ],
+      "publications": [
+        {
+          "id": "op2",
+          "topic": "aspect",
+          "data": [
+            {
+              "name": "Question Root",
+              "graph": {
+                "nodes": [
+                  {
+                    "type": "",
+                    "in": [],
+                    "out": [
+                      0,
+                      1
+                    ],
+                    "props": {
+                      "name": "Question\nRoot",
+                      "title": "Question Root",
+                      "site": "alpha.fixture.test"
+                    }
+                  },
+                  {
+                    "type": "",
+                    "in": [
+                      0,
+                      1
+                    ],
+                    "out": [],
+                    "props": {
+                      "name": "Alpha\nOlder\nInterpretation",
+                      "title": "Alpha Older Interpretation",
+                      "site": "alpha.fixture.test"
+                    }
+                  }
+                ],
+                "rels": [
+                  {
+                    "type": "",
+                    "from": 0,
+                    "to": 1,
+                    "props": {}
+                  },
+                  {
+                    "type": "",
+                    "from": 0,
+                    "to": 1,
+                    "props": {}
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      ],
+      "batches": [
+        {
+          "data": {
+            "type": "batch",
+            "sources": [
+              {
+                "source": "WALK 60 questions",
+                "aspects": [
+                  {
+                    "name": "Question Root",
+                    "graph": {
+                      "nodes": [
+                        {
+                          "type": "",
+                          "in": [],
+                          "out": [
+                            0,
+                            1
+                          ],
+                          "props": {
+                            "name": "Question\nRoot",
+                            "title": "Question Root",
+                            "site": "alpha.fixture.test"
+                          }
+                        },
+                        {
+                          "type": "",
+                          "in": [
+                            0,
+                            1
+                          ],
+                          "out": [],
+                          "props": {
+                            "name": "Alpha\nOlder\nInterpretation",
+                            "title": "Alpha Older Interpretation",
+                            "site": "alpha.fixture.test"
+                          }
+                        }
+                      ],
+                      "rels": [
+                        {
+                          "type": "",
+                          "from": 0,
+                          "to": 1,
+                          "props": {}
+                        },
+                        {
+                          "type": "",
+                          "from": 0,
+                          "to": 1,
+                          "props": {}
+                        }
+                      ]
+                    }
+                  }
+                ]
+              }
+            ],
+            "pageKey": "root-page"
+          },
+          "origin": "https://alpha.fixture.test"
+        }
+      ],
+      "errors": [],
+      "fetches": [
+        "//beta.fixture.test/shared-page.json",
+        "//alpha.fixture.test/question-root.json",
+        "//alpha.fixture.test/shared-page.json"
+      ],
+      "listeners": [
+        {
+          "event": "message",
+          "function": "soloListener"
+        }
+      ],
+      "statuses": [
+        {
+          "id": "op0",
+          "command": "NEIGHBORS",
+          "text": "⇒ 3 pages, 2 sites"
+        },
+        {
+          "id": "op1",
+          "command": "EXTRACT",
+          "text": " ⇒ parsed 3/3 pages, 1 typed edges (claim: 0; unknown folds: 0)"
+        },
+        {
+          "id": "op2",
+          "command": "WALK 60 questions",
+          "text": " ⇒ 1 aspects, 2 nodes"
+        },
+        {
+          "id": "op3",
+          "command": "SOLO",
+          "text": ""
+        },
+        {
+          "id": "op3",
+          "command": "SOLO",
+          "text": " ⇒ 1 sources, 1 aspects"
+        }
+      ],
+      "rootSelection": {
+        "mode": "question",
+        "lineupIds": [
+          "alpha.fixture.test+question-root"
+        ],
+        "eligibleSourceIds": [
+          "alpha.fixture.test+question-root"
+        ],
+        "firstGraphNode": {
+          "type": "",
+          "in": [],
+          "out": [
+            0,
+            1
+          ],
+          "props": {
+            "name": "Question\nRoot",
+            "title": "Question Root",
+            "site": "alpha.fixture.test"
+          }
+        },
+        "qualifiedLookup": {
+          "id": "alpha.fixture.test+question-root",
+          "site": "alpha.fixture.test",
+          "slug": "question-root",
+          "date": 200,
+          "title": "Question Root"
+        }
+      },
+      "lookups": [
+        {
+          "caller": "roleWalk root selection",
+          "stack": [
+            "    at Proxy.<anonymous> (file:///Users/rgb/workspace/wiki-mech-maintained/integrations/mech/test/ambiguity.mjs:57:23)",
+            "    at find (file:///Users/rgb/workspace/wiki-mech-maintained/integrations/mech/.artifacts/ambiguity/discourse/client/mech.js:3599:46)",
+            "    at file:///Users/rgb/workspace/wiki-mech-maintained/integrations/mech/.artifacts/ambiguity/discourse/client/mech.js:3672:14",
+            "    at Array.map (<anonymous>)",
+            "    at roleWalk (file:///Users/rgb/workspace/wiki-mech-maintained/integrations/mech/.artifacts/ambiguity/discourse/client/mech.js:3669:32)",
+            "    at walks2 (file:///Users/rgb/workspace/wiki-mech-maintained/integrations/mech/.artifacts/ambiguity/discourse/client/mech.js:3676:10)",
+            "    at role_walk_emit (file:///Users/rgb/workspace/wiki-mech-maintained/integrations/mech/.artifacts/ambiguity/discourse/client/mech.js:3708:17)",
+            "    at emit (file:///Users/rgb/workspace/wiki-mech-maintained/integrations/mech/.artifacts/ambiguity/discourse/client/mech.js:3747:97)",
+            "    at Module.run (file:///Users/rgb/workspace/wiki-mech-maintained/integrations/mech/.artifacts/ambiguity/discourse/client/mech.js:2435:45)",
+            "    at run (file:///Users/rgb/workspace/wiki-mech-maintained/integrations/mech/test/ambiguity.mjs:176:24)"
+          ],
+          "candidates": [
+            {
+              "id": "alpha.fixture.test+question-root",
+              "date": 200,
+              "propertiesRead": [
+                "slug",
+                "domain"
+              ],
+              "matches": true
+            }
+          ],
+          "result": {
+            "id": "alpha.fixture.test+question-root",
+            "site": "alpha.fixture.test",
+            "slug": "question-root",
+            "date": 200,
+            "title": "Question Root"
+          },
+          "siteConstraintEvaluated": true
+        },
+        {
+          "caller": "blanket graph construction",
+          "stack": [
+            "    at Proxy.<anonymous> (file:///Users/rgb/workspace/wiki-mech-maintained/integrations/mech/test/ambiguity.mjs:57:23)",
+            "    at find (file:///Users/rgb/workspace/wiki-mech-maintained/integrations/mech/.artifacts/ambiguity/discourse/client/mech.js:3599:46)",
+            "    at blanket (file:///Users/rgb/workspace/wiki-mech-maintained/integrations/mech/.artifacts/ambiguity/discourse/client/mech.js:3621:21)",
+            "    at file:///Users/rgb/workspace/wiki-mech-maintained/integrations/mech/.artifacts/ambiguity/discourse/client/mech.js:3674:60",
+            "    at Array.map (<anonymous>)",
+            "    at roleWalk (file:///Users/rgb/workspace/wiki-mech-maintained/integrations/mech/.artifacts/ambiguity/discourse/client/mech.js:3674:18)",
+            "    at walks2 (file:///Users/rgb/workspace/wiki-mech-maintained/integrations/mech/.artifacts/ambiguity/discourse/client/mech.js:3676:10)",
+            "    at role_walk_emit (file:///Users/rgb/workspace/wiki-mech-maintained/integrations/mech/.artifacts/ambiguity/discourse/client/mech.js:3708:17)",
+            "    at emit (file:///Users/rgb/workspace/wiki-mech-maintained/integrations/mech/.artifacts/ambiguity/discourse/client/mech.js:3747:97)",
+            "    at Module.run (file:///Users/rgb/workspace/wiki-mech-maintained/integrations/mech/.artifacts/ambiguity/discourse/client/mech.js:2435:45)"
+          ],
+          "candidates": [
+            {
+              "id": "alpha.fixture.test+question-root",
+              "date": 200,
+              "propertiesRead": [
+                "slug"
+              ],
+              "matches": false
+            },
+            {
+              "id": "alpha.fixture.test+shared-page",
+              "date": 100,
+              "propertiesRead": [
+                "slug"
+              ],
+              "matches": true
+            }
+          ],
+          "result": {
+            "id": "alpha.fixture.test+shared-page",
+            "site": "alpha.fixture.test",
+            "slug": "shared-page",
+            "date": 100,
+            "title": "Alpha Older Interpretation"
+          },
+          "siteConstraintEvaluated": false
+        }
+      ],
+      "tracedGraphTarget": {
+        "id": "alpha.fixture.test+shared-page",
+        "site": "alpha.fixture.test",
+        "slug": "shared-page",
+        "date": 100,
+        "title": "Alpha Older Interpretation"
+      }
+    },
+    {
+      "implementation": "baseline",
+      "siteOrder": [
+        "beta.fixture.test",
+        "alpha.fixture.test"
+      ],
+      "tracingMatchesUninstrumented": true,
+      "neighborhood": [
+        {
+          "domain": "beta.fixture.test",
+          "slug": "shared-page",
+          "date": 300,
+          "title": "Beta Newer Interpretation",
+          "links": {}
+        },
+        {
+          "domain": "alpha.fixture.test",
+          "slug": "question-root",
+          "date": 200,
+          "title": "Question Root",
+          "links": {
+            "shared-page": 1
+          }
+        },
+        {
+          "domain": "alpha.fixture.test",
+          "slug": "shared-page",
+          "date": 100,
+          "title": "Alpha Older Interpretation",
+          "links": {}
+        }
+      ],
+      "extracted": {
+        "identity": "domain+slug",
+        "edges": [
+          {
+            "fromId": "alpha.fixture.test+question-root",
+            "toId": "alpha.fixture.test+shared-page",
+            "role": "question",
+            "source": {
+              "pageId": "alpha.fixture.test+question-root",
+              "fold": "question",
+              "extractorVersion": "extract-fold-aware-v1"
+            }
+          }
+        ],
+        "metadata": {
+          "extractorVersion": "extract-fold-aware-v1",
+          "timestamp": "2026-10-08T10:00:00.000Z",
+          "pagesInScope": 3,
+          "pagesFetched": 3,
+          "pagesParsed": 3,
+          "fetchFailures": 0,
+          "parseFailures": 0,
+          "unparsedPages": [],
+          "edgesExtracted": 1,
+          "edgesByRole": {
+            "question": 1,
+            "claim": 0,
+            "support": 0,
+            "oppose": 0
+          },
+          "foldsEncountered": {
+            "question": 1
+          },
+          "foldsUnknown": {},
+          "note": "fetch"
+        }
+      },
+      "aspects": [
+        {
+          "id": "op2",
+          "result": [
+            {
+              "name": "Question Root",
+              "graph": {
+                "nodes": [
+                  {
+                    "type": "",
+                    "in": [],
+                    "out": [
+                      0,
+                      1
+                    ],
+                    "props": {
+                      "name": "Question\nRoot",
+                      "title": "Question Root",
+                      "site": "alpha.fixture.test"
+                    }
+                  },
+                  {
+                    "type": "",
+                    "in": [
+                      0,
+                      1
+                    ],
+                    "out": [],
+                    "props": {
+                      "name": "Beta\nNewer\nInterpretation",
+                      "title": "Beta Newer Interpretation",
+                      "site": "beta.fixture.test"
+                    }
+                  }
+                ],
+                "rels": [
+                  {
+                    "type": "",
+                    "from": 0,
+                    "to": 1,
+                    "props": {}
+                  },
+                  {
+                    "type": "",
+                    "from": 0,
+                    "to": 1,
+                    "props": {}
+                  }
+                ]
+              }
+            }
+          ],
+          "source": "WALK 60 questions"
+        }
+      ],
+      "publications": [
+        {
+          "id": "op2",
+          "topic": "aspect",
+          "data": [
+            {
+              "name": "Question Root",
+              "graph": {
+                "nodes": [
+                  {
+                    "type": "",
+                    "in": [],
+                    "out": [
+                      0,
+                      1
+                    ],
+                    "props": {
+                      "name": "Question\nRoot",
+                      "title": "Question Root",
+                      "site": "alpha.fixture.test"
+                    }
+                  },
+                  {
+                    "type": "",
+                    "in": [
+                      0,
+                      1
+                    ],
+                    "out": [],
+                    "props": {
+                      "name": "Beta\nNewer\nInterpretation",
+                      "title": "Beta Newer Interpretation",
+                      "site": "beta.fixture.test"
+                    }
+                  }
+                ],
+                "rels": [
+                  {
+                    "type": "",
+                    "from": 0,
+                    "to": 1,
+                    "props": {}
+                  },
+                  {
+                    "type": "",
+                    "from": 0,
+                    "to": 1,
+                    "props": {}
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      ],
+      "batches": [
+        {
+          "data": {
+            "type": "batch",
+            "sources": [
+              {
+                "source": "WALK 60 questions",
+                "aspects": [
+                  {
+                    "name": "Question Root",
+                    "graph": {
+                      "nodes": [
+                        {
+                          "type": "",
+                          "in": [],
+                          "out": [
+                            0,
+                            1
+                          ],
+                          "props": {
+                            "name": "Question\nRoot",
+                            "title": "Question Root",
+                            "site": "alpha.fixture.test"
+                          }
+                        },
+                        {
+                          "type": "",
+                          "in": [
+                            0,
+                            1
+                          ],
+                          "out": [],
+                          "props": {
+                            "name": "Beta\nNewer\nInterpretation",
+                            "title": "Beta Newer Interpretation",
+                            "site": "beta.fixture.test"
+                          }
+                        }
+                      ],
+                      "rels": [
+                        {
+                          "type": "",
+                          "from": 0,
+                          "to": 1,
+                          "props": {}
+                        },
+                        {
+                          "type": "",
+                          "from": 0,
+                          "to": 1,
+                          "props": {}
+                        }
+                      ]
+                    }
+                  }
+                ]
+              }
+            ],
+            "pageKey": "root-page"
+          },
+          "origin": "https://alpha.fixture.test"
+        }
+      ],
+      "errors": [],
+      "fetches": [
+        "//beta.fixture.test/shared-page.json",
+        "//alpha.fixture.test/question-root.json",
+        "//alpha.fixture.test/shared-page.json"
+      ],
+      "listeners": [
+        {
+          "event": "message",
+          "function": "soloListener"
+        }
+      ],
+      "statuses": [
+        {
+          "id": "op0",
+          "command": "NEIGHBORS",
+          "text": "⇒ 3 pages, 2 sites"
+        },
+        {
+          "id": "op1",
+          "command": "EXTRACT",
+          "text": " ⇒ parsed 3/3 pages, 1 typed edges (claim: 0; unknown folds: 0)"
+        },
+        {
+          "id": "op2",
+          "command": "WALK 60 questions",
+          "text": " ⇒ 1 aspects, 2 nodes"
+        }
+      ],
+      "rootSelection": {
+        "mode": "question",
+        "lineupIds": [
+          "alpha.fixture.test+question-root"
+        ],
+        "eligibleSourceIds": [
+          "alpha.fixture.test+question-root"
+        ],
+        "firstGraphNode": {
+          "type": "",
+          "in": [],
+          "out": [
+            0,
+            1
+          ],
+          "props": {
+            "name": "Question\nRoot",
+            "title": "Question Root",
+            "site": "alpha.fixture.test"
+          }
+        },
+        "qualifiedLookup": {
+          "id": "alpha.fixture.test+question-root",
+          "site": "alpha.fixture.test",
+          "slug": "question-root",
+          "date": 200,
+          "title": "Question Root"
+        }
+      },
+      "lookups": [
+        {
+          "caller": "roleWalk root selection",
+          "stack": [
+            "    at Proxy.<anonymous> (file:///Users/rgb/workspace/wiki-mech-maintained/integrations/mech/test/ambiguity.mjs:57:23)",
+            "    at find (file:///Users/rgb/workspace/wiki-mech-maintained/integrations/mech/.artifacts/ambiguity/baseline/client/mech.js:116:46)",
+            "    at file:///Users/rgb/workspace/wiki-mech-maintained/integrations/mech/.artifacts/ambiguity/baseline/client/mech.js:334:14",
+            "    at Array.map (<anonymous>)",
+            "    at roleWalk (file:///Users/rgb/workspace/wiki-mech-maintained/integrations/mech/.artifacts/ambiguity/baseline/client/mech.js:331:32)",
+            "    at walks (file:///Users/rgb/workspace/wiki-mech-maintained/integrations/mech/.artifacts/ambiguity/baseline/client/mech.js:171:14)",
+            "    at walk_emit (file:///Users/rgb/workspace/wiki-mech-maintained/integrations/mech/.artifacts/ambiguity/baseline/client/mech.js:1040:17)",
+            "    at Module.run (file:///Users/rgb/workspace/wiki-mech-maintained/integrations/mech/.artifacts/ambiguity/baseline/client/mech.js:686:45)",
+            "    at run (file:///Users/rgb/workspace/wiki-mech-maintained/integrations/mech/test/ambiguity.mjs:176:24)",
+            "    at async file:///Users/rgb/workspace/wiki-mech-maintained/integrations/mech/test/ambiguity.mjs:216:22"
+          ],
+          "candidates": [
+            {
+              "id": "beta.fixture.test+shared-page",
+              "date": 300,
+              "propertiesRead": [
+                "slug"
+              ],
+              "matches": false
+            },
+            {
+              "id": "alpha.fixture.test+question-root",
+              "date": 200,
+              "propertiesRead": [
+                "slug",
+                "domain"
+              ],
+              "matches": true
+            }
+          ],
+          "result": {
+            "id": "alpha.fixture.test+question-root",
+            "site": "alpha.fixture.test",
+            "slug": "question-root",
+            "date": 200,
+            "title": "Question Root"
+          },
+          "siteConstraintEvaluated": true
+        },
+        {
+          "caller": "blanket graph construction",
+          "stack": [
+            "    at Proxy.<anonymous> (file:///Users/rgb/workspace/wiki-mech-maintained/integrations/mech/test/ambiguity.mjs:57:23)",
+            "    at find (file:///Users/rgb/workspace/wiki-mech-maintained/integrations/mech/.artifacts/ambiguity/baseline/client/mech.js:116:46)",
+            "    at blanket (file:///Users/rgb/workspace/wiki-mech-maintained/integrations/mech/.artifacts/ambiguity/baseline/client/mech.js:141:21)",
+            "    at file:///Users/rgb/workspace/wiki-mech-maintained/integrations/mech/.artifacts/ambiguity/baseline/client/mech.js:336:60",
+            "    at Array.map (<anonymous>)",
+            "    at roleWalk (file:///Users/rgb/workspace/wiki-mech-maintained/integrations/mech/.artifacts/ambiguity/baseline/client/mech.js:336:18)",
+            "    at walks (file:///Users/rgb/workspace/wiki-mech-maintained/integrations/mech/.artifacts/ambiguity/baseline/client/mech.js:171:14)",
+            "    at walk_emit (file:///Users/rgb/workspace/wiki-mech-maintained/integrations/mech/.artifacts/ambiguity/baseline/client/mech.js:1040:17)",
+            "    at Module.run (file:///Users/rgb/workspace/wiki-mech-maintained/integrations/mech/.artifacts/ambiguity/baseline/client/mech.js:686:45)",
+            "    at run (file:///Users/rgb/workspace/wiki-mech-maintained/integrations/mech/test/ambiguity.mjs:176:24)"
+          ],
+          "candidates": [
+            {
+              "id": "beta.fixture.test+shared-page",
+              "date": 300,
+              "propertiesRead": [
+                "slug"
+              ],
+              "matches": true
+            }
+          ],
+          "result": {
+            "id": "beta.fixture.test+shared-page",
+            "site": "beta.fixture.test",
+            "slug": "shared-page",
+            "date": 300,
+            "title": "Beta Newer Interpretation"
+          },
+          "siteConstraintEvaluated": false
+        }
+      ],
+      "tracedGraphTarget": {
+        "id": "beta.fixture.test+shared-page",
+        "site": "beta.fixture.test",
+        "slug": "shared-page",
+        "date": 300,
+        "title": "Beta Newer Interpretation"
+      }
+    },
+    {
+      "implementation": "composite",
+      "siteOrder": [
+        "beta.fixture.test",
+        "alpha.fixture.test"
+      ],
+      "tracingMatchesUninstrumented": true,
+      "neighborhood": [
+        {
+          "domain": "beta.fixture.test",
+          "slug": "shared-page",
+          "date": 300,
+          "title": "Beta Newer Interpretation",
+          "links": {}
+        },
+        {
+          "domain": "alpha.fixture.test",
+          "slug": "question-root",
+          "date": 200,
+          "title": "Question Root",
+          "links": {
+            "shared-page": 1
+          }
+        },
+        {
+          "domain": "alpha.fixture.test",
+          "slug": "shared-page",
+          "date": 100,
+          "title": "Alpha Older Interpretation",
+          "links": {}
+        }
+      ],
+      "extracted": {
+        "identity": "domain+slug",
+        "edges": [
+          {
+            "fromId": "alpha.fixture.test+question-root",
+            "toId": "alpha.fixture.test+shared-page",
+            "role": "question",
+            "source": {
+              "pageId": "alpha.fixture.test+question-root",
+              "fold": "question",
+              "extractorVersion": "extract-fold-aware-v1"
+            }
+          }
+        ],
+        "metadata": {
+          "extractorVersion": "extract-fold-aware-v1",
+          "timestamp": "2026-10-08T10:00:00.000Z",
+          "pagesInScope": 3,
+          "pagesFetched": 3,
+          "pagesParsed": 3,
+          "fetchFailures": 0,
+          "parseFailures": 0,
+          "unparsedPages": [],
+          "edgesExtracted": 1,
+          "edgesByRole": {
+            "question": 1,
+            "claim": 0,
+            "support": 0,
+            "oppose": 0
+          },
+          "foldsEncountered": {
+            "question": 1
+          },
+          "foldsUnknown": {},
+          "note": "fetch"
+        }
+      },
+      "aspects": [
+        {
+          "id": "op2",
+          "result": [
+            {
+              "name": "Question Root",
+              "graph": {
+                "nodes": [
+                  {
+                    "type": "",
+                    "in": [],
+                    "out": [
+                      0,
+                      1
+                    ],
+                    "props": {
+                      "name": "Question\nRoot",
+                      "title": "Question Root",
+                      "site": "alpha.fixture.test"
+                    }
+                  },
+                  {
+                    "type": "",
+                    "in": [
+                      0,
+                      1
+                    ],
+                    "out": [],
+                    "props": {
+                      "name": "Beta\nNewer\nInterpretation",
+                      "title": "Beta Newer Interpretation",
+                      "site": "beta.fixture.test"
+                    }
+                  }
+                ],
+                "rels": [
+                  {
+                    "type": "",
+                    "from": 0,
+                    "to": 1,
+                    "props": {}
+                  },
+                  {
+                    "type": "",
+                    "from": 0,
+                    "to": 1,
+                    "props": {}
+                  }
+                ]
+              }
+            }
+          ],
+          "source": "WALK 60 questions"
+        }
+      ],
+      "publications": [
+        {
+          "id": "op2",
+          "topic": "aspect",
+          "data": [
+            {
+              "name": "Question Root",
+              "graph": {
+                "nodes": [
+                  {
+                    "type": "",
+                    "in": [],
+                    "out": [
+                      0,
+                      1
+                    ],
+                    "props": {
+                      "name": "Question\nRoot",
+                      "title": "Question Root",
+                      "site": "alpha.fixture.test"
+                    }
+                  },
+                  {
+                    "type": "",
+                    "in": [
+                      0,
+                      1
+                    ],
+                    "out": [],
+                    "props": {
+                      "name": "Beta\nNewer\nInterpretation",
+                      "title": "Beta Newer Interpretation",
+                      "site": "beta.fixture.test"
+                    }
+                  }
+                ],
+                "rels": [
+                  {
+                    "type": "",
+                    "from": 0,
+                    "to": 1,
+                    "props": {}
+                  },
+                  {
+                    "type": "",
+                    "from": 0,
+                    "to": 1,
+                    "props": {}
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      ],
+      "batches": [
+        {
+          "data": {
+            "type": "batch",
+            "sources": [
+              {
+                "source": "WALK 60 questions",
+                "aspects": [
+                  {
+                    "name": "Question Root",
+                    "graph": {
+                      "nodes": [
+                        {
+                          "type": "",
+                          "in": [],
+                          "out": [
+                            0,
+                            1
+                          ],
+                          "props": {
+                            "name": "Question\nRoot",
+                            "title": "Question Root",
+                            "site": "alpha.fixture.test"
+                          }
+                        },
+                        {
+                          "type": "",
+                          "in": [
+                            0,
+                            1
+                          ],
+                          "out": [],
+                          "props": {
+                            "name": "Beta\nNewer\nInterpretation",
+                            "title": "Beta Newer Interpretation",
+                            "site": "beta.fixture.test"
+                          }
+                        }
+                      ],
+                      "rels": [
+                        {
+                          "type": "",
+                          "from": 0,
+                          "to": 1,
+                          "props": {}
+                        },
+                        {
+                          "type": "",
+                          "from": 0,
+                          "to": 1,
+                          "props": {}
+                        }
+                      ]
+                    }
+                  }
+                ]
+              }
+            ],
+            "pageKey": "root-page"
+          },
+          "origin": "https://alpha.fixture.test"
+        }
+      ],
+      "errors": [],
+      "fetches": [
+        "//beta.fixture.test/shared-page.json",
+        "//alpha.fixture.test/question-root.json",
+        "//alpha.fixture.test/shared-page.json"
+      ],
+      "listeners": [
+        {
+          "event": "message",
+          "function": "soloListener"
+        }
+      ],
+      "statuses": [
+        {
+          "id": "op0",
+          "command": "NEIGHBORS",
+          "text": "⇒ 3 pages, 2 sites"
+        },
+        {
+          "id": "op1",
+          "command": "EXTRACT",
+          "text": " ⇒ parsed 3/3 pages, 1 typed edges (claim: 0; unknown folds: 0)"
+        },
+        {
+          "id": "op2",
+          "command": "WALK 60 questions",
+          "text": " ⇒ 1 aspects, 2 nodes"
+        },
+        {
+          "id": "op3",
+          "command": "SOLO",
+          "text": ""
+        },
+        {
+          "id": "op3",
+          "command": "SOLO",
+          "text": " ⇒ 1 sources, 1 aspects"
+        }
+      ],
+      "rootSelection": {
+        "mode": "question",
+        "lineupIds": [
+          "alpha.fixture.test+question-root"
+        ],
+        "eligibleSourceIds": [
+          "alpha.fixture.test+question-root"
+        ],
+        "firstGraphNode": {
+          "type": "",
+          "in": [],
+          "out": [
+            0,
+            1
+          ],
+          "props": {
+            "name": "Question\nRoot",
+            "title": "Question Root",
+            "site": "alpha.fixture.test"
+          }
+        },
+        "qualifiedLookup": {
+          "id": "alpha.fixture.test+question-root",
+          "site": "alpha.fixture.test",
+          "slug": "question-root",
+          "date": 200,
+          "title": "Question Root"
+        }
+      },
+      "lookups": [
+        {
+          "caller": "roleWalk root selection",
+          "stack": [
+            "    at Proxy.<anonymous> (file:///Users/rgb/workspace/wiki-mech-maintained/integrations/mech/test/ambiguity.mjs:57:23)",
+            "    at find (file:///Users/rgb/workspace/wiki-mech-maintained/integrations/mech/.artifacts/ambiguity/discourse/client/mech.js:3599:46)",
+            "    at file:///Users/rgb/workspace/wiki-mech-maintained/integrations/mech/.artifacts/ambiguity/discourse/client/mech.js:3672:14",
+            "    at Array.map (<anonymous>)",
+            "    at roleWalk (file:///Users/rgb/workspace/wiki-mech-maintained/integrations/mech/.artifacts/ambiguity/discourse/client/mech.js:3669:32)",
+            "    at walks2 (file:///Users/rgb/workspace/wiki-mech-maintained/integrations/mech/.artifacts/ambiguity/discourse/client/mech.js:3676:10)",
+            "    at role_walk_emit (file:///Users/rgb/workspace/wiki-mech-maintained/integrations/mech/.artifacts/ambiguity/discourse/client/mech.js:3708:17)",
+            "    at emit (file:///Users/rgb/workspace/wiki-mech-maintained/integrations/mech/.artifacts/ambiguity/discourse/client/mech.js:3747:97)",
+            "    at Module.run (file:///Users/rgb/workspace/wiki-mech-maintained/integrations/mech/.artifacts/ambiguity/discourse/client/mech.js:2435:45)",
+            "    at run (file:///Users/rgb/workspace/wiki-mech-maintained/integrations/mech/test/ambiguity.mjs:176:24)"
+          ],
+          "candidates": [
+            {
+              "id": "beta.fixture.test+shared-page",
+              "date": 300,
+              "propertiesRead": [
+                "slug"
+              ],
+              "matches": false
+            },
+            {
+              "id": "alpha.fixture.test+question-root",
+              "date": 200,
+              "propertiesRead": [
+                "slug",
+                "domain"
+              ],
+              "matches": true
+            }
+          ],
+          "result": {
+            "id": "alpha.fixture.test+question-root",
+            "site": "alpha.fixture.test",
+            "slug": "question-root",
+            "date": 200,
+            "title": "Question Root"
+          },
+          "siteConstraintEvaluated": true
+        },
+        {
+          "caller": "blanket graph construction",
+          "stack": [
+            "    at Proxy.<anonymous> (file:///Users/rgb/workspace/wiki-mech-maintained/integrations/mech/test/ambiguity.mjs:57:23)",
+            "    at find (file:///Users/rgb/workspace/wiki-mech-maintained/integrations/mech/.artifacts/ambiguity/discourse/client/mech.js:3599:46)",
+            "    at blanket (file:///Users/rgb/workspace/wiki-mech-maintained/integrations/mech/.artifacts/ambiguity/discourse/client/mech.js:3621:21)",
+            "    at file:///Users/rgb/workspace/wiki-mech-maintained/integrations/mech/.artifacts/ambiguity/discourse/client/mech.js:3674:60",
+            "    at Array.map (<anonymous>)",
+            "    at roleWalk (file:///Users/rgb/workspace/wiki-mech-maintained/integrations/mech/.artifacts/ambiguity/discourse/client/mech.js:3674:18)",
+            "    at walks2 (file:///Users/rgb/workspace/wiki-mech-maintained/integrations/mech/.artifacts/ambiguity/discourse/client/mech.js:3676:10)",
+            "    at role_walk_emit (file:///Users/rgb/workspace/wiki-mech-maintained/integrations/mech/.artifacts/ambiguity/discourse/client/mech.js:3708:17)",
+            "    at emit (file:///Users/rgb/workspace/wiki-mech-maintained/integrations/mech/.artifacts/ambiguity/discourse/client/mech.js:3747:97)",
+            "    at Module.run (file:///Users/rgb/workspace/wiki-mech-maintained/integrations/mech/.artifacts/ambiguity/discourse/client/mech.js:2435:45)"
+          ],
+          "candidates": [
+            {
+              "id": "beta.fixture.test+shared-page",
+              "date": 300,
+              "propertiesRead": [
+                "slug"
+              ],
+              "matches": true
+            }
+          ],
+          "result": {
+            "id": "beta.fixture.test+shared-page",
+            "site": "beta.fixture.test",
+            "slug": "shared-page",
+            "date": 300,
+            "title": "Beta Newer Interpretation"
+          },
+          "siteConstraintEvaluated": false
+        }
+      ],
+      "tracedGraphTarget": {
+        "id": "beta.fixture.test+shared-page",
+        "site": "beta.fixture.test",
+        "slug": "shared-page",
+        "date": 300,
+        "title": "Beta Newer Interpretation"
+      }
+    }
+  ]
+}

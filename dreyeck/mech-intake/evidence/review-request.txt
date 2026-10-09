@@ -1,0 +1,188 @@
+# Codex: Correct the Four Mech Integration Review Findings
+
+## Objective
+
+Correct the four blocking findings from the independent review of the uncommitted maintained Mech integration module.
+
+Worktree:
+
+`/Users/rgb/workspace/wiki-mech-maintained`
+
+Branch:
+
+`codex/mech-intake-module`
+
+Module:
+
+`integrations/mech/`
+
+This is a correction slice, not a new integration or migration task.
+
+Do not commit yet.
+
+## Starting conditions
+
+Observe the repository root, branch, HEAD, index and working-tree state before editing.
+
+Preserve the existing module and all unrelated files.
+
+The user intentionally deleted `.DS_Store`; do not recreate it.
+
+The independent review established four findings: one P1 and three P2.
+
+Address exactly these findings, including regression tests.
+
+## 1. P1 — EDGES HTML attribute injection
+
+Review `src/discourse.mjs`, particularly the reference-site input and the HTML link construction around lines 48, 206 and 250.
+
+The current implementation permits an untrusted reference-site string to escape a quoted `href` attribute.
+
+Correct the owned renderer.
+
+Requirements:
+
+- Establish the existing contract for valid Wiki site identifiers and link targets before choosing validation rules.
+- Validate or reject malformed site identifiers.
+- Construct safe URL attributes without injecting untrusted text into HTML syntax.
+- Preserve supported Wiki link formats and the navigation contract for valid inputs.
+- Keep text escaping and attribute/URL safety distinct.
+- Reject or render invalid destinations inertly, with appropriate diagnostics.
+- Do not introduce a broader URL policy without evidence that the application requires it.
+
+Add regression tests covering:
+
+- Normal site and slug values.
+- Malformed site values.
+- Quotes and attribute delimiters.
+- Injected event-handler syntax.
+- URL scheme or host manipulation attempts.
+- Existing valid navigation output.
+
+The adversarial fixture must remain inert. Do not execute an attack payload.
+
+Do not alter upstream Mech.
+
+## 2. P2 — Browser acceptance exit status
+
+Review `test/browser.mjs`, especially the acceptance computation and process-exit handling.
+
+Ensure that command success requires all of the following:
+
+- Every required T1–T9 criterion is PASS.
+- All individual required checks pass.
+- No unexpected requests or browser/page errors are recorded.
+- All mandatory cleanup conditions are satisfied.
+
+A failed acceptance criterion must produce a nonzero process exit status.
+
+Add a deterministic negative test that introduces a controlled page or console error and verifies:
+
+1. The appropriate criterion fails.
+2. The aggregate acceptance fails.
+3. The command exits nonzero.
+
+Do not rely solely on the successful browser fixture to test failure reporting.
+
+## 3. P2 — Browser context cleanup
+
+Review browser-context creation, initialization, registration and teardown.
+
+Ensure that a context is closed even when navigation, bundle loading or subsequent initialization fails before `openConfig` returns.
+
+Use explicit ownership tracking and try/finally-style cleanup as appropriate.
+
+Record cleanup outcomes from actual operations.
+
+Do not report `ownedContextsClosed: true` merely because the normal cleanup path was entered.
+
+Add failure-injection tests for initialization failures and verify that all experiment-owned contexts are closed or that any cleanup failure is explicitly reported and causes acceptance failure.
+
+Do not affect other browser processes or profiles.
+
+## 4. P2 — Durable acceptance evidence
+
+Keep generated bundles, temporary browser profiles and large execution outputs ignored.
+
+Preserve a compact acceptance record in version-controlled module source, outside `.artifacts`.
+
+The record must identify:
+
+- Tested upstream and downstream source OIDs.
+- Wiki base revision and uncommitted module identity.
+- Dependency-lock identity.
+- Build profiles and generated artifact digests.
+- Test command and relevant tool versions.
+- T1–T9 results and check counts.
+- Known behavioral differences.
+- Reproducibility and browser-provenance limitations.
+- Location and purpose of optional generated diagnostic files.
+
+Avoid absolute temporary paths as required inputs.
+
+Do not treat the acceptance record as an independent extension Git release.
+
+Ensure a subsequent test run cannot silently replace the only retained evidence for a previous acceptance decision.
+
+## 5. Regression verification
+
+After corrections, execute the relevant existing tests and new negative tests.
+
+Rebuild and test both profiles.
+
+Verify:
+
+- Unchanged upstream Mech source.
+- Unchanged upstream parser and dispatcher.
+- Correct extension registration.
+- Ordinary WALK delegation.
+- EXTRACT, EDGES, DEBUG and role-WALK behavioral contracts.
+- The known duplicate-slug ambiguity witnesses.
+- Trusted CODE guard tests.
+- SOLO status/reset and batch-delivery tests.
+- T1–T9 technical browser acceptance.
+- Repeated build output identity.
+
+Preserve the earlier full behavioral-equivalence result as FAILED.
+
+Do not fix the duplicate-slug resolution policy or change graph-projection semantics.
+
+Distinguish new test passes from previously retained evidence.
+
+## 6. Scope and stopping conditions
+
+Allowed:
+
+- Corrections to the four findings.
+- Regression tests for those corrections.
+- Necessary changes to module-local test and build documentation.
+- A compact durable acceptance record.
+
+Not allowed:
+
+- Changes to root Wiki packages or Nix expressions.
+- Upstream source edits.
+- New Mech commands or application features.
+- LISTEN/CODE authorization redesign.
+- Package publication or deployment.
+- New dependencies without separate authorization.
+- Git commits.
+
+Stop and report if a correction requires changes outside the module or changes established application semantics.
+
+## Deliverable
+
+Return:
+
+1. The exact files changed.
+2. How each of the four findings was corrected.
+3. The added regression tests, including negative tests.
+4. Test commands, pass/fail counts and exit statuses.
+5. Updated T1–T9 results.
+6. Updated source, lockfile and artifact identities.
+7. Any remaining defects or unsupported claims.
+8. Final Git working-tree status.
+
+Finish with reviewable, uncommitted changes.
+
+Do not proceed to a commit until the corrections have been independently reviewed.

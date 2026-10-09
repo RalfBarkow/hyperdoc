@@ -1,0 +1,178 @@
+{
+  "hyperdoc": {
+    "root": "/Users/rgb/workspace/hyperdoc-dreyeck-ch",
+    "branch": "dreyeck.ch",
+    "head": "4136ea621cce62aaae7f3d9f923a811e12693754",
+    "startingIndex": "empty",
+    "startingWorktree": "clean",
+    "finalIndex": "empty",
+    "committed": false
+  },
+  "wikiObservation": {
+    "observedAt": "2026-10-09T04:54:31.341Z",
+    "wiki": {
+      "authority": "https://github.com/RalfBarkow/wiki",
+      "branch": "codex/mech-intake-module",
+      "head": "8e6c2e53a47f038f4b0c6d2ef35576cc1d4f456c",
+      "status": "## codex/mech-intake-module\n?? integrations/",
+      "indexDiff": ""
+    },
+    "module": {
+      "authority": "https://github.com/RalfBarkow/wiki",
+      "baseCommitOid": "8e6c2e53a47f038f4b0c6d2ef35576cc1d4f456c",
+      "modulePath": "integrations/mech",
+      "moduleVersion": "0.1.0",
+      "extensionCommitOid": null,
+      "workingTree": true,
+      "sourceContentSha256": "dc5edee13803ef230f3f6e2611d3700573e6216685cb95b3938bc92ccf6b358f",
+      "sourceDigestExcludes": [
+        "evidence/acceptance/"
+      ],
+      "lockfileSha256": "a270bbc60832486c1bbf5ba8bfb957e7fd9b9bbe9be11e0c790e44dc1820a103"
+    },
+    "kind": "local-source-observation",
+    "runtimeExecuted": false
+  },
+  "reader": {
+    "title": "Reading a Maintained Mech Composition",
+    "hyperbookId": "dreyeck/mech-intake/reading",
+    "textPages": 4,
+    "codePages": 4,
+    "executableExamples": 6,
+    "verifiedDefinitions": 23,
+    "retainedFiles": 21,
+    "manifestSha256": "a6609a129a555bd1bcf41fdb3056d9c1a20cd0fc2f034c81b157979a6af5b382",
+    "projections": {
+      "Source Composition": {
+        "topics": 21,
+        "associations": 19
+      },
+      "Discourse Execution": {
+        "topics": 16,
+        "associations": 14
+      }
+    }
+  },
+  "tests": [
+    {
+      "suite": "new-reading-and-tala",
+      "exitStatus": 0,
+      "log": "/private/tmp/mech-intake-acceptance-final.log",
+      "logSha256": "932ab7af79278f5a529105db6f62a31f7d721187bd51ec8e32997bae91fe9c4c"
+    },
+    {
+      "suite": "existing-regressions",
+      "exitStatus": 0,
+      "log": "/private/tmp/mech-intake-regressions-final.log",
+      "logSha256": "2aaf61aace1de98c2238c08f783c2870a2f002b03be6ee9470caffbdd74407cb"
+    },
+    {
+      "suite": "fresh-catalog",
+      "exitStatus": 0,
+      "log": "/private/tmp/mech-intake-catalog-final2.log",
+      "logSha256": "a0701367ea2dab5416bb92dafd2cbbc39a5d61582776f2682e3996b76cd6195f"
+    }
+  ],
+  "newChecks": 885,
+  "newTalaChecks": 6,
+  "retainedMechDecision": {
+    "technicalBrowser": "PASS",
+    "browserChecks": 36,
+    "criteria": "T1-T9",
+    "fullBehavioralEquivalence": "FAIL",
+    "comparisonPasses": 33,
+    "comparisonFailures": 2,
+    "newMechExecution": false
+  },
+  "tools": {
+    "sbcl": "2.4.10",
+    "cachedWrapper": "/nix/store/8j4gxfa63znzgcba9x1mw68yz7cb0ywf-sbcl-with-packages/bin/sbcl",
+    "sourceEditorCommit": "38afb02d79838d4098589c2e203ba39799a44853",
+    "d2": "v0.9.0",
+    "d2ReleaseUrl": "https://github.com/d2lang/d2/releases/download/v0.9.0/d2-v0.9.0-macos-amd64.tar.gz",
+    "d2ArchiveSha256": "cad39576a480d6bb02ea142fef1726647914b0d2da51ccc9b30b660a2b1babf0",
+    "installedInProfiles": false
+  },
+  "claimExample": {
+    "key": "owned:walks",
+    "path": "integrations/mech/src/discourse.mjs",
+    "file": "owned-discourse.mjs",
+    "authority": "https://github.com/RalfBarkow/wiki",
+    "revision": null,
+    "baseRevision": "8e6c2e53a47f038f4b0c6d2ef35576cc1d4f456c",
+    "moduleDigest": "dc5edee13803ef230f3f6e2611d3700573e6216685cb95b3938bc92ccf6b358f",
+    "definition": "walks",
+    "start": 11650,
+    "end": 15049,
+    "startLine": 317,
+    "endLine": 418,
+    "sha256": "d49a4a012c7c710d219f6b08d72f38b48054d58ec354fc2c493970b312fb23c2",
+    "fileSha256": "2ed678f4458d69251688837b62f68a7151e04d06640901feb455ea700073cda8",
+    "status": "observed-uncommitted-snapshot",
+    "immutableLink": "pending-uncommitted-module",
+    "moduleRelativePath": "src/discourse.mjs",
+    "modulePath": "integrations/mech"
+  },
+  "limits": [
+    "Retained records are inspected; original JavaScript test suites were not rerun.",
+    "No compatibility claim beyond the pinned upstream revision.",
+    "Owned module has no commit OID; immutable file links remain pending.",
+    "Duplicate-slug policy, production Solo and CODE/message trust remain open.",
+    "Ward LISTEN is separately reported temporary source; repository/revision/current deployment unknown."
+  ],
+  "authoring": [
+    "Pinned guarded structural writer; all accepted Lisp/ASDF edits reparse and compare forms.",
+    "Text Pages produced through existing HTML DSL and reparsed.",
+    "Initial Nix devshell dependency bootstrap launches were stopped before authoring; cached closure used instead.",
+    "Reader caught a missing standalone precedent dependency; explicit existing reading dependency added.",
+    "Guard refused a nonportable SBCL printed character name; temporary proposal corrected, guard not bypassed.",
+    "Final tests force recompilation to exclude an older cached test FASL."
+  ],
+  "finalGitStatus": "## dreyeck.ch...github/dreyeck.ch [ahead 2]\n M dreyeck.asd\n M dreyeck/tests/catalog-startup-smoke.lisp\n?? docs/mech-intake-reading-executors.json\n?? docs/mech-intake-reading-report.md\n?? dreyeck/mech-intake/\n?? dreyeck/pages/mech-intake/\n?? dreyeck/tests/mech-intake-reading.lisp",
+  "recordScope": "Original authoring executor evidence is retained as historical; sourceIntegration separately records the later local integration verification.",
+  "sourceIntegration": {
+    "branch": "dreyeck.ch",
+    "parentOid": "4136ea621cce62aaae7f3d9f923a811e12693754",
+    "wikiSourceCommitOid": "971794d2066f87f63e7685447352340d5276a959",
+    "wikiSourceCommitRole": "later matching source, not historical browser execution identity",
+    "verifiedOwnedFiles": 6,
+    "verifiedOwnedDefinitions": 13,
+    "currentManifestSha256": "90c625f9a328594121931e3d82c7c95ca0ac41127d949e63c6d8bcf654a3b7e6",
+    "freshTests": [
+      {
+        "system": "dreyeck/mech-intake/reading/tests",
+        "force": true,
+        "checks": 996,
+        "exitStatus": 0,
+        "log": "/tmp/mech-reading-integration-acceptance.log",
+        "logSha256": "19eab6192a6502af0d6f8e6618eff2556e92970a96fda5ffa04cf37750228286"
+      },
+      {
+        "system": "dreyeck/mech-intake/tala/tests",
+        "force": true,
+        "checks": 6,
+        "exitStatus": 0,
+        "log": "/tmp/mech-reading-integration-acceptance.log",
+        "logSha256": "19eab6192a6502af0d6f8e6618eff2556e92970a96fda5ffa04cf37750228286"
+      },
+      {
+        "system": "dreyeck/catalog/tests",
+        "force": true,
+        "books": 21,
+        "exitStatus": 0,
+        "log": "/tmp/mech-reading-integration-catalog.log",
+        "logSha256": "6f5f788d281199e797f4e7956d02dbd32155341cb0c131c71eec6b9c1812fcf3"
+      }
+    ],
+    "editor": {
+      "authority": "https://github.com/khinsen/html-inspector-views",
+      "oid": "38afb02d79838d4098589c2e203ba39799a44853",
+      "source": "verified clean local checkout; original temporary store path no longer exists",
+      "runtimePinChanged": false
+    },
+    "noMechExecution": true,
+    "wikiModuleChanged": false,
+    "runningImagesReloaded": false,
+    "deployed": false
+  }
+}

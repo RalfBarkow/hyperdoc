@@ -1,0 +1,7 @@
+{
+  "status": "PASS",
+  "selectedComparisonsPassed": 33,
+  "knownDifferencesVerified": 2,
+  "fullBehavioralEquivalence": "FAIL",
+  "normalizationAdded": false
+}
