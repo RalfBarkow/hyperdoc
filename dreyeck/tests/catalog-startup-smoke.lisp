@@ -218,7 +218,7 @@
                              "(PROGN
  (ASSERT (NULL (FIND-PACKAGE :DREYECK/WORKFLOW/AUTHORING)))
  (ASSERT (NULL (FIND-PACKAGE :DREYECK/WORK/AUTHORING)))
- (PROGN (ASSERT (= 21 (LENGTH (HYPERBOOK:HYPERBOOKS-OF HYPERBOOK:*CATALOG*))))
+ (PROGN (ASSERT (= 22 (LENGTH (HYPERBOOK:HYPERBOOKS-OF HYPERBOOK:*CATALOG*))))
         (LET
              ((BOOK
                     (HYPERBOOK:FIND-HYPERBOOK \"dreyeck/nested-actions/reading\"
@@ -361,10 +361,11 @@
  (FORMAT T
          \"OPERATION-REQUEST-CATALOG-PROOF: the gesture reading code page offers Operations; its button and the mark Binding reach one unexecuted request; source unchanged; no authoring runtime.~%\")
  (FORMAT T
-         \"NORMAL-LAUNCHER-PROOF: 21 books including Nested Actions in Solo and Maintained Mech; TALA 12 source widgets (layout capability gated), workflow 12 play thunks; no authoring runtime.~%\"))"))
+         \"NORMAL-LAUNCHER-PROOF: 22 books including Nested Actions, Maintained Mech and FedWiki Configurations; TALA 12 source widgets (layout capability gated), workflow 12 play thunks; no authoring runtime.~%\"))"))
                (LIST
                      "(LET* ((BOOK (HYPERBOOK:FIND-HYPERBOOK \"dreyeck/upstream-intake\" :SIGNAL-ERROR? T)) (PAGE (HYPERBOOK:FIND-PAGE BOOK \"Upstream Intake as a Read-Only Observation\" :SIGNAL-ERROR? T)) (DOM (PLUMP-PARSER:PARSE (HYPERDOC:FILE-OF PAGE))) (ACTION \"(upstream-intake-removal-workspace-example)\") (ANCHORS (REMOVE-IF-NOT (LAMBDA (A) (EQUAL ACTION (PLUMP-DOM:ATTRIBUTE A \"expr\"))) (PLUMP-DOM:GET-ELEMENTS-BY-TAG-NAME DOM \"a\"))) (VIEW (FIND \"Content\" (HTML-INSPECTOR-VIEWS:ALL-VIEWS PAGE) :KEY (FUNCTION HTML-INSPECTOR-VIEWS:VIEW-TITLE) :TEST (FUNCTION EQUAL)))) (ASSERT (= 1 (LENGTH ANCHORS))) (ASSERT (EQUAL \"Topicmap\" (PLUMP-DOM:ATTRIBUTE (FIRST ANCHORS) \"view\"))) (HTML-INSPECTOR-VIEWS:VIEW-HTML VIEW) (LET* ((WIDGET (FIND-IF (LAMBDA (ENTRY) (SEARCH \"upstream-intake-removal-workspace-example\" (HTML-INSPECTOR-VIEWS:VIEW-HTML (CDR ENTRY)) :TEST (FUNCTION CHAR-EQUAL))) (HTML-INSPECTOR-VIEWS:VIEW-REFERENCES VIEW))) (THUNKS (AND WIDGET (REMOVE-IF-NOT (LAMBDA (ENTRY) (TYPEP (CDR ENTRY) (QUOTE HTML-INSPECTOR-VIEWS:THUNK))) (HTML-INSPECTOR-VIEWS:VIEW-REFERENCES (CDR WIDGET)))))) (ASSERT WIDGET) (ASSERT (= 1 (LENGTH THUNKS))) (LET* ((WORKSPACE (HTML-INSPECTOR-VIEWS:EVAL-THUNK (CDAR THUNKS))) (PROJECTION (DREYECK/TOPICMAP:TOPICMAP-WORKSPACE-PROJECTION-OF WORKSPACE)) (WORKSPACE-VIEW (FIND \"Topicmap\" (HTML-INSPECTOR-VIEWS:ALL-VIEWS WORKSPACE) :KEY (FUNCTION HTML-INSPECTOR-VIEWS:VIEW-TITLE) :TEST (FUNCTION EQUAL)))) (ASSERT (TYPEP WORKSPACE (QUOTE DREYECK/TOPICMAP:TOPICMAP-WORKSPACE))) (ASSERT (EQUAL \"page:dreyeck/upstream-intake/Observing an Upstream Commit\" (DREYECK/TOPICMAP:TOPICMAP-WORKSPACE-POINT-OF WORKSPACE))) (PROGN (ASDF/OPERATE:LOAD-SYSTEM \"dreyeck/hyperdoc/curation/tests\") (LET ((EXPECTED (UIOP/PACKAGE:SYMBOL-CALL :DREYECK/HYPERDOC/CURATION/TESTS :EXPECTED-INTAKE-IMPACT :COMMIT)) (ACTUAL (DREYECK/TOPICMAP/CURATION:IMPACT-SUMMARY PROJECTION))) (ASSERT (= (LENGTH EXPECTED) (LENGTH ACTUAL))) (ASSERT (NULL (SET-EXCLUSIVE-OR EXPECTED ACTUAL :TEST (FUNCTION EQUAL)))))) (ASSERT WORKSPACE-VIEW) (LET ((HTML (HTML-INSPECTOR-VIEWS:VIEW-HTML WORKSPACE-VIEW))) (ASSERT (SEARCH \"Point\" HTML)) (ASSERT (SEARCH \"Associations\" HTML))) (FORMAT T \"~%CATALOG-CURATION-DEMO-PASS: existing overview, one action/play thunk, Point and exact warranted impact.~%\"))))"
-                     "(LET ((BOOK (HYPERBOOK:FIND-HYPERBOOK \"dreyeck/mech-intake/reading\" :SIGNAL-ERROR? T))) (ASSERT (STRING= \"Reading a Maintained Mech Composition\" (HYPERBOOK:TITLE-OF BOOK))) (ASSERT (HYPERBOOK:FIND-PAGE BOOK \"Reading a Maintained Mech Composition\" :SIGNAL-ERROR? T)))")))
+                     "(LET ((BOOK (HYPERBOOK:FIND-HYPERBOOK \"dreyeck/mech-intake/reading\" :SIGNAL-ERROR? T))) (ASSERT (STRING= \"Reading a Maintained Mech Composition\" (HYPERBOOK:TITLE-OF BOOK))) (ASSERT (HYPERBOOK:FIND-PAGE BOOK \"Reading a Maintained Mech Composition\" :SIGNAL-ERROR? T)))"
+                     "(LET ((BOOK (HYPERBOOK:FIND-HYPERBOOK \"dreyeck/fedwiki-config/reading\" :SIGNAL-ERROR? T))) (ASSERT (STRING= \"Reading FedWiki Configuration and Fork Behavior\" (HYPERBOOK:TITLE-OF BOOK))) (ASSERT (HYPERBOOK:FIND-PAGE BOOK \"Forking a Local Page Across Origins\" :SIGNAL-ERROR? T)))")))
 
 (DEFUN FRESH-CATALOG-COMMAND ()
   (APPEND

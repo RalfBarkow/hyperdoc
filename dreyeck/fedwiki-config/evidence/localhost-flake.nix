@@ -1,0 +1,428 @@
+{
+  description = "fedwiki/wiki packaged from this checkout via buildNpmPackage";
+
+  inputs = {
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.05";
+    flake-utils.url = "github:numtide/flake-utils";
+    "wiki-client-src" = {
+      url = "github:RalfBarkow/wiki-client/1aba55920f95b957bc8ccf3b3648c9b23d534c9a";
+      flake = false;
+    };
+    "wiki-server-src" = {
+      url = "github:fedwiki/wiki-server/ec3527abf0d1c1e1929272d580a80905c1dbf381";
+      flake = false;
+    };
+  };
+
+  outputs = inputs @ { self, nixpkgs, flake-utils, ... }:
+    (flake-utils.lib.eachDefaultSystem (system:
+      let
+        pkgs = import nixpkgs { inherit system; };
+        lib  = pkgs.lib;
+        mechRev = "4b8051417dec6b0eff40878290a703b1fa60fb52";
+        journalmaticRev = "aa5f5863bb8de8f697815b405cfb2f1a0e055ed9";
+        # Local development override (impure, opt-in):
+        #   WIKI_MECH_SRC=/path/to/built/wiki-plugin-mech nix build .#wiki --impure
+        # The checkout must already contain its built client/mech.js.
+        # Without WIKI_MECH_SRC the pinned revision below is used unchanged.
+        mechLocal = builtins.getEnv "WIKI_MECH_SRC";
+        mechSrc = if mechLocal != "" then builtins.path {
+          name = "wiki-plugin-mech-local";
+          path = /. + mechLocal;
+          filter = path: type: !(builtins.elem (baseNameOf path) [ ".git" "node_modules" "coverage" ".direnv" ]);
+        } else pkgs.fetchFromGitHub {
+          owner = "RalfBarkow";
+          repo = "wiki-plugin-mech";
+          rev = mechRev;
+          hash = "sha256-UQyFvFY+buaZQ8mAilJL1/XOCzTMS02D4O9d3BKbiYc=";
+        };
+        journalmaticSrc = pkgs.fetchFromGitHub {
+          owner = "RalfBarkow";
+          repo = "wiki-plugin-journalmatic";
+          rev = journalmaticRev;
+          hash = "sha256-ox+ZA5kgAETyTcPY1+y4DUsy7YRmufYv/cJJ7lqZwWg=";
+        };
+        soloVersion = "0.1.30-1";
+        soloSrc = pkgs.fetchurl {
+          url = "https://registry.npmjs.org/wiki-plugin-solo/-/wiki-plugin-solo-${soloVersion}.tgz";
+          hash = "sha256-HnKwvcEaA8uagQus0wmaC+uNAx5PuZdVVh+wJ7lYqrw=";
+        };
+        wikiClientSrc = inputs."wiki-client-src";
+        wikiServerSrc = inputs."wiki-server-src";
+        wikiServerRev = lib.attrByPath
+          [ "wiki-server-src" "rev" ]
+          (lib.attrByPath [ "wiki-server-src" "sourceInfo" "rev" ] "unknown" inputs)
+          inputs;
+        wikiClientRev = lib.attrByPath
+          [ "wiki-client-src" "rev" ]
+          (lib.attrByPath [ "wiki-client-src" "sourceInfo" "rev" ] "unknown" inputs)
+          inputs;
+        profilePins = lib.importJSON ./nix/mech-pins.json;
+        dreyeckRecipeSrc = pkgs.fetchFromGitHub {
+          owner = "RalfBarkow";
+          repo = "wiki";
+          rev = profilePins.dreyeckRecipe.oid;
+          hash = profilePins.dreyeckRecipe.narHash;
+        };
+        # Same nixpkgs/flake-utils identities in both recorded branch locks.
+        # Evaluate the frozen recipe without copying/reconciling its core pins.
+        dreyeckBase = ((import (dreyeckRecipeSrc + "/flake.nix")).outputs {
+          inherit self nixpkgs flake-utils;
+        }).packages.${system}.wiki;
+        ralfRecipeSrc = pkgs.fetchFromGitHub {
+          owner = "RalfBarkow"; repo = "wiki";
+          rev = profilePins.ralfbarkowRecipe.oid;
+          hash = profilePins.ralfbarkowRecipe.narHash;
+        };
+        ralfNixpkgsSrc = pkgs.fetchFromGitHub {
+          owner = "NixOS"; repo = "nixpkgs";
+          rev = profilePins.ralfbarkowRecipe.nixpkgs.rev;
+          hash = profilePins.ralfbarkowRecipe.nixpkgs.narHash;
+        };
+        ralfBase = ((import (ralfRecipeSrc + "/flake.nix")).outputs {
+          inherit self;
+          nixpkgs = { outPath = ralfNixpkgsSrc; lib = import (ralfNixpkgsSrc + "/lib"); };
+        }).packages.${system}.default;
+        mechUpstream = import ./nix/mech.nix { inherit pkgs; profile = "upstream"; };
+        mechDiscourse = import ./nix/mech.nix { inherit pkgs; profile = "discourse"; };
+        withMech = base: recipe: profile: mech:
+          import ./nix/wiki-profile.nix { inherit pkgs base recipe profile mech; };
+        profilePackages = {
+          mech-upstream = mechUpstream;
+          mech-discourse = mechDiscourse;
+          wiki-upstream = withMech ralfBase "ralfbarkow" "upstream" mechUpstream;
+          wiki-localhost-upstream = withMech self.packages.${system}.wiki "localhost" "upstream" mechUpstream;
+          wiki-ralfbarkow-discourse = withMech ralfBase "ralfbarkow" "discourse" mechDiscourse;
+          wiki-discourse = withMech dreyeckBase "dreyeck" "discourse" mechDiscourse;
+          wiki-localhost-discourse = withMech self.packages.${system}.wiki "localhost" "discourse" mechDiscourse;
+          wiki-dreyeck-upstream = withMech dreyeckBase "dreyeck" "upstream" mechUpstream;
+        };
+        wikiClientRevShort =
+          if wikiClientRev == "unknown" then "unknown" else lib.substring 0 7 wikiClientRev;
+      in {
+        packages = {
+          wiki = pkgs.buildNpmPackage {
+            pname   = "wiki";
+            # Keep in sync with package.json at repo root
+            version = (lib.importJSON ./package.json).version;
+            src     = ./.;
+
+            # Build/runtime Node
+            nodejs = pkgs.nodejs_22;
+            nativeBuildInputs = [ pkgs.git pkgs.makeWrapper pkgs.esbuild pkgs.curl ];
+
+            # Set to lib.fakeHash when package-lock.json changes, then replace with the "got: sha256-..." value from nix build.
+            npmDepsHash = "sha256-kxIOeiIn6SWivhzlT6NC2ZOeDTF1MnCxrNPfR9F82gg=";
+
+            makeCacheWritable = true;
+
+            # Only production deps for the CLI
+            npmFlags = [ "--omit=dev" ];
+
+            # Upstream has no build step
+            dontNpmBuild = true;
+
+            prePatch = ''
+              # Stage pinned wiki-client into the source tree for this build.
+              rm -rf vendor/wiki-client
+              mkdir -p vendor/wiki-client
+              tar -C "${wikiClientSrc}" --exclude=.git -cf - . | tar -C vendor/wiki-client -xf -
+              rm -rf vendor/wiki-server
+              mkdir -p vendor/wiki-server
+              tar -C "${wikiServerSrc}" --exclude=.git -cf - . | tar -C vendor/wiki-server -xf -
+            '';
+
+            postInstall = ''
+              # Replace wiki-client source with pinned checkout but keep npm-installed runtime deps.
+              wikiClientTarget="$out/lib/node_modules/wiki/node_modules/wiki-client"
+              savedNodeModules="$(mktemp -d)"
+              if [ -d "$wikiClientTarget/node_modules" ]; then
+                mv "$wikiClientTarget/node_modules" "$savedNodeModules/node_modules"
+              fi
+              find "$wikiClientTarget" -mindepth 1 -maxdepth 1 ! -name node_modules -exec rm -rf {} +
+              tar -C "$PWD/vendor/wiki-client" -cf - . | tar -C "$wikiClientTarget" -xf -
+              chmod u+w "$wikiClientTarget"
+              if [ -d "$savedNodeModules/node_modules" ]; then
+                mv "$savedNodeModules/node_modules" "$wikiClientTarget/node_modules"
+              fi
+              chmod -R u+w "$wikiClientTarget"
+
+              # wiki-client uses minisearch during browser bundling, but in this assembled tree it may
+              # only be present under wiki-server/node_modules.
+              if [ ! -d "$wikiClientTarget/node_modules/minisearch" ] && [ -d "$out/lib/node_modules/wiki/node_modules/wiki-server/node_modules/minisearch" ]; then
+                mkdir -p "$wikiClientTarget/node_modules"
+                ln -s "$out/lib/node_modules/wiki/node_modules/wiki-server/node_modules/minisearch" "$wikiClientTarget/node_modules/minisearch"
+              fi
+
+              # Keep browser test harness sourced from pinned wiki-client.
+              testTarget="$wikiClientTarget/client/test"
+              mkdir -p "$testTarget"
+              cp -R "$PWD/vendor/wiki-client/client/test/." "$testTarget/"
+
+              # Rebuild wiki-client browser bundle from pinned sources.
+              # (The upstream build script is scripts/build-client.mjs; we use esbuild CLI to avoid requiring
+              # devDependencies inside the node_modules tree.)
+              (
+                cd "$wikiClientTarget"
+
+                version="$(node -e "console.log(JSON.parse(require('fs').readFileSync('package.json','utf8')).version)")"
+                now="$(date -u +"%a, %d %b %Y %H:%M:%S GMT")"
+                dev="${wikiClientRevShort}"
+                devVersion="''${version}-dev+''${dev}"
+                banner="/* wiki-client - $devVersion - $now */"
+                test -f client.js || { echo "missing wiki-client entrypoint: $wikiClientTarget/client.js" >&2; exit 1; }
+
+                mkdir -p client
+
+                esbuild client.js \
+                  --bundle \
+                  --minify \
+                  --sourcemap \
+                  --platform=browser \
+                  --format=iife \
+                  --log-level=warning \
+                  --banner:js="$banner" \
+                  --metafile=meta-client.json \
+                  --outfile=client/client.js
+              )
+
+              # Guard: without a built browser bundle, /client.js will fall through as HTML.
+              test -s "$wikiClientTarget/client/client.js" || {
+                echo "missing wiki-client browser bundle: $wikiClientTarget/client/client.js" >&2
+                exit 1
+              }
+              grep -q "''${devVersion}" "$wikiClientTarget/client/client.js" || {
+                echo "client bundle missing dev version stamp ''${devVersion}" >&2
+                exit 1
+              }
+
+              # Guard: ensure plugin globals are initialized by the bundled entrypoint.
+              grep -q "window\\.plugins" "$wikiClientTarget/client/client.js" || {
+                echo "client bundle missing window.plugins init (plugin bootstrap regression)" >&2
+                exit 1
+              }
+              grep -q "pluginSuccessor" "$wikiClientTarget/client/client.js" || {
+                echo "client bundle missing pluginSuccessor mapping (plugin bootstrap regression)" >&2
+                exit 1
+              }
+
+              # Replace wiki-server with the staged checkout.
+              wikiServerTarget="$out/lib/node_modules/wiki/node_modules/wiki-server"
+              mkdir -p "$wikiServerTarget"
+              tar -C "$PWD/vendor/wiki-server" --exclude=.git --exclude=node_modules --exclude=package-lock.json -cf - . | tar -C "$wikiServerTarget" -xf -
+              chmod -R u+w "$wikiServerTarget"
+
+              # Fix /system/plugins.json for ESM (avoid require.main.require).
+              serverJs="$out/lib/node_modules/wiki/node_modules/wiki-server/lib/server.js"
+              if [ -f "$serverJs" ]; then
+                substituteInPlace "$serverJs" \
+                  --replace \
+                    "const pluginNames = Object.keys(require.main.require('./package').dependencies)" \
+                    "const packageJson = JSON.parse(fs.readFileSync(path.join(argv.packageDir, '..', 'package.json'), 'utf8')); const pluginDeps = { ...(packageJson.dependencies || {}), ...(packageJson.optionalDependencies || {}) }; const pluginNames = Object.keys(pluginDeps)"
+                substituteInPlace "$serverJs" \
+                  --replace \
+                    "Object.keys(packageJson.dependencies)" \
+                    "Object.keys({ ...(packageJson.dependencies || {}), ...(packageJson.optionalDependencies || {}) })"
+              fi
+
+              # Fix plugin pages lookup in page.js for ESM/Nix (avoid require.main.*).
+              pageJs="$out/lib/node_modules/wiki/node_modules/wiki-server/lib/page.js"
+              if [ -f "$pageJs" ]; then
+                substituteInPlace "$pageJs" \
+                  --replace \
+                    "Object.keys(packageJson.dependencies)" \
+                    "Object.keys((() => { const packageJson = JSON.parse(fs.readFileSync(path.join(argv.packageDir, '..', 'package.json'), 'utf8')); return { ...(packageJson.dependencies || {}), ...(packageJson.optionalDependencies || {}) }; })())"
+                substituteInPlace "$pageJs" \
+                  --replace \
+                    "const pagesPath = path.join(path.dirname(require.resolve(`''${plugin}/package`)), 'pages')" \
+                    "const pagesPath = path.join(argv.packageDir, plugin, 'pages')"
+              fi
+
+              # Vendor mech into the closure and ensure client/mech.js exists.
+              mechTarget="$out/lib/node_modules/wiki/node_modules/wiki-plugin-mech"
+              rm -rf "$mechTarget"
+              cp -R "${mechSrc}" "$mechTarget"
+              chmod -R u+w "$mechTarget"
+              if [ ! -f "$mechTarget/client/mech.js" ] && [ -f "$mechTarget/src/client/mech.js" ]; then
+                mkdir -p "$mechTarget/client"
+                cp -R "$mechTarget/src/client/"* "$mechTarget/client/"
+              fi
+              test -f "$mechTarget/client/mech.js" || { echo "missing mech client/mech.js in $mechTarget" >&2; exit 1; }
+
+              pluginsDir="$out/lib/node_modules/wiki/plugins"
+              mkdir -p "$pluginsDir"
+              rm -f "$pluginsDir/mech"
+              ln -s "$mechTarget" "$pluginsDir/mech"
+
+              # Vendor journalmatic into the closure and ensure client/check-page.html exists.
+              journalTarget="$out/lib/node_modules/wiki/node_modules/wiki-plugin-journalmatic"
+              rm -rf "$journalTarget"
+              cp -R "${journalmaticSrc}" "$journalTarget"
+              chmod -R u+w "$journalTarget"
+              test -f "$journalTarget/client/check-page.html" || { echo "missing journalmatic client/check-page.html in $journalTarget" >&2; exit 1; }
+              rm -f "$pluginsDir/journalmatic"
+              ln -s "$journalTarget" "$pluginsDir/journalmatic"
+
+              # Vendor solo into the closure and ensure client assets exist.
+              soloTarget="$out/lib/node_modules/wiki/node_modules/wiki-plugin-solo"
+              rm -rf "$soloTarget"
+              mkdir -p "$soloTarget"
+              tar -xzf "${soloSrc}" -C "$soloTarget" --strip-components=1
+              chmod -R u+w "$soloTarget"
+              test -f "$soloTarget/client/solo.js" || { echo "missing solo client/solo.js in $soloTarget" >&2; exit 1; }
+              test -f "$soloTarget/client/dialog/index.html" || { echo "missing solo client/dialog/index.html in $soloTarget" >&2; exit 1; }
+              rm -f "$pluginsDir/solo"
+              ln -s "$soloTarget" "$pluginsDir/solo"
+            '';
+
+            doInstallCheck = true;
+            installCheckPhase = ''
+              runHook preInstallCheck
+
+              tmpdir="$(mktemp -d)"
+              mkdir -p "$tmpdir/data"
+              cat > "$tmpdir/config.json" <<JSON
+{
+  "data": "$tmpdir/data"
+}
+JSON
+
+              port="$(shuf -i 20000-29999 -n 1)"
+              "$out/bin/wiki" --config "$tmpdir/config.json" --port "$port" >"$tmpdir/wiki.log" 2>&1 &
+              wpid="$!"
+              trap 'kill "$wpid" >/dev/null 2>&1 || true' EXIT
+
+              # wait until endpoint responds
+              for _ in $(seq 1 30); do
+                if curl -fsSI "http://127.0.0.1:$port/client.js" >/dev/null 2>&1; then
+                  break
+                fi
+                sleep 1
+              done
+
+              headers="$(curl -fsSI "http://127.0.0.1:$port/client.js")"
+              printf "%s\n" "$headers" | grep -Eiq '^HTTP/.* 200'
+              printf "%s\n" "$headers" | grep -Eiq '^Content-Type:.*javascript'
+
+              curl -fsS "http://127.0.0.1:$port/client.js" -o "$tmpdir/client.js"
+              body_head="$(head -c 1024 "$tmpdir/client.js")"
+              [ "''${body_head#<}" = "$body_head" ]
+              grep -q -- "-dev+${wikiClientRevShort}" "$tmpdir/client.js"
+
+              kill "$wpid" >/dev/null 2>&1 || true
+              trap - EXIT
+
+              runHook postInstallCheck
+            '';
+
+            postFixup = ''
+              wrapProgram "$out/bin/wiki" \
+                --set-default WIKI_SERVER_REV "${wikiServerRev}" \
+                --set-default WIKI_CLIENT_REV "${wikiClientRev}"
+            '';
+
+            meta = {
+              description = "Federated Wiki command-line server";
+              homepage    = "https://github.com/fedwiki/wiki";
+              mainProgram = "wiki";
+              license     = lib.licenses.mit;
+              platforms   = lib.platforms.linux ++ lib.platforms.darwin;
+            };
+          };
+        } // profilePackages;
+
+        # nix build
+        defaultPackage = self.packages.${system}.wiki;
+
+        # nix run
+        apps.wiki = {
+          type    = "app";
+          program = lib.getExe self.packages.${system}.wiki;
+        };
+        defaultApp = self.apps.${system}.wiki;
+
+        # nix develop / direnv use flake .
+        devShells.default = pkgs.mkShell {
+          packages = [
+            pkgs.nodejs_22
+            pkgs.corepack
+            pkgs.jq
+            pkgs.caddy
+          ];
+          shellHook = ''
+            echo "Dev shell for fedwiki/wiki"
+            echo "  node: $(node -v)"
+            echo "  npm : $(npm -v 2>/dev/null || true)"
+          '';
+        };
+      }))
+    // {
+      # Optional: NixOS module (harmless on Darwin)
+      nixosModules.fedwiki = { config, lib, pkgs, ... }:
+        let cfg = config.services.fedwiki;
+        in {
+          options.services.fedwiki = {
+            enable  = lib.mkEnableOption "Federated Wiki server";
+            package = lib.mkOption {
+              type = lib.types.package;
+              default = self.packages.${pkgs.system}.wiki;
+              description = "Wiki package to run";
+            };
+            user  = lib.mkOption { type = lib.types.str; default = "fedwiki"; };
+            group = lib.mkOption { type = lib.types.str; default = "fedwiki"; };
+            port  = lib.mkOption { type = lib.types.port; default = 3000; };
+            configFile = lib.mkOption {
+              type = lib.types.path;
+              example = "/var/lib/fedwiki/config.json";
+              description = "Path to wiki config.json";
+            };
+            hostName = lib.mkOption {
+              type = lib.types.nullOr lib.types.str;
+              default = null;
+              description = "If set, create an nginx vhost for this host name";
+            };
+          };
+
+          config = lib.mkIf cfg.enable {
+            users.users.${cfg.user} = {
+              isSystemUser = true;
+              group = cfg.group;
+              home = "/var/lib/fedwiki";
+              createHome = true;
+            };
+            users.groups.${cfg.group} = {};
+
+            systemd.services.fedwiki = {
+              description = "Federated Wiki";
+              after = [ "network-online.target" ];
+              wantedBy = [ "multi-user.target" ];
+              serviceConfig = {
+                ExecStart = ''${cfg.package}/bin/wiki --config ${cfg.configFile} --port ${toString cfg.port}'';
+                WorkingDirectory = "/var/lib/fedwiki";
+                User = cfg.user;
+                Group = cfg.group;
+                Restart = "on-failure";
+                RestartSec = 3;
+                NoNewPrivileges = true;
+                PrivateTmp = true;
+                ProtectSystem = "strict";
+                ProtectHome = true;
+                ReadWritePaths = [ "/var/lib/fedwiki" ];
+              };
+            };
+
+            services.nginx = lib.mkIf (cfg.hostName != null) {
+              enable = true;
+              virtualHosts."${cfg.hostName}" = {
+                forceSSL = true;
+                enableACME = true;
+                locations."/" = {
+                  proxyPass = "http://127.0.0.1:${toString cfg.port}";
+                  proxyWebsockets = true;
+                };
+              };
+            };
+          };
+        };
+    };
+}

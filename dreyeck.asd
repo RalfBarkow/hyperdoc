@@ -731,10 +731,125 @@
   (ASDF/LISP-ACTION:TEST-OP (OP COMPONENT) (DECLARE (IGNORE OP COMPONENT))
    (UIOP/PACKAGE:SYMBOL-CALL :DREYECK/MECH-INTAKE/TESTS :RUN-TALA-TESTS)))
 
+(ASDF/PARSE-DEFSYSTEM:DEFSYSTEM "dreyeck/fedwiki-config/reading" :DESCRIPTION
+                                "Reading declared Wiki recipes, Mech compositions and independent fork observations"
+                                :SERIAL T :DEPENDS-ON
+                                ("dreyeck/mech-intake/reading") :COMPONENTS
+                                ((:MODULE "dreyeck/fedwiki-config" :SERIAL T
+                                          :COMPONENTS
+                                          ((:FILE "configuration")
+                                           (:FILE "composition")
+                                           (:FILE "fork")
+                                           (:FILE "workspace")
+                                           (:MODULE "evidence" :COMPONENTS
+                                                    ((:STATIC-FILE
+                                                                   "dreyeck-client-license.txt")
+                                                     (:STATIC-FILE
+                                                                   "dreyeck-flake.nix")
+                                                     (:STATIC-FILE
+                                                                   "dreyeck-lock.lock")
+                                                     (:STATIC-FILE
+                                                                   "dreyeck-pageHandler.js")
+                                                     (:STATIC-FILE
+                                                                   "dreyeck-server.js")
+                                                     (:STATIC-FILE
+                                                                   "dreyeck-siteAdapter.js")
+                                                     (:STATIC-FILE
+                                                                   "fork-evidence.json")
+                                                     (:STATIC-FILE
+                                                                   "fork-harness.mjs")
+                                                     (:STATIC-FILE
+                                                                   "localhost-client-license.txt")
+                                                     (:STATIC-FILE
+                                                                   "localhost-flake.nix")
+                                                     (:STATIC-FILE
+                                                                   "localhost-lock.lock")
+                                                     (:STATIC-FILE
+                                                                   "localhost-networkSecurity.js")
+                                                     (:STATIC-FILE
+                                                                   "localhost-pageHandler.js")
+                                                     (:STATIC-FILE
+                                                                   "localhost-server.js")
+                                                     (:STATIC-FILE
+                                                                   "localhost-siteAdapter.js")
+                                                     (:STATIC-FILE
+                                                                   "maintained-build.mjs")
+                                                     (:STATIC-FILE
+                                                                   "maintained-entry.mjs")
+                                                     (:STATIC-FILE
+                                                                   "maintained-installer.mjs")
+                                                     (:STATIC-FILE
+                                                                   "manifest.json")
+                                                     (:STATIC-FILE
+                                                                   "mech-builder.mjs")
+                                                     (:STATIC-FILE
+                                                                   "mech-derivation.nix")
+                                                     (:STATIC-FILE
+                                                                   "p41-build.mjs")
+                                                     (:STATIC-FILE
+                                                                   "p41-production-client.patch")
+                                                     (:STATIC-FILE
+                                                                   "p41-provenance.json")
+                                                     (:STATIC-FILE
+                                                                   "p41-source-inputs.json")
+                                                     (:STATIC-FILE
+                                                                   "p41-wiki-client.patch")
+                                                     (:STATIC-FILE
+                                                                   "package-evidence.json")
+                                                     (:STATIC-FILE
+                                                                   "profile-overlay.nix")
+                                                     (:STATIC-FILE
+                                                                   "ralfbarkow-client-license.txt")
+                                                     (:STATIC-FILE
+                                                                   "ralfbarkow-flake.nix")
+                                                     (:STATIC-FILE
+                                                                   "ralfbarkow-lock.lock")
+                                                     (:STATIC-FILE
+                                                                   "ralfbarkow-networkSecurity.js")
+                                                     (:STATIC-FILE
+                                                                   "ralfbarkow-pageHandler.js")
+                                                     (:STATIC-FILE
+                                                                   "ralfbarkow-siteAdapter.js")
+                                                     (:STATIC-FILE
+                                                                   "LICENSE-Wiki.txt")
+                                                     (:STATIC-FILE
+                                                                   "LICENSE-Server.txt")))))
+                                 (:MODULE "dreyeck/pages/fedwiki-config"
+                                          :COMPONENTS
+                                          ((:STATIC-FILE
+                                                         "Reading FedWiki Configuration and Fork Behavior.html")
+                                           (:STATIC-FILE
+                                                         "From Declared Inputs to Resolved Packages.html")
+                                           (:STATIC-FILE
+                                                         "Two Mech Profiles in One Wiki Recipe.html")
+                                           (:STATIC-FILE
+                                                         "Forking a Local Page Across Origins.html"))))
+                                :IN-ORDER-TO
+                                ((ASDF/LISP-ACTION:TEST-OP
+                                                           (ASDF/LISP-ACTION:TEST-OP
+                                                                                     "dreyeck/fedwiki-config/reading/tests"))))
+
+(ASDF/PARSE-DEFSYSTEM:DEFSYSTEM "dreyeck/fedwiki-config/reading/tests"
+  :DEPENDS-ON
+  ("dreyeck/fedwiki-config/reading" "dreyeck/topicmap/tests")
+  :COMPONENTS
+  ((:FILE "dreyeck/tests/fedwiki-config-reading"))
+  :PERFORM
+  (ASDF/LISP-ACTION:TEST-OP (OP COMPONENT) (DECLARE (IGNORE OP COMPONENT))
+   (UIOP/PACKAGE:SYMBOL-CALL :DREYECK/FEDWIKI-CONFIG/TESTS :RUN-TESTS)))
+
+(ASDF/PARSE-DEFSYSTEM:DEFSYSTEM "dreyeck/fedwiki-config/tala/tests"
+  :DEPENDS-ON
+  ("dreyeck/fedwiki-config/reading/tests")
+  :PERFORM
+  (ASDF/LISP-ACTION:TEST-OP (OP COMPONENT) (DECLARE (IGNORE OP COMPONENT))
+   (UIOP/PACKAGE:SYMBOL-CALL :DREYECK/FEDWIKI-CONFIG/TESTS :RUN-TALA-TESTS)))
+
 (ASDF/PARSE-DEFSYSTEM:DEFSYSTEM #:DREYECK/CATALOG :DESCRIPTION
                                 "Explicit membership and runtime support for the dreyeck.ch HyperBook catalog"
                                 :LICENSE "BSD" :VERSION "0.0.1" :DEPENDS-ON
-                                ("dreyeck/mech-intake/reading"
+                                ("dreyeck/fedwiki-config/reading"
+                                 "dreyeck/mech-intake/reading"
                                  "dreyeck/nested-actions/reading"
                                  "dreyeck/hyperspec"
                                  "dreyeck/authority-policy"

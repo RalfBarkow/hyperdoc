@@ -1,0 +1,332 @@
+{
+  "hyperdoc": {
+    "authority": "https://github.com/RalfBarkow/hyperdoc",
+    "branch": "dreyeck.ch",
+    "parentOid": "57ce7b317c457d92d694af38bc545a47e9eb926b",
+    "indexAtStart": "empty",
+    "worktreeAtStart": "clean"
+  },
+  "catalogEntry": "dreyeck/fedwiki-config/reading",
+  "textPages": 4,
+  "codePages": 4,
+  "runnableExamples": 8,
+  "readerChecks": 1679,
+  "talaChecks": 6,
+  "catalogBooks": 22,
+  "projections": {
+    "deployment": {
+      "topics": 26,
+      "associations": 26
+    },
+    "fork": {
+      "topics": 26,
+      "associations": 32
+    }
+  },
+  "tools": {
+    "sbclVersion": "2.4.10",
+    "editorCommit": "38afb02d79838d4098589c2e203ba39799a44853",
+    "editorPath": "/Users/rgb/workspace/html-inspector-views",
+    "lispLauncher": "/private/tmp/run-mech-lisp.sh",
+    "launcherSha256": "626b810ce6b438474b3164075433d5d3bc4e1921e36ffff57e3abd391e69466c",
+    "d2Version": "0.9.0",
+    "d2Sha256": "a59c3d378681d2e5f7cffd7fceaaf000842a04b3ef0356f4ea90cff91256e217"
+  },
+  "results": [
+    {
+      "suite": "reading",
+      "logPath": "/private/tmp/fedwiki-delivery-verification.log",
+      "logSha256": "622c68529dd6c771d2808889a6dba4a45c913ca57c0a6fbe5274d66b6aa36479",
+      "exitStatus": 0,
+      "scope": "fresh isolated Lisp execution; retained Wiki JS tests not rerun"
+    },
+    {
+      "suite": "regressions",
+      "logPath": "/private/tmp/fedwiki-reading-regressions.log",
+      "logSha256": "56670f38f5b419c03c06d3f40b993499d58e6e4c1a5877294563670701bb6227",
+      "exitStatus": 0,
+      "scope": "fresh isolated Lisp execution; retained Wiki JS tests not rerun"
+    },
+    {
+      "suite": "catalog",
+      "logPath": "/private/tmp/fedwiki-catalog-final.log",
+      "logSha256": "bdd47f4afb00bf16332f7323a7af90dce46f97072554113b896a45155c4c0228",
+      "exitStatus": 0,
+      "scope": "fresh isolated Lisp execution; retained Wiki JS tests not rerun"
+    }
+  ],
+  "sourceFiles": [
+    {
+      "path": "dreyeck.asd",
+      "sha256": "c1b1a292fc25f1fdd343c7b5246db36dedf8c4064999108ee79d6d1fea4ac0cc"
+    },
+    {
+      "path": "dreyeck/fedwiki-config/composition.lisp",
+      "sha256": "0180a990fe831359157ca2f5c13df67438704d1e6e9575ab050a4378756a38c4"
+    },
+    {
+      "path": "dreyeck/fedwiki-config/configuration.lisp",
+      "sha256": "ebf6352cc6615fbc3ec0891b53f45da5385d00397d6219c6e82ab91de91fbff3"
+    },
+    {
+      "path": "dreyeck/fedwiki-config/evidence/.gitattributes",
+      "sha256": "0a90fd4058d22324984b5a3e850af80310fe173f37db771fa2df42bbe9daa87e"
+    },
+    {
+      "path": "dreyeck/fedwiki-config/evidence/LICENSE-Server.txt",
+      "sha256": "71d31fb34e4227a1fa5dd84fcccade1d4ebd029b75266a474e2317d889b07684"
+    },
+    {
+      "path": "dreyeck/fedwiki-config/evidence/LICENSE-Wiki.txt",
+      "sha256": "8a602347f364a0d8a71a358b793b66e69b5b349ea48557de5bb693f5bb0f4f2b"
+    },
+    {
+      "path": "dreyeck/fedwiki-config/evidence/dreyeck-client-license.txt",
+      "sha256": "03993ada840226cde727e391b91bb52a74b4d367126cd1601aa0c7b9cc2f02e4"
+    },
+    {
+      "path": "dreyeck/fedwiki-config/evidence/dreyeck-flake.nix",
+      "sha256": "dbe5f17cc7af652fa8f5a5a87262b8560165f377e1625c4ad9023a07f5ee5dab"
+    },
+    {
+      "path": "dreyeck/fedwiki-config/evidence/dreyeck-lock.lock",
+      "sha256": "e417ddcb8a3f0e73a8376e2571626e1454632bf5fabc44902388022ffd580297"
+    },
+    {
+      "path": "dreyeck/fedwiki-config/evidence/dreyeck-pageHandler.js",
+      "sha256": "00d28b5901ddc1ea2d31a029df1c30d7a26f81c59da34a0bd51270142e324bd2"
+    },
+    {
+      "path": "dreyeck/fedwiki-config/evidence/dreyeck-server.js",
+      "sha256": "e6fc124a827e5f47274480807e05a202e9dc44bea12317f14264481401368c55"
+    },
+    {
+      "path": "dreyeck/fedwiki-config/evidence/dreyeck-siteAdapter.js",
+      "sha256": "4a4240a55a68179bcd6e2a9a37204714ac3c7dbba00676a0953273b6227b82a1"
+    },
+    {
+      "path": "dreyeck/fedwiki-config/evidence/fork-evidence.json",
+      "sha256": "8ae100458c0fa29afe1d36f94a48ca47865a0397dd909bc1bc0a8ccc87e55836"
+    },
+    {
+      "path": "dreyeck/fedwiki-config/evidence/fork-harness.mjs",
+      "sha256": "fe1515852026e96a3dc760f91856a6398bf0fdafc9e6577c47e5aa75a42c329c"
+    },
+    {
+      "path": "dreyeck/fedwiki-config/evidence/localhost-client-license.txt",
+      "sha256": "03993ada840226cde727e391b91bb52a74b4d367126cd1601aa0c7b9cc2f02e4"
+    },
+    {
+      "path": "dreyeck/fedwiki-config/evidence/localhost-flake.nix",
+      "sha256": "23ca97547f8de3938b1a6485a61c2e6c3ade94526077e672fa0642b48e9be4ac"
+    },
+    {
+      "path": "dreyeck/fedwiki-config/evidence/localhost-lock.lock",
+      "sha256": "c0c6f97dd1fa2a167ff22e67823e7f8f69603044ed878d6e56bc38d5ea9cd803"
+    },
+    {
+      "path": "dreyeck/fedwiki-config/evidence/localhost-networkSecurity.js",
+      "sha256": "38bed329d438e36b66129eca14ae1446fa72d9a122016f3150b5fcb42b143ab0"
+    },
+    {
+      "path": "dreyeck/fedwiki-config/evidence/localhost-pageHandler.js",
+      "sha256": "a863704b6545a2fb1b7d8147af170043f6eee7724038923ef9abbd0a566d9976"
+    },
+    {
+      "path": "dreyeck/fedwiki-config/evidence/localhost-server.js",
+      "sha256": "63e483fb857ad501844e9e55401dfec8419b0526f220e2359cf886379162d11b"
+    },
+    {
+      "path": "dreyeck/fedwiki-config/evidence/localhost-siteAdapter.js",
+      "sha256": "2b34bd6a4d0e58dc7c7ae0b60d9c6eb61416601ad17d872caac2359cd740e6dc"
+    },
+    {
+      "path": "dreyeck/fedwiki-config/evidence/maintained-build.mjs",
+      "sha256": "0da3d8aa619dd7e31f9778e0c79875fb75dfd283ab18deeaa204bbac1c562e28"
+    },
+    {
+      "path": "dreyeck/fedwiki-config/evidence/maintained-entry.mjs",
+      "sha256": "e60a805b71c290aa07216920ec96d69f51e3b5ea7f9d252212b428b75acfda07"
+    },
+    {
+      "path": "dreyeck/fedwiki-config/evidence/maintained-installer.mjs",
+      "sha256": "2ed678f4458d69251688837b62f68a7151e04d06640901feb455ea700073cda8"
+    },
+    {
+      "path": "dreyeck/fedwiki-config/evidence/manifest.json",
+      "sha256": "6045cd2fce720a6645acffc553ba23ecc94b33c236a6c2d5c24c821fdd80e09e"
+    },
+    {
+      "path": "dreyeck/fedwiki-config/evidence/mech-builder.mjs",
+      "sha256": "2c19dc2fcf79f545b99db74fb8b6bafd3e416ebafeadd478a2eae76447b160a9"
+    },
+    {
+      "path": "dreyeck/fedwiki-config/evidence/mech-derivation.nix",
+      "sha256": "addfcdbd343ecbb12aaf7affd1a9b481e84fb235327e58223aa4b4150c5e43f4"
+    },
+    {
+      "path": "dreyeck/fedwiki-config/evidence/p41-build.mjs",
+      "sha256": "a48f3169b653e6e3fad3f1d65077489083396e3f94f24cc7edfc4d86234e4566"
+    },
+    {
+      "path": "dreyeck/fedwiki-config/evidence/p41-production-client.patch",
+      "sha256": "733826d0003cff94c9617f46589932aed0d17b3b22b87cbbac73fdea6adc4d07"
+    },
+    {
+      "path": "dreyeck/fedwiki-config/evidence/p41-provenance.json",
+      "sha256": "d309551220e75aad557461c7cfa147e101f02c1fa140ad3531b4b093f6327a4e"
+    },
+    {
+      "path": "dreyeck/fedwiki-config/evidence/p41-source-inputs.json",
+      "sha256": "decd99d9faadbbac8ed25c4db23d7e650ed6c08734e678735821259e4cd92d54"
+    },
+    {
+      "path": "dreyeck/fedwiki-config/evidence/p41-wiki-client.patch",
+      "sha256": "cc2f38b40d1bd651528c5e3cdceafc4d0e1b381ffe7604abf70f18fd7e54d06f"
+    },
+    {
+      "path": "dreyeck/fedwiki-config/evidence/package-evidence.json",
+      "sha256": "431b894a085387e156707a7a98524bd344a4892bb8774a0f149202117e48568a"
+    },
+    {
+      "path": "dreyeck/fedwiki-config/evidence/profile-overlay.nix",
+      "sha256": "a0ed89ea30333e2a25804d945032164a87847390de8115fa82aeae40ca6882bf"
+    },
+    {
+      "path": "dreyeck/fedwiki-config/evidence/ralfbarkow-client-license.txt",
+      "sha256": "03993ada840226cde727e391b91bb52a74b4d367126cd1601aa0c7b9cc2f02e4"
+    },
+    {
+      "path": "dreyeck/fedwiki-config/evidence/ralfbarkow-flake.nix",
+      "sha256": "a407f4d23cd0252349296d4cd3134d6e3c31a99aa8b59b72f97cfe5bc83ad3ba"
+    },
+    {
+      "path": "dreyeck/fedwiki-config/evidence/ralfbarkow-lock.lock",
+      "sha256": "3044fc646964b412f156531236fd5341f3804d65ca7f777f1e0d78100d7a3c08"
+    },
+    {
+      "path": "dreyeck/fedwiki-config/evidence/ralfbarkow-networkSecurity.js",
+      "sha256": "38bed329d438e36b66129eca14ae1446fa72d9a122016f3150b5fcb42b143ab0"
+    },
+    {
+      "path": "dreyeck/fedwiki-config/evidence/ralfbarkow-pageHandler.js",
+      "sha256": "a863704b6545a2fb1b7d8147af170043f6eee7724038923ef9abbd0a566d9976"
+    },
+    {
+      "path": "dreyeck/fedwiki-config/evidence/ralfbarkow-siteAdapter.js",
+      "sha256": "c25f1f75d745cd93f1d0e689e2c7e277aaf24331cef91c316693f758bc2c414f"
+    },
+    {
+      "path": "dreyeck/fedwiki-config/fork.lisp",
+      "sha256": "04e89f3a1f71957a611063f65905396b2dfe29853918ba5d06cc1874c0f72363"
+    },
+    {
+      "path": "dreyeck/fedwiki-config/workspace.lisp",
+      "sha256": "728588b1a793f9eb182f7855a8645982eada60edd535678d0aac412fcfc54e13"
+    },
+    {
+      "path": "dreyeck/pages/fedwiki-config/Forking a Local Page Across Origins.html",
+      "sha256": "5f1ccf2aa060b293ec221738c6b8618fea5bbcbd14ea269ab9f3a672980c169e"
+    },
+    {
+      "path": "dreyeck/pages/fedwiki-config/From Declared Inputs to Resolved Packages.html",
+      "sha256": "e6c792e588708d72442d4e14f83dff6a170b47f1e4755b96d44ecbec5a783dc6"
+    },
+    {
+      "path": "dreyeck/pages/fedwiki-config/Reading FedWiki Configuration and Fork Behavior.html",
+      "sha256": "b3086857675d37d38ed05ef9ca3d59897ac8dd2d4d45dedf879c9e0ec09b8c2f"
+    },
+    {
+      "path": "dreyeck/pages/fedwiki-config/Two Mech Profiles in One Wiki Recipe.html",
+      "sha256": "1cc781c719310274ec16dcf93c3ba6842840b641da6f5b435717693fb3c73e9e"
+    },
+    {
+      "path": "dreyeck/tests/catalog-startup-smoke.lisp",
+      "sha256": "3b66c43a584ca184f7bf29253f17165516ee90ac912e6e17f3171787d3b6df9d"
+    },
+    {
+      "path": "dreyeck/tests/fedwiki-config-reading.lisp",
+      "sha256": "6294974b3cfbf4ae62b7cca32ba521e4dd0f861affa8b156510ce9c21fca46ee"
+    }
+  ],
+  "sourceIdentities": [
+    {
+      "branch": "localhost",
+      "authority": "https://github.com/RalfBarkow/wiki",
+      "oid": "4dd6be43453b451615ce04fc9ac4e5792eede46e",
+      "client": {
+        "authority": "https://github.com/RalfBarkow/wiki-client",
+        "oid": "4b290709a1906c2010306f0f47ebfad530d8b4b6",
+        "selectionKind": "flake-lock-input",
+        "sourceDefinitions": [
+          "localhost-siteAdapter",
+          "localhost-pageHandler",
+          "localhost-networkSecurity"
+        ],
+        "packageVersion": "0.31.6"
+      },
+      "server": {
+        "authority": "https://github.com/RalfBarkow/wiki-server",
+        "oid": "0ea9ba00d8286faba7633e413e9786e3c4508fa8",
+        "selectionKind": "flake-lock-input",
+        "packageVersion": "0.26.2"
+      }
+    },
+    {
+      "branch": "dreyeck.ch",
+      "authority": "https://github.com/RalfBarkow/wiki",
+      "oid": "db98a893a7c710fcb3506150b68b1aa08915c47e",
+      "client": {
+        "authority": "https://github.com/fedwiki/wiki-client",
+        "oid": "3f61a4862703f492b0d6bfb8695bd665b943bb38",
+        "selectionKind": "hash-pinned-fetcher",
+        "sourceDefinitions": [
+          "dreyeck-siteAdapter",
+          "dreyeck-pageHandler"
+        ],
+        "packageVersion": "0.31.6"
+      },
+      "server": {
+        "authority": "https://github.com/fedwiki/wiki-server",
+        "oid": "9b842d7be8bc5e0990ec574b19fb5554830591a5",
+        "selectionKind": "hash-pinned-fetcher",
+        "packageVersion": "0.26.2"
+      }
+    },
+    {
+      "branch": "wiki.ralfbarkow.ch",
+      "authority": "https://github.com/RalfBarkow/wiki",
+      "oid": "6774447eff17d705a3083378ab2c9a93b237cf91",
+      "client": {
+        "authority": "https://github.com/fedwiki/wiki-client",
+        "oid": "d59dbd68c2a539d32add72e06d2fd74e9d6d60c2",
+        "selectionKind": "reconstructed-npm-archive",
+        "sourceDefinitions": [
+          "ralfbarkow-siteAdapter",
+          "ralfbarkow-pageHandler",
+          "ralfbarkow-networkSecurity"
+        ],
+        "personalRevision": {
+          "authority": "https://github.com/RalfBarkow/wiki-client",
+          "oid": "f3c72d9fc31a3db8a296c7f2d05b36364395e4fe"
+        },
+        "archiveSha256": "70237aa59f7f29c1ae29eaca0da5434b39e74765b6fd6083b76786330dbb5b15",
+        "packageVersion": "0.33.0"
+      },
+      "server": {
+        "authority": "https://github.com/fedwiki/wiki-server",
+        "oid": "6e8d4e1433da6773016ca35641b797453a667ff0",
+        "selectionKind": "reconstructed-npm-archive",
+        "packageVersion": "0.28.0"
+      }
+    }
+  ],
+  "boundaries": {
+    "hostProbePerformed": false,
+    "gitFetchPerformed": false,
+    "javascriptExecutedByReading": false,
+    "historicalWikiTestsRerun": false,
+    "retainedPackageObjectsNotRequired": true
+  },
+  "authoring": "Existing guarded CST materialization/edit procedures and HTML DSL, each reparsed. New lexical-boundary errors repaired before acceptance; Lisp-reader top-level preflight added to authoring executor. No running image touched."
+}
