@@ -1,0 +1,113 @@
+{
+  "purpose": "Product runtime dependencies for isolated Story Wiki plugin host, not test output",
+  "mechVersion": "0.1.32-dev.2",
+  "assets": [
+    {
+      "path": "plugins/mech/mech.js",
+      "sha256": "d25151ef5170779de50e13e819b950277b99aa7a6591ef097eaef5c0043d71c7",
+      "source": {
+        "repository": "https://github.com/RalfBarkow/wiki-plugin-mech",
+        "oid": "0fc36fcd58a8d7c399d3e86d2ee2e9328cafba44",
+        "path": "src/client/mech.js",
+        "role": "unchanged source module; local CODE-capable candidate, not deployed"
+      }
+    },
+    {
+      "path": "plugins/mech/blocks.js",
+      "sha256": "c3bc41f896ee965e067d9dc618450eed9c90cf81710d92bbd05b66ea4e59bd70",
+      "source": {
+        "repository": "https://github.com/RalfBarkow/wiki-plugin-mech",
+        "oid": "0fc36fcd58a8d7c399d3e86d2ee2e9328cafba44",
+        "path": "src/client/blocks.js",
+        "role": "unchanged source module; local CODE-capable candidate, not deployed"
+      }
+    },
+    {
+      "path": "plugins/mech/interpreter.js",
+      "sha256": "f0a0b360496ee520072421e1b4cc9584b6e46b47df455fcd5c8406e9baa5e90f",
+      "source": {
+        "repository": "https://github.com/RalfBarkow/wiki-plugin-mech",
+        "oid": "0fc36fcd58a8d7c399d3e86d2ee2e9328cafba44",
+        "path": "src/client/interpreter.js",
+        "role": "unchanged source module; local CODE-capable candidate, not deployed"
+      }
+    },
+    {
+      "path": "plugins/mech/library.js",
+      "sha256": "bf1e1a2f3438d7cba322c90d4410ba4be353552256459ad32bc338050bb5e319",
+      "source": {
+        "repository": "https://github.com/RalfBarkow/wiki-plugin-mech",
+        "oid": "0fc36fcd58a8d7c399d3e86d2ee2e9328cafba44",
+        "path": "src/client/library.js",
+        "role": "unchanged source module; local CODE-capable candidate, not deployed"
+      }
+    },
+    {
+      "path": "plugins/mech/LICENSE",
+      "sha256": "d46e9ee22150bd932292a79b4fa67ece6e39c95a6678c3f3ac86247f82192ad5",
+      "source": {
+        "repository": "https://github.com/RalfBarkow/wiki-plugin-mech",
+        "oid": "0fc36fcd58a8d7c399d3e86d2ee2e9328cafba44",
+        "path": "LICENSE"
+      }
+    },
+    {
+      "path": "plugins/solo/dialog/index.html",
+      "sha256": "5a513f70546ced3e2af7f83c4f14fb73d30e27f22a295558cbff4b078871aed8",
+      "source": {
+        "package": "wiki-plugin-solo",
+        "version": "0.1.30-1",
+        "tarball": "https://registry.npmjs.org/wiki-plugin-solo/-/wiki-plugin-solo-0.1.30-1.tgz",
+        "tarballSha256": "1e72b0bdc11a03cb9a810bacd3099a0beb8d031e4fb99755561fb027b958aabc",
+        "path": "client/dialog/index.html",
+        "role": "unchanged original Solo receiver"
+      }
+    },
+    {
+      "path": "plugins/solo/dialog/style.css",
+      "sha256": "dbd8bce99f60ce752847cac274810ea8cd3bd93261495e6412431d5853b4de19",
+      "source": {
+        "package": "wiki-plugin-solo",
+        "version": "0.1.30-1",
+        "tarball": "https://registry.npmjs.org/wiki-plugin-solo/-/wiki-plugin-solo-0.1.30-1.tgz",
+        "tarballSha256": "1e72b0bdc11a03cb9a810bacd3099a0beb8d031e4fb99755561fb027b958aabc",
+        "path": "client/dialog/style.css",
+        "role": "unchanged original Solo receiver"
+      }
+    },
+    {
+      "path": "plugins/solo/package.json",
+      "sha256": "b5ccea34603cad89daa8a079f3a08162068d13a15853dfb2fa78a7fe79f7e598",
+      "source": {
+        "package": "wiki-plugin-solo",
+        "version": "0.1.30-1",
+        "tarball": "https://registry.npmjs.org/wiki-plugin-solo/-/wiki-plugin-solo-0.1.30-1.tgz",
+        "tarballSha256": "1e72b0bdc11a03cb9a810bacd3099a0beb8d031e4fb99755561fb027b958aabc",
+        "path": "package.json",
+        "role": "unchanged original Solo receiver"
+      }
+    },
+    {
+      "path": "jquery-3.7.1.min.js",
+      "sha256": "fc9a93dd241f6b045cbff0481cf4e1901becd0e12fb45166a8f17f95823f0b1a",
+      "source": {
+        "url": "https://code.jquery.com/jquery-3.7.1.min.js",
+        "version": "3.7.1",
+        "license": "MIT, embedded header"
+      }
+    },
+    {
+      "path": "plugins/solo/ReadMe.md",
+      "sha256": "a6c3766e3645ab071b799d2598af3f4963b100d0cb5d7d3250fe32d17bab68a3",
+      "source": {
+        "package": "wiki-plugin-solo",
+        "version": "0.1.30-1",
+        "tarball": "https://registry.npmjs.org/wiki-plugin-solo/-/wiki-plugin-solo-0.1.30-1.tgz",
+        "tarballSha256": "1e72b0bdc11a03cb9a810bacd3099a0beb8d031e4fb99755561fb027b958aabc",
+        "path": "ReadMe.md",
+        "role": "original package documentation and MIT license declaration"
+      }
+    }
+  ],
+  "externalImports": "Original Code imports Graph from its original public URL; Solo retains original Graphviz/WASM and pan/zoom URLs. No implementation is rewritten."
+}

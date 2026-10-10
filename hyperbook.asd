@@ -120,7 +120,7 @@
                #:bordeaux-threads
                #:cl-ppcre
                #:cl-who
-               #:drakma #:usocket
+               #:drakma #:usocket #:cl-base64 #:flexi-streams
                #:local-time
                #:shasht
                #:str
@@ -135,3 +135,11 @@
                              (:file "wiki-links")
                              (:file "plugins")
                              (:file "views")))))
+
+(defsystem #:hyperbook/fedwiki/tests
+  :description "Original Mech Story browser-host boundary contracts"
+  :depends-on (#:hyperbook/fedwiki #:clog-moldable-inspector)
+  :components ((:file "tests/fedwiki-mech-story"))
+  :perform (test-op (op system)
+             (declare (ignore op system))
+             (uiop:symbol-call :hyperbook/fedwiki/tests :run-tests)))

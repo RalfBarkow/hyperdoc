@@ -53,6 +53,8 @@
                               (hb:id-of page-on-remote-wiki)))
          (title (hb:title-of page-on-remote-wiki))
          (remote-page (get-remote-page wiki page-id title)))
+    (setf (slot-value remote-page 'raw-json)
+          (copy-page-json (raw-json-of page-on-remote-wiki)))
     (setf (slot-value remote-page 'story)
           (story-of page-on-remote-wiki))
     (setf (slot-value remote-page 'journal)

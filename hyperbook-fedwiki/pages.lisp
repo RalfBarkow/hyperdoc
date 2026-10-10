@@ -13,6 +13,8 @@
 
 (defclass fedwiki-page (hb:page)
   ((title :reader hb:title-of :type (or null string) :initarg :title :initform nil)
+   (raw-json :reader raw-json-of :initform nil
+             :documentation "Retained complete page JSON, separate from inspection caches.")
    (story :reader story-of :type (or null vector) :initform nil
           :documentation "A sequence of story items such as paragraphs,
 images, etc.")
@@ -102,11 +104,23 @@ images, etc.")
     (unless (eq origin (hb:hyperbook-of page))
       (push origin (slot-value page 'context)))))
 
+(defun copy-page-json (value)
+  "Copy JSON containers so inspection never removes source fields."
+  (typecase value
+    (hash-table (let ((copy (make-hash-table :test #'equal)))
+                  (maphash (lambda (key item)
+                             (setf (gethash key copy) (copy-page-json item))) value)
+                  copy))
+    (string (copy-seq value))
+    (vector (map 'vector #'copy-page-json value))
+    (t value)))
+
 (defun set-page-data (page json)
   (let* ((title (gethash "title" json))
-         (story (make-story (gethash "story" json)))
-         (journal (make-journal (gethash "journal" json)))
+         (story (make-story (copy-page-json (gethash "story" json))))
+         (journal (make-journal (copy-page-json (gethash "journal" json))))
          (context (extract-context journal)))
+    (setf (slot-value page 'raw-json) (copy-page-json json))
     (setf (slot-value page 'title) title)
     (setf (slot-value page 'story) story)
     (setf (slot-value page 'journal) journal)

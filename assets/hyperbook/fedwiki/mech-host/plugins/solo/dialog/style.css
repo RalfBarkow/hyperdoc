@@ -1,0 +1,62 @@
+body {
+  inset: 0;
+  position: absolute;
+  background: #eee url('/images/crosses.png');
+  padding: 0;
+  margin: 0;
+  line-height: 1.3;
+  color: #333;
+}
+
+main {
+  width: 100vw;
+  height: 100vh;
+  margin: 0;
+}
+
+main {
+  display: grid;
+  grid-template-areas:
+    "beam   target"
+    "create target";
+  grid-template-columns: 1fr 4fr;
+  grid-template-rows: 3fr 1fr;
+  gap: 0px;
+}
+
+#beam {
+  grid-area: beam;
+  background-color: palegreen;
+  overflow: auto;
+  scrollbar-gutter: stable;
+  scrollbar-width: thin;
+  scrollbar-color: #ccc #eee;
+  resize:horizontal;
+}
+
+#create {
+  grid-area: create;
+  background-color: bisque;
+  overflow: auto;
+  scrollbar-gutter: stable;
+  scrollbar-width: thin;
+  scrollbar-color: #ccc #eee;
+}
+
+#target {
+  grid-area: target;
+  overflow: hidden;
+  margin: 4px 4px 4px 0px;
+  background-color: #fff;
+}
+
+#beam,
+#create {
+  margin: 4px;
+  padding: 8px;
+}
+
+#beam input,
+label {
+  cursor: pointer;
+}

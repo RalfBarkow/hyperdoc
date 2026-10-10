@@ -1,0 +1,4 @@
+body { margin: 8px; font: 16px system-ui, sans-serif; }
+button { cursor: pointer; }
+#failure { white-space: pre-wrap; color: #a00; }
+.mechanism-source { white-space: pre-wrap; }

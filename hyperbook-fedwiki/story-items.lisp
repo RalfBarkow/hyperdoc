@@ -312,3 +312,31 @@ Any non-empty string size is retained as presentation metadata."
                                       unless (member type '(:paragraph :pagefold :image :reference))
                                         do (pushnew page (gethash type m)))))
     m))
+
+;; Mech runs in a separately hosted browser Wiki environment. The Lisp side
+;; supplies JSON only, never evaluates or dispatches Wiki JavaScript.
+(defvar *mech-plugin-host-url* nil
+  "HTTP(S) URL of a standalone static Wiki plugin host, at an origin distinct
+from the Inspector. NIL keeps the original item inspectable without execution.")
+
+(defmethod render-story-item ((type (eql :mech)) item page)
+  (declare (ignore type))
+  (views:include-js "/hyperbook/fedwiki/mech-story.js")
+  (views:include-script "mountFedwikiMech(window.currentInspectorView)")
+  (views:html
+    (:section :class "fedwiki-mech-host"
+              :data-host-url (or *mech-plugin-host-url* "")
+              :data-item-id (id-of item)
+              :data-site (domain-name-of (origin-of page))
+              :data-slug (origin-id-of page)
+              :data-page-json-base64
+              (cl-base64:usb8-array-to-base64-string
+               (flexi-streams:string-to-octets
+                (shasht:write-json (raw-json-of page) nil) :external-format :utf-8))
+      (:p :class "mech-host-status"
+          (views:esc (if *mech-plugin-host-url*
+                         "Loading browser Wiki plugin host. No Code item has run."
+                         "Wiki plugin host is not configured. No Code item has run.")))
+      (:p (views:object-ref item :display "Inspect original Mech item" :select "Data"))
+      (:details (:summary "Original Mech item")
+                (:pre (views:esc (text-of item)))))))
