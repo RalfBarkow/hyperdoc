@@ -32,6 +32,24 @@ test('missing/loading/failed context is explicit and cannot become a partial or 
   assert.match(empty.message, /ready.*0 pages/)
 })
 
+test('native inflight filtering and the strict host selection gate remain distinct policies', async () => {
+  const input = snapshot('loading'), oldWiki = globalThis.wiki, elements = {}, statuses = []
+  // Direct input to the original extractor, without the HyperDoc availability gate.
+  globalThis.wiki = {neighborhoodObject: {sites: Object.fromEntries(input.sites.map(s =>
+    [s.domain, {sitemap: s.sitemap, sitemapRequestInflight: s.state === 'loading'}]))}}
+  const state = {api: {...api, element: key => elements[key] ??= {id: key},
+    status(elem, command, text) { statuses.push(command + text) },
+    trouble(elem, message) { throw Error(message) }}}
+  const nest = tree(['NEIGHBORS'], [], 0); nest[0].key = 'native-inflight'
+  try {
+    await run(nest, state)
+    assert.equal(state.neighborhood.length, 3)
+    assert.deepEqual(statuses, ['NEIGHBORS⇒ 3 pages, 1 sites'])
+    // The same declared two-site selection is deliberately refused as incomplete.
+    assert.throws(() => createNeighborhood(input, page).neighborhoodObject.sites, /loading.*cannot run/)
+  } finally { globalThis.wiki = oldWiki }
+})
+
 test('malformed/provenance-mismatched snapshots are rejected instead of substituted', () => {
   for (const mutate of [s => s.version = 2, s => s.scope = 'global',
     s => s.page = {...s.page, slug: 'other-page'}, s => s.sites = [],

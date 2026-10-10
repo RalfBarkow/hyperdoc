@@ -30,11 +30,13 @@
 
 (defun check-sitemap-contract ()
   (check-sitemap-worker-snapshot)
+  (check-page-selection-contract)
   (let* ((fixture (sitemap-fixture))
          (record (aref (gethash "sites" fixture) 0))
          (raw (gethash "sitemap" record))
          (before (shasht:write-json raw nil))
-         (wiki (make-instance 'fw::fedwiki :id "fedwiki:source.fixture.test")))
+         (wiki (make-instance 'fw::fedwiki :id "fedwiki:source.fixture.test"))
+         (fw::*neighborhood* (make-hash-table :test #'equal)))
     (let ((missing (fw::sitemap-snapshot wiki)))
       (assert (equal "missing" (gethash "state" missing)))
       (with-input-from-string (in (shasht:write-json missing nil))
@@ -46,6 +48,8 @@
         (assert (equal "https://source.fixture.test/system/sitemap.json" url))
         (assert (equal "loading" (gethash "state" (fw::sitemap-snapshot wiki))))
         raw))
+    ;; Retaining/projecting one site's data does not register a neighborhood.
+    (assert (zerop (hash-table-count fw::*neighborhood*)))
     (let ((snapshot (fw::sitemap-snapshot wiki)))
       (assert (equal "ready" (gethash "state" snapshot)))
       (assert (equal before (shasht:write-json (gethash "sitemap" snapshot) nil)))
@@ -96,6 +100,42 @@
         (assert (equal (string-downcase (symbol-name mode)) (gethash "state" site)))
         (assert (eq :null (gethash "sitemap" site))))))
   (format t "~&FEDWIKI-MECH-SITEMAPS-PASS: raw fields, provenance, order, scope, loading/failure/empty, actual Story boundary.~%"))
+
+(defun check-page-selection-contract ()
+  "The explicit page selection must not become a native browser-session claim."
+  (let* ((fixture (sitemap-fixture))
+         (example (gethash "selectionReference" fixture))
+         (fw::*neighborhood* (make-hash-table :test #'equal))
+         (origin-name (gethash "origin" example))
+         (domains (concatenate 'list (gethash "nativePageRegistrations" example)
+                              (list (gethash "priorSessionSite" example)
+                                    (gethash "referenceOnlySite" example)
+                                    (gethash "attributionOnlySite" example)))))
+    ;; Even fully loaded session/reference sites must not enter this selection.
+    (dolist (domain domains)
+      (let ((wiki (make-instance 'fw::fedwiki :id (concatenate 'string "fedwiki:" domain))))
+        (setf (gethash domain fw::*neighborhood*) wiki)
+        (fw::fetch-sitemap wiki :json-fetcher
+          (constantly (gethash "sitemap" (aref (gethash "sites" fixture) 0))))))
+    (let* ((origin (gethash origin-name fw::*neighborhood*))
+           (page (fw::make-fedwiki-page origin "selection-fixture" "Selection fixture"))
+           (json (alexandria:plist-hash-table
+                  (list "title" "Selection fixture"
+                        "journal" (gethash "journal" example)
+                        "story" #()) :test 'equal)))
+      (fw::set-page-data page json)
+      (let* ((snapshot (fw::mech-neighborhood-snapshot page))
+             (domains (map 'vector (lambda (s) (gethash "domain" s))
+                           (gethash "sites" snapshot))))
+        (assert (equal "page-origin-and-context" (gethash "scope" snapshot)))
+        (assert (equalp (gethash "hyperdocPageSelection" example) domains))
+        (assert (not (equalp (gethash "nativePageRegistrations" example) domains)))
+        (assert (find (gethash "attributionOnlySite" example) domains :test #'equal))
+        (assert (not (find (gethash "attributionOnlySite" example)
+                           (gethash "nativePageRegistrations" example) :test #'equal)))
+        (assert (not (find (gethash "priorSessionSite" example) domains :test #'equal)))
+        (assert (not (find (gethash "referenceOnlySite" example) domains :test #'equal))))))
+  (format t "~&PAGE-SELECTION-CONTRACT-PASS: raw retention is independent; loaded global/session sites excluded; explicit HyperDoc order and attribution membership differ from source-qualified Wiki-client registrations.~%"))
 
 (defun check-sitemap-worker-snapshot ()
   ;; A snapshot must not join/wait for the loader or fabricate empty data.

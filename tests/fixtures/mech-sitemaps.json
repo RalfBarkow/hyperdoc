@@ -19,5 +19,56 @@
       "domain": "context.fixture.test",
       "sitemap": [{"slug": "gamma", "title": "Gamma", "date": 1791547200000, "links": {"alpha": "context-item-1"}}]
     }
-  ]
+  ],
+  "selectionReference": {
+    "kind": "Source-derived selection example, not an observed browser session",
+    "repository": "https://github.com/RalfBarkow/wiki-client",
+    "oid": "1aba55920f95b957bc8ccf3b3648c9b23d534c9a",
+    "path": "lib/page.js",
+    "sha256": "dc086e9786254a586cee08d6156f0929e70f0681e96e9be8c50a51d426c9af67",
+    "origin": "source.fixture.test",
+    "journal": [
+      {
+        "type": "fork",
+        "site": "first.fixture.test",
+        "date": 1
+      },
+      {
+        "type": "fork",
+        "site": "second.fixture.test",
+        "date": 2
+      },
+      {
+        "type": "fork",
+        "site": "first.fixture.test",
+        "date": 3
+      },
+      {
+        "type": "fork",
+        "site": "second.fixture.test",
+        "date": 4
+      },
+      {
+        "type": "add",
+        "date": 5,
+        "attribution": {
+          "site": "attribution-only.fixture.test"
+        }
+      }
+    ],
+    "nativePageRegistrations": [
+      "source.fixture.test",
+      "first.fixture.test",
+      "second.fixture.test"
+    ],
+    "hyperdocPageSelection": [
+      "source.fixture.test",
+      "attribution-only.fixture.test",
+      "second.fixture.test",
+      "first.fixture.test"
+    ],
+    "priorSessionSite": "session-only.fixture.test",
+    "referenceOnlySite": "reference-only.fixture.test",
+    "attributionOnlySite": "attribution-only.fixture.test"
+  }
 }

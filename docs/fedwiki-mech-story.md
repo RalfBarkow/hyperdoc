@@ -293,51 +293,132 @@ copies until evidence is retained; never remove Wiki pages or original plugin
 files. Asset-link changes require no Wiki restart. Codex performs no production
 action.
 
-## Page-scoped sitemap data contract
+## Four separate input contracts
+
+| Subject | Authority and meaning | Current HyperDoc boundary |
+|---|---|---|
+| Sitemap | JSON read from one concrete site's `/system/sitemap.json`; its original fields and entry order | `fetch-sitemap` retains a copied array independently of page projections or site selection |
+| Wiki neighborhood | Sites registered by the Wiki client in its browser session, including page-derived and earlier registrations | Not reconstructed; the host declares a bounded page-origin/context selection |
+| Loading state | Availability of each selected site's sitemap | Separate missing/loading/ready/failed state; ready `[]` means proven empty |
+| Mech execution | Pinned original NEIGHBORS and WALK interpretation | Unchanged candidate `0fc36fcd58a8d7c399d3e86d2ee2e9328cafba44`; exact comparisons apply to identical complete inputs |
+
+### Site selection precedes sitemap availability
+
+The source-qualified Wiki-client reference is
+[RalfBarkow/wiki-client 1aba55920f95b957bc8ccf3b3648c9b23d534c9a](https://github.com/RalfBarkow/wiki-client/tree/1aba55920f95b957bc8ccf3b3648c9b23d534c9a).
+Its `lib/page.js:getNeighbors(host)` lists remote origin (or local host), then
+direct `journal.site` values in forward order, removing duplicates at first occurrence.
+Reference items alone are deliberately not added. `lib/refresh.js:whenGotten`
+registers those sites; `lib/neighborhood.js:registerNeighbor` keeps site entries
+in the browser cache and initiates sitemap loading. Earlier registrations are
+not replaced merely because another page is selected. This source reference
+is not a claim about the currently deployed Wiki-client revision or a capture
+of its live neighborhood.
+
+The HyperDoc snapshot instead contains **page origin and existing page context**.
+Context uses most-recent Journal-site occurrence order. Duplicate sites are
+removed at first occurrence after origin is prepended. This can have a different
+order from Wiki-client registration, as well as omit earlier session sites.
+Membership can also differ: HyperDoc `site-of` falls back to
+`journal.attribution.site`, whereas this Wiki-client `getNeighbors` reads only
+direct `journal.site`. Thus the selection is not guaranteed to be a subset of
+the native registry; it is a bounded, explicitly different input.
+Remote projection uses the actual origin, not the containing Wiki. The
+process-global Lisp `*neighborhood*` registry can supply an already selected
+site's cached object; its membership is never iterated to choose the input.
+Neither that registry nor page-title/link projections are a browser session.
+
+The declared `page-origin-and-context` selection is therefore a separate input
+contract, not native-neighborhood equivalence. Site selection is not filtered
+by reachability: an unavailable selected site remains represented, with its
+state. No alternative site, reordered list or synthetic fallback is substituted.
+The selection-reference fixture records forward native registration versus
+HyperDoc context order and includes a fully loaded prior-session site that
+must remain excluded, plus an attribution-only site included by HyperDoc but
+not by the native page-derived registration. The reference output was checked
+by executing the identified original `newPage(...).getNeighbors(...)` factory
+offline; this is source-level execution, not a live session observation.
+
+### Lossless retention and transport
 
 The existing Lisp `fetch-sitemap` reads the original `/system/sitemap.json`.
-It now retains a copied JSON array and its attempted source URL separately from
-page skeletons and link projections. All original fields survive, including
-`slug`, `title`, `date`, `links` with their values, and unknown nested fields.
-A sitemap-specific state and lock distinguish missing, loading, ready and failed
-without equating Wiki/plugin initialization with sitemap availability. Failures
-are recorded and re-signaled through the existing handling path.
+Its page projection uses `slug` and `title`, and converts `links` to hash-table
+keys for `make-links`; that projection does not preserve `date`, original link
+values or sitemap entry order. Mech therefore receives the separately retained
+raw array, not a reconstruction from those page objects.
+It retains a copied JSON array and attempted source URL separately from page
+skeletons and link projections. All original fields survive: `slug`, `title`,
+`date`, `links` with their values, and unknown nested fields. Retention does not
+register a neighborhood. A sitemap-specific state and lock distinguish missing,
+loading, ready and failed independently of Wiki/plugin initialization. Failures
+are recorded and retain their original propagation/handling.
 
 Story supplies a version-1 snapshot through the existing base64 JSON/postMessage
-bridge. Its declared scope is **page origin and existing page context**, in that
-order, with duplicate sites removed at their first occurrence. Entry order is
-unchanged. Remote-page projection uses the actual origin; the containing Wiki
-and unrelated entries from the process-global cache are not added. This is a
-bounded input for Mech, not the complete neighborhood of a native Wiki session.
-The snapshot operation performs no fetch and does not wait for an initializer.
-Each record carries domain, sourceUrl, state, message and original sitemap.
-Unavailable values are JSON `null`; a proven empty sitemap is `[]` with state
-`ready`. Source provenance identifies the retained read, not a new verification
-of the remote site's current state.
+bridge. Each selected site record carries domain, sourceUrl, state, message and
+original sitemap. Entry order is unchanged; unavailable values are JSON `null`.
+Snapshotting performs no fetch and does not wait for an initializer. `ready`
+means retained data is available, not that the remote site was freshly verified
+or that automatic refresh matches the Wiki client.
 
-The host's `neighborhood.js` validates this data boundary and supplies the
-existing `wiki.neighborhoodObject.sites` contract. The original Mech extractor,
-ordering and graph code remain unchanged. If any selected-context sitemap is
-unavailable, the host explains that condition on display; an attempted
-NEIGHBORS data access throws the same explicit explanation before emitting a
-zero or partial neighborhood. A known empty snapshot remains executable and
-uses the pinned Mech revision's original zero-result behavior. CODE does not
-require this data access: the original Trails export and Solo remain available
-when sitemap data is absent. Display initializes CLICK controls but does not
-execute NEIGHBORS, WALK or Code items.
+The host's `neighborhood.js` validates the boundary and supplies
+`wiki.neighborhoodObject.sites`. Original Mech extraction, ordering and graph
+algorithms remain unchanged. There is an explicit **host availability policy**:
+all declared sites must be ready before NEIGHBORS reads this input. The native
+extractor would instead skip `sitemapRequestInflight` sites and continue with a
+partial set. A durable test executes that original behavior and contrasts it
+with the strict host gate; the two policies are not called equivalent.
 
-Snapshots are not live subscriptions. Reopen Story after background sitemap
-initialization completes to obtain a new snapshot. No browser-side fetch,
-public proxy, editing/publishing function or additional service is introduced.
-The original PREVIEW limitation and shared Wiki-origin/CSP boundary still apply.
-`WALK topics` and `POPUP state` remain unsupported by this pinned candidate.
+The host explains unavailable data on display and on an attempted NEIGHBORS
+access before emitting a zero or partial result. Proven empty input remains
+executable with the candidate's original zero-result semantics. CODE trails
+never requires this data access and remains usable without sitemaps. Display
+initializes CLICK controls but does not execute NEIGHBORS, WALK or Code items.
+Reopen Story after data becomes available to obtain another snapshot; this is
+not a live subscription or a new retry/refresh implementation.
 
-Tests use `tests/fixtures/mech-sitemaps.json`, explicitly labelled trusted test
-data. It contains two sites, four entries, deliberately unsorted dates, original
-link values, UTF-8 text, false/null and an extra nested field. No fixture is used
-as production fallback. The browser comparison executes the same original
-Mech revision directly on identical inputs and controls clock, locale and
-timezone; it neither substitutes graph algorithms nor normalizes outputs.
+### Actual data path and the production evidence boundary
+
+The intended data path is the existing HyperDoc **Lisp process**:
+`get-fedwiki -> make-fedwiki -> initialize-fedwiki -> protocol probe ->
+fetch-sitemap -> fetch-json/Drakma HTTP(S)`. HTTPS is the initial protocol;
+only the existing immediate port-443 connection-refused rule switches it to
+HTTP. It does not use the browser's Wiki site adapter or `/proxy` route. The
+browser receives JSON already retained by HyperDoc. No new public fetch proxy,
+browser-side sitemap fetch, service or TLS exception is introduced.
+
+The prior diagnosis observed an HTTP Ward sitemap (45 entries) from the local
+inspection machine. It also observed refused HTTPS connections for Ward and
+two Pattern Journal sites, plus anonymous HTTP 403 at the Wiki proxy endpoint.
+Those are observations of that caller and path, not proof of production-Lisp
+DNS, egress, TLS or reachability for every selected site. The live server's
+complete selected set and corresponding successful source reads remain
+unverified. The missing/loading/failed records are precisely how this boundary
+is exposed; fixture success does not establish production completeness.
+
+Before any separate production acceptance, observe the actual service package,
+source and network context, then obtain each selected site's `sourceUrl` and
+state from that runtime. All declared sites require successfully retained JSON
+through its existing loader. A shell curl result outside a service's network
+restrictions is insufficient by itself. Do not activate or reload just to obtain
+this evidence, weaken TLS or a proxy policy, or turn a failed source into empty
+data. No production reachability check or activation is performed by this slice.
+
+### Reproducible tests
+
+`tests/fixtures/mech-sitemaps.json` is labelled trusted test data, not production
+source. Its two sitemap sites/four entries include unsorted dates, original link
+values, UTF-8, false/null and nested extra fields. Loader tests inject that JSON
+via the existing fetch seam; their fixture URLs do **not** prove HTTP delivery.
+Selection examples are source-derived reference cases, not recorded browser
+sessions. Tests prove independent retention, bounded selection even with loaded
+global sites, missing/loading/failed/empty distinctions and original execution.
+
+The browser compares the same Mech revision directly on identical complete
+inputs with controlled clock, locale and timezone. It substitutes no graph
+algorithm and normalizes no output. Existing CODE trails/Solo and its original
+Preview failure remain separate regressions. Full behavioral equivalence from
+the earlier composition experiment remains failed; this data contract does not
+reclassify it. `WALK topics` and `POPUP state` remain a separate intake.
 
 ```sh
 node --test tests/fedwiki-mech-host.test.mjs tests/fedwiki-mech-neighborhood.test.mjs
@@ -345,9 +426,8 @@ node scripts/test-fedwiki-mech-sitemaps.mjs LISP_WRAPPER PLAYWRIGHT_DIRECTORY \
   CHROME_EXECUTABLE /external/results
 ```
 
-The existing ASDF Story tests include the retention/scope/state contracts.
-The new browser driver checks actual fresh Inspector serialization, transfer,
-original weeks/hubs results and ready/empty/missing/loading/failed states.
-Run the existing Trails browser driver as well. All execution output remains
-outside the repository. Deployment must update both the packaged HyperDoc and
-its versioned complete host assets; this source slice performs no activation.
+Run the existing ASDF Story contracts and Trails browser driver as well.
+Execution output remains outside the repository. The implementation and initial
+tests are in commit `99521dc6a8df21fd56fc0e9da25302bfb7b87f3f`; this clarification
+adds documented boundaries and regression controls, not another Mech adapter.
+No original page, service, source pin or runtime instance is changed.
