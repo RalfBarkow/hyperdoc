@@ -1,0 +1,38 @@
+[
+  {
+    "key": "p41-historical-flake",
+    "file": "p41-historical-flake.nix",
+    "authority": "https://github.com/RalfBarkow/wiki",
+    "oid": "b42eb888d6e5d59803667c6320e0779523fc265c",
+    "path": "flake.nix",
+    "sha256": "b112a3c040f18bd0e74b4da1689ab3ab7cf03915ef62388f585e3c14ed493ab4",
+    "page": "wiki.ralfbarkow.ch deployment"
+  },
+  {
+    "key": "served-catalog-start",
+    "file": "served-catalog-start.lisp",
+    "authority": "https://github.com/RalfBarkow/hyperdoc",
+    "oid": "fab214334279bc5d3df0f2f624d34e6a1bdc1897",
+    "path": "scripts/catalog-main.lisp",
+    "sha256": "e273b1ceef7aff4398d67407ac441a13b8d8f1ecc65b38ec5df7b43f9af3b2fc",
+    "page": "dreyeck.ch deployment"
+  },
+  {
+    "key": "served-application",
+    "file": "served-application.lisp",
+    "authority": "https://github.com/RalfBarkow/hyperdoc",
+    "oid": "fab214334279bc5d3df0f2f624d34e6a1bdc1897",
+    "path": "dreyeck/src/catalog-application.lisp",
+    "sha256": "9b112c3e70822891214b99c5061054bd6ff69e09f4f954bb5c8ffc92d3c9fbbe",
+    "page": "dreyeck.ch deployment"
+  },
+  {
+    "key": "served-assets-policy",
+    "file": "served-assets-policy.lisp",
+    "authority": "https://github.com/RalfBarkow/hyperdoc",
+    "oid": "fab214334279bc5d3df0f2f624d34e6a1bdc1897",
+    "path": "dreyeck/src/fedwiki-assets.lisp",
+    "sha256": "8a3ae56f35d335ef95d136eed7de3d90cb46ce2c873370316b40c6ae543b2af9",
+    "page": "dreyeck.ch deployment"
+  }
+]

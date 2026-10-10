@@ -1,0 +1,343 @@
+{
+  "hyperdocAuthority": "https://github.com/RalfBarkow/hyperdoc",
+  "branch": "dreyeck.ch",
+  "parentOid": "454ee9e32c794bb66a4339e09e523c85b506ec42",
+  "historicalObservationFileUnchanged": true,
+  "historicalFileSha256": "c1967adbcaca46fc284abfb8dfbc1543834dc18df649177e4e7a87f73a35c090",
+  "newReaderChecks": 227,
+  "browser": {
+    "kind": "Fresh ordinary Inspector browser reader/layout witness",
+    "browser": "154.0.8037.98",
+    "origin": "http://127.0.0.1:65428",
+    "cases": [
+      {
+        "width": 1440,
+        "name": "ralf-explanation",
+        "contentWidth": 688,
+        "scrollWidth": 688,
+        "screenshot": "1440-ralf-explanation.png",
+        "status": "PASS"
+      },
+      {
+        "width": 1440,
+        "name": "historical-witness",
+        "contentWidth": 688,
+        "scrollWidth": 688,
+        "screenshot": "1440-historical-witness.png",
+        "status": "PASS"
+      },
+      {
+        "width": 1440,
+        "name": "package-identity",
+        "contentWidth": 688,
+        "scrollWidth": 688,
+        "screenshot": "1440-package-identity.png",
+        "status": "PASS"
+      },
+      {
+        "width": 1440,
+        "name": "revision-identity",
+        "contentWidth": 688,
+        "scrollWidth": 688,
+        "screenshot": "1440-revision-identity.png",
+        "status": "PASS"
+      },
+      {
+        "width": 1440,
+        "name": "historical-source",
+        "contentWidth": 688,
+        "scrollWidth": 688,
+        "screenshot": "1440-historical-source.png",
+        "status": "PASS"
+      },
+      {
+        "width": 1440,
+        "name": "return-to-ralf",
+        "contentWidth": 688,
+        "scrollWidth": 688,
+        "screenshot": "1440-return-to-ralf.png",
+        "status": "PASS"
+      },
+      {
+        "width": 1440,
+        "name": "declared-package",
+        "contentWidth": 688,
+        "scrollWidth": 688,
+        "screenshot": "1440-declared-package.png",
+        "status": "PASS"
+      },
+      {
+        "width": 1440,
+        "name": "dreyeck-explanation",
+        "contentWidth": 688,
+        "scrollWidth": 688,
+        "screenshot": "1440-dreyeck-explanation.png",
+        "status": "PASS"
+      },
+      {
+        "width": 1440,
+        "name": "activation-evidence",
+        "contentWidth": 688,
+        "scrollWidth": 688,
+        "screenshot": "1440-activation-evidence.png",
+        "status": "PASS"
+      },
+      {
+        "width": 1440,
+        "name": "activation-boundary",
+        "contentWidth": 688,
+        "scrollWidth": 688,
+        "screenshot": "1440-activation-boundary.png",
+        "status": "PASS"
+      },
+      {
+        "width": 380,
+        "name": "ralf-explanation",
+        "contentWidth": 332,
+        "scrollWidth": 332,
+        "screenshot": "380-ralf-explanation.png",
+        "status": "PASS"
+      },
+      {
+        "width": 380,
+        "name": "historical-witness",
+        "contentWidth": 332,
+        "scrollWidth": 332,
+        "screenshot": "380-historical-witness.png",
+        "status": "PASS"
+      },
+      {
+        "width": 380,
+        "name": "package-identity",
+        "contentWidth": 332,
+        "scrollWidth": 332,
+        "screenshot": "380-package-identity.png",
+        "status": "PASS"
+      },
+      {
+        "width": 380,
+        "name": "revision-identity",
+        "contentWidth": 332,
+        "scrollWidth": 332,
+        "screenshot": "380-revision-identity.png",
+        "status": "PASS"
+      },
+      {
+        "width": 380,
+        "name": "historical-source",
+        "contentWidth": 332,
+        "scrollWidth": 332,
+        "screenshot": "380-historical-source.png",
+        "status": "PASS"
+      },
+      {
+        "width": 380,
+        "name": "return-to-ralf",
+        "contentWidth": 332,
+        "scrollWidth": 332,
+        "screenshot": "380-return-to-ralf.png",
+        "status": "PASS"
+      },
+      {
+        "width": 380,
+        "name": "declared-package",
+        "contentWidth": 332,
+        "scrollWidth": 332,
+        "screenshot": "380-declared-package.png",
+        "status": "PASS"
+      },
+      {
+        "width": 380,
+        "name": "dreyeck-explanation",
+        "contentWidth": 332,
+        "scrollWidth": 332,
+        "screenshot": "380-dreyeck-explanation.png",
+        "status": "PASS"
+      },
+      {
+        "width": 380,
+        "name": "activation-evidence",
+        "contentWidth": 332,
+        "scrollWidth": 332,
+        "screenshot": "380-activation-evidence.png",
+        "status": "PASS"
+      },
+      {
+        "width": 380,
+        "name": "activation-boundary",
+        "contentWidth": 332,
+        "scrollWidth": 332,
+        "screenshot": "380-activation-boundary.png",
+        "status": "PASS"
+      }
+    ],
+    "errors": [],
+    "externalRequests": [],
+    "productionAccess": false,
+    "sourceWrites": false,
+    "status": "PASS"
+  },
+  "wikiPublication": {
+    "authority": "https://github.com/RalfBarkow/wiki",
+    "remote": "origin",
+    "verifiedAt": "2026-10-10T04:29:01.455896+00:00",
+    "productionDeploymentPerformed": false,
+    "branches": [
+      {
+        "branch": "dreyeck.ch",
+        "before": "548ee4c31ec7824bf19954b745f12b3b5212fc2b",
+        "after": "db98a893a7c710fcb3506150b68b1aa08915c47e",
+        "fastForward": true,
+        "canonicalUrl": "https://github.com/RalfBarkow/wiki/commit/db98a893a7c710fcb3506150b68b1aa08915c47e",
+        "canonicalHttpStatus": 200,
+        "canonicalBodySha256": "1b2769320e78624e291f66bfb5ce6e962d5056b9670dfd15835bb55bab1549c5",
+        "apiCommitOid": "db98a893a7c710fcb3506150b68b1aa08915c47e"
+      },
+      {
+        "branch": "wiki.ralfbarkow.ch",
+        "before": "b42eb888d6e5d59803667c6320e0779523fc265c",
+        "after": "6774447eff17d705a3083378ab2c9a93b237cf91",
+        "fastForward": true,
+        "canonicalUrl": "https://github.com/RalfBarkow/wiki/commit/6774447eff17d705a3083378ab2c9a93b237cf91",
+        "canonicalHttpStatus": 200,
+        "canonicalBodySha256": "d57788c01ec23d1de1c4f977690ae3d9aa6564b7f94e9e293fbef5af036e5a2b",
+        "apiCommitOid": "6774447eff17d705a3083378ab2c9a93b237cf91"
+      }
+    ],
+    "alreadyPublicDependencies": [
+      {
+        "oid": "9a9afef387e8c05587c95171119d627117798f56",
+        "url": "https://github.com/RalfBarkow/wiki/commit/9a9afef387e8c05587c95171119d627117798f56",
+        "pushedByThisTask": false
+      },
+      {
+        "oid": "4dd6be43453b451615ce04fc9ac4e5792eede46e",
+        "url": "https://github.com/RalfBarkow/wiki/commit/4dd6be43453b451615ce04fc9ac4e5792eede46e",
+        "pushedByThisTask": false
+      }
+    ]
+  },
+  "noDeployment": true,
+  "noLongRunningImageReload": true,
+  "screenshots": [
+    {
+      "path": "docs/deployment-reading-layout/dreyeck-narrow.png",
+      "sha256": "0089df7788582c9c1482773450733a689b510b3f94a056b21f5225a3bb86fd08"
+    },
+    {
+      "path": "docs/deployment-reading-layout/revision-narrow.png",
+      "sha256": "addba5b67e5917bf1228cdbdfcd6ce0e7bca436c8a2e1d961c01d7a6ab418e23"
+    },
+    {
+      "path": "docs/deployment-reading-layout/ralfbarkow-narrow.png",
+      "sha256": "a1a7cbe05d213e44abca71461881b9857e71f2d2403c84bbcad89a1809a4d311"
+    }
+  ],
+  "regressions": [
+    {
+      "log": "/private/tmp/deployment-all-reading-accepted.log",
+      "sha256": "623b200bf93ea53a15aba8158efa18b8dec240a85aa6eeb6e774d01fbe7aea78",
+      "exitStatus": 0
+    },
+    {
+      "log": "/private/tmp/deployment-git-topicmap-final.log",
+      "sha256": "318dcfc7ea72e8102832f9e68581a3372778e28818d753447b803b199b0cb795",
+      "exitStatus": 0
+    },
+    {
+      "log": "/private/tmp/deployment-catalog-final.log",
+      "sha256": "fe73e39537caffb41c24e6a419076a70e05f4f5cdfcf40bab339d13c9b1668a0",
+      "exitStatus": 0
+    }
+  ],
+  "sourceFiles": [
+    {
+      "path": "docs/deployment-reading-layout/dreyeck-narrow.png",
+      "sha256": "0089df7788582c9c1482773450733a689b510b3f94a056b21f5225a3bb86fd08"
+    },
+    {
+      "path": "docs/deployment-reading-layout/ralfbarkow-narrow.png",
+      "sha256": "a1a7cbe05d213e44abca71461881b9857e71f2d2403c84bbcad89a1809a4d311"
+    },
+    {
+      "path": "docs/deployment-reading-layout/revision-narrow.png",
+      "sha256": "addba5b67e5917bf1228cdbdfcd6ce0e7bca436c8a2e1d961c01d7a6ab418e23"
+    },
+    {
+      "path": "docs/deployment-reading-publication.md",
+      "sha256": "bf738cee0b2f5418408d31888ee9daef1926ef56a95e74e39de36cc89544ed80"
+    },
+    {
+      "path": "dreyeck.asd",
+      "sha256": "1d7b31782871c96699a53f3d36ab650f795fc5a290337d6a6d8df980d44bd894"
+    },
+    {
+      "path": "dreyeck/pages/fedwiki-config/Reading FedWiki Configuration and Fork Behavior.html",
+      "sha256": "9171da7a0a434d5284cf7be7919ff5ffda0c2c68291e6c5cd487921a7b93fe6a"
+    },
+    {
+      "path": "dreyeck/pages/work/Federated Wiki deployment state.html",
+      "sha256": "b3ebcd4f4a514a1ed0fd0bcbf299a905c49f592ec07a3de2f134ac1632ae71db"
+    },
+    {
+      "path": "dreyeck/pages/work/Work Breakdown.html",
+      "sha256": "61d15e69532a49b40baf49dcf8085891e5019acc53f876c92875b0efd1a5d476"
+    },
+    {
+      "path": "dreyeck/pages/work/dreyeck.ch deployment.html",
+      "sha256": "94ee1f3211997d33df34212cd164e7c75136658f7d28ca4ec7e14127357438ad"
+    },
+    {
+      "path": "dreyeck/pages/work/wiki.ralfbarkow.ch deployment.html",
+      "sha256": "de823d977dda513a22e8fda6107a1b04b1fa85e061a9953a7f57109a0c7025e0"
+    },
+    {
+      "path": "dreyeck/tests/work-deployment-inspection.lisp",
+      "sha256": "3ee70fad14e1cb33800326253d47aac3a291ad0ed10850f1c586ffe34ab46dac"
+    },
+    {
+      "path": "dreyeck/tests/work-deployment-reading.lisp",
+      "sha256": "161fac97849b72129e9fd1665578a31b703de4c49db26377bd7e2d67acde1b77"
+    },
+    {
+      "path": "dreyeck/work/deployment-evidence/manifest.json",
+      "sha256": "430bdede963ac3df9313a69d1c7097d83d13550a80d04c2c8a8e0450ed75772b"
+    },
+    {
+      "path": "dreyeck/work/deployment-evidence/p41-historical-flake.nix",
+      "sha256": "b112a3c040f18bd0e74b4da1689ab3ab7cf03915ef62388f585e3c14ed493ab4"
+    },
+    {
+      "path": "dreyeck/work/deployment-evidence/publication.json",
+      "sha256": "0ea445dcfea6d6fd9dc7a8ac119383d2b05c64d4f862c788cfe374949c2a8e9e"
+    },
+    {
+      "path": "dreyeck/work/deployment-evidence/served-application.lisp",
+      "sha256": "9b112c3e70822891214b99c5061054bd6ff69e09f4f954bb5c8ffc92d3c9fbbe"
+    },
+    {
+      "path": "dreyeck/work/deployment-evidence/served-assets-policy.lisp",
+      "sha256": "8a3ae56f35d335ef95d136eed7de3d90cb46ce2c873370316b40c6ae543b2af9"
+    },
+    {
+      "path": "dreyeck/work/deployment-evidence/served-catalog-start.lisp",
+      "sha256": "e273b1ceef7aff4398d67407ac441a13b8d8f1ecc65b38ec5df7b43f9af3b2fc"
+    },
+    {
+      "path": "dreyeck/work/deployment-inspection.lisp",
+      "sha256": "eebb4b098f2973f50d5660101bfb4d4a28cd4843ff0609832e4e356536bad757"
+    },
+    {
+      "path": "scripts/test-deployment-reading-browser.mjs",
+      "sha256": "da7a0334291c964821f96a3e55066ca66f501d6cd9acfbb68f9021724bd903e3"
+    }
+  ],
+  "tools": {
+    "sbcl": "2.4.10",
+    "editorOid": "38afb02d79838d4098589c2e203ba39799a44853",
+    "browser": "154.0.8037.98",
+    "tala": "0.9.0",
+    "lispWrapper": "/private/tmp/run-mech-lisp.sh"
+  },
+  "scope": "Actual fresh normal Inspector browser, temporary loopback listener; Wiki publication separate from HyperDoc edit; no host access or activation."
+}

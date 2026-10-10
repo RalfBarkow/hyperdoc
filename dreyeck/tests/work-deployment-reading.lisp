@@ -444,79 +444,160 @@
                       (reading:deployment-evidence))
   (format t "~&SERVED-STATE-CONTROLS-PASS: a revision on the process, a PID on the store source, a versioned assets copy, a promoted inference and an undated observation rejected.~%"))
 
-(defun run-tests ()
-  (check-preserved-observation-sources)
-  (check-preserved-update-observation-source)
-  (check-evidence (reading:deployment-evidence))
-  (check-positive-controls)
-  (check-confirmation (reading:service-start-confirmation) (reading:deployment-evidence))
-  (check-confirmation-controls)
-  (check-update-observation (reading:deployment-update-observation))
-  (check-update-controls)
-  (check-served-state (reading:served-state-observation-2026-10-08)
-                      (reading:deployment-evidence))
-  (check-served-state-controls)
-  ;; The snapshot is still exactly what it was, after the confirmation was read.
-  (check-evidence (reading:deployment-evidence))
-  (let ((changed (reading:deployment-evidence)))
-    (let ((record (record-by-id changed :observed "hyperdoc-service")))
-      (setf (getf record :active-state) "changed"))
-    (check-evidence (reading:deployment-evidence)))
-  (let* ((book (hyperbook:find-hyperbook "dreyeck/work/reading" :signal-error? t))
-         (titles '("Federated Wiki deployment state" "wiki.ralfbarkow.ch deployment"
-                   "dreyeck.ch deployment" "Cookie Secret")))
-    (assert (equal "Working on HyperDoc" (hyperbook:title-of book)))
-    (assert (equal "Work Breakdown" (hyperbook:main-page-id-of book)))
-    (assert (null (hyperbook:find-hyperbook "dreyeck/working-on-hyperdoc")))
-    (assert (typep (hyperbook:find-page book "Working on HyperDoc" :signal-error? t)
-                   'hyperdoc::code-page))
-    (multiple-value-bind (landing view) (render-page book "Work Breakdown")
-      (declare (ignore landing))
-      (dolist (title titles)
-        (let* ((page (render-page book title))
-               (source (uiop:read-file-string (hyperdoc:file-of page))))
-          (assert (member page (mapcar #'cdr (views:view-references view)) :test #'eq))
-          (assert (not (search "data-topic=" source)))
-          (assert (not (search "data-from=" source))))))
-    ;; EXPR must resolve to evidence, not merely render text or a stored condition.
-    (multiple-value-bind (page view) (render-page book "Federated Wiki deployment state")
-      (declare (ignore page))
-      (assert (member (reading:deployment-evidence)
-                      (mapcar #'cdr (views:view-references view)) :test #'equal)))
-    ;; The page reaches all three evidence objects and visibly distinguishes
-    ;; the service-start question from the revision-deployment question.
-    (multiple-value-bind (page view) (render-page book "dreyeck.ch deployment")
-      (declare (ignore page))
-      (let ((references (mapcar #'cdr (views:view-references view))))
-        (assert (member (reading:deployment-evidence) references :test #'equal))
-        (assert (member (reading:service-start-confirmation) references :test #'equal))
-        (assert (member (reading:deployment-update-observation) references :test #'equal))
-        (assert (member (reading:served-state-observation-2026-10-08) references
-                        :test #'equal)))
-      (let ((html (views:view-html view)))
-        (dolist (text '("How is the service started?" "2026-10-01"
-                        "How was this HyperDoc revision deployed?" "2026-10-03"
-                        "operator supplied command output"
-                        "384fab636fd2695109aea626b12963cd58bbdcac"
-                        "548f73d09826795cbeaea1eae38da9a4b6e8a9e7"
-                        "nix flake update hyperdoc"
-                        "nixos-rebuild switch --flake /etc/nixos#dreyeck"
-                        "does not establish ExecStart, WorkingDirectory"
-                        ;; The 2026-10-08 section, beside the sections above.
-                        "What served dreyeck.ch?" "2026-10-08T03:29:16Z"
-                        "127.0.0.1:8080" "0.0.0.0:8080"
-                        "fab214334279bc5d3df0f2f624d34e6a1bdc1897"
-                        "bdb09ff431b1750ade5be5ea15ae9d2467194f71"
-                        "content identity, not provenance" "wiki.service"
-                        "No such service claim is made."))
-          (assert (search text html)))))
-    (let ((source (uiop:read-file-string
-                   (hyperdoc:file-of (hyperbook:find-page book "Cookie Secret" :signal-error? t)))))
-      (assert (search "Cookie Secret → Session → Session Cookie → wiki-security-friends" source))
-      (assert (search "b42eb888d6e5d59803667c6320e0779523fc265c" source)))
-    ;; Navigation additions must preserve the existing semantic Work graph.
-    (let ((projection (dreyeck/work/reading:work-projection)))
-      (assert (= 23 (length (dreyeck/topicmap:topicmap-projection-topics-of projection))))
-      (assert (= 22 (length (dreyeck/topicmap:topicmap-projection-associations-of projection))))))
-  (format t "~&WORK-DEPLOYMENT-READING-PASS: preserved snapshot/confirmation, dated update with activation result, page navigation and unchanged Work graph.~%")
-  t)
+(defun run-tests nil (check-preserved-observation-sources)
+       (check-preserved-update-observation-source)
+       (check-evidence (reading:deployment-evidence)) (check-positive-controls)
+       (check-confirmation (reading:service-start-confirmation)
+                           (reading:deployment-evidence))
+       (check-confirmation-controls)
+       (check-update-observation (reading:deployment-update-observation))
+       (check-update-controls)
+       (check-served-state (reading:served-state-observation-2026-10-08)
+                           (reading:deployment-evidence))
+       (check-served-state-controls)
+       (check-evidence (reading:deployment-evidence))
+       (let ((changed (reading:deployment-evidence)))
+            (let ((record (record-by-id changed :observed "hyperdoc-service")))
+                 (setf (getf record :active-state) "changed"))
+            (check-evidence (reading:deployment-evidence)))
+       (let*
+             ((book
+                    (hyperbook:find-hyperbook "dreyeck/work/reading"
+                                              :signal-error? t))
+              (titles
+                      (quote
+                             ("Federated Wiki deployment state"
+                              "wiki.ralfbarkow.ch deployment"
+                              "dreyeck.ch deployment"
+                              "Cookie Secret"))))
+             (assert (equal "Working on HyperDoc" (hyperbook:title-of book)))
+             (assert (equal "Work Breakdown" (hyperbook:main-page-id-of book)))
+             (assert
+                     (null
+                           (hyperbook:find-hyperbook
+                                                     "dreyeck/working-on-hyperdoc")))
+             (assert
+                     (typep
+                            (hyperbook:find-page book "Working on HyperDoc"
+                                                 :signal-error? t)
+                            (quote hyperdoc::code-page)))
+             (multiple-value-bind (landing view)
+                                  (render-page book "Work Breakdown")
+                                  (declare (ignore landing))
+                                  (dolist (title titles)
+                                          (let*
+                                                ((page
+                                                       (render-page book
+                                                                    title))
+                                                 (source
+                                                         (uiop:read-file-string
+                                                                                (hyperdoc:file-of
+                                                                                                  page))))
+                                                (assert
+                                                        (member page
+                                                                (mapcar
+                                                                        (function
+                                                                                  cdr)
+                                                                        (views:view-references
+                                                                                               view))
+                                                                :test
+                                                                (function eq)))
+                                                (assert
+                                                        (not
+                                                             (search
+                                                                     "data-topic="
+                                                                     source)))
+                                                (assert
+                                                        (not
+                                                             (search
+                                                                     "data-from="
+                                                                     source))))))
+             (multiple-value-bind (page view)
+                                  (render-page book
+                                               "Federated Wiki deployment state")
+                                  (declare (ignore page))
+                                  (assert
+                                          (member (reading:deployment-evidence)
+                                                  (mapcar (function cdr)
+                                                          (views:view-references
+                                                                                 view))
+                                                  :test (function equal))))
+             (multiple-value-bind (page view)
+                                  (render-page book "dreyeck.ch deployment")
+                                  (declare (ignore page))
+                                  (let
+                                       ((references
+                                                    (mapcar (function cdr)
+                                                            (views:view-references
+                                                                                   view))))
+                                       (assert
+                                               (member
+                                                       (reading:deployment-evidence)
+                                                       references :test
+                                                       (function equal)))
+                                       (assert
+                                               (member
+                                                       (reading:service-start-confirmation)
+                                                       references :test
+                                                       (function equal)))
+                                       (assert
+                                               (member
+                                                       (reading:deployment-update-observation)
+                                                       references :test
+                                                       (function equal)))
+                                       (assert
+                                               (member
+                                                       (reading:served-state-observation-2026-10-08)
+                                                       references :test
+                                                       (function equal))))
+                                  (let ((html (views:view-html view)))
+                                       (dolist
+                                               (text
+                                                     (quote
+                                                            ("Which applications serve"
+                                                             "Lisp-based HyperDoc"
+                                                             "separate Node Federated Wiki farm"
+                                                             "28 September"
+                                                             "1 October"
+                                                             "3 October"
+                                                             "8 October"
+                                                             "operator supplied command output"
+                                                             "Successful activation alone"
+                                                             "03:29:16 UTC"
+                                                             "127.0.0.1:8080"
+                                                             "not a live monitor"
+                                                             "did not report its own revision"
+                                                             "does not establish who made the copy"
+                                                             "wiki.service"
+                                                             "newer Wiki declaration")))
+                                               (assert (search text html)))))
+             (let
+                  ((source
+                           (uiop:read-file-string
+                                                  (hyperdoc:file-of
+                                                                    (hyperbook:find-page
+                                                                                         book
+                                                                                         "Cookie Secret"
+                                                                                         :signal-error?
+                                                                                         t)))))
+                  (assert
+                          (search
+                                  "Cookie Secret → Session → Session Cookie → wiki-security-friends"
+                                  source))
+                  (assert
+                          (search "b42eb888d6e5d59803667c6320e0779523fc265c"
+                                  source)))
+             (let ((projection (dreyeck/work/reading:work-projection)))
+                  (assert
+                          (= 23
+                             (length
+                                     (dreyeck/topicmap:topicmap-projection-topics-of
+                                                                                     projection))))
+                  (assert
+                          (= 22
+                             (length
+                                     (dreyeck/topicmap:topicmap-projection-associations-of
+                                                                                           projection))))))
+       (format t
+               "~&WORK-DEPLOYMENT-READING-PASS: preserved snapshot/confirmation, dated update with activation result, page navigation and unchanged Work graph.~%")
+       t)

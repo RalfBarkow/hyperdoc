@@ -1,0 +1,40 @@
+{
+  "authority": "https://github.com/RalfBarkow/wiki",
+  "remote": "origin",
+  "verifiedAt": "2026-10-10T04:29:01.455896+00:00",
+  "productionDeploymentPerformed": false,
+  "branches": [
+    {
+      "branch": "dreyeck.ch",
+      "before": "548ee4c31ec7824bf19954b745f12b3b5212fc2b",
+      "after": "db98a893a7c710fcb3506150b68b1aa08915c47e",
+      "fastForward": true,
+      "canonicalUrl": "https://github.com/RalfBarkow/wiki/commit/db98a893a7c710fcb3506150b68b1aa08915c47e",
+      "canonicalHttpStatus": 200,
+      "canonicalBodySha256": "1b2769320e78624e291f66bfb5ce6e962d5056b9670dfd15835bb55bab1549c5",
+      "apiCommitOid": "db98a893a7c710fcb3506150b68b1aa08915c47e"
+    },
+    {
+      "branch": "wiki.ralfbarkow.ch",
+      "before": "b42eb888d6e5d59803667c6320e0779523fc265c",
+      "after": "6774447eff17d705a3083378ab2c9a93b237cf91",
+      "fastForward": true,
+      "canonicalUrl": "https://github.com/RalfBarkow/wiki/commit/6774447eff17d705a3083378ab2c9a93b237cf91",
+      "canonicalHttpStatus": 200,
+      "canonicalBodySha256": "d57788c01ec23d1de1c4f977690ae3d9aa6564b7f94e9e293fbef5af036e5a2b",
+      "apiCommitOid": "6774447eff17d705a3083378ab2c9a93b237cf91"
+    }
+  ],
+  "alreadyPublicDependencies": [
+    {
+      "oid": "9a9afef387e8c05587c95171119d627117798f56",
+      "url": "https://github.com/RalfBarkow/wiki/commit/9a9afef387e8c05587c95171119d627117798f56",
+      "pushedByThisTask": false
+    },
+    {
+      "oid": "4dd6be43453b451615ce04fc9ac4e5792eede46e",
+      "url": "https://github.com/RalfBarkow/wiki/commit/4dd6be43453b451615ce04fc9ac4e5792eede46e",
+      "pushedByThisTask": false
+    }
+  ]
+}

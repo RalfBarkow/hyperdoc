@@ -830,13 +830,21 @@
                                                                                      "dreyeck/fedwiki-config/reading/tests"))))
 
 (ASDF/PARSE-DEFSYSTEM:DEFSYSTEM "dreyeck/fedwiki-config/reading/tests"
-  :DEPENDS-ON
-  ("dreyeck/fedwiki-config/reading" "dreyeck/topicmap/tests")
-  :COMPONENTS
-  ((:FILE "dreyeck/tests/fedwiki-config-reading"))
-  :PERFORM
-  (ASDF/LISP-ACTION:TEST-OP (OP COMPONENT) (DECLARE (IGNORE OP COMPONENT))
-   (UIOP/PACKAGE:SYMBOL-CALL :DREYECK/FEDWIKI-CONFIG/TESTS :RUN-TESTS)))
+                                :DEPENDS-ON
+                                ("dreyeck/work/reading"
+                                 "dreyeck/fedwiki-config/reading"
+                                 "dreyeck/topicmap/tests")
+                                :COMPONENTS
+                                ((:FILE
+                                        "dreyeck/tests/fedwiki-config-reading"))
+                                :PERFORM
+                                (ASDF/LISP-ACTION:TEST-OP (OP COMPONENT)
+                                                          (DECLARE
+                                                                   (IGNORE OP
+                                                                           COMPONENT))
+                                                          (UIOP/PACKAGE:SYMBOL-CALL
+                                                                                    :DREYECK/FEDWIKI-CONFIG/TESTS
+                                                                                    :RUN-TESTS)))
 
 (ASDF/PARSE-DEFSYSTEM:DEFSYSTEM "dreyeck/fedwiki-config/tala/tests"
   :DEPENDS-ON
@@ -2717,98 +2725,149 @@
              (uiop:symbol-call :dreyeck/topicmap/gesture/tests
                                :run-workspace-action-sign-tests)))
 
-(defsystem "dreyeck/work/reading"
-  :description "HyperDoc work pages and one complete D2 Connections example"
-  :depends-on ("dreyeck/topicmap/tala/reading" "dreyeck/gesture-binding-witness"
-               "dreyeck/inspector/git" "dreyeck/gesture/operation-request" "hyperbook/fedwiki"
-               "shasht" "cl-base64" "local-time" "ironclad")
-  :serial t
-  :components ((:module "dreyeck/work" :components ((:file "reading")
-                                                    (:file "operation-requests")
-                                                    (:file "deployment-reading")
-                                                    (:file "authoring-architecture")
-                                                    (:file "addresses")
-                                                    (:file "trails-rendered-reading")
-                                                    (:file "trails-rendered-federated-context")
-                                                    (:file "trails-rendered-following")
-                                                    (:file "trails-rendered-browser-check")
-                                                    (:file "shift-click" :depends-on ("trails-rendered-federated-context"))
-                                                    (:static-file "trails-rendered-solo-batch.json")
-                                                    (:static-file "trails-rendered-solo-beam.json")
-                                                    (:static-file "trails-rendered-federated-context.json")
-                                                    (:module "trails-rendered-evidence" :components
-                                                     ((:static-file "ward.voices.ustawi.wiki--trails-rendered.json")
-                                                      (:static-file "thompson.voices.ustawi.wiki--how-we-think.json")
-                                                      (:static-file "thompson.voices.ustawi.wiki--as-we-may-think.json")
-                                                      (:static-file "jan.voices.ustawi.wiki--alan-cooper.json")
-                                                      (:static-file "jan.voices.ustawi.wiki--ethnomethodology.json")
-                                                      (:static-file "jan.voices.ustawi.wiki--john-dewey.json")
-                                                      (:static-file "jan.voices.ustawi.wiki--how-we-think.json")
-                                                      (:static-file "thompson.fed.wiki--how-we-think.json")))
-                                                    (:static-file "trails-rendered-hoverbold-observation.json")
-                                                    (:static-file "trails-rendered-following-provenance.json")
-                                                    (:static-file "trails-rendered-solo-composite.js")
-                                                    (:static-file "trails-rendered-mech-solo.js")
-                                                    (:static-file "trails-rendered-runtime-evidence.json")
-                                                    (:static-file "trails-rendered-result.png")
-                                                    (:static-file "trails-rendered-witness.mjs")
-                                                    (:static-file "trails-rendered-witness.json")
-                                                    (:static-file "trails-rendered-browser-repro.mjs")
-                                                    (:module "trails-rendered-browser-evidence" :components
-                                                     ((:static-file "manifest.json") (:static-file "public-code-run.json")
-                                                      (:static-file "mech.js.map") (:static-file "mech.loaded.js")
-                                                      (:static-file "graph.loaded.js") (:static-file "cypher.loaded.js")
-                                                      (:static-file "mech.mapped-blocks.js") (:static-file "code.mapped-source.js")
-                                                      (:static-file "hyperdoc-code-run.json") (:static-file "hyperdoc-single-page-run.json")
-                                                      (:static-file "hyperdoc.trails-rendered.json") (:static-file "hyperdoc.mech.js")
-                                                      (:static-file "hyperdoc.blocks.js") (:static-file "hyperdoc.interpreter.js")
-                                                      (:static-file "hyperdoc.library.js") (:static-file "hyperdoc.code.js")
-                                                      (:static-file "dispatch-probe.json")))
-                                                    (:static-file "trails-rendered-dispatch-probe.mjs")))
-               (:module "dreyeck/pages/work" :components
-                ((:static-file "Work Breakdown.html")
-                 (:static-file "Interaction.html")
-                 (:static-file "Operations and Change.html")
-                 (:static-file "Connect and Associations.html")
-                 (:static-file "State and Persistence.html")
-                 (:static-file "HyperDoc Dogfooding.html")
-                 (:static-file "D2 Corpus.html")
-                 (:static-file "Planning with SHOP3.html")
-                 (:static-file "D2 Connections.html")
-                 (:static-file "Relation Contract informs.html")
-                 (:static-file "Deriving HyperDoc Authoring Constraints.html")
-                 (:static-file "Federated Wiki deployment state.html")
-                 (:static-file "wiki.ralfbarkow.ch deployment.html")
-                 (:static-file "dreyeck.ch deployment.html")
-                 (:static-file "Cookie Secret.html")
-                 (:static-file "Trails Rendered public reproduction.html")
-                 (:static-file "Solo hoverbold.html")
-                 (:static-file "Shift-click Is Pane Policy.html")
-                 (:static-file "Following One Recorded Trail.html")
-                 (:static-file "Original CODE Browser Check.html")))))
+(defsystem "dreyeck/work/reading" :description
+           "HyperDoc work pages and one complete D2 Connections example"
+           :depends-on
+           ("dreyeck/fedwiki-config/reading"
+            "dreyeck/topicmap/tala/reading"
+            "dreyeck/gesture-binding-witness"
+            "dreyeck/inspector/git"
+            "dreyeck/gesture/operation-request"
+            "hyperbook/fedwiki"
+            "shasht"
+            "cl-base64"
+            "local-time"
+            "ironclad")
+           :serial t :components
+           ((:module "dreyeck/work" :components
+                     ((:file "reading")
+                      (:file "operation-requests")
+                      (:file "deployment-reading")
+                      (:file "authoring-architecture")
+                      (:file "addresses")
+                      (:file "trails-rendered-reading")
+                      (:file "trails-rendered-federated-context")
+                      (:file "trails-rendered-following")
+                      (:file "trails-rendered-browser-check")
+                      (:file "shift-click" :depends-on
+                             ("trails-rendered-federated-context"))
+                      (:static-file "trails-rendered-solo-batch.json")
+                      (:static-file "trails-rendered-solo-beam.json")
+                      (:static-file "trails-rendered-federated-context.json")
+                      (:module "trails-rendered-evidence" :components
+                               ((:static-file
+                                              "ward.voices.ustawi.wiki--trails-rendered.json")
+                                (:static-file
+                                              "thompson.voices.ustawi.wiki--how-we-think.json")
+                                (:static-file
+                                              "thompson.voices.ustawi.wiki--as-we-may-think.json")
+                                (:static-file
+                                              "jan.voices.ustawi.wiki--alan-cooper.json")
+                                (:static-file
+                                              "jan.voices.ustawi.wiki--ethnomethodology.json")
+                                (:static-file
+                                              "jan.voices.ustawi.wiki--john-dewey.json")
+                                (:static-file
+                                              "jan.voices.ustawi.wiki--how-we-think.json")
+                                (:static-file
+                                              "thompson.fed.wiki--how-we-think.json")))
+                      (:static-file
+                                    "trails-rendered-hoverbold-observation.json")
+                      (:static-file
+                                    "trails-rendered-following-provenance.json")
+                      (:static-file "trails-rendered-solo-composite.js")
+                      (:static-file "trails-rendered-mech-solo.js")
+                      (:static-file "trails-rendered-runtime-evidence.json")
+                      (:static-file "trails-rendered-result.png")
+                      (:static-file "trails-rendered-witness.mjs")
+                      (:static-file "trails-rendered-witness.json")
+                      (:static-file "trails-rendered-browser-repro.mjs")
+                      (:module "trails-rendered-browser-evidence" :components
+                               ((:static-file "manifest.json")
+                                (:static-file "public-code-run.json")
+                                (:static-file "mech.js.map")
+                                (:static-file "mech.loaded.js")
+                                (:static-file "graph.loaded.js")
+                                (:static-file "cypher.loaded.js")
+                                (:static-file "mech.mapped-blocks.js")
+                                (:static-file "code.mapped-source.js")
+                                (:static-file "hyperdoc-code-run.json")
+                                (:static-file "hyperdoc-single-page-run.json")
+                                (:static-file "hyperdoc.trails-rendered.json")
+                                (:static-file "hyperdoc.mech.js")
+                                (:static-file "hyperdoc.blocks.js")
+                                (:static-file "hyperdoc.interpreter.js")
+                                (:static-file "hyperdoc.library.js")
+                                (:static-file "hyperdoc.code.js")
+                                (:static-file "dispatch-probe.json")))
+                      (:static-file "trails-rendered-dispatch-probe.mjs")
+                      (:file "deployment-inspection")
+                      (:module "deployment-evidence" :components
+                               ((:static-file "publication.json")
+                                (:static-file "manifest.json")
+                                (:static-file "p41-historical-flake.nix")
+                                (:static-file "served-application.lisp")
+                                (:static-file "served-assets-policy.lisp")
+                                (:static-file "served-catalog-start.lisp")))))
+            (:module "dreyeck/pages/work" :components
+                     ((:static-file "Work Breakdown.html")
+                      (:static-file "Interaction.html")
+                      (:static-file "Operations and Change.html")
+                      (:static-file "Connect and Associations.html")
+                      (:static-file "State and Persistence.html")
+                      (:static-file "HyperDoc Dogfooding.html")
+                      (:static-file "D2 Corpus.html")
+                      (:static-file "Planning with SHOP3.html")
+                      (:static-file "D2 Connections.html")
+                      (:static-file "Relation Contract informs.html")
+                      (:static-file
+                                    "Deriving HyperDoc Authoring Constraints.html")
+                      (:static-file "Federated Wiki deployment state.html")
+                      (:static-file "wiki.ralfbarkow.ch deployment.html")
+                      (:static-file "dreyeck.ch deployment.html")
+                      (:static-file "Cookie Secret.html")
+                      (:static-file "Trails Rendered public reproduction.html")
+                      (:static-file "Solo hoverbold.html")
+                      (:static-file "Shift-click Is Pane Policy.html")
+                      (:static-file "Following One Recorded Trail.html")
+                      (:static-file "Original CODE Browser Check.html")))))
 
-(defsystem "dreyeck/work/reading/tests"
-  :depends-on ("dreyeck/work/reading" "clog-moldable-inspector" "fset"
-               "dreyeck/gesture/operation-request" "shasht" "hyperbook/server"
-               "dreyeck/topicmap/gesture/tests" "ironclad")
-  :serial t
-  :components ((:file "dreyeck/tests/work-reading")
-               (:file "dreyeck/tests/work-reading-live")
-               (:file "dreyeck/tests/work-authoring-architecture")
-               (:file "dreyeck/tests/work-deployment-reading")
-               (:file "dreyeck/tests/work-trails-rendered-reading")
-               (:file "dreyeck/tests/work-trails-rendered-federated-context")
-               (:file "dreyeck/tests/work-trails-rendered-following")
-               (:file "dreyeck/tests/work-shift-click")
-               (:file "dreyeck/tests/work-trails-rendered-browser-check"))
-  :perform (test-op (op component)
-             (declare (ignore op component))
-             (uiop:symbol-call :dreyeck/work/tests :run-tests)
-             (uiop:symbol-call :dreyeck/work/authoring-architecture/tests
-                               :run-authoring-architecture-tests)
-             (uiop:symbol-call :dreyeck/work/deployment-reading/tests :run-tests)
-             (uiop:symbol-call :dreyeck/work/trails-rendered-reading/tests :run-tests)
-             (uiop:symbol-call :dreyeck/work/shift-click/tests :run-tests)))
+(defsystem "dreyeck/work/reading/tests" :depends-on
+           ("dreyeck/catalog"
+            "dreyeck/work/reading"
+            "clog-moldable-inspector"
+            "fset"
+            "dreyeck/gesture/operation-request"
+            "shasht"
+            "hyperbook/server"
+            "dreyeck/topicmap/gesture/tests"
+            "ironclad")
+           :serial t :components
+           ((:file "dreyeck/tests/work-reading")
+            (:file "dreyeck/tests/work-reading-live")
+            (:file "dreyeck/tests/work-authoring-architecture")
+            (:file "dreyeck/tests/work-deployment-reading")
+            (:file "dreyeck/tests/work-trails-rendered-reading")
+            (:file "dreyeck/tests/work-trails-rendered-federated-context")
+            (:file "dreyeck/tests/work-trails-rendered-following")
+            (:file "dreyeck/tests/work-shift-click")
+            (:file "dreyeck/tests/work-trails-rendered-browser-check")
+            (:file "dreyeck/tests/work-deployment-inspection"))
+           :perform
+           (test-op (op component) (declare (ignore op component))
+                    (uiop:symbol-call :dreyeck/work/tests :run-tests)
+                    (uiop:symbol-call
+                                      :dreyeck/work/authoring-architecture/tests
+                                      :run-authoring-architecture-tests)
+                    (uiop:symbol-call :dreyeck/work/deployment-reading/tests
+                                      :run-tests)
+                    (uiop:symbol-call
+                                      :dreyeck/work/trails-rendered-reading/tests
+                                      :run-tests)
+                    (uiop:symbol-call :dreyeck/work/shift-click/tests
+                                      :run-tests)
+                    (uiop:symbol-call :dreyeck/work/deployment-inspection/tests
+                                      :run-tests)))
 
 (defsystem "dreyeck/work/authoring"
   :description "Inspect and execute Work status/relationship requests from the Topicmap; authoring-side, never in the Catalog"
