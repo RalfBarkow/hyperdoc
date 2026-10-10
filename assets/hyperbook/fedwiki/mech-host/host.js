@@ -1,3 +1,4 @@
+import {createNeighborhood} from './neighborhood.js'
 // Minimal read-only Wiki client contract. Parser, catalog, emit and execution
 // are the original pinned plugin; this host does not implement Mech commands.
 const parentOrigin = new URLSearchParams(location.hash.slice(1)).get('parent')
@@ -17,15 +18,19 @@ window.addEventListener('message', async event => {
   if (event.source !== parent || event.origin !== parentOrigin || event.data?.type !== 'hyperdoc-mech-page' || initialized) return
   initialized = true
   try {
-    const {page, itemId, site, slug} = event.data
+    const {page, itemId, site, slug, neighborhood} = event.data
     const item = page?.story?.find(item => item.id === itemId && item.type === 'mech')
     if (!item || typeof item.text !== 'string') throw Error('The original Mech item is unavailable in the supplied page.')
     const key = 'hyperdoc-page'
     const pageObject = {getRawPage: () => page, getSlug: () => slug, isRemote: () => true}
     const unavailable = () => { throw Error('Editing and Wiki publication are unavailable in this read-only host.') }
+    const cache = createNeighborhood(neighborhood, {site, slug})
+    const availability = document.createElement('p')
+    availability.id = 'neighborhood-status'; availability.textContent = cache.message
+    document.querySelector('main').append(availability)
     window.wiki = {
       lineup: {atKey: candidate => { if (candidate !== key) throw Error('Unknown lineup key'); return pageObject }},
-      neighborhoodObject: {sites: {}}, pageHandler: {context: [site]},
+      neighborhoodObject: cache.neighborhoodObject, pageHandler: {context: [site]},
       textEditor: unavailable, showResult: unavailable, newPage: unavailable,
     }
     const section = document.createElement('section')

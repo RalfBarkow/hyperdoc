@@ -139,7 +139,9 @@
 (defsystem #:hyperbook/fedwiki/tests
   :description "Original Mech Story browser-host boundary contracts"
   :depends-on (#:hyperbook/fedwiki #:clog-moldable-inspector)
-  :components ((:file "tests/fedwiki-mech-story"))
+  :serial t
+  :components ((:file "tests/fedwiki-mech-story")
+               (:file "tests/fedwiki-mech-sitemaps"))
   :perform (test-op (op system)
              (declare (ignore op system))
              (uiop:symbol-call :hyperbook/fedwiki/tests :run-tests)))

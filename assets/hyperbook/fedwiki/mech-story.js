@@ -30,7 +30,10 @@ window.mountFedwikiMech = function (view) {
         initialized = true; clearTimeout(timeout)
         frame.contentWindow.postMessage({type: 'hyperdoc-mech-page',
           page: JSON.parse(new TextDecoder().decode(Uint8Array.from(atob(container.dataset.pageJsonBase64), c => c.charCodeAt(0)))), itemId: container.dataset.itemId,
-          site: container.dataset.site, slug: container.dataset.slug}, url.origin)
+          site: container.dataset.site, slug: container.dataset.slug,
+          neighborhood: container.dataset.neighborhoodJsonBase64
+            ? JSON.parse(new TextDecoder().decode(Uint8Array.from(atob(container.dataset.neighborhoodJsonBase64), c => c.charCodeAt(0))))
+            : null}, url.origin)
         status.textContent = 'Code runs only after Play. Solo opens in a separate browser window.'
       } else if (event.data?.type === 'hyperdoc-mech-height') {
         const height = Number(event.data.height)

@@ -1,0 +1,23 @@
+{
+  "kind": "Trusted test fixture; not an observed production neighborhood",
+  "clock": 1791633600000,
+  "page": {
+    "title": "Mech sitemap fixture",
+    "story": [{"type": "mech", "id": "mech-sitemap-fixture", "text": "CLICK\n NEIGHBORS\n WALK 12 weeks\n WALK 25 hubs"}],
+    "journal": [{"type": "fork", "site": "context.fixture.test", "date": 1791460800000}]
+  },
+  "sites": [
+    {
+      "domain": "source.fixture.test",
+      "sitemap": [
+        {"slug": "archived", "title": "Archived", "date": 1, "links": {}},
+        {"slug": "alpha", "title": "Alpha", "date": 1791547200000, "links": {"beta": "source-item-1"}, "extra": {"text": "Größe", "flag": false, "nothing": null}},
+        {"slug": "beta", "title": "Beta", "date": 1791460800000, "links": {"alpha": "source-item-2"}}
+      ]
+    },
+    {
+      "domain": "context.fixture.test",
+      "sitemap": [{"slug": "gamma", "title": "Gamma", "date": 1791547200000, "links": {"alpha": "context-item-1"}}]
+    }
+  ]
+}

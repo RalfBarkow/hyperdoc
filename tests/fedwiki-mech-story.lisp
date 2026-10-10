@@ -44,6 +44,7 @@
       (error "Missing Story view")))
 
 (defun run-tests ()
+  (check-sitemap-contract)
   (let* ((page (original-page))
          (item (find :mech (fw::story-of page) :key #'fw::item-type-of))
          (raw (fw::raw-json-of page))

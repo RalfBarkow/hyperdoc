@@ -292,3 +292,62 @@ Absent configuration returns the new packaged startup to inert. Keep versioned
 copies until evidence is retained; never remove Wiki pages or original plugin
 files. Asset-link changes require no Wiki restart. Codex performs no production
 action.
+
+## Page-scoped sitemap data contract
+
+The existing Lisp `fetch-sitemap` reads the original `/system/sitemap.json`.
+It now retains a copied JSON array and its attempted source URL separately from
+page skeletons and link projections. All original fields survive, including
+`slug`, `title`, `date`, `links` with their values, and unknown nested fields.
+A sitemap-specific state and lock distinguish missing, loading, ready and failed
+without equating Wiki/plugin initialization with sitemap availability. Failures
+are recorded and re-signaled through the existing handling path.
+
+Story supplies a version-1 snapshot through the existing base64 JSON/postMessage
+bridge. Its declared scope is **page origin and existing page context**, in that
+order, with duplicate sites removed at their first occurrence. Entry order is
+unchanged. Remote-page projection uses the actual origin; the containing Wiki
+and unrelated entries from the process-global cache are not added. This is a
+bounded input for Mech, not the complete neighborhood of a native Wiki session.
+The snapshot operation performs no fetch and does not wait for an initializer.
+Each record carries domain, sourceUrl, state, message and original sitemap.
+Unavailable values are JSON `null`; a proven empty sitemap is `[]` with state
+`ready`. Source provenance identifies the retained read, not a new verification
+of the remote site's current state.
+
+The host's `neighborhood.js` validates this data boundary and supplies the
+existing `wiki.neighborhoodObject.sites` contract. The original Mech extractor,
+ordering and graph code remain unchanged. If any selected-context sitemap is
+unavailable, the host explains that condition on display; an attempted
+NEIGHBORS data access throws the same explicit explanation before emitting a
+zero or partial neighborhood. A known empty snapshot remains executable and
+uses the pinned Mech revision's original zero-result behavior. CODE does not
+require this data access: the original Trails export and Solo remain available
+when sitemap data is absent. Display initializes CLICK controls but does not
+execute NEIGHBORS, WALK or Code items.
+
+Snapshots are not live subscriptions. Reopen Story after background sitemap
+initialization completes to obtain a new snapshot. No browser-side fetch,
+public proxy, editing/publishing function or additional service is introduced.
+The original PREVIEW limitation and shared Wiki-origin/CSP boundary still apply.
+`WALK topics` and `POPUP state` remain unsupported by this pinned candidate.
+
+Tests use `tests/fixtures/mech-sitemaps.json`, explicitly labelled trusted test
+data. It contains two sites, four entries, deliberately unsorted dates, original
+link values, UTF-8 text, false/null and an extra nested field. No fixture is used
+as production fallback. The browser comparison executes the same original
+Mech revision directly on identical inputs and controls clock, locale and
+timezone; it neither substitutes graph algorithms nor normalizes outputs.
+
+```sh
+node --test tests/fedwiki-mech-host.test.mjs tests/fedwiki-mech-neighborhood.test.mjs
+node scripts/test-fedwiki-mech-sitemaps.mjs LISP_WRAPPER PLAYWRIGHT_DIRECTORY \
+  CHROME_EXECUTABLE /external/results
+```
+
+The existing ASDF Story tests include the retention/scope/state contracts.
+The new browser driver checks actual fresh Inspector serialization, transfer,
+original weeks/hubs results and ready/empty/missing/loading/failed states.
+Run the existing Trails browser driver as well. All execution output remains
+outside the repository. Deployment must update both the packaged HyperDoc and
+its versioned complete host assets; this source slice performs no activation.

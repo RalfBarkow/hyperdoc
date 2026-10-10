@@ -319,6 +319,29 @@ Any non-empty string size is retained as presentation metadata."
   "HTTP(S) URL of a standalone static Wiki plugin host, at an origin distinct
 from the Inspector. NIL keeps the original item inspectable without execution.")
 
+(defun mech-neighborhood-snapshot (page)
+  "Snapshot only PAGE's origin and existing context, preserving first occurrence.
+This is declared page scope, not a reconstruction of a complete Wiki session."
+  (let ((seen (make-hash-table :test #'equal)))
+    (alexandria:plist-hash-table
+     (list "version" 1 "scope" "page-origin-and-context"
+           "page" (alexandria:plist-hash-table
+                   (list "site" (domain-name-of (origin-of page))
+                         "slug" (origin-id-of page)) :test 'equal)
+           "sites" (coerce
+                    (loop for wiki in (cons (origin-of page) (context-of page))
+                          for domain = (domain-name-of wiki)
+                          unless (gethash domain seen)
+                            collect (progn (setf (gethash domain seen) t)
+                                           (sitemap-snapshot wiki)))
+                    'vector))
+     :test 'equal)))
+
+(defun mech-json-base64 (value)
+  (cl-base64:usb8-array-to-base64-string
+   (flexi-streams:string-to-octets (shasht:write-json value nil)
+                                 :external-format :utf-8)))
+
 (defmethod render-story-item ((type (eql :mech)) item page)
   (declare (ignore type))
   (views:include-js "/hyperbook/fedwiki/mech-story.js")
@@ -330,9 +353,9 @@ from the Inspector. NIL keeps the original item inspectable without execution.")
               :data-site (domain-name-of (origin-of page))
               :data-slug (origin-id-of page)
               :data-page-json-base64
-              (cl-base64:usb8-array-to-base64-string
-               (flexi-streams:string-to-octets
-                (shasht:write-json (raw-json-of page) nil) :external-format :utf-8))
+              (mech-json-base64 (raw-json-of page))
+              :data-neighborhood-json-base64
+              (mech-json-base64 (mech-neighborhood-snapshot page))
       (:p :class "mech-host-status"
           (views:esc (if *mech-plugin-host-url*
                          "Loading browser Wiki plugin host. No Code item has run."

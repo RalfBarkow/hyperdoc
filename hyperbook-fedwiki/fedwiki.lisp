@@ -16,7 +16,13 @@
 ;; the title -> slug function is not invertible.
 
 (defclass fedwiki (hb:hyperbook)
-  ((pages :reader pages-of :type hash-table
+  ((sitemap :reader sitemap-of :initform nil
+            :documentation "Lossless original JSON array; NIL means no retained sitemap, #() is known empty.")
+   (sitemap-state :initform :missing
+                  :documentation "Sitemap-specific state: :missing, :loading, :ready or a failure condition.")
+   (sitemap-source-url :initform nil)
+   (sitemap-lock :initform (bt:make-lock "FedWiki sitemap snapshot"))
+   (pages :reader pages-of :type hash-table
           :initform (make-hash-table :test #'equal)
           :documentation "A map from page ids to page objects")
    (remote-pages :reader remote-pages-of :type hash-table
@@ -120,26 +126,55 @@ existing production behavior and escape to the caller."
                 :plugin-data-fetcher plugin-data-fetcher)))))
     wiki))
 
-(defun fetch-sitemap (wiki)
-  (let* ((sitemap-url (wiki-url (domain-name-of wiki)
-                                (protocol-of wiki)
-                                "/system/sitemap.json"))
-         (sitemap (fetch-json sitemap-url)))
-    (loop for page-spec across sitemap
-          for slug = (gethash "slug" page-spec)
-          for title = (gethash "title" page-spec)
-          for links = (some->> page-spec
-                        (gethash "links")
-                        alexandria:hash-table-keys)
-          for page = (make-fedwiki-page wiki slug title)
-          do (setf (gethash slug (pages-of wiki))
-                   page)
-             (setf (gethash slug (slugs-of wiki))
-                   title)
-             (setf (gethash title (slugs-of wiki))
-                   slug)
-             (setf (slot-value page 'links)
-                   (make-links page links)))))
+(defun fetch-sitemap (wiki &key (json-fetcher #'fetch-json))
+  "Retain the original sitemap separately from the existing page projection.
+JSON-FETCHER is the same read-only loader used for production and test fixtures."
+  (let ((url (wiki-url (domain-name-of wiki) (protocol-of wiki)
+                       "/system/sitemap.json")))
+    (bt:with-lock-held ((slot-value wiki 'sitemap-lock))
+      (setf (slot-value wiki 'sitemap-state) :loading
+            (slot-value wiki 'sitemap-source-url) url))
+    ;; Record the failure, but preserve its original propagation/handling.
+    (handler-bind ((error (lambda (condition)
+                           (bt:with-lock-held ((slot-value wiki 'sitemap-lock))
+                             (setf (slot-value wiki 'sitemap-state) condition)))))
+      (let ((sitemap (funcall json-fetcher url)))
+        (check-type sitemap (and vector (not string)))
+        (loop for page-spec across sitemap
+              for slug = (gethash "slug" page-spec)
+              for title = (gethash "title" page-spec)
+              for links = (some->> page-spec
+                            (gethash "links")
+                            alexandria:hash-table-keys)
+              for page = (make-fedwiki-page wiki slug title)
+              do (setf (gethash slug (pages-of wiki)) page
+                       (gethash slug (slugs-of wiki)) title
+                       (gethash title (slugs-of wiki)) slug
+                       (slot-value page 'links) (make-links page links)))
+        (let ((retained (copy-page-json sitemap)))
+          (bt:with-lock-held ((slot-value wiki 'sitemap-lock))
+            (setf (slot-value wiki 'sitemap) retained
+                  (slot-value wiki 'sitemap-state) :ready)))))))
+
+(defun sitemap-snapshot (wiki)
+  "Copy a coherent read-only snapshot; never fetch or join an initializer."
+  (bt:with-lock-held ((slot-value wiki 'sitemap-lock))
+    (let* ((state (slot-value wiki 'sitemap-state))
+           (initialization (status-of wiki))
+           (effective (if (eq state :missing)
+                          (cond ((typep initialization 'condition) initialization)
+                                ((and (typep initialization 'bt:thread)
+                                      (bt:thread-alive-p initialization)) :loading)
+                                (t state))
+                          state)))
+      (alexandria:plist-hash-table
+       (list "domain" (domain-name-of wiki)
+             "sourceUrl" (or (slot-value wiki 'sitemap-source-url) :null)
+             "state" (if (typep effective 'condition) "failed"
+                         (string-downcase (symbol-name effective)))
+             "message" (if (typep effective 'condition) (princ-to-string effective) :null)
+             "sitemap" (if (eq effective :ready) (copy-page-json (sitemap-of wiki)) :null))
+       :test 'equal))))
 
 ;; see https://matrix.to/#/!BkPDqaI4Qv3Gjcxk1HoInFDyL14M41hU7aC9evyWGZQ/$4MOZVD4F5_BMRwWv6GjsfrCTPqJlmrFZ7qxIhtSapzU
 ;; and https://matrix.to/#/!BkPDqaI4Qv3Gjcxk1HoInFDyL14M41hU7aC9evyWGZQ/$hdhNbB8kOl5kOYghNwaudGVbk1JlnqCWlbB8lS2bgXo
