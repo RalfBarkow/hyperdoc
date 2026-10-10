@@ -7,7 +7,17 @@
                     (#:N #:DREYECK/NESTED-ACTIONS)
                     (#:R #:DREYECK/WORK/DEPLOYMENT-READING)
                     (#:C #:DREYECK/FEDWIKI-CONFIG))
-  (:EXPORT #:DEPLOYMENT-OBJECT
+  (:EXPORT #:DEPLOYMENT-TARGET
+           #:TARGET-ID
+           #:TARGET-HOSTNAME
+           #:TARGET-SITE
+           #:TARGET-ROUTE-PATTERN
+           #:TARGET-PHYSICAL-MACHINE
+           #:TARGET-RELATIONS
+           #:WIKI-TARGET
+           #:HYPERDOC-TARGET
+           #:WIKI-FARM-TARGET
+           #:DEPLOYMENT-OBJECT
            #:OBJECT-KIND
            #:OBJECT-RECORD
            #:OBJECT-LINKS
@@ -53,6 +63,17 @@
            (RECORD :INITARG :RECORD :READER OBJECT-RECORD)
            (PAGE :INITARG :PAGE :READER OBJECT-PAGE)
            (LINKS :INITARG :LINKS :INITFORM NIL :ACCESSOR OBJECT-LINKS)))
+
+(DEFCLASS DEPLOYMENT-TARGET (DEPLOYMENT-OBJECT)
+          ((ID :INITARG :ID :READER TARGET-ID)
+           (HOSTNAME :INITARG :HOSTNAME :READER TARGET-HOSTNAME)
+           (SITE :INITARG :SITE :READER TARGET-SITE)
+           (ROUTE-PATTERN :INITARG :ROUTE-PATTERN :INITFORM NIL :READER
+            TARGET-ROUTE-PATTERN)
+           (PHYSICAL-MACHINE :INITFORM NIL :READER TARGET-PHYSICAL-MACHINE)
+           (RELATIONS :INITARG :RELATIONS :READER TARGET-RELATIONS)))
+
+(DEFVAR *DEPLOYMENT-TARGETS* (MAKE-HASH-TABLE :TEST 'EQUAL))
 
 (DEFCLASS DEPLOYMENT-REVISION (G:GIT-REVISION-REFERENCE)
           ((PAGE :INITARG :PAGE :READER REVISION-PAGE)))
@@ -291,6 +312,114 @@
                 (CONS "Unactivated Wiki declaration"
                       (DECLARED-WIKI "dreyeck")))))
 
+(DEFUN TARGET-RELATION (LABEL OBJECT WARRANT BASIS)
+  (LIST :LABEL LABEL :OBJECT OBJECT :WARRANT WARRANT :BASIS BASIS))
+
+(DEFUN ENSURE-TARGET
+       (ID HOSTNAME SITE TITLE SUMMARY PAGE RELATIONS &OPTIONAL ROUTE-PATTERN)
+  "Intern the finite reading subjects. DNS names and physical machines are not target identities."
+  (OR (GETHASH ID *DEPLOYMENT-TARGETS*)
+      (SETF (GETHASH ID *DEPLOYMENT-TARGETS*)
+              (MAKE-INSTANCE 'DEPLOYMENT-TARGET :ID ID :HOSTNAME HOSTNAME :SITE
+                             SITE :ROUTE-PATTERN ROUTE-PATTERN :KIND
+                             :DEPLOYMENT-TARGET :TITLE TITLE :SUMMARY SUMMARY
+                             :PAGE PAGE :RELATIONS RELATIONS :RECORD
+                             (LIST :LOGICAL-ID ID :HOSTNAME HOSTNAME
+                                   :LOGICAL-SITE SITE :ROUTE-PATTERN
+                                   ROUTE-PATTERN :PHYSICAL-MACHINE NIL
+                                   :CURRENT-ACTIVATION :UNRESOLVED)
+                             :LINKS
+                             (MAPCAR
+                              (LAMBDA (REL)
+                                (CONS (GETF REL :LABEL) (GETF REL :OBJECT)))
+                              RELATIONS)))))
+
+(DEFUN WIKI-TARGET ()
+  (OR (GETHASH "deployment:wiki.ralfbarkow.ch/wiki" *DEPLOYMENT-TARGETS*)
+      (ENSURE-TARGET "deployment:wiki.ralfbarkow.ch/wiki" "wiki.ralfbarkow.ch"
+                     "Federated Wiki site wiki.ralfbarkow.ch"
+                     "Wiki deployment target: wiki.ralfbarkow.ch"
+                     "This logical deployment target denotes the Federated Wiki installation named wiki.ralfbarkow.ch. It is a different target from the HyperDoc reading application at dreyeck.ch, even when this page is viewed there. The hostname is an address, not a physical-machine identity. The P41 witness has no supplied capture time; newer published configuration does not establish activation."
+                     "wiki.ralfbarkow.ch deployment"
+                     (LIST
+                      (TARGET-RELATION "Historical deployment observation"
+                                       (HISTORICAL-WIKI) :AUTHOR-REPORTED
+                                       "Operator-supplied P41 witness; capture time not supplied.")
+                      (TARGET-RELATION "Reported Wiki service" (WIKI-SERVICE)
+                                       :AUTHOR-REPORTED
+                                       "wiki.service and its active/running status belong to the historical witness.")
+                      (TARGET-RELATION "Reported Nix package" (WIKI-PACKAGE)
+                                       :AUTHOR-REPORTED
+                                       "Package identity and service selection were supplied together; no rebuild performed.")
+                      (TARGET-RELATION "Historical source revision"
+                                       (WIKI-SOURCE) :AUTHOR-REPORTED
+                                       "The operator associated this repository revision with the P41 package.")
+                      (TARGET-RELATION "Newer published Wiki configuration"
+                                       (DECLARED-WIKI "ralfbarkow")
+                                       :SOURCE-OBSERVED
+                                       "Retained consumer configuration; publication verified on 10 October 2026.")
+                      (TARGET-RELATION "Unresolved Wiki activation"
+                                       (WIKI-BOUNDARY "ralfbarkow") :UNRESOLVED
+                                       "No subsequent service selection or activation observation.")))))
+
+(DEFUN HYPERDOC-TARGET ()
+  (OR (GETHASH "deployment:dreyeck.ch/hyperdoc" *DEPLOYMENT-TARGETS*)
+      (ENSURE-TARGET "deployment:dreyeck.ch/hyperdoc" "dreyeck.ch"
+                     "HyperDoc application dreyeck.ch"
+                     "HyperDoc deployment target: dreyeck.ch"
+                     "This logical target denotes the Lisp HyperDoc application addressed by the exact hostname dreyeck.ch. The 8 October operator capture associates the exact route with hyperdoc.service. The separately routed Federated Wiki farm is a different target. A hostname, dated PID or co-located service does not identify a permanent physical machine or today's activation."
+                     "dreyeck.ch deployment"
+                     (LIST
+                      (TARGET-RELATION "Dated HyperDoc observation"
+                                       (LATEST-HYPERDOC) :AUTHOR-REPORTED
+                                       "Operator capture 2026-10-08T03:29:16Z; not a current host query.")
+                      (TARGET-RELATION "Recorded service and route evidence"
+                                       (SERVED-SERVICE) :AUTHOR-REPORTED
+                                       "The record separates hyperdoc.service, wiki.service and exact/wildcard routes.")
+                      (TARGET-RELATION "Recorded HyperDoc process"
+                                       (SERVED-PROCESS) :AUTHOR-REPORTED
+                                       "SBCL process at the capture time; PID is not logical target identity.")
+                      (TARGET-RELATION "Recorded HyperDoc package"
+                                       (SERVED-PACKAGE) :AUTHOR-REPORTED
+                                       "Recorded executable and immutable source, distinct from mutable assets.")
+                      (TARGET-RELATION "Corresponding HyperDoc source revision"
+                                       (SERVED-REVISION) :DERIVED
+                                       "Host lock, narHash and exported-tree correspondence; not a process-reported revision.")
+                      (TARGET-RELATION "Historical HyperDoc activation"
+                                       (RECORDED-ACTIVATION) :AUTHOR-REPORTED
+                                       "3 October update and activation output; not a current activation claim.")
+                      (TARGET-RELATION "Unresolved HyperDoc runtime state"
+                                       (HYPERDOC-BOUNDARY) :UNRESOLVED
+                                       "Later source publication does not establish the source now loaded.")))))
+
+(DEFUN WIKI-FARM-TARGET ()
+  (OR (GETHASH "deployment:dreyeck.ch/wiki-farm" *DEPLOYMENT-TARGETS*)
+      (LET* ((RAW (R:SERVED-STATE-OBSERVATION-2026-10-08))
+             (SERVICE
+              (OBJECT :SERVICE "Recorded Node Wiki farm service"
+                      "The 8 October capture identifies wiki.service as a Node Federated Wiki farm. This service is separate from hyperdoc.service. The wildcard route has explicit exact-host exceptions, including HyperDoc and MCP; it is not a single Wiki site's identity."
+                      (FACT RAW "node-wiki-service") "dreyeck.ch deployment")))
+        (ENSURE-TARGET "deployment:dreyeck.ch/wiki-farm" NIL
+                       "Federated Wiki farm under the recorded Dreyeck wildcard route"
+                       "Wiki farm deployment target: *.dreyeck.ch"
+                       "This logical target denotes the separate Node Wiki farm reached by the recorded wildcard route *.dreyeck.ch. A routing pattern is not a DNS hostname or a single logical Wiki site. The exact dreyeck.ch HyperDoc route and explicit MCP route are exceptions. The captured farm service record does not identify its Wiki package revision. The newer Wiki consumer declaration does not prove either profile was activated."
+                       "dreyeck.ch deployment"
+                       (LIST
+                        (TARGET-RELATION "Dated Wiki farm routing observation"
+                                         (LATEST-HYPERDOC) :AUTHOR-REPORTED
+                                         "2026-10-08T03:29:16Z capture includes the wildcard route and exceptions.")
+                        (TARGET-RELATION "Recorded Wiki farm service" SERVICE
+                                         :AUTHOR-REPORTED
+                                         "Node wiki.service as recorded on 8 October; no current query.")
+                        (TARGET-RELATION "Newer published farm configuration"
+                                         (DECLARED-WIKI "dreyeck")
+                                         :SOURCE-OBSERVED
+                                         "Retained Wiki consumer source; publication verified on 10 October 2026.")
+                        (TARGET-RELATION "Unresolved farm activation"
+                                         (WIKI-BOUNDARY "dreyeck") :UNRESOLVED
+                                         "No subsequent selection of wiki-upstream or wiki-discourse observed."))
+                       "*.dreyeck.ch"))))
+
 (DEFUN FOOTER (TITLE)
   (V:HTML
     (:P
@@ -309,13 +438,15 @@
   (OBJECT-TITLE OBJECT))
 
 (DEFUN OBJECT-VIEW-TITLE (OBJECT)
-  (IF (TYPEP OBJECT 'DEPLOYMENT-REVISION)
-      "Deployment revision"
-      (IF (TYPEP OBJECT 'DEPLOYMENT-SOURCE)
-          "Deployment source"
-          (IF (TYPEP OBJECT 'DEPLOYMENT-OBJECT)
-              "Deployment evidence"
-              NIL))))
+  (IF (TYPEP OBJECT 'DEPLOYMENT-TARGET)
+      "Deployment target"
+      (IF (TYPEP OBJECT 'DEPLOYMENT-REVISION)
+          "Deployment revision"
+          (IF (TYPEP OBJECT 'DEPLOYMENT-SOURCE)
+              "Deployment source"
+              (IF (TYPEP OBJECT 'DEPLOYMENT-OBJECT)
+                  "Deployment evidence"
+                  NIL)))))
 
 (V:DEFVIEW DEPLOYMENT-OBJECT-VIEW (OBJECT DEPLOYMENT-OBJECT)
            (V:HTML-VIEW :TITLE "Deployment evidence" :PRIORITY 0
@@ -428,3 +559,47 @@
 
 (DEFMETHOD V:TEXT-REPRESENTATION ((SOURCE DEPLOYMENT-SOURCE))
   "Retained deployment source")
+
+(V:DEFVIEW DEPLOYMENT-TARGET-VIEW (TARGET DEPLOYMENT-TARGET)
+           (V:HTML-VIEW :TITLE "Deployment target" :PRIORITY -1
+                        (V:HTML
+                          (:DIV :CLASS "deployment-reading" :STYLE
+                           "max-width:100%;overflow-wrap:anywhere;line-height:1.55"
+                           (:H3 (CL-WHO:ESC (OBJECT-TITLE TARGET)))
+                           (:P (CL-WHO:ESC (OBJECT-SUMMARY TARGET)))
+                           (:P "Stable logical identity: "
+                            (:CODE (CL-WHO:ESC (TARGET-ID TARGET))))
+                           (:P "Logical site or application: "
+                            (CL-WHO:ESC (TARGET-SITE TARGET)))
+                           (:P
+                            (CL-WHO:ESC
+                             (IF (TARGET-HOSTNAME TARGET)
+                                 "Address hostname: "
+                                 "Routing pattern, not a hostname: "))
+                            (CL-WHO:ESC
+                             (OR (TARGET-HOSTNAME TARGET)
+                                 (TARGET-ROUTE-PATTERN TARGET))))
+                           (:P
+                            "Physical-machine identity has not been established. Current activation remains unresolved. Services, processes, packages and observations are linked evidence objects, not aliases for this target.")
+                           (:H4 "Evidence, changes and remaining boundaries")
+                           (DOLIST (REL (TARGET-RELATIONS TARGET))
+                             (V:HTML
+                               (:P
+                                (V:OBJECT-REF (GETF REL :OBJECT) :SELECT
+                                              (OBJECT-VIEW-TITLE
+                                               (GETF REL :OBJECT))
+                                              :DISPLAY (GETF REL :LABEL))
+                                " — "
+                                (CL-WHO:ESC
+                                 (STRING-DOWNCASE
+                                  (SYMBOL-NAME (GETF REL :WARRANT))))
+                                ". " (CL-WHO:ESC (GETF REL :BASIS)))))
+                           (:P
+                            (IF (EQ TARGET (HYPERDOC-TARGET))
+                                (V:OBJECT-REF (WIKI-FARM-TARGET) :SELECT
+                                              "Deployment target" :DISPLAY
+                                              "Separate wildcard Wiki farm target")
+                                (V:OBJECT-REF (HYPERDOC-TARGET) :SELECT
+                                              "Deployment target" :DISPLAY
+                                              "Separate exact-host HyperDoc target")))
+                           (FOOTER (OBJECT-PAGE TARGET))))))
