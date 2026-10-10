@@ -2911,7 +2911,8 @@
   :in-order-to ((test-op (test-op "dreyeck/catalog-application/tests"))))
 
 (defsystem "dreyeck/catalog-application/tests"
-  :depends-on ("dreyeck/catalog-application" "dreyeck/local-fedwiki-view/tests")
+  :depends-on ("dreyeck/catalog-application" "dreyeck/local-fedwiki-view/tests"
+               "hyperbook/fedwiki/tests")
   :components ((:file "dreyeck/tests/catalog-application"))
   :perform (test-op (op component)
              (declare (ignore op component))

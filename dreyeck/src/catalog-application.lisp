@@ -20,17 +20,25 @@
                         (funcall getenv "HYPERDOC_CATALOG_PORT") "8080"))
         :host (or (funcall getenv "HYPERDOC_CATALOG_HOST") "0.0.0.0")
         :catalog-system (or (funcall getenv "HYPERDOC_CATALOG_SYSTEM")
-                            "dreyeck/catalog")))
+                            "dreyeck/catalog")
+        :mech-plugin-host-url
+        (let ((value (funcall getenv "HYPERDOC_MECH_PLUGIN_HOST_URL")))
+          (unless (equal value "") value))))
 
 (defun start-catalog (&key (port 8080) (host "0.0.0.0")
                           (site-root (dreyeck/local-fedwiki-view:configured-site-root))
                           (catalog-system "dreyeck/catalog")
+                          (mech-plugin-host-url
+                            hyperbook/fedwiki::*mech-plugin-host-url*)
                           (pane-width "700px") (development nil))
   "Start Catalog and local /view and /gesture routes; return to the caller.
 ASDF loads the default Catalog through LOCAL-FEDWIKI-VIEW. CATALOG-SYSTEM
 can add trusted books; it does not replace that default membership.
 Interactive callers own shutdown. MAIN owns executable lifetime."
   (let ((port (%port port)))
+    ;; MAIN always supplies the environment choice, including NIL when absent.
+    ;; Interactive callers may retain their explicitly configured host instead.
+    (setf hyperbook/fedwiki::*mech-plugin-host-url* mech-plugin-host-url)
     ;; The default membership is already a static ASDF dependency.
     (unless (equal catalog-system "dreyeck/catalog")
       (asdf:load-system catalog-system))
@@ -50,7 +58,8 @@ The executable never enables development tools."
   (when (equal arguments '("--help"))
     (format t "Usage: hyperdoc-catalog [PORT]~%~
 Environment: HYPERDOC_CATALOG_PORT, HYPERDOC_CATALOG_HOST,~%~
-HYPERDOC_CATALOG_SYSTEM (additive), HYPERDOC_FEDWIKI_SITE_ROOT.~%")
+HYPERDOC_CATALOG_SYSTEM (additive), HYPERDOC_FEDWIKI_SITE_ROOT,~%~
+HYPERDOC_MECH_PLUGIN_HOST_URL (optional separate browser origin).~%")
     (return-from main 0))
   (handler-case
       (let ((configuration (%configuration arguments)))
