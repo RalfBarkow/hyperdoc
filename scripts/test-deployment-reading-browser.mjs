@@ -7,7 +7,7 @@
 // authoring or user init. SERVE-BROWSER-WITNESS uses ordinary CLOG/Inspector APIs.
 // Lisp owns object identity, revision provenance and warrants. Here we check
 // browser-origin clicks, visible destination headings, cross-book/return routes,
-// viewport geometry and isolated browser errors/network. CLOG synthetic-event
+// viewport geometry, non-visible package metadata and isolated browser errors/network. CLOG synthetic-event
 // helpers cannot supply the same independent input/viewport guarantee.
 // Screenshots are diagnostic captures, not approved visual-regression baselines.
 // All generated output stays in the explicitly supplied disposable directory.
@@ -37,15 +37,26 @@ try {
   const page=await context.newPage();page.on('pageerror',e=>report.errors.push(e.message));await page.goto(report.origin)
   const last=()=>page.locator('.inspector-pane').last()
   const click=async text=>{const count=await page.locator('.inspector-pane').count();await last().getByText(text,{exact:true}).first().click();await page.waitForFunction(c=>document.querySelectorAll('.inspector-pane').length>c,count)}
-  const measure=async(name,heading)=>{
+  const noPackageDirective=async()=>{
+   const content=last().locator('.hyperbook-page')
+   if(await content.count()){
+    assert.equal(await content.locator('in-package').count(),0,'Content must consume package directives')
+    assert(!(await content.innerText()).includes('<in-package>'),'Escaped package metadata must not be reader-visible')
+   }
+  }
+  const measure=async(name,heading,selector='.deployment-reading')=>{
    await last().getByRole('heading',{name:heading,exact:true}).waitFor()
+   await noPackageDirective()
    await page.locator('.inspector').evaluate(e=>{e.scrollLeft=e.scrollWidth-e.clientWidth})
-   const sizes=await last().locator('.deployment-reading').evaluate(e=>({width:e.clientWidth,scrollWidth:e.scrollWidth,height:e.scrollHeight}))
+   const sizes=await last().locator(selector).evaluate(e=>({width:e.clientWidth,scrollWidth:e.scrollWidth,height:e.scrollHeight}))
    assert(sizes.width>200 && sizes.scrollWidth<=sizes.width+1,`${name}: horizontal content overflow ${JSON.stringify(sizes)}`)
    const screenshot=`${width}-${name}.png`;await page.screenshot({path:path.join(output,screenshot)})
    report.cases.push({width,name,contentWidth:sizes.width,scrollWidth:sizes.scrollWidth,screenshot,status:'PASS'})
   }
   await page.getByText('Operational reading',{exact:true}).waitFor()
+  await noPackageDirective()
+  await click('deployment evidence');await measure('work-deployment-state','Federated Wiki deployment state')
+  await click('Return to Work Breakdown')
   await click('the Wiki package and service on wiki.ralfbarkow.ch')
   await measure('ralf-explanation','wiki.ralfbarkow.ch deployment')
   await click('wiki.ralfbarkow.ch');await measure('ralf-target','Wiki deployment target: wiki.ralfbarkow.ch')
@@ -62,6 +73,24 @@ try {
   await click('wiki.ralfbarkow.ch');await click('Newer published Wiki configuration');await measure('declared-package','Newer declared Wiki package choices')
   await click('Return to deployment explanation')
   await click('Reading FedWiki Configuration and Fork Behavior');await last().getByRole('heading',{name:'Reading FedWiki Configuration and Fork Behavior',exact:true}).waitFor()
+  await measure('fedwiki-content','Reading FedWiki Configuration and Fork Behavior','.hyperbook-page')
+  // Technical views retain metadata; observe their real CLOG widgets, not HTML substitutes.
+  await last().getByRole('button',{name:'Parse tree',exact:true}).click()
+  const defaultRow=last().getByRole('row').filter({hasText:'CL-USER'})
+  await defaultRow.getByRole('cell',{name:'in-package',exact:true}).waitFor()
+  await defaultRow.getByRole('cell',{name:'CL-USER',exact:true}).waitFor()
+  await last().getByRole('button',{name:'Source',exact:true}).click()
+  const editor=last().locator('.ace_editor');await editor.waitFor()
+  const authored=fs.readFileSync(new URL('../dreyeck/pages/fedwiki-config/Reading FedWiki Configuration and Fork Behavior.html',import.meta.url),'utf8')
+  const editorId=await editor.getAttribute('id')
+  await page.waitForFunction(({id,text})=>window.ace && document.getElementById(id) && window.ace.edit(id).getValue()===text && window.ace.edit(id).getReadOnly(),{id:editorId,text:authored})
+  const source=await editor.evaluate(e=>({text:window.ace.edit(e).getValue(),readOnly:window.ace.edit(e).getReadOnly()}))
+  assert.equal(source.text,authored)
+  assert.equal(source.readOnly,true)
+  report.technicalViews??=[];report.technicalViews.push({width,parseTreeDefaultElement:true,sourceMatchesAuthoredFile:true,sourceReadOnly:true})
+  await last().getByRole('button',{name:'Content',exact:true}).click()
+  await last().getByRole('heading',{name:'Reading FedWiki Configuration and Fork Behavior',exact:true}).waitFor()
+  await noPackageDirective()
   await click('HyperDoc and the separate Dreyeck Wiki farm');await measure('dreyeck-explanation','dreyeck.ch deployment')
   await click('dreyeck.ch');await measure('hyperdoc-target','HyperDoc deployment target: dreyeck.ch')
   await click('Separate wildcard Wiki farm target');await measure('wiki-farm-target','Wiki farm deployment target: *.dreyeck.ch')

@@ -40,7 +40,8 @@
 (COMMON-LISP:DEFMETHOD HYPERDOC:LOAD-PAGE :AFTER
                        ((DREYECK/HYPERDOC::PAGE DREYECK/HYPERDOC:HTML-PAGE))
   "Use the upstream loading seam to retain Dreyeck default reader context in memory only."
-  (COMMON-LISP:LET* ((DREYECK/HYPERDOC::ROOT
+  (COMMON-LISP:LET* ((PLUMP-PARSER:*TAG-DISPATCHERS* PLUMP-PARSER:*HTML-TAGS*)
+                     (DREYECK/HYPERDOC::ROOT
                       (PLUMP-PARSER:PARSE "<in-package>CL-USER</in-package>"))
                      (DREYECK/HYPERDOC::CONTEXT
                       (COMMON-LISP:AREF
