@@ -321,7 +321,7 @@
         (dolist (label '("Observed:" "Derived:" "Not established:"))
           (assert (search label html)))
         (assert (search "PUBLIC REPRODUCTION ENDS HERE." html))
-        (assert (equal '("Question" "Observed path" "Inspect" "Result" "Boundary" "Falsification")
+        (assert (equal '("Question" "Observed path" "Mech execution environment" "Inspect" "Result" "Boundary" "Falsification")
                        (mapcar #'plump:text (plump:get-elements-by-tag-name dom "h2"))))
         (assert (= 8 (length expressions)))
         (assert (null (plump:get-elements-by-tag-name dom "source-of-function")))
@@ -447,7 +447,68 @@
         (assert (search "Counter-observation" (views:view-html view))))))
   (format t "~&SOLO-HOVERBOLD-PASS: observed source and installation, trusted enter/leave writes, incident edge widths, unchanged controls/child DOM/node, fresh snapshots, native inspector references and linked page.~%"))
 
+(defun check-mech-documentation-navigation ()
+  "Offline contract with explicitly synthetic documentation pages, not public captures."
+  (let* ((catalog hyperbook::*catalog*)
+         (hyperbook/fedwiki::*neighborhood* (make-hash-table :test #'equal))
+         (hyperbook::*catalog* (make-instance 'hyperbook::catalog))
+         (targets nil))
+    (setf (hyperbook::factories-of hyperbook::*catalog*)
+          (hyperbook::factories-of catalog)
+          (hyperbook::hyperbooks-of hyperbook::*catalog*)
+          (remove-if (lambda (book)
+                       (member (hyperbook:id-of book)
+                               '("fedwiki:mech.dreyeck.ch" "fedwiki:ward.voices.ustawi.wiki")
+                               :test #'equal))
+                     (hyperbook::hyperbooks-of catalog)))
+    (loop for (site slug title) in '(("mech.dreyeck.ch" "hyperdoc-mech" "HyperDoc Mech")
+                                    ("ward.voices.ustawi.wiki" "trails-rendered" "Trails Rendered"))
+          for wiki = (make-instance 'hyperbook/fedwiki::fedwiki
+                                    :id (concatenate 'string "fedwiki:" site))
+          for page = (hyperbook/fedwiki::make-fedwiki-page wiki slug title)
+          do (setf (hyperbook/fedwiki::status-of wiki) t
+                   (gethash site hyperbook/fedwiki::*neighborhood*) wiki
+                   (gethash slug (hyperbook/fedwiki::pages-of wiki)) page)
+             (hyperbook/fedwiki::set-page-data
+              page (shasht:read-json
+                    (format nil "{\"title\":~S,\"story\":[{\"type\":\"paragraph\",\"id\":\"navigation-test-only\",\"text\":\"Synthetic documentation fixture\"}],\"journal\":[]}" title)))
+             (push page targets))
+    (multiple-value-bind (page view)
+        (render-page (hyperbook:find-hyperbook "dreyeck/work/reading")
+                     "Trails Rendered public reproduction")
+      (let* ((html (views:view-html view))
+             (dom (plump:parse (uiop:read-file-string (hyperdoc:file-of page))))
+             (links (plump:get-elements-by-tag-name dom "a")))
+        (dolist (target targets)
+          (assert (typep target 'hyperbook/fedwiki::fedwiki-page))
+          (assert (member target (mapcar #'cdr (views:view-references view)) :test #'eq))
+          (assert (eq target (hyperbook:find-page
+                             (hyperbook:find-hyperbook
+                              (hyperbook:id-of (hyperbook:hyperbook-of target)))
+                             (hyperbook:id-of target)))))
+        (assert (find-if (lambda (link)
+                          (and (equal "fedwiki:mech.dreyeck.ch" (plump:attribute link "hyperbook"))
+                               (equal "hyperdoc-mech" (plump:attribute link "page")))) links))
+        (assert (find-if (lambda (link)
+                          (and (equal "https://mech.dreyeck.ch/assets/hyperdoc-mech/"
+                                      (plump:attribute link "href"))
+                               (null (plump:attribute link "page")))) links))
+        (assert (search "hyperbook-reference" html))
+        (assert (not (search "hyperbook-error" html)))))
+    ;; Even with a configured host, documentation creates no executable frame.
+    (let* ((hyperbook/fedwiki::*mech-plugin-host-url*
+             "https://mech.dreyeck.ch/assets/hyperdoc-mech/")
+           (page (find "hyperdoc-mech" targets :key #'hyperbook:id-of :test #'equal))
+           (view (hyperbook/fedwiki::👀story page))
+           (html (views:view-html view)))
+      (assert (equal "Story" (views:view-title view)))
+      (assert (search "Synthetic documentation fixture" html))
+      (assert (not (search "<iframe" html)))
+      (assert (not (search "fedwiki-mech-host" html)))))
+  (format t "~&MECH-DOCUMENTATION-NAVIGATION-PASS: native site/slug references, Ward link, documentation Story and distinct external host URL.~%"))
+
 (defun run-tests ()
+  (check-mech-documentation-navigation)
   (check-original-code-browser)
   (check-trail-following)
   (check-solo-batch)
