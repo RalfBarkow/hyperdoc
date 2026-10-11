@@ -14,12 +14,19 @@
     },
     {
       "path": "plugins/mech/blocks.js",
-      "sha256": "c3bc41f896ee965e067d9dc618450eed9c90cf81710d92bbd05b66ea4e59bd70",
+      "sha256": "de061186893cddfb889f985c4198bda8482b6340de766f65531c9d6de165a3ea",
       "source": {
         "repository": "https://github.com/RalfBarkow/wiki-plugin-mech",
         "oid": "0fc36fcd58a8d7c399d3e86d2ee2e9328cafba44",
         "path": "src/client/blocks.js",
-        "role": "unchanged source module; local CODE-capable candidate, not deployed"
+        "role": "base source module with bounded Ward WALK topics intake; not a complete Ward revision",
+        "baseSha256": "c3bc41f896ee965e067d9dc618450eed9c90cf81710d92bbd05b66ea4e59bd70",
+        "intake": {
+          "repository": "https://github.com/WardCunningham/wiki-plugin-mech",
+          "oid": "c858eff1e655e913418bfe86ddecab6053ce38b5",
+          "path": "src/client/blocks.js",
+          "region": "walk_emit recognition of topics adapted to existing parse_walk_command; existing role dispatch unchanged"
+        }
       }
     },
     {
@@ -34,12 +41,20 @@
     },
     {
       "path": "plugins/mech/library.js",
-      "sha256": "bf1e1a2f3438d7cba322c90d4410ba4be353552256459ad32bc338050bb5e319",
+      "sha256": "a55269686c5941a5a058c08bef2e0ef3afcaa22c87f6b7bc61a0e10e34776a7b",
       "source": {
         "repository": "https://github.com/RalfBarkow/wiki-plugin-mech",
         "oid": "0fc36fcd58a8d7c399d3e86d2ee2e9328cafba44",
         "path": "src/client/library.js",
-        "role": "unchanged source module; local CODE-capable candidate, not deployed"
+        "role": "base source module with bounded Ward WALK topics intake; not a complete Ward revision",
+        "baseSha256": "bf1e1a2f3438d7cba322c90d4410ba4be353552256459ad32bc338050bb5e319",
+        "intake": {
+          "repository": "https://github.com/WardCunningham/wiki-plugin-mech",
+          "oid": "c858eff1e655e913418bfe86ddecab6053ce38b5",
+          "path": "src/client/library.js",
+          "region": "walks: topics and nested linked/newest/partitions; topics switch arm",
+          "functionSha256": "6477e57584d16aa474d41f978d9bad14fe0278770e5ba23794f50ee40fbfa0e5"
+        }
       }
     },
     {
@@ -109,5 +124,6 @@
       }
     }
   ],
-  "externalImports": "Original Code imports Graph from its original public URL; Solo retains original Graphviz/WASM and pan/zoom URLs. No implementation is rewritten."
+  "externalImports": "Original Code imports Graph from its original public URL; Solo retains original Graphviz/WASM and pan/zoom URLs. No implementation is rewritten.",
+  "composition": "CODE/Discourse base 0fc36fcd58a8d7c399d3e86d2ee2e9328cafba44 plus bounded original Ward WALK topics intake; Mech/Solo/parser/other operations unchanged"
 }

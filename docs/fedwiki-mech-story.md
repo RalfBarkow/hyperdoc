@@ -3,7 +3,8 @@
 Story's `:mech` renderer sends the complete original page JSON, source site,
 origin slug and selected item ID to a read-only browser Wiki plugin host. The
 host supplies the Wiki lineup/page-object contract required by `CODE` and uses
-the original Mech parser, formatter, catalog, `emit` and dispatcher. JavaScript
+the retained Mech parser, formatter, catalog, `emit` and dispatcher, with the
+bounded WALK mode intake documented below. JavaScript
 runs in the browser; neither page display nor button clicks invoke a Lisp
 JavaScript evaluator or an executable Wiki-to-Lisp callback.
 
@@ -52,13 +53,16 @@ or rewrite Code.
 Only passive outer `CLICK` blocks initialize on display. Other top-level
 scripts require a separate explicit start action. Ownership is false and the
 page object is remote; the original CODE authorization guard still applies.
-There is no authorization adapter, modified dispatcher, LISTEN forwarding or
+There is no CODE authorization adapter, LISTEN forwarding or
 implicit Code evaluation. Plugin failures appear in the frame; module/uncaught
 failures also reach the Story status as text.
 
-The retained runtime modules are unchanged Git source files of RalfBarkow's
+The retained runtime modules use Git source files of RalfBarkow's
 CODE-capable **local candidate** `0fc36fcd58a8d7c399d3e86d2ee2e9328cafba44`,
-version `0.1.32-dev.2`, from the existing `docs/mech-upgrade/` investigation.
+with the bounded original Ward WALK topics intake documented below. Only
+`library.js` and the WALK recognition expression in `blocks.js` differ from
+that base. The interpreter parser and all pre-existing operations remain unchanged.
+The base version is `0.1.32-dev.2`, from the existing `docs/mech-upgrade/` investigation.
 This is not a claim about current upstream or deployed Mech. The source-copy
 host has no compiled build stamp. Solo is the unchanged `wiki-plugin-solo`
 `0.1.30-1` npm receiver. `provenance.json` records repository/package authority,
@@ -300,7 +304,7 @@ action.
 | Sitemap | JSON read from one concrete site's `/system/sitemap.json`; its original fields and entry order | `fetch-sitemap` retains a copied array independently of page projections or site selection |
 | Wiki neighborhood | Sites registered by the Wiki client in its browser session, including page-derived and earlier registrations | Not reconstructed; the host declares a bounded page-origin/context selection |
 | Loading state | Availability of each selected site's sitemap | Separate missing/loading/ready/failed state; ready `[]` means proven empty |
-| Mech execution | Pinned original NEIGHBORS and WALK interpretation | Unchanged candidate `0fc36fcd58a8d7c399d3e86d2ee2e9328cafba44`; exact comparisons apply to identical complete inputs |
+| Mech execution | Pinned original NEIGHBORS and WALK interpretation | Base `0fc36fcd58a8d7c399d3e86d2ee2e9328cafba44` plus the bounded topics intake below; exact comparisons apply to identical complete inputs |
 
 ### Site selection precedes sitemap availability
 
@@ -361,8 +365,9 @@ means retained data is available, not that the remote site was freshly verified
 or that automatic refresh matches the Wiki client.
 
 The host's `neighborhood.js` validates the boundary and supplies
-`wiki.neighborhoodObject.sites`. Original Mech extraction, ordering and graph
-algorithms remain unchanged. There is an explicit **host availability policy**:
+`wiki.neighborhoodObject.sites`. Existing Mech extraction, ordering and graph
+algorithms remain unchanged; the additional original topics mode is documented below.
+There is an explicit **host availability policy**:
 all declared sites must be ready before NEIGHBORS reads this input. The native
 extractor would instead skip `sitemapRequestInflight` sites and continue with a
 partial set. A durable test executes that original behavior and contrasts it
@@ -418,7 +423,8 @@ inputs with controlled clock, locale and timezone. It substitutes no graph
 algorithm and normalizes no output. Existing CODE trails/Solo and its original
 Preview failure remain separate regressions. Full behavioral equivalence from
 the earlier composition experiment remains failed; this data contract does not
-reclassify it. `WALK topics` and `POPUP state` remain a separate intake.
+reclassify it. The bounded `WALK topics` intake below adds a separate Ward
+source authority; `POPUP state` remains outside this implementation.
 
 ```sh
 node --test tests/fedwiki-mech-host.test.mjs tests/fedwiki-mech-neighborhood.test.mjs
@@ -430,4 +436,99 @@ Run the existing ASDF Story contracts and Trails browser driver as well.
 Execution output remains outside the repository. The implementation and initial
 tests are in commit `99521dc6a8df21fd56fc0e9da25302bfb7b87f3f`; this clarification
 adds documented boundaries and regression controls, not another Mech adapter.
-No original page, service, source pin or runtime instance is changed.
+No original page, service, source pin or runtime instance is changed by that
+contract clarification.
+
+## Bounded original WALK topics intake
+
+The starting HyperDoc HEAD is `9772eefc4ec84bc2b98e2108d2aaaf2d764f0b58`,
+following the sitemap implementation `99521dc6a8df21fd56fc0e9da25302bfb7b87f3f`.
+This is an asset-source intake, not a production activation or whole-plugin update.
+
+The selected upstream authority is
+[WardCunningham/wiki-plugin-mech c858eff1e655e913418bfe86ddecab6053ce38b5](https://github.com/WardCunningham/wiki-plugin-mech/commit/c858eff1e655e913418bfe86ddecab6053ce38b5)
+(`first version of WALK topics`). `src/client/library.js:walks` dispatches to
+`topics(count)` with its nested `linked`, `newest` and `partitions` functions.
+That complete function body, including its original formatting, is copied
+byte-for-byte into the CODE/Discourse base,
+and its switch arm is added. The upstream `src/client/blocks.js:walk_emit`
+recognizes `topics`; that alternative is added to the existing downstream
+`parse_walk_command` expression, preserving role-aware dispatch. No new catalog
+operation, graph dependency, browser fetch or helper algorithm is introduced.
+
+The comparison revision
+[a028b4bba04e539dcaa090423d38a00a0050489d](https://github.com/WardCunningham/wiki-plugin-mech/tree/a028b4bba04e539dcaa090423d38a00a0050489d)
+was inspected separately. Its topics body is reformatted; its broader library,
+Graph import and dispatcher have other changes. It is not used as a replacement
+for either base module, nor claimed as the executed whole-plugin revision.
+
+The original operation examines successive seven-day windows relative to
+`Date.now()`, excludes roots without links and titles ending in ` Survey`, links
+to at most three known targets ordered by date, then partitions connected nodes.
+It randomly orders traversal using `Math.random()`. Nodes are reconstructed by
+name/type and `neighborhood.find(slug)`; the inherited duplicate-slug ambiguity
+and title coalescing are not resolved here. Its `count` controls the loop, not a
+new promise to return exactly that many aspects. This meaning comes from the
+source, not the English word "topics".
+
+`assets/hyperbook/fedwiki/mech-host/provenance.json` records base repository/OID,
+base file digests, adopted source repository/OID/region and resulting file digests.
+`tests/fixtures/mech-topics/provenance.json` records the upstream library blob,
+function digest, exact original utility excerpt and retained data digests. The
+source-integrity test removes just the topics insertion/recognition and verifies
+that the previous base bytes are recovered. CODE, EXTRACT, EDGES, DEBUG,
+role WALK and Solo source are thereby preserved rather than replaced.
+
+### Original data and comparison boundaries
+
+The fixtures retain the original `Pattern Machinery` JSON and Mech item
+`3a62aa636c883134` unchanged, plus the original Ward sitemap captured during the
+local diagnosis of 2026-10-10 (45 entries). These are historical reads, not newly
+verified public content. Tests consume their exact digests; no generated graph,
+screenshot or local execution log is committed as source evidence.
+
+The ready browser control explicitly selects that one loaded Ward site. It does
+not stand in for the original page/session neighborhood. The separate full
+historical-context control retains `thompson.fed.wiki` and
+`thompson.patterns.ustawi.wiki` as missing; no sitemap is synthesized for them.
+Original page JSON, item IDs, Mech text and Code items never change. This control
+changes only the test object's selected context, not production selection policy.
+Production still requires every declared selected sitemap to be ready through
+HyperDoc's existing loader. Their availability on dreyeck.ch remains unverified.
+
+The Node comparison runs the real parser/dispatcher on the loaded sitemap and
+executes the retained original Ward `walks` directly on the identical resulting
+neighborhood. The oracle binds only the original library's import location to
+its exact original utility excerpt. Original walks/Graph code is untouched;
+there is no reimplementation of topics. Clock is fixed at `1791633600000`.
+Multiple seeded random sequences exercise different actual node orders.
+Comparison retains node type/properties/site/date, directed edges and edge
+multiplicity, ignoring only numeric node IDs and enumeration order. The same
+seed also checks aspect names. Browser oracle uses controlled en-US/UTC.
+
+Fresh CLOG Inspector acceptance clicks the original first CLICK, verifies
+NEIGHBORS and all three WALK commands, and compares aggregate graph content with
+the bounded Ward oracle plus the unchanged weeks/hubs reference. Display alone
+runs no program. Missing/loading/failed and incomplete historical context retain
+visible failures. Existing original `CODE trails -> SOLO` and PREVIEW regressions
+are run separately without changing their fixtures.
+
+```sh
+node --test tests/fedwiki-mech-host.test.mjs tests/fedwiki-mech-neighborhood.test.mjs \
+  tests/fedwiki-mech-topics.test.mjs
+node scripts/test-fedwiki-mech-topics.mjs LISP_WRAPPER PLAYWRIGHT_DIRECTORY \
+  CHROME_EXECUTABLE /external/results
+```
+
+### Independent POPUP state boundary
+
+In Ward comparison revision `a028b4b...`, `src/client/blocks.js:popup_emit`
+escapes and serializes state into HTML details, then calls
+`wiki.dialog(elem.innerText, html.join('\n'))`. The source-qualified Wiki-client
+`1aba55920f95b957bc8ccf3b3648c9b23d534c9a:lib/wiki.js` maps `wiki.dialog` to
+`lib/dialog.js:open(title, html)`. It opens/reuses `/dialog/#` in a named popup and
+posts `{title, body}` to `window.origin` after load if needed. This requires a
+separate dialog receiver/lifecycle contract; it is not Solo's graph protocol.
+The reduced host provides no `wiki.dialog` and this candidate catalog has no
+POPUP. That unsupported-command error remains visible and tested. No dialog
+shim, receiver, command intake or new endpoint is implemented in this slice.

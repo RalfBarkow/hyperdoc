@@ -1,0 +1,46 @@
+{
+  "purpose": "Durable offline original-source and retained-data oracles; no generated execution output",
+  "upstream": {
+    "repository": "https://github.com/WardCunningham/wiki-plugin-mech",
+    "oid": "c858eff1e655e913418bfe86ddecab6053ce38b5"
+  },
+  "comparisonRevision": "a028b4bba04e539dcaa090423d38a00a0050489d",
+  "comparisonRole": "Source comparison only; not a whole-plugin upgrade",
+  "clock": 1791633600000,
+  "files": [
+    {
+      "path": "ward-library.js",
+      "sourcePath": "src/client/library.js",
+      "sha256": "b810eb42ed9785e29e95460ffbc6e5db49530f923420aac3bab96cb4b072011e",
+      "gitBlob": "624877679c2332fe97f3bbd2b794caf9444f19b5"
+    },
+    {
+      "path": "ward-helpers.mjs",
+      "sourcePath": "src/client/mech.js",
+      "region": "export const uniq through asSlug; unchanged excerpt, no runtime dispatcher",
+      "sha256": "f4624eea04a9ded30ce79f316b9d8433924b16a7cfd0267151923d3c7cefe1ff",
+      "sourceFileSha256": "28328a36948132ec9ca3cd4f3de4c341ba1835f6bf1a22d9b3b7ef0f774a6023"
+    },
+    {
+      "path": "LICENSE",
+      "sourcePath": "LICENSE",
+      "sha256": "d46e9ee22150bd932292a79b4fa67ece6e39c95a6678c3f3ac86247f82192ad5"
+    },
+    {
+      "path": "pattern-machinery.json",
+      "url": "http://ward.voices.ustawi.wiki/pattern-machinery.json",
+      "retainedFrom": "Local diagnosis of 2026-10-10; not a new/current fetch",
+      "itemId": "3a62aa636c883134",
+      "sha256": "49253a601b16bd8b896baa553504255d7ea9338ec4b7ab7e59c4157627509fb9"
+    },
+    {
+      "path": "ward-sitemap.json",
+      "url": "http://ward.voices.ustawi.wiki/system/sitemap.json",
+      "retainedFrom": "Local diagnosis of 2026-10-10; one site, not a complete browser neighborhood",
+      "sha256": "2f463fde00e41517b76fe9882458bbb28464cca95c0732862204e3817c5bc8a0"
+    }
+  ],
+  "topicsRegionSha256": "6477e57584d16aa474d41f978d9bad14fe0278770e5ba23794f50ee40fbfa0e5",
+  "insertionSha256": "79416971348f7225528fb2467f51da0035fe11d5011aaa4ba5ae9465acc75350",
+  "browserSelection": "Controlled one-site selection, retaining original page JSON unchanged; complete historical page context is tested as unavailable, not fabricated"
+}
