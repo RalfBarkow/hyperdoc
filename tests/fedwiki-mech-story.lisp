@@ -44,6 +44,7 @@
       (error "Missing Story view")))
 
 (defun run-tests ()
+  (check-dialog-contract)
   (check-topics-contract)
   (check-sitemap-contract)
   (let* ((page (original-page))

@@ -67,6 +67,6 @@ test('missing, loading and failed sources remain failures; a retained empty site
   assert.equal(empty.state.aspect, undefined)
 })
 
-test('POPUP remains an independent unsupported command with no fabricated dialog adapter', async () => {
-  await assert.rejects(execute(['POPUP state']), /POPUP doesn't name a block we know/)
+test('POPUP requires its explicit Wiki dialog contract; data execution supplies no implicit adapter', async () => {
+  await assert.rejects(execute(['POPUP state']), /wiki.dialog is not a function/)
 })

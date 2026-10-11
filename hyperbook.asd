@@ -142,7 +142,8 @@
   :serial t
   :components ((:file "tests/fedwiki-mech-story")
                (:file "tests/fedwiki-mech-sitemaps")
-               (:file "tests/fedwiki-mech-topics"))
+               (:file "tests/fedwiki-mech-topics")
+               (:file "tests/fedwiki-mech-dialog"))
   :perform (test-op (op system)
              (declare (ignore op system))
              (uiop:symbol-call :hyperbook/fedwiki/tests :run-tests)))

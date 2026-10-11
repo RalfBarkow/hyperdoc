@@ -1129,6 +1129,38 @@ async function solo_emit({ elem, command, state }) {
   }
 }
 
+// Original POPUP intake: Ward a028b4bba04e539dcaa090423d38a00a0050489d.
+function popup_emit({ elem, args, state }) {
+  const expand = text => text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+  const html = []
+  switch (args[0]) {
+    case 'state':
+      for (const key in state) {
+        let value = state[key]
+        if (value == null) continue
+        if (typeof value != 'string') value = JSON.stringify(state[key], null, 2)
+        html.push(
+          `<details>
+            <summary>${key}</summary>
+            <pre style="white-space: pre-wrap;">${expand(value)}</pre>
+          </details>`,
+        )
+      }
+      break
+    case 'images':
+      if (!state.commons)
+        return state.api.trouble(elem, `POPUP images expects "commons" state, like from "GET" "COMMONS"`)
+      const where = args[1] == 'all' ? state.commons.all : state.commons.here
+      for (const item of where.items) {
+        html.push(`<span><img height=200 src=/assets/plugins/image/${item}></span>`)
+      }
+      break
+    default:
+      return state.api.trouble(elem, `POPUP doesn't know "${args[0]}".`)
+  }
+  wiki.dialog(elem.innerText, html.join('\n'))
+}
+
 // CODE backport: named exports/state proxy (70b23b9), visibility policy (6782e4d).
 async function code_emit({ elem, command, args, state, initiator }) {
   if (typeof window == 'undefined' || !state.api.lineupAtKey || !state.api.thisLineupKey)
@@ -1193,6 +1225,7 @@ export const blocks = {
   DEBUG: { emit: debug_emit },
   SOLO: { emit: solo_emit },
   CODE: { emit: code_emit },
+  POPUP: { emit: popup_emit },
 }
 
 export {

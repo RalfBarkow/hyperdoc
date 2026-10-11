@@ -1,0 +1,21 @@
+{
+  "purpose": "Exact original source oracles used by offline POPUP/dialog tests; no execution logs",
+  "popup": {
+    "repository": "https://github.com/WardCunningham/wiki-plugin-mech",
+    "oid": "a028b4bba04e539dcaa090423d38a00a0050489d",
+    "path": "src/client/blocks.js",
+    "definition": "popup_emit",
+    "sourceFileSha256": "388ee024299ce3674c607b83ec671f8d3df0cb9ba9e584960768fd359fff6d9d",
+    "gitBlob": "1f53aeebe83acf83a7eb26eccb78558d93922169",
+    "excerptSha256": "3be185ca96eec375edc3220b560227cfd8c6bd5ec2a9afc6d38d49ef9daddec9",
+    "insertionSha256": "76b49d39ac22e17a95b137a3dc930cd7b759da11eb6d9842ad239396fadb4369"
+  },
+  "dialog": {
+    "repository": "https://github.com/RalfBarkow/wiki-client",
+    "oid": "1aba55920f95b957bc8ccf3b3648c9b23d534c9a",
+    "path": "lib/dialog.js",
+    "sha256": "0efc0c734ee0ad9f4bc0070d16e5f79ae2a3bc5833009c550279912fb0649f66",
+    "moduleAdaptation": "Only CommonJS module.exports changed to ES module export; open body unchanged"
+  },
+  "largeFixture": "Test-only generated 1500 entries in three sites; not production data or public neighborhood reconstruction"
+}

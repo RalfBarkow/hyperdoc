@@ -14,19 +14,32 @@
     },
     {
       "path": "plugins/mech/blocks.js",
-      "sha256": "de061186893cddfb889f985c4198bda8482b6340de766f65531c9d6de165a3ea",
+      "sha256": "ce254e24b5466cc2e9f54d773dae5159232aba4ab4f974a2ba9f16367144a591",
       "source": {
         "repository": "https://github.com/RalfBarkow/wiki-plugin-mech",
         "oid": "0fc36fcd58a8d7c399d3e86d2ee2e9328cafba44",
         "path": "src/client/blocks.js",
-        "role": "base source module with bounded Ward WALK topics intake; not a complete Ward revision",
+        "role": "base source module with bounded original Ward WALK topics and POPUP intakes; not a whole Ward revision",
         "baseSha256": "c3bc41f896ee965e067d9dc618450eed9c90cf81710d92bbd05b66ea4e59bd70",
         "intake": {
           "repository": "https://github.com/WardCunningham/wiki-plugin-mech",
           "oid": "c858eff1e655e913418bfe86ddecab6053ce38b5",
           "path": "src/client/blocks.js",
           "region": "walk_emit recognition of topics adapted to existing parse_walk_command; existing role dispatch unchanged"
-        }
+        },
+        "additionalIntakes": [
+          {
+            "repository": "https://github.com/WardCunningham/wiki-plugin-mech",
+            "oid": "a028b4bba04e539dcaa090423d38a00a0050489d",
+            "path": "src/client/blocks.js",
+            "definition": "popup_emit",
+            "sourceFileSha256": "388ee024299ce3674c607b83ec671f8d3df0cb9ba9e584960768fd359fff6d9d",
+            "gitBlob": "1f53aeebe83acf83a7eb26eccb78558d93922169",
+            "excerptSha256": "3be185ca96eec375edc3220b560227cfd8c6bd5ec2a9afc6d38d49ef9daddec9",
+            "insertionSha256": "76b49d39ac22e17a95b137a3dc930cd7b759da11eb6d9842ad239396fadb4369",
+            "role": "verbatim popup_emit function and POPUP catalog arm"
+          }
+        ]
       }
     },
     {
@@ -122,8 +135,49 @@
         "path": "ReadMe.md",
         "role": "original package documentation and MIT license declaration"
       }
+    },
+    {
+      "path": "wiki-dialog.js",
+      "sha256": "cfcf9627997e9a4b0a8c8f0e9a73b264a7ac7d23223db1ad2ce7beb29b2ccf62",
+      "source": {
+        "repository": "https://github.com/RalfBarkow/wiki-client",
+        "oid": "1aba55920f95b957bc8ccf3b3648c9b23d534c9a",
+        "path": "lib/dialog.js",
+        "role": "original open function; CommonJS export adapted to browser ES module",
+        "originalSha256": "0efc0c734ee0ad9f4bc0070d16e5f79ae2a3bc5833009c550279912fb0649f66"
+      }
+    },
+    {
+      "path": "dialog/index.html",
+      "sha256": "5403bb263f87c4a9524c49f338368f0db5eaa82007bb7e25f137e905343b2e91",
+      "source": {
+        "repository": "https://github.com/RalfBarkow/wiki-client",
+        "oid": "1aba55920f95b957bc8ccf3b3648c9b23d534c9a",
+        "path": "client/dialog/index.html",
+        "role": "unchanged regular receiver mirror for local standalone host/tests; production uses existing Wiki /dialog/"
+      }
+    },
+    {
+      "path": "dialog/style.css",
+      "sha256": "bb6c170aa9b81b1ea1e41301e57982bf752edef197f5197a2025e7f6bbc6886b",
+      "source": {
+        "repository": "https://github.com/RalfBarkow/wiki-client",
+        "oid": "1aba55920f95b957bc8ccf3b3648c9b23d534c9a",
+        "path": "client/dialog/style.css",
+        "role": "unchanged regular receiver CSS mirror"
+      }
+    },
+    {
+      "path": "dialog/LICENSE",
+      "sha256": "03993ada840226cde727e391b91bb52a74b4d367126cd1601aa0c7b9cc2f02e4",
+      "source": {
+        "repository": "https://github.com/RalfBarkow/wiki-client",
+        "oid": "1aba55920f95b957bc8ccf3b3648c9b23d534c9a",
+        "path": "LICENSE.txt",
+        "role": "original Wiki-client license"
+      }
     }
   ],
   "externalImports": "Original Code imports Graph from its original public URL; Solo retains original Graphviz/WASM and pan/zoom URLs. No implementation is rewritten.",
-  "composition": "CODE/Discourse base 0fc36fcd58a8d7c399d3e86d2ee2e9328cafba44 plus bounded original Ward WALK topics intake; Mech/Solo/parser/other operations unchanged"
+  "composition": "CODE/Discourse base 0fc36fcd58a8d7c399d3e86d2ee2e9328cafba44 plus bounded original Ward WALK topics intake; Mech/Solo/parser/other operations unchanged; original Ward a028b4b POPUP plus Wiki-client 1aba559 dialog.open (ES export adaptation only)"
 }

@@ -59,9 +59,10 @@ failures also reach the Story status as text.
 
 The retained runtime modules use Git source files of RalfBarkow's
 CODE-capable **local candidate** `0fc36fcd58a8d7c399d3e86d2ee2e9328cafba44`,
-with the bounded original Ward WALK topics intake documented below. Only
-`library.js` and the WALK recognition expression in `blocks.js` differ from
-that base. The interpreter parser and all pre-existing operations remain unchanged.
+with the bounded original Ward WALK topics and POPUP intakes documented below. Only
+`library.js` and `blocks.js` differ from that base: topics recognition/calculation
+and the original POPUP function/catalog arm are the bounded additions. The
+interpreter parser and all pre-existing operations remain unchanged.
 The base version is `0.1.32-dev.2`, from the existing `docs/mech-upgrade/` investigation.
 This is not a claim about current upstream or deployed Mech. The source-copy
 host has no compiled build stamp. Solo is the unchanged `wiki-plugin-solo`
@@ -424,7 +425,7 @@ algorithm and normalizes no output. Existing CODE trails/Solo and its original
 Preview failure remain separate regressions. Full behavioral equivalence from
 the earlier composition experiment remains failed; this data contract does not
 reclassify it. The bounded `WALK topics` intake below adds a separate Ward
-source authority; `POPUP state` remains outside this implementation.
+source authority. The subsequent original POPUP intake is documented below.
 
 ```sh
 node --test tests/fedwiki-mech-host.test.mjs tests/fedwiki-mech-neighborhood.test.mjs
@@ -520,7 +521,7 @@ node scripts/test-fedwiki-mech-topics.mjs LISP_WRAPPER PLAYWRIGHT_DIRECTORY \
   CHROME_EXECUTABLE /external/results
 ```
 
-### Independent POPUP state boundary
+### Historical POPUP boundary after the topics slice
 
 In Ward comparison revision `a028b4b...`, `src/client/blocks.js:popup_emit`
 escapes and serializes state into HTML details, then calls
@@ -529,6 +530,121 @@ escapes and serializes state into HTML details, then calls
 `lib/dialog.js:open(title, html)`. It opens/reuses `/dialog/#` in a named popup and
 posts `{title, body}` to `window.origin` after load if needed. This requires a
 separate dialog receiver/lifecycle contract; it is not Solo's graph protocol.
-The reduced host provides no `wiki.dialog` and this candidate catalog has no
-POPUP. That unsupported-command error remains visible and tested. No dialog
-shim, receiver, command intake or new endpoint is implemented in this slice.
+At commit `394bb79fcd738610b7f290e062c4504f095aa070`, the reduced host provided
+no `wiki.dialog` and its catalog had no POPUP. The unsupported-command result
+was recorded by that slice. The subsequent intake below changes this specific
+boundary; the earlier acceptance observations are not rewritten.
+
+
+## Original POPUP state and regular Wiki dialog intake
+
+Starting HyperDoc HEAD: `394bb79fcd738610b7f290e062c4504f095aa070` on
+`dreyeck.ch`, with a clean index/worktree. The user reports public Pattern
+Machinery results of 1,532 pages/three sites, 16 topics aspects, 25 hubs aspects
+and 62 aspects received by Solo. These are author-reported runtime observations,
+not the input or counts of the offline fixtures below.
+
+The complete `popup_emit` function from
+[Ward Mech a028b4bba04e539dcaa090423d38a00a0050489d](https://github.com/WardCunningham/wiki-plugin-mech/blob/a028b4bba04e539dcaa090423d38a00a0050489d/src/client/blocks.js)
+is copied verbatim into the existing composition, and the POPUP catalog arm is
+added. Other commands, CODE authorization, topics and Solo are unchanged.
+`tests/fixtures/mech-popup/` retains the original function excerpt and original
+client source as executed comparison oracles, with source-file/excerpt digests,
+repository/OID/path and Git blob provenance. The product manifest records the
+additional intake separately from the existing topics authority. Removing the
+bounded additions recovers the previous base source digest.
+
+### Original implementation versus provided host contract
+
+The sender is
+[Wiki-client 1aba55920f95b957bc8ccf3b3648c9b23d534c9a:lib/dialog.js](https://github.com/RalfBarkow/wiki-client/blob/1aba55920f95b957bc8ccf3b3648c9b23d534c9a/lib/dialog.js).
+`wiki-dialog.js` changes only its CommonJS `module.exports` to an ES module
+export. The `open` body is unchanged: open/reuse named `dialog` at `/dialog/#`,
+wait for first load when needed, then post `{title, body}` to `window.origin`.
+The host supplies only `wiki.dialog = open`; it does not load the full Wiki
+client, supply a new authorization rule, grant editing/publication or substitute
+Solo. Popup blocking and an inaccessible cross-origin named window remain
+visible original errors, without a fallback receiver or permission escalation.
+
+The existing public
+[regular receiver](https://mech.dreyeck.ch/dialog/) and `/dialog/style.css` were
+read on 2026-10-11. Both returned HTTP 200 with HTML/CSS MIME types and were
+byte-identical to that Wiki-client revision:
+
+- HTML SHA256: `5403bb263f87c4a9524c49f338368f0db5eaa82007bb7e25f137e905343b2e91`.
+- CSS SHA256: `bb6c170aa9b81b1ea1e41301e57982bf752edef197f5197a2025e7f6bbc6886b`.
+
+This establishes these resources, not the installed server package revision.
+No CSP, X-Frame-Options or X-Content-Type-Options header was present in those
+responses. The HTML response also had no COOP, COEP or CORP header in a
+confirming read. The unchanged receiver/CSS/license mirror under the asset directory
+supports the existing standalone local host and repeatable tests. Production
+uses its already installed regular `/dialog/` route, not a new service, vhost,
+root mount or receiver replacement. The asset-prefix copy is not that public
+root route.
+
+### Tested origin and HTML boundaries
+
+The original sender targets its own origin. Tests verify initial load transfer,
+fresh delivery on named-window reuse, blocked popups and cross-origin WindowProxy
+failure. The existing Inspector-to-host origin/source check is unchanged.
+
+The original receiver has **no `event.origin` or `event.source` validation**.
+A real cross-origin trusted offline test sender reproduces acceptance of a
+non-opener message. Wrong `targetOrigin` is dropped by the browser, but this is
+not receiver authentication: another sender can supply the correct target.
+The test sends only non-executable fixture markup; no live attack or production
+message injection is performed. We do not add a hidden receiver check, claim
+safe isolation or change the server to conceal this source limitation.
+
+Original `popup_emit` escapes `&`, `<` and `>` in values, including serialized
+objects, and omits null values. State keys inserted into `<summary>` are not
+escaped; tests retain this limitation rather than silently sanitizing upstream
+behavior. Actual Pattern Machinery's computed values render as literal text.
+The original `images` branch is retained as source, but it is not a new verified
+image workflow or endpoint. The receiver and execution frame share the Wiki
+origin and its potential privileges. This contract supports the explicit trusted
+demonstration; it is not a security boundary for arbitrary public Wiki code or
+arbitrary message senders. Receiver validation is a separate decision.
+
+### Acceptance and repeatable fixtures
+
+The fresh CLOG driver keeps the complete original page JSON, Code items and
+Mech item `3a62aa636c883134` unchanged. Display creates only CLICK controls.
+The first CLICK computes NEIGHBORS, weeks, topics and hubs; the second opens the
+regular dialog and shows that actual state. A reader can expand the native
+`neighborhood` disclosure to see its values. Received neighborhood data and all
+three aspect-source results are compared with the execution snapshot; the DOM
+is compared against the identified original `popup_emit`, using only ordinary
+browser HTML parsing. Repeated invocation proves fresh message receipt and
+reuse; recomputed test input updates the existing dialog without stale state.
+
+Two inputs are distinguished: the retained 45-entry original Ward sitemap with
+an explicitly controlled origin-only selection, and an authored generator of
+1,500 trusted fixture entries across three sites. The large fixture is test-only,
+never production fallback, and is written outside the repository by the driver.
+It does not reproduce the user's 1,532-entry public neighborhood. Escaping and
+large-state rendering are tested along with popup blocking and the original
+receiver's foreign-message limitation.
+
+The browser uses `https://mech.dreyeck.ch/assets/hyperdoc-mech/` and `/dialog/`
+as **offline intercepted URLs** backed by the local versioned mirrors. No new
+code is executed on production. The public check above is a separate read-only
+resource observation. Current public activation of this new host binding is
+not established by local acceptance; installation must include the updated
+`host.js`, `wiki-dialog.js` and matching composed `blocks.js` before a separate
+public browser check.
+No server configuration, port, original Wiki content or Lisp runtime is changed.
+
+```sh
+node --test tests/fedwiki-mech-host.test.mjs tests/fedwiki-mech-neighborhood.test.mjs \
+  tests/fedwiki-mech-topics.test.mjs tests/fedwiki-mech-popup.test.mjs
+node scripts/test-fedwiki-mech-dialog.mjs LISP_WRAPPER PLAYWRIGHT_DIRECTORY \
+  CHROME_EXECUTABLE /external/results
+```
+
+Run the existing topics, sitemap and original CODE trails/Solo browser drivers
+and fresh ASDF contracts as well. PREVIEW's original error remains unchanged.
+All execution logs, HTTP observations, reports and screenshots remain outside
+the source repository. The earlier failed full Behavioral-Equivalence acceptance
+remains FAILED; this contract does not reclassify it.

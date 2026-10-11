@@ -1,4 +1,5 @@
 import {createNeighborhood} from './neighborhood.js'
+import {open as wikiDialog} from './wiki-dialog.js'
 // Minimal read-only Wiki client contract. Parser, catalog, emit and execution
 // are the original pinned plugin; this host does not implement Mech commands.
 const parentOrigin = new URLSearchParams(location.hash.slice(1)).get('parent')
@@ -32,6 +33,7 @@ window.addEventListener('message', async event => {
       lineup: {atKey: candidate => { if (candidate !== key) throw Error('Unknown lineup key'); return pageObject }},
       neighborhoodObject: cache.neighborhoodObject, pageHandler: {context: [site]},
       textEditor: unavailable, showResult: unavailable, newPage: unavailable,
+      dialog: wikiDialog,
     }
     const section = document.createElement('section')
     section.className = 'page'; section.id = slug; section.dataset.key = key

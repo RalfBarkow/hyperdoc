@@ -4,6 +4,7 @@ import fs from 'node:fs'
 import path from 'node:path'
 import crypto from 'node:crypto'
 import {insertion} from './fedwiki-mech-topics-reference.mjs'
+import {popupInsertion} from './fedwiki-mech-popup-reference.mjs'
 import {createMechHost, root} from '../scripts/serve-fedwiki-mech-host.mjs'
 const digest = b => crypto.createHash('sha256').update(b).digest('hex')
 test('shipped plugin sources match bounded source identities and existing upgrade evidence', () => {
@@ -20,13 +21,14 @@ test('shipped plugin sources match bounded source identities and existing upgrad
       assert.equal(asset.source.intake.oid, 'c858eff1e655e913418bfe86ddecab6053ce38b5')
       assert.equal(asset.source.baseSha256, prior.sourceSha256)
       const current = fs.readFileSync(path.join(root, asset.path), 'utf8')
+      const withoutPopup = current.replace(popupInsertion, '').replace('  POPUP: { emit: popup_emit },\n', '')
       const restored = name === 'blocks.js'
-        ? current.replace('hubs|lineup|references|topics|questions?', 'hubs|lineup|references|questions?')
+        ? withoutPopup.replace('hubs|lineup|references|topics|questions?', 'hubs|lineup|references|questions?')
         : current.replace(insertion, '').replace("    case 'topics':\n      return topics(count)\n", '')
-      assert.equal(digest(restored), prior.sourceSha256, 'Only the bounded topics delta is allowed: ' + name)
+      assert.equal(digest(restored), prior.sourceSha256, 'Only the bounded topics/POPUP delta is allowed: ' + name)
     } else assert.equal(asset.sha256, prior.sourceSha256)
   }
-  assert.equal(manifest.assets.find(a => a.path.endsWith('dialog/index.html')).sha256, '5a513f70546ced3e2af7f83c4f14fb73d30e27f22a295558cbff4b078871aed8')
+  assert.equal(manifest.assets.find(a => a.path === 'plugins/solo/dialog/index.html').sha256, '5a513f70546ced3e2af7f83c4f14fb73d30e27f22a295558cbff4b078871aed8')
   assert.equal(JSON.parse(fs.readFileSync(path.join(root, 'plugins/solo/package.json'))).version, '0.1.30-1')
 })
 test('isolated static host has no Lisp, publication, write or traversal endpoint', async () => {

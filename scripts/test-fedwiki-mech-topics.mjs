@@ -95,10 +95,13 @@ try {
       result.graphContent=graphContent(topics)
       report.checks.push('ready: actual original WALK 15 topics dispatch, randomized directed graph content equals direct Ward c858 execution on identical input')
       report.checks.push('ready: weeks/hubs still execute in the unchanged original Pattern Machinery CLICK sequence')
+      const popupPromise=context.waitForEvent('page')
       await buttons.nth(1).click()
-      await frame.getByRole('button', {name:'✖︎',exact:true}).click()
-      await frame.locator('.item.mech').getByText("POPUP doesn't name a block we know.",{exact:false}).waitFor()
-      report.checks.push('ready: independent POPUP limitation remains visible; no wiki.dialog adapter installed')
+      const popup=await popupPromise;await popup.waitForURL(hostOrigin+'/dialog/#')
+      await popup.waitForFunction(()=>document.title==='POPUP state' && document.querySelector('details'))
+      assert((await popup.locator('.page').innerText()).includes('neighborhood'))
+      await popup.close()
+      report.checks.push('ready: original POPUP state uses the regular named Wiki dialog receiver')
     } else {
       if (mode === 'context') {
         assert.equal(wire.snapshot.sites.length,3)
