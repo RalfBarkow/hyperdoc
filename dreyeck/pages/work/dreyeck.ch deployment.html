@@ -1,176 +1,52 @@
-<html><head><title>dreyeck.ch deployment</title></head><body><in-package>dreyeck/work/deployment-inspection</in-package><div class='deployment-reading' style='max-width:100%;overflow-wrap:anywhere;line-height:1.6'><h1>dreyeck.ch deployment</h1><h2>Which applications serve dreyeck.ch and its Wiki subdomains?</h2><p>The latest supported routing observation separates two applications. The exact hostname <a expr='(hyperdoc-target)' view='Deployment target'>dreyeck.ch</a> denotes the Lisp-based HyperDoc application recorded behind hyperdoc.service. The recorded <a expr='(wiki-farm-target)' view='Deployment target'>wildcard Wiki deployment target</a> represents a separate Node Federated Wiki farm behind wiki.service. The explicit MCP route is a further exception to the wildcard. These logical targets are distinct; their names do not establish physical-machine identity or current activation.</p><h2>Detailed service/process observation: 8 October 2026</h2><p>The operator's read-only host output was captured at 03:29:16 UTC on 8 October. It records the HyperDoc service and SBCL process, immutable package source, routes and mutable site assets separately. This is the latest detailed service/process capture in this reading, not a live monitor. The separately reported 11 October Mech asset installation is documented below.</p><p><a expr='(latest-hyperdoc)' view='Deployment evidence'>Inspect the time-stamped served-state observation</a> · <a expr='(served-service)' view='Deployment evidence'>Compare the HyperDoc and Wiki services</a> · <a expr='(served-process)' view='Deployment evidence'>Understand the recorded process</a></p><p>HyperDoc was started by the built hyperdoc-catalog executable, loaded code from an immutable Nix store source, and listened on loopback at 127.0.0.1:8080. The service did not start from the older mutable checkout. The source revision comes from the host lock and a matching store-content comparison; the process did not report its own revision.</p><p><a expr='(served-package)' view='Deployment evidence'>Inspect the executable and package identity</a> · <a expr='(served-selection)' view='Deployment evidence'>Follow Nix source selection and its warrant</a> · <a expr='(served-revision)' view='Deployment revision'>Open the corresponding HyperDoc source</a></p><p>The served site assets were a separate mutable copy whose twelve files matched an assets revision by content. That does not establish who made the copy or when. <a expr='(assets-identity)' view='Deployment evidence'>Inspect assets identity and its provenance limit</a>.</p><h2>How the startup changed</h2><p>The observations below answer different questions. They are kept separate rather than merged into one timeless deployment record.</p><ol><li><strong>28 September — checkout and service snapshot. </strong>The reported startup used nix develop and a relative script. Its WorkingDirectory named the checkout; startup from the checkout revision was inferred from directory and times. Capture time for the whole snapshot was not supplied. <a expr='(earlier-hyperdoc)' view='Deployment evidence'>Inspect the earlier basis and inference</a>.</li><li><strong>1 October — built startup confirmation. </strong>The operator confirmed hyperdoc-catalog as the startup program. This did not supply exact arguments, package path or current WorkingDirectory. <a expr='(startup-confirmation)' view='Deployment evidence'>Inspect what that confirmation establishes</a>.</li><li><strong>3 October — source update and activation. </strong>The operator supplied command output: first the HyperDoc flake input changed, then NixOS activation built the application and stopped/started the service. Successful activation alone does not establish post-restart health or proxy state. <a expr='(recorded-activation)' view='Deployment evidence'>Inspect the two operations and their result</a>.</li><li><strong>8 October — source and process observation. </strong>The later capture records the store-based startup and loopback listener. It refines the later deployment without rewriting September's checkout witness. <a expr='(latest-hyperdoc)' view='Deployment evidence'>Return to the latest supported observation</a>.</li></ol><h2>The Wiki farm has its own package configuration</h2><p>The separately published Dreyeck Wiki consumer adds selectable upstream and Discourse Mech packages. That Wiki revision is not the HyperDoc source revision. Its publication does not prove that the Node farm selected either package, and a hostname alone does not select independent plugin assets inside a shared farm.</p><p><a expr='(declared-wiki "dreyeck")' view='Deployment evidence'>Inspect the newer Wiki declaration</a> · <a expr='(wiki-boundary "dreyeck")' view='Deployment evidence'>Inspect its unobserved activation</a> · <a expr='(hyperdoc-boundary)' view='Deployment evidence'>Inspect remaining source, assets and runtime uncertainties</a></p><p>No production service was changed by publishing these sources. A later observation is needed to say what is serving now; the dated observations above remain the evidence they originally supplied.</p><section id="mech-operations">
-<h2>HyperDoc Mech: three independently maintained objects</h2>
-<p>The operator report dated <strong>11 October 2026</strong>, supplied for this documentation on 12 October, describes the asset installation below. It adds to the dated observations above; it does not turn them into a current inventory. The current Catalog pin, active asset symlink, HTTP bodies and browser-loaded modules are <strong>not verified</strong> here.</p>
-<p><a expr="(mech-deployment)" view="Deployment evidence">Inspect the installation report and the two update paths</a>. Follow source revision → asset copy → active symlink → HTTP delivery separately from source input → Catalog package → service. <a expr="(dreyeck/work/deployment-reading:mech-installation-report-2026-10-11)">Inspect the dated operator report</a>.</p>
-<table><thead><tr><th>Object</th><th>Source</th><th>Installation</th><th>Update</th><th>Restart?</th></tr></thead><tbody>
-<tr><td>HyperDoc Catalog — https://dreyeck.ch</td><td>HyperDoc repository; hyperdoc input in /etc/nixos/flake.lock</td><td>Nix-built hyperdoc-catalog, started by hyperdoc.service</td><td>Select source, build, activate and verify</td><td>Activation must start the selected Catalog; verify the process</td></tr>
-<tr><td>Mech browser host</td><td>assets/hyperbook/fedwiki/mech-host/ at a full HyperDoc commit</td><td>Wiki-served versioned copy and active symlink</td><td>Install complete assets, compare HTTP bytes, switch symlink</td><td>No service restart; use a fresh browser context</td></tr>
-<tr><td>HyperDoc Mech documentation</td><td>Federated Wiki page and its journal</td><td>mech.dreyeck.ch Wiki page store</td><td>Edit the Wiki documentation through its normal workflow</td><td>No; reload the inspected page explicitly if cached</td></tr>
+<html><head><title>dreyeck.ch deployment</title></head><body>
+<in-package>dreyeck/work/deployment-inspection</in-package>
+<div class="deployment-reading" style="max-width:100%;overflow-wrap:anywhere;line-height:1.6">
+<h1>dreyeck.ch deployment</h1>
+<p>Choose the component first. Filesystem selection, HTTP delivery and browser execution are separate claims. Current production state is <strong>not verified</strong> by this reading.</p>
+<h2>What changes?</h2>
+<table><thead><tr><th>Change</th><th>Update</th><th>Rollback decision</th></tr></thead><tbody>
+<tr><td>HyperDoc reading, navigation or Lisp</td><td>Catalog: hyperdoc input → Nix package → hyperdoc.service</td><td>Previous pin/declaration or reviewed system generation</td></tr>
+<tr><td>Mech JavaScript / browser host</td><td>Complete versioned asset copy → active symlink</td><td>Previous asset selection; retain copies</td></tr>
+<tr><td>Both components</td><td>Both selections, with coordinated revisions</td><td>Review both independently</td></tr>
+<tr><td>HyperDoc Mech Wiki text</td><td>Editorial Wiki page, not executable assets</td><td>Wiki history</td></tr>
 </tbody></table>
-<p>The Catalog receives <code>HYPERDOC_MECH_PLUGIN_HOST_URL=https://mech.dreyeck.ch/assets/hyperdoc-mech/</code> at startup. An absent value leaves the Story renderer inert. The <a hyperbook="fedwiki:mech.dreyeck.ch" page="hyperdoc-mech">HyperDoc Mech Wiki page</a> opens as a <code>fedwiki-page</code> with a Story view; it is documentation, not the <a href="https://mech.dreyeck.ch/assets/hyperdoc-mech/">executable host installation</a>. Return to <a page="Trails Rendered public reproduction">Trails Rendered public reproduction</a> for the demonstration.</p>
-<h2>Install or update the complete Mech asset copy</h2>
-<p>The operator reports the site asset root <code>/home/rgb/.wiki/mech.dreyeck.ch/assets/</code>, copies under <code>hyperdoc-mech-versions/&lt;FULL_COMMIT_OID&gt;/</code>, and the relative link <code>hyperdoc-mech → hyperdoc-mech-versions/&lt;FULL_COMMIT_OID&gt;</code>. The successful POPUP slice used <code>77bfb29e19ed802ea206a3cbe25ee7b5a8adabed</code>. This is a historical installation report, not today's observed target.</p>
-<p>Choose an approved full commit and make it available on GitHub before beginning. These are operator instructions, never actions performed by rendering this page. Run the Bash blocks on the server in one session; from a Mac the operator may explicitly open <code>ssh rgb@dreyeck.ch</code> and run the same blocks there, using the established administrative account for NixOS commands. Paths refer to the server. No SSH is executed by this reading.</p>
-<p>The preparation resolves an immutable source with <code>nix eval --raw --impure</code>; it does not parse the human-readable <code>Path:</code> output of <code>nix flake metadata</code>, which is emitted on stderr. Keep the receipt outside the served assets. Confirm directory ownership; serialize updates. Existing revision directories are never overwritten. If a revision already exists, compare it with the immutable source and review it rather than deleting it.</p>
-<pre style="white-space:pre-wrap;overflow-wrap:anywhere" data-shell="bash" id="asset-prepare"><code># Bash on dreyeck.ch, as the operator owning the Wiki assets.
-set -euo pipefail
-: &quot;${MECH_REV:?Set the approved full HyperDoc commit OID first}&quot;
-[[ &quot;$MECH_REV&quot; =~ ^[0-9a-f]{40}$ ]]
-export MECH_REV
-wiki_assets_dir=/home/rgb/.wiki/mech.dreyeck.ch/assets
-# Confirm this 11 October reported path and ownership before continuing.
-test -d &quot;$wiki_assets_dir&quot;
-receipt=$(mktemp -d /var/tmp/hyperdoc-mech-update.XXXXXXXX)
-source_path=$(nix eval --raw --impure --expr &#x27;
-  let rev = builtins.getEnv &quot;MECH_REV&quot;;
-      source = builtins.getFlake (&quot;github:RalfBarkow/hyperdoc/&quot; + rev);
-  in assert source.rev == rev; source.outPath&#x27;)
-source_assets=&quot;$source_path/assets/hyperbook/fedwiki/mech-host&quot;
-test -f &quot;$source_assets/provenance.json&quot;
-versions=&quot;$wiki_assets_dir/hyperdoc-mech-versions&quot;
-target=&quot;$wiki_assets_dir/hyperdoc-mech&quot;
-mkdir -p &quot;$versions&quot;
-if test -L &quot;$target&quot;; then
-  readlink &quot;$target&quot; &gt; &quot;$receipt/previous-link&quot;
-else
-  test ! -e &quot;$target&quot; # Refuse to replace a real directory.
-  : &gt; &quot;$receipt/previous-link&quot;
-fi
-printf &#x27;%s\n&#x27; &quot;$MECH_REV&quot; &quot;$source_path&quot; &gt; &quot;$receipt/selected-source&quot;
-version_dir=&quot;$versions/$MECH_REV&quot;
-test ! -e &quot;$version_dir&quot; &amp;&amp; test ! -L &quot;$version_dir&quot;
-staging=$(mktemp -d &quot;$versions/.staging.XXXXXXXX&quot;)
-cp -R &quot;$source_assets/.&quot; &quot;$staging/&quot;
-chmod -R a+rX,a-w &quot;$staging&quot;
-diff -qr &quot;$source_assets&quot; &quot;$staging&quot;
-# No concurrent asset publisher; never overwrite an existing revision.
-mv -T &quot;$staging&quot; &quot;$version_dir&quot;
-printf &#x27;Receipt: %s\n&#x27; &quot;$receipt&quot;
-</code></pre><p>Compare every file before selection, including index.html, host.js, wiki-dialog.js, neighborhood.js and plugins/mech modules. HTTP 200 can be a generic Wiki page: require byte equality and appropriate JavaScript MIME types. Record CSP, framing and cache headers; an absent CSP is not the local launcher's tested CSP. A receiver mismatch requires investigation, not overwriting the root Wiki receiver.</p><pre style="white-space:pre-wrap;overflow-wrap:anywhere" data-shell="bash" id="asset-http"><code># Continue in the same Bash session. This function checks every shipped file.
-verify_host() {
-  local base=$1 resource mime
-  while IFS= read -r -d &#x27;&#x27; resource; do
-    resource=${resource#&quot;$version_dir/&quot;}
-    curl --fail --silent --show-error -H &#x27;Cache-Control: no-cache&#x27; \
-      -D &quot;$receipt/headers&quot; &quot;$base/$resource&quot; -o &quot;$receipt/body&quot; || return 1
-    cmp &quot;$version_dir/$resource&quot; &quot;$receipt/body&quot; || return 1
-    mime=$(sed -n &#x27;s/^[Cc]ontent-[Tt]ype: *//p&#x27; &quot;$receipt/headers&quot; | tr -d &#x27;\r&#x27;)
-    case &quot;$resource&quot; in
-      *.js) [[ &quot;$mime&quot; == application/javascript* || &quot;$mime&quot; == text/javascript* ]] || return 1 ;;
-      *.html) [[ &quot;$mime&quot; == text/html* ]] || return 1 ;;
-      *.css) [[ &quot;$mime&quot; == text/css* ]] || return 1 ;;
-    esac
-  done &lt; &lt;(find &quot;$version_dir&quot; -type f -print0)
-  curl --fail --silent --show-error &quot;$base/&quot; -o &quot;$receipt/directory-body&quot; || return 1
-  cmp &quot;$version_dir/index.html&quot; &quot;$receipt/directory-body&quot;
-}
-verify_host &quot;https://mech.dreyeck.ch/assets/hyperdoc-mech-versions/$MECH_REV&quot;
-# Distinct existing root receivers, not copies installed at new root routes.
-curl -fsS -D &quot;$receipt/popup-headers&quot; https://mech.dreyeck.ch/dialog/ -o &quot;$receipt/popup&quot;
-cmp &quot;$version_dir/dialog/index.html&quot; &quot;$receipt/popup&quot;
-curl -fsS -D &quot;$receipt/solo-headers&quot; https://mech.dreyeck.ch/plugins/solo/dialog/ -o &quot;$receipt/solo&quot;
-cmp &quot;$version_dir/plugins/solo/dialog/index.html&quot; &quot;$receipt/solo&quot;
-</code></pre><pre style="white-space:pre-wrap;overflow-wrap:anywhere" data-shell="bash" id="asset-switch"><code># Only after HTTP/content checks and explicit operator approval.
-# No concurrent publisher; confirm the active selection has not changed.
-previous_link=$(cat &quot;$receipt/previous-link&quot;)
-if test -n &quot;$previous_link&quot;; then
-  test &quot;$(readlink &quot;$target&quot;)&quot; = &quot;$previous_link&quot;
-else
-  test ! -e &quot;$target&quot; &amp;&amp; test ! -L &quot;$target&quot;
-fi
-next_dir=$(mktemp -d &quot;$wiki_assets_dir/.mech-switch.XXXXXXXX&quot;)
-ln -s &quot;hyperdoc-mech-versions/$MECH_REV&quot; &quot;$next_dir/link&quot;
-mv -Tf &quot;$next_dir/link&quot; &quot;$target&quot;
-rmdir &quot;$next_dir&quot;
-readlink &quot;$target&quot; &gt; &quot;$receipt/activated-link&quot;
-verify_host https://mech.dreyeck.ch/assets/hyperdoc-mech
-# No wiki.service or hyperdoc.service restart for this asset-only switch.
-</code></pre>
-<h3>Asset rollback</h3><p>Restore only the previous selection, preserving old and new copies. Check that no later operator has changed the active link. The commands below assume the reported relative link layout; stop on a different layout.</p><pre style="white-space:pre-wrap;overflow-wrap:anywhere" data-shell="bash" id="asset-rollback"><code># Use the saved receipt from this change; retain every version directory.
-: &quot;${receipt:?Path to the saved update receipt}&quot;
-wiki_assets_dir=/home/rgb/.wiki/mech.dreyeck.ch/assets
-target=&quot;$wiki_assets_dir/hyperdoc-mech&quot;
-test -L &quot;$target&quot;
-test &quot;$(readlink &quot;$target&quot;)&quot; = &quot;$(cat &quot;$receipt/activated-link&quot;)&quot;
-previous_link=$(cat &quot;$receipt/previous-link&quot;)
-if test -n &quot;$previous_link&quot;; then
-  test -d &quot;$wiki_assets_dir/$previous_link&quot;
-  rollback_dir=$(mktemp -d &quot;$wiki_assets_dir/.mech-rollback.XXXXXXXX&quot;)
-  ln -s &quot;$previous_link&quot; &quot;$rollback_dir/link&quot;
-  mv -Tf &quot;$rollback_dir/link&quot; &quot;$target&quot;
-  rmdir &quot;$rollback_dir&quot;
-else
-  rm -- &quot;$target&quot; # First installation: remove only the confirmed symlink.
-fi
-# Recheck stable HTTP bytes against the previous version, then use a fresh browser.
-</code></pre>
-<h2>Update the HyperDoc Catalog independently</h2>
-<p>The operator used the following workflow on 3 October. It is preserved as history; an arbitrary new branch HEAD is not the update target.</p><pre style="white-space:pre-wrap;overflow-wrap:anywhere" data-shell="bash" id="catalog-historical"><code>cd /etc/nixos
-nix flake update hyperdoc
-nixos-rebuild switch --flake /etc/nixos#dreyeck
-</code></pre><p>For a controlled update, choose <code>CATALOG_REV</code>, retain the previous declaration, lock and system generation, pin the input to that exact commit, and compare the resulting lock. The helper below supports the observed direct GitHub input; a follows/path input or different authority requires inspection rather than guessing. Review all lock changes and stop if unrelated inputs changed. Build first and approve activation separately.</p><pre style="white-space:pre-wrap;overflow-wrap:anywhere" data-shell="bash" id="catalog-selected"><code># Bash on dreyeck.ch, with the operator&#x27;s NixOS administration privileges.
-set -euo pipefail
-: &quot;${CATALOG_REV:?Set the approved full HyperDoc commit OID first}&quot;
-[[ &quot;$CATALOG_REV&quot; =~ ^[0-9a-f]{40}$ ]]
-cd /etc/nixos
-catalog_receipt=$(mktemp -d /var/tmp/hyperdoc-catalog-update.XXXXXXXX)
-cp -p flake.nix flake.lock &quot;$catalog_receipt/&quot;
-readlink -f /run/current-system &gt; &quot;$catalog_receipt/previous-system&quot;
-nix-env --list-generations --profile /nix/var/nix/profiles/system &gt; &quot;$catalog_receipt/generations&quot;
-locked_hyperdoc_rev() {
-  nix eval --raw --impure --expr &#x27;
-    let lock = builtins.fromJSON (builtins.readFile /etc/nixos/flake.lock);
-        key = lock.nodes.${lock.root}.inputs.hyperdoc;
-        node = lock.nodes.${key}.locked;
-    in assert builtins.isString key;
-       assert node.owner == &quot;RalfBarkow&quot; &amp;&amp; node.repo == &quot;hyperdoc&quot;;
-       node.rev&#x27;
-}
-locked_hyperdoc_rev &gt; &quot;$catalog_receipt/previous-revision&quot;
-# Before the next command, edit the declared hyperdoc input to:
-# github:RalfBarkow/hyperdoc/&lt;the exact CATALOG_REV&gt;
-# Locate its declaration; save any additional edited file in the receipt too.
-# Do not change unrelated inputs. Inspect the resulting source/lock diff.
-nix flake update hyperdoc
-test &quot;$(locked_hyperdoc_rev)&quot; = &quot;$CATALOG_REV&quot;
-nixos-rebuild build --flake /etc/nixos#dreyeck
-test &quot;$(locked_hyperdoc_rev)&quot; = &quot;$CATALOG_REV&quot;
-readlink -f result &gt; &quot;$catalog_receipt/built-system&quot;
-# Explicit activation approval is required before proceeding.
-nixos-rebuild switch --flake /etc/nixos#dreyeck
-test &quot;$(readlink -f /run/current-system)&quot; = &quot;$(cat &quot;$catalog_receipt/built-system&quot;)&quot;
-systemctl is-active hyperdoc.service
-systemctl show --no-pager --full hyperdoc.service -p MainPID -p ExecStart -p ActiveState
-pid=$(systemctl show hyperdoc.service -p MainPID --value)
-test &quot;$pid&quot; -gt 0
-ps -ww -p &quot;$pid&quot; -o pid=,args=
-readlink -f &quot;/proc/$pid/exe&quot;
-curl -fsS -D &quot;$catalog_receipt/public-headers&quot; https://dreyeck.ch/ -o &quot;$catalog_receipt/public-body&quot;
-</code></pre><p>A successful switch alone proves neither application health nor the code loaded in an older process. Correlate the selected lock, built generation, ExecStart store path, actual PID/program and public navigation. Do not expose secrets from service environments. Verify the configured host URL from the rendered Story frame and the operator's non-secret service setting.</p>
-<h3>Catalog rollback</h3><pre style="white-space:pre-wrap;overflow-wrap:anywhere" data-shell="bash" id="catalog-rollback"><code># Option A: restore the previous input declaration AND lock from the receipt.
-# Only after confirming no later/unrelated configuration edits would be lost.
-cd /etc/nixos
-: &quot;${catalog_receipt:?Path to the saved Catalog update receipt}&quot;
-cp -p &quot;$catalog_receipt/flake.nix&quot; &quot;$catalog_receipt/flake.lock&quot; .
-# Restore any additional declaration file explicitly saved during this update.
-nixos-rebuild build --flake /etc/nixos#dreyeck
-# Inspect the selected revision and build; then authorize activation.
-nixos-rebuild switch --flake /etc/nixos#dreyeck
-# Option B, instead of A: select a KNOWN recorded system generation.
-# This rolls back the whole NixOS system, not only HyperDoc; review that scope.
-# nix-env --profile /nix/var/nix/profiles/system --switch-generation KNOWN_NUMBER
-# /nix/var/nix/profiles/system/bin/switch-to-configuration switch
-# Reconcile /etc/nixos with the selected generation before the next rebuild.
-# Neither option changes the separately maintained Wiki asset symlink.
-</code></pre>
-<h2>Which update does a change require?</h2>
-<table><thead><tr><th>Change</th><th>Required update</th></tr></thead><tbody>
-<tr><td>New HyperDoc reading or navigation</td><td>HyperDoc Catalog</td></tr>
-<tr><td>Mech JavaScript or browser host</td><td>Versioned Mech assets</td></tr>
-<tr><td>Both components</td><td>Both, with explicitly coordinated revisions</td></tr>
-<tr><td>Content of the HyperDoc Mech Wiki page</td><td>Wiki page itself</td></tr></tbody></table>
-<p><code>77bfb29e19ed802ea206a3cbe25ee7b5a8adabed</code> added original POPUP state and wiki.dialog: update the assets. <code>6e7041515bd65d24be3e0d8a74b88f5c449d4822</code> added the native documentation link: update the Catalog, with no repeated asset switch needed. These describe source changes, not current production activation. Each asset tree retains provenance.json for its separately pinned Mech, Wiki-client dialog, Solo and dependency sources; the HyperDoc commit is the composition identity, not a substitute for those identities.</p>
-<h2>Verify delivery, execution and boundaries</h2>
-<p>After selection, inspect a fresh browser's Network responses (disable cache) and compare actual loaded module bodies to the selected copy. Keep the observed URLs, headers, digests and time. A cached open frame can retain old modules after a symlink switch. Open Trails Rendered through the native Inspector: display alone executes no Code; first CLICK returns two aspects; SOLO transfers both and composes five nodes/four Trail relations. Check documentation navigation, visible import failures and the unchanged Preview error. For POPUP, verify the second Pattern Machinery CLICK shows the calculated state and reuses the regular dialog; do not prescribe counts without the same sitemap input.</p>
-<p>Mech runs in the browser, separate from the HyperDoc Inspector but sharing the Wiki origin and potentially its privileges. The original <code>/dialog/</code> receiver for POPUP validates neither <code>event.origin</code> nor <code>event.source</code>. Original POPUP state escapes values, not all keys. SOLO uses the different <code>/plugins/solo/dialog/</code> receiver. The observed missing CSP is a boundary, not silently supplied protection. A public demonstration does not establish safe general execution of arbitrary Wiki programs. The earlier failed full behavioral-equivalence acceptance remains failed; these operating instructions do not change it.</p>
-</section><details><summary>Unchanged original observations</summary><p><a expr='(dreyeck/work/deployment-reading:deployment-evidence)'>September snapshot</a> · <a expr='(dreyeck/work/deployment-reading:service-start-confirmation)'>October startup confirmation</a> · <a expr='(dreyeck/work/deployment-reading:deployment-update-observation)'>Update and activation record</a> · <a expr='(dreyeck/work/deployment-reading:served-state-observation-2026-10-08)'>Time-stamped host record</a></p></details><p><a page='Work Breakdown'>Return to Work Breakdown</a> · <a page='Federated Wiki deployment state'>Compare the deployment evidence</a></p><p>For how the Wiki packages choose client revisions, Mech profiles and fork policies, continue to <a hyperbook='dreyeck/fedwiki-config/reading' page='Reading FedWiki Configuration and Fork Behavior'>Reading FedWiki Configuration and Fork Behavior</a>.</p></div></body></html>
+<h2>Select, verify, then activate</h2>
+<p><a expr='(asdf:system-relative-pathname "dreyeck/work/reading" "dreyeck/CATALOG-OPERATIONS.md")' view="Text">Catalog procedure and rollback</a>: normally retain the configured branch, update its lock and review the resulting OID before building. Explicit commit pinning changes the input declaration and its future tracking policy. Activation requires separate approval.</p>
+<p><a expr='(asdf:system-relative-pathname "dreyeck/work/reading" "docs/fedwiki-mech-story.md")' view="Text">Mech asset procedure and rollback</a>: install a missing version; verify an existing version without overwriting it. Refuse differences. Compare versioned HTTP responses before approving the symlink switch; an already selected verified version needs no change.</p>
+<h2>What would falsify success?</h2>
+<table><thead><tr><th>Claim</th><th>Counter-observation</th></tr></thead><tbody>
+<tr><td>Desired Catalog activated</td><td>The actual process belongs to another package, or Inspector navigation fails</td></tr>
+<tr><td>Desired Mech revision selected and served</td><td>Symlink differs, or HTTP 200 body differs from the selected copy; wrong JavaScript MIME type</td></tr>
+<tr><td>Asset change requires no service restart</td><td>Correctly selected new files are not served; investigate routing/cache before claiming success</td></tr>
+<tr><td>POPUP state works</td><td>The regular dialog is absent, cannot be reused or lacks the calculated state</td></tr>
+<tr><td>Browser runs selected modules</td><td>Network bodies differ or an open frame retains old modules despite a correct filesystem selection</td></tr>
+</tbody></table>
+<p>Local fixtures test refusals and no-op repeats. They do not prove the production process, routing, cache or browser lifecycle. The shared Wiki origin is not an unprivileged execution boundary; the original dialog checks neither event.origin nor event.source. Full behavioral equivalence remains failed.</p>
+<p><a page="Trails Rendered public reproduction">Trails Rendered demonstration</a> · <a hyperbook="fedwiki:mech.dreyeck.ch" page="hyperdoc-mech">HyperDoc Mech documentation (fedwiki-page)</a>. The <a href="https://mech.dreyeck.ch/assets/hyperdoc-mech/">executable browser host</a> is a different resource.</p>
+<h2>Dated evidence, not a current inventory</h2>
+<p>September and 1, 3, 8 and 11 October reports retain their original dates and limits. Open the evidence or logical targets below; DNS names do not identify physical machines.</p>
+<details><summary>Deployment targets and original observations</summary>
+<p><a expr='(hyperdoc-target)' view='Deployment target'>dreyeck.ch</a></p>
+<p><a expr='(wiki-farm-target)' view='Deployment target'>wildcard Wiki deployment target</a></p>
+<p><a expr='(latest-hyperdoc)' view='Deployment evidence'>Inspect the time-stamped served-state observation</a></p>
+<p><a expr='(served-service)' view='Deployment evidence'>Compare the HyperDoc and Wiki services</a></p>
+<p><a expr='(served-process)' view='Deployment evidence'>Understand the recorded process</a></p>
+<p><a expr='(served-package)' view='Deployment evidence'>Inspect the executable and package identity</a></p>
+<p><a expr='(served-selection)' view='Deployment evidence'>Follow Nix source selection and its warrant</a></p>
+<p><a expr='(served-revision)' view='Deployment revision'>Open the corresponding HyperDoc source</a></p>
+<p><a expr='(assets-identity)' view='Deployment evidence'>Inspect assets identity and its provenance limit</a></p>
+<p><a expr='(earlier-hyperdoc)' view='Deployment evidence'>Inspect the earlier basis and inference</a></p>
+<p><a expr='(startup-confirmation)' view='Deployment evidence'>Inspect what that confirmation establishes</a></p>
+<p><a expr='(recorded-activation)' view='Deployment evidence'>Inspect the two operations and their result</a></p>
+<p><a expr='(declared-wiki "dreyeck")' view='Deployment evidence'>Inspect the newer Wiki declaration</a></p>
+<p><a expr='(wiki-boundary "dreyeck")' view='Deployment evidence'>Inspect its unobserved activation</a></p>
+<p><a expr='(hyperdoc-boundary)' view='Deployment evidence'>Inspect remaining source, assets and runtime uncertainties</a></p>
+<p><a expr="(mech-deployment)" view="Deployment evidence">Inspect the installation report and the two update paths</a></p>
+<p><a expr="(dreyeck/work/deployment-reading:mech-installation-report-2026-10-11)">Inspect the dated operator report</a></p>
+<p><a expr='(dreyeck/work/deployment-reading:deployment-evidence)'>September snapshot</a></p>
+<p><a expr='(dreyeck/work/deployment-reading:service-start-confirmation)'>October startup confirmation</a></p>
+<p><a expr='(dreyeck/work/deployment-reading:deployment-update-observation)'>Update and activation record</a></p>
+<p><a expr='(dreyeck/work/deployment-reading:served-state-observation-2026-10-08)'>Time-stamped host record</a></p>
+</details>
+<p><a page="Work Breakdown">Work Breakdown</a> · <a page="Federated Wiki deployment state">Deployment evidence overview</a> · <a hyperbook="dreyeck/fedwiki-config/reading" page="Reading FedWiki Configuration and Fork Behavior">Wiki package configuration</a></p>
+</div></body></html>

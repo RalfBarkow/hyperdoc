@@ -192,6 +192,7 @@
 (defun check-preserved-observation-sources ()
   ;; Pin the exact DEFEXAMPLE forms at 548f73d0, including their evidence and
   ;; docstrings. The 8 October form is pinned at 6e704151.
+  ;; The 11 October form is pinned at f46237d5.
   ;; This catches even changes the semantic checks do not cover.
   (let ((source (uiop:read-file-string
                  (asdf:system-relative-pathname "dreyeck/work/reading"
@@ -202,7 +203,9 @@
                    (reading:service-start-confirmation
                     "b210379b8d3c766b3413b6c38f518138472321e29be6cc548af570b6618ff2b7")
                    (reading:served-state-observation-2026-10-08
-                    "b3e3322fe397142ca4e049219f57a257c9d0a070f876a3eec1db644adb61c770")))
+                    "b3e3322fe397142ca4e049219f57a257c9d0a070f876a3eec1db644adb61c770")
+                   (reading:mech-installation-report-2026-10-11
+                    "966da7699db465c6cb10936f7a12ce3beac464d8055894933259bd9ba216c83e")))
       (let ((start (search (format nil "(hyperdoc:defexample ~A~%"
                                   (string-downcase (symbol-name (first spec))))
                            source)))
@@ -216,7 +219,7 @@
                              :sha256 (babel:string-to-octets
                                       (subseq tail 0 (file-position stream))
                                       :encoding :utf-8))))))))))
-  (format t "~&DEPLOYMENT-SOURCES-PRESERVED-PASS: earlier DEFEXAMPLE forms retain their pinned bytes (548f73d0 / 6e704151).~%"))
+  (format t "~&DEPLOYMENT-SOURCES-PRESERVED-PASS: earlier DEFEXAMPLE forms retain their pinned bytes (548f73d0 / 6e704151 / f46237d5).~%"))
 
 (defun check-update-observation (observation)
   (assert (equal (getf observation :provenance)
@@ -467,8 +470,17 @@
                                (equal "hyperdoc-mech" (hyperbook:id-of ref))
                                (equal "fedwiki:mech.dreyeck.ch"
                                       (hyperbook:id-of (hyperbook:hyperbook-of ref))))) references))
-        (dolist (text '("Asset rollback" "Catalog rollback" "nixos-rebuild build"
-                        "hyperdoc-mech-versions" "HYPERDOC_MECH_PLUGIN_HOST_URL"
+        (assert (not (search "<pre" html)))
+        (dolist (file '("dreyeck/CATALOG-OPERATIONS.md" "docs/fedwiki-mech-story.md"))
+          (let ((path (asdf:system-relative-pathname "dreyeck/work/reading" file)))
+            (assert (probe-file path))
+            (assert (member path references :test #'equal))
+            (let ((text-view (find "Text" (views:all-views path)
+                                   :key #'views:view-title :test #'equal)))
+              (assert text-view)
+              (assert (typep text-view 'clog-moldable-inspector:clog-view)))))
+        (dolist (text '("Mech asset procedure and rollback" "Catalog procedure and rollback"
+                        "What changes?" "Counter-observation"
                         "not verified" "event.origin" "event.source"))
           (assert (search text html)))
         (labels ((inspect-object (object)
@@ -599,22 +611,12 @@
                                        (dolist
                                                (text
                                                      (quote
-                                                            ("Which applications serve"
-                                                             "Lisp-based HyperDoc"
-                                                             "separate Node Federated Wiki farm"
-                                                             "28 September"
-                                                             "1 October"
-                                                             "3 October"
-                                                             "8 October"
-                                                             "operator supplied command output"
-                                                             "Successful activation alone"
-                                                             "03:29:16 UTC"
-                                                             "127.0.0.1:8080"
-                                                             "not a live monitor"
-                                                             "did not report its own revision"
-                                                             "does not establish who made the copy"
-                                                             "wiki.service"
-                                                             "newer Wiki declaration")))
+                                                            ("What changes?"
+                                                             "Select, verify, then activate"
+                                                             "Counter-observation"
+                                                             "Catalog procedure and rollback"
+                                                             "Mech asset procedure and rollback"
+                                                             "Dated evidence, not a current inventory")))
                                                (assert (search text html)))))
              (let
                   ((source

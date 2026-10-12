@@ -144,116 +144,179 @@ activation or a claim about the production Wiki server revision. The harness,
 reports and screenshots remain outside the repository. The committed standalone
 browser driver remains the repeatable source-level acceptance procedure above.
 
-### Operator procedure (human only, after activation approval)
+### Operator procedure: complete asset versions
 
-For the parameterized, revision-selected procedure with pre-switch versioned
-HTTP checks and independent Catalog/asset rollback, use the **HyperDoc Mech**
-section of [`dreyeck.ch deployment`](../dreyeck/pages/work/dreyeck.ch%20deployment.html).
-It adds the operator-reported 11 October asset layout without rewriting the
-10 October observations above. The original preparation outline below remains
-context; use the newer procedure for an update.
+This is the single maintained asset procedure. The [deployment reading](../dreyeck/pages/work/dreyeck.ch%20deployment.html)
+provides the decision and dated evidence, not another copy of these commands.
+The 11 October operator report names `/home/rgb/.wiki/mech.dreyeck.ch/assets/`;
+verify that path/ownership before use. Current selection is not established by that report.
+Select an approved, GitHub-published full HyperDoc commit in `MECH_REV`.
+Run these Bash blocks in order in one operator session on the NixOS host.
+No commands here are executed by reading the page. `WIKI_ASSETS_DIR` and
+`ASSET_ORIGIN` allow explicitly selected contexts; tests point them only at temporary local fixtures.
 
-First establish the actual paths and packaged startup; no source checkout
-proves the loaded server definitions. Run read-only observations:
+`nix eval --raw --impure` resolves immutable source and checks the revision.
+Do not parse `nix flake metadata`'s human-readable `Path:` output on stderr.
+The full asset directory includes its `provenance.json`; compare all bytes.
+A missing version is staged and installed; an identical existing version is
+reused without rewriting it. A mismatch (including provenance or extra files)
+is a refusal, never permission to overwrite. Preserve the receipt and all versions.
+Serialize publishers; these examples do not implement a concurrent deployment lock.
 
-```sh
-hostname
-readlink -f /run/current-system
-readlink -f /etc/nixos/flake.nix
-systemctl show --no-pager --full wiki.service hyperdoc.service hyperdoc-catalog.service \
-  -p Id -p ActiveState -p MainPID -p ExecStart -p EnvironmentFiles
+<!-- deployment-example: asset-prepare -->
+```bash
+# Bash on dreyeck.ch, as the operator owning the Wiki assets.
+set -euo pipefail
+: "${MECH_REV:?Set the approved full HyperDoc commit OID first}"
+[[ "$MECH_REV" =~ ^[0-9a-f]{40}$ ]]
+export MECH_REV
+wiki_assets_dir=${WIKI_ASSETS_DIR:-/home/rgb/.wiki/mech.dreyeck.ch/assets}
+# Confirm this 11 October reported path and ownership before continuing.
+test -d "$wiki_assets_dir"
+receipt=$(mktemp -d "${TMPDIR:-/var/tmp}/hyperdoc-mech-update.XXXXXXXX")
+source_path=$(nix eval --raw --impure --expr '
+  let rev = builtins.getEnv "MECH_REV";
+      source = builtins.getFlake ("github:RalfBarkow/hyperdoc/" + rev);
+  in assert source.rev == rev; source.outPath')
+source_assets="$source_path/assets/hyperbook/fedwiki/mech-host"
+test -f "$source_assets/provenance.json"
+versions="$wiki_assets_dir/hyperdoc-mech-versions"
+target="$wiki_assets_dir/hyperdoc-mech"
+mkdir -p "$versions"
+if test -L "$target"; then
+  readlink "$target" > "$receipt/previous-link"
+else
+  test ! -e "$target" # Refuse to replace a real directory.
+  : > "$receipt/previous-link"
+fi
+printf '%s\n' "$MECH_REV" "$source_path" > "$receipt/selected-source"
+version_dir="$versions/$MECH_REV"
+if test -L "$version_dir"; then
+  echo "Refusing symlink as version directory: $version_dir" >&2; exit 1
+elif test -e "$version_dir"; then
+  test -d "$version_dir" || { echo "Not a version directory" >&2; exit 1; }
+  diff -qr "$source_assets" "$version_dir" || {
+    echo "Existing revision differs; preserving it and the active link" >&2; exit 1;
+  }
+  echo "Existing revision verified; no copy changed"
+else
+  staging=$(mktemp -d "$versions/.staging.XXXXXXXX")
+  cp -R "$source_assets/." "$staging/"
+  chmod -R a+rX "$staging"
+  diff -qr "$source_assets" "$staging" || {
+    echo "Staged copy differs; active link unchanged" >&2; exit 1;
+  }
+  # GNU mv on the NixOS host; no concurrent publisher.
+  mv -T "$staging" "$version_dir"
+  chmod -R a-w "$version_dir"
+fi
+printf 'Receipt: %s\n' "$receipt"
 ```
 
-Use the actual HyperDoc unit name if different. From the Wiki config named in
-`ExecStart`, return only non-secret path/routing fields:
+#### Verify before selecting
 
-```sh
-python3 - /OBSERVED/WIKI/CONFIG.json <<'PYCONFIG'
-import json, sys
-c = json.load(open(sys.argv[1]))
-keys = ('data', 'assets', 'farm', 'port', 'host', 'wiki_domain', 'security_type')
-print({k: c[k] for k in keys if k in c})
-for domain, options in c.get('wikiDomains', {}).items():
-    print(domain, {k: options[k] for k in keys if k in options})
-PYCONFIG
+HTTP 200 is insufficient. Compare every body against the selected version and
+check MIME types. The directory response must equal index.html. Capture headers
+for CSP/framing/cache review. `/dialog/` and `/plugins/solo/dialog/` remain distinct
+existing Wiki receivers. A mismatch requires investigation, not replacement.
+
+<!-- deployment-example: asset-http -->
+```bash
+# Continue in the same Bash session. This function checks every shipped file.
+verify_host() {
+  local base=$1 resource mime
+  while IFS= read -r -d '' resource; do
+    resource=${resource#"$version_dir/"}
+    curl --fail --silent --show-error -H 'Cache-Control: no-cache' \
+      -D "$receipt/headers" "$base/$resource" -o "$receipt/body" || return 1
+    cmp "$version_dir/$resource" "$receipt/body" || { echo "HTTP content mismatch: $resource" >&2; return 1; }
+    mime=$(sed -n 's/^[Cc]ontent-[Tt]ype: *//p' "$receipt/headers" | tr -d '\r')
+    case "$resource" in
+      *.js) [[ "$mime" == application/javascript* || "$mime" == text/javascript* ]] || { echo "Wrong JavaScript MIME: $resource ($mime)" >&2; return 1; } ;;
+      *.html) [[ "$mime" == text/html* ]] || return 1 ;;
+      *.css) [[ "$mime" == text/css* ]] || return 1 ;;
+    esac
+  done < <(find "$version_dir" -type f -print0)
+  curl --fail --silent --show-error "$base/" -o "$receipt/directory-body" || return 1
+  cmp "$version_dir/index.html" "$receipt/directory-body"
+}
+asset_origin=${ASSET_ORIGIN:-https://mech.dreyeck.ch}
+verify_host "$asset_origin/assets/hyperdoc-mech-versions/$MECH_REV"
+# Distinct existing root receivers, not copies installed at new root routes.
+curl -fsS -D "$receipt/popup-headers" "$asset_origin/dialog/" -o "$receipt/popup"
+cmp "$version_dir/dialog/index.html" "$receipt/popup"
+curl -fsS -D "$receipt/solo-headers" "$asset_origin/plugins/solo/dialog/" -o "$receipt/solo"
+cmp "$version_dir/plugins/solo/dialog/index.html" "$receipt/solo"
 ```
 
-Resolve **mech.dreyeck.ch's effective assets directory** using those settings
-and the running package's farm/default-argument code. Domain overrides matter;
-do not guess its pathname. Record directory ownership, any existing
-`hyperdoc-mech` link, the current HyperDoc source pin/system generation, and the
-existing proxy's framing/CSP headers. Do not dump credentials or cookie values.
+#### Explicit selection
 
-1. Select the approved HyperDoc commit through the existing source/package
-   workflow. Build `hyperdoc-catalog` and the existing NixOS configuration
-   without activation. Identify the selected immutable source directory. If
-   the service uses a custom old Lisp loader instead of the packaged Catalog,
-   stop: that launcher does not automatically consume this setting.
-2. Install a versioned copy as the site's asset operator, preserving ownership.
-   Substitute the observed directory and selected full commit/source path:
+Only after all checks pass, set `APPROVE_ASSET_SWITCH` to the reviewed `MECH_REV`.
+An already selected identical version leaves the symlink untouched. Check for
+an intervening publisher before an atomic replacement. The previous link is
+recorded even on a no-op: rollback of a no-op simply retains that selection.
 
-   ```sh
-   wiki_assets_dir=/OBSERVED/SITE/ASSETS
-   hyperdoc_source=/nix/store/SELECTED-HYPERDOC-SOURCE
-   hyperdoc_revision=APPROVED_FULL_COMMIT_OID
-   source_assets="$hyperdoc_source/assets/hyperbook/fedwiki/mech-host"
-   version_dir="$wiki_assets_dir/hyperdoc-mech-versions/$hyperdoc_revision"
-   target="$wiki_assets_dir/hyperdoc-mech"
-   previous_link=$(readlink "$target" || true) # retain for rollback
-   test ! -e "$target" || test -L "$target" || exit 1
-   test ! -e "$version_dir" && test ! -L "$version_dir" || exit 1
-   mkdir -p "$version_dir"
-   cp -a "$source_assets/." "$version_dir/"
-   diff -r "$source_assets" "$version_dir" || exit 1
-   chmod -R a+rX,a-w "$version_dir"
-   test ! -e "$target.next" && test ! -L "$target.next" || exit 1
-   ln -s "hyperdoc-mech-versions/$hyperdoc_revision" "$target.next"
-   mv -Tf "$target.next" "$target"
-   ```
+<!-- deployment-example: asset-switch -->
+```bash
+# Only after asset-http succeeds, in the same set -e Bash session.
+: "${APPROVE_ASSET_SWITCH:?Set explicitly after reviewing the verification}"
+test "$APPROVE_ASSET_SWITCH" = "$MECH_REV"
+# No concurrent publisher; confirm the active selection has not changed.
+previous_link=$(cat "$receipt/previous-link")
+if test -n "$previous_link"; then
+  test "$(readlink "$target")" = "$previous_link"
+else
+  test ! -e "$target" && test ! -L "$target"
+fi
+if test "$previous_link" = "hyperdoc-mech-versions/$MECH_REV"; then
+  echo "Already selected; active symlink unchanged"
+else
+  next_dir=$(mktemp -d "$wiki_assets_dir/.mech-switch.XXXXXXXX")
+  ln -s "hyperdoc-mech-versions/$MECH_REV" "$next_dir/link"
+  mv -Tf "$next_dir/link" "$target"
+  rmdir "$next_dir"
+fi
+readlink "$target" > "$receipt/activated-link"
+verify_host "$asset_origin/assets/hyperdoc-mech"
+# No wiki.service or hyperdoc.service restart for this asset-only switch.
+```
 
-   A pre-existing real directory needs preservation before proceeding. Copying
-   avoids an unrooted Nix-store link disappearing after GC. Keep the full asset
-   tree and provenance manifest. The bundled Solo copy stays reproducible;
-   production continues using the existing root plugin route. No Wiki restart
-   or page edit is needed.
-3. Check actual responses, not just the directory fallback:
+No service restart is prescribed for the static asset switch. This expectation
+is falsified if the correctly selected files are not served; investigate caches
+and routing rather than claiming success. Recheck stable HTTP bodies and then a
+fresh browser's actual module responses. A previously open frame can retain old code.
+Check CODE trails → two aspects → SOLO, and POPUP's actual calculated state and
+reuse. Local fixture tests do not establish production receivers or browser health.
+The original Preview error remains unchanged.
 
-   ```sh
-   base=https://mech.dreyeck.ch/assets/hyperdoc-mech
-   curl -fsS -D /tmp/mech-host-headers "$base/index.html" -o /tmp/mech-host-index.html
-   cmp "$version_dir/index.html" /tmp/mech-host-index.html || exit 1
-   for resource in host.js jquery-3.7.1.min.js plugins/mech/mech.js \
-       plugins/mech/blocks.js plugins/mech/interpreter.js plugins/mech/library.js; do
-     curl -fsS -D /tmp/mech-js-headers "$base/$resource" -o /tmp/mech-js-body || exit 1
-     cmp "$version_dir/$resource" /tmp/mech-js-body || exit 1
-     sed -n '/^[Cc]ontent-[Tt]ype:/p' /tmp/mech-js-headers
-   done
-   curl -fsS -D /tmp/solo-headers https://mech.dreyeck.ch/plugins/solo/dialog/ -o /tmp/solo.html
-   cmp "$version_dir/plugins/solo/dialog/index.html" /tmp/solo.html || exit 1
-   curl -fsS https://mech.dreyeck.ch/plugins/solo/dialog/style.css -o /tmp/solo.css
-   cmp "$version_dir/plugins/solo/dialog/style.css" /tmp/solo.css || exit 1
-   ```
+#### Asset rollback
 
-   Require HTTP 200 and the actual host HTML; JavaScript must be served as
-   `text/javascript` or `application/javascript`. Check recorded response
-   headers for CSP, framing restrictions, MIME and cache behavior. If Solo
-   differs, stop and establish compatibility rather than replacing its source.
-4. Add this single environment setting to the **existing** HyperDoc unit's
-   NixOS configuration, preserving ports, site root and Wiki service:
+Use the saved receipt; stop if the active link changed since this operation.
+The relative-link layout below is the reported layout. Preserve every version.
+For a no-op repeat, no older version is implied by the new receipt; use the
+receipt of the actual earlier switch if that switch is what must be reversed.
 
-   ```nix
-   systemd.services."OBSERVED-HYPERDOC-UNIT".environment.HYPERDOC_MECH_PLUGIN_HOST_URL =
-     "https://mech.dreyeck.ch/assets/hyperdoc-mech/";
-   ```
+<!-- deployment-example: asset-rollback -->
+```bash
+# Use the saved receipt from this change; retain every version directory.
+: "${receipt:?Path to the saved update receipt}"
+wiki_assets_dir=${WIKI_ASSETS_DIR:-/home/rgb/.wiki/mech.dreyeck.ch/assets}
+target="$wiki_assets_dir/hyperdoc-mech"
+test -L "$target"
+test "$(readlink "$target")" = "$(cat "$receipt/activated-link")"
+previous_link=$(cat "$receipt/previous-link")
+if test -n "$previous_link"; then
+  test -d "$wiki_assets_dir/$previous_link"
+  rollback_dir=$(mktemp -d "$wiki_assets_dir/.mech-rollback.XXXXXXXX")
+  ln -s "$previous_link" "$rollback_dir/link"
+  mv -Tf "$rollback_dir/link" "$target"
+  rmdir "$rollback_dir"
+else
+  rm -- "$target" # First installation: remove only the confirmed symlink.
+fi
+# Recheck stable HTTP bytes against the previous version, then use a fresh browser.
+```
 
-   ```sh
-   nixos-rebuild build --flake /OBSERVED/CONFIG-CHECKOUT#OBSERVED-CONFIGURATION
-   ```
-
-   Inspect the resulting unit/package identity. Activation requires separate
-   approval, then the host's existing activation procedure with the same
-   selector. Do not hot-load into the old Lisp image. A push alone neither
-   changes the running package nor establishes that these definitions are served.
 
 ### Security and external browser acceptance
 
@@ -293,17 +356,6 @@ interception:
 Record source/package identity, asset/receiver digests, headers and browser
 results outside the repository. Actual production activation and this ordinary
 browser journey remain unverified until the operator performs them.
-
-### Short rollback
-
-Stop the demonstration. Restore the previous asset link atomically using the
-saved `previous_link` (or remove only the new `hyperdoc-mech` symlink if none
-existed). Remove the environment override and restore the previous HyperDoc pin
-using the existing approved NixOS workflow, or its recorded previous generation.
-Absent configuration returns the new packaged startup to inert. Keep versioned
-copies until evidence is retained; never remove Wiki pages or original plugin
-files. Asset-link changes require no Wiki restart. Codex performs no production
-action.
 
 ## Four separate input contracts
 
