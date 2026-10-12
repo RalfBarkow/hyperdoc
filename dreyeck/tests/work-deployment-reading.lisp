@@ -191,7 +191,8 @@
 
 (defun check-preserved-observation-sources ()
   ;; Pin the exact DEFEXAMPLE forms at 548f73d0, including their evidence and
-  ;; docstrings. This catches even changes the semantic checks do not cover.
+  ;; docstrings. The 8 October form is pinned at 6e704151.
+  ;; This catches even changes the semantic checks do not cover.
   (let ((source (uiop:read-file-string
                  (asdf:system-relative-pathname "dreyeck/work/reading"
                                                 "dreyeck/work/deployment-reading.lisp")))
@@ -199,7 +200,9 @@
     (dolist (spec '((reading:deployment-evidence
                     "d1fc93f5008be13d60f03cbf236306e42f0bf3a744f4016811ddb3d99eb794dc")
                    (reading:service-start-confirmation
-                    "b210379b8d3c766b3413b6c38f518138472321e29be6cc548af570b6618ff2b7")))
+                    "b210379b8d3c766b3413b6c38f518138472321e29be6cc548af570b6618ff2b7")
+                   (reading:served-state-observation-2026-10-08
+                    "b3e3322fe397142ca4e049219f57a257c9d0a070f876a3eec1db644adb61c770")))
       (let ((start (search (format nil "(hyperdoc:defexample ~A~%"
                                   (string-downcase (symbol-name (first spec))))
                            source)))
@@ -213,7 +216,7 @@
                              :sha256 (babel:string-to-octets
                                       (subseq tail 0 (file-position stream))
                                       :encoding :utf-8))))))))))
-  (format t "~&DEPLOYMENT-SOURCES-PRESERVED-PASS: both earlier DEFEXAMPLE forms are byte-for-byte unchanged from 548f73d0.~%"))
+  (format t "~&DEPLOYMENT-SOURCES-PRESERVED-PASS: earlier DEFEXAMPLE forms retain their pinned bytes (548f73d0 / 6e704151).~%"))
 
 (defun check-update-observation (observation)
   (assert (equal (getf observation :provenance)
@@ -444,7 +447,49 @@
                       (reading:deployment-evidence))
   (format t "~&SERVED-STATE-CONTROLS-PASS: a revision on the process, a PID on the store source, a versioned assets copy, a promoted inference and an undated observation rejected.~%"))
 
-(defun run-tests nil (check-preserved-observation-sources)
+(defun check-mech-operating-guide ()
+  (let* ((report (reading:mech-installation-report-2026-10-11))
+         (book (hyperbook:find-hyperbook "dreyeck/work/reading" :signal-error? t)))
+    (assert (equal "2026-10-11" (getf (getf report :provenance) :observation-date)))
+    (assert (eq :operator-supplied (getf (getf report :provenance) :kind)))
+    (assert (eq :not-performed (getf (getf report :provenance) :host-probe)))
+    (dolist (key '(:current-symlink :current-http-bytes :current-catalog-pin :current-browser-execution))
+      (assert (eq :not-verified (getf report key))))
+    (assert (equal "/home/rgb/.wiki/mech.dreyeck.ch/assets/" (getf report :asset-root)))
+    (setf (getf report :current-symlink) :changed)
+    (assert (eq :not-verified (getf (reading:mech-installation-report-2026-10-11) :current-symlink)))
+    (multiple-value-bind (page view) (render-page book "dreyeck.ch deployment")
+      (let ((html (views:view-html view))
+            (references (mapcar #'cdr (views:view-references view))))
+        (assert (member (hyperbook:find-page book "Trails Rendered public reproduction") references :test #'eq))
+        (assert (find-if (lambda (ref)
+                          (and (typep ref 'hyperbook/fedwiki::fedwiki-page)
+                               (equal "hyperdoc-mech" (hyperbook:id-of ref))
+                               (equal "fedwiki:mech.dreyeck.ch"
+                                      (hyperbook:id-of (hyperbook:hyperbook-of ref))))) references))
+        (dolist (text '("Asset rollback" "Catalog rollback" "nixos-rebuild build"
+                        "hyperdoc-mech-versions" "HYPERDOC_MECH_PLUGIN_HOST_URL"
+                        "not verified" "event.origin" "event.source"))
+          (assert (search text html)))
+        (labels ((inspect-object (object)
+                   (let ((child-view (find "Deployment evidence" (views:all-views object)
+                                           :key #'views:view-title :test #'equal)))
+                     (assert child-view)
+                     (views:view-html child-view)
+                     (assert (member page (mapcar #'cdr (views:view-references child-view)) :test #'eq))
+                     (dolist (link (dreyeck/work/deployment-inspection:object-links object))
+                       (assert (member (cdr link) (mapcar #'cdr (views:view-references child-view)) :test #'eq))
+                       (when (and (typep (cdr link) 'dreyeck/work/deployment-inspection:deployment-object)
+                                  (not (typep (cdr link) 'dreyeck/work/deployment-inspection:deployment-target)))
+                         (inspect-object (cdr link)))))))
+          (let ((root (find-if (lambda (ref)
+                                (and (typep ref 'dreyeck/work/deployment-inspection:deployment-object)
+                                     (eq :operator-report (dreyeck/work/deployment-inspection:object-kind ref)))) references)))
+            (assert root)
+            (inspect-object root))))))
+  (format t "~&MECH-OPERATING-GUIDE-PASS: dated report, explicit unknowns, both update paths, native Wiki/reading links and evidence/return navigation.~%"))
+
+(defun run-tests nil (check-mech-operating-guide) (check-preserved-observation-sources)
        (check-preserved-update-observation-source)
        (check-evidence (reading:deployment-evidence)) (check-positive-controls)
        (check-confirmation (reading:service-start-confirmation)

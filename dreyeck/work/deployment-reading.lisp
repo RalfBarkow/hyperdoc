@@ -3,7 +3,7 @@
   (:use #:cl)
   (:export #:deployment-evidence #:service-start-confirmation
            #:deployment-update-observation
-           #:served-state-observation-2026-10-08))
+           #:served-state-observation-2026-10-08 #:mech-installation-report-2026-10-11))
 (in-package #:dreyeck/work/deployment-reading)
 
 (hyperdoc:see (hyperdoc:page "Federated Wiki deployment state"))
@@ -380,3 +380,22 @@ command or querying a host."
       (:subject "dreyeck.ch" :relation :nixos-configuration-history
        :status :not-available :basis ("hyperdoc-input-lock")
        :limit "/etc/nixos is not a Git repository; earlier configurations exist only as generation store paths.")))))
+
+(hyperdoc:defexample mech-installation-report-2026-10-11
+  "Operator report supplied in the 12 October documentation task. No live probe."
+  (copy-tree
+   '(:provenance (:kind :operator-supplied :observation-date "2026-10-11"
+                  :reported-in "2026-10-12 documentation task"
+                  :host-probe :not-performed :exact-time :not-supplied)
+     :site "mech.dreyeck.ch"
+     :asset-root "/home/rgb/.wiki/mech.dreyeck.ch/assets/"
+     :versions "hyperdoc-mech-versions/<FULL_COMMIT_OID>/"
+     :active-link "hyperdoc-mech"
+     :reported-installation-revision "77bfb29e19ed802ea206a3cbe25ee7b5a8adabed"
+     :source-authority "https://github.com/RalfBarkow/hyperdoc"
+     :source-path "assets/hyperbook/fedwiki/mech-host/"
+     :host-url "https://mech.dreyeck.ch/assets/hyperdoc-mech/"
+     :documentation-page "fedwiki:mech.dreyeck.ch/hyperdoc-mech"
+     :current-symlink :not-verified :current-http-bytes :not-verified
+     :current-catalog-pin :not-verified :current-browser-execution :not-verified
+     :limit "Reported installation procedure and path; no raw operator transcript, current link target, current HTTP digest or current process evidence supplied in this task.")))

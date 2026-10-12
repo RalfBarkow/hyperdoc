@@ -143,3 +143,28 @@ confirmed that the service runs the packaged executable (`b1078097`); it
 remains readable as `git show 91785f77:scripts/serve-catalog.sh`. Operator
 evidence about the deployed service is kept in the dreyeck.ch deployment
 reading, not here.
+
+## HyperDoc Mech: independent operator updates
+
+The maintained reader-facing procedure is in
+[`dreyeck.ch deployment`](pages/work/dreyeck.ch%20deployment.html), available
+through the Work reading in the Catalog. Its **HyperDoc Mech** section separates
+the Catalog pin/build/service from the full versioned Wiki asset copy and from
+the Wiki documentation page. It includes explicit revision selection, HTTP
+byte/MIME checks before the asset switch, and independent rollbacks.
+
+The 11 October 2026 asset path and installation revision are operator-reported;
+the reading does not claim a current production inventory. No service restart
+is required for an asset-only switch. A new Catalog generation and a new asset
+selection must each be verified independently. The original dated observations
+above remain unchanged.
+
+Validate the authored Bash examples without running them:
+
+```sh
+python3 scripts/test-mech-deployment-documentation.py
+```
+
+Run the Work deployment and navigation tests and the Catalog startup tests in
+fresh appropriate Lisp instances. Catalog startup's initial book-count check
+must not follow tests that have already opened additional Wiki books.

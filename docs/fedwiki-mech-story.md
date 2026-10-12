@@ -146,6 +146,13 @@ browser driver remains the repeatable source-level acceptance procedure above.
 
 ### Operator procedure (human only, after activation approval)
 
+For the parameterized, revision-selected procedure with pre-switch versioned
+HTTP checks and independent Catalog/asset rollback, use the **HyperDoc Mech**
+section of [`dreyeck.ch deployment`](../dreyeck/pages/work/dreyeck.ch%20deployment.html).
+It adds the operator-reported 11 October asset layout without rewriting the
+10 October observations above. The original preparation outline below remains
+context; use the newer procedure for an update.
+
 First establish the actual paths and packaged startup; no source checkout
 proves the loaded server definitions. Run read-only observations:
 

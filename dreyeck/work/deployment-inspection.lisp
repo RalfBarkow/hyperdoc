@@ -42,7 +42,7 @@
            #:EARLIER-HYPERDOC
            #:HYPERDOC-BOUNDARY
            #:ASSETS-IDENTITY
-           #:SOURCE-OBJECT))
+           #:SOURCE-OBJECT #:MECH-DEPLOYMENT))
 
 (IN-PACKAGE #:DREYECK/WORK/DEPLOYMENT-INSPECTION)
 
@@ -603,3 +603,39 @@
                                               "Deployment target" :DISPLAY
                                               "Separate exact-host HyperDoc target")))
                            (FOOTER (OBJECT-PAGE TARGET))))))
+
+(defun mech-deployment ()
+  "Inspectable operator report and independent update paths; no live inventory."
+  (let* ((page "dreyeck.ch deployment")
+         (report (r:mech-installation-report-2026-10-11))
+         (source (revision "https://github.com/RalfBarkow/hyperdoc"
+                           (getf report :reported-installation-revision)
+                           :operator-reported-asset-installation page))
+         (navigation (revision "https://github.com/RalfBarkow/hyperdoc"
+                               "6e7041515bd65d24be3e0d8a74b88f5c449d4822"
+                               :historical-documentation-link-change page))
+         (delivery (object :verification-boundary "Stable HTTP delivery"
+                     "Compare response bodies and MIME types, then open a fresh browser. Neither the symlink nor HTTP 200 proves browser execution. Current delivery is not verified."
+                     (list :url (getf report :host-url) :status :not-verified) page))
+         (link (object :operator-reported-link "Active asset symlink"
+                 "Reported 11 October layout. Inspect the actual target before each switch; preserve it for rollback. Today's target is unknown."
+                 (list :link (getf report :active-link) :status :not-verified) page
+                 (list (cons "Verify HTTP delivery separately" delivery))))
+         (copy (object :operator-reported-copy "Versioned Mech asset copy"
+                 "The operator reports a complete versioned copy under the site's asset directory. Copy identity, active selection and browser-loaded modules are separate observations."
+                 report page (list (cons "Reported source revision" source)
+                                   (cons "Active selection" link))))
+         (catalog (object :update-procedure "Catalog source → package → service"
+                    "The hyperdoc flake input selects source; a Nix build creates hyperdoc-catalog; activation selects a generation and starts hyperdoc.service. Verify the loaded process and public application separately. Linked 8 October objects remain historical evidence."
+                    '(:input "hyperdoc" :lock "/etc/nixos/flake.lock"
+                      :package "hyperdoc-catalog" :service "hyperdoc.service"
+                      :environment "HYPERDOC_MECH_PLUGIN_HOST_URL" :current :not-verified)
+                    page (list (cons "Historical source selection" (served-selection))
+                               (cons "Historical package" (served-package))
+                               (cons "Historical service" (served-service))
+                               (cons "Navigation-only source change" navigation)))))
+    (object :operator-report "HyperDoc Mech: 11 October installation report"
+            "Supplied by the operator in the 12 October documentation task. This report adds an asset-installation procedure; it does not replace the September, 3 October or 8 October observations and is not a current inventory."
+            report page (list (cons "Independent Catalog update" catalog)
+                              (cons "Independent Mech asset update" copy)
+                              (cons "Logical HyperDoc target" (hyperdoc-target))))))
