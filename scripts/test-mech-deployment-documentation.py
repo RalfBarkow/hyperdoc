@@ -7,6 +7,7 @@ import http.server
 import os
 import re
 import shutil
+import shlex
 import subprocess
 import tempfile
 import threading
@@ -22,6 +23,13 @@ for doc in DOCS:
         BLOCKS[key] = shell
     for shell in re.findall(r'```(?:bash|sh)\n(.*?)```', text, re.S):
         subprocess.run(['bash', '-n'], input=shell, text=True, check=True)
+
+# The bounded asset-switch trial has one source authority. Do not let a new
+# Markdown copy silently replace it. Other procedures retain their reference path.
+assert 'asset-switch' not in BLOCKS, 'Duplicate asset-switch authority in Markdown'
+ASSET_SWITCH = ROOT / 'scripts/mech-asset-switch.sh'
+subprocess.run(['bash', '-n', str(ASSET_SWITCH)], check=True)
+BLOCKS['asset-switch'] = '. ' + shlex.quote(str(ASSET_SWITCH)) + '\n'
 
 class DeploymentExamples(unittest.TestCase):
     def setUp(self):

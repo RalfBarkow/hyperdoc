@@ -471,7 +471,8 @@
                                (equal "fedwiki:mech.dreyeck.ch"
                                       (hyperbook:id-of (hyperbook:hyperbook-of ref))))) references))
         (assert (not (search "<pre" html)))
-        (dolist (file '("dreyeck/CATALOG-OPERATIONS.md" "docs/fedwiki-mech-story.md"))
+        (dolist (file '("dreyeck/CATALOG-OPERATIONS.md" "docs/fedwiki-mech-story.md"
+                        "scripts/mech-asset-switch.sh"))
           (let ((path (asdf:system-relative-pathname "dreyeck/work/reading" file)))
             (assert (probe-file path))
             (assert (member path references :test #'equal))

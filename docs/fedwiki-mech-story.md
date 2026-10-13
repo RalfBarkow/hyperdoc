@@ -256,30 +256,22 @@ An already selected identical version leaves the symlink untouched. Check for
 an intervening publisher before an atomic replacement. The previous link is
 recorded even on a no-op: rollback of a no-op simply retains that selection.
 
-<!-- deployment-example: asset-switch -->
+The authoritative operation is
+[`scripts/mech-asset-switch.sh`](../scripts/mech-asset-switch.sh).
+Source it from a reviewed HyperDoc source checkout in this same verified Bash
+session (with `set -euo pipefail` still active):
+
 ```bash
-# Only after asset-http succeeds, in the same set -e Bash session.
-: "${APPROVE_ASSET_SWITCH:?Set explicitly after reviewing the verification}"
-test "$APPROVE_ASSET_SWITCH" = "$MECH_REV"
-# No concurrent publisher; confirm the active selection has not changed.
-previous_link=$(cat "$receipt/previous-link")
-if test -n "$previous_link"; then
-  test "$(readlink "$target")" = "$previous_link"
-else
-  test ! -e "$target" && test ! -L "$target"
-fi
-if test "$previous_link" = "hyperdoc-mech-versions/$MECH_REV"; then
-  echo "Already selected; active symlink unchanged"
-else
-  next_dir=$(mktemp -d "$wiki_assets_dir/.mech-switch.XXXXXXXX")
-  ln -s "hyperdoc-mech-versions/$MECH_REV" "$next_dir/link"
-  mv -Tf "$next_dir/link" "$target"
-  rmdir "$next_dir"
-fi
-readlink "$target" > "$receipt/activated-link"
-verify_host "$asset_origin/assets/hyperdoc-mech"
-# No wiki.service or hyperdoc.service restart for this asset-only switch.
+. /PATH/TO/REVIEWED/HYPERDOC/scripts/mech-asset-switch.sh
 ```
+
+This is a sourced operation, not a standalone installer. It uses the receipt,
+selected revision, paths and `verify_host` function established above. Its source
+revision is independent of `MECH_REV`: an older asset revision need not contain
+this procedure file. Inspect the script in HyperDoc; reading it does not run it.
+The tests source this same file directly. Preparation, HTTP verification and
+Catalog examples remain in their existing documentation during this bounded trial.
+
 
 No service restart is prescribed for the static asset switch. This expectation
 is falsified if the correctly selected files are not served; investigate caches

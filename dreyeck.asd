@@ -2805,6 +2805,7 @@
                                 (:static-file "dispatch-probe.json")))
                       (:static-file "trails-rendered-dispatch-probe.mjs")
                       (:file "deployment-inspection")
+                      (:file "source-text-view")
                       (:module "deployment-evidence" :components
                                ((:static-file "publication.json")
                                 (:static-file "manifest.json")

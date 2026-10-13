@@ -13,6 +13,7 @@
 <h2>Select, verify, then activate</h2>
 <p><a expr='(asdf:system-relative-pathname "dreyeck/work/reading" "dreyeck/CATALOG-OPERATIONS.md")' view="Text">Catalog procedure and rollback</a>: normally retain the configured branch, update its lock and review the resulting OID before building. Explicit commit pinning changes the input declaration and its future tracking policy. Activation requires separate approval.</p>
 <p><a expr='(asdf:system-relative-pathname "dreyeck/work/reading" "docs/fedwiki-mech-story.md")' view="Text">Mech asset procedure and rollback</a>: install a missing version; verify an existing version without overwriting it. Refuse differences. Compare versioned HTTP responses before approving the symlink switch; an already selected verified version needs no change.</p>
+<p><a expr='(asdf:system-relative-pathname "dreyeck/work/reading" "scripts/mech-asset-switch.sh")' view="Text">Inspect the asset-switch operation</a>. This sourced Bash step is also executed directly by the local tests; inspection does not execute it. Its preparation and HTTP-check prerequisites remain in the asset procedure.</p>
 <h2>What would falsify success?</h2>
 <table><thead><tr><th>Claim</th><th>Counter-observation</th></tr></thead><tbody>
 <tr><td>Desired Catalog activated</td><td>The actual process belongs to another package, or Inspector navigation fails</td></tr>
