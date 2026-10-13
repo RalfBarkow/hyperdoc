@@ -512,6 +512,7 @@
   (check-original-code-browser)
   (check-trail-following)
   (check-solo-trail-identity)
+  (check-direct-how-trails-sources)
   (check-how-trails-sources)
   (check-solo-batch)
   (check-solo-beam)

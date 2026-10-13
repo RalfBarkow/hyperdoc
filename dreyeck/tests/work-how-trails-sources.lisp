@@ -92,3 +92,57 @@
       (assert (equal (second entry) (ironclad:byte-array-to-hex-string
                     (ironclad:digest-file :sha256 (reading::following-path (first entry))))))))
   (format t "~&HOW-TRAILS-SOURCES-PASS: original Story/Links, four exact ranges, Git/source/reading navigation, page-local scope, unchanged evidence.~%")))
+
+(defun check-direct-how-trails-sources ()
+  (let* ((original-catalog hyperbook::*catalog*)
+         (hyperbook::*catalog* (make-instance 'hyperbook::catalog))
+         (hyperbook/fedwiki::*neighborhood* (make-hash-table :test #'equal))
+         (reading::*how-trails-sources* (make-hash-table :test #'eq))
+         (locations (copy-list (dreyeck/git:git-evidence-file-locations-of reading::*how-trails-file*))))
+    (setf (hyperbook::factories-of hyperbook::*catalog*) (hyperbook::factories-of original-catalog)
+          (hyperbook::hyperbooks-of hyperbook::*catalog*) (copy-list (hyperbook::hyperbooks-of original-catalog)))
+    (unwind-protect
+        (let* ((page (seed-how-trails-page))
+               (raw (hyperbook/fedwiki::copy-page-json (hyperbook/fedwiki::raw-json-of page))))
+          ;; No how-trails-sources or page-wide Source references call prepares this.
+          (assert (zerop (hash-table-count reading::*how-trails-sources*)))
+          (dolist (coordinates reading::*how-trails-coordinates*)
+            (assert (null (reading::how-trails-item-source
+                           (find (first coordinates) (hyperbook/fedwiki::story-of page)
+                                 :key #'hyperbook/fedwiki::id-of :test #'equal)))))
+          (let* ((view (hyperbook/fedwiki::👀story page))
+                 (html (views:view-html view))
+                 (refs (mapcar #'cdr (views:view-references view)))
+                 (sources (cdr (gethash page reading::*how-trails-sources*))))
+            (assert (= 4 (length sources)))
+            (dolist (source sources)
+              (let ((item (reading::how-source-item source)))
+                (assert (member item refs :test #'eq))
+                (assert (search (format nil "Inspect story item ~A" (hyperbook/fedwiki::id-of item)) html))
+                (assert (member source (mapcar #'cdr (views:view-references
+                                       (following-view item "Source reference"))) :test #'eq))))
+            (views:view-html (hyperbook/fedwiki::👀story page))
+            (assert (eq sources (cdr (gethash page reading::*how-trails-sources*)))))
+          ;; Three reloads replace references for this page; old item identities
+          ;; cannot inherit the new item's reference, despite matching IDs.
+          (dotimes (i 3)
+            (let ((old-items (mapcar #'reading::how-source-item
+                                    (cdr (gethash page reading::*how-trails-sources*)))))
+              (hyperbook/fedwiki::set-page-data page raw)
+              (views:view-html (hyperbook/fedwiki::👀story page))
+              (assert (= 1 (hash-table-count reading::*how-trails-sources*)))
+              (assert (= (+ 4 (length locations))
+                         (length (dreyeck/git:git-evidence-file-locations-of reading::*how-trails-file*))))
+              (dolist (old old-items) (assert (null (reading::how-trails-item-source old))))))
+          (assert (equalp raw (hyperbook/fedwiki::raw-json-of page)))
+          (let* ((wiki (make-instance 'hyperbook/fedwiki::fedwiki :id "fedwiki:other.invalid"))
+                 (other (hyperbook/fedwiki::make-fedwiki-page wiki "how-trails-travel" "Other"))
+                 (json (alexandria:plist-hash-table
+                        (list "title" "Other" "story" (vector (aref (gethash "story" raw) 2))
+                              "journal" #()) :test 'equal)))
+            (hyperbook/fedwiki::set-page-data other json)
+            (let ((html (views:view-html (hyperbook/fedwiki::👀story other))))
+              (assert (not (search "Inspect story item" html))))
+            (assert (null (reading::how-trails-item-source (aref (hyperbook/fedwiki::story-of other) 0))))))
+      (setf (dreyeck/git:git-evidence-file-locations-of reading::*how-trails-file*) locations)))
+  (format t "~&HOW-TRAILS-DIRECT-PASS: cold load, Story establishes exact-item refs, no page-wide view, repeat/reload bounded, foreign items untouched.~%"))

@@ -65,6 +65,24 @@
                   (cons (hyperbook/fedwiki::story-of page) sources))
             sources)))))
 
+;; The ordinary paragraph renderer offers only external hyperlinks. Add the
+;; existing object-ref affordance for these four actual items, leaving their
+;; original text/link rendering untouched. Establish provenance before the item
+;; is opened, even when no page-wide Source references view has been evaluated.
+(defmethod hyperbook/fedwiki::render-story-item :after
+    ((type (eql :paragraph)) (item hyperbook/fedwiki::story-item)
+     (page hyperbook/fedwiki::fedwiki-page))
+  (when (and (how-trails-page-p page)
+             (find (hyperbook/fedwiki::id-of item) *how-trails-coordinates*
+                   :key #'first :test #'equal)
+             (find item (hyperbook/fedwiki::story-of page) :test #'eq))
+    (let ((source (find item (how-trails-sources page) :key #'how-source-item :test #'eq)))
+      (when source
+        (html-inspector-views:html
+          (:p (:small (html-inspector-views:object-ref item :select "Data"
+                        :display (format nil "Inspect story item ~A"
+                                         (hyperbook/fedwiki::id-of item))))))))))
+
 (defun how-trails-reading-link ()
   (html-inspector-views:object-ref
    (hyperbook:find-page (hyperbook:find-hyperbook "dreyeck/work/reading") "How Trails Travel")
