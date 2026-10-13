@@ -514,6 +514,7 @@
   (check-solo-trail-identity)
   (check-direct-how-trails-sources)
   (check-how-trails-sources)
+  (check-how-trails-plan)
   (check-solo-batch)
   (check-solo-beam)
   (check-result-and-boundary)
