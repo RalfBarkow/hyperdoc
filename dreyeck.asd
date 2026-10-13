@@ -2748,6 +2748,7 @@
                       (:file "trails-rendered-reading")
                       (:file "trails-rendered-federated-context")
                       (:file "trails-rendered-following")
+                      (:file "how-trails-sources")
                       (:file "trails-rendered-browser-check")
                       (:file "shift-click" :depends-on
                              ("trails-rendered-federated-context"))
@@ -2853,6 +2854,7 @@
             (:file "dreyeck/tests/work-trails-rendered-reading")
             (:file "dreyeck/tests/work-trails-rendered-federated-context")
             (:file "dreyeck/tests/work-trails-rendered-following")
+            (:file "dreyeck/tests/work-how-trails-sources")
             (:file "dreyeck/tests/work-shift-click")
             (:file "dreyeck/tests/work-trails-rendered-browser-check")
             (:file "dreyeck/tests/work-deployment-inspection"))
