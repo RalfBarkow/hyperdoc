@@ -1,0 +1,11 @@
+{
+  "name": "acorn",
+  "version": "8.16.0",
+  "upstream": "https://github.com/acornjs/acorn",
+  "origin": "Locally installed npm distribution; no registry tarball or Git commit verification asserted. Vendored bytes are the offline dependency authority.",
+  "files": {
+    "LICENSE": "76a876cf886ff9be2a8b5e2e86514fed06223c8c9f0c1e9ee9606e93841e00b7",
+    "acorn.mjs": "efb0124a960b34d53f9928c4926bfcfd300bb6a3d7ab64ee949b3a8bed1c7e5f",
+    "package.json": "705aa08b7b4fee1112244952b4843c40c381a3c7a9fc77101f369a172865bfac"
+  }
+}

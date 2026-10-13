@@ -1,0 +1,85 @@
+{
+  "schema": 1,
+  "source": {
+    "repository": "https://github.com/WardCunningham/wiki-plugin-solo",
+    "oid": "17915844349bada64c901bd5ea73472702c446f9",
+    "path": "client/dialog/index.html",
+    "sha256": "5a513f70546ced3e2af7f83c4f14fb73d30e27f22a295558cbff4b078871aed8"
+  },
+  "parser": {
+    "name": "acorn",
+    "version": "8.16.0",
+    "sha256": "efb0124a960b34d53f9928c4926bfcfd300bb6a3d7ab64ee949b3a8bed1c7e5f",
+    "ecmaVersion": 2022,
+    "sourceType": "module"
+  },
+  "script": {
+    "ordinal": 4,
+    "ordinalBase": 0,
+    "type": "module",
+    "startUtf16": 1348,
+    "endUtf16": 19715,
+    "startByte": 1348,
+    "endByte": 19719,
+    "sha256": "ef2bb6171cba40ecc88f2e3557975706b962bec3599b6e68ac30f987abbe08b7"
+  },
+  "definitions": [
+    {
+      "key": "composite",
+      "name": "composite",
+      "nodeType": "FunctionDeclaration",
+      "scope": "module",
+      "parent": null,
+      "astStart": 9420,
+      "astEnd": 11178,
+      "offsetUnit": "UTF-16 code units; end exclusive",
+      "fileStartUtf16": 10768,
+      "fileEndUtf16": 12526,
+      "fileStartByte": 10768,
+      "fileEndByte": 12526,
+      "startLine": 318,
+      "startColumn": 0,
+      "endLine": 378,
+      "endColumn": 1,
+      "text": "function composite(concepts) {\n  const merged = {nids:[]}\n  const comp = new Graph()\n  for (const concept of concepts) {\n    const {name,graph} = concept\n    merge(comp,graph,name)\n  }\n  return {graph:comp, merged}\n\n\n  function merge(comp,incr,source) {\n\n    function mergeprops(into,from) {\n      const keys = Object.keys(into)\n        .concat(Object.keys(from))\n        .filter(uniq)\n      for (const key of keys) {\n        if (into[key]) {\n          // if (from[key] && into[key] != from[key]) {\n          //   window.result.innerHTML +=\n          //     `<div style=\"font-size:small; padding:4px; background-color:#fee; border-radius:4px; border:1px solid #aaa;\">\n          //       conflict for \"${key}\" property<br>\n          //       choosing \"${into[key]}\" over \"${from[key]}\"</div>`\n          // }\n        }\n        else {\n          if(from[key]) {\n            into[key] = from[key]\n          }\n        }\n      }\n    }\n\n    const nids = {}  // incr => comp\n    incr.nodes.forEach((node,id) => {\n      const match = comp.nodes.find(each =>\n        each.type == node.type &&\n        each.props.name == node.props.name)\n      if(match) {\n        nids[id] = comp.nodes.findIndex(node => node === match)\n        merged.nids.push(nids[id])\n        mergeprops(match.props, node.props)\n      } else {\n        nids[id] = comp.addNode(node.type,node.props)\n      }\n    })\n    incr.rels.forEach(rel => {\n      const match = comp.rels.find(each =>\n        each.type == rel.type &&\n        each.from == nids[rel.from] &&\n        each.to == nids[rel.to]\n      )\n      if(match) {\n        mergeprops(match.props, rel.props)\n      } else {\n        rel.props.source = source\n        comp.addRel(rel.type, nids[rel.from], nids[rel.to], rel.props)\n      }\n    })\n  }\n}"
+    },
+    {
+      "key": "composite/merge",
+      "name": "merge",
+      "nodeType": "FunctionDeclaration",
+      "scope": "composite",
+      "parent": "composite",
+      "astStart": 9639,
+      "astEnd": 11176,
+      "offsetUnit": "UTF-16 code units; end exclusive",
+      "fileStartUtf16": 10987,
+      "fileEndUtf16": 12524,
+      "fileStartByte": 10987,
+      "fileEndByte": 12524,
+      "startLine": 328,
+      "startColumn": 2,
+      "endLine": 377,
+      "endColumn": 3,
+      "text": "function merge(comp,incr,source) {\n\n    function mergeprops(into,from) {\n      const keys = Object.keys(into)\n        .concat(Object.keys(from))\n        .filter(uniq)\n      for (const key of keys) {\n        if (into[key]) {\n          // if (from[key] && into[key] != from[key]) {\n          //   window.result.innerHTML +=\n          //     `<div style=\"font-size:small; padding:4px; background-color:#fee; border-radius:4px; border:1px solid #aaa;\">\n          //       conflict for \"${key}\" property<br>\n          //       choosing \"${into[key]}\" over \"${from[key]}\"</div>`\n          // }\n        }\n        else {\n          if(from[key]) {\n            into[key] = from[key]\n          }\n        }\n      }\n    }\n\n    const nids = {}  // incr => comp\n    incr.nodes.forEach((node,id) => {\n      const match = comp.nodes.find(each =>\n        each.type == node.type &&\n        each.props.name == node.props.name)\n      if(match) {\n        nids[id] = comp.nodes.findIndex(node => node === match)\n        merged.nids.push(nids[id])\n        mergeprops(match.props, node.props)\n      } else {\n        nids[id] = comp.addNode(node.type,node.props)\n      }\n    })\n    incr.rels.forEach(rel => {\n      const match = comp.rels.find(each =>\n        each.type == rel.type &&\n        each.from == nids[rel.from] &&\n        each.to == nids[rel.to]\n      )\n      if(match) {\n        mergeprops(match.props, rel.props)\n      } else {\n        rel.props.source = source\n        comp.addRel(rel.type, nids[rel.from], nids[rel.to], rel.props)\n      }\n    })\n  }"
+    },
+    {
+      "key": "composite/merge/mergeprops",
+      "name": "mergeprops",
+      "nodeType": "FunctionDeclaration",
+      "scope": "composite/merge",
+      "parent": "composite/merge",
+      "astStart": 9679,
+      "astEnd": 10347,
+      "offsetUnit": "UTF-16 code units; end exclusive",
+      "fileStartUtf16": 11027,
+      "fileEndUtf16": 11695,
+      "fileStartByte": 11027,
+      "fileEndByte": 11695,
+      "startLine": 330,
+      "startColumn": 4,
+      "endLine": 349,
+      "endColumn": 5,
+      "text": "function mergeprops(into,from) {\n      const keys = Object.keys(into)\n        .concat(Object.keys(from))\n        .filter(uniq)\n      for (const key of keys) {\n        if (into[key]) {\n          // if (from[key] && into[key] != from[key]) {\n          //   window.result.innerHTML +=\n          //     `<div style=\"font-size:small; padding:4px; background-color:#fee; border-radius:4px; border:1px solid #aaa;\">\n          //       conflict for \"${key}\" property<br>\n          //       choosing \"${into[key]}\" over \"${from[key]}\"</div>`\n          // }\n        }\n        else {\n          if(from[key]) {\n            into[key] = from[key]\n          }\n        }\n      }\n    }"
+    }
+  ]
+}

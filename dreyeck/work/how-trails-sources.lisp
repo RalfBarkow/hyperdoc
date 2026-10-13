@@ -111,7 +111,11 @@
       (html-inspector-views:html-view :title "Source reference" :priority 0
         (html-inspector-views:html
           (:p (html-inspector-views:object-ref source :display (how-source-name source)
-                                                   :select "Source reference")))))))
+                                                   :select "Source reference"))
+          (when (equal "fcbf4b3a2dcbe81b" (hyperbook/fedwiki::id-of item))
+            (html-inspector-views:html
+              (:p (html-inspector-views:object-ref (how-trails-composite-definition)
+                     :select "Function definition" :display "composite — full function definition")))))))))
 
 (html-inspector-views:defview how-trails-source-view (source how-trails-source)
   (html-inspector-views:html-view :title "Source reference" :priority -1
@@ -126,6 +130,10 @@
       (:p (html-inspector-views:object-ref *how-trails-revision* :display "Pinned Git revision" :select "Evidence revision")
           " / " (html-inspector-views:object-ref (fragment-revision-file source) :display "Source file" :select "Evidence locations"))
       (:p "Exact referenced range, verified against the full file digest. L107 is a single-line reference, not the whole dochoose definition.")
+      (when (equal "fcbf4b3a2dcbe81b" (hyperbook/fedwiki::id-of (how-source-item source)))
+        (html-inspector-views:html
+          (:p (html-inspector-views:object-ref (how-trails-composite-definition)
+                 :select "Function definition" :display "composite — full function definition"))))
       (:pre (cl-who:esc (fragment-text source))))))
 
 (defmethod html-inspector-views:text-representation ((source how-trails-source))

@@ -52,6 +52,27 @@ try {
   await page.getByText(name,{exact:true}).last().click()
   await page.getByRole('heading',{name,exact:true}).last().waitFor()
   assert((await page.locator('pre').allTextContents()).some(t=>t.includes(code)))
+  if(name==='composite') {
+   const definitions=JSON.parse(fs.readFileSync('dreyeck/work/how-trails-definitions.json','utf8')).definitions
+   await page.getByText('composite — full function definition',{exact:true}).last().click()
+   for(const definition of definitions) {
+    await page.getByRole('heading',{name:'JavaScript definition: '+definition.key,exact:true}).last().waitFor()
+    assert((await page.locator('pre').allTextContents()).includes(definition.text))
+    if(definition.name==='composite')await page.getByText('merge',{exact:true}).last().click()
+    if(definition.name==='merge')await page.getByText('mergeprops',{exact:true}).last().click()
+   }
+   assert((await page.locator('body').innerText()).includes('not an isolated test'))
+   await page.getByText('Enclosing definition',{exact:true}).last().click()
+   await page.getByRole('heading',{name:'JavaScript definition: composite/merge',exact:true}).last().waitFor()
+   await page.getByText('Enclosing definition',{exact:true}).last().click()
+   await page.getByRole('heading',{name:'JavaScript definition: composite',exact:true}).last().waitFor()
+   await page.getByText('Composite execution evidence',{exact:true}).last().click()
+   await page.getByText('cases',{exact:true}).last().waitFor()
+   await page.getByText("Ward's original page",{exact:true}).last().click()
+   await page.getByRole('heading',{name:'How Trails Travel',exact:true}).last().waitFor()
+   console.log('PASS: Story → source reference → composite → merge → mergeprops; complete AST source, lexical parents, retained evidence and original page return')
+  }
+
  }
  // Only after all four direct journeys, check the page-wide view and Links.
  await page.getByRole('button',{name:'Links',exact:true}).first().click()

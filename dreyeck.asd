@@ -2735,6 +2735,7 @@
             "dreyeck/gesture/operation-request"
             "hyperbook/fedwiki"
             "shasht"
+            "babel"
             "cl-base64"
             "local-time"
             "ironclad")
@@ -2749,6 +2750,8 @@
                       (:file "trails-rendered-federated-context")
                       (:file "trails-rendered-following")
                       (:file "how-trails-sources")
+                      (:file "javascript-definitions")
+                      (:static-file "how-trails-definitions.json")
                       (:file "trails-rendered-browser-check")
                       (:file "shift-click" :depends-on
                              ("trails-rendered-federated-context"))
