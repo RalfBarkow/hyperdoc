@@ -484,3 +484,29 @@
        (FORMAT T
                "~&TRAIL-FOLLOWING-PASS: actual paragraph/relations/aspect/node objects, namespaced identities, derived cross-capture correspondences, explicit witness/control execution, pure rendering, shared Workspace and native source/reading/code navigation.~%")
        T)
+
+
+(defun check-solo-trail-identity ()
+  (let* ((record (reading::read-observation "dreyeck/work/solo-trail-identity.json"))
+         (cases (gethash "cases" record))
+         (book (hyperbook:find-hyperbook "dreyeck/work/reading")))
+    (assert (= 3 (length cases)))
+    (assert (equal (gethash "testSha256" record)
+                   (ironclad:byte-array-to-hex-string
+                    (ironclad:digest-file :sha256
+                     (asdf:system-relative-pathname "dreyeck/work/reading"
+                                                    "scripts/test-solo-trail-identity.mjs")))))
+    (loop for c across cases do
+      (let* ((graph (gethash "graph" (gethash "complex" c)))
+             (svg (gethash "svg" c)))
+        (assert (= (length (gethash "nodes" graph)) (length (gethash "nodes" svg))))
+        (assert (= (length (gethash "rels" graph)) (length (gethash "edges" svg))))
+        (loop for mapping across (gethash "nodeMap" c) do
+          (assert (find (gethash "svg" mapping) (gethash "nodes" svg)
+                        :key (lambda (n) (gethash "id" n)) :test #'equal)))))
+    (let* ((page (hyperbook:find-page book "How Trails Travel" :signal-error? t))
+           (view (following-view page "Content"))
+           (refs (mapcar #'cdr (views:view-references view))))
+      (assert (find-if (lambda (o) (and (hash-table-p o) (gethash "cases" o))) refs)))
+    (render-page book "Following One Recorded Trail")
+    (format t "~&SOLO-IDENTITY-PASS: evidence/source integrity, maps and actual Content links.~%")))

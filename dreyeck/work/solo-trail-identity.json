@@ -1,0 +1,1385 @@
+{
+  "kind": "Executed offline identity witness, not historical public capture",
+  "solo": {
+    "repository": "https://github.com/WardCunningham/wiki-plugin-solo",
+    "oid": "17915844349bada64c901bd5ea73472702c446f9",
+    "path": "client/dialog/index.html",
+    "sha256": "5a513f70546ced3e2af7f83c4f14fb73d30e27f22a295558cbff4b078871aed8"
+  },
+  "source": {
+    "site": "ward.voices.ustawi.wiki",
+    "slug": "trails-rendered",
+    "sha256": "5fdba40fd3a68eddee00497af4dadb3847500356a2f131dbc0745afb86de9810",
+    "paragraphs": [
+      "93cd119d6286888a",
+      "fc6c7d06e5bce7d3"
+    ],
+    "association": "Paragraph to aspect by original execution order, not preserved paragraph ID"
+  },
+  "testSha256": "f54b2a79514008531c959a816a5d76e9ef833775760aea018ffb3d64f9bd9c88",
+  "imports": [
+    {
+      "name": "graph.js",
+      "url": "https://wardcunningham.github.io/graph/graph.js",
+      "sha256": "8a137c3d51d49f7233ea10e7c067aab7871b8dc605a171a16de36a03624ff852",
+      "contentType": "text/javascript",
+      "role": "retained original browser response"
+    },
+    {
+      "name": "cypher.js",
+      "url": "https://wardcunningham.github.io/graph/cypher.js",
+      "sha256": "952768e094d5eb61e5a56a5857fd30e0bd7a110af6acd9d65877fc35c101c1bd",
+      "contentType": "text/javascript",
+      "role": "retained original browser response"
+    },
+    {
+      "name": "wasm-index.js",
+      "url": "https://unpkg.com/@hpcc-js/wasm@1.20.1/dist/index.min.js",
+      "sha256": "99dcf9250df252a3be23483785c6c95d0c10963b5b83f5f6d4282b151e9634e3",
+      "contentType": "text/javascript",
+      "role": "read-only dependency capture 2026-10-10, URL and digest, no Git revision asserted"
+    },
+    {
+      "name": "graphvizlib.wasm",
+      "url": "https://unpkg.com/@hpcc-js/wasm@1.20.1/dist/graphvizlib.wasm",
+      "sha256": "791124bccad50f6f0978ab6301ae97e7596653514fd9e2866fe8458bdff02649",
+      "contentType": "application/wasm",
+      "role": "read-only dependency capture 2026-10-10, URL and digest, no Git revision asserted"
+    },
+    {
+      "name": "panzoom.js",
+      "url": "https://cdn.jsdelivr.net/gh/dash14/svg-pan-zoom/dist/svg-pan-zoom.min.js",
+      "sha256": "7168baf6f47485adf67bc22504d39e2c9ee62c2b402b5b984b54e8f3f9391fcc",
+      "contentType": "text/javascript",
+      "role": "read-only dependency capture 2026-10-10, URL and digest, no Git revision asserted"
+    }
+  ],
+  "browser": "154.0.8037.98",
+  "cases": [
+    {
+      "label": "original",
+      "chosen": [
+        {
+          "name": "trail 1",
+          "graph": {
+            "nodes": [
+              {
+                "type": "",
+                "in": [],
+                "out": [
+                  0
+                ],
+                "props": {
+                  "name": "Susan\nKare"
+                }
+              },
+              {
+                "type": "",
+                "in": [
+                  0
+                ],
+                "out": [
+                  1
+                ],
+                "props": {
+                  "name": "John\nDewey"
+                }
+              },
+              {
+                "type": "",
+                "in": [
+                  1
+                ],
+                "out": [],
+                "props": {
+                  "name": "Reflective\nPractice"
+                }
+              }
+            ],
+            "rels": [
+              {
+                "type": "Trail",
+                "from": 0,
+                "to": 1,
+                "props": {}
+              },
+              {
+                "type": "Trail",
+                "from": 1,
+                "to": 2,
+                "props": {}
+              }
+            ]
+          }
+        },
+        {
+          "name": "trail 2",
+          "graph": {
+            "nodes": [
+              {
+                "type": "",
+                "in": [],
+                "out": [
+                  0
+                ],
+                "props": {
+                  "name": "Jean\nLave"
+                }
+              },
+              {
+                "type": "",
+                "in": [
+                  0
+                ],
+                "out": [
+                  1
+                ],
+                "props": {
+                  "name": "Dorothy\nSmith"
+                }
+              },
+              {
+                "type": "",
+                "in": [
+                  1
+                ],
+                "out": [],
+                "props": {
+                  "name": "Reflective\nPractice"
+                }
+              }
+            ],
+            "rels": [
+              {
+                "type": "Trail",
+                "from": 0,
+                "to": 1,
+                "props": {}
+              },
+              {
+                "type": "Trail",
+                "from": 1,
+                "to": 2,
+                "props": {}
+              }
+            ]
+          }
+        }
+      ],
+      "after": [
+        {
+          "name": "trail 1",
+          "graph": {
+            "nodes": [
+              {
+                "type": "",
+                "in": [],
+                "out": [
+                  0
+                ],
+                "props": {
+                  "name": "Susan\nKare"
+                }
+              },
+              {
+                "type": "",
+                "in": [
+                  0
+                ],
+                "out": [
+                  1
+                ],
+                "props": {
+                  "name": "John\nDewey"
+                }
+              },
+              {
+                "type": "",
+                "in": [
+                  1
+                ],
+                "out": [],
+                "props": {
+                  "name": "Reflective\nPractice"
+                }
+              }
+            ],
+            "rels": [
+              {
+                "type": "Trail",
+                "from": 0,
+                "to": 1,
+                "props": {
+                  "source": "trail 1"
+                }
+              },
+              {
+                "type": "Trail",
+                "from": 1,
+                "to": 2,
+                "props": {
+                  "source": "trail 1"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "name": "trail 2",
+          "graph": {
+            "nodes": [
+              {
+                "type": "",
+                "in": [],
+                "out": [
+                  0
+                ],
+                "props": {
+                  "name": "Jean\nLave"
+                }
+              },
+              {
+                "type": "",
+                "in": [
+                  0
+                ],
+                "out": [
+                  1
+                ],
+                "props": {
+                  "name": "Dorothy\nSmith"
+                }
+              },
+              {
+                "type": "",
+                "in": [
+                  1
+                ],
+                "out": [],
+                "props": {
+                  "name": "Reflective\nPractice"
+                }
+              }
+            ],
+            "rels": [
+              {
+                "type": "Trail",
+                "from": 0,
+                "to": 1,
+                "props": {
+                  "source": "trail 2"
+                }
+              },
+              {
+                "type": "Trail",
+                "from": 1,
+                "to": 2,
+                "props": {
+                  "source": "trail 2"
+                }
+              }
+            ]
+          }
+        }
+      ],
+      "complex": {
+        "graph": {
+          "nodes": [
+            {
+              "type": "",
+              "in": [],
+              "out": [
+                0
+              ],
+              "props": {
+                "name": "Susan\nKare"
+              }
+            },
+            {
+              "type": "",
+              "in": [
+                0
+              ],
+              "out": [
+                1
+              ],
+              "props": {
+                "name": "John\nDewey"
+              }
+            },
+            {
+              "type": "",
+              "in": [
+                1,
+                3
+              ],
+              "out": [],
+              "props": {
+                "name": "Reflective\nPractice"
+              }
+            },
+            {
+              "type": "",
+              "in": [],
+              "out": [
+                2
+              ],
+              "props": {
+                "name": "Jean\nLave"
+              }
+            },
+            {
+              "type": "",
+              "in": [
+                2
+              ],
+              "out": [
+                3
+              ],
+              "props": {
+                "name": "Dorothy\nSmith"
+              }
+            }
+          ],
+          "rels": [
+            {
+              "type": "Trail",
+              "from": 0,
+              "to": 1,
+              "props": {
+                "source": "trail 1"
+              }
+            },
+            {
+              "type": "Trail",
+              "from": 1,
+              "to": 2,
+              "props": {
+                "source": "trail 1"
+              }
+            },
+            {
+              "type": "Trail",
+              "from": 3,
+              "to": 4,
+              "props": {
+                "source": "trail 2"
+              }
+            },
+            {
+              "type": "Trail",
+              "from": 4,
+              "to": 2,
+              "props": {
+                "source": "trail 2"
+              }
+            }
+          ]
+        },
+        "merged": {
+          "nids": [
+            2
+          ]
+        }
+      },
+      "nodeMap": [
+        {
+          "aspect": 0,
+          "local": 0,
+          "composite": 0,
+          "svg": "node2"
+        },
+        {
+          "aspect": 0,
+          "local": 1,
+          "composite": 1,
+          "svg": "node3"
+        },
+        {
+          "aspect": 0,
+          "local": 2,
+          "composite": 2,
+          "svg": "node1"
+        },
+        {
+          "aspect": 1,
+          "local": 0,
+          "composite": 3,
+          "svg": "node4"
+        },
+        {
+          "aspect": 1,
+          "local": 1,
+          "composite": 4,
+          "svg": "node5"
+        },
+        {
+          "aspect": 1,
+          "local": 2,
+          "composite": 2,
+          "svg": "node1"
+        }
+      ],
+      "relationMap": [
+        {
+          "aspect": 0,
+          "local": 0,
+          "composite": 0
+        },
+        {
+          "aspect": 0,
+          "local": 1,
+          "composite": 1
+        },
+        {
+          "aspect": 1,
+          "local": 0,
+          "composite": 2
+        },
+        {
+          "aspect": 1,
+          "local": 1,
+          "composite": 3
+        }
+      ],
+      "dot": "strict digraph {\noverlap = false; splines=true\nlayout = dot\nnode [shape=box style=filled fillcolor=gold penwidth=2]\n2\nnode [fillcolor=palegreen penwidth=1]\n0 [label=\"Susan\nKare\"   tooltip=\"name: Susan Kare\"]\n1 [label=\"John\nDewey\"   tooltip=\"name: John Dewey\"]\n2 [label=\"Reflective\nPractice\"   tooltip=\"name: Reflective Practice\"]\n3 [label=\"Jean\nLave\"   tooltip=\"name: Jean Lave\"]\n4 [label=\"Dorothy\nSmith\"   tooltip=\"name: Dorothy Smith\"]\n0->1 [label=\"Trail\"  labeltooltip=\"source: trail 1\"]\n1->2 [label=\"Trail\"  labeltooltip=\"source: trail 1\"]\n3->4 [label=\"Trail\"  labeltooltip=\"source: trail 2\"]\n4->2 [label=\"Trail\"  labeltooltip=\"source: trail 2\"]\n}",
+      "mappingWarrant": "Derived using unchanged type/name and directed type/endpoints matching; not an exported Solo identity map.",
+      "svg": {
+        "dot": "strict digraph {\noverlap = false; splines=true\nlayout = dot\nnode [shape=box style=filled fillcolor=gold penwidth=2]\n2\nnode [fillcolor=palegreen penwidth=1]\n0 [label=\"Susan\nKare\"   tooltip=\"name: Susan Kare\"]\n1 [label=\"John\nDewey\"   tooltip=\"name: John Dewey\"]\n2 [label=\"Reflective\nPractice\"   tooltip=\"name: Reflective Practice\"]\n3 [label=\"Jean\nLave\"   tooltip=\"name: Jean Lave\"]\n4 [label=\"Dorothy\nSmith\"   tooltip=\"name: Dorothy Smith\"]\n0->1 [label=\"Trail\"  labeltooltip=\"source: trail 1\"]\n1->2 [label=\"Trail\"  labeltooltip=\"source: trail 1\"]\n3->4 [label=\"Trail\"  labeltooltip=\"source: trail 2\"]\n4->2 [label=\"Trail\"  labeltooltip=\"source: trail 2\"]\n}",
+        "nodes": [
+          {
+            "id": "node1",
+            "title": "2",
+            "text": [
+              "Reflective",
+              "Practice"
+            ]
+          },
+          {
+            "id": "node2",
+            "title": "0",
+            "text": [
+              "Susan",
+              "Kare"
+            ]
+          },
+          {
+            "id": "node3",
+            "title": "1",
+            "text": [
+              "John",
+              "Dewey"
+            ]
+          },
+          {
+            "id": "node4",
+            "title": "3",
+            "text": [
+              "Jean",
+              "Lave"
+            ]
+          },
+          {
+            "id": "node5",
+            "title": "4",
+            "text": [
+              "Dorothy",
+              "Smith"
+            ]
+          }
+        ],
+        "edges": [
+          {
+            "id": "edge1",
+            "title": "0->1",
+            "text": "Trail"
+          },
+          {
+            "id": "edge2",
+            "title": "1->2",
+            "text": "Trail"
+          },
+          {
+            "id": "edge3",
+            "title": "3->4",
+            "text": "Trail"
+          },
+          {
+            "id": "edge4",
+            "title": "4->2",
+            "text": "Trail"
+          }
+        ],
+        "viewportTransform": "matrix(1.3296979865771812,0,0,1.3296979865771812,0.1553691275167779,0)"
+      },
+      "zoom": {
+        "transform": "matrix(1.4332667873209755,0,0,1.4332667873209755,-39.555901599032865,-27.728473000307904)",
+        "nodeIdentifiersUnchanged": true
+      }
+    },
+    {
+      "label": "overlap",
+      "chosen": [
+        {
+          "name": "synthetic A",
+          "graph": {
+            "nodes": [
+              {
+                "type": "",
+                "in": [],
+                "out": [
+                  0
+                ],
+                "props": {
+                  "name": "A"
+                }
+              },
+              {
+                "type": "",
+                "in": [
+                  0
+                ],
+                "out": [
+                  1
+                ],
+                "props": {
+                  "name": "B"
+                }
+              },
+              {
+                "type": "",
+                "in": [
+                  1
+                ],
+                "out": [],
+                "props": {
+                  "name": "C"
+                }
+              }
+            ],
+            "rels": [
+              {
+                "type": "Trail",
+                "from": 0,
+                "to": 1,
+                "props": {}
+              },
+              {
+                "type": "Trail",
+                "from": 1,
+                "to": 2,
+                "props": {}
+              }
+            ]
+          }
+        },
+        {
+          "name": "synthetic B",
+          "graph": {
+            "nodes": [
+              {
+                "type": "",
+                "in": [],
+                "out": [
+                  0
+                ],
+                "props": {
+                  "name": "X"
+                }
+              },
+              {
+                "type": "",
+                "in": [
+                  0
+                ],
+                "out": [
+                  1
+                ],
+                "props": {
+                  "name": "B"
+                }
+              },
+              {
+                "type": "",
+                "in": [
+                  1
+                ],
+                "out": [],
+                "props": {
+                  "name": "C"
+                }
+              }
+            ],
+            "rels": [
+              {
+                "type": "Trail",
+                "from": 0,
+                "to": 1,
+                "props": {}
+              },
+              {
+                "type": "Trail",
+                "from": 1,
+                "to": 2,
+                "props": {}
+              }
+            ]
+          }
+        }
+      ],
+      "after": [
+        {
+          "name": "synthetic A",
+          "graph": {
+            "nodes": [
+              {
+                "type": "",
+                "in": [],
+                "out": [
+                  0
+                ],
+                "props": {
+                  "name": "A"
+                }
+              },
+              {
+                "type": "",
+                "in": [
+                  0
+                ],
+                "out": [
+                  1
+                ],
+                "props": {
+                  "name": "B"
+                }
+              },
+              {
+                "type": "",
+                "in": [
+                  1
+                ],
+                "out": [],
+                "props": {
+                  "name": "C"
+                }
+              }
+            ],
+            "rels": [
+              {
+                "type": "Trail",
+                "from": 0,
+                "to": 1,
+                "props": {
+                  "source": "synthetic A"
+                }
+              },
+              {
+                "type": "Trail",
+                "from": 1,
+                "to": 2,
+                "props": {
+                  "source": "synthetic A"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "name": "synthetic B",
+          "graph": {
+            "nodes": [
+              {
+                "type": "",
+                "in": [],
+                "out": [
+                  0
+                ],
+                "props": {
+                  "name": "X"
+                }
+              },
+              {
+                "type": "",
+                "in": [
+                  0
+                ],
+                "out": [
+                  1
+                ],
+                "props": {
+                  "name": "B"
+                }
+              },
+              {
+                "type": "",
+                "in": [
+                  1
+                ],
+                "out": [],
+                "props": {
+                  "name": "C"
+                }
+              }
+            ],
+            "rels": [
+              {
+                "type": "Trail",
+                "from": 0,
+                "to": 1,
+                "props": {
+                  "source": "synthetic B"
+                }
+              },
+              {
+                "type": "Trail",
+                "from": 1,
+                "to": 2,
+                "props": {}
+              }
+            ]
+          }
+        }
+      ],
+      "complex": {
+        "graph": {
+          "nodes": [
+            {
+              "type": "",
+              "in": [],
+              "out": [
+                0
+              ],
+              "props": {
+                "name": "A"
+              }
+            },
+            {
+              "type": "",
+              "in": [
+                0,
+                2
+              ],
+              "out": [
+                1
+              ],
+              "props": {
+                "name": "B"
+              }
+            },
+            {
+              "type": "",
+              "in": [
+                1
+              ],
+              "out": [],
+              "props": {
+                "name": "C"
+              }
+            },
+            {
+              "type": "",
+              "in": [],
+              "out": [
+                2
+              ],
+              "props": {
+                "name": "X"
+              }
+            }
+          ],
+          "rels": [
+            {
+              "type": "Trail",
+              "from": 0,
+              "to": 1,
+              "props": {
+                "source": "synthetic A"
+              }
+            },
+            {
+              "type": "Trail",
+              "from": 1,
+              "to": 2,
+              "props": {
+                "source": "synthetic A"
+              }
+            },
+            {
+              "type": "Trail",
+              "from": 3,
+              "to": 1,
+              "props": {
+                "source": "synthetic B"
+              }
+            }
+          ]
+        },
+        "merged": {
+          "nids": [
+            1,
+            2
+          ]
+        }
+      },
+      "nodeMap": [
+        {
+          "aspect": 0,
+          "local": 0,
+          "composite": 0,
+          "svg": "node3"
+        },
+        {
+          "aspect": 0,
+          "local": 1,
+          "composite": 1,
+          "svg": "node1"
+        },
+        {
+          "aspect": 0,
+          "local": 2,
+          "composite": 2,
+          "svg": "node2"
+        },
+        {
+          "aspect": 1,
+          "local": 0,
+          "composite": 3,
+          "svg": "node4"
+        },
+        {
+          "aspect": 1,
+          "local": 1,
+          "composite": 1,
+          "svg": "node1"
+        },
+        {
+          "aspect": 1,
+          "local": 2,
+          "composite": 2,
+          "svg": "node2"
+        }
+      ],
+      "relationMap": [
+        {
+          "aspect": 0,
+          "local": 0,
+          "composite": 0
+        },
+        {
+          "aspect": 0,
+          "local": 1,
+          "composite": 1
+        },
+        {
+          "aspect": 1,
+          "local": 0,
+          "composite": 2
+        },
+        {
+          "aspect": 1,
+          "local": 1,
+          "composite": 1
+        }
+      ],
+      "dot": "strict digraph {\noverlap = false; splines=true\nlayout = dot\nnode [shape=box style=filled fillcolor=gold penwidth=2]\n1\n2\nnode [fillcolor=palegreen penwidth=1]\n0 [label=\"A\"   tooltip=\"name: A\"]\n1 [label=\"B\"   tooltip=\"name: B\"]\n2 [label=\"C\"   tooltip=\"name: C\"]\n3 [label=\"X\"   tooltip=\"name: X\"]\n0->1 [label=\"Trail\"  labeltooltip=\"source: synthetic A\"]\n1->2 [label=\"Trail\"  labeltooltip=\"source: synthetic A\"]\n3->1 [label=\"Trail\"  labeltooltip=\"source: synthetic B\"]\n}",
+      "mappingWarrant": "Derived using unchanged type/name and directed type/endpoints matching; not an exported Solo identity map.",
+      "svg": {
+        "dot": "strict digraph {\noverlap = false; splines=true\nlayout = dot\nnode [shape=box style=filled fillcolor=gold penwidth=2]\n1\n2\nnode [fillcolor=palegreen penwidth=1]\n0 [label=\"A\"   tooltip=\"name: A\"]\n1 [label=\"B\"   tooltip=\"name: B\"]\n2 [label=\"C\"   tooltip=\"name: C\"]\n3 [label=\"X\"   tooltip=\"name: X\"]\n0->1 [label=\"Trail\"  labeltooltip=\"source: synthetic A\"]\n1->2 [label=\"Trail\"  labeltooltip=\"source: synthetic A\"]\n3->1 [label=\"Trail\"  labeltooltip=\"source: synthetic B\"]\n}",
+        "nodes": [
+          {
+            "id": "node1",
+            "title": "1",
+            "text": [
+              "B"
+            ]
+          },
+          {
+            "id": "node2",
+            "title": "2",
+            "text": [
+              "C"
+            ]
+          },
+          {
+            "id": "node3",
+            "title": "0",
+            "text": [
+              "A"
+            ]
+          },
+          {
+            "id": "node4",
+            "title": "3",
+            "text": [
+              "X"
+            ]
+          }
+        ],
+        "edges": [
+          {
+            "id": "edge2",
+            "title": "1->2",
+            "text": "Trail"
+          },
+          {
+            "id": "edge1",
+            "title": "0->1",
+            "text": "Trail"
+          },
+          {
+            "id": "edge3",
+            "title": "3->1",
+            "text": "Trail"
+          }
+        ],
+        "viewportTransform": "matrix(1.3357400722021662,0,0,1.3357400722021662,0.005415162454866618,0)"
+      },
+      "zoom": {
+        "transform": "matrix(1.4397794847453975,0,0,1.4397794847453975,-39.717536133398404,-27.728471961929397)",
+        "nodeIdentifiersUnchanged": true
+      }
+    },
+    {
+      "label": "overlap reversed",
+      "chosen": [
+        {
+          "name": "synthetic B",
+          "graph": {
+            "nodes": [
+              {
+                "type": "",
+                "in": [],
+                "out": [
+                  0
+                ],
+                "props": {
+                  "name": "X"
+                }
+              },
+              {
+                "type": "",
+                "in": [
+                  0
+                ],
+                "out": [
+                  1
+                ],
+                "props": {
+                  "name": "B"
+                }
+              },
+              {
+                "type": "",
+                "in": [
+                  1
+                ],
+                "out": [],
+                "props": {
+                  "name": "C"
+                }
+              }
+            ],
+            "rels": [
+              {
+                "type": "Trail",
+                "from": 0,
+                "to": 1,
+                "props": {}
+              },
+              {
+                "type": "Trail",
+                "from": 1,
+                "to": 2,
+                "props": {}
+              }
+            ]
+          }
+        },
+        {
+          "name": "synthetic A",
+          "graph": {
+            "nodes": [
+              {
+                "type": "",
+                "in": [],
+                "out": [
+                  0
+                ],
+                "props": {
+                  "name": "A"
+                }
+              },
+              {
+                "type": "",
+                "in": [
+                  0
+                ],
+                "out": [
+                  1
+                ],
+                "props": {
+                  "name": "B"
+                }
+              },
+              {
+                "type": "",
+                "in": [
+                  1
+                ],
+                "out": [],
+                "props": {
+                  "name": "C"
+                }
+              }
+            ],
+            "rels": [
+              {
+                "type": "Trail",
+                "from": 0,
+                "to": 1,
+                "props": {}
+              },
+              {
+                "type": "Trail",
+                "from": 1,
+                "to": 2,
+                "props": {}
+              }
+            ]
+          }
+        }
+      ],
+      "after": [
+        {
+          "name": "synthetic B",
+          "graph": {
+            "nodes": [
+              {
+                "type": "",
+                "in": [],
+                "out": [
+                  0
+                ],
+                "props": {
+                  "name": "X"
+                }
+              },
+              {
+                "type": "",
+                "in": [
+                  0
+                ],
+                "out": [
+                  1
+                ],
+                "props": {
+                  "name": "B"
+                }
+              },
+              {
+                "type": "",
+                "in": [
+                  1
+                ],
+                "out": [],
+                "props": {
+                  "name": "C"
+                }
+              }
+            ],
+            "rels": [
+              {
+                "type": "Trail",
+                "from": 0,
+                "to": 1,
+                "props": {
+                  "source": "synthetic B"
+                }
+              },
+              {
+                "type": "Trail",
+                "from": 1,
+                "to": 2,
+                "props": {
+                  "source": "synthetic B"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "name": "synthetic A",
+          "graph": {
+            "nodes": [
+              {
+                "type": "",
+                "in": [],
+                "out": [
+                  0
+                ],
+                "props": {
+                  "name": "A"
+                }
+              },
+              {
+                "type": "",
+                "in": [
+                  0
+                ],
+                "out": [
+                  1
+                ],
+                "props": {
+                  "name": "B"
+                }
+              },
+              {
+                "type": "",
+                "in": [
+                  1
+                ],
+                "out": [],
+                "props": {
+                  "name": "C"
+                }
+              }
+            ],
+            "rels": [
+              {
+                "type": "Trail",
+                "from": 0,
+                "to": 1,
+                "props": {
+                  "source": "synthetic A"
+                }
+              },
+              {
+                "type": "Trail",
+                "from": 1,
+                "to": 2,
+                "props": {}
+              }
+            ]
+          }
+        }
+      ],
+      "complex": {
+        "graph": {
+          "nodes": [
+            {
+              "type": "",
+              "in": [],
+              "out": [
+                0
+              ],
+              "props": {
+                "name": "X"
+              }
+            },
+            {
+              "type": "",
+              "in": [
+                0,
+                2
+              ],
+              "out": [
+                1
+              ],
+              "props": {
+                "name": "B"
+              }
+            },
+            {
+              "type": "",
+              "in": [
+                1
+              ],
+              "out": [],
+              "props": {
+                "name": "C"
+              }
+            },
+            {
+              "type": "",
+              "in": [],
+              "out": [
+                2
+              ],
+              "props": {
+                "name": "A"
+              }
+            }
+          ],
+          "rels": [
+            {
+              "type": "Trail",
+              "from": 0,
+              "to": 1,
+              "props": {
+                "source": "synthetic B"
+              }
+            },
+            {
+              "type": "Trail",
+              "from": 1,
+              "to": 2,
+              "props": {
+                "source": "synthetic B"
+              }
+            },
+            {
+              "type": "Trail",
+              "from": 3,
+              "to": 1,
+              "props": {
+                "source": "synthetic A"
+              }
+            }
+          ]
+        },
+        "merged": {
+          "nids": [
+            1,
+            2
+          ]
+        }
+      },
+      "nodeMap": [
+        {
+          "aspect": 0,
+          "local": 0,
+          "composite": 0,
+          "svg": "node3"
+        },
+        {
+          "aspect": 0,
+          "local": 1,
+          "composite": 1,
+          "svg": "node1"
+        },
+        {
+          "aspect": 0,
+          "local": 2,
+          "composite": 2,
+          "svg": "node2"
+        },
+        {
+          "aspect": 1,
+          "local": 0,
+          "composite": 3,
+          "svg": "node4"
+        },
+        {
+          "aspect": 1,
+          "local": 1,
+          "composite": 1,
+          "svg": "node1"
+        },
+        {
+          "aspect": 1,
+          "local": 2,
+          "composite": 2,
+          "svg": "node2"
+        }
+      ],
+      "relationMap": [
+        {
+          "aspect": 0,
+          "local": 0,
+          "composite": 0
+        },
+        {
+          "aspect": 0,
+          "local": 1,
+          "composite": 1
+        },
+        {
+          "aspect": 1,
+          "local": 0,
+          "composite": 2
+        },
+        {
+          "aspect": 1,
+          "local": 1,
+          "composite": 1
+        }
+      ],
+      "dot": "strict digraph {\noverlap = false; splines=true\nlayout = dot\nnode [shape=box style=filled fillcolor=gold penwidth=2]\n1\n2\nnode [fillcolor=palegreen penwidth=1]\n0 [label=\"X\"   tooltip=\"name: X\"]\n1 [label=\"B\"   tooltip=\"name: B\"]\n2 [label=\"C\"   tooltip=\"name: C\"]\n3 [label=\"A\"   tooltip=\"name: A\"]\n0->1 [label=\"Trail\"  labeltooltip=\"source: synthetic B\"]\n1->2 [label=\"Trail\"  labeltooltip=\"source: synthetic B\"]\n3->1 [label=\"Trail\"  labeltooltip=\"source: synthetic A\"]\n}",
+      "mappingWarrant": "Derived using unchanged type/name and directed type/endpoints matching; not an exported Solo identity map.",
+      "svg": {
+        "dot": "strict digraph {\noverlap = false; splines=true\nlayout = dot\nnode [shape=box style=filled fillcolor=gold penwidth=2]\n1\n2\nnode [fillcolor=palegreen penwidth=1]\n0 [label=\"X\"   tooltip=\"name: X\"]\n1 [label=\"B\"   tooltip=\"name: B\"]\n2 [label=\"C\"   tooltip=\"name: C\"]\n3 [label=\"A\"   tooltip=\"name: A\"]\n0->1 [label=\"Trail\"  labeltooltip=\"source: synthetic B\"]\n1->2 [label=\"Trail\"  labeltooltip=\"source: synthetic B\"]\n3->1 [label=\"Trail\"  labeltooltip=\"source: synthetic A\"]\n}",
+        "nodes": [
+          {
+            "id": "node1",
+            "title": "1",
+            "text": [
+              "B"
+            ]
+          },
+          {
+            "id": "node2",
+            "title": "2",
+            "text": [
+              "C"
+            ]
+          },
+          {
+            "id": "node3",
+            "title": "0",
+            "text": [
+              "X"
+            ]
+          },
+          {
+            "id": "node4",
+            "title": "3",
+            "text": [
+              "A"
+            ]
+          }
+        ],
+        "edges": [
+          {
+            "id": "edge2",
+            "title": "1->2",
+            "text": "Trail"
+          },
+          {
+            "id": "edge1",
+            "title": "0->1",
+            "text": "Trail"
+          },
+          {
+            "id": "edge3",
+            "title": "3->1",
+            "text": "Trail"
+          }
+        ],
+        "viewportTransform": "matrix(1.3357400722021662,0,0,1.3357400722021662,0.005415162454866618,0)"
+      },
+      "zoom": {
+        "transform": "matrix(1.4397794847453975,0,0,1.4397794847453975,-39.717536133398404,-27.728471961929397)",
+        "nodeIdentifiersUnchanged": true
+      }
+    }
+  ],
+  "checks": [
+    "Original code yields recorded aspects",
+    "Original 5 nodes / 4 Trail relations",
+    "Shared relation reduced to one with first source",
+    "Removing duplicate membership yields identical complex",
+    "Reversed order changes winning source",
+    "Input props mutated and aliased",
+    "Actual unchanged Solo DOT matches extracted function",
+    "Graphviz SVG titles identify composite node indices",
+    "Real zoom changes transform but preserves node identifiers",
+    "No graph on receiver display; no external requests"
+  ],
+  "limits": [
+    "No original paragraph IDs survive in aspects",
+    "Derived maps are test observations, not Solo return fields",
+    "No arbitrary relayout/reload/rename guarantee",
+    "No Polyline or trails[] implemented"
+  ]
+}

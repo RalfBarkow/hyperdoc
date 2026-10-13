@@ -2781,6 +2781,8 @@
                       (:static-file "trails-rendered-result.png")
                       (:static-file "trails-rendered-witness.mjs")
                       (:static-file "trails-rendered-witness.json")
+                      (:static-file "solo-trail-identity.json")
+                      (:static-file "trails-rendered-evidence/next.ward.dojo.fed.wiki--how-trails-travel.json")
                       (:static-file "trails-rendered-browser-repro.mjs")
                       (:module "trails-rendered-browser-evidence" :components
                                ((:static-file "manifest.json")
@@ -2830,6 +2832,7 @@
                       (:static-file "Solo hoverbold.html")
                       (:static-file "Shift-click Is Pane Policy.html")
                       (:static-file "Following One Recorded Trail.html")
+                      (:static-file "How Trails Travel.html")
                       (:static-file "Original CODE Browser Check.html")))))
 
 (defsystem "dreyeck/work/reading/tests" :depends-on

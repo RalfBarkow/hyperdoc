@@ -511,6 +511,7 @@
   (check-mech-documentation-navigation)
   (check-original-code-browser)
   (check-trail-following)
+  (check-solo-trail-identity)
   (check-solo-batch)
   (check-solo-beam)
   (check-result-and-boundary)
