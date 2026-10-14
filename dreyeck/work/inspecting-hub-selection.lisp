@@ -138,7 +138,7 @@
 (hyperdoc:defexample hub-and-trail-workspace
   "One native Workspace; topic navigation changes Point/History, display has no execution."
   (or *hub-workspace*
-      (let* ((projection (hub-learning-projection))
+      (let* ((projection (hub-investigation-projection))
              (workspace (tm:make-topicmap-workspace projection "definition")))
         (setf (slot-value projection 'tm::source) workspace
               *hub-workspace* workspace))))

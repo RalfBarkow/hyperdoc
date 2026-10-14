@@ -48,8 +48,8 @@
              (multiple-value-bind (bridge r outcome) (create page)
                (declare (ignore outcome))
                (let ((local (work:work-projection :page page)) (evidence (work:evidence-neighborhood :page page)))
-                 (assert (= 23 (length (tm:topicmap-projection-topics-of local))))
-                 (assert (= 22 (length (tm:topicmap-projection-associations-of local))))
+                 (assert (= 24 (length (tm:topicmap-projection-topics-of local))))
+                 (assert (= 23 (length (tm:topicmap-projection-associations-of local))))
                  (assert (null (tm:topicmap-projection-topic-by-id local "serialized-verified-effect")))
                  (assert (= 3 (length (tm:topicmap-projection-topics-of evidence))))
                  (assert (= 2 (length (tm:topicmap-projection-associations-of evidence))))
@@ -62,7 +62,7 @@
                  (let ((old (symbol-function 'work::%resolve-authority)))
                    (unwind-protect
                         (progn (setf (symbol-function 'work::%resolve-authority) (lambda (&rest _) (declare (ignore _)) (error "Unexpected foreign read")))
-                               (assert (= 22 (length (tm:topicmap-projection-associations-of (work:work-projection :page page))))))
+                               (assert (= 23 (length (tm:topicmap-projection-associations-of (work:work-projection :page page))))))
                      (setf (symbol-function 'work::%resolve-authority) old))))
                (assert-current bridge)
                (handler-case (progn (work:resolve-work-topic-occurrence (work:work-relationship-creation-from-occurrence r))
@@ -102,7 +102,7 @@
                         (setf (slot-value foreign 'hyperdoc::file) old) (delete-file copy)))))
                  (unless (eq mutation :remap) (assert-stale bridge))
                  (unless (member mutation '(:duplicate :remap))
-                   (assert (= 22 (length (tm:topicmap-projection-associations-of (work:work-projection :page page)))))
+                   (assert (= 23 (length (tm:topicmap-projection-associations-of (work:work-projection :page page)))))
                    (assert (null (tm:topicmap-projection-associations-of (work:evidence-neighborhood :page page)))))))
              ;; Unknown/broken qualification cannot be accepted as a local row.
              (dolist (bad '(:version :missing :orphan :base64 :duplicate-marker))
@@ -194,7 +194,7 @@
                (assert (eq :applied (a:work-relationship-creation-outcome-status
                                      (a:execute-work-relationship-creation r environment))))
                (assert-current bridge-a)
-               (assert (= 23 (length (tm:topicmap-projection-associations-of (work:work-projection :page page))))))))
+               (assert (= 24 (length (tm:topicmap-projection-associations-of (work:work-projection :page page))))))))
         (reset)))))
 
 (defun check-ui (page path)

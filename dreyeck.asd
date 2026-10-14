@@ -2753,6 +2753,7 @@
                       (:file "javascript-definitions")
                       (:file "reading-mech-hubs")
                       (:file "inspecting-hub-selection")
+                      (:file "investigating-ward-hub-selection")
                       (:module "hubs-evidence" :components
                         ((:static-file "synthetic-selection.json")
                          (:static-file "ward.voices.ustawi.wiki--dewey-alexander-trail.json")))
@@ -2867,6 +2868,7 @@
             (:file "dreyeck/tests/work-trails-rendered-following")
             (:file "dreyeck/tests/work-how-trails-sources")
             (:file "dreyeck/tests/work-hubs-reading")
+            (:file "dreyeck/tests/work-hub-investigation")
             (:file "dreyeck/tests/work-shift-click")
             (:file "dreyeck/tests/work-trails-rendered-browser-check")
             (:file "dreyeck/tests/work-deployment-inspection"))
@@ -2882,6 +2884,7 @@
                                       :dreyeck/work/trails-rendered-reading/tests
                                       :run-tests)
                     (uiop:symbol-call :dreyeck/work/hubs/tests :run-tests)
+                    (uiop:symbol-call :dreyeck/work/hub-investigation/tests :run-tests)
                     (uiop:symbol-call :dreyeck/work/shift-click/tests
                                       :run-tests)
                     (uiop:symbol-call :dreyeck/work/deployment-inspection/tests

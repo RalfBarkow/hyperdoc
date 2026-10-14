@@ -210,9 +210,9 @@ is on the temporary Work Breakdown copy; TEST-OP never starts this server."
                                        (now (clog-moldable-inspector::pane-object relation-fresh-pane)))
                                   (%browser-tab relation-fresh-pane "Work Breakdown" "Applied")
                                   (assert (eq :applied (a:work-relationship-creation-outcome-status (outcome now))))
-                                  (assert (= 23 (length (tm:topicmap-projection-associations-of (tm:topicmap-workspace-projection-of now)))))
+                                  (assert (= 24 (length (tm:topicmap-projection-associations-of (tm:topicmap-workspace-projection-of now)))))
                                   (assert (equal "lisp-source-authoring" (tm:topicmap-workspace-point-of now)))
-                                  (format t "~&EDITOR-BROWSER-RELATIONSHIP-PASS: exact target from observed projection, work:relation/informs preserved, request -> plan -> Execute -> fresh 22/23 Workspace.~%")
+                                  (format t "~&EDITOR-BROWSER-RELATIONSHIP-PASS: exact target from observed projection, work:relation/informs preserved, request -> plan -> Execute -> fresh 23/24 Workspace.~%")
                                   ;; Branch from the pre-effect selection last:
                                   ;; Inspector navigation closes panes to its right.
                                   (let* ((current (tst::%read path))

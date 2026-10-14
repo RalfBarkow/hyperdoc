@@ -268,7 +268,7 @@
     (assert (eq :applied (a:work-relationship-creation-outcome-status (outcome fresh))))
     (assert (not (eq preview (a:work-relationship-creation-outcome-plan (outcome fresh)))))
     (assert (equal "lisp-source-authoring" (tm:topicmap-workspace-point-of fresh)))
-    (assert (= 23 (length (tm:topicmap-projection-associations-of (tm:topicmap-workspace-projection-of fresh)))))
+    (assert (= 24 (length (tm:topicmap-projection-associations-of (tm:topicmap-workspace-projection-of fresh)))))
     (let ((added (car (last (tm:topicmap-projection-associations-of (tm:topicmap-workspace-projection-of fresh))))))
       (assert (equal "work:relation/informs" (tm:topicmap-association-type-of added)))
       (assert (equal "running-image-authoring" (tm:topicmap-association-to-of added))))))

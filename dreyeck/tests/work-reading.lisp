@@ -45,13 +45,14 @@
     "work:fedwiki-item-authoring:develops:hyperdoc-authoring"
     "work:hyperdoc-page-authoring:develops:hyperdoc-authoring"
     "work:lisp-source-authoring:develops:hyperdoc-authoring"
-    "work:running-image-authoring:develops:hyperdoc-authoring"))
+    "work:running-image-authoring:develops:hyperdoc-authoring"
+    "work:dogfooding:current-work:ward-hub-trail-selection"))
 
 (defun check-projection-integrity (projection)
   (let* ((topics (tm:topicmap-projection-topics-of projection))
          (associations (tm:topicmap-projection-associations-of projection))
          (ids (mapcar #'tm:topicmap-association-id-of associations)))
-    (assert (= 23 (length topics)))
+    (assert (= 24 (length topics)))
     (assert (= (length *expected-work-associations*) (length ids)))
     (dolist (id *expected-work-associations*)
       (assert (= 1 (count id ids :test #'equal))))
