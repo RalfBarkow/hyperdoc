@@ -1,0 +1,209 @@
+# Revidierter Plan: Kollaborative Planung als nachvollziehbarer HyperDoc-Prozess
+
+Der vorige Plan wird vollständig ersetzt. Die P3-Association bleibt ein begrenzter Testfall. Sie ist weder das gesamte Planungsmodell noch ein Nachweis vollständiger Zusammenarbeit.
+
+Der Zielpfad bleibt:
+
+`Work Breakdown → Codex Proposal → SHOP3 Assessment → Human Decision → Revised Proposal`
+
+## 1. Beobachtete Grundlage und Review-Abgleich
+
+Beobachteter Worktree: `/Users/rgb/workspace/hyperdoc-dreyeck-ch`  
+Branch: `dreyeck.ch`  
+HEAD: `e85e87913ee7fdcecaaaa6e3f0414cfec23de152`  
+Index und Arbeitsbaum: sauber.
+
+Der [vollständige Claude-Review](/Users/rgb/Downloads/claude-code-review-hyperdoc-planning-20261014.txt) wurde gelesen. Sein SHA-256 lautet:
+
+`3811f57a518689b359383b5d3895d35e184e6971769f15f5edc666075f9c9c3a`
+
+Seine Empfehlungen sind Prüfgegenstand, keine Implementierungsfreigabe.
+
+| Befund | Bewertung | Source-Abgleich und Konsequenz |
+|---|---|---|
+| F1: S1 wird durch Bootstrap verbindlich | **Bestätigt** | Der vorige Plan genehmigte nur die Association. Eine Interpretation muss zunächst ausdrücklich als Codex-Vorschlag erscheinen; ihre Bedeutung darf nicht durch Import oder Bootstrap als menschlich gebilligt gelten. |
+| F2: Bestätigung ist keine Autoritätsgrenze gegenüber Codex | **Bestätigt** | CLOG-Callbacks und Writer schützen einen Bedienablauf. Privilegierter Lisp- oder Dateizugriff kann diesen umgehen. Das persistierte Ergebnis allein authentifiziert keinen Menschen. |
+| F3: P3-Identität hängt am Dateidigest | **Teilweise bestätigt** | Der vorgeschlagene logische Schlüssel enthielt keinen Digest. Die zusätzliche Gültigkeitsbedingung hätte jedoch denselben problematischen Effekt gehabt. Identität, historische Quellversion und aktuelle Frische werden getrennt. |
+| F4: Owner-Nachweis fehlt im Read-Set | **Bestätigt** | `hub-investigation-step` besitzt nur `id` und `title`. Die Zugehörigkeit entsteht in `hub-investigation-projection`; die Owner-Deklaration steht in Work Breakdown. Beide Quellen müssen berücksichtigt werden. |
+| F5: Viertes, unverbundenes Planmodell | **Teilweise bestätigt** | Ein importiertes Dokument ist erforderlich, aber kein weiteres ausführbares Planmodell. Bisher fehlten die ausdrückliche Verbindung und die Festlegung der Projektion. |
+| F6: S1 muss innerhalb eines Prozesses wiederverwendet werden | **Bestätigt hinsichtlich der technischen Voraussetzung** | `%topic-row` vergleicht das Topic-Objekt nach Identität. Neu erzeugte Interpretationsobjekte könnten die Kandidatenprüfung scheitern lassen. Eine begrenzte Wiederverwendung nach Dokumentversion und Interpretationsidentität ist erforderlich; kein allgemeiner Domain-Resolver. |
+| F7: Ladefolge verhindert einen frühen direkten P3-Resolver | **Bestätigt hinsichtlich der Ladefolge** | `reading.lisp` wird vor dem Hubs-Paket geladen. Ein später Referentenadapter muss nach `investigating-ward-hub-selection` geladen werden. Der frühe Reader darf das noch nicht vorhandene Paket nicht voraussetzen. |
+| F8: `references` erzeugt nur Navigation | **Bestätigt** | Der Effekt verändert weder Work-Status noch Planannahmen. `references` ist derzeit kein formaler Work Relation Contract und bedeutet im Hub-Workspace bereits Schritt→Evidenz. Der neue Fall benötigt eine ausdrücklich begrenzte Bedeutung. |
+| F9: P3-spezifischer Container erzeugt Sonderinfrastruktur | **Teilweise bestätigt** | Ein expliziter Container war vereinbart. Seine Bindung an einen einzelnen P3-Vertrag war unnötig. Dass zwangsläufig jeder weitere Vertrag einen Writer-Zweig benötigt, folgt daraus nicht; die bisherige Planung begünstigte dies aber. |
+| F10: SHOP3 ist nicht beteiligt | **Bestätigt** | Das vorhandene Experiment besitzt eine feste Methode mit acht Stufen. Ergebnisse werden neu berechnet. Der unbekannte Operator wird tatsächlich als `:source-edit` klassifiziert. |
+| F11: Menschliche Entscheidung bleibt flüchtig | **Bestätigt** | Editor-Kontexte und Outcomes liegen in Speicher-Tabellen. Ein dauerhafter Entscheidungsrecord fehlt. Er muss außerdem Engine-Ausgabe, Interpretation und behauptete Entscheidung unterscheiden. |
+
+Maßgebliche Definitionen sind insbesondere [P3 und seine Projektion](/Users/rgb/workspace/hyperdoc-dreyeck-ch/dreyeck/work/investigating-ward-hub-selection.lisp:10), [%topic-row und Writer-Prüfung](/Users/rgb/workspace/hyperdoc-dreyeck-ch/dreyeck/src/work-authoring.lisp:241), [Editor-Kontexte](/Users/rgb/workspace/hyperdoc-dreyeck-ch/dreyeck/src/work-topicmap-editor.lisp:5) und [SHOP3-Klassifikation](/Users/rgb/workspace/hyperdoc-dreyeck-ch/dreyeck/shop3/plan-objects.lisp:42).
+
+Bereits ausgeführte, nicht schreibende Vorprüfungen:
+
+- **G1, Leseseite:** Writer-Kandidat und unabhängig gebildete manuelle Darstellung waren bytegleich und ergaben dieselben Associations. Ein Confirm→Execute-Ablauf wurde damit ausdrücklich nicht nachgewiesen.
+- **G2, Vorprüfung:** Ein zusätzlicher Kommentar änderte den Dateidigest, während die gelesenen Formen unverändert blieben. Ein persistenter P3-Referentenvertrag existiert noch nicht; seine spätere Rekonstruktion konnte deshalb noch nicht getestet werden.
+- **SHOP3:** Der vorhandene Test bestand mit „Verdict B“. Ein unbekannter Operator ergab `:source-edit`.
+
+Es wurden keine Repository-Dateien verändert.
+
+## 2. Architektur und vorhandene Fähigkeiten
+
+Die fünf Fähigkeiten werden getrennt entwickelt und geprüft:
+
+| Fähigkeit | Gegenstand | Aussagegrenze |
+|---|---|---|
+| A | Unveränderlicher Vorschlag und versionierte Interpretation | Interpretation ist zunächst vorgeschlagen. |
+| B | Tatsächlich erzeugte SHOP3-Beurteilung | Modelliertes Ergebnis ist keine Ausführungsberechtigung. |
+| C | Dauerhafte Entscheidung und Provenienz | Aufzeichnung, geprüfter Bedienablauf und authentifizierte Urheberschaft sind unterschiedliche Nachweise. |
+| D | Begrenzter autorisierter Source-Effekt | Ausschließlich der konkret bestätigte Effekt. |
+| E | Reparse, Rekonstruktion und Topicmap | Persistenz und Referentenauflösung werden erneut beobachtet. |
+
+Vorhandene Mechanismen werden wie folgt verwendet:
+
+- Die [Addresses-Bridge](/Users/rgb/workspace/hyperdoc-dreyeck-ch/dreyeck/work/addresses.lisp:313) liefert das Muster für qualifizierte Requests, Warrants und vollständige Read-Sets. Ihr bestehender Vertrag bleibt auf das vorhandene Authority-Paar und den Constraint-Referenten beschränkt. P3 wird nicht als `addresses` ausgegeben.
+- [operation-contract](/Users/rgb/workspace/hyperdoc-dreyeck-ch/dreyeck/src/authority-policy.lisp:58) beschreibt Capability, Permission, Effekt und Verifikation. Seine gegenwärtige Permission-Prüfung unterstützt nur `:anonymous`; sie stellt noch keine menschliche Inspector-Freigabe bereit.
+- Authoring-Envelopes und [%consume-challenge](/Users/rgb/workspace/hyperdoc-dreyeck-ch/dreyeck/src/authenticated-page-authoring.lisp:232) liefern Byte-Bindung und einmaligen Verbrauch unter Lock. Der vorhandene authentifizierte Handler erlaubt ausschließlich FedWiki-Page-Edits. Er darf nicht unverändert für HyperDoc-HTML benutzt werden.
+- Der bestehende Writer mit `%replace-source`, `:before-install` und Reparse bleibt der einzige Schreibpfad. Kein zweiter Writer.
+- CLOGs Pane-Callbacks liefern Verbindungskontext, aber keine authentifizierte menschliche Identität.
+- [topicmap-workspace-reproject](/Users/rgb/workspace/hyperdoc-dreyeck-ch/dreyeck/src/topicmap.lisp:170) erhält Point und History. Der heutige Editor erzeugt dagegen nach Ausführung einen neuen Workspace; dessen Verhalten darf nicht versehentlich als History-Erhaltung behauptet werden.
+- [lisp-critic-recorded](/Users/rgb/workspace/hyperdoc-dreyeck-ch/dreyeck/src/lisp-critic-recorded.lisp:1) ist der Provenienzpräzedenzfall für tatsächliche Engine-Ausgabe, getrennte Beschreibung und überprüfbare Quellenidentität.
+
+### P3: vier verschiedene Gegenstände
+
+1. **Logische Identität:** HyperBook `dreyeck/work/reading`, Owner `ward-hub-trail-selection`, Klasse `hub-investigation-step`, Schritt `P3`.
+2. **Aktuelles Domain-Objekt:** das vorhandene Element aus `*hub-investigation-steps*`.
+3. **Topic:** der projizierte Träger mit Topic-ID `P3` und diesem Domain-Objekt im Object-Slot.
+4. **Source-authoritative Referenz:** noch nicht vorhanden; sie muss später ausdrücklich deklariert und aufgelöst werden.
+
+Der Dateidigest ist Frische- beziehungsweise Revisionsevidenz, kein Bestandteil der logischen Identität. Ein Kommentar darf eine historische Beziehung nicht aufheben; er muss einen bereits vorbereiteten Schreibrequest trotzdem veralten lassen.
+
+## 3. Erster kleinster Slice: den tatsächlichen Revisionsfall lesbar machen
+
+**Beitrag zum Ziel:** A, C als aufgezeichnete Entscheidung und E. Noch kein SHOP3-Assessment und keine Association-Erstellung.
+
+Materialisiert wird ausschließlich der vorliegende Fall:
+
+`Codex Plan v1 → Claude Review → übermittelte Nichtfreigabe → Codex Plan v2`
+
+### Eingabebedingung
+
+Die vollständigen Originalexporte von Plan v1 und v2 müssen vorliegen. Lokal wurden solche Exporte nicht gefunden. Der Review liegt vollständig vor.
+
+Der Implementierer darf Plan v1 nicht aus Claudes Zusammenfassung rekonstruieren. Fehlen Originalexporte, endet die Materialisierung dieses realen Falls mit einem bezeichneten Eingabeblocker. Synthetische Fixtures sind für Tests zulässig, aber kein Ersatz für diese Dokumente.
+
+### Umsetzung
+
+- Kleine Datenobjekte für Dokumentversion, vorgeschlagene Interpretation und aufgezeichnete Entscheidung. Kein neues ausführbares Planmodell.
+- Dokumentversionen bewahren Originalbytes, Digest und übermittelte Herkunft. Interpretationen besitzen eigene ID, Version, Autorenzuschreibung und genaue Bezugsspannen zum Original.
+- `proposed-by`, `interpreted-by` und behaupteter Entscheidender werden getrennt. Der Bootstrap setzt keinen menschlichen Genehmigungsstatus.
+- Die Nichtfreigabe wird als vom Nutzer übermittelte Entscheidung dokumentiert. Weder der Dateidigest noch die Zuschreibung „Claude“ oder „Codex“ authentifiziert den jeweiligen Urheber.
+- Eine Text Page erschließt Originale, Interpretation, Review, Entscheidung und Revision durch native Inspector-Referenzen.
+- Eine abgeleitete Planning-Projektion verwendet die vorhandenen Work- und Hub-Subjekte. Sie erhält die bisherige Hub-Projektion und ergänzt die Dokumentgegenstände aus derselben Provenienzquelle. Kein unabhängig gepflegter zweiter Faktenbestand.
+- P3 kann als bestehender Untersuchungskontext geöffnet werden. Eine persistierte, genehmigte `S1 --references--> P3`-Association wird in diesem Slice nicht behauptet oder erzeugt.
+
+Geplante Dateien:
+
+- `/Users/rgb/workspace/hyperdoc-dreyeck-ch/dreyeck/work/collaborative-planning-reading.lisp`
+- `/Users/rgb/workspace/hyperdoc-dreyeck-ch/dreyeck/pages/work/Collaborative Planning with Codex and SHOP3.html`
+- Ein begrenztes Evidenzverzeichnis unter `/Users/rgb/workspace/hyperdoc-dreyeck-ch/dreyeck/work/` für unveränderte Exporte und Provenienzrecords.
+- `/Users/rgb/workspace/hyperdoc-dreyeck-ch/dreyeck/tests/work-collaborative-planning.lisp`
+- ASDF-Registrierung in [dreyeck.asd](/Users/rgb/workspace/hyperdoc-dreyeck-ch/dreyeck.asd:2730) und Einstieg über [Planning with SHOP3](/Users/rgb/workspace/hyperdoc-dreyeck-ch/dreyeck/pages/work/Planning%20with%20SHOP3.html).
+- Erweiterung des vorhandenen [Browser-Navigationstests](/Users/rgb/workspace/hyperdoc-dreyeck-ch/scripts/test-hubs-reading-navigation.mjs).
+
+### Tests im selben Slice
+
+- Originalbytes und Digests; Zurückweisung fehlender, veränderter oder falsch zugeordneter Exporte.
+- Interpretation bleibt vorgeschlagen; Review wird nicht als SHOP3-Ausgabe dargestellt.
+- Versionsänderungen überschreiben keine historischen Dokumente oder Entscheidungen.
+- Frische Rekonstruktion erhält Dokument- und Interpretationsidentitäten ohne prozessübergreifendes `EQ`.
+- Topic-Objekte verweisen auf tatsächliche Dokumente beziehungsweise vorhandene Domain-Objekte.
+- Point, History und Rücknavigation funktionieren.
+- Frischer Browser: Work Breakdown → Planning / SHOP3 → Fall → Originalplan → Review → Nichtfreigabe → Revision.
+- Bestehende P3-, Ward-Plan-, Wiki-JSON-, Work-, Topicmap- und Catalog-Verträge bleiben unverändert.
+
+**Stopping condition:** Der reale Revisionsfall ist nachvollziehbar; fehlende SHOP3-Beurteilung und fehlende Schreibfreigabe bleiben sichtbar.
+
+## 4. Getrennte Folgeslices
+
+### Slice 2 — Quellengestützte SHOP3-Beurteilung
+
+Voraussetzung: Slice 1 und überprüfbare Interpretationsquellen.
+
+Zuerst wird die unsichere Klassifikation korrigiert: unbekannte Operatoren bleiben als rohe Daten inspizierbar, erhalten aber keine `:source-edit`-Normalisierung. Bekannte Modelloperatoren werden ausdrücklich von schreibenden Operationen unterschieden. Das ist eine eigenständige Sicherheitsvoraussetzung, keine Permission-Erweiterung.
+
+Eine begrenzte Assessment-Domäne beurteilt die vorgeschlagene Interpretation anhand beobachteter Quellenfakten. Mindestens zwei unterschiedliche Methoden unterscheiden beispielsweise:
+
+- fehlender Referentenvertrag → begründeter Halt mit benannter Voraussetzung;
+- vorhandener Referentenvertrag, aber fehlende passende Entscheidung → menschliche Prüfung anfordern;
+- vollständig nachgewiesene Voraussetzungen → Authoring-Vorschau als mögliche Fortsetzung benennen.
+
+Kein Operator schreibt Dateien oder erteilt Genehmigungen.
+
+Betroffen sind `dreyeck/work/planning.lisp`, `dreyeck/shop3/plan-objects.lisp` und ihre Tests; die neue Domäne bleibt vom bisherigen D2-Experiment getrennt. Tatsächliche Resultate werden mit Eingabefakten, Quellen, Domain-/Engine-Identität, Rohplan, Planbaum und modelliertem Endzustand aufgezeichnet.
+
+**Tests:** G3 verändert einen quellengelesenen Fakt in einer Fixture und verlangt einen anderen Assessment-Pfad. Ein gleichwertiger `if/case`-Kontrollablauf dient zum Vergleich. Unterschiedliche Pläne belegen Quellenabhängigkeit, noch keinen zusätzlichen Nutzen von SHOP3. Bei fehlendem Nutzen bleibt dieser Befund ausdrücklich offen.
+
+### Slice 3 — Begrenzter dauerhafter P3-Referentenvertrag
+
+Voraussetzung: klare Referentenidentität; noch keine Schreibfreigabe.
+
+Eine eigene versionierte Interpretationsseite enthält die ausdrückliche Referentendeklaration. Zulässig ist ausschließlich die genannte Kombination aus HyperBook, Owner, Klasse und `P3`.
+
+Der Reader erhält einen kleinen Erweiterungspunkt; der konkrete Adapter wird nach dem Hubs-System geladen. Er:
+
+- prüft die eindeutige Owner-Deklaration in Work Breakdown;
+- prüft die bestehende Zuordnung im Untersuchungscode;
+- verlangt genau einen passenden Schritt des richtigen Typs;
+- liefert das tatsächliche P3-Objekt;
+- verweigert unbekannte, mehrdeutige oder falsch typisierte Referenzen.
+
+Work Breakdown, P3-Definition und Wards Plan bleiben unverändert. Der Read-Set umfasst auch die Owner-Quelle und den neuen Binding-Vertrag.
+
+**Tests:** Request-Auflösung, erneutes Lesen und frischer Prozess liefern denselben logischen Schlüssel. G2 erhält nach einer Kommentaränderung die Identität, verweigert aber einen veralteten Request. Gleichnamige Topics, falsche Owner, falsche Klassen und doppelte P3-Kandidaten werden zurückgewiesen. Die frühe ASDF-Ladefolge wird separat getestet.
+
+### Slice 4 — Inspector-Entscheidung und genau ein persistenter Effekt
+
+Voraussetzung: Slice 3 sowie eine gesondert geprüfte Bestätigungsanbindung. Keine implizite Freigabe durch die Authoring-Umgebung.
+
+Die eigene Interpretationsseite ist Source-Authority und besitzt den vereinbarten expliziten Relationship-Container. Dessen Identität beschreibt die Interpretationsquelle, nicht einen P3-spezifischen Writer-Zweig.
+
+Ein qualifizierter Request-/Plan-Modus folgt dem Addresses-Präzedenzfall. `references` bedeutet hier ausschließlich: Der identifizierte interpretierte Schritt bezeichnet diesen Untersuchungsschritt. Keine Statusänderung, keine Bestätigung seiner Richtigkeit.
+
+Der Inspector zeigt Originalbezug, Interpretationsversion, beide Referenten, Authority, Read-Set, vollständigen Kandidaten und erwarteten Effekt. Die Bestätigung umfasst ausdrücklich auch die angezeigte Interpretation.
+
+Die kleinste fehlende Fähigkeit ist ein Adapter zwischen diesem Kandidaten, dem bestehenden CLOG-Verbindungskontext und einem einmalig verbrauchbaren, effektgebundenen Bestätigungsnachweis. Challenge-Verbrauch und Byte-Bindung werden wiederverwendet beziehungsweise begrenzt zugänglich gemacht; kein zweiter UI-Request-Registry und keine vorgetäuschte FedWiki-Edit-Operation.
+
+Unmittelbar vor dem Schreiben werden Kandidat, Sitzung, Interpretation, Referenten und Read-Set erneut geprüft. Die Bestätigung wird einmalig verbraucht. Der bestehende atomare Dateiersatz persistiert gemeinsam:
+
+- genau die eine Association;
+- einen Entscheidungsrecord mit Quellen-/Effektbindung und bezeichnetem Bedienablauf.
+
+Nichtrekursive Effekt-Digests und der Digest des vollständigen Kandidaten werden getrennt behandelt; kein Record soll seinen eigenen vollständigen Dateidigest enthalten müssen.
+
+Für den lokalen Prototyp heißt das **aufgezeichnete Inspector-Bestätigung mit geprüftem Ablauf**, nicht authentifizierte menschliche Urheberschaft. Der vorhandene Signaturvertrag darf erst nach einer eigenen Authority-Integration stärkere Aussagen tragen.
+
+**Tests:** ohne Bestätigung, anderer Kandidat, anderer Effekt, andere Sitzung, veraltete Quelle, falscher Referent und Wiederverwendung werden verweigert. Gleichzeitige Versuche verbrauchen höchstens einmal. Preview und Navigation schreiben nichts. Fehler vor Installation ändern keine Datei; Fehler nach Installation werden als `unverified` dargestellt.
+
+Reparse und frischer Prozess prüfen Association, Record und tatsächlichen P3-Referenten. Die bestehende Workspace-Reprojektion erhält Point und History.
+
+## 5. Gegenproben, Grenzen und Freigaben
+
+**G1 wird vollständig übernommen:** bestätigter Writer-Ablauf und manueller Eingriff werden auf temporären Quellen verglichen. Eine bloße manuelle Kante besitzt keinen Entscheidungsrecord. Ein vollständig nachgebildeter Record kann dennoch dieselbe Behauptung erzeugen. Ohne unabhängige Authentifizierung darf HyperDoc daraus keinen menschlichen Urheber beweisen.
+
+**G2 wird vollständig übernommen:** Kommentaränderung lässt die logische P3-Referenz bestehen; vorbereitete Requests und Bestätigungen werden wegen geänderter Quellenfrische ungültig.
+
+**G3 wird beim ersten SHOP3-Nutzenanspruch ausgeführt:** Quellenänderung muss die Beurteilung beeinflussen. Zusätzlich wird geprüft, ob SHOP3 gegenüber dem Kontrollablauf überhaupt einen eigenständigen Planungsertrag zeigt.
+
+Negative Tests erhalten passende positive Kontrollen. Bei neu eingeführten Guards zeigen gezielte Testvarianten ohne Guard, dass die Gegenprobe den Fehler tatsächlich entdeckt. Strukturänderungen werden in einem frischen Prozess mit erzwungener Neukompilation geprüft. Browserergebnisse und reine Modelltests werden getrennt berichtet.
+
+Gegenüber Plan v1 entfallen zunächst der P3-Writer-Ausbau, die neue Freigabetabelle und die Behauptung eines bereits autorisierten Kollaborationszyklus. Zuerst werden die tatsächlichen Vorschläge, Kritik, Nichtfreigabe und Revision nachvollziehbar. SHOP3-Beurteilung, Referentenvertrag und persistente Ausführung folgen mit eigenen Abnahmen.
+
+Weiterhin außerhalb dieser Slices:
+
+- Änderung oder Entfernung bestehender Associations;
+- allgemeine Domain-Referenten, Plan-DSL oder Aufgabenverwaltung;
+- automatische Interpretation beliebiger Codex-Pläne;
+- produktive Authentifizierung oder öffentliche Authoring-Freigabe;
+- Crash-Durabilität beziehungsweise Transaktionen über mehrere Quelldateien;
+- Deployment und Änderungen langlebiger Images.
+
+Noch benötigte menschliche Beiträge sind die unveränderten Originalexporte und spätere konkrete Freigaben. Authentifizierte Urheberschaft und ein nachgewiesener zusätzlicher SHOP3-Nutzen bleiben getrennte Entscheidungen. Eine technische Capability, ein Engine-Ergebnis oder dieser Plan ersetzt keine davon.
+
+Der erste Slice ist damit ein überprüfbarer Provenienz- und Lektüreschritt. Der vollständige kollaborative Zyklus benötigt mehrere Slices und wird erst nach deren jeweiligen Nachweisen behauptet.

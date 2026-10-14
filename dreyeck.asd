@@ -2754,6 +2754,16 @@
                       (:file "reading-mech-hubs")
                       (:file "inspecting-hub-selection")
                       (:file "investigating-ward-hub-selection")
+                      (:file "collaborative-planning-reading")
+                      (:module "collaborative-planning-evidence" :components
+                        ((:static-file "case.json")
+                         (:static-file "MANIFEST.txt")
+                         (:static-file "codex-plan-v1-submitted.txt")
+                         (:static-file "claude-review-submitted.txt")
+                         (:static-file "codex-plan-v2-submitted.txt")
+                         (:static-file "chatgpt-recommendation-excerpt.txt")
+                         (:static-file "user-clarification.txt")
+                         (:static-file "slice-1-authorization.txt")))
                       (:module "hubs-evidence" :components
                         ((:static-file "synthetic-selection.json")
                          (:static-file "ward.voices.ustawi.wiki--dewey-alexander-trail.json")))
@@ -2831,6 +2841,7 @@
                       (:static-file "HyperDoc Dogfooding.html")
                       (:static-file "D2 Corpus.html")
                       (:static-file "Planning with SHOP3.html")
+                      (:static-file "Collaborative Planning with Codex and SHOP3.html")
                       (:static-file "D2 Connections.html")
                       (:static-file "Relation Contract informs.html")
                       (:static-file
@@ -2869,6 +2880,7 @@
             (:file "dreyeck/tests/work-how-trails-sources")
             (:file "dreyeck/tests/work-hubs-reading")
             (:file "dreyeck/tests/work-hub-investigation")
+            (:file "dreyeck/tests/work-collaborative-planning")
             (:file "dreyeck/tests/work-shift-click")
             (:file "dreyeck/tests/work-trails-rendered-browser-check")
             (:file "dreyeck/tests/work-deployment-inspection"))
@@ -2885,6 +2897,7 @@
                                       :run-tests)
                     (uiop:symbol-call :dreyeck/work/hubs/tests :run-tests)
                     (uiop:symbol-call :dreyeck/work/hub-investigation/tests :run-tests)
+                    (uiop:symbol-call :dreyeck/work/collaborative-planning/tests :run-tests)
                     (uiop:symbol-call :dreyeck/work/shift-click/tests
                                       :run-tests)
                     (uiop:symbol-call :dreyeck/work/deployment-inspection/tests

@@ -1,0 +1,7 @@
+Plan v2 ist die aktuelle Planungsgrundlage.
+Die vollständigen übermittelten Dokumenttexte (Plan v1, Claude Review, Plan v2) liegen im beigefügten ZIP samt SHA-256-Manifest. Verwende sie quellentreu; fehlende native Exporte oder unbekannte Herkunft nicht behaupten.
+Vor einer Implementation von Slice 1 gelten zwei Präzisierungen:
+1. Stelle die bisher nicht erteilte Implementierungsfreigabe als dokumentierten Verfahrensstand dar. Schreibe dem Nutzer keine ausdrückliche Ablehnungsentscheidung zu, sofern keine solche Quelle vorliegt. Claudes Review, ChatGPTs Empfehlung und eine tatsächliche menschliche Entscheidung bleiben verschiedene Gegenstände.
+2. Ordne Slice 1 einem ausdrücklich bezeichneten Work Item unter Planning / SHOP3 und HyperDoc Dogfooding zu. Die bestehende Hub-/Trail-Untersuchung bleibt ein verlinkter Anwendungsfall, keine allgemeine Planungsautorität.
+Ansonsten keine weitere Architekturrevision. Warte auf die explizite Implementierungsfreigabe für Slice 1.
+Kein Push, Deployment, SSH oder Reload.

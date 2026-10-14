@@ -1,0 +1,46 @@
+# Implementierungsfreigabe — Collaborative Planning, Slice 1
+
+Ich gebe **ausschließlich Slice 1** des revidierten Plans „Kollaborative Planung als nachvollziehbarer HyperDoc-Prozess“ zur lokalen Implementierung frei.
+
+## Ziel
+
+Den tatsächlichen Revisionsvorgang in HyperDoc nachvollziehbar machen:
+
+`Codex Plan v1 → Claude Review → fehlende Implementierungsfreigabe → Codex Plan v2`
+
+Alle Gegenstände und belegten Beziehungen müssen über native HyperDoc-Topicmaps und den Inspector navigierbar sein.
+
+## Arbeitsautorität
+
+Eigenes Work Item: `collaborative-planning-case`
+
+Zuordnung zu Planning / SHOP3 und HyperDoc Dogfooding im bestehenden Work Breakdown.
+
+Die Hub-/Trail-Untersuchung bleibt ein verlinkter Anwendungsfall.
+
+## Verbindliche Grenzen
+
+- Verwende die drei geprüften Originaldokumente aus dem ZIP unverändert.
+- Trenne Originaldokumente, Interpretationen, Review-Befunde und dokumentierten Entscheidungsstand.
+- Dokumentiere **fehlende Implementierungsfreigabe**, keine erfundene ausdrückliche Ablehnung durch den Nutzer.
+- Verwende bestehende HyperDoc-Objekte und native Topicmap-/Workspace-Mechanismen.
+- Erhalte Source-Identität und Provenienz auch nach frischer Rekonstruktion.
+- Jeder Implementierungsschritt enthält die zugehörigen Regressionstests.
+- Verifiziere Navigation, Point und History im frischen Browser.
+
+## Nicht freigegeben
+
+- Slice 2: SHOP3 Assessment
+- Slice 3: persistenter P3-Referentenvertrag
+- Slice 4: Inspector-Genehmigung und Association-Write
+- Neue Authoring- oder Ausführungsberechtigungen
+- Automatische Genehmigungs- oder Statusentscheidungen
+- Push, SSH, Deployment oder Reload langlebiger Lisp-Images
+
+## Abschluss
+
+Implementiere Slice 1, führe die vorgesehenen Tests durch und committe den abgeschlossenen Slice lokal.
+
+Berichte Commit-ID, Arbeitsbaumzustand, tatsächlich erzeugte HyperDoc-Gegenstände, Topicmap-Beziehungen, Testnachweise und verbliebene Grenzen.
+
+Keine nachfolgenden Slices ohne gesonderte Freigabe.

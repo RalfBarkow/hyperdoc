@@ -1,0 +1,456 @@
+{
+  "version": 1,
+  "id": "collaborative-planning-case",
+  "baseRevision": "e85e87913ee7fdcecaaaa6e3f0414cfec23de152",
+  "submittedArchiveSha256": "23e58f2cb6a38e5f475f2d38a2226bc17ca7842bf970d674785ab79085d064d4",
+  "manifestSha256": "da752158e188b00d941b2dcd49c0e7158fb7d72bdf38cac9773466ca989d8cb1",
+  "documents": [
+    {
+      "id": "plan-v1",
+      "file": "codex-plan-v1-submitted.txt",
+      "label": "Codex Plan v1",
+      "kind": "proposal",
+      "authority": "user-submitted:hyperdoc-planning/2026-10-14",
+      "attributedTo": "Codex, as attributed in the user submission",
+      "extent": "complete submitted text",
+      "sha256": "9f25b2776e75da4d121bcf2ea5b13ccbf84134acd3d123e736748b17d252504f"
+    },
+    {
+      "id": "claude-review",
+      "file": "claude-review-submitted.txt",
+      "label": "Claude Review",
+      "kind": "review",
+      "authority": "user-submitted:hyperdoc-planning/2026-10-14",
+      "attributedTo": "Claude Code, as attributed in the user submission",
+      "extent": "complete submitted text",
+      "sha256": "3811f57a518689b359383b5d3895d35e184e6971769f15f5edc666075f9c9c3a"
+    },
+    {
+      "id": "plan-v2",
+      "file": "codex-plan-v2-submitted.txt",
+      "label": "Codex Plan v2",
+      "kind": "revised proposal",
+      "authority": "user-submitted:hyperdoc-planning/2026-10-14",
+      "attributedTo": "Codex, as attributed in the user submission",
+      "extent": "complete submitted text",
+      "sha256": "be5458f54ac3a4bfb36fba6066cdc08c7333c70d60ca46202185458461662e59"
+    },
+    {
+      "id": "chatgpt-recommendation",
+      "file": "chatgpt-recommendation-excerpt.txt",
+      "label": "ChatGPT recommendation",
+      "kind": "recommendation",
+      "authority": "user-submitted:hyperdoc-planning/2026-10-14",
+      "attributedTo": "ChatGPT, as attributed by the user",
+      "extent": "verbatim excerpt from the user-transmitted recommendation; not a complete export",
+      "sha256": "2e5aaf748fe318b0ee127dae725feac5ee561e56c720e693e004ac3ed408411b"
+    },
+    {
+      "id": "user-clarification",
+      "file": "user-clarification.txt",
+      "label": "User clarification before implementation",
+      "kind": "procedural clarification",
+      "authority": "user-submitted:hyperdoc-planning/2026-10-14",
+      "attributedTo": "user message in this conversation; no authenticated principal recorded",
+      "extent": "retained message text, UTF-8 with final LF; not a native export",
+      "sha256": "4622d66d6b118a8564a4d68aeb63d0591a05364097967f1782d46078b3ef50a1"
+    },
+    {
+      "id": "slice-1-authorization",
+      "file": "slice-1-authorization.txt",
+      "label": "Local Slice 1 authorization",
+      "kind": "scope-limited implementation authorization",
+      "authority": "user-submitted:hyperdoc-planning/2026-10-14",
+      "attributedTo": "user message in this conversation; no authenticated principal recorded",
+      "extent": "retained message text, UTF-8 with final LF; not a native export",
+      "sha256": "6a1e88e9d602c14180704c4e3528113a912e79226a4a04675402d7615ffb7435"
+    }
+  ],
+  "interpretations": [
+    {
+      "id": "interpretation-v1",
+      "version": "1",
+      "label": "Interpretation of Plan v1",
+      "proposedBy": "Codex",
+      "status": "proposed, not a human approval",
+      "summary": "Plan v1 proposes one persistent cross-reference to actual P3. This interpretation does not approve its meaning or its execution.",
+      "document": "plan-v1",
+      "start": 345,
+      "end": 443,
+      "quote": "Genau ein persistenter Effekt wird ermöglicht:\n\n`interpreted-codex-step --references--> actual P3`",
+      "coordinates": "unicode-code-points/half-open/v1"
+    },
+    {
+      "id": "interpretation-v2",
+      "version": "1",
+      "label": "Interpretation of Plan v2",
+      "proposedBy": "Codex",
+      "status": "proposed, not a human approval",
+      "summary": "Plan v2 separates document provenance, SHOP3 assessment, referent binding and persistent execution. Its statement assigning a rejection decision to the user is corrected by the separate user clarification; the original bytes remain unchanged.",
+      "document": "plan-v2",
+      "start": 8596,
+      "end": 8722,
+      "quote": "**Beitrag zum Ziel:** A, C als aufgezeichnete Entscheidung und E. Noch kein SHOP3-Assessment und keine Association-Erstellung.",
+      "coordinates": "unicode-code-points/half-open/v1"
+    }
+  ],
+  "findings": [
+    {
+      "id": "F1",
+      "label": "Claude finding F1",
+      "document": "claude-review",
+      "start": 2639,
+      "end": 3089,
+      "quote": "**F1 – S1 wird ohne menschliche Entscheidung verbindlich.** Laut Plan legt der Bootstrap Seite und Importdaten „ohne Genehmigung“ an. Welcher Abschnitt des Codex-Plans S1 ist und was er bedeutet, ist aber selbst eine Planungsaussage. Der Plan legt nicht fest, wer die „manuelle Schrittinterpretation“ schreibt. Da der Bootstrap im Implementierungsslice liegt, schreibt sie faktisch Codex. Genehmigt wird danach nur die Kante, nicht ihr Ausgangspunkt.",
+      "coordinates": "unicode-code-points/half-open/v1"
+    },
+    {
+      "id": "F2",
+      "label": "Claude finding F2",
+      "document": "claude-review",
+      "start": 3091,
+      "end": 3742,
+      "quote": "**F2 – Gate C ist keine Grenze gegenüber Codex.** Codex editiert und committet in diesem Worktree.\n- Ein per Texteditor eingefügtes `<li data-from=… data-relation=\"references\" data-to=…>` hat dieselben Bytes wie das bestätigte Ergebnis.\n- Die Freigabe lebt nur im Speicher („Der frische Prozess besitzt keine übernommene Freigabe“).\n- „Direkter Apply-Aufruf wird abgewiesen“ hilft nur gegen Code, der die Freigabe nicht selbst erzeugt. Im selben Image kann jeder sie erzeugen.\n\nGate C ist also ein Ablauf aus zwei Klicks, kein Nachweis, dass ein Mensch entschieden hat. Über den Writer wird kein Vorschlag verbindlich, über den Bootstrap-Commit schon.",
+      "coordinates": "unicode-code-points/half-open/v1"
+    },
+    {
+      "id": "F3",
+      "label": "Claude finding F3",
+      "document": "claude-review",
+      "start": 3768,
+      "end": 4123,
+      "quote": "**F3 – Die P3-Identität enthält die Dateiversion.** Zwischen Prozessen werden Referenzschlüssel, Klasse und „Quellversion“ (der SHA der ganzen Datei) verglichen. Damit macht jede Änderung an P1/P2, an einem Finding-Text oder an einem Kommentar die P3-Kante ungültig. Für S1 trennt der Plan Version (Occurrence/Request) und Identität richtig, für P3 nicht.",
+      "coordinates": "unicode-code-points/half-open/v1"
+    },
+    {
+      "id": "F4",
+      "label": "Claude finding F4",
+      "document": "claude-review",
+      "start": 4125,
+      "end": 4766,
+      "quote": "**F4 – Der Owner im Schlüssel ist nicht in der Quelle festgehalten, und seine Quelle fehlt im Read-Set.**\n- `ward-hub-trail-selection` ist in [Work Breakdown.html:73](dreyeck/pages/work/Work%20Breakdown.html:73) deklariert.\n- Dass P3 dazugehört, steht nur in der abgeleiteten Kante [investigating-ward-hub-selection.lisp:163](dreyeck/work/investigating-ward-hub-selection.lisp:163).\n- P3 selbst ist ein `defvar`-Listenelement ohne Owner-Slot ([:24](dreyeck/work/investigating-ward-hub-selection.lisp:24)).\n- Work Breakdown fehlt im geplanten Read-Set. Die Aussage „prüft den festgelegten Owner“ stützt sich also auf keine Quelle im Read-Set.",
+      "coordinates": "unicode-code-points/half-open/v1"
+    },
+    {
+      "id": "F5",
+      "label": "Claude finding F5",
+      "document": "claude-review",
+      "start": 4768,
+      "end": 5366,
+      "quote": "**F5 – Ein viertes Planmodell ohne Verbindung zu den anderen.** Es gibt bereits drei Planmodelle:\n- `hub-investigation-plan`\n- Ward's Plan (FedWiki-„Plan“-View, [work-hub-investigation.lisp:37](dreyeck/tests/work-hub-investigation.lisp:37))\n- `hyperdoc-htn-plan-result`\n\nDer Codex-Import kommt als viertes dazu und ist mit den anderen nur über die eine Kante zu P3 verbunden. P3 ist heute schon Topic `\"P3\"` mit Objekt = Step ([:166](dreyeck/work/investigating-ward-hub-selection.lisp:166)). Der Plan sagt nicht, ob die „native Planning Topicmap“ diese Projektion erweitert oder eine dritte anlegt.",
+      "coordinates": "unicode-code-points/half-open/v1"
+    },
+    {
+      "id": "F6",
+      "label": "Claude finding F6",
+      "document": "claude-review",
+      "start": 5368,
+      "end": 5821,
+      "quote": "**F6 – S1 muss interniert sein.** `%topic-row` vergleicht Topic-Objekte mit `EQUAL`, bei CLOS-Instanzen also auf Objektidentität ([work-authoring.lisp:241](dreyeck/src/work-authoring.lisp:241)). Wird S1 bei jeder Projektion neu gebaut, lehnt `%verify-relationship-candidate` jeden Kandidaten mit „the candidate changes the Topics“ ab. Nötig ist dann eine Registry pro `(digest, interpretation-id, S1)`, also genau der Resolver, den der Plan ausschließt.",
+      "coordinates": "unicode-code-points/half-open/v1"
+    },
+    {
+      "id": "F7",
+      "label": "Claude finding F7",
+      "document": "claude-review",
+      "start": 5823,
+      "end": 6242,
+      "quote": "**F7 – Ladefolge.** `dreyeck/work/reading` ist `:serial t`. `reading.lisp` wird als erste Datei geladen, `investigating-ward-hub-selection` erst als dreizehnte ([dreyeck.asd:2743](dreyeck.asd:2743)). Ein Resolver in `reading.lisp` kann `hub-investigation-step` deshalb nicht direkt nennen. Er muss ein Erweiterungspunkt in `project-work-breakdown` werden. Das ist eine Strukturentscheidung, die der Plan nicht ausweist.",
+      "coordinates": "unicode-code-points/half-open/v1"
+    },
+    {
+      "id": "F8",
+      "label": "Claude finding F8",
+      "document": "claude-review",
+      "start": 6925,
+      "end": 7323,
+      "quote": "**F8 – Der Effekt reicht nur für Navigation.** `S1 --references--> P3` ändert keinen Status, keine Entscheidung und keine Planannahme. `references` ist kein Relation Contract: Work Breakdown kennt `informs`, `evidenced-by`, `realized-by` usw., aber nicht `references`. Im Hub-Workspace bedeutet `:references` schon „step → evidence“ ([:169](dreyeck/work/investigating-ward-hub-selection.lisp:169)).",
+      "coordinates": "unicode-code-points/half-open/v1"
+    },
+    {
+      "id": "F9",
+      "label": "Claude finding F9",
+      "document": "claude-review",
+      "start": 7325,
+      "end": 7737,
+      "quote": "**F9 – Der Containername bindet die Seite an genau einen Vertrag.** Der bestehende Writer dokumentiert, dass es bewusst keine Relationship-Collection gibt ([work-authoring.lisp:571](dreyeck/src/work-authoring.lisp:571)). `data-work-relationships=\"codex-p3-references-v1\"` führt eine ein, aber nur für diesen einen Vertrag. Jeder weitere Vertrag bräuchte einen eigenen Container und einen eigenen Zweig im Writer.",
+      "coordinates": "unicode-code-points/half-open/v1"
+    },
+    {
+      "id": "F10",
+      "label": "Claude finding F10",
+      "document": "claude-review",
+      "start": 7760,
+      "end": 8433,
+      "quote": "**F10 – SHOP3 spielt in diesem Slice keine Rolle.**\n- Das einzige SHOP3-Ergebnis wird bei jedem Aufruf neu berechnet ([planning.lisp](dreyeck/work/planning.lisp)). Es gibt kein gespeichertes Ergebnis, das „unverändert bleiben“ könnte.\n- Verdict B gilt weiter: eine Methode, acht feste Schritte, Ablehnung nur, wenn die Quelle fehlt.\n- `classify-hyperdoc-plan-step` stuft jeden unbekannten Operator als `:source-edit` ein ([plan-objects.lisp:47](dreyeck/shop3/plan-objects.lisp:47)).\n\nDie „spätere“ Lösung, den Effekt als beobachtetes Faktum zu nutzen, wiederholt Verdict B, solange es nicht mindestens zwei Methoden gibt, deren Vorbedingungen aus der Quelle gelesen werden.",
+      "coordinates": "unicode-code-points/half-open/v1"
+    },
+    {
+      "id": "F11",
+      "label": "Claude finding F11",
+      "document": "claude-review",
+      "start": 8832,
+      "end": 9172,
+      "quote": "**F11 –** Ausgerechnet die Entscheidung bleibt nicht erhalten, und genau nach ihr fragt die leitende Frage. Vorhandene Vorbilder halten solche Unterschiede fest:\n- Hub-Findings trennen `observed`, `inferred`, `author-reported`, `unsupported` und `needed`.\n- `lisp-critic-recorded.lisp` trennt Engine-Output von Hand-Beschreibung (b915ab08).",
+      "coordinates": "unicode-code-points/half-open/v1"
+    }
+  ],
+  "states": [
+    {
+      "id": "approval-pending",
+      "label": "Implementation authorization not yet granted",
+      "status": "not-yet-granted",
+      "scope": "historical procedural state before the present Slice 1 authorization; not an explicit user rejection",
+      "document": "user-clarification",
+      "start": 333,
+      "end": 430,
+      "quote": "Stelle die bisher nicht erteilte Implementierungsfreigabe als dokumentierten Verfahrensstand dar.",
+      "coordinates": "unicode-code-points/half-open/v1"
+    },
+    {
+      "id": "slice-1-approved",
+      "label": "Local Slice 1 authorization only",
+      "status": "slice-1-only",
+      "scope": "current source-integration authorization, not an Inspector approval, new authoring permission, or authorization for Slices 2–4",
+      "document": "slice-1-authorization",
+      "start": 62,
+      "end": 216,
+      "quote": "Ich gebe **ausschließlich Slice 1** des revidierten Plans „Kollaborative Planung als nachvollziehbarer HyperDoc-Prozess“ zur lokalen Implementierung frei.",
+      "coordinates": "unicode-code-points/half-open/v1"
+    }
+  ],
+  "relations": [
+    {
+      "id": "planning:collaborative-planning-case:contains:plan-v1",
+      "relation": "contains",
+      "to": "plan-v1",
+      "source": "slice-1-authorization",
+      "warrant": "derived",
+      "from": "collaborative-planning-case"
+    },
+    {
+      "id": "planning:collaborative-planning-case:contains:claude-review",
+      "relation": "contains",
+      "to": "claude-review",
+      "source": "slice-1-authorization",
+      "warrant": "derived",
+      "from": "collaborative-planning-case"
+    },
+    {
+      "id": "planning:collaborative-planning-case:contains:plan-v2",
+      "relation": "contains",
+      "to": "plan-v2",
+      "source": "slice-1-authorization",
+      "warrant": "derived",
+      "from": "collaborative-planning-case"
+    },
+    {
+      "id": "planning:collaborative-planning-case:contains:chatgpt-recommendation",
+      "relation": "contains",
+      "to": "chatgpt-recommendation",
+      "source": "slice-1-authorization",
+      "warrant": "derived",
+      "from": "collaborative-planning-case"
+    },
+    {
+      "id": "planning:collaborative-planning-case:contains:user-clarification",
+      "relation": "contains",
+      "to": "user-clarification",
+      "source": "slice-1-authorization",
+      "warrant": "derived",
+      "from": "collaborative-planning-case"
+    },
+    {
+      "id": "planning:collaborative-planning-case:contains:slice-1-authorization",
+      "relation": "contains",
+      "to": "slice-1-authorization",
+      "source": "slice-1-authorization",
+      "warrant": "derived",
+      "from": "collaborative-planning-case"
+    },
+    {
+      "id": "planning:plan-v1:reviewed-by:claude-review",
+      "relation": "reviewed-by",
+      "to": "claude-review",
+      "source": "claude-review",
+      "warrant": "source-observed",
+      "from": "plan-v1"
+    },
+    {
+      "id": "planning:plan-v2:revises:plan-v1",
+      "relation": "revises",
+      "to": "plan-v1",
+      "source": "plan-v2",
+      "warrant": "source-observed",
+      "from": "plan-v2"
+    },
+    {
+      "id": "planning:claude-review:contains:F1",
+      "relation": "contains",
+      "to": "F1",
+      "source": "F1",
+      "warrant": "source-observed",
+      "from": "claude-review"
+    },
+    {
+      "id": "planning:claude-review:contains:F2",
+      "relation": "contains",
+      "to": "F2",
+      "source": "F2",
+      "warrant": "source-observed",
+      "from": "claude-review"
+    },
+    {
+      "id": "planning:claude-review:contains:F3",
+      "relation": "contains",
+      "to": "F3",
+      "source": "F3",
+      "warrant": "source-observed",
+      "from": "claude-review"
+    },
+    {
+      "id": "planning:claude-review:contains:F4",
+      "relation": "contains",
+      "to": "F4",
+      "source": "F4",
+      "warrant": "source-observed",
+      "from": "claude-review"
+    },
+    {
+      "id": "planning:claude-review:contains:F5",
+      "relation": "contains",
+      "to": "F5",
+      "source": "F5",
+      "warrant": "source-observed",
+      "from": "claude-review"
+    },
+    {
+      "id": "planning:claude-review:contains:F6",
+      "relation": "contains",
+      "to": "F6",
+      "source": "F6",
+      "warrant": "source-observed",
+      "from": "claude-review"
+    },
+    {
+      "id": "planning:claude-review:contains:F7",
+      "relation": "contains",
+      "to": "F7",
+      "source": "F7",
+      "warrant": "source-observed",
+      "from": "claude-review"
+    },
+    {
+      "id": "planning:claude-review:contains:F8",
+      "relation": "contains",
+      "to": "F8",
+      "source": "F8",
+      "warrant": "source-observed",
+      "from": "claude-review"
+    },
+    {
+      "id": "planning:claude-review:contains:F9",
+      "relation": "contains",
+      "to": "F9",
+      "source": "F9",
+      "warrant": "source-observed",
+      "from": "claude-review"
+    },
+    {
+      "id": "planning:claude-review:contains:F10",
+      "relation": "contains",
+      "to": "F10",
+      "source": "F10",
+      "warrant": "source-observed",
+      "from": "claude-review"
+    },
+    {
+      "id": "planning:claude-review:contains:F11",
+      "relation": "contains",
+      "to": "F11",
+      "source": "F11",
+      "warrant": "source-observed",
+      "from": "claude-review"
+    },
+    {
+      "id": "planning:plan-v1:interpreted-as:interpretation-v1",
+      "relation": "interpreted-as",
+      "to": "interpretation-v1",
+      "source": "interpretation-v1",
+      "warrant": "derived",
+      "from": "plan-v1"
+    },
+    {
+      "id": "planning:plan-v2:interpreted-as:interpretation-v2",
+      "relation": "interpreted-as",
+      "to": "interpretation-v2",
+      "source": "interpretation-v2",
+      "warrant": "derived",
+      "from": "plan-v2"
+    },
+    {
+      "id": "planning:collaborative-planning-case:documents:approval-pending",
+      "relation": "documents",
+      "to": "approval-pending",
+      "source": "approval-pending",
+      "warrant": "derived",
+      "from": "collaborative-planning-case"
+    },
+    {
+      "id": "planning:approval-pending:documented-by:user-clarification",
+      "relation": "documented-by",
+      "to": "user-clarification",
+      "source": "approval-pending",
+      "warrant": "user-reported",
+      "from": "approval-pending"
+    },
+    {
+      "id": "planning:collaborative-planning-case:documents:slice-1-approved",
+      "relation": "documents",
+      "to": "slice-1-approved",
+      "source": "slice-1-approved",
+      "warrant": "derived",
+      "from": "collaborative-planning-case"
+    },
+    {
+      "id": "planning:slice-1-approved:documented-by:slice-1-authorization",
+      "relation": "documented-by",
+      "to": "slice-1-authorization",
+      "source": "slice-1-approved",
+      "warrant": "user-reported",
+      "from": "slice-1-approved"
+    },
+    {
+      "id": "planning:chatgpt-recommendation:recommends-not-approving:plan-v1",
+      "relation": "recommends-not-approving",
+      "to": "plan-v1",
+      "source": "chatgpt-recommendation",
+      "warrant": "user-reported",
+      "from": "chatgpt-recommendation"
+    },
+    {
+      "id": "planning:plan-v2:qualified-by:user-clarification",
+      "relation": "qualified-by",
+      "to": "user-clarification",
+      "source": "user-clarification",
+      "warrant": "user-reported",
+      "from": "plan-v2"
+    },
+    {
+      "id": "planning:slice-1-authorization:authorizes-local-slice-1:collaborative-planning-case",
+      "relation": "authorizes-local-slice-1",
+      "to": "collaborative-planning-case",
+      "source": "slice-1-approved",
+      "warrant": "user-reported",
+      "from": "slice-1-authorization"
+    },
+    {
+      "id": "planning:collaborative-planning-case:uses-case:hub-investigation",
+      "relation": "uses-case",
+      "to": "hub-investigation",
+      "source": "slice-1-authorization",
+      "warrant": "derived",
+      "from": "collaborative-planning-case"
+    }
+  ]
+}

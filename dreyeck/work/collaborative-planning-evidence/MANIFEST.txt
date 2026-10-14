@@ -1,0 +1,9 @@
+HyperDoc collaborative planning: user-submitted source texts
+
+Dateien: Unveränderte Bytes der drei hier hochgeladenen TXT-Dateien.
+Hashes belegen Integrität dieser Kopien, nicht die Identität der jeweiligen Autoren.
+
+SHA-256  Datei  Beschreibung
+9f25b2776e75da4d121bcf2ea5b13ccbf84134acd3d123e736748b17d252504f  codex-plan-v1-submitted.txt  Von Nutzer übermittelter Codex-Plan v1
+3811f57a518689b359383b5d3895d35e184e6971769f15f5edc666075f9c9c3a  claude-review-submitted.txt  Von Nutzer übermittelter Claude-Review
+be5458f54ac3a4bfb36fba6066cdc08c7333c70d60ca46202185458461662e59  codex-plan-v2-submitted.txt  Von Nutzer übermittelter Codex-Plan v2

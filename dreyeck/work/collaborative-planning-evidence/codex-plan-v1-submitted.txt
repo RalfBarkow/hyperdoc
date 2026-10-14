@@ -1,0 +1,227 @@
+# Minimaler Referentenvertrag für eine genehmigte P3-Association
+
+## 1. Ziel, Ausgangszustand und Grenzen
+
+Beobachteter Stand:
+
+- Worktree: `/Users/rgb/workspace/hyperdoc-dreyeck-ch`
+- Branch: `dreyeck.ch`
+- HEAD: `e85e87913ee7fdcecaaaa6e3f0414cfec23de152`
+- Index und Arbeitsbaum sauber.
+- Keine Aussage über geladene Produktionsdefinitionen.
+
+Genau ein persistenter Effekt wird ermöglicht:
+
+`interpreted-codex-step --references--> actual P3`
+
+Die Authority ist eine eigene Interpretationsseite. Work Breakdown bleibt unverändert. Originaler Codex-Vorschlag, vorhandene SHOP3-Ergebnisse und die P3-Definition werden nicht verändert.
+
+**Vorhanden:** Work-Source-Occurrences, source-gebundene Creation-Requests, Kandidatenprüfung, atomare Dateiersetzung, Reparse, Inspector, native Topicmaps und Workspace-Navigation.
+
+**Noch nicht vorhanden:**
+
+1. Ein dauerhafter, begrenzter Referentenvertrag für P3 und den interpretierten Vorschlagsschritt.
+2. Eine zulässige erste Einfügung in einen ausdrücklich leeren Relationship-Container.
+3. Eine einmalige, sitzungs- und effektgebundene Inspector-Genehmigung.
+
+Geplant wird **ein zusammenhängender Implementierungsslice**, mit internen Prüfgates und seinen Tests. Kein allgemeiner Domain-Objekt-Resolver und kein neuer Writer.
+
+## 2. Identitäten, Referenten und Source-Authority
+
+### P3: vier unterschiedliche Gegenstände
+
+| Gegenstand | Identität und Bedeutung |
+|---|---|
+| Logischer Untersuchungsschritt | Neu festzulegender Schlüssel: HyperBook `dreyeck/work/reading`, Work Item `ward-hub-trail-selection`, Schritt `P3` |
+| Lisp-Domain-Objekt | Das vorhandene `hub-investigation-step`, das `hub-investigation-step("P3")` zurückgibt |
+| Topicmap-Topic | Eine Darstellung dieses Objekts; Topic-ID, Position und Darstellung sind keine Domain-Identität |
+| Source-authoritative Referenz | Neue, überprüfte Deklaration in der Interpretationsquelle, die genau diesen logischen Schlüssel bezeichnet |
+
+Die vorhandene Definition enthält bereits die ID `P3` und eine rekonstruierbare Schrittmenge. Sie enthält **noch keinen vollständigen dauerhaften Referentenvertrag**. Dieser wird zuerst ergänzt, ohne die P3-Definition zu ändern.
+
+Als geprüfte Definitionsevidenz wird festgehalten:
+
+- Repository-Authority: `local:/Users/rgb/workspace/hyperdoc`
+- Revision: `e85e87913ee7fdcecaaaa6e3f0414cfec23de152`
+- Datei: `dreyeck/work/investigating-ward-hub-selection.lisp`
+- SHA-256: `0e4d16cd7aa3b42eeaf8765a6bd7ff39138fb7ffc51dee9f40d826f23d3f0b6c`
+
+Der neue Resolver prüft den festgelegten Owner, die Quellversion und die erwartete Klasse. Innerhalb der vorhandenen Schrittmenge muss genau ein passendes P3 existieren. Null Treffer, mehrere Treffer oder eine falsche Klasse führen zur Ablehnung.
+
+Innerhalb eines Prozesses muss die Auflösung auf das vorhandene P3-Objekt zeigen. Zwischen Prozessen werden **kanonischer Referenzschlüssel, Referentenklasse und Quellversion** verglichen; niemals prozessübergreifendes Lisp-`EQ`.
+
+### Codex-Vorschlag und interpretierter Schritt
+
+Ein expliziter Dateiimport besteht aus:
+
+- unveränderten UTF-8-Originalbytes;
+- einem kleinen Metadatensatz mit Herkunft, Original-Digest, Formatversion und zugrunde liegendem Repository-Zustand;
+- genau einer manuellen Schrittinterpretation `S1`, einschließlich ihres geprüften Quellbereichs.
+
+Es gibt keinen allgemeinen Planparser und keine Evaluation importierten Textes.
+
+Der Vorschlags-Digest identifiziert die unveränderliche Originalversion. Der interpretierte Schritt erhält den Schlüssel:
+
+`(proposal-digest, interpretation-id, S1)`
+
+Die aktuelle Version der veränderbaren Interpretationsquelle ist deren vollständiger Byte-Digest. Diese Version gehört zur Source-Occurrence und zum Änderungsrequest, **nicht** zur Identität des unveränderten Schrittobjekts. Dadurch verändert die alleinige Association-Einfügung keine Topic-Referenten und bleibt mit der bestehenden Kandidatenprüfung vereinbar.
+
+Regressionstests verwenden ausdrücklich synthetische Importdateien. Ein tatsächlicher Demonstrationsimport benötigt einen vom Nutzer bereitgestellten Originalexport; seine Herkunft darf nicht erfunden werden.
+
+### Interpretationsseite und Container
+
+Neue Text Page: **Interpreting a Codex Plan for P3**.
+
+Sie enthält:
+
+- ihre stabile Interpretationsidentität;
+- den Bezug zur unveränderlichen Vorschlagsversion;
+- source-backed Referenzdeklarationen für `S1` und P3;
+- genau einen zunächst leeren Container:
+
+```html
+<ul data-work-relationships="codex-p3-references-v1"></ul>
+```
+
+Die Referenzsyntax erhält genau zwei zugelassene Fälle:
+
+- interpretierter Vorschlagsschritt `S1`;
+- `hub-investigation-step` P3 unter dem festgelegten Owner.
+
+Keine beliebigen Klassennamen, Lisp-Ausdrücke, URLs oder Dateipfade werden als Referenten ausgewertet.
+
+Eine P3-Referenzdeklaration ist eine Darstellung des vorhandenen Domain-Objekts. Sie erzeugt keinen Ersatz-Schritt und verleiht keine Änderungsautorität über dessen Definition.
+
+Der Bootstrap erstellt Seite und Importdaten ohne Association und ohne Genehmigung. Er ist eine initiale Source-Integration, kein vorweggenommener Authoring-Effekt.
+
+## 3. Ablauf und Wiederverwendung des bestehenden Writers
+
+### Gate A — Referentenvertrag
+
+Ein gemeinsamer, lesender Auflösungspfad wird von folgenden Stellen verwendet:
+
+- Work-Projektion;
+- Rekonstruktion deklarierter Topics;
+- Creation-Request;
+- Kandidatenprüfung;
+- Reparse und frische Rekonstruktion.
+
+Bestehende page-basierte Work-Deklarationen behalten ihren bisherigen Vertrag. Neue Referenzdeklarationen werden außerhalb der ausdrücklich zugelassenen Interpretationsquelle abgewiesen.
+
+Der Prüf-Read-Set umfasst Interpretationsquelle, Importmetadaten, Originalvorschlag und P3-Definitionsevidenz. Fehlende oder nicht passende Authority führt zu einer sichtbaren Ablehnung, ohne Fallback auf Titel oder Seitenlinks.
+
+**Gate:** Solange die Endpunkte nicht eindeutig und quellengestützt auflösbar sind, wird keine Schreibfähigkeit ergänzt.
+
+### Gate B — Genau eine erste Einfügung
+
+Für diesen Vertrag wird der bestehende Insertion-Path erweitert:
+
+- Der Container muss eindeutig, ausdrücklich deklariert und zunächst tatsächlich leer sein; nur Whitespace ist zulässig.
+- Die einzige erlaubte Einfügung ist `S1 --references--> P3`.
+- Fehlender Container, mehrere Container, eine vorhandene Association oder eine nicht zugelassene Quelle werden abgewiesen.
+- Die bisherige Ablehnung gewöhnlicher Seiten ohne Relationship-Anker bleibt erhalten.
+
+Kandidatenbildung, `%replace-source`, atomare Installation und Reparse werden wiederverwendet. Es entsteht kein zweiter Schreibpfad.
+
+Die Kandidatenprüfung muss beweisen: genau ein neuer Relationship-Eintrag; alle Deklarationen, Referenten und sonstigen Quellbytes unverändert.
+
+### Gate C — Inspector-Bestätigung
+
+Die vorhandenen Preview-/Execute-Aktionen enthalten keine ausreichende Genehmigung. Eine kleine, ausschließlich authoring-seitige Ergänzung verwendet die vorhandene pane-bewusste `clog-view`-Anbindung und CLOG-Verbindungsdaten.
+
+Der Inspector zeigt vor der Bestätigung:
+
+- Authority und geprüfte Ausgangsversion;
+- Originalvorschlag und dessen Digest;
+- beide kanonischen Referenten samt Quellversion;
+- Relationstyp;
+- exakte geplante Einfügung und erwartete Nachbedingungen.
+
+Zwei getrennte Aktionen:
+
+1. **Confirm exactly this change** — erzeugt nur eine serverseitige Freigabe.
+2. **Execute confirmed change** — prüft erneut und führt den bestätigten Effekt aus.
+
+Die Freigabe liegt nicht im gemeinsam inspizierten Planobjekt und nicht in clientseitigen Flags. Sie ist an die aktuelle CLOG-Verbindung und Inspector-Instanz sowie an Authority, Read-Set, Endpunkte, Relation und Kandidaten-Digest gebunden.
+
+Der Verbrauch wird gegen doppelte beziehungsweise konkurrierende Ausführung synchronisiert. Unmittelbar vor Installation werden Bindung, Quellen und Referenten erneut geprüft. Eine veraltete Freigabe wird ungültig; sobald der Schreibversuch zugelassen wurde, ist sie verbraucht — auch bei anschließendem `:unverified`.
+
+Die Genehmigungsprüfung gilt auch bei direktem Aufruf des Apply-/Execution-Pfads für diese Request-Klasse. Der alte Execute-Button darf keine Umgehung ermöglichen.
+
+Navigation, Import, Preview und Darstellung schreiben nichts. Generische Statusänderungen oder andere Relationsoperationen werden für diese Referenzdeklarationen nicht angeboten.
+
+### Gate D — Beobachtung und Rekonstruktion
+
+Nach Installation:
+
+1. Geschriebene Quelle erneut lesen.
+2. Association aus der Quelle projizieren.
+3. Tatsächliche Referenten erneut prüfen.
+4. Native Planning Topicmap aktualisieren.
+5. Point und History beim expliziten Reprojektieren erhalten.
+6. In einem neuen Prozess dieselbe Quelle rekonstruieren und die kanonischen Identitäten vergleichen.
+
+Ein fehlgeschlagener Reparse oder eine abweichende Referentenidentität wird als `:unverified` sichtbar. Keine automatische Wiederholung und keine Behauptung eines verifizierten Erfolgs.
+
+## 4. Betroffene Dateien und Tests
+
+| Datei beziehungsweise Gruppe | Geplante Änderung |
+|---|---|
+| `dreyeck/work/reading.lisp` | Begrenzte Referenzdeklarationen, Source-Occurrence-Metadaten, gemeinsamer Resolver und Creation-Validierung |
+| `dreyeck/work/operation-requests.lisp` | `declared-work-topic` und Request-Rekonstruktion gegen denselben Resolver prüfen; keine alternative Auflösung einführen |
+| `dreyeck/work/addresses.lisp` | `relationship-insertion-position`: geprüfter leerer Container nur für den neuen Vertrag |
+| `dreyeck/src/work-authoring.lisp` | Read-Set-/Referentenprüfung in Planung, Kandidatenprüfung und Reparse; Genehmigung am Apply-/Execution-Pfad absichern |
+| `dreyeck/src/work-topicmap-editor.lisp` | Begrenzte Ziel-/Relationsauswahl und Routing zur bestätigungspflichtigen Preview |
+| Neu: `dreyeck/work/codex-plan-references.lisp` | Importmodell, kanonische Referenzen, geschlossene Auflösung und lesende Inspector-/Topicmap-Views |
+| Neu: `dreyeck/src/work-referent-authoring.lisp` | Einmalige Bestätigung, sitzungsgebundene Freigabe und deren Prüfung; kein eigener Writer |
+| Neu: `dreyeck/pages/work/Interpreting a Codex Plan for P3.html` und registrierte Importdaten | Bootstrap der eigenen Authority mit leerem Container |
+| `dreyeck/pages/work/Planning with SHOP3.html` | Verweis auf den Vertragsprototyp und klare Abgrenzung zur späteren Planerintegration |
+| Neu: `dreyeck/tests/work-referents.lisp`, `dreyeck/tests/work-referent-authoring.lisp` | Referenten-, Authority-, Persistenz- und Genehmigungsregressionen |
+| Neu: `scripts/test-work-referent-navigation.mjs` | Frischer Inspector, getrennte Browser-Sitzungen und Prozessneustart |
+| `dreyeck.asd` | Registrierung; Lesemodell im Reading, Schreib-/Bestätigungsfähigkeit ausschließlich authoring-seitig |
+
+P3-Definitionsdatei, Work Breakdown und SHOP3-Normalizer werden in diesem Slice nicht verändert.
+
+**Positive Abnahme**
+
+- Import und Preview lassen Originaldateien und Interpretation unverändert.
+- Genehmigte Ausführung fügt genau die erwartete Association ein.
+- Originalvorschlag, Metadaten und P3-Definition bleiben bytegleich.
+- Reparse und Prozessneustart zeigen dieselben kanonischen Referenten.
+- Der native Topicmap-Endpunkt öffnet tatsächlich P3 im Inspector.
+- Topic-Auswahl und Rücknavigation ändern Point/History erwartungsgemäß.
+- Der frische Prozess besitzt keine übernommene Freigabe.
+
+**Negative Abnahme**
+
+- Keine Bestätigung; geänderter Vorschlag; veraltete Quelle.
+- Andere Association als bestätigt; verbrauchte Freigabe; andere Sitzung.
+- Unbekannter, falsch typisierter oder mehrdeutiger Referent.
+- Fehlende/falsche Authority; fehlende oder mehrere Container.
+- Geänderter Container; Anwendung auf einer nicht zugelassenen Quelle.
+- Doppelte Anlage; doppelte Referenzdeklaration.
+- Reparse oder frische Rekonstruktion ergibt eine andere Identität.
+- Direkter Apply-/Execute-Aufruf ohne passende Freigabe.
+- Fehler nach Installation wird als unverified ausgewiesen, nicht erneut ausgeführt.
+
+Alle Effektprüfungen arbeiten auf registrierten temporären Authority-Kopien. Zusätzlich laufen die bestehenden Work-Reading-/Authoring-, Hub-/Trail-, Topicmap-/TALA- und Catalog-Regressionen. Die bisherigen normalen Work-Verträge müssen unverändert bestehen.
+
+## 5. Nachgelagerte Arbeiten, Risiken und Freigabe
+
+Die neue Seite verweist auf das bestehende Work Item sowie **Planning / SHOP3** und **HyperDoc Dogfooding**. Work Breakdown erhält weder neue Statuswerte noch automatische Änderungen. Es gibt zunächst eine native Planning-Projektion mit gemeinsam aufgelösten Domain-Objekten, keine unabhängig gepflegten Work-/Evidence-Duplikate.
+
+Später könnte SHOP3 den Effekt als beobachtetes Faktum berücksichtigen: Association vorhanden, Authority-Version geprüft, Referenten rekonstruiert. Ein modellierter Planungsschritt oder eine menschliche Bestätigung allein genügt dafür nicht. Eine neue SHOP3-Domäne gehört ausdrücklich nicht in diesen Slice.
+
+Die unbekannten Operatoren als `:source-edit` klassifizierende Normalisierung bleibt eine **unabhängige, noch zu korrigierende Voraussetzung** jeder späteren ausführungsbezogenen Integration. Sie wird hier weder verwendet noch als Schreibberechtigung interpretiert.
+
+Außerhalb dieses Slice bleiben:
+
+- Korrektur und Entfernung vorhandener Associations;
+- allgemeine Referentenregistrierung, Planparser oder Editorplattform;
+- automatische Codex-/SHOP3-Ausführung;
+- dauerhafte, authentifizierte Entscheidungsarchive;
+- Produktionsautorisierung, Deployment und öffentliche Dienste.
+
+Die lokale Inspector-Bestätigung ist ein überprüfbarer Interaktionsvertrag, keine personenbezogene Produktionsauthentifizierung. Der bestehende atomare Dateiwriter ist außerdem keine allgemeine Transaktion über mehrere Dateien; der Read-Set wird erneut geprüft, ohne eine umfassende Prozess- oder Filesystem-Isolation zu behaupten.
+
+Die Architekturentscheidungen für diesen Plan sind abgeschlossen. Erforderlich bleiben die unabhängige Prüfung durch Claude Code, anschließend eine ausdrückliche Implementierungsfreigabe und für einen realen Demonstrationsimport die unveränderte Originaldatei. Die heutige Planungsphase verändert keine Repository-Dateien und erteilt keine Ausführungsfreigabe.

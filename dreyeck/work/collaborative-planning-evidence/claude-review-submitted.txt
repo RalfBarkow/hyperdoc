@@ -1,0 +1,144 @@
+Ich prüfe gerade die Faktenbehauptungen des Plans (HEAD und SHA-256 stimmen; die Repository-Authority sehe ich mir noch an). Danach lese ich Work-Reading, Writer, Topicmap-Editor und SHOP3.
+
+Ich habe den `addresses`-Bridge-Mechanismus (Warrant, Read-Set, dauerhafter Resolver) geprüft und er ähnelt stark dem geplanten Neubau. Jetzt schaue ich mir den Writer in `work-authoring.lisp` an.
+
+Ich prüfe jetzt die ASDF-Abhängigkeiten (ob `reading.lisp` das P3-Objekt aus dem Hubs-Paket überhaupt erreichen kann) und danach SHOP3/Planning.
+
+Writer und Topicmap-Editor gelesen – die Preview→Execute-Kette führt bereits deterministisch den previewten Kandidaten aus. Jetzt prüfe ich, ob Inspector-Thunks schon verbindungsgebunden sind, und welche Provenienz-Modelle (Lisp-Critic-Records, Evaluation Record) bereits existieren.
+
+Die CLOG-Klick-Handler sind bereits pro Verbindung am gerenderten Pane vorhanden, wodurch sich die geplante „sitzungsgebundene Freigabe“ größtenteils erübrigt. Jetzt prüfe ich die bestehenden Autorisierungs- und Envelope-Mechanismen (`authority-policy`, `authoring-envelope`, `authenticated-page-authoring`).
+
+Fast fertig: Work Breakdown deklariert bereits `ward-hub-trail-selection` und `planning`, P3 ist schon Topic im Hub-and-Trail-Workspace. Als Nächstes prüfe ich die Hub-Investigation-Tests und die Work-Topic-Rekonstruktion, bevor ich den Bericht schreibe.
+
+# Review: Plan „Minimaler Referentenvertrag für eine genehmigte P3-Association“
+
+Ich habe den Plan gegen `dreyeck.ch` @ `e85e8791` (sauber) geprüft und nur gelesen: nichts geändert, kein Commit, kein Push, kein Reload.
+
+**Ausgangsangaben:**
+- HEAD stimmt.
+- Der SHA-256 `0e4d16cd…f0b6c` von `investigating-ward-hub-selection.lisp` stimmt.
+- `local:/Users/rgb/workspace/hyperdoc` ist die übliche Authority-Konvention ([reading-mech-hubs.lisp:17](dreyeck/work/reading-mech-hubs.lisp:17)). Der Checkout dort steht aber auf `workflow` und enthält die Datei nicht. Die Authority muss deshalb über `make-git-revision-reference` aufgelöst werden, nicht über den Pfad.
+
+## Kurzurteil
+
+**Nicht freigabefähig in dieser Form.** Der technische Kern ist solide: Endpunkte werden quellengestützt aufgelöst, die erste Einfügung geht in einen leeren Container, und nach Reparse und Neustart wird verglichen. Aber der Slice liefert nur eine **Querverweis-Kante**, keinen Kollaborationszyklus.
+
+Zwei seiner Behauptungen lassen sich am gespeicherten Ergebnis nicht überprüfen:
+- dass die Kante „autorisiert“ ist;
+- dass die Provenienz unterscheidbar bleibt.
+
+Außerdem baut er drei Mechanismen nach, die es schon gibt.
+
+## Befunde nach Prüffrage
+
+### 1. Planungsautorität
+
+**F1 – S1 wird ohne menschliche Entscheidung verbindlich.** Laut Plan legt der Bootstrap Seite und Importdaten „ohne Genehmigung“ an. Welcher Abschnitt des Codex-Plans S1 ist und was er bedeutet, ist aber selbst eine Planungsaussage. Der Plan legt nicht fest, wer die „manuelle Schrittinterpretation“ schreibt. Da der Bootstrap im Implementierungsslice liegt, schreibt sie faktisch Codex. Genehmigt wird danach nur die Kante, nicht ihr Ausgangspunkt.
+
+**F2 – Gate C ist keine Grenze gegenüber Codex.** Codex editiert und committet in diesem Worktree.
+- Ein per Texteditor eingefügtes `<li data-from=… data-relation="references" data-to=…>` hat dieselben Bytes wie das bestätigte Ergebnis.
+- Die Freigabe lebt nur im Speicher („Der frische Prozess besitzt keine übernommene Freigabe“).
+- „Direkter Apply-Aufruf wird abgewiesen“ hilft nur gegen Code, der die Freigabe nicht selbst erzeugt. Im selben Image kann jeder sie erzeugen.
+
+Gate C ist also ein Ablauf aus zwei Klicks, kein Nachweis, dass ein Mensch entschieden hat. Über den Writer wird kein Vorschlag verbindlich, über den Bootstrap-Commit schon.
+
+### 2. Objektidentität
+
+**F3 – Die P3-Identität enthält die Dateiversion.** Zwischen Prozessen werden Referenzschlüssel, Klasse und „Quellversion“ (der SHA der ganzen Datei) verglichen. Damit macht jede Änderung an P1/P2, an einem Finding-Text oder an einem Kommentar die P3-Kante ungültig. Für S1 trennt der Plan Version (Occurrence/Request) und Identität richtig, für P3 nicht.
+
+**F4 – Der Owner im Schlüssel ist nicht in der Quelle festgehalten, und seine Quelle fehlt im Read-Set.**
+- `ward-hub-trail-selection` ist in [Work Breakdown.html:73](dreyeck/pages/work/Work%20Breakdown.html:73) deklariert.
+- Dass P3 dazugehört, steht nur in der abgeleiteten Kante [investigating-ward-hub-selection.lisp:163](dreyeck/work/investigating-ward-hub-selection.lisp:163).
+- P3 selbst ist ein `defvar`-Listenelement ohne Owner-Slot ([:24](dreyeck/work/investigating-ward-hub-selection.lisp:24)).
+- Work Breakdown fehlt im geplanten Read-Set. Die Aussage „prüft den festgelegten Owner“ stützt sich also auf keine Quelle im Read-Set.
+
+**F5 – Ein viertes Planmodell ohne Verbindung zu den anderen.** Es gibt bereits drei Planmodelle:
+- `hub-investigation-plan`
+- Ward's Plan (FedWiki-„Plan“-View, [work-hub-investigation.lisp:37](dreyeck/tests/work-hub-investigation.lisp:37))
+- `hyperdoc-htn-plan-result`
+
+Der Codex-Import kommt als viertes dazu und ist mit den anderen nur über die eine Kante zu P3 verbunden. P3 ist heute schon Topic `"P3"` mit Objekt = Step ([:166](dreyeck/work/investigating-ward-hub-selection.lisp:166)). Der Plan sagt nicht, ob die „native Planning Topicmap“ diese Projektion erweitert oder eine dritte anlegt.
+
+**F6 – S1 muss interniert sein.** `%topic-row` vergleicht Topic-Objekte mit `EQUAL`, bei CLOS-Instanzen also auf Objektidentität ([work-authoring.lisp:241](dreyeck/src/work-authoring.lisp:241)). Wird S1 bei jeder Projektion neu gebaut, lehnt `%verify-relationship-candidate` jeden Kandidaten mit „the candidate changes the Topics“ ab. Nötig ist dann eine Registry pro `(digest, interpretation-id, S1)`, also genau der Resolver, den der Plan ausschließt.
+
+**F7 – Ladefolge.** `dreyeck/work/reading` ist `:serial t`. `reading.lisp` wird als erste Datei geladen, `investigating-ward-hub-selection` erst als dreizehnte ([dreyeck.asd:2743](dreyeck.asd:2743)). Ein Resolver in `reading.lisp` kann `hub-investigation-step` deshalb nicht direkt nennen. Er muss ein Erweiterungspunkt in `project-work-breakdown` werden. Das ist eine Strukturentscheidung, die der Plan nicht ausweist.
+
+### 3. Editierbarkeit
+
+Positiv: Ein dauerhafter und wieder lesbarer Effekt über die vorhandene Kette Create relationship → Preview → Execute → Reread ist schon nachgewiesen ([WORK-EDITOR-DEMO.md](dreyeck/WORK-EDITOR-DEMO.md), [work-topicmap-editor.lisp:182](dreyeck/src/work-topicmap-editor.lisp:182)). Die geplante Erweiterung ist begründet:
+- Seiten ohne Statement werden abgelehnt ([work-authoring.lisp:703](dreyeck/src/work-authoring.lisp:703)).
+- Ohne Anker meldet der Writer „No relationship insertion anchor“ ([addresses.lisp:246](dreyeck/work/addresses.lisp:246)).
+- Jede Topic-Deklaration braucht ein `page=`-Attribut ([reading.lisp:793](dreyeck/work/reading.lisp:793)).
+
+**F8 – Der Effekt reicht nur für Navigation.** `S1 --references--> P3` ändert keinen Status, keine Entscheidung und keine Planannahme. `references` ist kein Relation Contract: Work Breakdown kennt `informs`, `evidenced-by`, `realized-by` usw., aber nicht `references`. Im Hub-Workspace bedeutet `:references` schon „step → evidence“ ([:169](dreyeck/work/investigating-ward-hub-selection.lisp:169)).
+
+**F9 – Der Containername bindet die Seite an genau einen Vertrag.** Der bestehende Writer dokumentiert, dass es bewusst keine Relationship-Collection gibt ([work-authoring.lisp:571](dreyeck/src/work-authoring.lisp:571)). `data-work-relationships="codex-p3-references-v1"` führt eine ein, aber nur für diesen einen Vertrag. Jeder weitere Vertrag bräuchte einen eigenen Container und einen eigenen Zweig im Writer.
+
+### 4. SHOP3-Nutzen
+
+**F10 – SHOP3 spielt in diesem Slice keine Rolle.**
+- Das einzige SHOP3-Ergebnis wird bei jedem Aufruf neu berechnet ([planning.lisp](dreyeck/work/planning.lisp)). Es gibt kein gespeichertes Ergebnis, das „unverändert bleiben“ könnte.
+- Verdict B gilt weiter: eine Methode, acht feste Schritte, Ablehnung nur, wenn die Quelle fehlt.
+- `classify-hyperdoc-plan-step` stuft jeden unbekannten Operator als `:source-edit` ein ([plan-objects.lisp:47](dreyeck/shop3/plan-objects.lisp:47)).
+
+Die „spätere“ Lösung, den Effekt als beobachtetes Faktum zu nutzen, wiederholt Verdict B, solange es nicht mindestens zwei Methoden gibt, deren Vorbedingungen aus der Quelle gelesen werden.
+
+### 5. Provenienz
+
+| Gegenstand | Unterscheidbar? | Nach Neustart |
+|---|---|---|
+| Codex-Original | ja (Bytes + Digest) | ja |
+| Interpretation S1 | ja, aber ohne Urheber | ohne Urheber |
+| SHOP3-Ergebnis | nicht vorhanden | — |
+| Menschliche Entscheidung | nur im Speicher | **nein** |
+| Ausführungsevidenz | `<li>` + Outcome im Speicher | nur `<li>`, nicht von einem Handedit unterscheidbar |
+
+**F11 –** Ausgerechnet die Entscheidung bleibt nicht erhalten, und genau nach ihr fragt die leitende Frage. Vorhandene Vorbilder halten solche Unterschiede fest:
+- Hub-Findings trennen `observed`, `inferred`, `author-reported`, `unsupported` und `needed`.
+- `lisp-critic-recorded.lisp` trennt Engine-Output von Hand-Beschreibung (b915ab08).
+
+### 6. Geltungsbereich: was es schon gibt
+
+| Plan baut neu | Vorhanden |
+|---|---|
+| Einmal-Freigabe, Verbrauch unter Lock, an die Bytes gebunden | `%consume-challenge` ([authenticated-page-authoring.lisp:232](dreyeck/src/authenticated-page-authoring.lisp:232)), Envelope bindet die Body-Bytes |
+| Vertrag mit Permission, Capability, Replay, Audit | `operation-contract` ([authority-policy.lisp:58](dreyeck/src/authority-policy.lisp:58)) |
+| Read-Set über mehrere Authorities, Prüfung vor dem Install | `%addresses-read-set-current` ([addresses.lisp:313](dreyeck/work/addresses.lisp:313)), `:before-install` ([work-authoring.lisp:236](dreyeck/src/work-authoring.lisp:236)) |
+| Begrenzte Relation zwischen zwei Authorities, nur ein zugelassenes Paar | `request-addresses-bridge` ([addresses.lisp:321](dreyeck/work/addresses.lisp:321), [:336](dreyeck/work/addresses.lisp:336)) |
+| Definitionsevidenz (Repository, Revision, Datei) | `make-git-revision-reference` / `ensure-git-evidence-file` ([reading-mech-hubs.lisp:17](dreyeck/work/reading-mech-hubs.lisp:17)) |
+| Sitzungsbindung | CLOG-Handler werden schon pro Pane und Verbindung gesetzt (`set-on-mouse-click` in `clog-moldable-inspector/inspector.lisp`) |
+
+Die Addresses-Bridge ist der nächste Präzedenzfall: Dort wurde dasselbe Problem schon gelöst, als Unterklasse von Request und Plan mit Verteilung (Dispatch) über den bestehenden Writer. Eine verbindungsgebundene Freigabetabelle widerspricht außerdem [work-topicmap-editor.lisp:5](dreyeck/src/work-topicmap-editor.lisp:5) („never a UI registry“).
+
+### 7. Kleinster Gegenversuch
+
+- **G1 (entscheidend):**
+  - Auf einer temporären Kopie das erwartete `<li>` per Texteditor einfügen, dann Reparse und Neustart.
+  - Als positive Kontrolle dasselbe über Confirm → Execute einfügen.
+  - Sind beide Ergebnisse bytegleich und gleich projiziert, lässt sich „autorisiert“ am Ergebnis nicht erkennen. Dann erreicht der Prototyp sein Ziel nicht.
+- **G2:** Einen Kommentar in der P3-Datei ändern. Wird die Kante `:unverified`, hängt die Identität an den Dateibytes (F3).
+- **G3 (Folgeslice):** Einen Fakt in der Quelle umschalten. Ändert sich der SHOP3-Plan nicht, gilt weiter Verdict B.
+
+## Notwendige Änderungen am Plan
+
+1. **Den Anspruch zuschneiden.** Entweder behauptet der Slice nur: „Ein importierter Codex-Schritt lässt sich über den vorhandenen Writer mit einem Domain-Objekt verknüpfen und übersteht Reparse und Neustart“, ohne „autorisiert“ und „Kollaboration“. Oder Punkt 2 wird umgesetzt.
+2. **Die Entscheidung dauerhaft speichern.** Im selben atomaren Ersatz wie die Kante einen Datenrecord schreiben: Kandidaten-Digest, Read-Set-Digests, Zeit, Pfad (analog zum Addresses-Warrant). Ausdrücklich als Behauptung kennzeichnen, nicht als Beweis. G1 muss danach einen Unterschied zeigen.
+3. **Rollen unterscheiden:** `proposed-by: codex`, `interpreted-by`, `confirmed-by`. S1 schreibt der Mensch oder bestätigt sie im Inspector.
+4. **Identität von Frische trennen.** P3-Identität ist (Owner-Key, Klasse, `P3`); der Dateidigest ist nur Frischeevidenz. Work Breakdown gehört in den Read-Set, oder der Owner fällt aus dem Schlüssel.
+5. **Gate C auf Vorhandenes stützen:** Sitzungsbindung von CLOG übernehmen, Verbrauch nach dem Muster von `%consume-challenge`, Vertrag als `operation-contract`. Ausdrücklich als Schutz des Bedienablaufs ausweisen, nicht als Autoritätsgrenze.
+6. **Als qualifizierten Modus implementieren**, wie `addresses-creation-request` → `plan-/apply-addresses-creation`, oder begründen, warum nicht.
+7. **Offene Strukturentscheidungen benennen:** Erweiterungspunkt in `project-work-breakdown` (F7), Interning von S1 (F6), die konkrete Deklarationssyntax (fehlt ganz), die Bedeutung von `references` (Relation Contract oder einfacher String).
+8. **Die Demo-Daten klären.** Der Plan will die Seite samt Importdaten ins Repository legen, verbietet aber, die Herkunft ohne Originalexport zu erfinden. Ohne Export ist die Seite entweder synthetisch und so gekennzeichnet, oder sie entsteht in diesem Slice nicht.
+9. **SHOP3 ausdrücklich als „nicht geprüft“ führen.** Als Folgefrage festhalten: zwei Methoden, Vorbedingungen aus der Quelle, G3 als Abnahme. Vorher den `:source-edit`-Default korrigieren.
+10. **Abnahme schärfen:** jeder Negativtest mit positiver Kontrolle (Guard entfernt → ungültige Eingabe wird akzeptiert), und nach Strukturänderungen mit `:force` neu kompilieren.
+
+## Empfehlung
+
+**Nicht freigeben.** Freigabefähig wird der Plan, wenn drei Bedingungen erfüllt sind:
+- Der Anspruch passt zu dem, was der Slice zeigt, oder die Entscheidung wird dauerhaft gespeichert.
+- P3-Identität und Owner-Read-Set sind korrigiert.
+- Gate C stützt sich auf vorhandene Mechanismen.
+
+Vor der Implementierung sollte der Plan außerdem G1 beantworten: Woran erkennt man nach einem Neustart, dass ein Mensch entschieden hat?
+
+Wenn du den Bericht weitergeben willst, kann ich ihn als private Seite veröffentlichen.
