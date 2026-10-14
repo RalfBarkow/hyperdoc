@@ -1,5 +1,5 @@
 {
-  "version": 1,
+  "version": 2,
   "id": "collaborative-planning-case",
   "baseRevision": "e85e87913ee7fdcecaaaa6e3f0414cfec23de152",
   "submittedArchiveSha256": "23e58f2cb6a38e5f475f2d38a2226bc17ca7842bf970d674785ab79085d064d4",
@@ -78,20 +78,29 @@
       "start": 345,
       "end": 443,
       "quote": "Genau ein persistenter Effekt wird ermöglicht:\n\n`interpreted-codex-step --references--> actual P3`",
-      "coordinates": "unicode-code-points/half-open/v1"
+      "coordinates": "unicode-code-points/half-open/v1",
+      "interpretedBy": "Codex"
     },
     {
       "id": "interpretation-v2",
-      "version": "1",
+      "version": "2",
       "label": "Interpretation of Plan v2",
       "proposedBy": "Codex",
       "status": "proposed, not a human approval",
-      "summary": "Plan v2 separates document provenance, SHOP3 assessment, referent binding and persistent execution. Its statement assigning a rejection decision to the user is corrected by the separate user clarification; the original bytes remain unchanged.",
+      "summary": "Plan v2 separates capabilities A–E and later slices for provenance, SHOP3 assessment, referent binding and persistent execution. Its rejection attribution and export condition are preserved in separate source spans and qualified by the user clarification. This remains a proposed Codex reading, not a human-approved interpretation.",
       "document": "plan-v2",
-      "start": 8596,
-      "end": 8722,
-      "quote": "**Beitrag zum Ziel:** A, C als aufgezeichnete Entscheidung und E. Noch kein SHOP3-Assessment und keine Association-Erstellung.",
-      "coordinates": "unicode-code-points/half-open/v1"
+      "start": 5326,
+      "end": 6019,
+      "quote": "Die fünf Fähigkeiten werden getrennt entwickelt und geprüft:\n\n| Fähigkeit | Gegenstand | Aussagegrenze |\n|---|---|---|\n| A | Unveränderlicher Vorschlag und versionierte Interpretation | Interpretation ist zunächst vorgeschlagen. |\n| B | Tatsächlich erzeugte SHOP3-Beurteilung | Modelliertes Ergebnis ist keine Ausführungsberechtigung. |\n| C | Dauerhafte Entscheidung und Provenienz | Aufzeichnung, geprüfter Bedienablauf und authentifizierte Urheberschaft sind unterschiedliche Nachweise. |\n| D | Begrenzter autorisierter Source-Effekt | Ausschließlich der konkret bestätigte Effekt. |\n| E | Reparse, Rekonstruktion und Topicmap | Persistenz und Referentenauflösung werden erneut beobachtet. |",
+      "coordinates": "unicode-code-points/half-open/v1",
+      "interpretedBy": "Codex",
+      "evidence": [
+        "interpretation-v2",
+        "v2-rejection-attribution",
+        "v2-export-condition",
+        "user-rejection-clarification",
+        "user-source-clarification"
+      ]
     }
   ],
   "findings": [
@@ -224,41 +233,61 @@
       "id": "planning:collaborative-planning-case:contains:plan-v1",
       "relation": "contains",
       "to": "plan-v1",
-      "source": "slice-1-authorization",
+      "source": "user-clarification",
       "warrant": "derived",
-      "from": "collaborative-planning-case"
+      "from": "collaborative-planning-case",
+      "binding": "case-membership",
+      "evidence": [
+        "user-source-clarification"
+      ]
     },
     {
       "id": "planning:collaborative-planning-case:contains:claude-review",
       "relation": "contains",
       "to": "claude-review",
-      "source": "slice-1-authorization",
+      "source": "user-clarification",
       "warrant": "derived",
-      "from": "collaborative-planning-case"
+      "from": "collaborative-planning-case",
+      "binding": "case-membership",
+      "evidence": [
+        "user-source-clarification"
+      ]
     },
     {
       "id": "planning:collaborative-planning-case:contains:plan-v2",
       "relation": "contains",
       "to": "plan-v2",
-      "source": "slice-1-authorization",
+      "source": "user-clarification",
       "warrant": "derived",
-      "from": "collaborative-planning-case"
+      "from": "collaborative-planning-case",
+      "binding": "case-membership",
+      "evidence": [
+        "user-source-clarification"
+      ]
     },
     {
       "id": "planning:collaborative-planning-case:contains:chatgpt-recommendation",
       "relation": "contains",
       "to": "chatgpt-recommendation",
-      "source": "slice-1-authorization",
+      "source": "user-clarification",
       "warrant": "derived",
-      "from": "collaborative-planning-case"
+      "from": "collaborative-planning-case",
+      "binding": "case-membership",
+      "evidence": [
+        "user-source-distinction"
+      ]
     },
     {
       "id": "planning:collaborative-planning-case:contains:user-clarification",
       "relation": "contains",
       "to": "user-clarification",
-      "source": "slice-1-authorization",
+      "source": "user-clarification",
       "warrant": "derived",
-      "from": "collaborative-planning-case"
+      "from": "collaborative-planning-case",
+      "binding": "case-membership",
+      "evidence": [
+        "user-rejection-clarification"
+      ]
     },
     {
       "id": "planning:collaborative-planning-case:contains:slice-1-authorization",
@@ -266,15 +295,25 @@
       "to": "slice-1-authorization",
       "source": "slice-1-authorization",
       "warrant": "derived",
-      "from": "collaborative-planning-case"
+      "from": "collaborative-planning-case",
+      "binding": "case-membership",
+      "evidence": [
+        "slice-1-approved",
+        "authorization-work-scope"
+      ]
     },
     {
       "id": "planning:plan-v1:reviewed-by:claude-review",
       "relation": "reviewed-by",
       "to": "claude-review",
       "source": "claude-review",
-      "warrant": "source-observed",
-      "from": "plan-v1"
+      "warrant": "derived",
+      "from": "plan-v1",
+      "binding": "named-review-subject",
+      "evidence": [
+        "review-subject",
+        "plan-v1-title"
+      ]
     },
     {
       "id": "planning:plan-v2:revises:plan-v1",
@@ -282,7 +321,11 @@
       "to": "plan-v1",
       "source": "plan-v2",
       "warrant": "source-observed",
-      "from": "plan-v2"
+      "from": "plan-v2",
+      "binding": "explicit-v2-to-v1-revision",
+      "evidence": [
+        "v2-revision-statement"
+      ]
     },
     {
       "id": "planning:claude-review:contains:F1",
@@ -290,7 +333,11 @@
       "to": "F1",
       "source": "F1",
       "warrant": "source-observed",
-      "from": "claude-review"
+      "from": "claude-review",
+      "binding": "review-finding-containment",
+      "evidence": [
+        "F1"
+      ]
     },
     {
       "id": "planning:claude-review:contains:F2",
@@ -298,7 +345,11 @@
       "to": "F2",
       "source": "F2",
       "warrant": "source-observed",
-      "from": "claude-review"
+      "from": "claude-review",
+      "binding": "review-finding-containment",
+      "evidence": [
+        "F2"
+      ]
     },
     {
       "id": "planning:claude-review:contains:F3",
@@ -306,7 +357,11 @@
       "to": "F3",
       "source": "F3",
       "warrant": "source-observed",
-      "from": "claude-review"
+      "from": "claude-review",
+      "binding": "review-finding-containment",
+      "evidence": [
+        "F3"
+      ]
     },
     {
       "id": "planning:claude-review:contains:F4",
@@ -314,7 +369,11 @@
       "to": "F4",
       "source": "F4",
       "warrant": "source-observed",
-      "from": "claude-review"
+      "from": "claude-review",
+      "binding": "review-finding-containment",
+      "evidence": [
+        "F4"
+      ]
     },
     {
       "id": "planning:claude-review:contains:F5",
@@ -322,7 +381,11 @@
       "to": "F5",
       "source": "F5",
       "warrant": "source-observed",
-      "from": "claude-review"
+      "from": "claude-review",
+      "binding": "review-finding-containment",
+      "evidence": [
+        "F5"
+      ]
     },
     {
       "id": "planning:claude-review:contains:F6",
@@ -330,7 +393,11 @@
       "to": "F6",
       "source": "F6",
       "warrant": "source-observed",
-      "from": "claude-review"
+      "from": "claude-review",
+      "binding": "review-finding-containment",
+      "evidence": [
+        "F6"
+      ]
     },
     {
       "id": "planning:claude-review:contains:F7",
@@ -338,7 +405,11 @@
       "to": "F7",
       "source": "F7",
       "warrant": "source-observed",
-      "from": "claude-review"
+      "from": "claude-review",
+      "binding": "review-finding-containment",
+      "evidence": [
+        "F7"
+      ]
     },
     {
       "id": "planning:claude-review:contains:F8",
@@ -346,7 +417,11 @@
       "to": "F8",
       "source": "F8",
       "warrant": "source-observed",
-      "from": "claude-review"
+      "from": "claude-review",
+      "binding": "review-finding-containment",
+      "evidence": [
+        "F8"
+      ]
     },
     {
       "id": "planning:claude-review:contains:F9",
@@ -354,7 +429,11 @@
       "to": "F9",
       "source": "F9",
       "warrant": "source-observed",
-      "from": "claude-review"
+      "from": "claude-review",
+      "binding": "review-finding-containment",
+      "evidence": [
+        "F9"
+      ]
     },
     {
       "id": "planning:claude-review:contains:F10",
@@ -362,7 +441,11 @@
       "to": "F10",
       "source": "F10",
       "warrant": "source-observed",
-      "from": "claude-review"
+      "from": "claude-review",
+      "binding": "review-finding-containment",
+      "evidence": [
+        "F10"
+      ]
     },
     {
       "id": "planning:claude-review:contains:F11",
@@ -370,7 +453,11 @@
       "to": "F11",
       "source": "F11",
       "warrant": "source-observed",
-      "from": "claude-review"
+      "from": "claude-review",
+      "binding": "review-finding-containment",
+      "evidence": [
+        "F11"
+      ]
     },
     {
       "id": "planning:plan-v1:interpreted-as:interpretation-v1",
@@ -378,7 +465,11 @@
       "to": "interpretation-v1",
       "source": "interpretation-v1",
       "warrant": "derived",
-      "from": "plan-v1"
+      "from": "plan-v1",
+      "binding": "proposed-interpretation",
+      "evidence": [
+        "interpretation-v1"
+      ]
     },
     {
       "id": "planning:plan-v2:interpreted-as:interpretation-v2",
@@ -386,7 +477,15 @@
       "to": "interpretation-v2",
       "source": "interpretation-v2",
       "warrant": "derived",
-      "from": "plan-v2"
+      "from": "plan-v2",
+      "binding": "proposed-interpretation",
+      "evidence": [
+        "interpretation-v2",
+        "v2-rejection-attribution",
+        "v2-export-condition",
+        "user-rejection-clarification",
+        "user-source-clarification"
+      ]
     },
     {
       "id": "planning:collaborative-planning-case:documents:approval-pending",
@@ -394,7 +493,11 @@
       "to": "approval-pending",
       "source": "approval-pending",
       "warrant": "derived",
-      "from": "collaborative-planning-case"
+      "from": "collaborative-planning-case",
+      "binding": "case-procedure-record",
+      "evidence": [
+        "approval-pending"
+      ]
     },
     {
       "id": "planning:approval-pending:documented-by:user-clarification",
@@ -402,7 +505,11 @@
       "to": "user-clarification",
       "source": "approval-pending",
       "warrant": "user-reported",
-      "from": "approval-pending"
+      "from": "approval-pending",
+      "binding": "procedure-source",
+      "evidence": [
+        "approval-pending"
+      ]
     },
     {
       "id": "planning:collaborative-planning-case:documents:slice-1-approved",
@@ -410,7 +517,11 @@
       "to": "slice-1-approved",
       "source": "slice-1-approved",
       "warrant": "derived",
-      "from": "collaborative-planning-case"
+      "from": "collaborative-planning-case",
+      "binding": "case-procedure-record",
+      "evidence": [
+        "slice-1-approved"
+      ]
     },
     {
       "id": "planning:slice-1-approved:documented-by:slice-1-authorization",
@@ -418,15 +529,25 @@
       "to": "slice-1-authorization",
       "source": "slice-1-approved",
       "warrant": "user-reported",
-      "from": "slice-1-approved"
+      "from": "slice-1-approved",
+      "binding": "procedure-source",
+      "evidence": [
+        "slice-1-approved"
+      ]
     },
     {
-      "id": "planning:chatgpt-recommendation:recommends-not-approving:plan-v1",
-      "relation": "recommends-not-approving",
-      "to": "plan-v1",
+      "id": "planning:chatgpt-recommendation:contextualized-in:collaborative-planning-case",
+      "relation": "contextualized-in",
+      "to": "collaborative-planning-case",
       "source": "chatgpt-recommendation",
-      "warrant": "user-reported",
-      "from": "chatgpt-recommendation"
+      "warrant": "inferred",
+      "from": "chatgpt-recommendation",
+      "binding": "unversioned-recommendation-context",
+      "evidence": [
+        "chatgpt-unspecified-plan",
+        "user-source-distinction"
+      ],
+      "targetPlanVersion": "unresolved"
     },
     {
       "id": "planning:plan-v2:qualified-by:user-clarification",
@@ -434,7 +555,14 @@
       "to": "user-clarification",
       "source": "user-clarification",
       "warrant": "user-reported",
-      "from": "plan-v2"
+      "from": "plan-v2",
+      "binding": "v2-user-qualification",
+      "evidence": [
+        "v2-rejection-attribution",
+        "v2-export-condition",
+        "user-rejection-clarification",
+        "user-source-clarification"
+      ]
     },
     {
       "id": "planning:slice-1-authorization:authorizes-local-slice-1:collaborative-planning-case",
@@ -442,7 +570,12 @@
       "to": "collaborative-planning-case",
       "source": "slice-1-approved",
       "warrant": "user-reported",
-      "from": "slice-1-authorization"
+      "from": "slice-1-authorization",
+      "binding": "scope-limited-user-authorization",
+      "evidence": [
+        "slice-1-approved",
+        "authorization-work-scope"
+      ]
     },
     {
       "id": "planning:collaborative-planning-case:uses-case:hub-investigation",
@@ -450,7 +583,123 @@
       "to": "hub-investigation",
       "source": "slice-1-authorization",
       "warrant": "derived",
-      "from": "collaborative-planning-case"
+      "from": "collaborative-planning-case",
+      "binding": "linked-application",
+      "evidence": [
+        "authorization-application"
+      ]
+    }
+  ],
+  "submittedArchiveSha256Status": "recorded, not verified by this reader",
+  "relationAssessment": "Codex-recorded case-specific bindings: endpoint roles, source spans and direction are checked; natural-language entailment and authenticated authorship are not established.",
+  "spans": [
+    {
+      "id": "v2-rejection-attribution",
+      "label": "Plan v2 — rejection attribution",
+      "document": "plan-v2",
+      "start": 9792,
+      "end": 9977,
+      "quote": "- Die Nichtfreigabe wird als vom Nutzer übermittelte Entscheidung dokumentiert. Weder der Dateidigest noch die Zuschreibung „Claude“ oder „Codex“ authentifiziert den jeweiligen Urheber.",
+      "coordinates": "unicode-code-points/half-open/v1"
+    },
+    {
+      "id": "v2-export-condition",
+      "label": "Plan v2 — superseded export condition",
+      "document": "plan-v2",
+      "start": 8882,
+      "end": 9308,
+      "quote": "Die vollständigen Originalexporte von Plan v1 und v2 müssen vorliegen. Lokal wurden solche Exporte nicht gefunden. Der Review liegt vollständig vor.\n\nDer Implementierer darf Plan v1 nicht aus Claudes Zusammenfassung rekonstruieren. Fehlen Originalexporte, endet die Materialisierung dieses realen Falls mit einem bezeichneten Eingabeblocker. Synthetische Fixtures sind für Tests zulässig, aber kein Ersatz für diese Dokumente.",
+      "coordinates": "unicode-code-points/half-open/v1"
+    },
+    {
+      "id": "user-rejection-clarification",
+      "label": "User clarification — no invented rejection",
+      "document": "user-clarification",
+      "start": 330,
+      "end": 651,
+      "quote": "1. Stelle die bisher nicht erteilte Implementierungsfreigabe als dokumentierten Verfahrensstand dar. Schreibe dem Nutzer keine ausdrückliche Ablehnungsentscheidung zu, sofern keine solche Quelle vorliegt. Claudes Review, ChatGPTs Empfehlung und eine tatsächliche menschliche Entscheidung bleiben verschiedene Gegenstände.",
+      "coordinates": "unicode-code-points/half-open/v1"
+    },
+    {
+      "id": "user-source-clarification",
+      "label": "User clarification — submitted source texts",
+      "document": "user-clarification",
+      "start": 0,
+      "end": 264,
+      "quote": "Plan v2 ist die aktuelle Planungsgrundlage.\nDie vollständigen übermittelten Dokumenttexte (Plan v1, Claude Review, Plan v2) liegen im beigefügten ZIP samt SHA-256-Manifest. Verwende sie quellentreu; fehlende native Exporte oder unbekannte Herkunft nicht behaupten.",
+      "coordinates": "unicode-code-points/half-open/v1"
+    },
+    {
+      "id": "user-source-distinction",
+      "label": "User clarification — distinct review, recommendation and decision",
+      "document": "user-clarification",
+      "start": 535,
+      "end": 651,
+      "quote": "Claudes Review, ChatGPTs Empfehlung und eine tatsächliche menschliche Entscheidung bleiben verschiedene Gegenstände.",
+      "coordinates": "unicode-code-points/half-open/v1"
+    },
+    {
+      "id": "review-subject",
+      "label": "Submitted review — named plan",
+      "document": "claude-review",
+      "start": 1386,
+      "end": 1465,
+      "quote": "# Review: Plan „Minimaler Referentenvertrag für eine genehmigte P3-Association“",
+      "coordinates": "unicode-code-points/half-open/v1"
+    },
+    {
+      "id": "plan-v1-title",
+      "label": "Submitted Plan v1 — title",
+      "document": "plan-v1",
+      "start": 0,
+      "end": 64,
+      "quote": "# Minimaler Referentenvertrag für eine genehmigte P3-Association",
+      "coordinates": "unicode-code-points/half-open/v1"
+    },
+    {
+      "id": "v2-revision-statement",
+      "label": "Plan v2 — explicit comparison to Plan v1",
+      "document": "plan-v2",
+      "start": 18839,
+      "end": 19180,
+      "quote": "Gegenüber Plan v1 entfallen zunächst der P3-Writer-Ausbau, die neue Freigabetabelle und die Behauptung eines bereits autorisierten Kollaborationszyklus. Zuerst werden die tatsächlichen Vorschläge, Kritik, Nichtfreigabe und Revision nachvollziehbar. SHOP3-Beurteilung, Referentenvertrag und persistente Ausführung folgen mit eigenen Abnahmen.",
+      "coordinates": "unicode-code-points/half-open/v1"
+    },
+    {
+      "id": "chatgpt-unspecified-plan",
+      "label": "ChatGPT excerpt — unspecified plan version",
+      "document": "chatgpt-recommendation",
+      "start": 0,
+      "end": 81,
+      "quote": "Ich würde den Codex-Implementierungsplan in seiner jetzigen Form nicht freigeben.",
+      "coordinates": "unicode-code-points/half-open/v1"
+    },
+    {
+      "id": "authorization-work-scope",
+      "label": "Slice 1 authorization — work scope",
+      "document": "slice-1-authorization",
+      "start": 501,
+      "end": 723,
+      "quote": "## Arbeitsautorität\n\nEigenes Work Item: `collaborative-planning-case`\n\nZuordnung zu Planning / SHOP3 und HyperDoc Dogfooding im bestehenden Work Breakdown.\n\nDie Hub-/Trail-Untersuchung bleibt ein verlinkter Anwendungsfall.",
+      "coordinates": "unicode-code-points/half-open/v1"
+    },
+    {
+      "id": "authorization-originals",
+      "label": "Slice 1 authorization — preserve submitted documents",
+      "document": "slice-1-authorization",
+      "start": 750,
+      "end": 822,
+      "quote": "- Verwende die drei geprüften Originaldokumente aus dem ZIP unverändert.",
+      "coordinates": "unicode-code-points/half-open/v1"
+    },
+    {
+      "id": "authorization-application",
+      "label": "Slice 1 authorization — linked application",
+      "document": "slice-1-authorization",
+      "start": 658,
+      "end": 723,
+      "quote": "Die Hub-/Trail-Untersuchung bleibt ein verlinkter Anwendungsfall.",
+      "coordinates": "unicode-code-points/half-open/v1"
     }
   ]
 }

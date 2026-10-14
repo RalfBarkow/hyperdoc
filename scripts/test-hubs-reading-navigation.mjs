@@ -63,6 +63,27 @@ try {
  await click('Document the Collaborative Planning Case')
  await heading('Collaborative Planning with Codex and SHOP3')
  await click('the revision case');await heading('Collaborative planning — the documented revision case')
+ assert((await last().innerText()).includes('recorded, not verified by this reader'))
+ // Inspect the actual projected association, then its checked source span.
+ await click('plan-v2 → revises → plan-v1');await heading('Planning relation evidence')
+ assert((await last().innerText()).includes('explicit-v2-to-v1-revision'))
+ assert((await last().innerText()).includes('do not establish natural-language entailment'))
+ await click('Plan v2 — explicit comparison to Plan v1')
+ await heading('Plan v2 — explicit comparison to Plan v1')
+ assert((await last().locator('pre').textContent()).includes('Gegenüber Plan v1 entfallen zunächst'))
+ await click('Revision case');await heading('Collaborative planning — the documented revision case')
+ await click('chatgpt-recommendation → contextualized-in → collaborative-planning-case')
+ await heading('Planning relation evidence')
+ assert((await last().innerText()).includes('Warrant: inferred'))
+ assert((await last().innerText()).includes('target plan version remains unresolved'))
+ await click('ChatGPT excerpt — unspecified plan version')
+ await heading('ChatGPT excerpt — unspecified plan version')
+ assert.equal(await last().locator('pre').textContent(),'Ich würde den Codex-Implementierungsplan in seiner jetzigen Form nicht freigeben.')
+ await click('Revision case');await heading('Collaborative planning — the documented revision case')
+ await click('collaborative-planning-case → contains → chatgpt-recommendation')
+ await heading('Planning relation evidence');await click('Source of this relation')
+ await heading('User clarification before implementation')
+ await click('Revision case');await heading('Collaborative planning — the documented revision case')
  const evidenceDirectory=path.resolve(path.dirname(new URL(import.meta.url).pathname),'../dreyeck/work/collaborative-planning-evidence')
  for(const [label,file] of [['Codex Plan v1','codex-plan-v1-submitted.txt'],['Claude Review','claude-review-submitted.txt'],['Codex Plan v2','codex-plan-v2-submitted.txt']]){
   await click(label);await heading(label)
@@ -99,10 +120,26 @@ try {
  for(const label of ['Interpretation of Plan v1','Interpretation of Plan v2']){
   await click(label);await heading(label)
   assert((await last().innerText()).includes('proposed, not a human approval'))
+  assert((await last().innerText()).includes('No person/role registry'))
+  if(label==='Interpretation of Plan v2'){
+   const interpretationId=await last().getAttribute('id')
+   const text=await last().locator('pre').textContent()
+   for(const row of ['| A |','| B |','| C |','| D |','| E |'])assert(text.includes(row))
+   for(const [span,expected] of [
+    ['Plan v2 — rejection attribution','Die Nichtfreigabe wird als vom Nutzer übermittelte Entscheidung dokumentiert.'],
+    ['Plan v2 — superseded export condition','Die vollständigen Originalexporte von Plan v1 und v2 müssen vorliegen.'],
+    ['User clarification — no invented rejection','Schreibe dem Nutzer keine ausdrückliche Ablehnungsentscheidung zu'],
+    ['User clarification — submitted source texts','Die vollständigen übermittelten Dokumenttexte']]){
+    await page.locator(`[id="${interpretationId}"]`).getByText(span,{exact:true}).click()
+    await heading(span)
+    assert((await last().locator('pre').textContent()).includes(expected))
+   }
+  }
   await click('Revision case');await heading('Collaborative planning — the documented revision case')
  }
  await click('Planning Workspace')
  await page.locator('.dreyeck-topicmap-point-sign[data-topic-id="collaborative-planning-case"]').last().waitFor()
+ assert.equal(await last().locator('.dreyeck-topicmap-topic-kind').filter({hasText:'PLANNING-DOCUMENT-VERSION'}).count(),0)
  await last().getByRole('button',{name:'Codex Plan v1',exact:true}).click()
  await page.locator('.dreyeck-topicmap-point-sign[data-topic-id="plan-v1"]').last().waitFor()
  await page.getByRole('button',{name:'Probe planning workspace',exact:true}).click()
@@ -216,8 +253,9 @@ try {
  assert.equal(freshCode,0,fs.readFileSync(freshLog,'utf8').slice(-3000))
  const keys=file=>JSON.parse(fs.readFileSync(file,'utf8').split('PLANNING-SOURCE-KEYS-BEGIN\n')[1].split('\nPLANNING-SOURCE-KEYS-END')[0])
  assert.deepEqual(keys(log),keys(freshLog))
+ assert.equal(keys(freshLog).length,34)
  fs.writeFileSync(path.join(output,'result.json'),JSON.stringify({status:'PASS',browser:browser.version(),planningSourceIdentities:keys(freshLog),scope:'fresh local CLOG and independent reconstruction; unchanged submitted documents and retained Wiki JSON; no production or approval-authentication claim'},null,2))
- console.log('HUBS-BROWSER-PASS: Collaborative Planning Work item → original documents, interpretations, F1 and distinct procedural states; native Point+History and independent fresh-process source identities; unchanged Hub P1/P2/P3, Ward Plan and Solo definitions; no executable host, planner or authoring')
+ console.log('HUBS-BROWSER-PASS: K1-K7 relation evidence and exact v2 correction spans; unchanged submitted documents; native Point+History and 34 independent fresh-process source identities; unchanged Hub P1/P2/P3, Ward Plan and Solo definitions; no executable host, planner or authoring')
 }finally{
  if(browser)await browser.close();fs.writeFileSync(stop,'')
  await new Promise(r=>{if(child.exitCode!==null)r();else{child.once('exit',r);setTimeout(()=>{child.kill();r()},5000).unref()}})
