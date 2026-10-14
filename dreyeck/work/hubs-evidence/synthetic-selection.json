@@ -1,0 +1,1955 @@
+{
+  "generatorSha256": "8c0f369fbcd98e6340f27046e8e76add2adee5a64e0960f9fbe91606f35863f4",
+  "nodeVersion": "v24.19.0",
+  "kind": "Trusted synthetic execution of the unchanged retained Mech library, not Ward's runtime",
+  "clock": 1791936000000,
+  "source": {
+    "retainedRepositoryAuthority": "local:/Users/rgb/workspace/hyperdoc",
+    "retainedOid": "9a1764250f31013a50965aad324dd72c0662b9cc",
+    "path": "assets/hyperbook/fedwiki/mech-host/plugins/mech/library.js",
+    "sha256": "a55269686c5941a5a058c08bef2e0ef3afcaa22c87f6b7bc61a0e10e34776a7b",
+    "provenance": {
+      "repository": "https://github.com/RalfBarkow/wiki-plugin-mech",
+      "oid": "0fc36fcd58a8d7c399d3e86d2ee2e9328cafba44",
+      "path": "src/client/library.js",
+      "role": "base source module with bounded Ward WALK topics intake; not a complete Ward revision",
+      "baseSha256": "bf1e1a2f3438d7cba322c90d4410ba4be353552256459ad32bc338050bb5e319",
+      "intake": {
+        "repository": "https://github.com/WardCunningham/wiki-plugin-mech",
+        "oid": "c858eff1e655e913418bfe86ddecab6053ce38b5",
+        "path": "src/client/library.js",
+        "region": "walks: topics and nested linked/newest/partitions; topics switch arm",
+        "functionSha256": "6477e57584d16aa474d41f978d9bad14fe0278770e5ba23794f50ee40fbfa0e5"
+      }
+    },
+    "status": "Retained composed module verified by digest; declared upstream base unavailable in local Git stores and at its raw URL. No whole upstream revision equivalence asserted."
+  },
+  "dependencies": [
+    {
+      "path": "plugins/mech/mech.js",
+      "sha256": "d25151ef5170779de50e13e819b950277b99aa7a6591ef097eaef5c0043d71c7",
+      "source": {
+        "repository": "https://github.com/RalfBarkow/wiki-plugin-mech",
+        "oid": "0fc36fcd58a8d7c399d3e86d2ee2e9328cafba44",
+        "path": "src/client/mech.js",
+        "role": "unchanged source module; local CODE-capable candidate, not deployed"
+      }
+    },
+    {
+      "path": "plugins/mech/blocks.js",
+      "sha256": "ce254e24b5466cc2e9f54d773dae5159232aba4ab4f974a2ba9f16367144a591",
+      "source": {
+        "repository": "https://github.com/RalfBarkow/wiki-plugin-mech",
+        "oid": "0fc36fcd58a8d7c399d3e86d2ee2e9328cafba44",
+        "path": "src/client/blocks.js",
+        "role": "base source module with bounded original Ward WALK topics and POPUP intakes; not a whole Ward revision",
+        "baseSha256": "c3bc41f896ee965e067d9dc618450eed9c90cf81710d92bbd05b66ea4e59bd70",
+        "intake": {
+          "repository": "https://github.com/WardCunningham/wiki-plugin-mech",
+          "oid": "c858eff1e655e913418bfe86ddecab6053ce38b5",
+          "path": "src/client/blocks.js",
+          "region": "walk_emit recognition of topics adapted to existing parse_walk_command; existing role dispatch unchanged"
+        },
+        "additionalIntakes": [
+          {
+            "repository": "https://github.com/WardCunningham/wiki-plugin-mech",
+            "oid": "a028b4bba04e539dcaa090423d38a00a0050489d",
+            "path": "src/client/blocks.js",
+            "definition": "popup_emit",
+            "sourceFileSha256": "388ee024299ce3674c607b83ec671f8d3df0cb9ba9e584960768fd359fff6d9d",
+            "gitBlob": "1f53aeebe83acf83a7eb26eccb78558d93922169",
+            "excerptSha256": "3be185ca96eec375edc3220b560227cfd8c6bd5ec2a9afc6d38d49ef9daddec9",
+            "insertionSha256": "76b49d39ac22e17a95b137a3dc930cd7b759da11eb6d9842ad239396fadb4369",
+            "role": "verbatim popup_emit function and POPUP catalog arm"
+          }
+        ]
+      }
+    },
+    {
+      "path": "plugins/mech/interpreter.js",
+      "sha256": "f0a0b360496ee520072421e1b4cc9584b6e46b47df455fcd5c8406e9baa5e90f",
+      "source": {
+        "repository": "https://github.com/RalfBarkow/wiki-plugin-mech",
+        "oid": "0fc36fcd58a8d7c399d3e86d2ee2e9328cafba44",
+        "path": "src/client/interpreter.js",
+        "role": "unchanged source module; local CODE-capable candidate, not deployed"
+      }
+    },
+    {
+      "path": "plugins/mech/library.js",
+      "sha256": "a55269686c5941a5a058c08bef2e0ef3afcaa22c87f6b7bc61a0e10e34776a7b",
+      "source": {
+        "repository": "https://github.com/RalfBarkow/wiki-plugin-mech",
+        "oid": "0fc36fcd58a8d7c399d3e86d2ee2e9328cafba44",
+        "path": "src/client/library.js",
+        "role": "base source module with bounded Ward WALK topics intake; not a complete Ward revision",
+        "baseSha256": "bf1e1a2f3438d7cba322c90d4410ba4be353552256459ad32bc338050bb5e319",
+        "intake": {
+          "repository": "https://github.com/WardCunningham/wiki-plugin-mech",
+          "oid": "c858eff1e655e913418bfe86ddecab6053ce38b5",
+          "path": "src/client/library.js",
+          "region": "walks: topics and nested linked/newest/partitions; topics switch arm",
+          "functionSha256": "6477e57584d16aa474d41f978d9bad14fe0278770e5ba23794f50ee40fbfa0e5"
+        }
+      }
+    }
+  ],
+  "parser": {
+    "name": "acorn",
+    "version": "8.16.0"
+  },
+  "functions": [
+    {
+      "name": "walks",
+      "key": "walks",
+      "start": 1365,
+      "end": 14303,
+      "startLine": 44,
+      "endLine": 433,
+      "text": "function walks(count, way = 'steps', neighborhood, scope = {}, discourse = null, debug = false) {\n  const find = (slug, site) => neighborhood.find(info => info.slug == slug && (!site || info.domain == site))\n  const finds = slugs => (slugs ? slugs.map(slug => find(slug)) : null)\n  const prob = n => Math.floor(n * Math.abs(Math.random() - Math.random()))\n  const rand = a => a[prob(a.length)]\n  const good = info => info.links && Object.keys(info.links).length < 10\n  const back = slug => neighborhood.filter(info => good(info) && slug in info.links)\n  // const uniq = (value, index, self) => self.indexOf(value) === index\n  const dedup = (value, index, self) => self.findIndex(info => info.slug == value.slug) === index\n  const newr = infos =>\n    infos\n      .toSorted((a, b) => b.date - a.date)\n      .filter(dedup)\n      .slice(0, 3)\n  const domains = neighborhood.map(info => info.domain).filter(uniq)\n\n  function blanket(info) {\n    // hub[0] => slug\n    // find(slug) => info\n    // node(info) => nid\n    // back(slug) => infos\n    // newr(infos) => infos\n\n    const graph = new Graph()\n    const node = info => {\n      return graph.addUniqNode('', {\n        name: info.title.replaceAll(/ /g, '\\n'),\n        title: info.title,\n        site: info.domain,\n      })\n    }\n    const up = info => finds(info?.patterns?.up) ?? newr(back(info.slug))\n    const down = info => info?.patterns?.down ?? Object.keys(info.links || {})\n\n    // hub\n    const nid = node(info)\n\n    // parents of hub\n    for (const parent of up(info)) {\n      graph.addRel('', node(parent), nid)\n    }\n\n    // children of hub\n    for (const link of down(info)) {\n      const child = find(link)\n      if (child) {\n        const cid = node(child)\n        graph.addRel('', nid, cid)\n\n        // parents of children of hub\n        for (const parent of up(child)) {\n          graph.addRel('', node(parent), cid)\n        }\n      }\n    }\n    return graph\n  }\n\n  switch (way) {\n    case 'steps':\n      return steps(count)\n    case 'days':\n      return periods(way, 1, count)\n    case 'weeks':\n      return periods(way, 7, count)\n    case 'months':\n      return periods(way, 30, count)\n    case 'hubs':\n      return hubs(count)\n    case 'references':\n      return references()\n    case 'lineup':\n      return lineup()\n    case 'topics':\n      return topics(count)\n    case 'question':\n    case 'claim':\n    case 'support':\n    case 'oppose':\n      return roleWalk(way, count)\n  }\n\n  function steps(count = 5) {\n    return domains.map(domain => {\n      const name = domain.split('.').slice(0, 3).join('.')\n      const done = new Set()\n      const graph = new Graph()\n      let nid = 0\n      const here = neighborhood.filter(info => info.domain == domain && 'links' in info)\n      if (!here.length) return { name, graph: null }\n      const node = info => {\n        nid = graph.addNode('', {\n          name: info.title.replaceAll(/ /g, '\\n'),\n          title: info.title,\n          site: domain,\n          links: Object.keys(info.links || {}).filter(slug => find(slug)),\n        })\n        return nid\n      }\n      const rel = (here, there) => graph.addRel('', here, there)\n      const links = nid => graph.nodes[nid].props.links.filter(slug => !done.has(slug))\n      const start = rand(here)\n      // const start = find('welcome-visitors')\n      done.add(start.slug)\n      node(start)\n      for (let n = 5; n > 0; n--) {\n        try {\n          const slugs = links(nid)\n          const slug = rand(slugs)\n          done.add(slug)\n          const info = find(slug)\n          rel(nid, node(info))\n        } catch (e) {}\n      }\n      return { name, graph }\n    })\n  }\n\n  function periods(way, days, count = 12) {\n    const interval = days * 24 * 60 * 60 * 1000\n    const iota = [...Array(Number(count)).keys()]\n    const dates = iota.map(n => Date.now() - n * interval)\n    const aspects = []\n    for (const stop of dates) {\n      const start = stop - interval\n      const name = `${way.replace(/s$/, '')} ${new Date(start).toLocaleDateString()}`\n      const here = neighborhood\n        .filter(info => info.date < stop && info.date >= start)\n        .filter(info => !(info.links && Object.keys(info.links).length > 5))\n      if (here.length) {\n        const domains = here.reduce((set, info) => {\n          set.add(info.domain)\n          return set\n        }, new Set())\n        for (const domain of domains) {\n          const graph = new Graph()\n          const node = info => {\n            return graph.addUniqNode('', {\n              name: info.title.replaceAll(/ /g, '\\n'),\n              title: info.title,\n              site: info.domain,\n              date: info.date,\n            })\n          }\n          const author = domain.split(/\\.|\\:/)[0]\n          for (const info of here.filter(info => info.domain == domain)) {\n            const nid = node(info)\n            for (const link in info.links || {}) {\n              const linked = find(link)\n              if (linked) graph.addRel('', nid, node(linked))\n            }\n          }\n          aspects.push({ name: `${name} ${author}`, graph })\n        }\n      }\n    }\n    return aspects\n  }\n\n  function hubs(count = 12) {\n    const aspects = []\n    const ignored = new Set()\n    const hits = {}\n    for (const info of neighborhood)\n      if (info.links)\n        if (Object.keys(info.links).length <= 15) {\n          for (const link in info.links) if (find(link)) hits[link] = (hits[link] || 0) + 1\n        } else {\n          ignored.add(info.slug)\n        }\n    if (ignored.size > 0) console.log('hub links ignored for large pages:', [...ignored])\n    const hubs = Object.entries(hits)\n      .sort((a, b) => b[1] - a[1])\n      .slice(0, count)\n    console.log({ hits, hubs })\n\n    for (const hub of hubs) {\n      const name = `hub ${hub[1]} ${hub[0]}`\n      const graph = blanket(find(hub[0]))\n      aspects.push({ name, graph })\n    }\n    return aspects\n  }\n\n  function lineup() {\n    const aspects = []\n    const lineup = scope.lineup()\n    console.log({ lineup })\n    for (const div of lineup) {\n      const pageObject = wiki.lineup.atKey(div.dataset.key)\n      const slug = pageObject.getSlug()\n      const site = pageObject.getRemoteSite(location.host)\n      const info = find(slug, site)\n      console.log({ div, pageObject, site, slug, info })\n      aspects.push({ name: pageObject.getTitle(), graph: blanket(info) })\n    }\n    return aspects\n  }\n\n  function references() {\n    const aspects = []\n    const items = scope.references()\n    console.log({ items })\n    for (const item of items) {\n      const { title, site, slug } = item\n      const info = find(slug, site)\n      console.log({ site, slug, info })\n      aspects.push({ name: title, graph: blanket(info) })\n    }\n    console.log({ aspects })\n    return aspects\n  }\n\n  // Source-faithful WALK topics intake: Ward c858eff1e655e913418bfe86ddecab6053ce38b5.\n  function topics(count=10) {\n    const aspects = []\n    const days = 7\n    const interval = days * 24 * 60 * 60 * 1000\n    const msec = n => Date.now() - n * interval\n    let week = 0\n    while(aspects.length < count && week < count) {\n      const stop = msec(week++)\n      const start = msec(week)\n      const nodes = neighborhood\n        .filter(info => info.date > start && info.date <= stop)\n        .filter(info => !!info.links)\n        .filter(info => !info.title.endsWith(' Survey'))\n      if (nodes.length) {\n        const graph = linked(nodes)\n        const name = new Date(stop).toLocaleDateString()\n        // aspects.push({name,graph})\n        aspects.push(...partitions({name,graph}, start, stop))\n      }\n    }\n    return aspects\n\n    function linked(infos) {\n      const graph = new Graph()\n      const node = slug => {\n        // const type = slug.includes('-and-') ? 'Prompt' : 'Page'\n        const type = ''\n        const info = neighborhood.find(info => info.slug==slug)\n        const twins = neighborhood.filter(info => info.slug==slug).length\n        const title = info.title\n        const site = info.domain\n        const date = info.date\n        const name = title.replaceAll(' ',\"\\n\")\n        const nid = graph.nodes.findIndex(node => node.type==type && node.props.name==name)\n        const result = (nid>=0) ? nid : graph.addNode(type,{name,site,date})\n        if(twins>1) graph.nodes[result].props.twins = twins\n        return result\n      }\n      for (const info of infos) {\n        const nid = node(info.slug)\n        for (const name of newest(Object.keys(info.links))) {\n          graph.addRel('',nid,node(name))\n        }\n      }\n      return graph\n    }\n\n    function newest(slugs) {\n      const recent = slug => neighborhood\n        .filter(info => info.slug == slug)\n      return slugs\n        .map(slug => [slug,recent(slug)])\n        .filter(pair => pair[1].length)\n        .map(pair => [pair[0],pair[1].sort((a,b) => b.date - a.date)[0]])\n        .sort((a,b) => b[1].date - a[1].date)\n        .map(pair => pair[0])\n        .slice(0,3)\n    }\n\n    function partitions(aspect,from,until) {\n      const input = aspect.graph\n      const output = [] // graphs\n      let doing = {} // nid => new nid\n      // const checkpoint = () => {\n      //   window.progress.innerText = output\n      //     .map(graph => `${print(graph.nodes)}\\n\\n${print(graph.rels)}`)\n      //     .join(\"\\n\\n\")\n      // }\n      const nodes = input.nodes\n      const rels = input.rels\n      const todo = [...Array(nodes.length).keys()]\n        .map(n => [n,Math.random()])\n        .sort((a,b)=>a[1]-b[1])\n        .map(v=>v[0])\n\n      const copy = nid => {\n        if(nid in doing) {\n          // console.log('copied before', nid, 'doing', doing)\n          return}\n        // console.log('copy start', nid, 'doing', doing)\n        todo.splice(todo.indexOf(nid),1)\n        const node = nodes[nid]\n        doing[nid] = output[0].addNode(node.type,node.props)\n        for (const rid of node.out) copy(rels[rid].to)\n        for (const rid of node.in) copy(rels[rid].from)\n        // console.log('linking',nid,'to',node.out.map(rid => rels[rid].to))\n        for (const rid of node.out) output[0].addRel('',doing[nid],doing[rels[rid].to],{})\n        // checkpoint()\n      }\n\n      // console.log('order todo',todo)\n      while(todo.length) {\n        const nid = todo.shift()\n      // for (let nid of todo) {\n        if (nid in doing) {\n          // console.log('did',nid,'already')\n          continue\n        }\n        const node = nodes[nid]\n        const title = node.props.name.replaceAll(\"\\n\",\" \")\n        if (node.in.length + node.out.length) {\n          // console.log('doing',nid,title)\n          output.unshift(new Graph())\n          doing = {}\n          copy(nid)     \n        }\n        // else\n          // console.log('skipping',nid,title)\n      }\n\n      const when = node => node.props.date || 0\n      const topic = graph => {\n        const node = graph.nodes.slice(0)\n          .sort((a,b) => when(b)-when(a))\n          .filter(a => when(a)>=from && when(a)<=until)\n          [0]\n        console.log({node,nodes:graph.nodes,name:aspect.name})\n        if(!node) return aspect.name\n        const words = node.props.name.split(/\\s+/)\n        return words.slice(0,3).join(' ')\n      }\n\n      return output.reverse()\n        .map((graph,i) => ({name:topic(graph),graph}))\n    }\n  }\n\n  function roleWalk(role, count = 5) {\n    if (!discourse || !Array.isArray(discourse.edges)) return []\n    const limit = Number.isInteger(+count) && +count > 0 ? +count : 5\n    const pages = scope.lineup ? scope.lineup() : []\n    const pageIds = pages.map(div => {\n      const pageObject = wiki.lineup.atKey(div.dataset.key)\n      const slug = pageObject.getSlug()\n      const site = location.host\n      return `${site}+${slug}`\n    })\n    const inScope = new Set(pageIds)\n    const fromIds = new Set()\n    for (const edge of discourse.edges) {\n      if (edge.role === role && inScope.has(edge.fromId)) fromIds.add(edge.fromId)\n    }\n    const scopedFromIdsCount = fromIds.size\n    let fallbackApplied = false\n    if (fromIds.size === 0) {\n      fallbackApplied = true\n      for (const edge of discourse.edges) {\n        if (edge.role === role && edge.fromId) fromIds.add(edge.fromId)\n      }\n    }\n    if (debug) {\n      const roleFromIds = discourse.edges.filter(edge => edge.role === role).map(edge => edge.fromId)\n      console.log('[mech][WALK]', {\n        role,\n        scopeCount: pages.length,\n        inScopeCount: inScope.size,\n        scopedFromIdsCount,\n        matchingFromIdsCount: fromIds.size,\n        fallbackApplied,\n        pageIdSample: pageIds[0],\n        pageIds,\n        roleFromIdsSample: roleFromIds.slice(0, 5),\n      })\n    }\n    const infos = [...fromIds]\n      .map(fromId => {\n        const [domain, ...rest] = fromId.split('+')\n        const slug = rest.join('+')\n        return find(slug, domain)\n      })\n      .filter(Boolean)\n      .toSorted((a, b) => b.date - a.date)\n      .slice(0, limit)\n    return infos.map(info => ({ name: info.title, graph: blanket(info) }))\n  }\n}",
+      "sha256": "976b6ab049b3e7b2e1fff27e53830b0f14ab5e87b599cc60d579f5398e1a4a0c"
+    },
+    {
+      "name": "blanket",
+      "key": "walks/blanket",
+      "start": 2276,
+      "end": 3291,
+      "startLine": 60,
+      "endLine": 100,
+      "text": "function blanket(info) {\n    // hub[0] => slug\n    // find(slug) => info\n    // node(info) => nid\n    // back(slug) => infos\n    // newr(infos) => infos\n\n    const graph = new Graph()\n    const node = info => {\n      return graph.addUniqNode('', {\n        name: info.title.replaceAll(/ /g, '\\n'),\n        title: info.title,\n        site: info.domain,\n      })\n    }\n    const up = info => finds(info?.patterns?.up) ?? newr(back(info.slug))\n    const down = info => info?.patterns?.down ?? Object.keys(info.links || {})\n\n    // hub\n    const nid = node(info)\n\n    // parents of hub\n    for (const parent of up(info)) {\n      graph.addRel('', node(parent), nid)\n    }\n\n    // children of hub\n    for (const link of down(info)) {\n      const child = find(link)\n      if (child) {\n        const cid = node(child)\n        graph.addRel('', nid, cid)\n\n        // parents of children of hub\n        for (const parent of up(child)) {\n          graph.addRel('', node(parent), cid)\n        }\n      }\n    }\n    return graph\n  }",
+      "sha256": "eac19f2498fda3baf5cc3faad69be9b954f545e11e3492a68326a6e67852172f"
+    },
+    {
+      "name": "hubs",
+      "key": "walks/hubs",
+      "start": 6480,
+      "end": 7244,
+      "startLine": 203,
+      "endLine": 226,
+      "text": "function hubs(count = 12) {\n    const aspects = []\n    const ignored = new Set()\n    const hits = {}\n    for (const info of neighborhood)\n      if (info.links)\n        if (Object.keys(info.links).length <= 15) {\n          for (const link in info.links) if (find(link)) hits[link] = (hits[link] || 0) + 1\n        } else {\n          ignored.add(info.slug)\n        }\n    if (ignored.size > 0) console.log('hub links ignored for large pages:', [...ignored])\n    const hubs = Object.entries(hits)\n      .sort((a, b) => b[1] - a[1])\n      .slice(0, count)\n    console.log({ hits, hubs })\n\n    for (const hub of hubs) {\n      const name = `hub ${hub[1]} ${hub[0]}`\n      const graph = blanket(find(hub[0]))\n      aspects.push({ name, graph })\n    }\n    return aspects\n  }",
+      "sha256": "48d319634813e9c654b028da21aa9d94849ef1dee4c853031ac1c8f912fff7e2"
+    }
+  ],
+  "cases": [
+    {
+      "label": "patterns and mixed site slugs",
+      "neighborhood": [
+        {
+          "slug": "hub",
+          "title": "Hub A",
+          "domain": "a.example",
+          "links": {
+            "child": 1,
+            "missing-target": 1
+          },
+          "date": 100,
+          "patterns": {
+            "up": [
+              "pattern-parent"
+            ],
+            "down": [
+              "child"
+            ]
+          }
+        },
+        {
+          "slug": "hub",
+          "title": "Hub B",
+          "domain": "b.example",
+          "links": {},
+          "date": 200,
+          "patterns": {
+            "up": [],
+            "down": []
+          }
+        },
+        {
+          "slug": "child",
+          "title": "Child",
+          "domain": "a.example",
+          "links": {},
+          "date": 0
+        },
+        {
+          "slug": "pattern-parent",
+          "title": "Pattern Parent",
+          "domain": "a.example",
+          "links": {},
+          "date": 0
+        },
+        {
+          "slug": "small-1",
+          "title": "Small One",
+          "domain": "a.example",
+          "links": {
+            "hub": 1,
+            "missing-target": 1
+          },
+          "date": 30
+        },
+        {
+          "slug": "small-2",
+          "title": "Small Two",
+          "domain": "b.example",
+          "links": {
+            "hub": 1
+          },
+          "date": 40
+        },
+        {
+          "slug": "small-3",
+          "title": "Small Three",
+          "domain": "a.example",
+          "links": {
+            "hub": 1
+          },
+          "date": 50
+        },
+        {
+          "slug": "fifteen",
+          "title": "Exactly Fifteen",
+          "domain": "a.example",
+          "links": {
+            "hub": 1,
+            "missing-0": 1,
+            "missing-1": 1,
+            "missing-2": 1,
+            "missing-3": 1,
+            "missing-4": 1,
+            "missing-5": 1,
+            "missing-6": 1,
+            "missing-7": 1,
+            "missing-8": 1,
+            "missing-9": 1,
+            "missing-10": 1,
+            "missing-11": 1,
+            "missing-12": 1,
+            "missing-13": 1
+          },
+          "date": 60
+        },
+        {
+          "slug": "sixteen",
+          "title": "Exactly Sixteen",
+          "domain": "b.example",
+          "links": {
+            "hub": 1,
+            "missing-0": 1,
+            "missing-1": 1,
+            "missing-2": 1,
+            "missing-3": 1,
+            "missing-4": 1,
+            "missing-5": 1,
+            "missing-6": 1,
+            "missing-7": 1,
+            "missing-8": 1,
+            "missing-9": 1,
+            "missing-10": 1,
+            "missing-11": 1,
+            "missing-12": 1,
+            "missing-13": 1,
+            "missing-14": 1
+          },
+          "date": 70
+        }
+      ],
+      "ranking": {
+        "hits": {
+          "child": 1,
+          "hub": 4
+        },
+        "hubs": [
+          [
+            "hub",
+            4
+          ]
+        ]
+      },
+      "aspects": [
+        {
+          "name": "hub 4 hub",
+          "graph": {
+            "nodes": [
+              {
+                "type": "",
+                "in": [
+                  0
+                ],
+                "out": [
+                  1,
+                  2
+                ],
+                "props": {
+                  "name": "Hub\nA",
+                  "title": "Hub A",
+                  "site": "a.example"
+                }
+              },
+              {
+                "type": "",
+                "in": [],
+                "out": [
+                  0
+                ],
+                "props": {
+                  "name": "Pattern\nParent",
+                  "title": "Pattern Parent",
+                  "site": "a.example"
+                }
+              },
+              {
+                "type": "",
+                "in": [
+                  1,
+                  2
+                ],
+                "out": [],
+                "props": {
+                  "name": "Child",
+                  "title": "Child",
+                  "site": "a.example"
+                }
+              }
+            ],
+            "rels": [
+              {
+                "type": "",
+                "from": 1,
+                "to": 0,
+                "props": {}
+              },
+              {
+                "type": "",
+                "from": 0,
+                "to": 2,
+                "props": {}
+              },
+              {
+                "type": "",
+                "from": 0,
+                "to": 2,
+                "props": {}
+              }
+            ]
+          }
+        }
+      ],
+      "logs": [
+        [
+          "hub links ignored for large pages:",
+          [
+            "sixteen"
+          ]
+        ],
+        [
+          {
+            "hits": {
+              "child": 1,
+              "hub": 4
+            },
+            "hubs": [
+              [
+                "hub",
+                4
+              ]
+            ]
+          }
+        ]
+      ]
+    },
+    {
+      "label": "fallback parent filter",
+      "neighborhood": [
+        {
+          "slug": "hub",
+          "title": "Hub A",
+          "domain": "a.example",
+          "links": {
+            "child": 1,
+            "missing-target": 1
+          },
+          "date": 100
+        },
+        {
+          "slug": "hub",
+          "title": "Hub B",
+          "domain": "b.example",
+          "links": {},
+          "date": 200,
+          "patterns": {
+            "up": [],
+            "down": []
+          }
+        },
+        {
+          "slug": "child",
+          "title": "Child",
+          "domain": "a.example",
+          "links": {},
+          "date": 0
+        },
+        {
+          "slug": "pattern-parent",
+          "title": "Pattern Parent",
+          "domain": "a.example",
+          "links": {},
+          "date": 0
+        },
+        {
+          "slug": "small-1",
+          "title": "Small One",
+          "domain": "a.example",
+          "links": {
+            "hub": 1,
+            "missing-target": 1
+          },
+          "date": 30
+        },
+        {
+          "slug": "small-2",
+          "title": "Small Two",
+          "domain": "b.example",
+          "links": {
+            "hub": 1
+          },
+          "date": 40
+        },
+        {
+          "slug": "small-3",
+          "title": "Small Three",
+          "domain": "a.example",
+          "links": {
+            "hub": 1
+          },
+          "date": 50
+        },
+        {
+          "slug": "fifteen",
+          "title": "Exactly Fifteen",
+          "domain": "a.example",
+          "links": {
+            "hub": 1,
+            "missing-0": 1,
+            "missing-1": 1,
+            "missing-2": 1,
+            "missing-3": 1,
+            "missing-4": 1,
+            "missing-5": 1,
+            "missing-6": 1,
+            "missing-7": 1,
+            "missing-8": 1,
+            "missing-9": 1,
+            "missing-10": 1,
+            "missing-11": 1,
+            "missing-12": 1,
+            "missing-13": 1
+          },
+          "date": 60
+        },
+        {
+          "slug": "sixteen",
+          "title": "Exactly Sixteen",
+          "domain": "b.example",
+          "links": {
+            "hub": 1,
+            "missing-0": 1,
+            "missing-1": 1,
+            "missing-2": 1,
+            "missing-3": 1,
+            "missing-4": 1,
+            "missing-5": 1,
+            "missing-6": 1,
+            "missing-7": 1,
+            "missing-8": 1,
+            "missing-9": 1,
+            "missing-10": 1,
+            "missing-11": 1,
+            "missing-12": 1,
+            "missing-13": 1,
+            "missing-14": 1
+          },
+          "date": 70
+        }
+      ],
+      "ranking": {
+        "hits": {
+          "child": 1,
+          "hub": 4
+        },
+        "hubs": [
+          [
+            "hub",
+            4
+          ]
+        ]
+      },
+      "aspects": [
+        {
+          "name": "hub 4 hub",
+          "graph": {
+            "nodes": [
+              {
+                "type": "",
+                "in": [
+                  0,
+                  1,
+                  2
+                ],
+                "out": [
+                  3,
+                  4
+                ],
+                "props": {
+                  "name": "Hub\nA",
+                  "title": "Hub A",
+                  "site": "a.example"
+                }
+              },
+              {
+                "type": "",
+                "in": [],
+                "out": [
+                  0
+                ],
+                "props": {
+                  "name": "Small\nThree",
+                  "title": "Small Three",
+                  "site": "a.example"
+                }
+              },
+              {
+                "type": "",
+                "in": [],
+                "out": [
+                  1
+                ],
+                "props": {
+                  "name": "Small\nTwo",
+                  "title": "Small Two",
+                  "site": "b.example"
+                }
+              },
+              {
+                "type": "",
+                "in": [],
+                "out": [
+                  2
+                ],
+                "props": {
+                  "name": "Small\nOne",
+                  "title": "Small One",
+                  "site": "a.example"
+                }
+              },
+              {
+                "type": "",
+                "in": [
+                  3,
+                  4
+                ],
+                "out": [],
+                "props": {
+                  "name": "Child",
+                  "title": "Child",
+                  "site": "a.example"
+                }
+              }
+            ],
+            "rels": [
+              {
+                "type": "",
+                "from": 1,
+                "to": 0,
+                "props": {}
+              },
+              {
+                "type": "",
+                "from": 2,
+                "to": 0,
+                "props": {}
+              },
+              {
+                "type": "",
+                "from": 3,
+                "to": 0,
+                "props": {}
+              },
+              {
+                "type": "",
+                "from": 0,
+                "to": 4,
+                "props": {}
+              },
+              {
+                "type": "",
+                "from": 0,
+                "to": 4,
+                "props": {}
+              }
+            ]
+          }
+        }
+      ],
+      "logs": [
+        [
+          "hub links ignored for large pages:",
+          [
+            "sixteen"
+          ]
+        ],
+        [
+          {
+            "hits": {
+              "child": 1,
+              "hub": 4
+            },
+            "hubs": [
+              [
+                "hub",
+                4
+              ]
+            ]
+          }
+        ]
+      ]
+    },
+    {
+      "label": "explicit down overrides links",
+      "neighborhood": [
+        {
+          "slug": "hub",
+          "title": "Hub A",
+          "domain": "a.example",
+          "links": {
+            "child": 1,
+            "missing-target": 1
+          },
+          "date": 100,
+          "patterns": {
+            "up": [
+              "pattern-parent"
+            ],
+            "down": [
+              "pattern-parent"
+            ]
+          }
+        },
+        {
+          "slug": "hub",
+          "title": "Hub B",
+          "domain": "b.example",
+          "links": {},
+          "date": 200,
+          "patterns": {
+            "up": [],
+            "down": []
+          }
+        },
+        {
+          "slug": "child",
+          "title": "Child",
+          "domain": "a.example",
+          "links": {},
+          "date": 0
+        },
+        {
+          "slug": "pattern-parent",
+          "title": "Pattern Parent",
+          "domain": "a.example",
+          "links": {},
+          "date": 0
+        },
+        {
+          "slug": "small-1",
+          "title": "Small One",
+          "domain": "a.example",
+          "links": {
+            "hub": 1,
+            "missing-target": 1
+          },
+          "date": 30
+        },
+        {
+          "slug": "small-2",
+          "title": "Small Two",
+          "domain": "b.example",
+          "links": {
+            "hub": 1
+          },
+          "date": 40
+        },
+        {
+          "slug": "small-3",
+          "title": "Small Three",
+          "domain": "a.example",
+          "links": {
+            "hub": 1
+          },
+          "date": 50
+        },
+        {
+          "slug": "fifteen",
+          "title": "Exactly Fifteen",
+          "domain": "a.example",
+          "links": {
+            "hub": 1,
+            "missing-0": 1,
+            "missing-1": 1,
+            "missing-2": 1,
+            "missing-3": 1,
+            "missing-4": 1,
+            "missing-5": 1,
+            "missing-6": 1,
+            "missing-7": 1,
+            "missing-8": 1,
+            "missing-9": 1,
+            "missing-10": 1,
+            "missing-11": 1,
+            "missing-12": 1,
+            "missing-13": 1
+          },
+          "date": 60
+        },
+        {
+          "slug": "sixteen",
+          "title": "Exactly Sixteen",
+          "domain": "b.example",
+          "links": {
+            "hub": 1,
+            "missing-0": 1,
+            "missing-1": 1,
+            "missing-2": 1,
+            "missing-3": 1,
+            "missing-4": 1,
+            "missing-5": 1,
+            "missing-6": 1,
+            "missing-7": 1,
+            "missing-8": 1,
+            "missing-9": 1,
+            "missing-10": 1,
+            "missing-11": 1,
+            "missing-12": 1,
+            "missing-13": 1,
+            "missing-14": 1
+          },
+          "date": 70
+        }
+      ],
+      "ranking": {
+        "hits": {
+          "child": 1,
+          "hub": 4
+        },
+        "hubs": [
+          [
+            "hub",
+            4
+          ]
+        ]
+      },
+      "aspects": [
+        {
+          "name": "hub 4 hub",
+          "graph": {
+            "nodes": [
+              {
+                "type": "",
+                "in": [
+                  0
+                ],
+                "out": [
+                  1
+                ],
+                "props": {
+                  "name": "Hub\nA",
+                  "title": "Hub A",
+                  "site": "a.example"
+                }
+              },
+              {
+                "type": "",
+                "in": [
+                  1
+                ],
+                "out": [
+                  0
+                ],
+                "props": {
+                  "name": "Pattern\nParent",
+                  "title": "Pattern Parent",
+                  "site": "a.example"
+                }
+              }
+            ],
+            "rels": [
+              {
+                "type": "",
+                "from": 1,
+                "to": 0,
+                "props": {}
+              },
+              {
+                "type": "",
+                "from": 0,
+                "to": 1,
+                "props": {}
+              }
+            ]
+          }
+        }
+      ],
+      "logs": [
+        [
+          "hub links ignored for large pages:",
+          [
+            "sixteen"
+          ]
+        ],
+        [
+          {
+            "hits": {
+              "child": 1,
+              "hub": 4
+            },
+            "hubs": [
+              [
+                "hub",
+                4
+              ]
+            ]
+          }
+        ]
+      ]
+    },
+    {
+      "label": "explicit empty up",
+      "neighborhood": [
+        {
+          "slug": "hub",
+          "title": "Hub A",
+          "domain": "a.example",
+          "links": {
+            "child": 1,
+            "missing-target": 1
+          },
+          "date": 100,
+          "patterns": {
+            "up": [],
+            "down": [
+              "child"
+            ]
+          }
+        },
+        {
+          "slug": "hub",
+          "title": "Hub B",
+          "domain": "b.example",
+          "links": {},
+          "date": 200,
+          "patterns": {
+            "up": [],
+            "down": []
+          }
+        },
+        {
+          "slug": "child",
+          "title": "Child",
+          "domain": "a.example",
+          "links": {},
+          "date": 0
+        },
+        {
+          "slug": "pattern-parent",
+          "title": "Pattern Parent",
+          "domain": "a.example",
+          "links": {},
+          "date": 0
+        },
+        {
+          "slug": "small-1",
+          "title": "Small One",
+          "domain": "a.example",
+          "links": {
+            "hub": 1,
+            "missing-target": 1
+          },
+          "date": 30
+        },
+        {
+          "slug": "small-2",
+          "title": "Small Two",
+          "domain": "b.example",
+          "links": {
+            "hub": 1
+          },
+          "date": 40
+        },
+        {
+          "slug": "small-3",
+          "title": "Small Three",
+          "domain": "a.example",
+          "links": {
+            "hub": 1
+          },
+          "date": 50
+        },
+        {
+          "slug": "fifteen",
+          "title": "Exactly Fifteen",
+          "domain": "a.example",
+          "links": {
+            "hub": 1,
+            "missing-0": 1,
+            "missing-1": 1,
+            "missing-2": 1,
+            "missing-3": 1,
+            "missing-4": 1,
+            "missing-5": 1,
+            "missing-6": 1,
+            "missing-7": 1,
+            "missing-8": 1,
+            "missing-9": 1,
+            "missing-10": 1,
+            "missing-11": 1,
+            "missing-12": 1,
+            "missing-13": 1
+          },
+          "date": 60
+        },
+        {
+          "slug": "sixteen",
+          "title": "Exactly Sixteen",
+          "domain": "b.example",
+          "links": {
+            "hub": 1,
+            "missing-0": 1,
+            "missing-1": 1,
+            "missing-2": 1,
+            "missing-3": 1,
+            "missing-4": 1,
+            "missing-5": 1,
+            "missing-6": 1,
+            "missing-7": 1,
+            "missing-8": 1,
+            "missing-9": 1,
+            "missing-10": 1,
+            "missing-11": 1,
+            "missing-12": 1,
+            "missing-13": 1,
+            "missing-14": 1
+          },
+          "date": 70
+        }
+      ],
+      "ranking": {
+        "hits": {
+          "child": 1,
+          "hub": 4
+        },
+        "hubs": [
+          [
+            "hub",
+            4
+          ]
+        ]
+      },
+      "aspects": [
+        {
+          "name": "hub 4 hub",
+          "graph": {
+            "nodes": [
+              {
+                "type": "",
+                "in": [],
+                "out": [
+                  0,
+                  1
+                ],
+                "props": {
+                  "name": "Hub\nA",
+                  "title": "Hub A",
+                  "site": "a.example"
+                }
+              },
+              {
+                "type": "",
+                "in": [
+                  0,
+                  1
+                ],
+                "out": [],
+                "props": {
+                  "name": "Child",
+                  "title": "Child",
+                  "site": "a.example"
+                }
+              }
+            ],
+            "rels": [
+              {
+                "type": "",
+                "from": 0,
+                "to": 1,
+                "props": {}
+              },
+              {
+                "type": "",
+                "from": 0,
+                "to": 1,
+                "props": {}
+              }
+            ]
+          }
+        }
+      ],
+      "logs": [
+        [
+          "hub links ignored for large pages:",
+          [
+            "sixteen"
+          ]
+        ],
+        [
+          {
+            "hits": {
+              "child": 1,
+              "hub": 4
+            },
+            "hubs": [
+              [
+                "hub",
+                4
+              ]
+            ]
+          }
+        ]
+      ]
+    },
+    {
+      "label": "duplicate slug order reversed",
+      "neighborhood": [
+        {
+          "slug": "hub",
+          "title": "Hub B",
+          "domain": "b.example",
+          "links": {},
+          "date": 200,
+          "patterns": {
+            "up": [],
+            "down": []
+          }
+        },
+        {
+          "slug": "hub",
+          "title": "Hub A",
+          "domain": "a.example",
+          "links": {
+            "child": 1,
+            "missing-target": 1
+          },
+          "date": 100,
+          "patterns": {
+            "up": [
+              "pattern-parent"
+            ],
+            "down": [
+              "child"
+            ]
+          }
+        },
+        {
+          "slug": "child",
+          "title": "Child",
+          "domain": "a.example",
+          "links": {},
+          "date": 0
+        },
+        {
+          "slug": "pattern-parent",
+          "title": "Pattern Parent",
+          "domain": "a.example",
+          "links": {},
+          "date": 0
+        },
+        {
+          "slug": "small-1",
+          "title": "Small One",
+          "domain": "a.example",
+          "links": {
+            "hub": 1,
+            "missing-target": 1
+          },
+          "date": 30
+        },
+        {
+          "slug": "small-2",
+          "title": "Small Two",
+          "domain": "b.example",
+          "links": {
+            "hub": 1
+          },
+          "date": 40
+        },
+        {
+          "slug": "small-3",
+          "title": "Small Three",
+          "domain": "a.example",
+          "links": {
+            "hub": 1
+          },
+          "date": 50
+        },
+        {
+          "slug": "fifteen",
+          "title": "Exactly Fifteen",
+          "domain": "a.example",
+          "links": {
+            "hub": 1,
+            "missing-0": 1,
+            "missing-1": 1,
+            "missing-2": 1,
+            "missing-3": 1,
+            "missing-4": 1,
+            "missing-5": 1,
+            "missing-6": 1,
+            "missing-7": 1,
+            "missing-8": 1,
+            "missing-9": 1,
+            "missing-10": 1,
+            "missing-11": 1,
+            "missing-12": 1,
+            "missing-13": 1
+          },
+          "date": 60
+        },
+        {
+          "slug": "sixteen",
+          "title": "Exactly Sixteen",
+          "domain": "b.example",
+          "links": {
+            "hub": 1,
+            "missing-0": 1,
+            "missing-1": 1,
+            "missing-2": 1,
+            "missing-3": 1,
+            "missing-4": 1,
+            "missing-5": 1,
+            "missing-6": 1,
+            "missing-7": 1,
+            "missing-8": 1,
+            "missing-9": 1,
+            "missing-10": 1,
+            "missing-11": 1,
+            "missing-12": 1,
+            "missing-13": 1,
+            "missing-14": 1
+          },
+          "date": 70
+        }
+      ],
+      "ranking": {
+        "hits": {
+          "child": 1,
+          "hub": 4
+        },
+        "hubs": [
+          [
+            "hub",
+            4
+          ]
+        ]
+      },
+      "aspects": [
+        {
+          "name": "hub 4 hub",
+          "graph": {
+            "nodes": [
+              {
+                "type": "",
+                "in": [],
+                "out": [],
+                "props": {
+                  "name": "Hub\nB",
+                  "title": "Hub B",
+                  "site": "b.example"
+                }
+              }
+            ],
+            "rels": []
+          }
+        }
+      ],
+      "logs": [
+        [
+          "hub links ignored for large pages:",
+          [
+            "sixteen"
+          ]
+        ],
+        [
+          {
+            "hits": {
+              "child": 1,
+              "hub": 4
+            },
+            "hubs": [
+              [
+                "hub",
+                4
+              ]
+            ]
+          }
+        ]
+      ]
+    },
+    {
+      "label": "default count",
+      "neighborhood": [
+        {
+          "slug": "target-0",
+          "title": "Target 0",
+          "domain": "limits.example",
+          "links": {},
+          "date": 0
+        },
+        {
+          "slug": "target-1",
+          "title": "Target 1",
+          "domain": "limits.example",
+          "links": {},
+          "date": 0
+        },
+        {
+          "slug": "target-2",
+          "title": "Target 2",
+          "domain": "limits.example",
+          "links": {},
+          "date": 0
+        },
+        {
+          "slug": "target-3",
+          "title": "Target 3",
+          "domain": "limits.example",
+          "links": {},
+          "date": 0
+        },
+        {
+          "slug": "target-4",
+          "title": "Target 4",
+          "domain": "limits.example",
+          "links": {},
+          "date": 0
+        },
+        {
+          "slug": "target-5",
+          "title": "Target 5",
+          "domain": "limits.example",
+          "links": {},
+          "date": 0
+        },
+        {
+          "slug": "target-6",
+          "title": "Target 6",
+          "domain": "limits.example",
+          "links": {},
+          "date": 0
+        },
+        {
+          "slug": "target-7",
+          "title": "Target 7",
+          "domain": "limits.example",
+          "links": {},
+          "date": 0
+        },
+        {
+          "slug": "target-8",
+          "title": "Target 8",
+          "domain": "limits.example",
+          "links": {},
+          "date": 0
+        },
+        {
+          "slug": "target-9",
+          "title": "Target 9",
+          "domain": "limits.example",
+          "links": {},
+          "date": 0
+        },
+        {
+          "slug": "target-10",
+          "title": "Target 10",
+          "domain": "limits.example",
+          "links": {},
+          "date": 0
+        },
+        {
+          "slug": "target-11",
+          "title": "Target 11",
+          "domain": "limits.example",
+          "links": {},
+          "date": 0
+        },
+        {
+          "slug": "target-12",
+          "title": "Target 12",
+          "domain": "limits.example",
+          "links": {},
+          "date": 0
+        },
+        {
+          "slug": "target-13",
+          "title": "Target 13",
+          "domain": "limits.example",
+          "links": {},
+          "date": 0
+        },
+        {
+          "slug": "target-14",
+          "title": "Target 14",
+          "domain": "limits.example",
+          "links": {},
+          "date": 0
+        },
+        {
+          "slug": "all",
+          "title": "All",
+          "domain": "limits.example",
+          "links": {
+            "target-0": 1,
+            "target-1": 1,
+            "target-2": 1,
+            "target-3": 1,
+            "target-4": 1,
+            "target-5": 1,
+            "target-6": 1,
+            "target-7": 1,
+            "target-8": 1,
+            "target-9": 1,
+            "target-10": 1,
+            "target-11": 1,
+            "target-12": 1,
+            "target-13": 1,
+            "target-14": 1
+          },
+          "date": 0
+        }
+      ],
+      "ranking": {
+        "hits": {
+          "target-0": 1,
+          "target-1": 1,
+          "target-2": 1,
+          "target-3": 1,
+          "target-4": 1,
+          "target-5": 1,
+          "target-6": 1,
+          "target-7": 1,
+          "target-8": 1,
+          "target-9": 1,
+          "target-10": 1,
+          "target-11": 1,
+          "target-12": 1,
+          "target-13": 1,
+          "target-14": 1
+        },
+        "hubs": [
+          [
+            "target-0",
+            1
+          ],
+          [
+            "target-1",
+            1
+          ],
+          [
+            "target-2",
+            1
+          ],
+          [
+            "target-3",
+            1
+          ],
+          [
+            "target-4",
+            1
+          ],
+          [
+            "target-5",
+            1
+          ],
+          [
+            "target-6",
+            1
+          ],
+          [
+            "target-7",
+            1
+          ],
+          [
+            "target-8",
+            1
+          ],
+          [
+            "target-9",
+            1
+          ],
+          [
+            "target-10",
+            1
+          ],
+          [
+            "target-11",
+            1
+          ]
+        ]
+      },
+      "aspects": [
+        {
+          "name": "hub 1 target-0",
+          "graph": {
+            "nodes": [
+              {
+                "type": "",
+                "in": [],
+                "out": [],
+                "props": {
+                  "name": "Target\n0",
+                  "title": "Target 0",
+                  "site": "limits.example"
+                }
+              }
+            ],
+            "rels": []
+          }
+        },
+        {
+          "name": "hub 1 target-1",
+          "graph": {
+            "nodes": [
+              {
+                "type": "",
+                "in": [],
+                "out": [],
+                "props": {
+                  "name": "Target\n1",
+                  "title": "Target 1",
+                  "site": "limits.example"
+                }
+              }
+            ],
+            "rels": []
+          }
+        },
+        {
+          "name": "hub 1 target-2",
+          "graph": {
+            "nodes": [
+              {
+                "type": "",
+                "in": [],
+                "out": [],
+                "props": {
+                  "name": "Target\n2",
+                  "title": "Target 2",
+                  "site": "limits.example"
+                }
+              }
+            ],
+            "rels": []
+          }
+        },
+        {
+          "name": "hub 1 target-3",
+          "graph": {
+            "nodes": [
+              {
+                "type": "",
+                "in": [],
+                "out": [],
+                "props": {
+                  "name": "Target\n3",
+                  "title": "Target 3",
+                  "site": "limits.example"
+                }
+              }
+            ],
+            "rels": []
+          }
+        },
+        {
+          "name": "hub 1 target-4",
+          "graph": {
+            "nodes": [
+              {
+                "type": "",
+                "in": [],
+                "out": [],
+                "props": {
+                  "name": "Target\n4",
+                  "title": "Target 4",
+                  "site": "limits.example"
+                }
+              }
+            ],
+            "rels": []
+          }
+        },
+        {
+          "name": "hub 1 target-5",
+          "graph": {
+            "nodes": [
+              {
+                "type": "",
+                "in": [],
+                "out": [],
+                "props": {
+                  "name": "Target\n5",
+                  "title": "Target 5",
+                  "site": "limits.example"
+                }
+              }
+            ],
+            "rels": []
+          }
+        },
+        {
+          "name": "hub 1 target-6",
+          "graph": {
+            "nodes": [
+              {
+                "type": "",
+                "in": [],
+                "out": [],
+                "props": {
+                  "name": "Target\n6",
+                  "title": "Target 6",
+                  "site": "limits.example"
+                }
+              }
+            ],
+            "rels": []
+          }
+        },
+        {
+          "name": "hub 1 target-7",
+          "graph": {
+            "nodes": [
+              {
+                "type": "",
+                "in": [],
+                "out": [],
+                "props": {
+                  "name": "Target\n7",
+                  "title": "Target 7",
+                  "site": "limits.example"
+                }
+              }
+            ],
+            "rels": []
+          }
+        },
+        {
+          "name": "hub 1 target-8",
+          "graph": {
+            "nodes": [
+              {
+                "type": "",
+                "in": [],
+                "out": [],
+                "props": {
+                  "name": "Target\n8",
+                  "title": "Target 8",
+                  "site": "limits.example"
+                }
+              }
+            ],
+            "rels": []
+          }
+        },
+        {
+          "name": "hub 1 target-9",
+          "graph": {
+            "nodes": [
+              {
+                "type": "",
+                "in": [],
+                "out": [],
+                "props": {
+                  "name": "Target\n9",
+                  "title": "Target 9",
+                  "site": "limits.example"
+                }
+              }
+            ],
+            "rels": []
+          }
+        },
+        {
+          "name": "hub 1 target-10",
+          "graph": {
+            "nodes": [
+              {
+                "type": "",
+                "in": [],
+                "out": [],
+                "props": {
+                  "name": "Target\n10",
+                  "title": "Target 10",
+                  "site": "limits.example"
+                }
+              }
+            ],
+            "rels": []
+          }
+        },
+        {
+          "name": "hub 1 target-11",
+          "graph": {
+            "nodes": [
+              {
+                "type": "",
+                "in": [],
+                "out": [],
+                "props": {
+                  "name": "Target\n11",
+                  "title": "Target 11",
+                  "site": "limits.example"
+                }
+              }
+            ],
+            "rels": []
+          }
+        }
+      ],
+      "logs": [
+        [
+          {
+            "hits": {
+              "target-0": 1,
+              "target-1": 1,
+              "target-2": 1,
+              "target-3": 1,
+              "target-4": 1,
+              "target-5": 1,
+              "target-6": 1,
+              "target-7": 1,
+              "target-8": 1,
+              "target-9": 1,
+              "target-10": 1,
+              "target-11": 1,
+              "target-12": 1,
+              "target-13": 1,
+              "target-14": 1
+            },
+            "hubs": [
+              [
+                "target-0",
+                1
+              ],
+              [
+                "target-1",
+                1
+              ],
+              [
+                "target-2",
+                1
+              ],
+              [
+                "target-3",
+                1
+              ],
+              [
+                "target-4",
+                1
+              ],
+              [
+                "target-5",
+                1
+              ],
+              [
+                "target-6",
+                1
+              ],
+              [
+                "target-7",
+                1
+              ],
+              [
+                "target-8",
+                1
+              ],
+              [
+                "target-9",
+                1
+              ],
+              [
+                "target-10",
+                1
+              ],
+              [
+                "target-11",
+                1
+              ]
+            ]
+          }
+        ]
+      ]
+    },
+    {
+      "label": "explicit count",
+      "neighborhood": [
+        {
+          "slug": "target-0",
+          "title": "Target 0",
+          "domain": "limits.example",
+          "links": {},
+          "date": 0
+        },
+        {
+          "slug": "target-1",
+          "title": "Target 1",
+          "domain": "limits.example",
+          "links": {},
+          "date": 0
+        },
+        {
+          "slug": "target-2",
+          "title": "Target 2",
+          "domain": "limits.example",
+          "links": {},
+          "date": 0
+        },
+        {
+          "slug": "target-3",
+          "title": "Target 3",
+          "domain": "limits.example",
+          "links": {},
+          "date": 0
+        },
+        {
+          "slug": "target-4",
+          "title": "Target 4",
+          "domain": "limits.example",
+          "links": {},
+          "date": 0
+        },
+        {
+          "slug": "target-5",
+          "title": "Target 5",
+          "domain": "limits.example",
+          "links": {},
+          "date": 0
+        },
+        {
+          "slug": "target-6",
+          "title": "Target 6",
+          "domain": "limits.example",
+          "links": {},
+          "date": 0
+        },
+        {
+          "slug": "target-7",
+          "title": "Target 7",
+          "domain": "limits.example",
+          "links": {},
+          "date": 0
+        },
+        {
+          "slug": "target-8",
+          "title": "Target 8",
+          "domain": "limits.example",
+          "links": {},
+          "date": 0
+        },
+        {
+          "slug": "target-9",
+          "title": "Target 9",
+          "domain": "limits.example",
+          "links": {},
+          "date": 0
+        },
+        {
+          "slug": "target-10",
+          "title": "Target 10",
+          "domain": "limits.example",
+          "links": {},
+          "date": 0
+        },
+        {
+          "slug": "target-11",
+          "title": "Target 11",
+          "domain": "limits.example",
+          "links": {},
+          "date": 0
+        },
+        {
+          "slug": "target-12",
+          "title": "Target 12",
+          "domain": "limits.example",
+          "links": {},
+          "date": 0
+        },
+        {
+          "slug": "target-13",
+          "title": "Target 13",
+          "domain": "limits.example",
+          "links": {},
+          "date": 0
+        },
+        {
+          "slug": "target-14",
+          "title": "Target 14",
+          "domain": "limits.example",
+          "links": {},
+          "date": 0
+        },
+        {
+          "slug": "all",
+          "title": "All",
+          "domain": "limits.example",
+          "links": {
+            "target-0": 1,
+            "target-1": 1,
+            "target-2": 1,
+            "target-3": 1,
+            "target-4": 1,
+            "target-5": 1,
+            "target-6": 1,
+            "target-7": 1,
+            "target-8": 1,
+            "target-9": 1,
+            "target-10": 1,
+            "target-11": 1,
+            "target-12": 1,
+            "target-13": 1,
+            "target-14": 1
+          },
+          "date": 0
+        }
+      ],
+      "ranking": {
+        "hits": {
+          "target-0": 1,
+          "target-1": 1,
+          "target-2": 1,
+          "target-3": 1,
+          "target-4": 1,
+          "target-5": 1,
+          "target-6": 1,
+          "target-7": 1,
+          "target-8": 1,
+          "target-9": 1,
+          "target-10": 1,
+          "target-11": 1,
+          "target-12": 1,
+          "target-13": 1,
+          "target-14": 1
+        },
+        "hubs": [
+          [
+            "target-0",
+            1
+          ],
+          [
+            "target-1",
+            1
+          ]
+        ]
+      },
+      "aspects": [
+        {
+          "name": "hub 1 target-0",
+          "graph": {
+            "nodes": [
+              {
+                "type": "",
+                "in": [],
+                "out": [],
+                "props": {
+                  "name": "Target\n0",
+                  "title": "Target 0",
+                  "site": "limits.example"
+                }
+              }
+            ],
+            "rels": []
+          }
+        },
+        {
+          "name": "hub 1 target-1",
+          "graph": {
+            "nodes": [
+              {
+                "type": "",
+                "in": [],
+                "out": [],
+                "props": {
+                  "name": "Target\n1",
+                  "title": "Target 1",
+                  "site": "limits.example"
+                }
+              }
+            ],
+            "rels": []
+          }
+        }
+      ],
+      "logs": [
+        [
+          {
+            "hits": {
+              "target-0": 1,
+              "target-1": 1,
+              "target-2": 1,
+              "target-3": 1,
+              "target-4": 1,
+              "target-5": 1,
+              "target-6": 1,
+              "target-7": 1,
+              "target-8": 1,
+              "target-9": 1,
+              "target-10": 1,
+              "target-11": 1,
+              "target-12": 1,
+              "target-13": 1,
+              "target-14": 1
+            },
+            "hubs": [
+              [
+                "target-0",
+                1
+              ],
+              [
+                "target-1",
+                1
+              ]
+            ]
+          }
+        ]
+      ]
+    }
+  ],
+  "failures": [
+    {
+      "label": "missing explicit parent",
+      "message": "Cannot read properties of undefined (reading 'title')"
+    }
+  ],
+  "checks": [
+    "15-link source counts",
+    "16-link source excluded",
+    "Unfindable targets absent",
+    "Duplicate slug hits conflate sites",
+    "First matching slug controls blanket",
+    "Explicit up/down honored",
+    "Fallback parents have <10 links, newest three, slug dedup",
+    "Empty up prevents fallback",
+    "Ranking differs from graph degree/aspect",
+    "Default count 12; explicit limit honored"
+  ],
+  "limitations": [
+    "No reconstruction of Ward's two-hub/four-node selection",
+    "No Solo or Graphviz execution",
+    "No claim about paths outside selected expansion"
+  ]
+}

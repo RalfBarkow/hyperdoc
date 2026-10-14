@@ -2751,6 +2751,11 @@
                       (:file "trails-rendered-following")
                       (:file "how-trails-sources")
                       (:file "javascript-definitions")
+                      (:file "reading-mech-hubs")
+                      (:file "inspecting-hub-selection")
+                      (:module "hubs-evidence" :components
+                        ((:static-file "synthetic-selection.json")
+                         (:static-file "ward.voices.ustawi.wiki--dewey-alexander-trail.json")))
                       (:static-file "how-trails-definitions.json")
                       (:file "trails-rendered-browser-check")
                       (:file "shift-click" :depends-on
@@ -2838,6 +2843,8 @@
                       (:static-file "Shift-click Is Pane Policy.html")
                       (:static-file "Following One Recorded Trail.html")
                       (:static-file "How Trails Travel.html")
+                      (:static-file "What Counts as a Hub?.html")
+                      (:static-file "From Two Hubs to One Trail.html")
                       (:static-file "Original CODE Browser Check.html")))))
 
 (defsystem "dreyeck/work/reading/tests" :depends-on
@@ -2859,6 +2866,7 @@
             (:file "dreyeck/tests/work-trails-rendered-federated-context")
             (:file "dreyeck/tests/work-trails-rendered-following")
             (:file "dreyeck/tests/work-how-trails-sources")
+            (:file "dreyeck/tests/work-hubs-reading")
             (:file "dreyeck/tests/work-shift-click")
             (:file "dreyeck/tests/work-trails-rendered-browser-check")
             (:file "dreyeck/tests/work-deployment-inspection"))
@@ -2873,6 +2881,7 @@
                     (uiop:symbol-call
                                       :dreyeck/work/trails-rendered-reading/tests
                                       :run-tests)
+                    (uiop:symbol-call :dreyeck/work/hubs/tests :run-tests)
                     (uiop:symbol-call :dreyeck/work/shift-click/tests
                                       :run-tests)
                     (uiop:symbol-call :dreyeck/work/deployment-inspection/tests
