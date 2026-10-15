@@ -32,6 +32,9 @@
    ;; from the code files in hyperdoc-explorer.
    (packages :reader packages-of :initform nil)))
 
+(defmethod print-object ((hd hyperdoc) stream)
+  (format stream "#<hyperdoc ~s>" (hb:id-of hd)))
+
 ;; Accessor for the ASDF system
 ;; (a generic function to ensure it appears in the "Operations" view)
 
@@ -54,6 +57,9 @@
 
 (defclass code-page (page)
   ((file :reader file-of :initarg :file)))
+
+(defmethod print-object ((p page) stream)
+  (format stream "#<page ~s in hyperdoc ~s>" (hb:id-of p) (hb:id-of (hb:hyperbook-of p))))
 
 ;;
 ;; Create a HyperDoc instance.
