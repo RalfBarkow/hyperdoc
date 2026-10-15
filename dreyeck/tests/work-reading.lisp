@@ -48,13 +48,16 @@
     "work:running-image-authoring:develops:hyperdoc-authoring"
     "work:dogfooding:current-work:ward-hub-trail-selection"
     "work:planning:contains:collaborative-planning-case"
-    "work:dogfooding:current-work:collaborative-planning-case"))
+    "work:dogfooding:current-work:collaborative-planning-case"
+    "work:ctm-plan-page-authoring:applies:fedwiki-item-authoring"
+    "work:ctm-plan-page-authoring:applies:hyperdoc-authoring-interaction"
+    "work:dogfooding:current-work:ctm-plan-page-authoring"))
 
 (defun check-projection-integrity (projection)
   (let* ((topics (tm:topicmap-projection-topics-of projection))
          (associations (tm:topicmap-projection-associations-of projection))
          (ids (mapcar #'tm:topicmap-association-id-of associations)))
-    (assert (= 25 (length topics)))
+    (assert (= 26 (length topics)))
     (assert (= (length *expected-work-associations*) (length ids)))
     (dolist (id *expected-work-associations*)
       (assert (= 1 (count id ids :test #'equal))))

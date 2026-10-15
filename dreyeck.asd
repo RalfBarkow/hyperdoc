@@ -2755,6 +2755,7 @@
                       (:file "inspecting-hub-selection")
                       (:file "investigating-ward-hub-selection")
                       (:file "collaborative-planning-reading")
+                      (:file "ctm-plan-page-authoring")
                       (:module "collaborative-planning-evidence" :components
                         ((:static-file "case.json")
                          (:static-file "MANIFEST.txt")
@@ -2842,6 +2843,8 @@
                       (:static-file "D2 Corpus.html")
                       (:static-file "Planning with SHOP3.html")
                       (:static-file "Collaborative Planning with Codex and SHOP3.html")
+                      (:static-file "Authoring the CTM Plan Page.html")
+                      (:static-file "CTM Plan Page WBS Dictionary.html")
                       (:static-file "D2 Connections.html")
                       (:static-file "Relation Contract informs.html")
                       (:static-file
@@ -2881,6 +2884,7 @@
             (:file "dreyeck/tests/work-hubs-reading")
             (:file "dreyeck/tests/work-hub-investigation")
             (:file "dreyeck/tests/work-collaborative-planning")
+            (:file "dreyeck/tests/work-ctm-plan-page-authoring")
             (:file "dreyeck/tests/work-shift-click")
             (:file "dreyeck/tests/work-trails-rendered-browser-check")
             (:file "dreyeck/tests/work-deployment-inspection"))
@@ -2898,6 +2902,7 @@
                     (uiop:symbol-call :dreyeck/work/hubs/tests :run-tests)
                     (uiop:symbol-call :dreyeck/work/hub-investigation/tests :run-tests)
                     (uiop:symbol-call :dreyeck/work/collaborative-planning/tests :run-tests)
+                    (uiop:symbol-call :dreyeck/work/ctm-page-authoring/tests :run-tests)
                     (uiop:symbol-call :dreyeck/work/shift-click/tests
                                       :run-tests)
                     (uiop:symbol-call :dreyeck/work/deployment-inspection/tests

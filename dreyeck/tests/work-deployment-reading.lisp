@@ -637,12 +637,12 @@
                                   source)))
              (let ((projection (dreyeck/work/reading:work-projection)))
                   (assert
-                          (= 25
+                          (= 26
                              (length
                                      (dreyeck/topicmap:topicmap-projection-topics-of
                                                                                      projection))))
                   (assert
-                          (= 25
+                          (= 28
                              (length
                                      (dreyeck/topicmap:topicmap-projection-associations-of
                                                                                            projection))))))

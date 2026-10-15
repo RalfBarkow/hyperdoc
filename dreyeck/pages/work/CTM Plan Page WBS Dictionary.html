@@ -1,0 +1,56 @@
+<h1>CTM Plan Page WBS Dictionary</h1>
+<in-package>dreyeck/work/ctm-page-authoring</in-package>
+<p>The WBS Dictionary for <a page="Authoring the CTM Plan Page">Authoring the CTM Plan Page</a>. Each entry defines one work package of that page's WBS: what it contains, when it is accepted, which authority it needs, which effect it performs and what evidence shows it. An entry describes the package; it grants nothing. The planned controls for the later concrete edit are listed with the existing test that already exercises each one generically, or marked as planned where none does.</p>
+
+<section data-wbs-entry="ctm-wp-1">
+<h2>1 Verified page source</h2>
+<p data-field="scope">Observe the page <code>ctm-and-tmdm-in-hyperdoc</code> at the site root of the HyperDoc instance that will edit it, through the existing local site reader (<code>read-local-fedwiki-page</code>, <code>configured-local-site-root</code>), and record site id, site root, slug, page SHA-256 and the Item ids of its story.</p>
+<p data-field="acceptance">The site root is the one the editing instance is configured with; the slug is a valid page slug; the Item to be edited occurs exactly once; the page digest is recorded, and any difference from the last local observation is explained (for example a fork entry added by the transfer).</p>
+<p data-field="authority">None to write. Reading the site root needs only the file access the instance already has. The transfer itself is the operator's.</p>
+<p data-field="effect">None: read-only observation.</p>
+<p data-field="evidence">An observation record with site root, slug, digest and Item ids, read in the instance that will perform the edit.</p>
+<ul data-field="controls"><li data-control="site-root-slug-item" data-coverage="existing" data-test="dreyeck/tests/fedwiki-page-authoring.lisp" data-marker="(refused :absent-id">Correct site root, slug and Item id: an invalid slug and an absent Item id are refused.</li></ul>
+</section>
+
+<section data-wbs-entry="ctm-wp-2">
+<h2>2 Inspectable edit proposal</h2>
+<p data-field="scope">Form, inside the HyperDoc Inspector, the expected Item (the exact current JSON of the one Item), its replacement with the same id, and the ordinary FedWiki <code>edit</code> Action, bound to the page digest of package 1. Show all three without executing anything.</p>
+<p data-field="acceptance">The replacement keeps the Item id and differs from the current Item; the content was decided by a person and that decision is recorded; the proposal names the digest it was formed against.</p>
+<p data-field="authority">None to prepare. The content decision belongs to the user.</p>
+<p data-field="effect">None: an unexecuted proposal.</p>
+<p data-field="evidence">The proposal object in the Inspector and the recorded content decision.</p>
+<ul data-field="controls"><li data-control="exactly-one-item" data-coverage="existing" data-test="dreyeck/tests/fedwiki-page-authoring.lisp" data-marker="(refused :duplicate-id">Change at exactly one Item: an Item id that occurs more than once is refused.</li></ul>
+</section>
+
+<section data-wbs-entry="ctm-wp-3">
+<h2>3 Authorized single-item edit</h2>
+<p data-field="scope">Execute exactly the proposal of package 2 with the existing M0 writer <code>edit-fedwiki-page-item</code>, holding a page-authoring capability for this site root, this page and the Action <code>edit</code>. In production that capability is derived by the existing authenticated path from a signed envelope, a registered principal, a single-use challenge and an authoring rule.</p>
+<p data-field="acceptance">The writer returns its edit record; nothing is executed without a capability that covers the page and the Action; a page that no longer holds the expected Item is refused as stale; the journal gains exactly this Action.</p>
+<p data-field="authority">A page-authoring capability for site dreyeck.ch, page ctm-and-tmdm-in-hyperdoc, Action edit, derived from an authenticated principal's authoring rule. Not granted.</p>
+<p data-field="effect">One FedWiki edit Action on one Item of one page.</p>
+<p data-field="evidence">The writer's edit record and the authoring request's observation.</p>
+<ul data-field="controls"><li data-control="no-execution-without-authority" data-coverage="existing" data-test="dreyeck/tests/fedwiki-page-authoring.lisp" data-marker="(refused :no-capability">No execution without permissible authority: a missing capability, or one that does not cover the page or the Action, is refused.</li>
+<li data-control="stale-source-refused" data-coverage="existing" data-test="dreyeck/tests/fedwiki-page-authoring.lisp" data-marker="(refused :stale">Refusal on a stale source: an Item that no longer equals the expected Item is refused without writing.</li>
+<li data-control="journal-continued" data-coverage="existing" data-test="dreyeck/tests/fedwiki-page-authoring.lisp" data-marker=";; The journal gained exactly the ordinary Action.">Journal continuation: the journal gains exactly the ordinary edit Action.</li></ul>
+</section>
+
+<section data-wbs-entry="ctm-wp-4">
+<h2>4 Verified persisted result</h2>
+<p data-field="scope">After the effect, read the page again in a fresh process and compare it with the proposal and with the observation of package 1: the same Items in the same order, the edited Item equal to the replacement, every other Item unchanged, the journal extended by exactly the Action.</p>
+<p data-field="acceptance">All comparisons hold. A mismatch is reported as unverified and is not repaired or retried automatically.</p>
+<p data-field="authority">None to write: an independent observation.</p>
+<p data-field="effect">None: read-only verification.</p>
+<p data-field="evidence">A verification record with the page digests before and after and the result of each comparison.</p>
+<ul data-field="controls"><li data-control="other-items-unchanged" data-coverage="existing" data-test="dreyeck/tests/fedwiki-page-authoring.lisp" data-marker="unless (eq old a1) do (assert (string= (json old) (json new)))">Unchanged other story Items: every Item other than the edited one reads back unchanged.</li>
+<li data-control="fresh-reconstruction" data-coverage="planned">Fresh reconstruction: the page is read in a new process and its Items and journal are compared with the proposal. The existing writer test rereads within its own process only.</li></ul>
+</section>
+
+<section data-wbs-entry="ctm-wp-5">
+<h2>5 HyperDoc work evidence</h2>
+<p data-field="scope">Record the outcome in HyperDoc: change the statuses of the work packages and plan steps on Authoring the CTM Plan Page through the existing Change work status operation, and link the evidence of packages 1 to 4.</p>
+<p data-field="acceptance">Each status change goes through the existing operation on its exact declaration and is verified by reading the page again; every evidence link resolves; no planning relation is read as an authorization.</p>
+<p data-field="authority">The local HyperDoc authoring environment for status changes on this HyperDoc page, and the user's decision that a package is verified.</p>
+<p data-field="effect">Work status changes on this HyperDoc page only.</p>
+<p data-field="evidence">The Work projection of Authoring the CTM Plan Page after the changes, and the commit that records them.</p>
+<ul data-field="controls"></ul>
+</section>
