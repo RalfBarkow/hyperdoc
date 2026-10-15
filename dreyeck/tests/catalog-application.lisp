@@ -47,7 +47,13 @@
   (assert (hyperbook:find-hyperbook "dreyeck/authority/reading"))
   (assert (hyperbook:find-hyperbook "dreyeck/clog-tutorial/reading"))
   (assert (hyperbook:find-hyperbook "dreyeck/nested-actions/reading"))
-  (assert (= 22 (length (hyperbook:hyperbooks-of hyperbook:*catalog*))))
+  ;; Function, not admission: every admitted HyperBook is materialized, each
+  ;; once. Which books are admitted is checked as a closed set by the fresh
+  ;; Catalog startup test; here a further registered book is no failure.
+  (let ((problems (dreyeck/catalog/tests:admitted-membership-problems
+                   (dreyeck/catalog/tests:catalog-hyperbook-ids))))
+    (assert (null (getf problems :missing)))
+    (assert (null (getf problems :duplicated))))
   (assert (null (find-package :dreyeck/workflow/authoring)))
   (let* ((hyperbook:*catalog* (make-instance 'hyperbook:catalog))
          (observed
@@ -121,10 +127,36 @@
             (fdefinition 'clog:shutdown) shutdown)
       #+sbcl (sb-sys:enable-interrupt sb-unix:sigterm :default))))
 
+(defun check-start-with-another-hyperbook ()
+  "A further, properly registered HyperBook extends the Catalog; it does not
+make the checks of what the Catalog does fail. The admission check, given
+the same ids, names exactly that book: the extension is visible, only
+judged elsewhere."
+  ;; An id without a scheme: FIND-HYPERBOOK would hand an absent "fedwiki:" id
+  ;; to that scheme's factory, which registers a remote wiki for it.
+  (let ((before (copy-list (hyperbook:hyperbooks-of hyperbook:*catalog*)))
+        (id "dreyeck/catalog-extension-test"))
+    (assert (not (member id (dreyeck/catalog/tests:catalog-hyperbook-ids) :test #'string=)))
+    (unwind-protect
+         (let ((book (dreyeck/local-fedwiki-page:register-local-fedwiki
+                      (dreyeck/local-fedwiki-view/tests::fixture-site-root) id)))
+           (assert (eq book (hyperbook:find-hyperbook id)))
+           ;; Other registered books may already be present (starting the
+           ;; Catalog registers its local wiki); this one is now among the extras.
+           (let ((problems (dreyeck/catalog/tests:admitted-membership-problems
+                            (dreyeck/catalog/tests:catalog-hyperbook-ids))))
+             (assert (member id (getf problems :extra) :test #'string=))
+             (assert (null (getf problems :missing)))
+             (assert (null (getf problems :duplicated))))
+           (check-start))
+      (setf (hyperbook:hyperbooks-of hyperbook:*catalog*) before))
+    (assert (equal before (hyperbook:hyperbooks-of hyperbook:*catalog*)))))
+
 (defun run-tests ()
   (check-configuration)
   (check-start)
+  (check-start-with-another-hyperbook)
   (check-mech-host-startup)
   (check-lifecycle)
-  (format t "~&Catalog application tests passed: graph, configuration, routes, lifecycle.~%")
+  (format t "~&Catalog application tests passed: graph, configuration, routes, lifecycle; a further registered HyperBook is tolerated by these checks and named by the admission check.~%")
   t)

@@ -142,9 +142,9 @@
 
 (defun run-tests ()
   (assert (equal +observed-sha256+ (file-sha256 (evidence-path))))
-  (let ((books (length (hyperbook:hyperbooks-of hyperbook:*catalog*))))
+  (let ((books (copy-list (hyperbook:hyperbooks-of hyperbook:*catalog*))))
     (unwind-protect (run-checks)
-      (assert (= books (length (hyperbook:hyperbooks-of hyperbook:*catalog*))))))
+      (assert (equal books (hyperbook:hyperbooks-of hyperbook:*catalog*)))))
   t)
 
 (defun run-checks ()

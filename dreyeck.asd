@@ -2972,7 +2972,7 @@
 
 (defsystem "dreyeck/catalog-application/tests"
   :depends-on ("dreyeck/catalog-application" "dreyeck/local-fedwiki-view/tests"
-               "hyperbook/fedwiki/tests")
+               "hyperbook/fedwiki/tests" "dreyeck/catalog/tests")
   :components ((:file "dreyeck/tests/catalog-application"))
   :perform (test-op (op component)
              (declare (ignore op component))

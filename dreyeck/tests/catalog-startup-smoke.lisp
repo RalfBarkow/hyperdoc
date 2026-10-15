@@ -1,13 +1,47 @@
 
 (DEFPACKAGE #:DREYECK/CATALOG/TESTS
   (:USE #:CL)
-  (:EXPORT #:RUN-CATALOG-STARTUP-SMOKE-TESTS))
+  (:EXPORT #:RUN-CATALOG-STARTUP-SMOKE-TESTS
+           #:+ADMITTED-HYPERBOOK-IDS+ #:CATALOG-HYPERBOOK-IDS #:ADMITTED-MEMBERSHIP-PROBLEMS))
 
 (IN-PACKAGE #:DREYECK/CATALOG/TESTS)
 
 (DEFUN CHECK (CONDITION FORMAT-CONTROL &REST FORMAT-ARGUMENTS)
   (UNLESS CONDITION
     (ERROR (APPLY #'FORMAT NIL FORMAT-CONTROL FORMAT-ARGUMENTS))))
+
+;;; Catalog membership is a decision, and these are its terms. Loading
+;;; dreyeck/catalog admits exactly these HyperBooks; admitting or withdrawing
+;;; one changes this list and nothing else. Only the fresh-process check below
+;;; holds the Catalog to it as a closed set. Tests of what the Catalog does
+;;; ask whether these books are present, once each, and tolerate others.
+
+(defparameter +admitted-hyperbook-ids+
+  '("asdf-systems" "dreyeck/authority/reading" "dreyeck/clog-tutorial/reading"
+    "dreyeck/fedwiki-config/reading" "dreyeck/fedwiki-source-relations" "dreyeck/gesture/reading"
+    "dreyeck/lisp-critic/reading" "dreyeck/lisp-image" "dreyeck/mech-intake/reading"
+    "dreyeck/nested-actions/reading" "dreyeck/topicmap/tala/reading" "dreyeck/upstream-intake"
+    "dreyeck/upstream-intake/temporal" "dreyeck/wiki-link" "dreyeck/work/reading"
+    "dreyeck/workflow/reading" "hyperbook" "hyperdoc" "hyperdoc/explorer"
+    "lisp-classes" "lisp-functions" "moldable-inspector"))
+
+(defun catalog-hyperbook-ids (&optional (catalog hyperbook:*catalog*))
+  (mapcar #'hyperbook:id-of (hyperbook:hyperbooks-of catalog)))
+
+(defun admitted-membership-problems (ids)
+  "How IDS, a Catalog's HyperBook ids, differ from the admitted set: a plist of
+:MISSING admitted ids, :DUPLICATED ids that occur more than once and :EXTRA ids
+that were not admitted. All three are NIL for the admitted Catalog."
+  (list :missing (remove-if (lambda (id) (member id ids :test #'string=)) +admitted-hyperbook-ids+)
+        :duplicated (remove-duplicates (remove-if (lambda (id) (= 1 (count id ids :test #'string=))) ids)
+                                       :test #'string=)
+        :extra (remove-if (lambda (id) (member id +admitted-hyperbook-ids+ :test #'string=)) ids)))
+
+(defun closed-membership-evaluation ()
+  "A fresh-process form: the loaded Catalog is the admitted set, each book once."
+  (let ((*print-pretty* nil))
+    (format nil "(let* ((ids (mapcar #'hyperbook:id-of (hyperbook:hyperbooks-of hyperbook:*catalog*))) (expected '~S)) (unless (and (= (length ids) (length (remove-duplicates ids :test #'string=))) (equal (sort (copy-list ids) #'string<) expected)) (error \"Catalog membership is not the admitted set: missing ~~S, extra ~~S\" (set-difference expected ids :test #'string=) (set-difference ids expected :test #'string=))) (format t \"ADMITTED-CATALOG-PROOF: ~~D admitted HyperBooks, each once, no other.~~%\" (length ids)))"
+            (sort (copy-list +admitted-hyperbook-ids+) #'string<))))
 
 (DEFUN DREYECK-ASD-PATHNAME ()
   (TRUENAME
@@ -215,10 +249,11 @@
                              "(asdf:load-system \"dreyeck/lisp-critic/reading/tests\")"
                              "(uiop:symbol-call :dreyeck/lisp-critic/reading/tests :check-under-catalog-runtime)"
                              "(format t \"Fresh Dreyeck catalog startup tests passed.~%\")"
+                             (closed-membership-evaluation)
                              "(PROGN
  (ASSERT (NULL (FIND-PACKAGE :DREYECK/WORKFLOW/AUTHORING)))
  (ASSERT (NULL (FIND-PACKAGE :DREYECK/WORK/AUTHORING)))
- (PROGN (ASSERT (= 22 (LENGTH (HYPERBOOK:HYPERBOOKS-OF HYPERBOOK:*CATALOG*))))
+ (PROGN
         (LET
              ((BOOK
                     (HYPERBOOK:FIND-HYPERBOOK \"dreyeck/nested-actions/reading\"
@@ -258,9 +293,8 @@
        (HTML-INSPECTOR-VIEWS:VIEW-HTML VIEW)
        (ASSERT (NOTANY (LAMBDA (REF) (TYPEP (CDR REF) 'CONDITION))
                        (HTML-INSPECTOR-VIEWS:VIEW-REFERENCES VIEW))))))
- ;; The eighteenth is the explicitly admitted HyperDoc Authority reading path. The
- ;; count is pinned so that catalog membership stays a decision; naming
- ;; the book here keeps the number attached to its reason.
+ ;; Catalog membership stays a decision through +ADMITTED-HYPERBOOK-IDS+,
+ ;; checked as a closed set just before this form, not through a total.
  (ASSERT (HYPERBOOK:FIND-PAGE
           (HYPERBOOK:FIND-HYPERBOOK \"dreyeck/work/reading\" :SIGNAL-ERROR? T)
           \"Work Breakdown\" :SIGNAL-ERROR? T))
@@ -361,7 +395,7 @@
  (FORMAT T
          \"OPERATION-REQUEST-CATALOG-PROOF: the gesture reading code page offers Operations; its button and the mark Binding reach one unexecuted request; source unchanged; no authoring runtime.~%\")
  (FORMAT T
-         \"NORMAL-LAUNCHER-PROOF: 22 books including Nested Actions, Maintained Mech and FedWiki Configurations; TALA 12 source widgets (layout capability gated), workflow 12 play thunks; no authoring runtime.~%\"))"))
+         \"NORMAL-LAUNCHER-PROOF: the admitted books including Nested Actions, Maintained Mech and FedWiki Configurations; TALA 12 source widgets (layout capability gated), workflow 12 play thunks; no authoring runtime.~%\"))"))
                (LIST
                      "(LET* ((BOOK (HYPERBOOK:FIND-HYPERBOOK \"dreyeck/upstream-intake\" :SIGNAL-ERROR? T)) (PAGE (HYPERBOOK:FIND-PAGE BOOK \"Upstream Intake as a Read-Only Observation\" :SIGNAL-ERROR? T)) (DOM (PLUMP-PARSER:PARSE (HYPERDOC:FILE-OF PAGE))) (ACTION \"(upstream-intake-removal-workspace-example)\") (ANCHORS (REMOVE-IF-NOT (LAMBDA (A) (EQUAL ACTION (PLUMP-DOM:ATTRIBUTE A \"expr\"))) (PLUMP-DOM:GET-ELEMENTS-BY-TAG-NAME DOM \"a\"))) (VIEW (FIND \"Content\" (HTML-INSPECTOR-VIEWS:ALL-VIEWS PAGE) :KEY (FUNCTION HTML-INSPECTOR-VIEWS:VIEW-TITLE) :TEST (FUNCTION EQUAL)))) (ASSERT (= 1 (LENGTH ANCHORS))) (ASSERT (EQUAL \"Topicmap\" (PLUMP-DOM:ATTRIBUTE (FIRST ANCHORS) \"view\"))) (HTML-INSPECTOR-VIEWS:VIEW-HTML VIEW) (LET* ((WIDGET (FIND-IF (LAMBDA (ENTRY) (SEARCH \"upstream-intake-removal-workspace-example\" (HTML-INSPECTOR-VIEWS:VIEW-HTML (CDR ENTRY)) :TEST (FUNCTION CHAR-EQUAL))) (HTML-INSPECTOR-VIEWS:VIEW-REFERENCES VIEW))) (THUNKS (AND WIDGET (REMOVE-IF-NOT (LAMBDA (ENTRY) (TYPEP (CDR ENTRY) (QUOTE HTML-INSPECTOR-VIEWS:THUNK))) (HTML-INSPECTOR-VIEWS:VIEW-REFERENCES (CDR WIDGET)))))) (ASSERT WIDGET) (ASSERT (= 1 (LENGTH THUNKS))) (LET* ((WORKSPACE (HTML-INSPECTOR-VIEWS:EVAL-THUNK (CDAR THUNKS))) (PROJECTION (DREYECK/TOPICMAP:TOPICMAP-WORKSPACE-PROJECTION-OF WORKSPACE)) (WORKSPACE-VIEW (FIND \"Topicmap\" (HTML-INSPECTOR-VIEWS:ALL-VIEWS WORKSPACE) :KEY (FUNCTION HTML-INSPECTOR-VIEWS:VIEW-TITLE) :TEST (FUNCTION EQUAL)))) (ASSERT (TYPEP WORKSPACE (QUOTE DREYECK/TOPICMAP:TOPICMAP-WORKSPACE))) (ASSERT (EQUAL \"page:dreyeck/upstream-intake/Observing an Upstream Commit\" (DREYECK/TOPICMAP:TOPICMAP-WORKSPACE-POINT-OF WORKSPACE))) (PROGN (ASDF/OPERATE:LOAD-SYSTEM \"dreyeck/hyperdoc/curation/tests\") (LET ((EXPECTED (UIOP/PACKAGE:SYMBOL-CALL :DREYECK/HYPERDOC/CURATION/TESTS :EXPECTED-INTAKE-IMPACT :COMMIT)) (ACTUAL (DREYECK/TOPICMAP/CURATION:IMPACT-SUMMARY PROJECTION))) (ASSERT (= (LENGTH EXPECTED) (LENGTH ACTUAL))) (ASSERT (NULL (SET-EXCLUSIVE-OR EXPECTED ACTUAL :TEST (FUNCTION EQUAL)))))) (ASSERT WORKSPACE-VIEW) (LET ((HTML (HTML-INSPECTOR-VIEWS:VIEW-HTML WORKSPACE-VIEW))) (ASSERT (SEARCH \"Point\" HTML)) (ASSERT (SEARCH \"Associations\" HTML))) (FORMAT T \"~%CATALOG-CURATION-DEMO-PASS: existing overview, one action/play thunk, Point and exact warranted impact.~%\"))))"
                      "(LET ((BOOK (HYPERBOOK:FIND-HYPERBOOK \"dreyeck/mech-intake/reading\" :SIGNAL-ERROR? T))) (ASSERT (STRING= \"Reading a Maintained Mech Composition\" (HYPERBOOK:TITLE-OF BOOK))) (ASSERT (HYPERBOOK:FIND-PAGE BOOK \"Reading a Maintained Mech Composition\" :SIGNAL-ERROR? T)))"
