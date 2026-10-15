@@ -27,10 +27,10 @@
           ;; Pages can be HTML or Markdown files
           ((member (pathname-type file) '("html" "md") :test #'string=)
            (let ((page (gethash file text-pages)))
-             (unless page
-               (setf page (make-text-page hdoc file))
-               (setf (gethash file text-pages) page))
-             (load-page page)
+             (if page
+                 (load-page page)
+                 (progn (setf page (make-text-page hdoc file))
+                        (setf (gethash file text-pages) page)))
              (push file page-files)))))
       ;; Remove pages whose files have been deleted.
       (loop for file being the hash-keys in text-pages
