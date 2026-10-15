@@ -9,7 +9,7 @@
   (:export #:fedwiki-page-authoring-capability
            #:make-fedwiki-page-authoring-capability
            #:capability-site-root #:capability-slugs #:capability-actions
-           #:edit-fedwiki-page-item
+           #:edit-fedwiki-page-item #:plan-fedwiki-page-edit
            #:fedwiki-page-edit
            #:page-edit-capability #:page-edit-slug #:page-edit-item-id
            #:page-edit-previous-item #:page-edit-action

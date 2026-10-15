@@ -158,6 +158,48 @@ ordinary Action that replaced it, as the reread page showed it."))
   (unless (hash-table-p expected-item)
     (%refuse :malformed "the expected Item is missing")))
 
+(defun %plan-edit (page expected-item action)
+  "PAGE as ACTION would leave it, the replaced Item's index and the Item it
+replaces, as three values; or a refusal. PAGE is not changed. Every check
+that needs the page, and none that needs the capability or the file."
+  (let* ((id (%json-field action "id"))
+         (item (%json-field action "item"))
+         (positions (loop for each in (%story page)
+                          for index from 0
+                          when (equal id (%json-field each "id")) collect index)))
+    (unless (= 1 (length positions))
+      (%refuse (if positions :duplicate-id :absent-id)
+               "the item id ~A occurs ~D times" id (length positions)))
+    (let* ((index (first positions))
+           (current (nth index (%story page))))
+      (unless (%json-equal current expected-item)
+        (%refuse :stale "the Item ~A is not the expected Item" id))
+      (unless (equal id (%json-field item "id"))
+        (%refuse :id-mismatch "the replacement has id ~S, the Action ~S"
+                 (%json-field item "id") id))
+      (when (%json-equal item current)
+        (%refuse :no-change "the replacement equals the current Item"))
+      (let ((next (%copy-json page)))
+        (setf (gethash "story" next)
+              (let ((story (coerce (%story next) 'vector)))
+                (setf (aref story index) (%copy-json item))
+                story)
+              (gethash "journal" next)
+              (concatenate 'vector (or (%json-field next "journal") (vector))
+                           (vector (%copy-json action))))
+        (values next index current)))))
+
+(defun plan-fedwiki-page-edit (page expected-item action)
+  "What EDIT-FEDWIKI-PAGE-ITEM would make of PAGE, a page's parsed JSON: the
+next page JSON, the replaced Item's index and the Item it replaces, as three
+values. The same checks of ACTION, EXPECTED-ITEM and PAGE, and only those:
+it holds no capability, reads and writes no file, and permits nothing.
+Signals FEDWIKI-PAGE-EDIT-REFUSED. The caller's objects are not changed."
+  (let ((action (%copy-json action))
+        (expected-item (%copy-json expected-item)))
+    (%check-edit-action action expected-item)
+    (%plan-edit (%copy-json page) expected-item action)))
+
 (defun edit-fedwiki-page-item (capability slug expected-item action)
   "Replace the Item ACTION names on the page SLUG with ACTION's item, if the
 page holds that id exactly once and its Item equals EXPECTED-ITEM, and append
@@ -175,46 +217,24 @@ Returns a FEDWIKI-PAGE-EDIT. The caller's objects are copied, never changed."
      (lambda ()
        (unless (probe-file path)
          (%refuse :no-page "there is no page ~A" slug))
-       (let* ((page (fa:read-local-fedwiki-page site-root slug))
-              (id (%json-field action "id"))
-              (item (%json-field action "item"))
-              (positions (loop for each in (%story page)
-                               for index from 0
-                               when (equal id (%json-field each "id")) collect index)))
-         (unless (= 1 (length positions))
-           (%refuse (if positions :duplicate-id :absent-id)
-                    "the item id ~A occurs ~D times" id (length positions)))
-         (let* ((index (first positions))
-                (current (nth index (%story page))))
-           (unless (%json-equal current expected-item)
-             (%refuse :stale "the Item ~A is not the expected Item" id))
-           (unless (equal id (%json-field item "id"))
-             (%refuse :id-mismatch "the replacement has id ~S, the Action ~S"
-                      (%json-field item "id") id))
-           (when (%json-equal item current)
-             (%refuse :no-change "the replacement equals the current Item"))
-           (let ((next (%copy-json page)))
-             (setf (gethash "story" next)
-                   (let ((story (coerce (%story next) 'vector)))
-                     (setf (aref story index) (%copy-json item))
-                     story)
-                   (gethash "journal" next)
-                   (concatenate 'vector (or (%json-field next "journal") (vector))
-                                (vector (%copy-json action))))
-             (mat:materialize-fedwiki-page-json next site-root slug :if-exists :supersede)
-             (let* ((after (fa:read-local-fedwiki-page site-root slug))
-                    (journal (coerce (or (%json-field after "journal") (vector)) 'list)))
-               (unless (and (= (length (%story after)) (length (%story page)))
-                            (%json-equal (nth index (%story after)) item)
-                            (every (lambda (old new)
-                                     (or (equal id (%json-field old "id")) (%json-equal old new)))
-                                   (%story page) (%story after))
-                            (= (length journal) (1+ (length (coerce (or (%json-field page "journal") (vector)) 'list))))
-                            (%json-equal (car (last journal)) action))
-                 (%refuse :verification "the reread page ~A does not show exactly this edit" slug))
-               (make-instance 'fedwiki-page-edit
-                              :capability capability :slug slug :item-id id
-                              :previous-item current :action action)))))))))
+       (let ((page (fa:read-local-fedwiki-page site-root slug))
+             (id (%json-field action "id"))
+             (item (%json-field action "item")))
+         (multiple-value-bind (next index current) (%plan-edit page expected-item action)
+           (mat:materialize-fedwiki-page-json next site-root slug :if-exists :supersede)
+           (let* ((after (fa:read-local-fedwiki-page site-root slug))
+                  (journal (coerce (or (%json-field after "journal") (vector)) 'list)))
+             (unless (and (= (length (%story after)) (length (%story page)))
+                          (%json-equal (nth index (%story after)) item)
+                          (every (lambda (old new)
+                                   (or (equal id (%json-field old "id")) (%json-equal old new)))
+                                 (%story page) (%story after))
+                          (= (length journal) (1+ (length (coerce (or (%json-field page "journal") (vector)) 'list))))
+                          (%json-equal (car (last journal)) action))
+               (%refuse :verification "the reread page ~A does not show exactly this edit" slug))
+             (make-instance 'fedwiki-page-edit
+                            :capability capability :slug slug :item-id id
+                            :previous-item current :action action))))))))
 
 ;;; Inspection: what the objects say, with nothing to press and no pathnames
 ;;; to follow.

@@ -51,13 +51,15 @@
     ;; Work status: one vocabulary, and agreement with the dependencies.
     (refused "not one of" :plan (replaced plan "data-status=\"open\">P4 Verify" "data-status=\"approved\">P4 Verify"))
     (refused "is blocked, but" :plan (replaced plan "data-status=\"open\">P4 Verify" "data-status=\"blocked\">P4 Verify"))
-    (refused "is blocked, but" :plan (replaced plan "data-topic=\"ctm-pre-transfer\" data-kind=\"precondition\" data-status=\"open\""
-                                               "data-topic=\"ctm-pre-transfer\" data-kind=\"precondition\" data-status=\"verified\""))
+    (refused "is blocked, but" :plan (replaced plan "data-topic=\"ctm-pre-content\" data-kind=\"precondition\" data-status=\"open\""
+                                               "data-topic=\"ctm-pre-content\" data-kind=\"precondition\" data-status=\"verified\""))
+    (refused "is open, but" :plan (replaced plan "data-topic=\"ctm-pre-transfer\" data-kind=\"precondition\" data-status=\"verified\""
+                                            "data-topic=\"ctm-pre-transfer\" data-kind=\"precondition\" data-status=\"open\""))
     ;; The same rule admits progress once the precondition is verified.
-    (assert (typep (reading-of :plan (replaced (replaced plan "data-topic=\"ctm-pre-transfer\" data-kind=\"precondition\" data-status=\"open\""
-                                                         "data-topic=\"ctm-pre-transfer\" data-kind=\"precondition\" data-status=\"verified\"")
-                                               "data-topic=\"ctm-plan-p1\" data-kind=\"plan step\" data-status=\"blocked\""
-                                               "data-topic=\"ctm-plan-p1\" data-kind=\"plan step\" data-status=\"open\""))
+    (assert (typep (reading-of :plan (replaced (replaced plan "data-topic=\"ctm-pre-content\" data-kind=\"precondition\" data-status=\"open\""
+                                                         "data-topic=\"ctm-pre-content\" data-kind=\"precondition\" data-status=\"verified\"")
+                                               "data-topic=\"ctm-plan-p2\" data-kind=\"plan step\" data-status=\"blocked\""
+                                               "data-topic=\"ctm-plan-p2\" data-kind=\"plan step\" data-status=\"open\""))
                    'c::ctm-authoring-reading))
     ;; Dictionary: one entry per package, known fields, every control, real test text.
     ;; A missing entry: deleting it leaves no other guard to refuse, unlike renaming it.
@@ -106,11 +108,13 @@
                               (c::subject-id (c::step-result (subject (format nil "ctm-plan-p~D" n))))))
                (assert (eq (subject (format nil "ctm-plan-p~D" n))
                            (c::element-producer (c::step-result (subject (format nil "ctm-plan-p~D" n)))))))
-      ;; Work status, separately: blocked exactly while a precondition is unmet; nothing is verified.
-      (assert (equal '("blocked" "blocked" "blocked" "open" "open") (mapcar #'c::subject-status (c::plan-steps reading))))
-      (assert (equal '(("ctm-pre-transfer") ("ctm-pre-content") ("ctm-pre-authority") () ())
+      ;; Work status, separately: blocked exactly while a precondition is unmet. Only the
+      ;; transfer is verified, by the user's report of the productive Inspector.
+      (assert (equal '("open" "blocked" "blocked" "open" "open") (mapcar #'c::subject-status (c::plan-steps reading))))
+      (assert (equal '(() ("ctm-pre-content") ("ctm-pre-authority") () ())
                      (mapcar (lambda (s) (ids (c::step-unmet-preconditions s))) (c::plan-steps reading))))
-      (assert (notany (lambda (s) (equal "verified" (c::subject-status s))) subjects))
+      (assert (equal '("ctm-pre-transfer")
+                     (ids (remove "verified" subjects :key #'c::subject-status :test-not #'equal))))
       ;; The authority precondition stays blocked while Work Breakdown's authority items are not complete.
       (dolist (id '("production-authoring-authority" "authoring-listener-startup"))
         (assert (member (getf (tm:topicmap-topic-view-properties-of (tm:topicmap-projection-topic-by-id work id)) :status)
@@ -198,4 +202,4 @@
               (tm:topicmap-workspace-history-of workspace) history)))
     ;; Nothing above wrote a source.
     (assert (equal before (mapcar #'file-digest titles))))
-  (format t "~&CTM-PLAN-PAGE-AUTHORING-PASS: Work item with three links; WBS 1+5 with one dictionary entry each; plan P1-P5 with dependencies, results and preconditions; status agrees with unmet preconditions; no authorization permitted; 7 planned controls, 6 bound to existing tests; 10 refusals and 1 admitted progress against the untouched sources; fresh reconstruction; Point/History; no source written.~%"))
+  (format t "~&CTM-PLAN-PAGE-AUTHORING-PASS: Work item with three links; WBS 1+5 with one dictionary entry each; plan P1-P5 with dependencies, results and preconditions; status agrees with unmet preconditions; no authorization permitted; 7 planned controls, 6 bound to existing tests; 11 refusals and 1 admitted progress against the untouched sources; fresh reconstruction; Point/History; no source written.~%"))

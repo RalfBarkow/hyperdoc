@@ -1334,9 +1334,10 @@
   :SERIAL
   T
   :DEPENDS-ON
-  (#:UIOP #:HYPERBOOK/FEDWIKI #:DREYECK/FEDWIKI-ASSETS)
+  (#:UIOP #:HYPERBOOK/FEDWIKI #:DREYECK/FEDWIKI-ASSETS #:SHASHT #:IRONCLAD)
   :COMPONENTS
-  ((:FILE "local-fedwiki-page-package") (:FILE "local-fedwiki-page"))
+  ((:FILE "local-fedwiki-page-package") (:FILE "local-fedwiki-page")
+   (:FILE "local-fedwiki-page-source"))
   :IN-ORDER-TO
   ((ASDF/LISP-ACTION:TEST-OP
     (ASDF/LISP-ACTION:TEST-OP "dreyeck/local-fedwiki-page/tests"))))
@@ -1465,7 +1466,8 @@
   (#:DREYECK/LOCAL-FEDWIKI-PAGE #:HYPERBOOK/SERVER #:DREYECK/PAGE-ATTACHED-ASDF
    #:DREYECK/CATALOG #:DREYECK/GESTURE/CLOG)
   :COMPONENTS
-  ((:FILE "local-fedwiki-view-package") (:FILE "local-fedwiki-view"))
+  ((:FILE "local-fedwiki-view-package") (:FILE "local-fedwiki-view")
+   (:FILE "local-fedwiki-page-source-views"))
   :IN-ORDER-TO
   ((ASDF/LISP-ACTION:TEST-OP
     (ASDF/LISP-ACTION:TEST-OP "dreyeck/local-fedwiki-view/tests"))))
@@ -1591,6 +1593,23 @@
              (unless (uiop:symbol-call :dreyeck/authoring-envelope/tests
                                        :run-authoring-envelope-tests)
                (error "Authoring envelope tests failed."))))
+
+(defsystem "dreyeck/fedwiki-item-edit-preview"
+  :description "Propose one FedWiki Item edit in the Inspector and preview it through the page-authoring contract; nothing is written"
+  :license "BSD"
+  :version "0.0.1"
+  :depends-on ("dreyeck/fedwiki-page-authoring" "dreyeck/local-fedwiki-view"
+               "html-inspector-views" "html-inspector-views/reactive" "lwcells" "shasht")
+  :components ((:file "dreyeck/src/fedwiki-item-edit-preview"))
+  :in-order-to ((test-op (test-op "dreyeck/fedwiki-item-edit-preview/tests"))))
+
+(defsystem "dreyeck/fedwiki-item-edit-preview/tests"
+  :description "Item identity, source revision, stale refusal and no write while previewing"
+  :depends-on ("dreyeck/fedwiki-item-edit-preview" "ironclad")
+  :components ((:file "dreyeck/tests/fedwiki-item-edit-preview"))
+  :perform (test-op (op component)
+             (declare (ignore op component))
+             (uiop:symbol-call :dreyeck/fedwiki-item-edit-preview/tests :run-tests)))
 
 (defsystem "dreyeck/authenticated-page-authoring"
   :description "Principals, principal-bound single-use challenges and authoring rules that derive the FedWiki page-authoring capability; trusted Lisp only, no HTTP"
@@ -2765,6 +2784,8 @@
                          (:static-file "chatgpt-recommendation-excerpt.txt")
                          (:static-file "user-clarification.txt")
                          (:static-file "slice-1-authorization.txt")))
+                      (:module "ctm-page-evidence" :components
+                        ((:static-file "ctm-and-tmdm-in-hyperdoc.json")))
                       (:module "hubs-evidence" :components
                         ((:static-file "synthetic-selection.json")
                          (:static-file "ward.voices.ustawi.wiki--dewey-alexander-trail.json")))
