@@ -44,7 +44,12 @@
            ;; HTML page assets
            #:*hyperdoc-html-page-assets*
            ;; HyperDoc's own HyperDoc
-           #:*hyperdoc*))
+           #:*hyperdoc*
+           ;; Symbols defined in system hyperdoc/explorer
+           #:html-page
+           #:markdown-page
+           #:*current-package*
+           #:ensure-pages-loaded))
 
 (trivial-package-local-nicknames:add-package-local-nickname
  :hb :hyperbook :hyperdoc)
