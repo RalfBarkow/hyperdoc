@@ -72,6 +72,22 @@ PAGE-LOOKUP-FAILURE."
            (error 'page-lookup-failure :hyperbook hdoc :page-id id))))
 
 ;;
+;; Access text, code, and tool pages
+;; (external API for use in HyperDocs)
+;;
+
+(defun text-pages (hd)
+  (ensure-pages-loaded hd)
+  (alexandria:hash-table-values (text-pages-of hd)))
+
+(defun code-pages (hd)
+  (loop for page across (code-pages-of hd)
+        collect page))
+
+(defun tool-pages (hd)
+  (tools-of hd))
+
+;;
 ;; The inspector title bar for HyperDocs
 ;;
 

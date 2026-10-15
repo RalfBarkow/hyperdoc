@@ -49,7 +49,8 @@
            #:html-page
            #:markdown-page
            #:*current-package*
-           #:ensure-pages-loaded))
+           #:ensure-pages-loaded
+           #:text-pages #:code-pages #:tool-pages))
 
 (trivial-package-local-nicknames:add-package-local-nickname
  :hb :hyperbook :hyperdoc)
