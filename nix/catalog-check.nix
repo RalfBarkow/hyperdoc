@@ -8,6 +8,7 @@ runCommand "catalog-startup-contract" { nativeBuildInputs = [ python3 ]; } ''
     --eval '(require :asdf)' \
     --eval '(asdf:test-system "dreyeck/catalog-application")' >lisp.log 2>&1 \
     || { cat lisp.log; exit 1; }
+  python3 ${source}/tests/test_conversation_sources.py
   python3 ${source}/tests/test_catalog_executable.py ${catalog}/bin/hyperdoc-catalog
   touch "$out"
 ''

@@ -635,17 +635,9 @@
                   (assert
                           (search "b42eb888d6e5d59803667c6320e0779523fc265c"
                                   source)))
-             (let ((projection (dreyeck/work/reading:work-projection)))
-                  (assert
-                          (= 26
-                             (length
-                                     (dreyeck/topicmap:topicmap-projection-topics-of
-                                                                                     projection))))
-                  (assert
-                          (= 28
-                             (length
-                                     (dreyeck/topicmap:topicmap-projection-associations-of
-                                                                                           projection))))))
+             ;; Check the complete authored contracts, not a global Topic count.
+             (dreyeck/work/tests::check-projection-integrity
+              (dreyeck/work/reading:work-projection)))
        (format t
                "~&WORK-DEPLOYMENT-READING-PASS: preserved snapshot/confirmation, dated update with activation result, page navigation and unchanged Work graph.~%")
        t)

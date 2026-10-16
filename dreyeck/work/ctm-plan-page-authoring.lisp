@@ -40,6 +40,8 @@ already exercises them or they are only planned.")
 (defclass ctm-authoring-reading ()
   ((projection :initarg :projection :reader reading-projection)
    (subjects :initarg :subjects :accessor reading-subjects)
+   ;; Optional read-only navigation context; never a plan or an authority.
+   (conversation-context :initform nil :accessor reading-conversation-context)
    (entries :initarg :entries :reader reading-entries))
   (:documentation "One reading of the plan page and its dictionary: the plan
 page's Work projection, one subject per declaration and the dictionary entries."))

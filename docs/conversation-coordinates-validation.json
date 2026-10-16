@@ -1,0 +1,711 @@
+{
+  "parent": "44ebc23a934b6373b445d88f023332deeafd256c",
+  "branch": "codex/conversation-coordinates-slice-1",
+  "recordedAt": "2026-10-16T05:42:23.666330+00:00",
+  "sbcl": "2.4.10",
+  "d2": "0.9.0",
+  "originalBodiesRetained": false,
+  "wrapper": {
+    "invocation": "$LISP (SBCL 2.4.10, ASDF registry from the pinned Nix runtime)"
+  },
+  "pathPrefix": "/nix/store/hr7118p9dlnhs916fydyd1fhvgpyzfv7-d2-tala-0.9.0/bin",
+  "runs": [
+    {
+      "name": "work-reading",
+      "status": "PASS",
+      "exitCode": 0,
+      "argv": [
+        "$LISP",
+        "--eval",
+        "(require :asdf)",
+        "--eval",
+        "(asdf:test-system \"dreyeck/work/reading/tests\")"
+      ],
+      "logSha256": "b08e434d4f50b17147f5573e38aa30911c585fab543a98695eb15c5e8b785487",
+      "results": [
+        "WORK-READING-PASS: complete projection integrity, Operations page link, pages, executable widget, D2 SVG, native page navigation, seven-area derived layout, informs relation contract (label, integrity, rename, contract text, retype one, uses, inspection), interactive TALA references, Inspect relation contract (novice/expert selection, one object, refusals, no effect), FedWiki-authored Work (the same projection as the HTML it was written from, contract integrity, consumers, requests from either occurrence form, duplicate statements told apart by item id; read side only), the current work map (seven areas unchanged, HyperDoc Authoring and its work items, warranted dependencies only, no architecture copied in), Work Topic declarations (one snapshot, the declaring page not the carrier, stale not relocated, a duplicate refused naming both declarations, the declaration form or a refusal), Change work status (one exact declaration on its declaring page, observed and proposed status, no copied range or edit, stale, moved, mismatched, unchanged and unstated refused, only the status value differs in memory, no effect), Change work status selected on a declaration (one registry-backed operation request, not offered here: no Topic sign Binding, no action, no authoring loaded), Create relationship (selected on the source declaration, destination and relation as arguments, the observed page snapshot as authority, no relationship occurrence yet; foreign selection, undeclared or foreign-snapshot endpoint, stale page, empty relation, absent contract and an already stated relationship refused).",
+        "AUTHORING-ARCHITECTURE-PASS: \"Deriving HyperDoc Authoring Constraints\" found in Working on HyperDoc at /A7574-working-on-hyperdoc/Deriving%20HyperDoc%20Authoring%20Constraints and rendered; the derivation is the seven-constraint chain with requirement, constraint and trade-off each; ten property claims, intended kept apart from demonstrated; 9a041fdd is the commit behind bounded challenges, with its source and tests; the HTTP transport is production, prototyped in scratch, not deployed, and the connector's two production commits are its evidence, no tooling commit; the current deployment is drawn from selected supplied evidence, the target adds the three missing relations, and neither claims more than the evidence; the run-time view has its components, connectors and data, and nginx does not authenticate; no geometry is authored; TALA lays out all three views and a changed graph, every shape and edge an Inspector reference; native navigation reaches the commit; no REST or stateless claim; no authoring runtime loaded; no page written.",
+        "MECH-OPERATING-GUIDE-PASS: dated report, explicit unknowns, both update paths, native Wiki/reading links and evidence/return navigation.",
+        "DEPLOYMENT-SOURCES-PRESERVED-PASS: earlier DEFEXAMPLE forms retain their pinned bytes (548f73d0 / 6e704151 / f46237d5).",
+        "DEPLOYMENT-UPDATE-SOURCE-PRESERVED-PASS: the 2026-10-03 DEFEXAMPLE form is byte-for-byte unchanged from fab21433.",
+        "DEPLOYMENT-EVIDENCE-CONTROLS-PASS: observed-commit promotion, stale unresolved WorkingDirectory, public Node route and target authoring rejected.",
+        "SERVICE-START-CONFIRMATION-CONTROLS-PASS: undated confirmation, a superseded command the snapshot never reported, an unlimited supersession and a merge into the snapshot rejected.",
+        "DEPLOYMENT-UPDATE-CONTROLS-PASS: reversed revisions, invented ExecStart and a transition detached from the activation result rejected.",
+        "SERVED-STATE-CONTROLS-PASS: a revision on the process, a PID on the store source, a versioned assets copy, a promoted inference and an undated observation rejected.",
+        "WORK-DEPLOYMENT-READING-PASS: preserved snapshot/confirmation, dated update with activation result, page navigation and unchanged Work graph.",
+        "MECH-DOCUMENTATION-NAVIGATION-PASS: native site/slug references, Ward link, documentation Story and distinct external host URL.",
+        "TRAIL-FOLLOWING-PASS: actual paragraph/relations/aspect/node objects, namespaced identities, derived cross-capture correspondences, explicit witness/control execution, pure rendering, shared Workspace and native source/reading/code navigation.",
+        "SOLO-IDENTITY-PASS: evidence/source integrity, maps and actual Content links.",
+        "HOW-TRAILS-DIRECT-PASS: cold load, Story establishes exact-item refs, no page-wide view, repeat/reload bounded, foreign items untouched.",
+        "HOW-TRAILS-SOURCES-PASS: original Story/Links, four exact ranges, Git/source/reading navigation, page-local scope, unchanged evidence.",
+        "HOW-TRAILS-PLAN-PASS: ten ordered original items, four source refs, retained evidence, scoped views, return links, no JSON mutation.",
+        "JAVASCRIPT-DEFINITIONS-PASS: stable identities, complete spans, lexical containment, native source/Git/Story/evidence links; wrong identities, bytes, spans and parents rejected.",
+        "FEDERATED-CONTEXT-PASS: seven named pages, observed links/fork attribution, older Memex trails, Ward trail nodes, derived ordering after Trail change and inspector navigation.",
+        "RAW-TEMPORAL-DERIVATION-PASS: byte-preserved journals, inherited prefix ownership, raw-driven dates and labels, direct State-at/Delta and seven Inspector values.",
+        "TEMPORAL-FEDERATION-PASS: 11 exact events, deterministic State/Delta, inherited fork history, separate site/page identities, native TALA page signs, event evidence and in-place cursor actions.",
+        "COORDINATED-WORKSPACE-PASS: one cursor, two TALA maps, ordered event selection, deterministic Previous/Next, actual State/Delta/topic/relation Inspector references and native object following.",
+        "REPRESENTED-OBJECTS-PASS: EQ page/subject/event/state/change objects, historical native pages, distinct same-title sites, unresolved native links, separate context/neighborhood and unchanged raw evidence/catalog.",
+        "SUBJECT-FOLLOW-PASS: unique Thompson / Reflective Practice follows; Jan + Thompson require explicit choice; native collaborative/context resolution and origin deduplication.",
+        "INTERACTION-SEMANTICS-PASS: temporal-only event selection, context Point navigation, exact historical Follow at Point, unchanged subject resolution/choice, exact Inspector targets, NIL movement transport and side-effect-free projection/rendering.",
+        "ORTHOGONAL-CONTEXT-OPERATIONS-PASS: primary B moves Point/returns Follow; Point Follow and inspections preserve Point/time; relation to C moves without Follow; temporal selection retains Workspace/Point/history.",
+        "PERSISTENT-WORKSPACE-PASS: same session, Point/history retained through time/mode, absent and empty projections, zero/one Cursor, fresh projected objects, no Follow or fallback, explicit D records C only.",
+        "FEDERATED-TOPIC-OPERATIONS-PASS: same menu/mark identities and sectors, exact B Follow/object/sign, secondary preserves A/history/time, applicability/refusal, PRIMARY establishes B then follows.",
+        "ATTRIBUTION-NEGATIVE-CONTROL-PASS: cursors 0–9, State/Delta associations and Topicmap/Evidence views have no attribution.",
+        "ATTRIBUTION-MUTATION-CONTROL-PASS: removing the raw attribution suppresses association/Topicmap/Evidence attribution despite stale observed metadata; derivation, association and view decisions use the single interpreter.",
+        "SOLO-HOVERBOLD-PASS: observed source and installation, trusted enter/leave writes, incident edge widths, unchanged controls/child DOM/node, fresh snapshots, native inspector references and linked page.",
+        "TRAILS-RENDERED-EXPERIMENT-PASS: exact inspectable batch/beam, expected trails and relations, observed 5/4 result, derived summary, shared provenance, scoped boundary, falsification and working page links.",
+        "HUB-READING-PASS: checked functions and seven cases, extended 26-topic/28-association warranted Workspace, pure display, Point/History and site-qualified Wiki/Plan/definition navigation.",
+        "HUB-INVESTIGATION-PASS: Work declaration, P1/P2/P3 findings and sources; negative identity/order/runtime controls; preserved original Plan/JSON and 18/15 subjects, extended native Point/History.",
+        "COLLABORATIVE-PLANNING-PASS: unchanged submitted bytes; K1-K7 bounded relation bindings and exact source spans, 4 semantic counterprobes refused; 34 reconstructed source keys; Work contracts preserved, case 25/31; Point/History; no planner, authoring or P3 contract.",
+        "CTM-PLAN-PAGE-AUTHORING-PASS: Work item with three links; WBS 1+5 with one dictionary entry each; plan P1-P5 with dependencies, results and preconditions; status agrees with unmet preconditions; no authorization permitted; 7 planned controls, 6 bound to existing tests; 12 refusals and 1 admitted progress against the untouched sources; fresh reconstruction; Point/History; no source written.",
+        "CONVERSATION-COORDINATES-PASS: 230 checks; stable keys, attribution refusals, both native reference paths, cursor/Point/History, unchanged source/projections. Original transcript and #8 report equality require scripts/verify-conversation-sources.py (NOT-RUN by this Lisp suite).",
+        "SHIFT-CLICK-READING-PASS: the pinned handler skips only CLOSE-PANES-AFTER under Shift for eval- and inspect- references (same Point, history, Follow identity and opened object), opens nothing for action- references, and Alt changes the result; Follow is one identity for PRIMARY and both Bindings; SECONDARY carries :SHIFT and selects the same Binding; the Topicmap carries the objects themselves; the pinned Mech excerpts match their hashes; the reading defines no interaction behaviour, and its page resolves every reference and runs its three examples.",
+        "DEPLOYMENT-INSPECTION-PASS: 484 checks; historical/source/package/service identities, activation boundary and native return journey."
+      ]
+    },
+    {
+      "name": "focused-after-E3-wrap",
+      "status": "PASS",
+      "exitCode": 0,
+      "argv": [
+        "$LISP",
+        "--eval",
+        "(require :asdf)",
+        "--eval",
+        "(asdf:load-system \"dreyeck/work/reading/tests\")",
+        "--eval",
+        "(dreyeck/work/conversation-coordinates/tests:run-tests)"
+      ],
+      "logSha256": "48ae47ca8a97e11391abad664db3420ab69d1c4894d185eb9e7bd7d39d683200",
+      "results": [
+        "CONVERSATION-COORDINATES-PASS: 230 checks; stable keys, attribution refusals, both native reference paths, cursor/Point/History, unchanged source/projections. Original transcript and #8 report equality require scripts/verify-conversation-sources.py (NOT-RUN by this Lisp suite)."
+      ]
+    },
+    {
+      "name": "m0-auth-preview",
+      "status": "PASS",
+      "exitCode": 0,
+      "argv": [
+        "$LISP",
+        "--eval",
+        "(require :asdf)",
+        "--eval",
+        "(dolist (system (quote (\"dreyeck/fedwiki-page-authoring\" \"dreyeck/authoring-envelope\" \"dreyeck/authenticated-page-authoring\" \"dreyeck/authoring-http\" \"dreyeck/fedwiki-item-edit-preview\"))) (asdf:test-system system))"
+      ],
+      "logSha256": "184d113b5519588859b38affd6762406085dcd9d1ff0654ff127f8dc52854f95",
+      "results": [
+        "FEDWIKI-PAGE-AUTHORING-PASS: a capability-scoped edit replaces one Item and journals the ordinary Action, verified by reread; stale, absent, duplicate, mismatched and no-change edits and missing or narrower capabilities are refused with no byte changed; concurrent edits of one page both survive, and the unlocked control loses one every round; two pages edit concurrently; concurrent writers of one file each get their own temporary file.",
+        "AUTHORING-ENVELOPE-PASS: sessionless-node signatures verify over Ethereum Keccak-256; high-s, zero, out-of-range and malformed signatures and off-curve or malformed keys are refused; the envelope binds every field and its body bytes; the strict v1 grammar refuses missing, repeated, unknown, reordered, trailing, CRLF, empty, overlong, non-ASCII and other-version input.",
+        "AUTHENTICATED-PAGE-AUTHORING-PASS: a registered key's signature, a current challenge of the same principal and an authoring rule derive the page capability and M0 applies the edit; replay after A->B->A and a concurrent duplicate are refused as a used challenge; another principal's challenge, a wrong site, page or operation, a bad time, key, signature, body or service leave the challenge unused and the page unchanged; nothing of it is stored; challenge state is bounded -- none for unknown principals, at most the limit of unused ones per principal even under concurrent issuance, consumed ones pruned to their limit, expired ones removed.",
+        "AUTHORING-HTTP-PASS: strict base64url; no listener until started, and none but loopback; challenges over HTTP, unknown principals allocating nothing and the bound answered 429; a signed PUT applied end to end, reread from disk, one ordinary journal entry, no identity stored, and the Work projection sees it; replay and A->B->A replay refused; route mismatch and every tampering refused with the challenge left usable; cookies and proxy headers carry no authority, and another adapter's authority is not this one's; M0 and rule refusals mapped; bodies bounded and drained; the adapter keeps no history, and a failing observer changes no answer; START returns only on its own bind, refusing a port another socket holds; the listener stopped.",
+        "FEDWIKI-ITEM-EDIT-PREVIEW-PASS: one reading gives revision d7215c50f4efa07b3e94749b060b7d7b828654f2a44caab7f1034415c6003dff and 18 unique Item ids; E3 ed37e9bac2fcd548 is paragraph 11; local-fedwiki-page → Story item → Edit proposal → Preview by view references; the preview shows original, id, proposal and effect and equals what the writer writes; no file changed while previewing; no-change and a stale revision (another Item, E3 itself) refused; the preview's declared load closure holds the page checks and not the writer."
+      ]
+    },
+    {
+      "name": "catalog-and-topicmaps",
+      "status": "PASS",
+      "exitCode": 0,
+      "argv": [
+        "$LISP",
+        "--eval",
+        "(require :asdf)",
+        "--eval",
+        "(dolist (system (quote (\"dreyeck/local-fedwiki-view\" \"dreyeck/catalog/tests\" \"dreyeck/catalog-application/tests\" \"dreyeck/topicmap/tests\" \"dreyeck/topicmap/tala/tests\" \"dreyeck/topicmap/gesture/tests\"))) (asdf:test-system system))"
+      ],
+      "logSha256": "e2124361c1dbf7ca45e7a71d5818dd2aabd201057c771619ff19d275c3f3439d",
+      "results": [
+        "BIND-ADDRESS-PASS: an explicit host reaches CLOG, omitting it keeps every interface, and host and development stay independent.",
+        "LAUNCHER-ROUTES-PASS: the ordinary launcher installs /gesture with ON-GESTURE-WINDOW, beside /view and 23 book routes.",
+        "CATALOG-LISP-CRITIC-READING-PASS: pages render, examples evaluate, real CAR-CDR match.",
+        "Fresh Dreyeck catalog startup tests passed.",
+        "WARD-FOLLOW-UP-CONTRACT-PASS: exact quotations, canonical Topics, directed/warranted mechanism relations, retained historical hypotheses, no SOLO event scoping, and native reading/source/witness/Topicmap route.",
+        "MESSAGE-INPUT-TRACE-PASS: live identity capture, counter-only retained listener, independent REPORT lookup, three relation kinds, precise open boundary and native REPORT/title navigation.",
+        "REVISION-PROVENANCE-HISTORY-PASS: repository/full-OID identity, native claim/revision/file/definition routes, exact local blobs, append versus replacement, fetch barrier and open historical/current bridges.",
+        "NESTED-ACTIONS-READING-PASS: 5 text/7 code pages; 39 Topics/52 warranted relations; explicit Git provenance; historical append/replacement and separate async fetch; current handoff unchanged, proposal-only scoped emitter; native navigation.",
+        "AUTHORITY-READING-PASS: five linked Pages; conceptual Library definitions first; actual source transcluded; six served Source examples run; visible uncontracted method refused before body; contracted observation permitted; gate-removal control fails. Open in Browser Is Navigation follows as a related case: upstream first, its sources resolve, its topicmap names the actual objects with a status per relation and no RUNNABLE?, and its one example renders the same link served and developing.",
+        "CATALOG-CURATION-DEMO-PASS: existing overview, one action/play thunk, Point and exact warranted impact.",
+        "Dreyeck Catalog startup smoke tests passed.",
+        "Catalog application tests passed: graph, configuration, routes, lifecycle; a further registered HyperBook is tolerated by these checks and named by the admission check.",
+        "Generic renderer-independent Topicmap view tests passed.",
+        "TALA input tests passed: real projection, deterministic IDs/endpoints, point independence, native availability, invalid output.",
+        "Generic renderer-independent Topicmap view tests passed.",
+        "TALA input tests passed: real projection, deterministic IDs/endpoints, point independence, native availability, invalid output.",
+        "WORKSPACE-ACTION-SIGN-OCCURRENCE-PASS: production inspections share identities/angles, exact targets and disjoint sectors; with test-only Bindings a radial and a mark complete on the exact occurrence; two occurrences of one Topic are distinct; the inspectable object is not the Topic; inputs record isTrusted; an ended occurrence takes no input."
+      ]
+    }
+  ],
+  "note": "After the full Work suite, only E3 source-display wrapping changed; the focused 230 assertions and full new browser journey were rerun after it.",
+  "originalSourceChecks": {
+    "extractionRule": "claude-code-jsonl/v1",
+    "privateBodiesRetained": false,
+    "originalTranscript": {
+      "status": "PASS",
+      "messages": 4,
+      "selectedOrderAndAncestry": "PASS",
+      "reviewIdentityAnd11FindingOffsets": "PASS",
+      "mutationControls": 10
+    },
+    "originalReportIdentity": {
+      "status": "PASS",
+      "octets": 21211,
+      "mutationControls": 1
+    },
+    "syntheticExtractionChecks": 2
+  },
+  "absentOriginalChecks": {
+    "extractionRule": "claude-code-jsonl/v1",
+    "privateBodiesRetained": false,
+    "originalTranscript": {
+      "status": "NOT-RUN",
+      "reason": "Original transcript not supplied or unavailable; no original-message checks claimed."
+    },
+    "originalReportIdentity": {
+      "status": "NOT-RUN",
+      "reason": "Requires original transcript plus local report page JSON."
+    },
+    "syntheticExtractionChecks": 2
+  },
+  "scope": {
+    "parent": "44ebc23a934b6373b445d88f023332deeafd256c",
+    "unchanged": {
+      "dreyeck/pages/work/Authoring the CTM Plan Page.html": "2fc65e445b64f7a43541319229d4c8ece12658493bb94686305e57236e6d6f4f",
+      "dreyeck/pages/work/CTM Plan Page WBS Dictionary.html": "f2a01d80a4e8ecf4cbed927fde0a723ee9d0377ccf322f7405fc150f1583f93e",
+      "dreyeck/work/collaborative-planning-evidence/case.json": "c288dd84a68c30805f55f3e8b5a8f1a5e68c305e61026a4247898890e9251b97",
+      "dreyeck/work/ctm-page-evidence/ctm-and-tmdm-in-hyperdoc.json": "d7215c50f4efa07b3e94749b060b7d7b828654f2a44caab7f1034415c6003dff"
+    },
+    "workExtension": {
+      "existingSourceUnchangedPrefix": true,
+      "newDeclaration": "conversation-coordinates",
+      "newRelations": [
+        "planning contains conversation-coordinates",
+        "dogfooding current-work conversation-coordinates"
+      ]
+    }
+  },
+  "browsers": [
+    {
+      "argv": [
+        "$LOCAL_PATH",
+        "scripts/test-conversation-coordinates.mjs",
+        "$LISP",
+        "$LOCAL_PATH",
+        "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
+        "$TEMP_PATH"
+      ],
+      "exitCode": 0,
+      "result": {
+        "status": "PASS",
+        "browser": "154.0.8037.98",
+        "development": false,
+        "policy": "ENFORCED",
+        "writer": "ABSENT",
+        "steps": [
+          "Catalog → Work Breakdown",
+          "carrier page",
+          "Chronology",
+          "independent chronology cursor",
+          "Message #20",
+          "Source span #20",
+          "P1",
+          "WBS 1",
+          "Conversation sources",
+          "E3 evidence",
+          "return to same coordinate",
+          "Message #2 → review → existing F3",
+          "Planning case",
+          "native Workspace",
+          "Point/History via native Slots"
+        ],
+        "sourcesUnchanged": true,
+        "privateBodiesPublished": false,
+        "privatePathsDisclosed": false
+      }
+    },
+    {
+      "argv": [
+        "$LOCAL_PATH",
+        "scripts/test-ctm-plan-page-navigation.mjs",
+        "$LISP",
+        "$LOCAL_PATH",
+        "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
+        "$TEMP_PATH"
+      ],
+      "exitCode": 0,
+      "result": {
+        "status": "PASS",
+        "browser": "154.0.8037.98",
+        "steps": [
+          "Work Breakdown",
+          "carrier page",
+          "Plan steps",
+          "P3",
+          "Authorization",
+          "WBS element 3",
+          "planned control",
+          "return to carrier page",
+          "Workspace",
+          "Point/History",
+          "represented object",
+          "local-fedwiki-page",
+          "Page source",
+          "Story Item E3",
+          "Edit proposal",
+          "Preview",
+          "page file unchanged"
+        ],
+        "pageSha256": "d7215c50f4efa07b3e94749b060b7d7b828654f2a44caab7f1034415c6003dff"
+      }
+    },
+    {
+      "argv": [
+        "$LOCAL_PATH",
+        "scripts/test-item-edit-preview-activation.mjs",
+        "$LISP",
+        "$LOCAL_PATH",
+        "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
+        "$TEMP_PATH"
+      ],
+      "exitCode": 0,
+      "result": {
+        "status": "PASS",
+        "browser": "154.0.8037.98",
+        "pageSha256": "d7215c50f4efa07b3e94749b060b7d7b828654f2a44caab7f1034415c6003dff",
+        "results": {
+          "default": {
+            "catalogSystem": "dreyeck/catalog",
+            "writerLoaded": "NO",
+            "previewLoaded": "NO",
+            "policyEnforced": "YES",
+            "steps": [
+              "/view",
+              "Page source",
+              "Story Item E3",
+              "no Edit tab"
+            ]
+          },
+          "activated": {
+            "catalogSystem": "dreyeck/fedwiki-item-edit-preview",
+            "writerLoaded": "NO",
+            "previewLoaded": "YES",
+            "policyEnforced": "YES",
+            "steps": [
+              "/view",
+              "Page source",
+              "Story Item E3",
+              "Edit",
+              "Edit proposal",
+              "Preview"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "argv": [
+        "$LOCAL_PATH",
+        "scripts/test-hubs-reading-navigation.mjs",
+        "$LISP",
+        "$LOCAL_PATH",
+        "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
+        "$TEMP_PATH"
+      ],
+      "exitCode": 0,
+      "result": {
+        "status": "PASS",
+        "browser": "154.0.8037.98",
+        "planningSourceIdentities": [
+          [
+            "dreyeck/work/reading",
+            "collaborative-planning-case",
+            "2"
+          ],
+          [
+            "user-submitted:hyperdoc-planning/2026-10-14",
+            "plan-v1",
+            "9f25b2776e75da4d121bcf2ea5b13ccbf84134acd3d123e736748b17d252504f"
+          ],
+          [
+            "user-submitted:hyperdoc-planning/2026-10-14",
+            "claude-review",
+            "3811f57a518689b359383b5d3895d35e184e6971769f15f5edc666075f9c9c3a"
+          ],
+          [
+            "user-submitted:hyperdoc-planning/2026-10-14",
+            "plan-v2",
+            "be5458f54ac3a4bfb36fba6066cdc08c7333c70d60ca46202185458461662e59"
+          ],
+          [
+            "user-submitted:hyperdoc-planning/2026-10-14",
+            "chatgpt-recommendation",
+            "2e5aaf748fe318b0ee127dae725feac5ee561e56c720e693e004ac3ed408411b"
+          ],
+          [
+            "user-submitted:hyperdoc-planning/2026-10-14",
+            "user-clarification",
+            "4622d66d6b118a8564a4d68aeb63d0591a05364097967f1782d46078b3ef50a1"
+          ],
+          [
+            "user-submitted:hyperdoc-planning/2026-10-14",
+            "slice-1-authorization",
+            "6a1e88e9d602c14180704c4e3528113a912e79226a4a04675402d7615ffb7435"
+          ],
+          [
+            "user-submitted:hyperdoc-planning/2026-10-14",
+            "interpretation-v1",
+            "1",
+            [
+              "user-submitted:hyperdoc-planning/2026-10-14",
+              "plan-v1",
+              "9f25b2776e75da4d121bcf2ea5b13ccbf84134acd3d123e736748b17d252504f"
+            ],
+            345,
+            443
+          ],
+          [
+            "user-submitted:hyperdoc-planning/2026-10-14",
+            "interpretation-v2",
+            "2",
+            [
+              "user-submitted:hyperdoc-planning/2026-10-14",
+              "plan-v2",
+              "be5458f54ac3a4bfb36fba6066cdc08c7333c70d60ca46202185458461662e59"
+            ],
+            5326,
+            6019
+          ],
+          [
+            "user-submitted:hyperdoc-planning/2026-10-14",
+            "F1",
+            "1",
+            [
+              "user-submitted:hyperdoc-planning/2026-10-14",
+              "claude-review",
+              "3811f57a518689b359383b5d3895d35e184e6971769f15f5edc666075f9c9c3a"
+            ],
+            2639,
+            3089
+          ],
+          [
+            "user-submitted:hyperdoc-planning/2026-10-14",
+            "F2",
+            "1",
+            [
+              "user-submitted:hyperdoc-planning/2026-10-14",
+              "claude-review",
+              "3811f57a518689b359383b5d3895d35e184e6971769f15f5edc666075f9c9c3a"
+            ],
+            3091,
+            3742
+          ],
+          [
+            "user-submitted:hyperdoc-planning/2026-10-14",
+            "F3",
+            "1",
+            [
+              "user-submitted:hyperdoc-planning/2026-10-14",
+              "claude-review",
+              "3811f57a518689b359383b5d3895d35e184e6971769f15f5edc666075f9c9c3a"
+            ],
+            3768,
+            4123
+          ],
+          [
+            "user-submitted:hyperdoc-planning/2026-10-14",
+            "F4",
+            "1",
+            [
+              "user-submitted:hyperdoc-planning/2026-10-14",
+              "claude-review",
+              "3811f57a518689b359383b5d3895d35e184e6971769f15f5edc666075f9c9c3a"
+            ],
+            4125,
+            4766
+          ],
+          [
+            "user-submitted:hyperdoc-planning/2026-10-14",
+            "F5",
+            "1",
+            [
+              "user-submitted:hyperdoc-planning/2026-10-14",
+              "claude-review",
+              "3811f57a518689b359383b5d3895d35e184e6971769f15f5edc666075f9c9c3a"
+            ],
+            4768,
+            5366
+          ],
+          [
+            "user-submitted:hyperdoc-planning/2026-10-14",
+            "F6",
+            "1",
+            [
+              "user-submitted:hyperdoc-planning/2026-10-14",
+              "claude-review",
+              "3811f57a518689b359383b5d3895d35e184e6971769f15f5edc666075f9c9c3a"
+            ],
+            5368,
+            5821
+          ],
+          [
+            "user-submitted:hyperdoc-planning/2026-10-14",
+            "F7",
+            "1",
+            [
+              "user-submitted:hyperdoc-planning/2026-10-14",
+              "claude-review",
+              "3811f57a518689b359383b5d3895d35e184e6971769f15f5edc666075f9c9c3a"
+            ],
+            5823,
+            6242
+          ],
+          [
+            "user-submitted:hyperdoc-planning/2026-10-14",
+            "F8",
+            "1",
+            [
+              "user-submitted:hyperdoc-planning/2026-10-14",
+              "claude-review",
+              "3811f57a518689b359383b5d3895d35e184e6971769f15f5edc666075f9c9c3a"
+            ],
+            6925,
+            7323
+          ],
+          [
+            "user-submitted:hyperdoc-planning/2026-10-14",
+            "F9",
+            "1",
+            [
+              "user-submitted:hyperdoc-planning/2026-10-14",
+              "claude-review",
+              "3811f57a518689b359383b5d3895d35e184e6971769f15f5edc666075f9c9c3a"
+            ],
+            7325,
+            7737
+          ],
+          [
+            "user-submitted:hyperdoc-planning/2026-10-14",
+            "F10",
+            "1",
+            [
+              "user-submitted:hyperdoc-planning/2026-10-14",
+              "claude-review",
+              "3811f57a518689b359383b5d3895d35e184e6971769f15f5edc666075f9c9c3a"
+            ],
+            7760,
+            8433
+          ],
+          [
+            "user-submitted:hyperdoc-planning/2026-10-14",
+            "F11",
+            "1",
+            [
+              "user-submitted:hyperdoc-planning/2026-10-14",
+              "claude-review",
+              "3811f57a518689b359383b5d3895d35e184e6971769f15f5edc666075f9c9c3a"
+            ],
+            8832,
+            9172
+          ],
+          [
+            "user-submitted:hyperdoc-planning/2026-10-14",
+            "approval-pending",
+            "1",
+            [
+              "user-submitted:hyperdoc-planning/2026-10-14",
+              "user-clarification",
+              "4622d66d6b118a8564a4d68aeb63d0591a05364097967f1782d46078b3ef50a1"
+            ],
+            333,
+            430
+          ],
+          [
+            "user-submitted:hyperdoc-planning/2026-10-14",
+            "slice-1-approved",
+            "1",
+            [
+              "user-submitted:hyperdoc-planning/2026-10-14",
+              "slice-1-authorization",
+              "6a1e88e9d602c14180704c4e3528113a912e79226a4a04675402d7615ffb7435"
+            ],
+            62,
+            216
+          ],
+          [
+            "user-submitted:hyperdoc-planning/2026-10-14",
+            "v2-rejection-attribution",
+            "1",
+            [
+              "user-submitted:hyperdoc-planning/2026-10-14",
+              "plan-v2",
+              "be5458f54ac3a4bfb36fba6066cdc08c7333c70d60ca46202185458461662e59"
+            ],
+            9792,
+            9977
+          ],
+          [
+            "user-submitted:hyperdoc-planning/2026-10-14",
+            "v2-export-condition",
+            "1",
+            [
+              "user-submitted:hyperdoc-planning/2026-10-14",
+              "plan-v2",
+              "be5458f54ac3a4bfb36fba6066cdc08c7333c70d60ca46202185458461662e59"
+            ],
+            8882,
+            9308
+          ],
+          [
+            "user-submitted:hyperdoc-planning/2026-10-14",
+            "user-rejection-clarification",
+            "1",
+            [
+              "user-submitted:hyperdoc-planning/2026-10-14",
+              "user-clarification",
+              "4622d66d6b118a8564a4d68aeb63d0591a05364097967f1782d46078b3ef50a1"
+            ],
+            330,
+            651
+          ],
+          [
+            "user-submitted:hyperdoc-planning/2026-10-14",
+            "user-source-clarification",
+            "1",
+            [
+              "user-submitted:hyperdoc-planning/2026-10-14",
+              "user-clarification",
+              "4622d66d6b118a8564a4d68aeb63d0591a05364097967f1782d46078b3ef50a1"
+            ],
+            0,
+            264
+          ],
+          [
+            "user-submitted:hyperdoc-planning/2026-10-14",
+            "user-source-distinction",
+            "1",
+            [
+              "user-submitted:hyperdoc-planning/2026-10-14",
+              "user-clarification",
+              "4622d66d6b118a8564a4d68aeb63d0591a05364097967f1782d46078b3ef50a1"
+            ],
+            535,
+            651
+          ],
+          [
+            "user-submitted:hyperdoc-planning/2026-10-14",
+            "review-subject",
+            "1",
+            [
+              "user-submitted:hyperdoc-planning/2026-10-14",
+              "claude-review",
+              "3811f57a518689b359383b5d3895d35e184e6971769f15f5edc666075f9c9c3a"
+            ],
+            1386,
+            1465
+          ],
+          [
+            "user-submitted:hyperdoc-planning/2026-10-14",
+            "plan-v1-title",
+            "1",
+            [
+              "user-submitted:hyperdoc-planning/2026-10-14",
+              "plan-v1",
+              "9f25b2776e75da4d121bcf2ea5b13ccbf84134acd3d123e736748b17d252504f"
+            ],
+            0,
+            64
+          ],
+          [
+            "user-submitted:hyperdoc-planning/2026-10-14",
+            "v2-revision-statement",
+            "1",
+            [
+              "user-submitted:hyperdoc-planning/2026-10-14",
+              "plan-v2",
+              "be5458f54ac3a4bfb36fba6066cdc08c7333c70d60ca46202185458461662e59"
+            ],
+            18839,
+            19180
+          ],
+          [
+            "user-submitted:hyperdoc-planning/2026-10-14",
+            "chatgpt-unspecified-plan",
+            "1",
+            [
+              "user-submitted:hyperdoc-planning/2026-10-14",
+              "chatgpt-recommendation",
+              "2e5aaf748fe318b0ee127dae725feac5ee561e56c720e693e004ac3ed408411b"
+            ],
+            0,
+            81
+          ],
+          [
+            "user-submitted:hyperdoc-planning/2026-10-14",
+            "authorization-work-scope",
+            "1",
+            [
+              "user-submitted:hyperdoc-planning/2026-10-14",
+              "slice-1-authorization",
+              "6a1e88e9d602c14180704c4e3528113a912e79226a4a04675402d7615ffb7435"
+            ],
+            501,
+            723
+          ],
+          [
+            "user-submitted:hyperdoc-planning/2026-10-14",
+            "authorization-originals",
+            "1",
+            [
+              "user-submitted:hyperdoc-planning/2026-10-14",
+              "slice-1-authorization",
+              "6a1e88e9d602c14180704c4e3528113a912e79226a4a04675402d7615ffb7435"
+            ],
+            750,
+            822
+          ],
+          [
+            "user-submitted:hyperdoc-planning/2026-10-14",
+            "authorization-application",
+            "1",
+            [
+              "user-submitted:hyperdoc-planning/2026-10-14",
+              "slice-1-authorization",
+              "6a1e88e9d602c14180704c4e3528113a912e79226a4a04675402d7615ffb7435"
+            ],
+            658,
+            723
+          ]
+        ],
+        "scope": "fresh local CLOG and independent reconstruction; unchanged submitted documents and retained Wiki JSON; no production or approval-authentication claim"
+      }
+    }
+  ],
+  "sourceVerificationArgv": [
+    "python3",
+    "scripts/verify-conversation-sources.py",
+    "--transcript",
+    "<explicit private original, not packaged>",
+    "--report",
+    "<existing local report page JSON, not copied>"
+  ],
+  "privacy": "No original message bodies; private local runtime paths redacted. Existing selected message coordinates retained.",
+  "reviewReportCoordinate": [
+    "262d6ca6-81c4-4cd2-b4da-1d4613821702",
+    "d3a18e51-fabb-43b6-90f2-e331c52dad89"
+  ],
+  "freshProcessKeys": {
+    "status": "PASS",
+    "processes": 2,
+    "keyCount": 9,
+    "serializedKeys": "((\"262d6ca6-81c4-4cd2-b4da-1d4613821702\")\n         (\"262d6ca6-81c4-4cd2-b4da-1d4613821702\"\n          \"ad0fb435-b522-4d96-a3cb-5d632b348096\")\n         (\"262d6ca6-81c4-4cd2-b4da-1d4613821702\"\n          \"30fc24fb-6c79-41b1-b043-34ee9895b4ea\")\n         (\"262d6ca6-81c4-4cd2-b4da-1d4613821702\"\n          \"a3503eb6-b352-4e39-8473-7fe547184ab9\")\n         (\"262d6ca6-81c4-4cd2-b4da-1d4613821702\"\n          \"b3acd503-a1d9-4f44-803e-81dcf173019e\")\n         (\"262d6ca6-81c4-4cd2-b4da-1d4613821702\"\n          \"ad0fb435-b522-4d96-a3cb-5d632b348096\" 0 12717)\n         (\"262d6ca6-81c4-4cd2-b4da-1d4613821702\"\n          \"30fc24fb-6c79-41b1-b043-34ee9895b4ea\" 0 20961)\n         (\"262d6ca6-81c4-4cd2-b4da-1d4613821702\"\n          \"a3503eb6-b352-4e39-8473-7fe547184ab9\" 0 1726)\n         (\"262d6ca6-81c4-4cd2-b4da-1d4613821702\"\n          \"b3acd503-a1d9-4f44-803e-81dcf173019e\" 0 1416))",
+    "sha256": "3096003c0154950b831dde4f29eec13e46834e7213466406a94468482c7ea49b",
+    "argv": [
+      "$LISP",
+      "--eval",
+      "(require :asdf)",
+      "--eval",
+      "(asdf:load-system \"dreyeck/work/reading\")",
+      "--eval",
+      "(let ((s (dreyeck/work/conversation-coordinates:read-conversation))) (format t \"~&CC-KEYS=~S~%\" (mapcar (function dreyeck/work/conversation-coordinates:source-key) (append (list s) (dreyeck/work/conversation-coordinates::session-messages s) (dreyeck/work/conversation-coordinates::session-spans s)))))"
+    ]
+  },
+  "historicalEvidence": "Original e1207487 run, not rerun of review corrections; claims superseded by conversation-coordinates-review-corrections.md"
+}

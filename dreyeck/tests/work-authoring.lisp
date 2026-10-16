@@ -747,6 +747,52 @@ planner and writer."
   (assert (member "dreyeck/workflow/authoring" (%closure "dreyeck/work/authoring") :test #'string=))
   (assert (not (member "dreyeck/workflow/authoring" (%closure "dreyeck/catalog") :test #'string=))))
 
+(defun check-conversation-status-edits ()
+  "H1 acceptance: real Change-work-status, only on disposable page copies."
+  (call-with-work-breakdown-fixture
+   (lambda (ignored ignored-path)
+     (declare (ignore ignored ignored-path))
+     (let* ((page (hyperbook:find-page "work-authoring-probe" "Authoring the CTM Plan Page" :signal-error? t))
+            (path (hyperdoc:file-of page)))
+       (dolist (id '("ctm-wp-5" "ctm-wp-1"))
+         (let* ((projection (work:project-work-breakdown (%read path) :source page))
+                (topic (tm:topicmap-projection-topic-by-id projection id))
+                (request (work:request-work-status-change
+                          (ops:work-topic-operation-request (w:change-work-status-operation) topic) topic "blocked")))
+           (assert (equal (if (equal id "ctm-wp-5") "open" "verified") (%status projection id)))
+           (a:apply-work-status-change (a:plan-work-status-change request))
+           (assert (equal "blocked" (%status (work:project-work-breakdown (%read path) :source page) id))))
+         (let* ((reading (dreyeck/work/ctm-page-authoring:read-ctm-authoring :plan-source (%read path)))
+                (session (dreyeck/work/conversation-coordinates:read-conversation :ctm reading))
+                (dreyeck/work/conversation-coordinates::*conversation* session)
+                (p1 (dreyeck/work/conversation-coordinates::subject-at session "ctm-plan-p1"))
+                (wp1 (dreyeck/work/conversation-coordinates::subject-at session "ctm-wp-1"))
+                (workspace (dreyeck/work/conversation-coordinates::workspace-of session)))
+           (assert (eq :current (dreyeck/work/conversation-coordinates::binding-status session p1)))
+           (assert (eq (if (equal id "ctm-wp-5") :current :stale)
+                       (dreyeck/work/conversation-coordinates::binding-status session wp1)))
+           (assert (eq wp1 (dreyeck/work/ctm-page-authoring::step-result p1)))
+           (dolist (object (list p1 wp1 (dreyeck/work/conversation-coordinates::subject-at session "ctm-plan-page-authoring")))
+             (%view object "Conversation sources"))
+           (%view session "Chronology")
+           (assert (equal '(2 8 16 20) (mapcar #'dreyeck/work/conversation-coordinates:message-number
+                                             (dreyeck/work/conversation-coordinates::session-messages session))))
+           (dreyeck/work/conversation-coordinates:select-message session 2)
+           (tm:topicmap-workspace-go-to workspace "ctm-plan-p1")
+           (tm:topicmap-workspace-go-to workspace "ctm-wp-1")
+           (assert (equal "ctm-plan-p1" (first (tm:topicmap-workspace-history-of workspace))))
+           (assert (= 2 (dreyeck/work/conversation-coordinates::session-cursor session)))
+           (%view workspace "Topicmap")
+           (let* ((projection (dreyeck/work/conversation-coordinates::conversation-projection session))
+                  (edge (find "conversation:ctm-wp-1:source-evidence:e3-evidence"
+                              (tm:topicmap-projection-associations-of projection)
+                              :key #'tm:topicmap-association-id-of :test #'equal)))
+             (assert edge)
+             (assert (eq (if (equal id "ctm-wp-5") :current :stale)
+                         (getf (tm:topicmap-association-properties-of edge) :binding-status))))
+           (format t "~&CONVERSATION-H1-PASS: real status edit ~A -> blocked; P1 current, WP1 ~A; Inspector, Chronology, Point/History and relations intact.~%"
+                   id (dreyeck/work/conversation-coordinates::binding-status session wp1))))))))
+
 (defun run-tests ()
   (let ((pages (work-page-sources)))
     (check-fixture-navigation)
@@ -762,6 +808,7 @@ planner and writer."
     (call-with-work-breakdown-fixture #'check-relationship-creation-effect)
     (call-with-work-breakdown-fixture #'check-relationship-creation-execution)
     (check-authoring-boundary)
+    (check-conversation-status-edits)
     (assert (equal pages (work-page-sources))))
   (format t "~&WORK-AUTHORING-PASS: a valid request plans without writing; a stale ~
 request, a moved declaration and a status the plain data-status representation does not admit plan ~

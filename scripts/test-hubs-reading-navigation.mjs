@@ -256,6 +256,12 @@ try {
  assert.equal(keys(freshLog).length,34)
  fs.writeFileSync(path.join(output,'result.json'),JSON.stringify({status:'PASS',browser:browser.version(),planningSourceIdentities:keys(freshLog),scope:'fresh local CLOG and independent reconstruction; unchanged submitted documents and retained Wiki JSON; no production or approval-authentication claim'},null,2))
  console.log('HUBS-BROWSER-PASS: K1-K7 relation evidence and exact v2 correction spans; unchanged submitted documents; native Point+History and 34 independent fresh-process source identities; unchanged Hub P1/P2/P3, Ward Plan and Solo definitions; no executable host, planner or authoring')
+}catch(error){
+ if(browser){const pages=browser.contexts().flatMap(c=>c.pages());if(pages.length){
+  fs.writeFileSync(path.join(output,'failure.txt'),await pages[0].locator('body').innerText())
+  await pages[0].screenshot({path:path.join(output,'failure.png')})
+ }}
+ throw error
 }finally{
  if(browser)await browser.close();fs.writeFileSync(stop,'')
  await new Promise(r=>{if(child.exitCode!==null)r();else{child.once('exit',r);setTimeout(()=>{child.kill();r()},5000).unref()}})

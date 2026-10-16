@@ -1,0 +1,176 @@
+{
+  "version": "claude-code-coordinates/v1",
+  "extractionRule": "claude-code-jsonl/v1: content string unchanged, text blocks concatenated, ExitPlanMode input.plan; never unwrap pasted content",
+  "sessionId": "262d6ca6-81c4-4cd2-b4da-1d4613821702",
+  "assessment": "Befund: Gespr\u00e4chskoordinaten in HyperDoc, 2026-10-16; checked against original records; coordinates only",
+  "messages": [
+    {
+      "ordinal": 2,
+      "sessionId": "262d6ca6-81c4-4cd2-b4da-1d4613821702",
+      "uuid": "ad0fb435-b522-4d96-a3cb-5d632b348096",
+      "parentUuid": "ff93c8c7-8ada-4e90-b1c9-4f26d8e3e1d7",
+      "timestamp": "2026-10-14T20:27:42.720Z",
+      "role": "assistant",
+      "origin": "assistant-text",
+      "author": "agent-reported",
+      "decision": false,
+      "lineOrdinal": 288,
+      "lineSha256": "73b045aebf2db2b43254b79cf8b695c5f8d9cae11605bd376530cb13aa154e98",
+      "textSha256": "bf8daba2cabd5046024127313a933371edf1d22300f260ab288dbdd92b2c3158",
+      "characters": 12717,
+      "octets": 12943,
+      "body": "not-published",
+      "evidenceRange": [
+        0,
+        12717
+      ]
+    },
+    {
+      "ordinal": 8,
+      "sessionId": "262d6ca6-81c4-4cd2-b4da-1d4613821702",
+      "uuid": "30fc24fb-6c79-41b1-b043-34ee9895b4ea",
+      "parentUuid": "458382e3-8253-4d03-98e4-528737eeb4ec",
+      "timestamp": "2026-10-15T06:37:35.954Z",
+      "role": "assistant",
+      "origin": "tool-input:ExitPlanMode",
+      "author": "agent-reported",
+      "decision": false,
+      "lineOrdinal": 960,
+      "lineSha256": "d3fbf874a5f372ed863ef4e8386c77ec6349010b82486ed18b1a10a0bc9d7874",
+      "textSha256": "68401649423dc6837b3a25bf0b0f6fb6e4fe57ef3ddf92c721fe106b45d7e936",
+      "characters": 20961,
+      "octets": 21211,
+      "body": "not-published",
+      "evidenceRange": [
+        0,
+        20961
+      ]
+    },
+    {
+      "ordinal": 16,
+      "sessionId": "262d6ca6-81c4-4cd2-b4da-1d4613821702",
+      "uuid": "a3503eb6-b352-4e39-8473-7fe547184ab9",
+      "parentUuid": "99dc3c6c-f5db-4972-b8d7-63543af8440b",
+      "timestamp": "2026-10-15T16:12:51.635Z",
+      "role": "user",
+      "origin": "unwrapped",
+      "author": "not-recorded",
+      "decision": false,
+      "lineOrdinal": 1703,
+      "lineSha256": "86f3d5a884ad358b402019ca56be0a0c63add074db5c11997719283556b8ce19",
+      "textSha256": "18897c6909d4a58edfe0f20f6f25b3ed876877fae403db825c8ba1d10b3162af",
+      "characters": 1726,
+      "octets": 1754,
+      "body": "not-published",
+      "recordedOrigin": "typed",
+      "sourceOriginKind": "human",
+      "promptSource": "sdk",
+      "evidenceRange": [
+        218,
+        343
+      ]
+    },
+    {
+      "ordinal": 20,
+      "sessionId": "262d6ca6-81c4-4cd2-b4da-1d4613821702",
+      "uuid": "b3acd503-a1d9-4f44-803e-81dcf173019e",
+      "parentUuid": "cabba73c-0191-40b3-ada1-c7f4712089b9",
+      "timestamp": "2026-10-16T04:32:01.458Z",
+      "role": "user",
+      "origin": "pasted-wrapper",
+      "author": "not-recorded",
+      "decision": false,
+      "lineOrdinal": 2285,
+      "lineSha256": "88d8d0b67717638112c73beec0ee902a5facf9d1bbad5d6d2f95770def3b70fc",
+      "textSha256": "327f8b0bce7ab139cb84978b72872354095abf377187174ccc1c5973e3c439a2",
+      "characters": 1416,
+      "octets": 1436,
+      "body": "not-published",
+      "recordedOrigin": "pasted",
+      "sourceOriginKind": "human",
+      "promptSource": "sdk",
+      "evidenceRange": [
+        208,
+        437
+      ]
+    }
+  ],
+  "report": {
+    "url": "https://wiki.ralfbarkow.ch/ctm-and-tmdm-in-hyperdoc-original-report.html",
+    "slug": "ctm-and-tmdm-in-hyperdoc-original-report",
+    "itemId": "516961263b8cdbeb",
+    "sha256": "68401649423dc6837b3a25bf0b0f6fb6e4fe57ef3ddf92c721fe106b45d7e936",
+    "octets": 21211,
+    "availability": "NOT-RUN",
+    "observedLocalSite": "localhost:3000",
+    "publicCheck": {
+      "status": "FAIL",
+      "httpStatus": 404,
+      "date": "2026-10-16",
+      "source": "Claude independent review 1a22c33a-59b8-4eec-bb15-dca10d671e82"
+    }
+  },
+  "review": {
+    "document": "claude-review",
+    "start": 1386,
+    "end": 14103,
+    "offset": -1386
+  },
+  "e3": {
+    "site": "localhost:3000",
+    "slug": "ctm-and-tmdm-in-hyperdoc",
+    "itemId": "ed37e9bac2fcd548",
+    "sha256": "d7215c50f4efa07b3e94749b060b7d7b828654f2a44caab7f1034415c6003dff",
+    "reportedProductionSite": "dreyeck.ch"
+  },
+  "ctmBindings": {
+    "ctm-plan-p1": {
+      "subjectKey": [
+        "work-subject/v2",
+        "dreyeck/work/reading",
+        "Authoring the CTM Plan Page",
+        "ctm-plan-p1"
+      ],
+      "declarationRange": [
+        7483,
+        7620
+      ],
+      "declarationSha256": "858dd3f6926074a8da78a9deb422341143c9f3789d34344734f762491d67c7d1",
+      "pageSha256": "2fc65e445b64f7a43541319229d4c8ece12658493bb94686305e57236e6d6f4f"
+    },
+    "ctm-wp-1": {
+      "subjectKey": [
+        "work-subject/v2",
+        "dreyeck/work/reading",
+        "Authoring the CTM Plan Page",
+        "ctm-wp-1"
+      ],
+      "declarationRange": [
+        4625,
+        4758
+      ],
+      "declarationSha256": "33871701fdfd657e8653aaac2d8f5a63ffca24522c8b19bdbfa78f4cc15a9da0",
+      "pageSha256": "2fc65e445b64f7a43541319229d4c8ece12658493bb94686305e57236e6d6f4f"
+    },
+    "ctm-pre-transfer": {
+      "subjectKey": [
+        "work-subject/v2",
+        "dreyeck/work/reading",
+        "Authoring the CTM Plan Page",
+        "ctm-pre-transfer"
+      ],
+      "declarationRange": [
+        8905,
+        9070
+      ],
+      "declarationSha256": "e300b09ce216b60c96dc694ae498927cce034a9d8f76a074bb83c5b9ee70ce0e",
+      "pageSha256": "2fc65e445b64f7a43541319229d4c8ece12658493bb94686305e57236e6d6f4f"
+    }
+  },
+  "offlineCheck": {
+    "status": "PASS",
+    "date": "2026-10-16",
+    "source": "Codex local source verification; conversation-coordinates-n1-validation.json",
+    "scope": "four original records including wrapper classification, local report identity, review and F1-F11 offsets; not a served-mode check"
+  }
+}

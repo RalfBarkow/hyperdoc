@@ -51,16 +51,48 @@
     "work:dogfooding:current-work:collaborative-planning-case"
     "work:ctm-plan-page-authoring:applies:fedwiki-item-authoring"
     "work:ctm-plan-page-authoring:applies:hyperdoc-authoring-interaction"
-    "work:dogfooding:current-work:ctm-plan-page-authoring"))
+    "work:dogfooding:current-work:ctm-plan-page-authoring"
+    "work:planning:contains:conversation-coordinates"
+    "work:dogfooding:current-work:conversation-coordinates"))
+
+(defparameter *expected-work-topics*
+  '("interaction"
+    "operations"
+    "connect"
+    "state"
+    "dogfooding"
+    "corpus"
+    "planning"
+    "connections-example"
+    "d2"
+    "connection"
+    "association"
+    "topicmap"
+    "hyperdoc-authoring"
+    "fedwiki-item-authoring"
+    "production-authoring-authority"
+    "authoring-listener-startup"
+    "authoring-nginx-route"
+    "hyperdoc-authoring-interaction"
+    "hyperdoc-page-authoring"
+    "lisp-source-authoring"
+    "running-image-authoring"
+    "work:relation/informs"
+    "work:relation/addresses"
+    "ward-hub-trail-selection"
+    "collaborative-planning-case"
+    "ctm-plan-page-authoring"
+    "conversation-coordinates"))
 
 (defun check-projection-integrity (projection)
   (let* ((topics (tm:topicmap-projection-topics-of projection))
          (associations (tm:topicmap-projection-associations-of projection))
          (ids (mapcar #'tm:topicmap-association-id-of associations)))
-    (assert (= 26 (length topics)))
-    (assert (= (length *expected-work-associations*) (length ids)))
-    (dolist (id *expected-work-associations*)
-      (assert (= 1 (count id ids :test #'equal))))
+    (let ((topic-ids (mapcar #'tm:topicmap-topic-id-of topics)))
+      (assert (= (length topic-ids) (length (remove-duplicates topic-ids :test #'equal))))
+      (assert (null (set-exclusive-or topic-ids *expected-work-topics* :test #'equal))))
+    (assert (= (length ids) (length (remove-duplicates ids :test #'equal))))
+    (assert (null (set-exclusive-or ids *expected-work-associations* :test #'equal)))
     (dolist (association associations)
       (dolist (endpoint (list (tm:topicmap-association-from-of association)
                              (tm:topicmap-association-to-of association)))

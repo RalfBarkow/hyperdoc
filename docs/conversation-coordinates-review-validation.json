@@ -1,0 +1,322 @@
+{
+  "baseCommit": "e120748740b3ad4e28b0b7fddda3cb9f9ce72dac",
+  "branch": "codex/conversation-coordinates-review-corrections",
+  "recordedAt": "2026-10-16T08:54:41.564385+00:00",
+  "review": {
+    "date": "2026-10-16",
+    "record": "1a22c33a-59b8-4eec-bb15-dca10d671e82",
+    "verdict": "Revise"
+  },
+  "runtime": {
+    "sbcl": "2.4.10",
+    "d2": "0.9.0",
+    "browser": "154.0.8037.98",
+    "nixSystem": "x86_64-darwin"
+  },
+  "privateBodiesAdded": false,
+  "privatePathsPublished": false,
+  "runs": [
+    {
+      "name": "work",
+      "status": "PASS",
+      "exitCode": 0,
+      "command": "$LISP --eval '(require :asdf)' --eval '(asdf:test-system \"dreyeck/work/reading/tests\")'",
+      "logSha256": "357477cf7eab1562f1911ebeeb3a64d0b59d5ddc7d974d1ae19405bef832835a",
+      "passMarkers": [
+        "WORK-READING-PASS",
+        "AUTHORING-ARCHITECTURE-PASS",
+        "MECH-OPERATING-GUIDE-PASS",
+        "DEPLOYMENT-SOURCES-PRESERVED-PASS",
+        "DEPLOYMENT-UPDATE-SOURCE-PRESERVED-PASS",
+        "DEPLOYMENT-EVIDENCE-CONTROLS-PASS",
+        "SERVICE-START-CONFIRMATION-CONTROLS-PASS",
+        "DEPLOYMENT-UPDATE-CONTROLS-PASS",
+        "SERVED-STATE-CONTROLS-PASS",
+        "WORK-DEPLOYMENT-READING-PASS",
+        "MECH-DOCUMENTATION-NAVIGATION-PASS",
+        "ORIGINAL-CODE-BROWSER-EVIDENCE-PASS",
+        "TRAIL-FOLLOWING-PASS",
+        "SOLO-IDENTITY-PASS",
+        "HOW-TRAILS-DIRECT-PASS",
+        "HOW-TRAILS-SOURCES-PASS",
+        "HOW-TRAILS-PLAN-PASS",
+        "JAVASCRIPT-DEFINITIONS-PASS",
+        "FEDERATED-CONTEXT-PASS",
+        "RAW-TEMPORAL-DERIVATION-PASS",
+        "TEMPORAL-FEDERATION-PASS",
+        "COORDINATED-WORKSPACE-PASS",
+        "REPRESENTED-OBJECTS-PASS",
+        "SUBJECT-FOLLOW-PASS",
+        "INTERACTION-SEMANTICS-PASS",
+        "ORTHOGONAL-CONTEXT-OPERATIONS-PASS",
+        "PERSISTENT-WORKSPACE-PASS",
+        "FEDERATED-TOPIC-OPERATIONS-PASS",
+        "ATTRIBUTION-NEGATIVE-CONTROL-PASS",
+        "ATTRIBUTION-MUTATION-CONTROL-PASS",
+        "SOLO-HOVERBOLD-PASS",
+        "TRAILS-RENDERED-EXPERIMENT-PASS",
+        "HUB-READING-PASS",
+        "HUB-INVESTIGATION-PASS",
+        "COLLABORATIVE-PLANNING-PASS",
+        "CTM-PLAN-PAGE-AUTHORING-PASS",
+        "CONVERSATION-COORDINATES-PASS",
+        "SHIFT-CLICK-READING-PASS",
+        "DEPLOYMENT-INSPECTION-PASS"
+      ]
+    },
+    {
+      "name": "work-authoring",
+      "status": "PASS",
+      "exitCode": 0,
+      "command": "$AUTHORING_LISP --eval '(require :asdf)' --eval '(asdf:test-system \"dreyeck/work/authoring/tests\")'",
+      "logSha256": "4c54e04c9fdb6f2de61c5fd44a28132ba98f594740cc55e2192fe512aeda09a6",
+      "passMarkers": [
+        "CONVERSATION-H1-PASS",
+        "CONVERSATION-H1-PASS",
+        "WORK-AUTHORING-PASS",
+        "OPTIONAL-TALA-PASS",
+        "UNPROJECTED-WORKSPACE-STATUS-PASS",
+        "WORK-TOPICMAP-EDITOR-PASS",
+        "ADDRESSES-TWO-BRIDGES-PASS",
+        "ADDRESSES-REGRESSION-PASS"
+      ]
+    },
+    {
+      "name": "authoring-preview",
+      "status": "PASS",
+      "exitCode": 0,
+      "command": "Five test-ops listed in the correction report",
+      "logSha256": "deb777243e31e9c6cbd400a59d8035bd9c48ada8107dc7243345b3d1141e2cfe",
+      "passMarkers": [
+        "FEDWIKI-PAGE-AUTHORING-PASS",
+        "AUTHORING-ENVELOPE-PASS",
+        "AUTHENTICATED-PAGE-AUTHORING-PASS",
+        "AUTHORING-HTTP-PASS",
+        "FEDWIKI-ITEM-EDIT-PREVIEW-PASS"
+      ]
+    },
+    {
+      "name": "catalog-topicmaps",
+      "status": "PASS",
+      "exitCode": 0,
+      "command": "Six test-ops listed in the correction report",
+      "logSha256": "9e42880eabf7c9caa281faa3228b5f25b0e15b98a574dee25c07bace8a74c909",
+      "passMarkers": [
+        "BIND-ADDRESS-PASS",
+        "LAUNCHER-ROUTES-PASS",
+        "CATALOG-LISP-CRITIC-READING-PASS",
+        "WARD-FOLLOW-UP-CONTRACT-PASS",
+        "MESSAGE-INPUT-TRACE-PASS",
+        "REVISION-PROVENANCE-HISTORY-PASS",
+        "NESTED-ACTIONS-READING-PASS",
+        "AUTHORITY-READING-PASS",
+        "CATALOG-CURATION-DEMO-PASS",
+        "WORKSPACE-ACTION-SIGN-OCCURRENCE-PASS"
+      ]
+    },
+    {
+      "name": "nix-build",
+      "status": "PASS",
+      "exitCode": 0,
+      "command": "nix build .#hyperdoc-catalog --offline --no-link --print-out-paths",
+      "logSha256": "ac67be7bf9daf910b0098826a32747adc607e392da4251a85734cbb4847e23ad",
+      "passMarkers": []
+    },
+    {
+      "name": "nix-native-check",
+      "status": "PASS",
+      "exitCode": 0,
+      "command": "nix build .#checks.x86_64-darwin.catalog --offline --no-link --print-out-paths",
+      "logSha256": "7008eb3b6c0ac4a9bb6862465cf13755861170f4c18fbb8529a6262bc841197e",
+      "passMarkers": []
+    },
+    {
+      "name": "h1-default-reconstruction",
+      "status": "PASS",
+      "exitCode": 0,
+      "command": "Disposable checkout; default read-conversation after actual Change-work-status operations",
+      "logSha256": "b627c40b9a94ecad302ffa19901e7e2eab07f2cb566f06208f35e0716e6974a0",
+      "passMarkers": [
+        "H1-DEFAULT-RECONSTRUCTION-PASS",
+        "H1-DEFAULT-RECONSTRUCTION-PASS"
+      ]
+    }
+  ],
+  "conversationChecks": 353,
+  "syntheticVerifierTests": 7,
+  "originalSourcesCheckedHereOffline": {
+    "extractionRule": "claude-code-jsonl/v1",
+    "privateBodiesRetained": false,
+    "originalTranscript": {
+      "status": "FAIL",
+      "messages": 4,
+      "selectedOrderAndAncestry": "PASS",
+      "originAndAuthorClassification": "FAIL",
+      "reviewIdentityAnd11FindingOffsets": "PASS",
+      "mutationControls": 10,
+      "n1Assessment": "At 7a383972 Codex reported PASS with the defective verifier; that result was a false positive for #20. Other identity checks remain historical PASS."
+    },
+    "originalReportIdentity": {
+      "status": "PASS",
+      "octets": 21211,
+      "mutationControls": 1
+    },
+    "syntheticExtractionChecks": 2
+  },
+  "servedOriginalChecks": {
+    "transcript": "NOT-RUN",
+    "report8Identity": "NOT-RUN",
+    "publicReportAvailability": "NOT-RUN",
+    "productionE3Bytes": "NOT-RUN",
+    "retainedReviewDigestAnd11Offsets": "checked here",
+    "retainedLocalE3DigestAndItem": "checked here"
+  },
+  "recordedPublicAvailability": {
+    "status": "FAIL",
+    "httpStatus": 404,
+    "date": "2026-10-16",
+    "source": "1a22c33a-59b8-4eec-bb15-dca10d671e82"
+  },
+  "browserRuns": [
+    {
+      "name": "conversation",
+      "status": "PASS",
+      "browser": "154.0.8037.98",
+      "development": false,
+      "steps": [
+        "Catalog → Work Breakdown",
+        "carrier page",
+        "Chronology",
+        "independent chronology cursor",
+        "H2: local report, offline identity, runtime NOT-RUN, historical HTTP 404, no public link",
+        "Message #20",
+        "Source span #20",
+        "P1",
+        "WBS 1",
+        "Conversation sources",
+        "E3 evidence",
+        "return to same coordinate",
+        "Message #2 → review → existing F3",
+        "Planning case",
+        "native Workspace",
+        "History values inspected through native Slots → Items",
+        "Point retained and Chronology cursor still #8"
+      ],
+      "sourceIdentityCount": null
+    },
+    {
+      "name": "packaged-conversation-denied-agent-directories",
+      "status": "PASS",
+      "browser": "154.0.8037.98",
+      "development": false,
+      "steps": [
+        "Catalog → Work Breakdown",
+        "carrier page",
+        "Chronology",
+        "independent chronology cursor",
+        "H2: local report, offline identity, runtime NOT-RUN, historical HTTP 404, no public link",
+        "Message #20",
+        "Source span #20",
+        "P1",
+        "WBS 1",
+        "Conversation sources",
+        "E3 evidence",
+        "return to same coordinate",
+        "Message #2 → review → existing F3",
+        "Planning case",
+        "native Workspace",
+        "History values inspected through native Slots → Items",
+        "Point retained and Chronology cursor still #8"
+      ],
+      "sourceIdentityCount": null
+    },
+    {
+      "name": "hubs",
+      "status": "PASS",
+      "browser": "154.0.8037.98",
+      "development": false,
+      "steps": [],
+      "sourceIdentityCount": 34
+    },
+    {
+      "name": "ctm-plan",
+      "status": "PASS",
+      "browser": "154.0.8037.98",
+      "development": false,
+      "steps": [
+        "Work Breakdown",
+        "carrier page",
+        "Plan steps",
+        "P3",
+        "Authorization",
+        "WBS element 3",
+        "planned control",
+        "return to carrier page",
+        "Workspace",
+        "Point/History",
+        "represented object",
+        "local-fedwiki-page",
+        "Page source",
+        "Story Item E3",
+        "Edit proposal",
+        "Preview",
+        "page file unchanged"
+      ],
+      "sourceIdentityCount": null
+    },
+    {
+      "name": "preview",
+      "status": "PASS",
+      "browser": "154.0.8037.98",
+      "development": false,
+      "steps": [],
+      "sourceIdentityCount": null
+    }
+  ],
+  "packagedSource": {
+    "artifact": "/nix/store/mimvcap7rqcfff9kxhghkv7m2qb9scqb-hyperdoc-catalog",
+    "source": "/nix/store/mdprsh4zrh3kkd1pqxmzyi33rw6mp7m8-source",
+    "gitPresent": false,
+    "checkedFiles": [
+      "dreyeck/work/conversation-coordinates-reading.lisp",
+      "dreyeck/work/conversation-evidence/coordinates.json",
+      "docs/conversation-coordinates-validation.json",
+      "tests/test_conversation_sources.py"
+    ],
+    "filesMatchCheckout": true,
+    "privatePathsAbsent": true,
+    "agentDirectoryDenialPositiveControls": "PASS"
+  },
+  "preliminaryAttempts": [
+    {
+      "name": "authoring-without-pinned-editor",
+      "status": "FAIL",
+      "reason": "Required explicit pinned authoring environment absent; corrected final gate PASS."
+    },
+    {
+      "name": "hubs-first-browser-attempt",
+      "status": "FAIL",
+      "reason": "Timeout waiting for Codex Plan v1 heading; unchanged assertions pass on repeat; cause unestablished."
+    },
+    {
+      "name": "aarch64-check-requested-in-error",
+      "buildStatus": "FAIL",
+      "testStatus": "NOT-RUN",
+      "reason": "Uncached foreign-platform dependencies unavailable offline; native x86_64 check PASS."
+    }
+  ],
+  "preservedFromBase": [
+    "dreyeck/pages/work/Work Breakdown.html",
+    "dreyeck/pages/work/Authoring the CTM Plan Page.html",
+    "dreyeck/pages/work/CTM Plan Page WBS Dictionary.html",
+    "dreyeck/work/collaborative-planning-evidence/",
+    "dreyeck/work/ctm-page-evidence/"
+  ],
+  "disclosureBoundary": "No new message body. Existing selected metadata retained. No relation grants authority. No production activation.",
+  "n1Correction": {
+    "historicalVerifierExecutedBy": "Codex",
+    "invalidatedClaim": "originAndAuthorClassification PASS for #20 was a false positive; old verifier missed attributed paste markers. Not Claude verification.",
+    "supersededBy": "conversation-coordinates-n1-validation.json",
+    "otherResults": "Historical records retained; not new N1 executions."
+  }
+}

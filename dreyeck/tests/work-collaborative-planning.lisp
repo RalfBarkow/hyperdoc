@@ -234,4 +234,4 @@
                                             (equal "P3" (tm:topicmap-association-to-of edge))))
                            (tm:topicmap-projection-associations-of projection))))
       (setf (tm:topicmap-workspace-point-of workspace) point (tm:topicmap-workspace-history-of workspace) history)))
-  (format t "~&COLLABORATIVE-PLANNING-PASS: unchanged submitted bytes; K1-K7 bounded relation bindings and exact source spans, 4 semantic counterprobes refused; 34 reconstructed source keys; Work 25/25, case 25/31; Point/History; no planner, authoring or P3 contract.~%"))
+  (format t "~&COLLABORATIVE-PLANNING-PASS: unchanged submitted bytes; K1-K7 bounded relation bindings and exact source spans, 4 semantic counterprobes refused; 34 reconstructed source keys; Work contracts preserved, case 25/31; Point/History; no planner, authoring or P3 contract.~%"))

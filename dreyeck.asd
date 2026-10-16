@@ -2782,6 +2782,8 @@
                       (:file "investigating-ward-hub-selection")
                       (:file "collaborative-planning-reading")
                       (:file "ctm-plan-page-authoring")
+                      (:file "conversation-coordinates-reading")
+                      (:module "conversation-evidence" :components ((:static-file "coordinates.json")))
                       (:module "collaborative-planning-evidence" :components
                         ((:static-file "case.json")
                          (:static-file "MANIFEST.txt")
@@ -2873,6 +2875,7 @@
                       (:static-file "Collaborative Planning with Codex and SHOP3.html")
                       (:static-file "Authoring the CTM Plan Page.html")
                       (:static-file "CTM Plan Page WBS Dictionary.html")
+                      (:static-file "Conversation Coordinates.html")
                       (:static-file "D2 Connections.html")
                       (:static-file "Relation Contract informs.html")
                       (:static-file
@@ -2913,6 +2916,7 @@
             (:file "dreyeck/tests/work-hub-investigation")
             (:file "dreyeck/tests/work-collaborative-planning")
             (:file "dreyeck/tests/work-ctm-plan-page-authoring")
+            (:file "dreyeck/tests/work-conversation-coordinates")
             (:file "dreyeck/tests/work-shift-click")
             (:file "dreyeck/tests/work-trails-rendered-browser-check")
             (:file "dreyeck/tests/work-deployment-inspection"))
@@ -2931,6 +2935,10 @@
                     (uiop:symbol-call :dreyeck/work/hub-investigation/tests :run-tests)
                     (uiop:symbol-call :dreyeck/work/collaborative-planning/tests :run-tests)
                     (uiop:symbol-call :dreyeck/work/ctm-page-authoring/tests :run-tests)
+                    (uiop:symbol-call :dreyeck/work/conversation-coordinates/tests :run-tests)
+                    (uiop:run-program
+                     (list "python3" (namestring (asdf:system-relative-pathname "dreyeck" "tests/test_conversation_sources.py")))
+                     :output *standard-output* :error-output *error-output*)
                     (uiop:symbol-call :dreyeck/work/shift-click/tests
                                       :run-tests)
                     (uiop:symbol-call :dreyeck/work/deployment-inspection/tests

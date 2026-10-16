@@ -1,0 +1,257 @@
+{
+  "baseCommit": "7a383972849b7ff267d6a02d4dff043e26888c78",
+  "branch": "codex/conversation-coordinates-n1",
+  "recordedAt": "2026-10-16T11:09:45.910462+00:00",
+  "scope": "N1 only; N2/N4 excluded; N3 open",
+  "executedBy": "Codex",
+  "runtime": {
+    "sbcl": "2.4.10",
+    "browser": "154.0.8037.98"
+  },
+  "counterprobe": {
+    "test": "SourceContracts.test_observed_attributed_paste_markers",
+    "oldVerifierCommit": "7a383972849b7ff267d6a02d4dff043e26888c78",
+    "oldResult": "FAIL",
+    "oldObservedOrigin": "unwrapped",
+    "correctedResult": "PASS",
+    "correctedOrigin": "pasted-wrapper",
+    "fixture": "Observed opening and closing markers with id=\"31d1\"; synthetic body only"
+  },
+  "syntheticVerifierTests": {
+    "status": "PASS",
+    "tests": 9,
+    "command": "python3 tests/test_conversation_sources.py"
+  },
+  "originalSourcesCheckedHereOffline": {
+    "extractionRule": "claude-code-jsonl/v1",
+    "privateBodiesRetained": false,
+    "originalTranscript": {
+      "status": "PASS",
+      "messages": 4,
+      "selectedOrderAndAncestry": "PASS",
+      "originAndAuthorClassification": "PASS",
+      "reviewIdentityAnd11FindingOffsets": "PASS",
+      "mutationControls": 10
+    },
+    "originalReportIdentity": {
+      "status": "PASS",
+      "octets": 21211,
+      "mutationControls": 1
+    },
+    "syntheticExtractionChecks": 2
+  },
+  "withoutOriginalInputs": {
+    "extractionRule": "claude-code-jsonl/v1",
+    "privateBodiesRetained": false,
+    "originalTranscript": {
+      "status": "NOT-RUN",
+      "reason": "Original transcript not supplied or unavailable."
+    },
+    "originalReportIdentity": {
+      "status": "NOT-RUN",
+      "reason": "Local farm report JSON not supplied or unavailable."
+    },
+    "syntheticExtractionChecks": 2
+  },
+  "classifications": [
+    {
+      "ordinal": 16,
+      "role": "user",
+      "origin": "unwrapped",
+      "author": "not-recorded",
+      "wrapperMarkers": []
+    },
+    {
+      "ordinal": 20,
+      "role": "user",
+      "origin": "pasted-wrapper",
+      "author": "not-recorded",
+      "wrapperMarkers": [
+        [
+          2,
+          28
+        ],
+        [
+          1388,
+          1415
+        ]
+      ],
+      "closingMarkerRepeatsId": true
+    }
+  ],
+  "preservedIdentity": {
+    "status": "PASS",
+    "comparedTo": "7a383972",
+    "messageMetadata": "all fields except corrected #20 origin unchanged",
+    "manifestSectionsUnchanged": [
+      "sessionId",
+      "extractionRule",
+      "review",
+      "report",
+      "e3",
+      "ctmBindings"
+    ],
+    "twoTextIdentities": "PASS",
+    "elevenFindingOffsets": "PASS",
+    "sourceKeys": "unchanged contract; fresh reconstruction covered by Lisp and browser tests"
+  },
+  "browserRuns": [
+    {
+      "name": "conversation",
+      "status": "PASS",
+      "exitCode": 0,
+      "browser": "154.0.8037.98",
+      "command": "\"$NODE\" scripts/test-conversation-coordinates.mjs \"$LISP\" \"$PLAYWRIGHT\" \"$CHROME\" \"$OUTPUT/conversation\"",
+      "development": false,
+      "logSha256": "ce6a65e33354c0e305d948ff1ceba3b32fae3a6c7c9d1a09f516c91bf36800ad",
+      "steps": [
+        "Catalog → Work Breakdown",
+        "carrier page",
+        "Chronology",
+        "independent chronology cursor",
+        "H2: local report, offline identity, runtime NOT-RUN, historical HTTP 404, no public link",
+        "N1: #16 unwrapped, author not-recorded",
+        "Message #20: pasted-wrapper, author not-recorded",
+        "Source span #20",
+        "P1",
+        "WBS 1",
+        "Conversation sources",
+        "E3 evidence",
+        "return to same coordinate",
+        "Message #2 → review → existing F3",
+        "Planning case",
+        "native Workspace",
+        "History values inspected through native Slots → Items",
+        "Point retained and Chronology cursor still #8"
+      ],
+      "sourceIdentityCount": null
+    },
+    {
+      "name": "hubs",
+      "status": "PASS",
+      "exitCode": 0,
+      "browser": "154.0.8037.98",
+      "command": "\"$NODE\" scripts/test-hubs-reading-navigation.mjs \"$LISP\" \"$PLAYWRIGHT\" \"$CHROME\" \"$OUTPUT/hubs\"",
+      "development": false,
+      "logSha256": "89042896fc450293f463f8b95902f18d8aab7f86bbe3d2f03444893fddf98795",
+      "steps": [],
+      "sourceIdentityCount": 34
+    },
+    {
+      "name": "plan",
+      "status": "PASS",
+      "exitCode": 0,
+      "browser": "154.0.8037.98",
+      "command": "\"$NODE\" scripts/test-ctm-plan-page-navigation.mjs \"$LISP\" \"$PLAYWRIGHT\" \"$CHROME\" \"$OUTPUT/plan\"",
+      "development": false,
+      "logSha256": "3ef780ca4c9503c69b2ccca0e71c4f0248a774488420766be2294c6ed4ea4217",
+      "steps": [
+        "Work Breakdown",
+        "carrier page",
+        "Plan steps",
+        "P3",
+        "Authorization",
+        "WBS element 3",
+        "planned control",
+        "return to carrier page",
+        "Workspace",
+        "Point/History",
+        "represented object",
+        "local-fedwiki-page",
+        "Page source",
+        "Story Item E3",
+        "Edit proposal",
+        "Preview",
+        "page file unchanged"
+      ],
+      "sourceIdentityCount": null
+    },
+    {
+      "name": "preview",
+      "status": "PASS",
+      "exitCode": 0,
+      "browser": "154.0.8037.98",
+      "command": "\"$NODE\" scripts/test-item-edit-preview-activation.mjs \"$LISP\" \"$PLAYWRIGHT\" \"$CHROME\" \"$OUTPUT/preview\"",
+      "development": false,
+      "logSha256": "d0ac1715c7326a6b7ef2ee3286b5ac8e28960de5ed645fe164abdb3e2c02be6d",
+      "steps": [],
+      "sourceIdentityCount": null
+    }
+  ],
+  "notRun": {
+    "nixRebuildAndPackagedN1Rerun": "NOT-RUN",
+    "currentPublicReportAvailability": "NOT-RUN",
+    "productionChecks": "NOT-RUN",
+    "remoteRefRefresh": "NOT-RUN",
+    "independentClaudeFinalReview": "NOT-RUN"
+  },
+  "history": {
+    "rewritten": false,
+    "publication": false,
+    "locallyKnownPublicationBase": "44ebc23a934b6373b445d88f023332deeafd256c",
+    "includedAncestorsAfterThatBase": [
+      "e120748740b3ad4e28b0b7fddda3cb9f9ce72dac",
+      "7a383972849b7ff267d6a02d4dff043e26888c78"
+    ],
+    "includesThisN1Commit": true,
+    "n3": "OPEN; earlier local-path-bearing tree remains reachable"
+  },
+  "newMessageBodiesPublished": false,
+  "productionModified": false,
+  "workReadingRun": {
+    "status": "PASS",
+    "exitCode": 0,
+    "command": "\"$LISP\" --eval '(require :asdf)' --eval '(asdf:test-system \"dreyeck/work/reading/tests\")'",
+    "conversationChecks": 363,
+    "syntheticVerifierTestsInTestOp": 9,
+    "passMarkerCount": 39,
+    "passMarkers": [
+      "WORK-READING-PASS",
+      "AUTHORING-ARCHITECTURE-PASS",
+      "MECH-OPERATING-GUIDE-PASS",
+      "DEPLOYMENT-SOURCES-PRESERVED-PASS",
+      "DEPLOYMENT-UPDATE-SOURCE-PRESERVED-PASS",
+      "DEPLOYMENT-EVIDENCE-CONTROLS-PASS",
+      "SERVICE-START-CONFIRMATION-CONTROLS-PASS",
+      "DEPLOYMENT-UPDATE-CONTROLS-PASS",
+      "SERVED-STATE-CONTROLS-PASS",
+      "WORK-DEPLOYMENT-READING-PASS",
+      "MECH-DOCUMENTATION-NAVIGATION-PASS",
+      "ORIGINAL-CODE-BROWSER-EVIDENCE-PASS",
+      "TRAIL-FOLLOWING-PASS",
+      "SOLO-IDENTITY-PASS",
+      "HOW-TRAILS-DIRECT-PASS",
+      "HOW-TRAILS-SOURCES-PASS",
+      "HOW-TRAILS-PLAN-PASS",
+      "JAVASCRIPT-DEFINITIONS-PASS",
+      "FEDERATED-CONTEXT-PASS",
+      "RAW-TEMPORAL-DERIVATION-PASS",
+      "TEMPORAL-FEDERATION-PASS",
+      "COORDINATED-WORKSPACE-PASS",
+      "REPRESENTED-OBJECTS-PASS",
+      "SUBJECT-FOLLOW-PASS",
+      "INTERACTION-SEMANTICS-PASS",
+      "ORTHOGONAL-CONTEXT-OPERATIONS-PASS",
+      "PERSISTENT-WORKSPACE-PASS",
+      "FEDERATED-TOPIC-OPERATIONS-PASS",
+      "ATTRIBUTION-NEGATIVE-CONTROL-PASS",
+      "ATTRIBUTION-MUTATION-CONTROL-PASS",
+      "SOLO-HOVERBOLD-PASS",
+      "TRAILS-RENDERED-EXPERIMENT-PASS",
+      "HUB-READING-PASS",
+      "HUB-INVESTIGATION-PASS",
+      "COLLABORATIVE-PLANNING-PASS",
+      "CTM-PLAN-PAGE-AUTHORING-PASS",
+      "CONVERSATION-COORDINATES-PASS",
+      "SHIFT-CLICK-READING-PASS",
+      "DEPLOYMENT-INSPECTION-PASS"
+    ],
+    "logSha256": "eb1169b0d66113add42631d982743b47b34f76935b516cdc1a489f1900d8d42e"
+  },
+  "disclosureAndScopeCheck": {
+    "status": "PASS",
+    "filesScanned": 12,
+    "privateHomePaths": "absent; literal privacy-test prefix is not a path",
+    "workWbsPlanE3AndExistingEvidence": "byte-unchanged from base"
+  }
+}
