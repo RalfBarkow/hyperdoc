@@ -140,8 +140,30 @@
       ;; reached through a preview; it remains the writer's guard at execution.
       (refused 'p:stale-item-source (lambda () (p:preview-item-edit (p:propose-item-edit (e3 again) "mine")))))))
 
+(defun system-closure (name)
+  "NAME and every system it depends on, as declared, by name."
+  (let ((seen nil))
+    (labels ((visit (designator)
+               (let ((system (and (or (stringp designator) (symbolp designator))
+                                  (asdf:find-system designator nil))))
+                 (when (and system (not (member (asdf:component-name system) seen :test #'string=)))
+                   (push (asdf:component-name system) seen)
+                   (mapc #'visit (asdf:system-depends-on system))))))
+      (visit name))
+    seen))
+
+(defun check-load-contract ()
+  "Activating the preview loads the page checks, never the writer."
+  (let ((closure (system-closure "dreyeck/fedwiki-item-edit-preview")))
+    (assert (member "dreyeck/fedwiki-page-edit-plan" closure :test #'string=))
+    (assert (not (member "dreyeck/fedwiki-page-authoring" closure :test #'string=)))
+    ;; Positive control: the same walk does find the writer where it is declared.
+    (assert (member "dreyeck/fedwiki-page-authoring" (system-closure "dreyeck/authenticated-page-authoring")
+                    :test #'string=))))
+
 (defun run-tests ()
   (assert (equal +observed-sha256+ (file-sha256 (evidence-path))))
+  (check-load-contract)
   (let ((books (copy-list (hyperbook:hyperbooks-of hyperbook:*catalog*))))
     (unwind-protect (run-checks)
       (assert (equal books (hyperbook:hyperbooks-of hyperbook:*catalog*)))))
@@ -150,6 +172,6 @@
 (defun run-checks ()
   (call-with-site #'check-identity-and-path)
   (call-with-site #'check-refusals)
-  (format t "~&FEDWIKI-ITEM-EDIT-PREVIEW-PASS: one reading gives revision ~A and 18 unique Item ids; E3 ~A is paragraph 11; local-fedwiki-page → Story item → Edit proposal → Preview by view references; the preview shows original, id, proposal and effect and equals what the writer writes; no file changed while previewing; no-change and a stale revision (another Item, E3 itself) refused.~%"
+  (format t "~&FEDWIKI-ITEM-EDIT-PREVIEW-PASS: one reading gives revision ~A and 18 unique Item ids; E3 ~A is paragraph 11; local-fedwiki-page → Story item → Edit proposal → Preview by view references; the preview shows original, id, proposal and effect and equals what the writer writes; no file changed while previewing; no-change and a stale revision (another Item, E3 itself) refused; the preview's declared load closure holds the page checks and not the writer.~%"
           +observed-sha256+ +e3-id+)
   t)

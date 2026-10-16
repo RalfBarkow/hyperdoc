@@ -1547,13 +1547,19 @@
                                  :RUN-FEDWIKI-PAGE-MATERIALIZATION-TESTS)
      (ERROR "FedWiki page materialization tests failed."))))
 
+(defsystem "dreyeck/fedwiki-page-edit-plan"
+  :description "What one FedWiki edit Action would make of a page: the writer's page checks, without file, capability or writer"
+  :license "BSD"
+  :version "0.0.1"
+  :components ((:file "dreyeck/src/fedwiki-page-edit-plan")))
+
 (defsystem "dreyeck/fedwiki-page-authoring"
   :description "Capability-scoped, page-serialized edits of one local FedWiki page; no HTTP route, no authentication"
   :license "BSD"
   :version "0.0.1"
   :pathname "dreyeck/src/"
   :serial t
-  :depends-on ("dreyeck/fedwiki-assets" "dreyeck/fedwiki-page-materialization"
+  :depends-on ("dreyeck/fedwiki-page-edit-plan" "dreyeck/fedwiki-assets" "dreyeck/fedwiki-page-materialization"
                "shasht" "bordeaux-threads" "html-inspector-views")
   :components ((:file "fedwiki-page-authoring-package") (:file "fedwiki-page-authoring"))
   :in-order-to ((test-op (test-op "dreyeck/fedwiki-page-authoring/tests"))))
@@ -1598,14 +1604,15 @@
   :description "Propose one FedWiki Item edit in the Inspector and preview it through the page-authoring contract; nothing is written"
   :license "BSD"
   :version "0.0.1"
-  :depends-on ("dreyeck/fedwiki-page-authoring" "dreyeck/local-fedwiki-view"
+  ;; Not the writer: activating this in a served Catalog loads no capability.
+  :depends-on ("dreyeck/fedwiki-page-edit-plan" "dreyeck/local-fedwiki-view"
                "html-inspector-views" "html-inspector-views/reactive" "lwcells" "shasht")
   :components ((:file "dreyeck/src/fedwiki-item-edit-preview"))
   :in-order-to ((test-op (test-op "dreyeck/fedwiki-item-edit-preview/tests"))))
 
 (defsystem "dreyeck/fedwiki-item-edit-preview/tests"
   :description "Item identity, source revision, stale refusal and no write while previewing"
-  :depends-on ("dreyeck/fedwiki-item-edit-preview" "ironclad")
+  :depends-on ("dreyeck/fedwiki-item-edit-preview" "dreyeck/fedwiki-page-authoring" "ironclad")
   :components ((:file "dreyeck/tests/fedwiki-item-edit-preview"))
   :perform (test-op (op component)
              (declare (ignore op component))

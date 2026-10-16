@@ -2,7 +2,7 @@
 (defpackage #:dreyeck/fedwiki-item-edit-preview
   (:use #:cl)
   (:local-nicknames (#:lp #:dreyeck/local-fedwiki-page)
-                    (#:pa #:dreyeck/fedwiki-page-authoring)
+                    (#:plan #:dreyeck/fedwiki-page-edit-plan)
                     (#:v #:html-inspector-views)
                     (#:hvr #:html-inspector-views/reactive))
   (:export #:item-edit-proposal #:propose-item-edit #:proposal-item #:proposal-text
@@ -17,7 +17,7 @@
 ;; refuses unless it is still the observed revision, and asks the existing
 ;; page-authoring contract (PLAN-FEDWIKI-PAGE-EDIT) what the edit would leave.
 ;; Neither holds a capability and neither writes: performing the edit is
-;; EDIT-FEDWIKI-PAGE-ITEM's, with a capability this system never makes.
+;; EDIT-FEDWIKI-PAGE-ITEM's, in a system this one does not load.
 
 (define-condition stale-item-source (error)
   ((observed :initarg :observed :reader stale-item-source-observed)
@@ -77,7 +77,7 @@ refuses; otherwise return an ITEM-EDIT-PREVIEW. Writes nothing."
       (error 'stale-item-source :observed observed :current now))
     (let ((expected (lp:story-item-json item))
           (action (proposal-action proposal)))
-      (multiple-value-bind (next index) (pa:plan-fedwiki-page-edit (lp:page-source-json now) expected action)
+      (multiple-value-bind (next index) (plan:plan-fedwiki-page-edit (lp:page-source-json now) expected action)
         (make-instance 'item-edit-preview :proposal proposal :source now :expected-item expected
                                           :action action :next-page next :index index)))))
 
