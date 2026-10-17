@@ -1,0 +1,31 @@
+{
+  "recordedOn": "2026-10-17",
+  "recordedBy": "the session that made this evidence, reading an installed FedWiki (wiki-client and wiki-server); the installation's location is not recorded",
+  "reRead": "to check these lines again, bind *FEDWIKI-NODE-MODULES* or set HYPERDOC_FEDWIKI_NODE_MODULES to the node_modules directory of that FedWiki installation",
+  "sources": [
+    {
+      "role": "The FedWiki client dates an Action before it is stored",
+      "package": "wiki-client",
+      "version": "0.33.0",
+      "file": "lib/pageHandler.js",
+      "line": 235,
+      "marker": "action.date = new Date().getTime()"
+    },
+    {
+      "role": "The FedWiki server appends the Action it receives to the journal as it is",
+      "package": "wiki-server",
+      "version": "0.28.0",
+      "file": "lib/server.js",
+      "line": 984,
+      "marker": "page.journal.push(action)"
+    },
+    {
+      "role": "The FedWiki server takes a page's last edit date from journal entries that have a date",
+      "package": "wiki-server",
+      "version": "0.28.0",
+      "file": "lib/page.js",
+      "line": 392,
+      "marker": "return action.date && action.type != 'fork'"
+    }
+  ]
+}

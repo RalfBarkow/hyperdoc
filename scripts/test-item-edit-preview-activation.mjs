@@ -5,6 +5,7 @@
 // /view → Page source → E3 → Edit → Edit proposal → Preview, no writer loaded,
 // the page file unchanged.
 // node THIS LISP_WRAPPER PLAYWRIGHT_DIRECTORY CHROME OUTPUT
+import {installBoundClicks} from './lib/inspector-ready.mjs'
 import fs from 'node:fs'
 import path from 'node:path'
 import os from 'node:os'
@@ -46,7 +47,7 @@ async function phase(name,catalogSystem,drive){
   const text=fs.readFileSync(log,'utf8'),flag=k=>(text.match(new RegExp(`${k}=(YES|NO)`))||[])[1]
   const context=await browser.newContext({serviceWorkers:'block'})
   await context.route('**/*',r=>new URL(r.request().url()).origin===`http://127.0.0.1:${port}`?r.continue():r.abort())
-  const page=await context.newPage();page.setDefaultTimeout(30000)
+  const page=await context.newPage();page.setDefaultTimeout(30000);installBoundClicks(page)
   const errors=[];page.on('pageerror',e=>errors.push(e.message))
   const last=()=>page.locator('.inspector-pane').last()
   const tab=async label=>last().getByRole('button',{name:label,exact:true}).first().click()

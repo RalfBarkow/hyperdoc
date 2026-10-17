@@ -1607,12 +1607,16 @@
   ;; Not the writer: activating this in a served Catalog loads no capability.
   :depends-on ("dreyeck/fedwiki-page-edit-plan" "dreyeck/local-fedwiki-view"
                "html-inspector-views" "html-inspector-views/reactive" "lwcells" "shasht")
-  :components ((:file "dreyeck/src/fedwiki-item-edit-preview"))
+  :components ((:file "dreyeck/src/fedwiki-item-edit-preview")
+               ;; Read at run time by the view "Action context": the recorded trial and where FedWiki dates an Action.
+               (:module "dreyeck/work/ctm-page-evidence"
+                :components ((:static-file "persisted-edit-trial.json")
+                             (:static-file "fedwiki-action-dating.json"))))
   :in-order-to ((test-op (test-op "dreyeck/fedwiki-item-edit-preview/tests"))))
 
 (defsystem "dreyeck/fedwiki-item-edit-preview/tests"
   :description "Item identity, source revision, stale refusal and no write while previewing"
-  :depends-on ("dreyeck/fedwiki-item-edit-preview" "dreyeck/fedwiki-page-authoring" "ironclad")
+  :depends-on ("dreyeck/fedwiki-item-edit-preview" "dreyeck/fedwiki-page-authoring" "ironclad" "babel")
   :components ((:file "dreyeck/tests/fedwiki-item-edit-preview"))
   :perform (test-op (op component)
              (declare (ignore op component))
