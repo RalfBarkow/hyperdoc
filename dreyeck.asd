@@ -1645,6 +1645,25 @@
              (declare (ignore op component))
              (uiop:symbol-call :dreyeck/work/item-edit-proposal/tests :run-tests)))
 
+(defsystem "dreyeck/topic-maps-reading"
+  :description "Optional: one CTM document read with the topic-maps reader and its TMDM objects projected into dreyeck/topicmap; nothing is parsed or modelled again"
+  :license "BSD"
+  :version "0.0.1"
+  ;; Needs the topic-maps checkout in the ASDF registry. It is not packaged: how HyperDoc
+  ;; should depend on topic-maps is open (E1), so nothing in flake.nix refers to it.
+  :depends-on ("dreyeck/work/item-edit-proposal" "topic-maps/ctm" "topic-maps/cxtm" "dreyeck/topicmap"
+               "html-inspector-views" "ironclad")
+  :components ((:file "dreyeck/work/topic-maps-reading"))
+  :in-order-to ((test-op (test-op "dreyeck/topic-maps-reading/tests"))))
+
+(defsystem "dreyeck/topic-maps-reading/tests"
+  :description "TMDM objects from the real reader, four projections, EQ identity, a fresh image"
+  :depends-on ("dreyeck/topic-maps-reading" "ironclad")
+  :components ((:file "dreyeck/tests/topic-maps-reading"))
+  :perform (test-op (op component)
+             (declare (ignore op component))
+             (uiop:symbol-call :dreyeck/topic-maps-reading/tests :run-tests)))
+
 (defsystem "dreyeck/authenticated-page-authoring"
   :description "Principals, principal-bound single-use challenges and authoring rules that derive the FedWiki page-authoring capability; trusted Lisp only, no HTTP"
   :license "BSD"
