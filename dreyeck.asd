@@ -1664,6 +1664,26 @@
              (declare (ignore op component))
              (uiop:symbol-call :dreyeck/topic-maps-reading/tests :run-tests)))
 
+(defsystem "dreyeck/fedwiki-item-edit-execution"
+  :description "Authoring side, never in the Catalog: complete a previewed Item edit Action with a date, execute it with a signed request through the existing writer, read the page again and verify it in a new process"
+  :license "BSD"
+  :version "0.0.1"
+  ;; Loads the writer. It makes no capability: one is derived only by the authenticated path,
+  ;; from a request signed by a registered principal.
+  :depends-on ("dreyeck/fedwiki-item-edit-preview" "dreyeck/fedwiki-page-authoring"
+               "dreyeck/authenticated-page-authoring" "dreyeck/authoring-envelope"
+               "shasht" "ironclad" "html-inspector-views")
+  :components ((:file "dreyeck/src/fedwiki-item-edit-execution"))
+  :in-order-to ((test-op (test-op "dreyeck/fedwiki-item-edit-execution/tests"))))
+
+(defsystem "dreyeck/fedwiki-item-edit-execution/tests"
+  :description "A previewed edit executed on temporary copies: authorized, persisted, verified; refusals with controls; concurrency; no capability without a signed request"
+  :depends-on ("dreyeck/fedwiki-item-edit-execution" "ironclad" "bordeaux-threads")
+  :components ((:file "dreyeck/tests/fedwiki-item-edit-execution"))
+  :perform (test-op (op component)
+             (declare (ignore op component))
+             (uiop:symbol-call :dreyeck/fedwiki-item-edit-execution/tests :run-tests)))
+
 (defsystem "dreyeck/authenticated-page-authoring"
   :description "Principals, principal-bound single-use challenges and authoring rules that derive the FedWiki page-authoring capability; trusted Lisp only, no HTTP"
   :license "BSD"

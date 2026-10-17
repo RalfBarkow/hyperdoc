@@ -268,6 +268,11 @@ SITE. Several principals may hold rules for the same page."))
 carry, the principals, the challenge store, the rules, and for each site id
 the local site root that site id means here."))
 
+(defun authoring-authority-site-root (authority site-id)
+  "The local site root AUTHORITY gives SITE-ID, or NIL if it has no such site. Read only: a site root is
+chosen when the authority is made, never by a request."
+  (cdr (assoc site-id (%authority-sites authority) :test #'equal)))
+
 (defun make-authoring-authority (&key service-id registry (challenges (make-challenge-store)) rules sites)
   "SITES is a list of (SITE-ID . SITE-ROOT). Site roots come from here only."
   (unless (%token-p service-id) (error "~S is not a service id." service-id))

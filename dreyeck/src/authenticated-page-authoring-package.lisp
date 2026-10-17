@@ -17,7 +17,7 @@
            #:authoring-rule #:make-authoring-rule #:authoring-rule-principal-id #:authoring-rule-operation
            #:authoring-rule-site #:authoring-rule-page
            #:authoring-authority #:make-authoring-authority
-           #:authoring-authority-registry #:authoring-authority-challenges
+           #:authoring-authority-registry #:authoring-authority-challenges #:authoring-authority-site-root
            #:authenticate-authoring-request
            #:authenticate-authorize-fedwiki-page-edit
            #:authoring-request-refused #:authoring-request-refusal-reason #:authoring-request-refusal-detail))
