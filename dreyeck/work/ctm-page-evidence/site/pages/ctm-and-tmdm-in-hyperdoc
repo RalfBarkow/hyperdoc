@@ -1,0 +1,207 @@
+{
+  "title": "CTM and TMDM in HyperDoc",
+  "story": [
+    {
+      "type": "paragraph",
+      "id": "a072bf760d396a2b",
+      "text": "Diese Seite enthält einen Planvorschlag zur Integration der CTM-/TMDM-Arbeit in HyperDoc. Eine Wiki-Änderung oder ein Journal-Eintrag ist keine Implementierungsfreigabe."
+    },
+    {
+      "type": "markdown",
+      "id": "174e5462ccd2815f",
+      "text": "## Purpose and Work Context\n\nDie CTM-/TMDM-Arbeit in `topic-maps` soll so in HyperDoc eingebunden werden, dass TMDM-Topics, Associations, Roles und Occurrences als echte Lisp-Objekte im Inspector untersucht und in nativen HyperDoc-Topicmaps dargestellt werden. Dafür werden vorhandene Implementierungen wiederverwendet; ein zweites Topicmap-Modell entsteht nicht.\n\nDie Erkundung war rein lesend. Die einzige Ausführung war ein Wegwerf-SBCL-Prozess, der die Quelldateien per `load` lud, ohne Fasls und ohne Schreibzugriff. Kein langlebiges Image und nicht Codex' Worktree wurden berührt.\n\nHyperDoc-Bezüge (Repository `dreyeck.ch` @ `2f6e809c`):\n\n- Work Breakdown: `dreyeck/pages/work/Work Breakdown.html`\n- Planning with SHOP3: `dreyeck/pages/work/Planning with SHOP3.html`\n- Structural HyperDoc Page Authoring: Work-Topic `hyperdoc-page-authoring` in Work Breakdown, Trägerseite „Operations and Change“. Nur als Vergleich für die spätere Editierbarkeit.\n\nVorschlag, nicht ausgeführt: eine Zuordnung zu einem eigenen Work Item unter HyperDoc Dogfooding. Work Breakdown bleibt unverändert; das Verhältnis zum Work-Topic-Modell ist offen (E8)."
+    },
+    {
+      "type": "markdown",
+      "id": "13a969495029b732",
+      "text": "## Observed Source State\n\n- `/Users/rgb/workspace/topic-maps`: Branch `codex/ctm-slice-5` @ `437ad53`, sauber, **kein Remote**; Branches `codex/ctm-slice-0…5`.\n- `/Users/rgb/workspace/hyperdoc-dreyeck-ch`: Branch `dreyeck.ch` @ `2f6e809c`, sauber (Codex arbeitet parallel).\n- `/Users/rgb/workspace/hyperdoc-hauptsache`: Branch `hauptsache` @ `591f275f`, sauber.\n\nIn `dreyeck.ch` gibt es keinen einzigen Verweis auf CTM, TMDM oder `topic-maps`. Das README von `topic-maps` sagt: „HyperDoc remains a possible future client and is neither the codebase nor a dependency.“ Die Abhängigkeit darf also nur in Richtung dreyeck → topic-maps gehen.\n\nOb `topic-maps` Slice 5 abgenommen ist, ist offen (README: „Await review before continuing“). Welche geladenen Images den Code enthalten, ist unbekannt."
+    },
+    {
+      "type": "markdown",
+      "id": "df3fc1a5a6d968f0",
+      "text": "## Existing CTM/TMDM Capabilities\n\nASDF-Systeme: `topic-maps/tmdm` (reines ANSI CL), `topic-maps/ctm` und `topic-maps/cxtm` (beide nur abhängig von tmdm), `topic-maps` und `topic-maps/tests` (Korpus-Grundlage), dazu fünf Testsysteme. Packages: `topic-maps.tmdm`, `topic-maps.ctm`, `topic-maps.cxtm`, `topic-maps.test-foundation`.\n\n- **CTM-Parsing:** `deserialize-string` / `deserialize-file` (`src/ctm/reader.lisp:218,233`). Eingeschränkte Teilmenge: Identität, Default-Names, String/IRI-Occurrences, Associations mit 1–2 Rollen.\n- **Topic:** `defstruct topic` (`src/tmdm/items.lisp:8`) mit II/SI/SL-Listen, `names`, `occurrences` und internem `forward`.\n- **Name:** nur Default-Typ; typisierte Names → `ctm-unsupported`; keine Variants.\n- **Occurrence:** nur `xsd:string` und `xsd:anyURI`.\n- **Association / Role:** Das Modell erlaubt n Rollen, der Reader lehnt mehr als 2 ab (`ctm-unsupported :association-arity`). Associations haben keine Item Identifiers.\n- **Roles played:** berechnet, nicht gespeichert.\n- **Identifikatoren und Merging:** ausführbar, nur innerhalb einer Map; II und SI matchen gegenseitig, SL nur SL.\n- **Scope:** nicht implementiert; `@` → `ctm-unsupported`. Reifier `~`, `%prefix`, Templates ebenfalls unsupported.\n- **CXTM:** `canonicalize`, `canonicalize-octets`, `write-cxtm`.\n- **Serialisierung / Roundtrip:** kein CTM-Writer, kein Roundtrip.\n- **Quellpositionen:** nur in Fehlern; keine Positionen an TMDM-Objekten. CTM-Source-Occurrences existieren nicht.\n\n**Selbst beobachtet** (SBCL 2.5.4, in-memory): `ctm/in/association-binary.ctm` liefert 5 Topics (nur Item Identifier), 1 Association und 2 Roles; die CXTM-Bytes sind gleich der Baseline (833 = 833); dreistellige Associations, `@`, `%prefix` und `~` werden als `ctm-unsupported` abgelehnt.\n\n**Übernommen, nicht selbst ausgeführt:** laut `docs/slice-5-validation.md` 28/28 CXTM-PASS, 244 Korpus-Verträge NOT-RUN, 123/646/657/445/1.101 semantische Checks."
+    },
+    {
+      "type": "markdown",
+      "id": "cbe8bd8384a5d4c0",
+      "text": "## HyperDoc Integration Boundary\n\n**dreyeck.ch:** `dreyeck/topicmap` hat `topicmap-topic` (String-`id`, `type`, `label`, `object`, `temporal-scope`) und `topicmap-association` (`from`/`to`, Property-Liste), dazu Projection und Workspace mit Point/History. Autoritativ sind bei Work die authored `<a data-topic>`-Deklarationen, bei Collaborative Planning die aufbewahrten Dokumente; das `object`-Slot zeigt auf das autoritative Lisp-Objekt. Die Naht `tm:topicmap-projection-of` lässt jedes Objekt im Inspector als native Topicmap erscheinen.\n\n**hauptsache:** `parsed-topic` aus Überschriften, ID `slug(title)-index` (namens- und positionsabhängig). Das DM6-Modell ignoriert `relations-of` vollständig; das DM6-JS hat keinen Rückweg zum Lisp-Objekt. Authored relations sind binäre Subjekt-Prädikat-Objekt-Tripel. Nicht als Basis wiederverwenden, keine Zusammenführung der Branches.\n\n**Drei Dinge bleiben getrennt:**\n\n1. CTM-Source-Occurrence: eine Textstelle im CTM-Dokument; existiert heute nicht als Objekt.\n2. TMDM-Topic-Item: Stellvertreter eines Subjects; Subject Identity nur in SI/SL. Im Beispiel haben alle Topics nur Item Identifier.\n3. Projiziertes HyperDoc-Topic: Präsentationsträger mit abgeleitetem ID-Schlüssel.\n\n**Bleibt erhalten:** jedes TMDM-Item als EQ-gleiches Lisp-Objekt; alle II/SI/SL am Objekt; n Rollen als n Kanten von einem Association-Knoten; Map-Inhalt prozessübergreifend über den CXTM-Digest; Provenienz auf Map-Ebene.\n\n**Geht verloren oder wird reduziert:** Richtung der Rollenkanten (nur Darstellung); Topic-ID als Projektionsschlüssel, nicht als TMDM-Identität; Rollentyp nur als Label und Property; Names/Occurrences nur am Topic-Objekt; Merging-Historie; Quellspannen (zwei Statements in `association-binary-duplicate.ctm` ergeben eine Association); Scope (im Quellmodell immer leer).\n\nEine n-stellige Association als gerichtete Kanten gilt nicht als semantisch gleichwertig."
+    },
+    {
+      "type": "markdown",
+      "id": "b20cd199e05705f4",
+      "text": "## Proposed Read-Only Slice\n\n**Behauptung:** Eine echte CTM-Quelle wird mit dem vorhandenen `topic-maps`-Reader zu TMDM-Objekten, die im Inspector untersuchbar sind und nativ projiziert werden, ohne Rollen binär zusammenzufassen. Vom projizierten Topic führt der Weg zurück zum EQ-gleichen TMDM-Objekt; Provenienz und Verluste sind sichtbar.\n\n- Neues, optionales System `dreyeck/topic-maps-reading`, nicht im Catalog; Abhängigkeiten `topic-maps/ctm`, `topic-maps/cxtm`, `dreyeck/topicmap`, `dreyeck/inspector/topicmap`, `html-inspector-views`, `ironclad`.\n- `topic-maps` bleibt unverändert und wird nicht kopiert; keine Änderung an `flake.nix`/`flake.lock` (E1).\n- `dreyeck/src/tmdm-topicmap.lisp`: `ctm-source-reading`, `read-ctm-source`, `tmdm-topic-key`, `tmdm-association-key`, eine Methode `tm:topicmap-projection-of` (ein Knoten pro Topic und pro Association, eine Rollenkante pro Rolle), Views über die öffentlichen TMDM-Reader, eine Provenienz- und Verlust-View.\n- Tests `dreyeck/tests/tmdm-topicmap.lisp`; eine Lese-Seite in einem eigenen kleinen HyperBook; optional ein frischer Browser-Test.\n- Beispiele aus dem vendorten Korpus: `association-binary.ctm` (Hauptfall), `association-type-sid.ctm` (SI-Fall), `association-binary-duplicate.ctm` (Grenzfall).\n\nNicht Teil des Slices: CTM-Writer, Änderungen an CTM-Dateien oder `topic-maps`, Authoring-API, HTML-Editor, Synchronisierung, Scope, Merging über Dokumente hinweg, Catalog-/Server-Integration.\n\n**Spätere Editierbarkeit (nur Bezug, kein Design):** Eine bearbeitbare Topicmap ist keine bearbeitbare CTM-Quelle. Es fehlt das Glied der CTM-Source-Occurrences; das gehört in den `topic-maps`-Reader, HyperDoc darf CTM nicht ein zweites Mal parsen. Die Zuordnung Item → Occurrence ist n:1."
+    },
+    {
+      "type": "markdown",
+      "id": "b9daf750470a2243",
+      "text": "## Acceptance Tests\n\nJeder Negativtest bekommt eine positive Kontrolle; wo möglich wird der Guard entfernt und gezeigt, dass der Test dann fehlschlägt.\n\n1. **Quelle:** falscher Digest abgelehnt, Original akzeptiert; CTM- und Baseline-Bytes unverändert.\n2. **TMDM-Treue:** 5 Topics, 1 Association, 2 Roles; Roles played berechnet; `canonicalize-octets` byte-gleich mit der Baseline (833 Bytes).\n3. **Projektion:** 6 Knoten und 2 Rollenkanten (+ ggf. Typkante); Objekte EQ-gleich; keine Kante topic1 ↔ topic2, mit Kontrolle.\n4. **n-Arität:** dreistellige Association über die TMDM-API → 1 Knoten, 3 Rollenkanten; der Reader lehnt `t(r1: a, r2: b, r3: c)` ab.\n5. **Identität:** eindeutige Schlüssel; zweiter frischer Prozess mit gleicher Schlüsselliste und gleichem CXTM-Digest.\n6. **Duplikat:** zwei Quell-Statements → ein Knoten; „source statements: not recorded by reader“.\n7. **Navigation:** Reading → Topicmap → Association → Role → Player → zurück; Point/History; vorhandene Projektionen unverändert.\n8. **Verlustregister:** in View und Seite sichtbar, per Test geprüft.\n9. **Gates:** frische Prozesse mit `:force`; `dreyeck/work/reading/tests` und `topicmap-view-smoke` bleiben grün."
+    },
+    {
+      "type": "markdown",
+      "id": "b1197f79d80d5486",
+      "text": "## Open Decisions\n\nJede offene Frage aus Abschnitt E des Berichts steht unten als eigenes, einzeln bearbeitbares Item. „Decision: open“ bleibt stehen, bis eine menschliche Entscheidung festgehalten wird; die Abnahme von `topic-maps` Slice 5 und die Bereitstellung des Repositories sind ausdrücklich nicht entschieden."
+    },
+    {
+      "type": "paragraph",
+      "id": "3cc03312dcc9cfe1",
+      "text": "E1 — Bereitstellung von topic-maps: Das Repo hat kein Remote. Varianten: Env-Variable mit Revisionsprüfung (im Bericht empfohlen), Flake-Input git+file:// (maschinengebunden, ändert flake.lock), oder erst einen Remote veröffentlichen. Welche Revision wird gepinnt, ist topic-maps Slice 5 abgenommen? Decision: open."
+    },
+    {
+      "type": "paragraph",
+      "id": "fa6304a65d40144c",
+      "text": "E2 — Ablageort: ein eigenes optionales System und HyperBook (im Bericht empfohlen) oder dreyeck/work/reading? Wie wird das Anhängen an dreyeck.asd mit Codex' laufender HTML-Arbeit abgestimmt? Decision: open."
+    },
+    {
+      "type": "paragraph",
+      "id": "ed37e9bac2fcd548",
+      "text": "E3 — Darstellung: Association-Knoten (im Bericht empfohlen). Typkante zeichnen oder nur Label? Rollentyp-Topics als isolierte Knoten zeigen oder ausblenden? Decision: open."
+    },
+    {
+      "type": "paragraph",
+      "id": "3e33a1c9abf716a3",
+      "text": "E4 — Schlüsselpolitik: Ist der Präfix plus kleinstem Locator akzeptabel, auch wenn sich der Schlüssel nach einem Merge ändert? Decision: open."
+    },
+    {
+      "type": "paragraph",
+      "id": "a2b0bc04d092f606",
+      "text": "E5 — Inspector-Ansichten: Adapter-Views über die öffentlichen Reader (im Bericht empfohlen) statt der rohen Slots-View; die rohe View bleibt sichtbar. Decision: open."
+    },
+    {
+      "type": "paragraph",
+      "id": "2e01ec6784ac7caa",
+      "text": "E6 — Source-Occurrences im topic-maps-Reader: Wird das dort angefragt (dortige Zuständigkeit), bevor über Editierbarkeit gesprochen wird? Decision: open."
+    },
+    {
+      "type": "paragraph",
+      "id": "3cb526724ccc5b0b",
+      "text": "E7 — Document-IRI-Politik für spätere echte HyperDoc-CTM-Dokumente; die Korpus-IRIs sind synthetisch (example.invalid). Decision: open."
+    },
+    {
+      "type": "paragraph",
+      "id": "f30eee9f3f59d995",
+      "text": "E8 — Verhältnis zum Work-Topic-Modell: TMDM-Topic, Work-Topic-Deklaration und Trägerseite werden im Slice nicht vereinheitlicht. Bestätigen? Decision: open."
+    },
+    {
+      "type": "paragraph",
+      "id": "ef6a85756b9e600e",
+      "text": "E9 — Layout: abgeleitete Rasterpositionen, keine authored Koordinaten. Ist TALA optional? Decision: open."
+    },
+    {
+      "type": "markdown",
+      "id": "8bd7701e01844868",
+      "text": "## Provenance and Original Report\n\nOriginalbericht: [[CTM and TMDM in HyperDoc: Original Report]], SHA-256 `68401649423dc6837b3a25bf0b0f6fb6e4fe57ef3ddf92c721fe106b45d7e936`, 21.211 Bytes, 237 Zeilen.\n\n**Selbst ausgeführt:** Lesen der Quellen in den drei Checkouts; In-Memory-SBCL-Lauf mit `association-binary.ctm` (CXTM 833 = 833) und Proben auf unsupported Konstrukte; Prüfung der Struct-Slots.\n\n**Übernommen, nicht selbst ausgeführt:** die Zählungen aus `docs/slice-5-validation.md`, insbesondere 28/28.\n\n**Statuskategorien:**\n\n- Claude's submitted proposal: die `create`-Aktion dieser Seite und die Originalseite.\n- Spätere Wiki-Änderungen: stehen im Journal dieser Seite.\n- Reviews: noch keine.\n- Menschliche Entscheidungen: noch keine; siehe Open Decisions.\n- Implementation Evidence: keine; der Slice ist nicht freigegeben."
+    }
+  ],
+  "journal": [
+    {
+      "type": "create",
+      "id": "1245dc71a5c89017",
+      "item": {
+        "title": "CTM and TMDM in HyperDoc",
+        "story": [
+          {
+            "type": "paragraph",
+            "id": "a072bf760d396a2b",
+            "text": "Status: proposed — not authorized for implementation. Diese Seite enthält Claudes eingereichten Planvorschlag zur Integration der CTM-/TMDM-Arbeit in HyperDoc. Eine Wiki-Änderung oder ein Journal-Eintrag ist keine Implementierungsfreigabe."
+          },
+          {
+            "type": "markdown",
+            "id": "174e5462ccd2815f",
+            "text": "## Purpose and Work Context\n\nDie CTM-/TMDM-Arbeit in `topic-maps` soll so in HyperDoc eingebunden werden, dass TMDM-Topics, Associations, Roles und Occurrences als echte Lisp-Objekte im Inspector untersucht und in nativen HyperDoc-Topicmaps dargestellt werden. Dafür werden vorhandene Implementierungen wiederverwendet; ein zweites Topicmap-Modell entsteht nicht.\n\nDie Erkundung war rein lesend. Die einzige Ausführung war ein Wegwerf-SBCL-Prozess, der die Quelldateien per `load` lud, ohne Fasls und ohne Schreibzugriff. Kein langlebiges Image und nicht Codex' Worktree wurden berührt.\n\nHyperDoc-Bezüge (Repository `dreyeck.ch` @ `2f6e809c`):\n\n- Work Breakdown: `dreyeck/pages/work/Work Breakdown.html`\n- Planning with SHOP3: `dreyeck/pages/work/Planning with SHOP3.html`\n- Structural HyperDoc Page Authoring: Work-Topic `hyperdoc-page-authoring` in Work Breakdown, Trägerseite „Operations and Change“. Nur als Vergleich für die spätere Editierbarkeit.\n\nVorschlag, nicht ausgeführt: eine Zuordnung zu einem eigenen Work Item unter HyperDoc Dogfooding. Work Breakdown bleibt unverändert; das Verhältnis zum Work-Topic-Modell ist offen (E8)."
+          },
+          {
+            "type": "markdown",
+            "id": "13a969495029b732",
+            "text": "## Observed Source State\n\n- `/Users/rgb/workspace/topic-maps`: Branch `codex/ctm-slice-5` @ `437ad53`, sauber, **kein Remote**; Branches `codex/ctm-slice-0…5`.\n- `/Users/rgb/workspace/hyperdoc-dreyeck-ch`: Branch `dreyeck.ch` @ `2f6e809c`, sauber (Codex arbeitet parallel).\n- `/Users/rgb/workspace/hyperdoc-hauptsache`: Branch `hauptsache` @ `591f275f`, sauber.\n\nIn `dreyeck.ch` gibt es keinen einzigen Verweis auf CTM, TMDM oder `topic-maps`. Das README von `topic-maps` sagt: „HyperDoc remains a possible future client and is neither the codebase nor a dependency.“ Die Abhängigkeit darf also nur in Richtung dreyeck → topic-maps gehen.\n\nOb `topic-maps` Slice 5 abgenommen ist, ist offen (README: „Await review before continuing“). Welche geladenen Images den Code enthalten, ist unbekannt."
+          },
+          {
+            "type": "markdown",
+            "id": "df3fc1a5a6d968f0",
+            "text": "## Existing CTM/TMDM Capabilities\n\nASDF-Systeme: `topic-maps/tmdm` (reines ANSI CL), `topic-maps/ctm` und `topic-maps/cxtm` (beide nur abhängig von tmdm), `topic-maps` und `topic-maps/tests` (Korpus-Grundlage), dazu fünf Testsysteme. Packages: `topic-maps.tmdm`, `topic-maps.ctm`, `topic-maps.cxtm`, `topic-maps.test-foundation`.\n\n- **CTM-Parsing:** `deserialize-string` / `deserialize-file` (`src/ctm/reader.lisp:218,233`). Eingeschränkte Teilmenge: Identität, Default-Names, String/IRI-Occurrences, Associations mit 1–2 Rollen.\n- **Topic:** `defstruct topic` (`src/tmdm/items.lisp:8`) mit II/SI/SL-Listen, `names`, `occurrences` und internem `forward`.\n- **Name:** nur Default-Typ; typisierte Names → `ctm-unsupported`; keine Variants.\n- **Occurrence:** nur `xsd:string` und `xsd:anyURI`.\n- **Association / Role:** Das Modell erlaubt n Rollen, der Reader lehnt mehr als 2 ab (`ctm-unsupported :association-arity`). Associations haben keine Item Identifiers.\n- **Roles played:** berechnet, nicht gespeichert.\n- **Identifikatoren und Merging:** ausführbar, nur innerhalb einer Map; II und SI matchen gegenseitig, SL nur SL.\n- **Scope:** nicht implementiert; `@` → `ctm-unsupported`. Reifier `~`, `%prefix`, Templates ebenfalls unsupported.\n- **CXTM:** `canonicalize`, `canonicalize-octets`, `write-cxtm`.\n- **Serialisierung / Roundtrip:** kein CTM-Writer, kein Roundtrip.\n- **Quellpositionen:** nur in Fehlern; keine Positionen an TMDM-Objekten. CTM-Source-Occurrences existieren nicht.\n\n**Selbst beobachtet** (SBCL 2.5.4, in-memory): `ctm/in/association-binary.ctm` liefert 5 Topics (nur Item Identifier), 1 Association und 2 Roles; die CXTM-Bytes sind gleich der Baseline (833 = 833); dreistellige Associations, `@`, `%prefix` und `~` werden als `ctm-unsupported` abgelehnt.\n\n**Übernommen, nicht selbst ausgeführt:** laut `docs/slice-5-validation.md` 28/28 CXTM-PASS, 244 Korpus-Verträge NOT-RUN, 123/646/657/445/1.101 semantische Checks."
+          },
+          {
+            "type": "markdown",
+            "id": "cbe8bd8384a5d4c0",
+            "text": "## HyperDoc Integration Boundary\n\n**dreyeck.ch:** `dreyeck/topicmap` hat `topicmap-topic` (String-`id`, `type`, `label`, `object`, `temporal-scope`) und `topicmap-association` (`from`/`to`, Property-Liste), dazu Projection und Workspace mit Point/History. Autoritativ sind bei Work die authored `<a data-topic>`-Deklarationen, bei Collaborative Planning die aufbewahrten Dokumente; das `object`-Slot zeigt auf das autoritative Lisp-Objekt. Die Naht `tm:topicmap-projection-of` lässt jedes Objekt im Inspector als native Topicmap erscheinen.\n\n**hauptsache:** `parsed-topic` aus Überschriften, ID `slug(title)-index` (namens- und positionsabhängig). Das DM6-Modell ignoriert `relations-of` vollständig; das DM6-JS hat keinen Rückweg zum Lisp-Objekt. Authored relations sind binäre Subjekt-Prädikat-Objekt-Tripel. Nicht als Basis wiederverwenden, keine Zusammenführung der Branches.\n\n**Drei Dinge bleiben getrennt:**\n\n1. CTM-Source-Occurrence: eine Textstelle im CTM-Dokument; existiert heute nicht als Objekt.\n2. TMDM-Topic-Item: Stellvertreter eines Subjects; Subject Identity nur in SI/SL. Im Beispiel haben alle Topics nur Item Identifier.\n3. Projiziertes HyperDoc-Topic: Präsentationsträger mit abgeleitetem ID-Schlüssel.\n\n**Bleibt erhalten:** jedes TMDM-Item als EQ-gleiches Lisp-Objekt; alle II/SI/SL am Objekt; n Rollen als n Kanten von einem Association-Knoten; Map-Inhalt prozessübergreifend über den CXTM-Digest; Provenienz auf Map-Ebene.\n\n**Geht verloren oder wird reduziert:** Richtung der Rollenkanten (nur Darstellung); Topic-ID als Projektionsschlüssel, nicht als TMDM-Identität; Rollentyp nur als Label und Property; Names/Occurrences nur am Topic-Objekt; Merging-Historie; Quellspannen (zwei Statements in `association-binary-duplicate.ctm` ergeben eine Association); Scope (im Quellmodell immer leer).\n\nEine n-stellige Association als gerichtete Kanten gilt nicht als semantisch gleichwertig."
+          },
+          {
+            "type": "markdown",
+            "id": "b20cd199e05705f4",
+            "text": "## Proposed Read-Only Slice\n\n**Behauptung:** Eine echte CTM-Quelle wird mit dem vorhandenen `topic-maps`-Reader zu TMDM-Objekten, die im Inspector untersuchbar sind und nativ projiziert werden, ohne Rollen binär zusammenzufassen. Vom projizierten Topic führt der Weg zurück zum EQ-gleichen TMDM-Objekt; Provenienz und Verluste sind sichtbar.\n\n- Neues, optionales System `dreyeck/topic-maps-reading`, nicht im Catalog; Abhängigkeiten `topic-maps/ctm`, `topic-maps/cxtm`, `dreyeck/topicmap`, `dreyeck/inspector/topicmap`, `html-inspector-views`, `ironclad`.\n- `topic-maps` bleibt unverändert und wird nicht kopiert; keine Änderung an `flake.nix`/`flake.lock` (E1).\n- `dreyeck/src/tmdm-topicmap.lisp`: `ctm-source-reading`, `read-ctm-source`, `tmdm-topic-key`, `tmdm-association-key`, eine Methode `tm:topicmap-projection-of` (ein Knoten pro Topic und pro Association, eine Rollenkante pro Rolle), Views über die öffentlichen TMDM-Reader, eine Provenienz- und Verlust-View.\n- Tests `dreyeck/tests/tmdm-topicmap.lisp`; eine Lese-Seite in einem eigenen kleinen HyperBook; optional ein frischer Browser-Test.\n- Beispiele aus dem vendorten Korpus: `association-binary.ctm` (Hauptfall), `association-type-sid.ctm` (SI-Fall), `association-binary-duplicate.ctm` (Grenzfall).\n\nNicht Teil des Slices: CTM-Writer, Änderungen an CTM-Dateien oder `topic-maps`, Authoring-API, HTML-Editor, Synchronisierung, Scope, Merging über Dokumente hinweg, Catalog-/Server-Integration.\n\n**Spätere Editierbarkeit (nur Bezug, kein Design):** Eine bearbeitbare Topicmap ist keine bearbeitbare CTM-Quelle. Es fehlt das Glied der CTM-Source-Occurrences; das gehört in den `topic-maps`-Reader, HyperDoc darf CTM nicht ein zweites Mal parsen. Die Zuordnung Item → Occurrence ist n:1."
+          },
+          {
+            "type": "markdown",
+            "id": "b9daf750470a2243",
+            "text": "## Acceptance Tests\n\nJeder Negativtest bekommt eine positive Kontrolle; wo möglich wird der Guard entfernt und gezeigt, dass der Test dann fehlschlägt.\n\n1. **Quelle:** falscher Digest abgelehnt, Original akzeptiert; CTM- und Baseline-Bytes unverändert.\n2. **TMDM-Treue:** 5 Topics, 1 Association, 2 Roles; Roles played berechnet; `canonicalize-octets` byte-gleich mit der Baseline (833 Bytes).\n3. **Projektion:** 6 Knoten und 2 Rollenkanten (+ ggf. Typkante); Objekte EQ-gleich; keine Kante topic1 ↔ topic2, mit Kontrolle.\n4. **n-Arität:** dreistellige Association über die TMDM-API → 1 Knoten, 3 Rollenkanten; der Reader lehnt `t(r1: a, r2: b, r3: c)` ab.\n5. **Identität:** eindeutige Schlüssel; zweiter frischer Prozess mit gleicher Schlüsselliste und gleichem CXTM-Digest.\n6. **Duplikat:** zwei Quell-Statements → ein Knoten; „source statements: not recorded by reader“.\n7. **Navigation:** Reading → Topicmap → Association → Role → Player → zurück; Point/History; vorhandene Projektionen unverändert.\n8. **Verlustregister:** in View und Seite sichtbar, per Test geprüft.\n9. **Gates:** frische Prozesse mit `:force`; `dreyeck/work/reading/tests` und `topicmap-view-smoke` bleiben grün."
+          },
+          {
+            "type": "markdown",
+            "id": "b1197f79d80d5486",
+            "text": "## Open Decisions\n\nJede offene Frage aus Abschnitt E des Berichts steht unten als eigenes, einzeln bearbeitbares Item. „Decision: open“ bleibt stehen, bis eine menschliche Entscheidung festgehalten wird; die Abnahme von `topic-maps` Slice 5 und die Bereitstellung des Repositories sind ausdrücklich nicht entschieden."
+          },
+          {
+            "type": "paragraph",
+            "id": "3cc03312dcc9cfe1",
+            "text": "E1 — Bereitstellung von topic-maps: Das Repo hat kein Remote. Varianten: Env-Variable mit Revisionsprüfung (im Bericht empfohlen), Flake-Input git+file:// (maschinengebunden, ändert flake.lock), oder erst einen Remote veröffentlichen. Welche Revision wird gepinnt, ist topic-maps Slice 5 abgenommen? Decision: open."
+          },
+          {
+            "type": "paragraph",
+            "id": "fa6304a65d40144c",
+            "text": "E2 — Ablageort: ein eigenes optionales System und HyperBook (im Bericht empfohlen) oder dreyeck/work/reading? Wie wird das Anhängen an dreyeck.asd mit Codex' laufender HTML-Arbeit abgestimmt? Decision: open."
+          },
+          {
+            "type": "paragraph",
+            "id": "ed37e9bac2fcd548",
+            "text": "E3 — Darstellung: Association-Knoten (im Bericht empfohlen). Typkante zeichnen oder nur Label? Rollentyp-Topics als isolierte Knoten zeigen oder ausblenden? Decision: open."
+          },
+          {
+            "type": "paragraph",
+            "id": "3e33a1c9abf716a3",
+            "text": "E4 — Schlüsselpolitik: Ist der Präfix plus kleinstem Locator akzeptabel, auch wenn sich der Schlüssel nach einem Merge ändert? Decision: open."
+          },
+          {
+            "type": "paragraph",
+            "id": "a2b0bc04d092f606",
+            "text": "E5 — Inspector-Ansichten: Adapter-Views über die öffentlichen Reader (im Bericht empfohlen) statt der rohen Slots-View; die rohe View bleibt sichtbar. Decision: open."
+          },
+          {
+            "type": "paragraph",
+            "id": "2e01ec6784ac7caa",
+            "text": "E6 — Source-Occurrences im topic-maps-Reader: Wird das dort angefragt (dortige Zuständigkeit), bevor über Editierbarkeit gesprochen wird? Decision: open."
+          },
+          {
+            "type": "paragraph",
+            "id": "3cb526724ccc5b0b",
+            "text": "E7 — Document-IRI-Politik für spätere echte HyperDoc-CTM-Dokumente; die Korpus-IRIs sind synthetisch (example.invalid). Decision: open."
+          },
+          {
+            "type": "paragraph",
+            "id": "f30eee9f3f59d995",
+            "text": "E8 — Verhältnis zum Work-Topic-Modell: TMDM-Topic, Work-Topic-Deklaration und Trägerseite werden im Slice nicht vereinheitlicht. Bestätigen? Decision: open."
+          },
+          {
+            "type": "paragraph",
+            "id": "ef6a85756b9e600e",
+            "text": "E9 — Layout: abgeleitete Rasterpositionen, keine authored Koordinaten. Ist TALA optional? Decision: open."
+          },
+          {
+            "type": "markdown",
+            "id": "8bd7701e01844868",
+            "text": "## Provenance and Original Report\n\nOriginalbericht: [[CTM and TMDM in HyperDoc: Original Report]], SHA-256 `68401649423dc6837b3a25bf0b0f6fb6e4fe57ef3ddf92c721fe106b45d7e936`, 21.211 Bytes, 237 Zeilen.\n\n**Selbst ausgeführt:** Lesen der Quellen in den drei Checkouts; In-Memory-SBCL-Lauf mit `association-binary.ctm` (CXTM 833 = 833) und Proben auf unsupported Konstrukte; Prüfung der Struct-Slots.\n\n**Übernommen, nicht selbst ausgeführt:** die Zählungen aus `docs/slice-5-validation.md`, insbesondere 28/28.\n\n**Statuskategorien:**\n\n- Claude's submitted proposal: die `create`-Aktion dieser Seite und die Originalseite.\n- Spätere Wiki-Änderungen: stehen im Journal dieser Seite.\n- Reviews: noch keine.\n- Menschliche Entscheidungen: noch keine; siehe Open Decisions.\n- Implementation Evidence: keine; der Slice ist nicht freigegeben."
+          }
+        ]
+      },
+      "date": 1792051762595
+    },
+    {
+      "type": "edit",
+      "id": "a072bf760d396a2b",
+      "item": {
+        "type": "paragraph",
+        "id": "a072bf760d396a2b",
+        "text": "Diese Seite enthält einen Planvorschlag zur Integration der CTM-/TMDM-Arbeit in HyperDoc. Eine Wiki-Änderung oder ein Journal-Eintrag ist keine Implementierungsfreigabe."
+      },
+      "date": 1792052301387
+    }
+  ]
+}

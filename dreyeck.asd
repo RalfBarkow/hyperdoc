@@ -1622,6 +1622,29 @@
              (declare (ignore op component))
              (uiop:symbol-call :dreyeck/fedwiki-item-edit-preview/tests :run-tests)))
 
+(defsystem "dreyeck/work/item-edit-proposal"
+  :description "Optional: Prepare edit proposal explained through the objects it makes, for Work package ctm-wp-2; no writer, no capability, nothing written"
+  :license "BSD"
+  :version "0.0.1"
+  ;; Not in the Catalog's closure, like the preview it explains: activated with
+  ;; HYPERDOC_CATALOG_SYSTEM or loaded by hand. It does not load the writer.
+  :depends-on ("dreyeck/work/reading" "dreyeck/fedwiki-item-edit-preview" "dreyeck/local-fedwiki-view"
+               "shasht" "ironclad")
+  :components ((:file "dreyeck/work/item-edit-proposal")
+               ;; The retained page as a site root the preview can read: a byte copy of
+               ;; ctm-page-evidence/ctm-and-tmdm-in-hyperdoc.json (retained in edc3b93c); the tests pin their digests as equal.
+               (:module "dreyeck/work/ctm-page-evidence/site/pages"
+                :components ((:static-file "ctm-and-tmdm-in-hyperdoc"))))
+  :in-order-to ((test-op (test-op "dreyeck/work/item-edit-proposal/tests"))))
+
+(defsystem "dreyeck/work/item-edit-proposal/tests"
+  :description "The proposal anatomy: real objects, a computed preview apart from a recorded persisted trial, nothing written"
+  :depends-on ("dreyeck/work/item-edit-proposal" "ironclad" "babel")
+  :components ((:file "dreyeck/tests/work-item-edit-proposal"))
+  :perform (test-op (op component)
+             (declare (ignore op component))
+             (uiop:symbol-call :dreyeck/work/item-edit-proposal/tests :run-tests)))
+
 (defsystem "dreyeck/authenticated-page-authoring"
   :description "Principals, principal-bound single-use challenges and authoring rules that derive the FedWiki page-authoring capability; trusted Lisp only, no HTTP"
   :license "BSD"
