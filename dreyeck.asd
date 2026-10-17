@@ -2787,6 +2787,7 @@
                       (:file "collaborative-planning-reading")
                       (:file "ctm-plan-page-authoring")
                       (:file "conversation-coordinates-reading")
+                      (:file "item-edit-view-diagnosis")
                       (:module "conversation-evidence" :components ((:static-file "coordinates.json")))
                       (:module "collaborative-planning-evidence" :components
                         ((:static-file "case.json")
@@ -2899,6 +2900,7 @@
 
 (defsystem "dreyeck/work/reading/tests" :depends-on
            ("dreyeck/catalog"
+            "dreyeck/local-fedwiki-view"
             "dreyeck/work/reading"
             "clog-moldable-inspector"
             "fset"
@@ -2921,6 +2923,7 @@
             (:file "dreyeck/tests/work-collaborative-planning")
             (:file "dreyeck/tests/work-ctm-plan-page-authoring")
             (:file "dreyeck/tests/work-conversation-coordinates")
+            (:file "dreyeck/tests/work-item-edit-view-diagnosis")
             (:file "dreyeck/tests/work-shift-click")
             (:file "dreyeck/tests/work-trails-rendered-browser-check")
             (:file "dreyeck/tests/work-deployment-inspection"))
@@ -2940,6 +2943,7 @@
                     (uiop:symbol-call :dreyeck/work/collaborative-planning/tests :run-tests)
                     (uiop:symbol-call :dreyeck/work/ctm-page-authoring/tests :run-tests)
                     (uiop:symbol-call :dreyeck/work/conversation-coordinates/tests :run-tests)
+                    (uiop:symbol-call :dreyeck/work/item-edit-view-diagnosis/tests :run-tests)
                     (uiop:run-program
                      (list "python3" (namestring (asdf:system-relative-pathname "dreyeck" "tests/test_conversation_sources.py")))
                      :output *standard-output* :error-output *error-output*)
