@@ -142,3 +142,9 @@ PYTHONDONTWRITEBYTECODE=1 TOPIC_MAPS_REPORT=/tmp/topic-maps-12b.json ./scripts/t
 Machine-readable validation and a redacted transcript accompany this document.
 Raw local compiler/server logs are kept outside the repository. Their paths and
 runtime object IDs are not published as subject addresses.
+
+## Later change: accepted Topic Maps checkouts
+
+The pin is no longer an exact match. The reading accepts the pinned commit or a clean descendant whose reading inputs (source, baseline,
+stored Slice 12A evidence, interpretation text) are unchanged blobs; see `docs/ctm-page-authoring-review.md`. The stored evidence stays
+that of Slice 12A and is still shown as not executed here.

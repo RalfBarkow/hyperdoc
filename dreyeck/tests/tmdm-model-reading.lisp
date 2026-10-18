@@ -59,8 +59,11 @@
       (check (list id :output-reference) (member (r:run-actual run) (refs run "Execution") :test #'eq))
       (check (list id :source-bytes) (string= (git:git-file-contents (r:run-source run))
                                            (uiop:read-file-string (tf:test-case-source-pathname (r:run-case run)) :external-format :utf-8)))
-      (check (list id :source-commit) (string= r::+topic-maps-commit+
-                                            (git:git-commit-hash-of (git:git-file-commit-of (r:run-source run)))))
+      ;; The source is read from the loaded checkout: the pinned commit, or a clean descendant whose pinned inputs are unchanged.
+      (check (list id :source-commit) (let ((hash (git:git-commit-hash-of (git:git-file-commit-of (r:run-source run)))))
+                                        (and (r::%descendant-of-pin-p (asdf:system-source-directory "topic-maps") hash)
+                                             (equal hash (git:git-commit-hash-of (getf (r:run-context run) :topic-maps-commit)))
+                                             (equal r::+topic-maps-commit+ (getf (r:run-context run) :topic-maps-pinned-commit)))))
       (check (list id :case-protocol) (and (eq (r:run-case run) (ev:evaluation-specification-of run))
                                           (eq map (ev:evaluation-result-of run))))
       (check (list id :time-context) (and (ev:evaluation-started-at-of run) (ev:evaluation-finished-at-of run)
@@ -78,6 +81,22 @@
       (check (list id :dated-evidence-not-current-claim) (and (not (r:model-state-current-p run))
                                                             (search "changed since" (text run "Execution"))
                                                             (eq :pass (ev:evaluation-status-of run)))))))
+
+(defun pinned-input-checks ()
+  ;; A checkout newer than the pin is accepted only where the reading's inputs are the pinned blobs. Control: a path that
+  ;; did change since the pin is refused, and one that did not change passes.
+  (let* ((root (asdf:system-source-directory "topic-maps"))
+         (head (git:trim-git-output (git:git-run-string root "rev-parse" "HEAD")))
+         (changed (remove "" (uiop:split-string (git:git-run-string root "diff" "--name-only" r::+topic-maps-commit+ head)
+                                               :separator '(#\Newline))
+                          :test #'string=))
+         (commit (git:make-git-commit :repository (make-instance 'git:git-repository-checkout :root root :root-source :asdf-system-source)
+                                      :commit-ish "HEAD")))
+    (check :unchanged-input-passes (null (r::%check-pinned-inputs commit (list "reports/slice-12a/execution.json"))))
+    (when changed
+      (check :changed-input-refused
+             (handler-case (progn (r::%check-pinned-inputs commit (list (first changed))) nil)
+               (error (condition) (search "no longer the pinned ones" (princ-to-string condition))))))))
 
 (defun generic-and-merge-checks ()
   (let* ((map (m:make-topic-map)) (a (topic map "a")) (b (topic map "b"))
@@ -152,7 +171,7 @@
 
 (defun run-tests ()
   (let ((*checks* nil) (before (snapshot-files)))
-    (example-checks) (generic-and-merge-checks) (work-checks)
+    (example-checks) (pinned-input-checks) (generic-and-merge-checks) (work-checks)
     (check :work-sources-unchanged (equalp before (snapshot-files)))
     (check :no-writer-loaded (not (find-package "DREYECK/FEDWIKI-PAGE-AUTHORING")))
     ;; The diagnosis of the missing Edit view is part of DREYECK/WORK/READING since the integration with the

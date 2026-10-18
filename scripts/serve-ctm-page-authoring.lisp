@@ -1,7 +1,8 @@
 ;;; A fresh, loopback-only review Catalog with the Item edit path: Edit proposal, Preview, Action context,
 ;;; Execution (no request is attached, so nothing can be written) and the TMDM readings.
 ;;; No existing Lisp image is contacted. Environment:
-;;;   TOPIC_MAPS_ROOT           the topic-maps checkout (required)
+;;;   TOPIC_MAPS_ROOT           a CLEAN topic-maps checkout (required): the commit 788899ae or a descendant whose reading inputs are
+;;;                             unchanged since (tested with 963f2a0). Not a working repository that is being developed.
 ;;;   HYPERDOC_FEDWIKI_SITE_ROOT the FedWiki site directory to read, e.g. ~/.wiki/localhost/ (required)
 ;;;   HYPERDOC_CTM_PORT         default 18773
 (load (merge-pathnames "tmdm-model-bootstrap.lisp" *load-truename*))

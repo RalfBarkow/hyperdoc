@@ -44,13 +44,29 @@ Its time-bound outcome and output are retained even if the live model later chan
   (with-open-file (in path :element-type '(unsigned-byte 8))
     (let ((bytes (make-array (file-length in) :element-type '(unsigned-byte 8))))
       (unless (= (length bytes) (read-sequence bytes in)) (error "Source changed while reading.")) bytes)))
+(defun %descendant-of-pin-p (root hash)
+  "Whether HASH is the pinned commit or a commit that has it as an ancestor."
+  (or (string= +topic-maps-commit+ hash)
+      (handler-case (progn (git:git-run-string root "merge-base" "--is-ancestor" +topic-maps-commit+ hash) t)
+        (error () nil))))
+(defun %blob-at (root revision path)
+  (git:trim-git-output (git:git-run-string root "rev-parse" (format nil "~A:~A" revision path))))
+(defun %check-pinned-inputs (commit paths)
+  "The reading's inputs, read at COMMIT, are the blobs of the pinned commit: a newer checkout is accepted only if nothing
+the reading starts from has changed since. What the newer code then does with them is what the run observes."
+  (let ((root (asdf:system-source-directory "topic-maps")) (hash (git:git-commit-hash-of commit)))
+    (dolist (path paths)
+      (unless (string= (%blob-at root +topic-maps-commit+ path) (%blob-at root hash path))
+        (error "~A differs between Topic Maps commit ~A and the checkout at ~A; the reading's inputs are no longer the pinned ones."
+               path +topic-maps-commit+ hash)))))
 (defun checked-repository ()
-  "Refuse an unpinned/dirty source checkout before assigning any execution outcome."
+  "Refuse an unpinned/dirty source checkout before assigning any execution outcome. The checkout is the pinned commit
+or a clean descendant of it; for a descendant the inputs of each reading are checked against the pinned blobs."
   (let* ((root (asdf:system-source-directory "topic-maps"))
          (repo (make-instance 'git:git-repository-checkout :root root :root-source :asdf-system-source))
          (commit (git:make-git-commit :repository repo :commit-ish "HEAD")))
-    (unless (string= +topic-maps-commit+ (git:git-commit-hash-of commit))
-      (error "The CTM reading requires Topic Maps commit ~A." +topic-maps-commit+))
+    (unless (%descendant-of-pin-p root (git:git-commit-hash-of commit))
+      (error "The CTM reading requires Topic Maps commit ~A or a clean descendant of it." +topic-maps-commit+))
     (unless (zerop (length (git:git-run-string root "status" "--porcelain")))
       (error "The pinned Topic Maps checkout has local changes."))
     (dolist (system '("topic-maps/ctm" "topic-maps/tmdm" "topic-maps/cxtm"))
@@ -70,7 +86,7 @@ Its time-bound outcome and output are retained even if the live model later chan
           (loop for path in '("dreyeck/src/tmdm-model-navigation.lisp" "dreyeck/work/tmdm-model-reading.lisp")
                 collect (cons path (ironclad:byte-array-to-hex-string
                                    (ironclad:digest-file :sha256 (merge-pathnames path root)))))
-          :topic-maps-commit commit
+          :topic-maps-commit commit :topic-maps-pinned-commit +topic-maps-commit+
           :loaded-definition-to-revision :inferred-from-matching-asdf-checkout
           :fresh-process :not-established-by-library
           :loaded-functions (list #'ctm:deserialize-string #'cx:canonicalize-octets #'m:add-name)
@@ -92,6 +108,8 @@ No source span is inferred, and normative interpretation is not a comparison out
            (text (git:git-file-contents source))
            (expected (git:git-file-contents baseline))
            (expected-bytes (binary-file (tf:test-case-expected-baseline case))))
+      (%check-pinned-inputs commit (list (concatenate 'string "vendor/cxtm/" id) (concatenate 'string "vendor/cxtm/" relative)
+                                         "reports/slice-12a/execution.json" "docs/reading-typed-topic-names.md"))
       (unless (and (string= text (uiop:read-file-string (tf:test-case-source-pathname case) :external-format :utf-8))
                    (equalp expected-bytes (babel:string-to-octets expected :encoding :utf-8)))
         (error "Pinned Git blobs and corpus files disagree; no comparison was executed."))
