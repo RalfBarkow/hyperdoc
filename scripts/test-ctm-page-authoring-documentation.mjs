@@ -94,6 +94,25 @@ try{
   assert.equal(tabs.includes('Execution'),!servedSized,tabs.join('|'))
   assert.equal(sha(pageFile),before)}
  await editPath(carrier+1);steps.push('E3 link → Edit → Prepare edit proposal → Preview')
+ if(!servedSized){
+  // On to the completion, and to its tab CTM, as the documentation says: Execution → Complete the Action with a date.
+  const preview=carrier+3
+  await panes().nth(preview).getByRole('button',{name:'Execution',exact:true}).first().click()
+  await panes().nth(preview).getByRole('button',{name:'Complete the Action with a date',exact:true}).click()
+  const completion=preview+1
+  await panes().nth(completion).getByRole('heading',{name:'The Action that would be authorized',exact:true}).waitFor()
+  const title=(await panes().nth(completion).locator('.inspector-title').first().innerText()).replace(/\s+/g,' ')
+  assert(title.includes('item-edit-completion')&&title.includes('Completed Action'),title)   // the completion pane, not the completed Action
+  const tabNames=(await panes().nth(completion).getByRole('button').allInnerTexts()).filter(Boolean)
+  for(const tab of ['Completed Action','CTM','Slots','Print','Operations','Playground'])assert(tabNames.includes(tab),tab+' in '+tabNames.join('|'))
+  await panes().nth(completion).getByRole('button',{name:'CTM',exact:true}).first().click()
+  await panes().nth(completion).getByRole('heading',{name:`CTM of the completion of ${e3}`,exact:true}).waitFor()
+  assert((await panes().nth(completion).innerText()).includes('completed-from(completed: the-completed-action, original: the-proposed-action) @derived'))
+  await panes().nth(completion).getByText('the TMDM Topic Map',{exact:true}).first().click()
+  await panes().nth(completion+1).locator('.inspector-title').filter({hasText:'TOPIC-MAP'}).first().waitFor()
+  assert.equal(sha(pageFile),before)
+  steps.push('… → Execution → Complete the Action with a date → the item-edit-completion pane (tabs '+tabNames.join(', ')+') → CTM → the TMDM Topic Map')
+ }
  await panes().nth(carrier).getByText('ctm-and-tmdm-in-hyperdoc',{exact:true}).first().click()
  await panes().nth(carrier+1).locator('.inspector-title').filter({hasText:'CTM and TMDM in HyperDoc'}).first().waitFor();steps.push('the linked FedWiki page → its local-fedwiki-page')
  // The same Item by the other way: Page source → E3. Each reading observes the file anew, so the two are equal in id, position,
@@ -116,7 +135,7 @@ try{
   steps.push('Item Edit Path in HyperDoc')
   const docIndex=await panes().count()-1   // a captured index: last() would follow the newest pane
   // A link of the documentation pane opens its object in the pane to the right; a later link replaces that pane.
-  const open=async(label,title)=>{await panes().nth(docIndex).getByText(label,{exact:true}).first().click()
+  const open=async(label,title)=>{await panes().nth(docIndex).locator('.inspector-inspect').filter({hasText:new RegExp('^'+label.replace(/[.*+?^${}()|[\]\\/]/g,'\\$&')+'$')}).first().click()   // the link, not a code word of the same text
    await panes().nth(docIndex+1).locator('.inspector-title').filter({hasText:title}).first().waitFor()}
   await open('item-edit-preview','ITEM-EDIT-PREVIEW');steps.push('item-edit-preview → the class')
   await open('execute-completed-edit','EXECUTE-COMPLETED-EDIT')

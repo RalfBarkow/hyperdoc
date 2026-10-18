@@ -54,3 +54,12 @@ recompile (`(asdf:load-system "dreyeck/work/tmdm-reading" :force t)`), because t
 
 The completion, preview and proposal have a `CTM` view (system `dreyeck/item-edit-ctm`, part of `dreyeck/ctm-page-authoring/local`): the Item edit written as CTM, read back with the
 topic-maps reader, and navigable as TMDM objects, with the Lisp objects each Topic stands for. See the Work page *Item Edit Path in HyperDoc*.
+
+### Click path to the `CTM` tab
+
+Start page → *Working on HyperDoc* → *Text pages* → *Work Breakdown* → *Author the CTM Plan Page through HyperDoc* → *E3* → tab `Edit` → button *Prepare edit proposal* →
+change the proposed text (an unchanged text is answered as "no change") → button *Preview* → tab `Execution` → button *Complete the Action with a date*. The new pane is the
+`item-edit-completion` (its title shows the class and the view name `Completed Action`); its tabs are `Completed Action`, `CTM`, `Slots`, `Print`, `Operations`, `Playground`.
+Click the tab `CTM`; the link *the TMDM Topic Map* opens the Topic Map. The link *this one* inside `Completed Action` opens the completed Action, a different object without a `CTM` view.
+A Catalog started before `dreyeck/item-edit-ctm` existed (or without `dreyeck/ctm-page-authoring/local`) shows no `CTM` tab: restart it. `scripts/test-ctm-page-authoring-documentation.mjs`
+follows exactly this path.
