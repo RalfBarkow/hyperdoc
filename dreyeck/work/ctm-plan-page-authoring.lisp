@@ -5,7 +5,8 @@
                     (#:tm #:dreyeck/topicmap)
                     (#:v #:html-inspector-views))
   (:export #:read-ctm-authoring #:validate-ctm-authoring #:ctm-authoring-structure-error
-           #:ctm-authoring-plan #:ctm-wbs #:ctm-authoring-workspace #:ctm-authoring-projection))
+           #:ctm-authoring-plan #:ctm-wbs #:ctm-authoring-workspace #:ctm-authoring-projection
+           #:optional-object))
 (in-package #:dreyeck/work/ctm-page-authoring)
 (hyperdoc:see (hyperdoc:page "Authoring the CTM Plan Page" :hyperbook "dreyeck/work/reading"))
 (hyperdoc:see (hyperdoc:page "CTM Plan Page WBS Dictionary" :hyperbook "dreyeck/work/reading"))
@@ -14,6 +15,16 @@
 ;; the plan page again with the ordinary Work reader and reads the dictionary
 ;; beside it. Nothing here keeps a status, a dependency or an authorization of
 ;; its own, and nothing here writes.
+
+(defun optional-object (kind package name system)
+  "The class (KIND :CLASS) or function (KIND :FUNCTION) NAME of PACKAGE if this image has it; otherwise a string that
+says which SYSTEM provides it. The pages that document the Item edit path link objects of systems that only the
+local review Catalog loads; in a served Catalog such a link must open an explanation, not a read error."
+  (let* ((package (find-package (string-upcase package)))
+         (symbol (and package (find-symbol (string-upcase name) package)))
+         (object (and symbol (ecase kind (:class (find-class symbol nil)) (:function (and (fboundp symbol) (fdefinition symbol)))))))
+    (or object
+        (format nil "~A is not loaded in this Catalog. The system ~A provides it, and only the local review Catalog loads that system." name system))))
 
 (defparameter +plan-page+ "Authoring the CTM Plan Page")
 (defparameter +dictionary-page+ "CTM Plan Page WBS Dictionary")

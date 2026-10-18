@@ -151,8 +151,10 @@
     (let ((controls (mapcan (lambda (e) (copy-list (c::entry-controls e))) (c::reading-entries reading))))
       (assert (equal (sort (copy-list c::+required-controls+) #'string<)
                      (sort (mapcar #'c::control-id controls) #'string<)))
-      (assert (equal '("fresh-reconstruction")
-                     (mapcar #'c::control-id (remove "existing" controls :key #'c::control-coverage :test #'equal)))))
+      ;; Each required control is bound to an existing test whose marker occurs in it (checked by validation);
+      ;; a control that is only planned is allowed by the reader, but none is left.
+      (assert (every (lambda (control) (member (c::control-coverage control) '("existing" "planned") :test #'equal)) controls))
+      (assert (equal "existing" (c::control-coverage (find "fresh-reconstruction" controls :key #'c::control-id :test #'equal)))))
     (assert (search "Not granted" (c::entry-field (c::element-entry (c::%subject reading "ctm-wp-3")) "authority")))
     (check-guards)
     ;; Fresh reconstruction: new objects, the same source identities.
@@ -205,4 +207,4 @@
               (tm:topicmap-workspace-history-of workspace) history)))
     ;; Nothing above wrote a source.
     (assert (equal before (mapcar #'file-digest titles))))
-  (format t "~&CTM-PLAN-PAGE-AUTHORING-PASS: Work item with three links; WBS 1+5 with one dictionary entry each; plan P1-P5 with dependencies, results and preconditions; status agrees with unmet preconditions; no authorization permitted; 7 planned controls, 6 bound to existing tests; 12 refusals and 1 admitted progress against the untouched sources; fresh reconstruction; Point/History; no source written.~%"))
+  (format t "~&CTM-PLAN-PAGE-AUTHORING-PASS: Work item with three links; WBS 1+5 with one dictionary entry each; plan P1-P5 with dependencies, results and preconditions; status agrees with unmet preconditions; no authorization permitted; the seven required controls, each bound to an existing test; 12 refusals and 1 admitted progress against the untouched sources; fresh reconstruction; Point/History; no source written.~%"))

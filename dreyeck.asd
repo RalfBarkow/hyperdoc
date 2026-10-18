@@ -1698,6 +1698,14 @@
   :depends-on ("dreyeck/ctm-page-authoring" "dreyeck/fedwiki-item-edit-execution"
                "dreyeck/topic-maps-reading" "dreyeck/work/tmdm-reading"))
 
+(defsystem "dreyeck/ctm-page-authoring/tests"
+  :description "The pages that document the Item edit path: every link evaluates to a real object, every page link has a page"
+  :depends-on ("dreyeck/ctm-page-authoring/local")
+  :components ((:file "dreyeck/tests/ctm-page-authoring-documentation"))
+  :perform (test-op (op component)
+             (declare (ignore op component))
+             (uiop:symbol-call :dreyeck/ctm-page-authoring-documentation/tests :run-tests)))
+
 (defsystem "dreyeck/authenticated-page-authoring"
   :description "Principals, principal-bound single-use challenges and authoring rules that derive the FedWiki page-authoring capability; trusted Lisp only, no HTTP"
   :license "BSD"
@@ -2956,6 +2964,7 @@
                       (:static-file "Collaborative Planning with Codex and SHOP3.html")
                       (:static-file "Authoring the CTM Plan Page.html")
                       (:static-file "CTM Plan Page WBS Dictionary.html")
+                      (:static-file "Item Edit Path in HyperDoc.html")
                       (:static-file "Conversation Coordinates.html")
                       (:static-file "D2 Connections.html")
                       (:static-file "Relation Contract informs.html")

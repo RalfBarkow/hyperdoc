@@ -106,6 +106,15 @@ The dated deployment observations are kept in the
 - The package carries the pinned development package set, not a minimal
   closure.
 
+## The Item edit path
+
+`HYPERDOC_CATALOG_SYSTEM=dreyeck/ctm-page-authoring` adds the Story Item `Edit` tab with proposal, preview and
+Action context to the served Catalog. The system loads neither the writer nor topic-maps. The execution,
+the CTM reading and the TMDM navigation are in `dreyeck/ctm-page-authoring/local`, a loopback review Catalog
+(`scripts/serve-ctm-page-authoring.lisp`, see `docs/ctm-page-authoring-review.md`). topic-maps is not in the
+packaged registry, so it cannot be named by the variable. The Work page *Item Edit Path in HyperDoc* describes
+the objects, the limits and the tests.
+
 ## Not verified
 
 The successful operator update above does not verify NixOS activation of the

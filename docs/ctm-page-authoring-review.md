@@ -30,3 +30,5 @@ Then open `http://127.0.0.1:18773/view/ctm-and-tmdm-in-hyperdoc` (port: `HYPERDO
 `dreyeck/catalog` and `dreyeck/work/reading/tests` need a Git checkout with a local branch `dreyeck.ch`.
 `scripts/test-tmdm-model-navigation.mjs` takes an SBCL binary (it runs it in `sandbox-exec`) and `TOPIC_MAPS_ROOT`.
 `CATALOG_SYSTEM` makes `test-item-edit-execution.mjs` serve another system, for example the local one (with `TOPIC_MAPS_ROOT`).
+`dreyeck/ctm-page-authoring/tests` follows every link of the pages that document the path (the Work page *Item Edit Path in HyperDoc*,
+the carrier page and the WBS Dictionary) and needs the topic-maps checkout; `scripts/test-ctm-page-authoring-documentation.mjs` reads them in a served local Catalog.
