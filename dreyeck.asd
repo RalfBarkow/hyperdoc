@@ -1689,6 +1689,24 @@
 ;;   dreyeck/ctm-page-authoring        Edit proposal, Preview, Action context. Needs nothing outside the repository.
 ;;   dreyeck/ctm-page-authoring/local  adds the execution (loads the writer; nothing is authorized by loading it)
 ;;                                     and the TMDM readings (need the topic-maps checkout in the ASDF registry).
+(defsystem "dreyeck/item-edit-ctm"
+  :description "Optional, local review: CTM views of the Item edit objects, read back as TMDM objects with the topic-maps reader"
+  :license "BSD"
+  :version "0.0.1"
+  ;; Needs the topic-maps checkout, like the readings it builds on. It loads the execution (and so the writer) for the completion class.
+  :depends-on ("dreyeck/fedwiki-item-edit-execution" "dreyeck/topic-maps-reading" "dreyeck/inspector/tmdm" "dreyeck/topicmap"
+               "html-inspector-views" "shasht" "ironclad")
+  :components ((:file "dreyeck/work/item-edit-ctm"))
+  :in-order-to ((test-op (test-op "dreyeck/item-edit-ctm/tests"))))
+
+(defsystem "dreyeck/item-edit-ctm/tests"
+  :description "CTM from a real completion is parsed; its Topics, Associations, Roles and Scopes; the date; the body; nothing claimed or changed"
+  :depends-on ("dreyeck/item-edit-ctm" "ironclad")
+  :components ((:file "dreyeck/tests/item-edit-ctm"))
+  :perform (test-op (op component)
+             (declare (ignore op component))
+             (uiop:symbol-call :dreyeck/item-edit-ctm/tests :run-tests)))
+
 (defsystem "dreyeck/ctm-page-authoring"
   :description "Optional: the Item edit proposal and preview with their Inspector views, without writer and without topic-maps"
   :depends-on ("dreyeck/work/item-edit-proposal" "dreyeck/fedwiki-item-edit-preview"))
@@ -1696,7 +1714,7 @@
 (defsystem "dreyeck/ctm-page-authoring/local"
   :description "Local review only: the proposal and preview plus execution, the CTM example read with the topic-maps reader, and the TMDM model navigation"
   :depends-on ("dreyeck/ctm-page-authoring" "dreyeck/fedwiki-item-edit-execution"
-               "dreyeck/topic-maps-reading" "dreyeck/work/tmdm-reading"))
+               "dreyeck/topic-maps-reading" "dreyeck/work/tmdm-reading" "dreyeck/item-edit-ctm"))
 
 (defsystem "dreyeck/ctm-page-authoring/tests"
   :description "The pages that document the Item edit path: every link evaluates to a real object, every page link has a page"

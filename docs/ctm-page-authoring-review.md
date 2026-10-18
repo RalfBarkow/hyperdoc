@@ -51,3 +51,6 @@ What the newer reader then does with those inputs is what the run observes: it m
 working repository that is being developed is not a suitable `TOPIC_MAPS_ROOT`: it is refused while it has local changes, and a
 half-edited tree does not load. Slice 12A (`788899ae`) stays the historical test state; after switching between checkouts, force a
 recompile (`(asdf:load-system "dreyeck/work/tmdm-reading" :force t)`), because the compiled HyperDoc code depends on the structures of topic-maps.
+
+The completion, preview and proposal have a `CTM` view (system `dreyeck/item-edit-ctm`, part of `dreyeck/ctm-page-authoring/local`): the Item edit written as CTM, read back with the
+topic-maps reader, and navigable as TMDM objects, with the Lisp objects each Topic stands for. See the Work page *Item Edit Path in HyperDoc*.

@@ -97,6 +97,41 @@ try{
  assert.equal(await completionPane.getByRole('button',{name:'Execute the attached signed request'}).count(),0)
  assert.equal(sha(pageFile),observed)
  steps.push('Execution tab → completed Action: a copy with a date, not an authorization')
+ // CTM: the completion as CTM, read back with the topic-maps reader as TMDM objects (only where the local system is served).
+ if(process.env.CATALOG_SYSTEM==='dreyeck/ctm-page-authoring/local'){
+  await completionPane.getByRole('button',{name:'CTM',exact:true}).first().click()
+  await completionPane.getByRole('heading',{name:`CTM of the completion of ${e3}`,exact:true}).waitFor()
+  text=await completionPane.innerText()
+  for(const expected of ['the-completed-action isa edit-action','date: ','proposes(proposal: the-proposal, action: the-proposed-action) @derived','previews(preview: the-preview, action: the-proposed-action) @observed',
+    'completed-from(completed: the-completed-action, original: the-proposed-action) @derived','contains(body: the-signed-body, content: the-expected-item) @derived','A completion is not an authorization.','request-attached: "no"','not stored'])assert(text.includes(expected),expected)
+  assert(!/authorized: |executed: |persisted: /.test(text))
+  assert.equal(sha(pageFile),observed)
+  // The date in the CTM is the completion's: it is found again, below, in the completed Action itself.
+  const date=text.match(/date: (\d+)/)[1]
+  steps.push('Completed Action → CTM: parsed text, observed and derived relations')
+  await completionPane.getByText('The derived projection: its Topics, Associations and the Lisp objects they stand for',{exact:true}).first().click()
+  const projectionPane=panes().nth(previewIndex+2)
+  await projectionPane.getByRole('heading',{name:`CTM of the completion of ${e3}`,exact:true}).waitFor()
+  text=await projectionPane.innerText()
+  for(const expected of ['Topics for the objects of the Item edit','the-completed-action','the-proposed-action','the-signed-body','Associations and Roles','completed-from','observed: COMPLETION-ACTION'])assert(text.includes(expected),expected)
+  assert(await projectionPane.getByText('TMDM Association',{exact:true}).count()>=8)
+  assert(await projectionPane.getByText('TMDM Role',{exact:true}).count()>=16)
+  steps.push('CTM → the projection: Topics, Associations, Roles and the Lisp objects')
+  await projectionPane.getByText('the TMDM Topic Map',{exact:true}).first().click()
+  await panes().nth(previewIndex+3).locator('.inspector-title').filter({hasText:'TOPIC-MAP'}).first().waitFor()
+  steps.push('the projection → the TMDM Topic Map')
+  await projectionPane.getByText('TMDM Topic',{exact:true}).first().click()
+  await panes().nth(previewIndex+3).locator('.inspector-title').filter({hasText:'TOPIC'}).first().waitFor()
+  steps.push('the projection → a TMDM Topic')
+  // Back to the Lisp object: the completed Action itself, by the projection's own binding.
+  await projectionPane.locator('tr').filter({hasText:'the-completed-action'}).first().locator('.inspector-inspect').last().click()
+  await panes().nth(previewIndex+3).locator('.inspector-title').filter({hasText:'HASH-TABLE'}).first().waitFor()
+  assert((await panes().nth(previewIndex+3).innerText()).includes(String(date)))
+  steps.push('the projection → the completed Action, the Lisp object')
+  assert.equal(sha(pageFile),observed)
+  await completionPane.getByRole('button',{name:'Completed Action',exact:true}).last().click()   // the tab; the title is a button too
+  await completionPane.getByRole('heading',{name:'The Action that would be authorized',exact:true}).waitFor()
+ }
  // Trusted code, outside the browser, attaches a request signed by a registered principal.
  fs.writeFileSync(flag,'')
  for(let n=0;n<300&&!logText().includes('EXECUTION-BROWSER-ATTACHED');n++)await new Promise(r=>setTimeout(r,100))

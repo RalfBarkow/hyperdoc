@@ -155,6 +155,13 @@ catalog of its own."
          (check (not (equal before (sha256-of-file page))))
          (check (probe-file root)))))))
 
+(defun check-ctm-section ()
+  ;; The completion's section names the CTM view and says what is observed, what is derived and that nothing is hypothetical.
+  (let ((source (page-source "Item Edit Path in HyperDoc")))
+    (dolist (text '("id=\"ctm-view\"" "CTM view of the completion" "Observed" "Derived" "No relation is hypothetical" "A completion is not an authorization"
+                    "dreyeck/item-edit-ctm" "href=\"#ctm-view\""))
+      (check (search text source)))))
+
 (defun check-states-are-kept-apart ()
   ;; The implementation state names the six statements and does not let one stand for another.
   (let ((source (page-source "Authoring the CTM Plan Page")))
@@ -170,6 +177,7 @@ catalog of its own."
     (check-optional-objects)
     (check-page-object-link)
     (check-story-item-link)
+    (check-ctm-section)
     (check-states-are-kept-apart)
     (format t "~&CTM-PAGE-AUTHORING-DOCUMENTATION-PASS: ~D checks; every expression link of the three pages evaluates to an object in its package, every page link names a page, the new page is reachable from the Work item, the Item page and the derivation, and the six statements of the implementation state are named.~%" *checks*)
     t))
