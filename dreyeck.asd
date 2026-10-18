@@ -1684,6 +1684,20 @@
              (declare (ignore op component))
              (uiop:symbol-call :dreyeck/fedwiki-item-edit-execution/tests :run-tests)))
 
+;; The Work Item ctm-plan-page-authoring as one system to name in HYPERDOC_CATALOG_SYSTEM. Two sizes,
+;; because the served runtime has no writer and no topic-maps checkout:
+;;   dreyeck/ctm-page-authoring        Edit proposal, Preview, Action context. Needs nothing outside the repository.
+;;   dreyeck/ctm-page-authoring/local  adds the execution (loads the writer; nothing is authorized by loading it)
+;;                                     and the TMDM readings (need the topic-maps checkout in the ASDF registry).
+(defsystem "dreyeck/ctm-page-authoring"
+  :description "Optional: the Item edit proposal and preview with their Inspector views, without writer and without topic-maps"
+  :depends-on ("dreyeck/work/item-edit-proposal" "dreyeck/fedwiki-item-edit-preview"))
+
+(defsystem "dreyeck/ctm-page-authoring/local"
+  :description "Local review only: the proposal and preview plus execution, the CTM example read with the topic-maps reader, and the TMDM model navigation"
+  :depends-on ("dreyeck/ctm-page-authoring" "dreyeck/fedwiki-item-edit-execution"
+               "dreyeck/topic-maps-reading" "dreyeck/work/tmdm-reading"))
+
 (defsystem "dreyeck/authenticated-page-authoring"
   :description "Principals, principal-bound single-use challenges and authoring rules that derive the FedWiki page-authoring capability; trusted Lisp only, no HTTP"
   :license "BSD"

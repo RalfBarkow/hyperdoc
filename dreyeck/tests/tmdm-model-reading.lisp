@@ -155,7 +155,8 @@
     (example-checks) (generic-and-merge-checks) (work-checks)
     (check :work-sources-unchanged (equalp before (snapshot-files)))
     (check :no-writer-loaded (not (find-package "DREYECK/FEDWIKI-PAGE-AUTHORING")))
-    (check :no-foreign-e3-module-loaded (not (find-package "DREYECK/WORK/ITEM-EDIT-VIEW-DIAGNOSIS")))
+    ;; The diagnosis of the missing Edit view is part of DREYECK/WORK/READING since the integration with the
+    ;; Item edit path, so it is no longer a foreign module here. The writer must still be absent.
     (check :topic-maps-remains-clean (zerop (length (git:git-run-string (asdf:system-source-directory "topic-maps") "status" "--porcelain"))))
     (format t "~&TMDM-MODEL-NAVIGATION-PASS: ~D assertions, actual references, dated evidence and unchanged sources.~%" (length *checks*))
     t))

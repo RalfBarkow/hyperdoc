@@ -27,11 +27,13 @@ fs.mkdirSync(path.dirname(pageFile),{recursive:true});fs.copyFileSync(evidence,p
 assert.equal(sha(pageFile),observed);assert.equal(sha(evidence),observed)
 const port=await new Promise(r=>{const s=net.createServer();s.listen(0,'127.0.0.1',()=>{const p=s.address().port;s.close(()=>r(p))})})
 const stop=path.join(temp,'stop'),flag=path.join(temp,'sign.request'),script=path.join(temp,'witness.lisp'),log=path.join(output,'lisp.log')
+const topicMapsRoot=process.env.TOPIC_MAPS_ROOT   // only needed when CATALOG_SYSTEM names a system that reads topic-maps
 fs.writeFileSync(script,`(require :asdf)
+${topicMapsRoot?`(pushnew #p${JSON.stringify(topicMapsRoot.endsWith('/')?topicMapsRoot:topicMapsRoot+'/')} asdf:*central-registry* :test (function equal))`:''}
 (asdf:load-system "dreyeck/catalog-application")
 (asdf:load-system "dreyeck/fedwiki-item-edit-execution/tests")
 (dreyeck/catalog-application:start-catalog :port ${port} :host "127.0.0.1" :site-root ${JSON.stringify(site+'/')}
- :catalog-system "dreyeck/fedwiki-item-edit-execution" :development nil)
+ :catalog-system ${JSON.stringify(process.env.CATALOG_SYSTEM||"dreyeck/fedwiki-item-edit-execution")} :development nil)
 (assert (dreyeck/authority-policy:policy-enforced-p))
 ;; What an operator's tooling would do, outside the browser: hold a principal and its key, and sign.
 (defvar *completion* nil)

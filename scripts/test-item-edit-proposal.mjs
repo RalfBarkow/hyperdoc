@@ -33,7 +33,7 @@ fs.writeFileSync(script,`(require :asdf)
 (pushnew #p${JSON.stringify(topicMaps.endsWith('/')?topicMaps:topicMaps+'/')} asdf:*central-registry* :test (function equal))
 (asdf:load-system "dreyeck/catalog-application")
 (dreyeck/catalog-application:start-catalog :port ${port} :host "127.0.0.1" :site-root ${JSON.stringify(temp+'/site/')}
- :catalog-system "dreyeck/topic-maps-reading" :development nil)
+ :catalog-system ${JSON.stringify(process.env.CATALOG_SYSTEM||"dreyeck/topic-maps-reading")} :development nil)
 (assert (dreyeck/authority-policy:policy-enforced-p))
 (defun state () (format nil "writer-package=~A writer-loaded=~A" (if (find-package "DREYECK/FEDWIKI-PAGE-AUTHORING") "YES" "NO")
                         (if (asdf:component-loaded-p "dreyeck/fedwiki-page-authoring") "YES" "NO")))
