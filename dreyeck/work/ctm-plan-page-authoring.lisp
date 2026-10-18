@@ -6,7 +6,7 @@
                     (#:v #:html-inspector-views))
   (:export #:read-ctm-authoring #:validate-ctm-authoring #:ctm-authoring-structure-error
            #:ctm-authoring-plan #:ctm-wbs #:ctm-authoring-workspace #:ctm-authoring-projection
-           #:optional-object #:registered-page))
+           #:optional-object #:registered-page #:registered-story-item))
 (in-package #:dreyeck/work/ctm-page-authoring)
 (hyperdoc:see (hyperdoc:page "Authoring the CTM Plan Page" :hyperbook "dreyeck/work/reading"))
 (hyperdoc:see (hyperdoc:page "CTM Plan Page WBS Dictionary" :hyperbook "dreyeck/work/reading"))
@@ -34,6 +34,24 @@ fedwiki: id, a remote wiki): the Catalog that serves a site registers its own wi
          (page (and book (hyperbook:find-page book page-id :signal-error? nil))))
     (or page
         (format nil "No Catalog here registers ~A with the page ~A. The Catalog that serves the wiki's site root does." hyperbook-id page-id))))
+
+(defun registered-story-item (hyperbook-id page-id item-id)
+  "The LOCAL-STORY-ITEM with id ITEM-ID of the page PAGE-ID of the registered HyperBook HYPERBOOK-ID, as the page file
+reads now: the Item the Page source view opens. The id is the identity; the position is not. Where the wiki is not
+registered, the page is absent or unreadable, or the id is not in the page, a string that says so. It reads the page
+file once, writes nothing, makes no wiki and loads no system. Each reading observes the file anew, so two readings
+give equal Items from the same page file, not the same object."
+  (let ((page (registered-page hyperbook-id page-id)))
+    (if (stringp page)
+        page
+        (handler-case
+            (let* ((package (find-package "DREYECK/LOCAL-FEDWIKI-PAGE"))
+                   (source (funcall (find-symbol "LOCAL-FEDWIKI-PAGE-SOURCE-OF" package) page)))
+              (or (funcall (find-symbol "FIND-STORY-ITEM" package) source item-id)
+                  (format nil "The page ~A of ~A has no story Item with the id ~A, as its file reads now. The id names the Item; the position does not."
+                          page-id hyperbook-id item-id)))
+          (error (condition)
+            (format nil "The page file of ~A could not be read now: ~A" page-id condition))))))
 
 (defparameter +plan-page+ "Authoring the CTM Plan Page")
 (defparameter +dictionary-page+ "CTM Plan Page WBS Dictionary")

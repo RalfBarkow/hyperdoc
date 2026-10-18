@@ -62,6 +62,12 @@ Its id and content are read from SOURCE's JSON; nothing is copied out."))
         for index from 0
         collect (make-instance 'local-story-item :source source :index index)))
 
+(defun find-story-item (source item-id)
+  "The LOCAL-STORY-ITEM of SOURCE whose id is ITEM-ID, or NIL. The id is the identity; the index is where the
+Item stands in this observation and changes when the story is reordered."
+  (let ((index (position item-id (%source-story source) :key (lambda (json) (gethash "id" json)) :test #'equal)))
+    (and index (make-instance 'local-story-item :source source :index index))))
+
 (defun story-item-json (item)
   "A copy of ITEM's JSON exactly as its source observed it."
   (hyperbook/fedwiki::copy-page-json (nth (story-item-index item) (%source-story (story-item-source item)))))

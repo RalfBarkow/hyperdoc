@@ -57,17 +57,28 @@ try{
  text=await last().innerText()
  for(const expected of ['Implementation state of packages 2 to 4','Integrated in source','Locally executable','Tested on temporary copies','Read in the local Inspector','Served on dreyeck.ch','Accepted'])assert(text.includes(expected),expected)
  steps.push('carrier page: implementation state')
- // The edited page is a link to the page object itself, not a URL and not a slug in code.
- await click('ctm-and-tmdm-in-hyperdoc')
- await last().locator('.inspector-title').filter({hasText:'CTM and TMDM in HyperDoc'}).first().waitFor();steps.push('the linked FedWiki page → its local-fedwiki-page')
- await page.getByRole('button',{name:'Page source',exact:true}).last().waitFor()
+ // Two links on the carrier page, two different objects: the whole page, and the Item E3 of it by its id.
+ const panes=()=>page.locator('.inspector-pane')
+ const carrier=await panes().count()-1
+ const normalized=async pane=>(await pane.innerText()).replace(/, observed [^\n]*UTC/,'')
+ await panes().nth(carrier).getByText('E3',{exact:true}).first().click()
+ await panes().nth(carrier+1).getByRole('heading',{name:'Story Item ed37e9bac2fcd548',exact:true}).waitFor()
+ const viaLink=await normalized(panes().nth(carrier+1));steps.push('E3 → the local-story-item')
+ assert(viaLink.includes('11 of 18'));assert(viaLink.includes('Item JSON, as observed'))
+ await panes().nth(carrier).getByText('ctm-and-tmdm-in-hyperdoc',{exact:true}).first().click()
+ await panes().nth(carrier+1).locator('.inspector-title').filter({hasText:'CTM and TMDM in HyperDoc'}).first().waitFor();steps.push('the linked FedWiki page → its local-fedwiki-page')
+ // The same Item by the other way: Page source → E3. Each reading observes the file anew, so the two are equal in id, position,
+ // source revision and content (the observation time aside), not the same object.
+ await panes().nth(carrier+1).getByRole('button',{name:'Page source',exact:true}).first().click()
+ await panes().nth(carrier+1).getByText('ed37e9bac2fcd548',{exact:true}).first().click()
+ await panes().nth(carrier+2).getByRole('heading',{name:'Story Item ed37e9bac2fcd548',exact:true}).waitFor()
+ assert.equal(await normalized(panes().nth(carrier+2)),viaLink);steps.push('Page source → E3: the same Item')
  // back on the carrier page for the next link
- await page.locator('.inspector-pane').filter({has:page.getByRole('heading',{name:'Authoring the CTM Plan Page',exact:true})}).last().getByText('Item Edit Path in HyperDoc',{exact:true}).first().click()
+ await panes().nth(carrier).getByText('Item Edit Path in HyperDoc',{exact:true}).first().click()
  await heading('Item Edit Path in HyperDoc')
  text=await last().innerText()
  for(const expected of ['The path and its objects','Three statements about an execution','ASDF systems','Operation','Known limits'])assert(text.includes(expected),expected)
  steps.push('Item Edit Path in HyperDoc')
- const panes=()=>page.locator('.inspector-pane')
  const docIndex=await panes().count()-1   // a captured index: last() would follow the newest pane
  // A link of the documentation pane opens its object in the pane to the right; a later link replaces that pane.
  const open=async(label,title)=>{await panes().nth(docIndex).getByText(label,{exact:true}).first().click()

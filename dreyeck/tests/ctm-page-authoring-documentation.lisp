@@ -90,6 +90,71 @@
     (check (stringp (funcall registered "fedwiki:no-such-wiki.example" "x")))
     (check (= before (length (hyperbook::hyperbooks-of hyperbook::*catalog*))))))
 
+(defun sha256-of-file (path)
+  (ironclad:byte-array-to-hex-string (ironclad:digest-file :sha256 path)))
+
+(defun call-with-registered-copy (function)
+  "FUNCTION is called with the site root of a temporary copy of the retained page, registered as fedwiki:dreyeck.ch in a
+catalog of its own."
+  (let* ((root (uiop:ensure-directory-pathname (merge-pathnames (format nil "ctm-doc-site-~D/" (random 1000000000)) (uiop:temporary-directory))))
+         (page (merge-pathnames "pages/ctm-and-tmdm-in-hyperdoc" root))
+         (hyperbook::*catalog* (make-instance 'hyperbook:catalog)))
+    (ensure-directories-exist page)
+    (uiop:copy-file (asdf:system-relative-pathname "dreyeck/work/reading" "dreyeck/work/ctm-page-evidence/site/pages/ctm-and-tmdm-in-hyperdoc") page)
+    (unwind-protect
+         (progn (dreyeck/local-fedwiki-page:register-local-fedwiki root "fedwiki:dreyeck.ch")
+                (funcall function root page))
+      (uiop:delete-directory-tree root :validate t :if-does-not-exist :ignore))))
+
+(defun check-story-item-link ()
+  (let ((resolve (find-symbol "REGISTERED-STORY-ITEM" "DREYECK/WORK/CTM-PAGE-AUTHORING"))
+        (e3 "ed37e9bac2fcd548"))
+    ;; The carrier page links E3 by wiki, page and Item id, and still links the whole page.
+    (let ((source (page-source "Authoring the CTM Plan Page")))
+      (check (search "(registered-story-item \"fedwiki:dreyeck.ch\" \"ctm-and-tmdm-in-hyperdoc\" \"ed37e9bac2fcd548\")'>E3</a>" source))
+      (check (search "(registered-page \"fedwiki:dreyeck.ch\" \"ctm-and-tmdm-in-hyperdoc\")" source)))
+    (call-with-registered-copy
+     (lambda (root page)
+       (let* ((before (sha256-of-file page)) (systems (asdf:already-loaded-systems))
+              (books (length (hyperbook::hyperbooks-of hyperbook::*catalog*)))
+              (item (funcall resolve "fedwiki:dreyeck.ch" "ctm-and-tmdm-in-hyperdoc" e3)))
+         ;; Registered, Item present: the reader's own Item, whose id, position and origin are those of the file.
+         (check (typep item 'dreyeck/local-fedwiki-page:local-story-item))
+         (check (equal e3 (dreyeck/local-fedwiki-page:story-item-id item)))
+         (check (= 10 (dreyeck/local-fedwiki-page:story-item-index item)))
+         (check (equal before (dreyeck/local-fedwiki-page:page-source-sha256 (dreyeck/local-fedwiki-page:story-item-source item))))
+         (check (equal "ctm-and-tmdm-in-hyperdoc" (dreyeck/local-fedwiki-page:page-source-slug (dreyeck/local-fedwiki-page:story-item-source item))))
+         ;; The same Item as the Page source view's: each reading observes the file anew, so the objects are equal in id,
+         ;; position and origin, not the same object. No cache makes them EQ.
+         (let* ((wiki (hyperbook:find-hyperbook "fedwiki:dreyeck.ch"))
+                (page-object (hyperbook:find-page wiki "ctm-and-tmdm-in-hyperdoc"))
+                (via-source (find e3 (dreyeck/local-fedwiki-page:source-story-items (dreyeck/local-fedwiki-page:local-fedwiki-page-source-of page-object))
+                                  :key #'dreyeck/local-fedwiki-page:story-item-id :test #'equal)))
+           (check (= (dreyeck/local-fedwiki-page:story-item-index via-source) (dreyeck/local-fedwiki-page:story-item-index item)))
+           (check (equalp (dreyeck/local-fedwiki-page:story-item-json via-source) (dreyeck/local-fedwiki-page:story-item-json item)))
+           (check (equal (dreyeck/local-fedwiki-page:page-source-sha256 (dreyeck/local-fedwiki-page:story-item-source via-source))
+                         (dreyeck/local-fedwiki-page:page-source-sha256 (dreyeck/local-fedwiki-page:story-item-source item)))))
+         ;; Registered, id absent: an explanation, not a condition.
+         (let ((absent (funcall resolve "fedwiki:dreyeck.ch" "ctm-and-tmdm-in-hyperdoc" "0000000000000000")))
+           (check (stringp absent)) (check (search "0000000000000000" absent)))
+         ;; Registered, page absent.
+         (check (stringp (funcall resolve "fedwiki:dreyeck.ch" "no-such-page" e3)))
+         ;; Not registered: an explanation, and no wiki is made by looking.
+         (check (stringp (funcall resolve "fedwiki:other.example" "ctm-and-tmdm-in-hyperdoc" e3)))
+         (check (= books (length (hyperbook::hyperbooks-of hyperbook::*catalog*))))
+         ;; Reordering the story changes the position and not the identity.
+         (let ((json (shasht:read-json (uiop:read-file-string page :external-format :utf-8))))
+           (let* ((story (gethash "story" json)) (last (1- (length story))) (first-item (aref story 0)))
+             (setf (aref story 0) (aref story last) (aref story last) first-item))
+           (with-open-file (out page :direction :output :if-exists :supersede :external-format :utf-8) (shasht:write-json json out)))
+         (let ((again (funcall resolve "fedwiki:dreyeck.ch" "ctm-and-tmdm-in-hyperdoc" e3)))
+           (check (equal e3 (dreyeck/local-fedwiki-page:story-item-id again)))
+           (check (equal (dreyeck/local-fedwiki-page:story-item-text item) (dreyeck/local-fedwiki-page:story-item-text again))))
+         ;; Looking changed nothing: no system was loaded and the (reordered) file is as the test left it.
+         (check (equal systems (asdf:already-loaded-systems)))
+         (check (not (equal before (sha256-of-file page))))
+         (check (probe-file root)))))))
+
 (defun check-states-are-kept-apart ()
   ;; The implementation state names the six statements and does not let one stand for another.
   (let ((source (page-source "Authoring the CTM Plan Page")))
@@ -104,6 +169,7 @@
     (check-reachability)
     (check-optional-objects)
     (check-page-object-link)
+    (check-story-item-link)
     (check-states-are-kept-apart)
     (format t "~&CTM-PAGE-AUTHORING-DOCUMENTATION-PASS: ~D checks; every expression link of the three pages evaluates to an object in its package, every page link names a page, the new page is reachable from the Work item, the Item page and the derivation, and the six statements of the implementation state are named.~%" *checks*)
     t))
