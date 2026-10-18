@@ -115,57 +115,112 @@ try{
   // The tab Topicmap, right after CTM: the diagram at once, then real Inspector actions on it.
   const order=tabNames.slice(tabNames.indexOf('Completed Action',2));assert.deepEqual(order.slice(0,3),['Completed Action','CTM','Topicmap'],order.join('|'))
   const map=panes().nth(completion)
-  await map.getByRole('button',{name:'Topicmap',exact:true}).first().click()
-  await map.getByRole('heading',{name:`Topicmap of the completion of ${e3}`,exact:true}).waitFor()
+  const tabTopicmap=async()=>{await map.getByRole('button',{name:'Topicmap',exact:true}).first().click();await map.getByRole('heading',{name:`Topicmap of the completion of ${e3}`,exact:true}).waitFor()}
+  await tabTopicmap()
   assert.equal(await map.locator('svg.dreyeck-topicmap-canvas').count(),1)
-  for(const id of ['the-proposal','the-preview','the-proposed-action','the-completion','the-completed-action','the-expected-item','the-signed-body'])
-    assert.equal(await map.locator(`.dreyeck-topicmap-topic[data-topic-id="${id}"]`).count(),1,id)
+  const objects=['the-proposal','the-preview','the-proposed-action','the-completion','the-completed-action','the-expected-item','the-signed-body']
+  for(const id of objects)assert.equal(await map.locator(`.dreyeck-topicmap-topic[data-topic-id="${id}"]`).count(),1,id)
   assert.equal(await map.locator('.dreyeck-topicmap-topic[data-topic-id*="("]').count(),8,'eight Associations drawn as nodes')
-  assert.equal(await map.locator('.dreyeck-topicmap-association').count(),16,'one edge for each Role')
-  steps.push('Topicmap: seven objects, eight Association nodes, sixteen Role edges')
+  // Sixteen Role edges, each from its Association node to the player named by its Role: identity and Role types, not geometry.
+  const edgeIds=await map.locator('.dreyeck-topicmap-association').evaluateAll(els=>els.map(e=>e.getAttribute('data-association-id')))
+  assert.equal(edgeIds.length,16,'one edge for each Role')
+  const edges=edgeIds.map(id=>{const player=id.slice(id.lastIndexOf(':')+1),rest=id.slice(0,id.lastIndexOf(':')),role=rest.slice(rest.lastIndexOf(':')+1),node=rest.slice(0,rest.lastIndexOf(':'));return {node,role,player,type:node.slice(0,node.indexOf('('))}})
+  const expectedEdges=[['proposes','proposal','the-proposal'],['proposes','action','the-proposed-action'],['previews','preview','the-preview'],['previews','action','the-proposed-action'],
+   ['completes','completion','the-completion'],['completes','preview','the-preview'],['yields','completion','the-completion'],['yields','action','the-completed-action'],
+   ['has-body','completion','the-completion'],['has-body','body','the-signed-body'],['completed-from','completed','the-completed-action'],['completed-from','original','the-proposed-action'],
+   ['contains','body','the-signed-body'],['contains','content','the-expected-item'],['contains','body','the-signed-body'],['contains','content','the-completed-action']].map(e=>e.join('|')).sort()
+  assert.deepEqual(edges.map(e=>[e.type,e.role,e.player].join('|')).sort(),expectedEdges)
+  for(const e of edges){
+   assert.equal(await map.locator(`.dreyeck-topicmap-topic[data-topic-id="${e.node}"]`).count(),1,'its Association node '+e.node)
+   assert(e.node.includes(`${e.role}=${e.player}`),'the node names the Role and its player: '+e.node)
+   assert.equal(await map.locator(`.dreyeck-topicmap-topic[data-topic-id="${e.player}"]`).count(),1,'its player '+e.player)}
+  steps.push('Topicmap: seven objects, eight Association nodes, sixteen Role edges with the right Role types and players')
   const sign=id=>map.locator(`.dreyeck-topicmap-workspace-action[data-topic-id="${id}"]`)
-  const pointAt=async id=>map.locator(`.dreyeck-topicmap-point-sign[data-topic-id="${id}"]`).waitFor()
-  // 1. the-completion.  2. completed-from.
+  const pointAt=async id=>{await map.locator(`.dreyeck-topicmap-point-sign[data-topic-id="${id}"]`).waitFor()
+   assert.equal(await map.locator('.dreyeck-topicmap-point-sign').count(),1,'one Point')
+   assert.equal(await map.locator('p').filter({hasText:/^Point:/}).first().locator('code').innerText(),id)}
+  const itemsOf=async pane=>{const out={};for(const tr of await pane.locator('tr').all()){const tds=await tr.locator('td').allInnerTexts();if(tds.length===2)out[tds[0].trim()]=tds[1].trim()};return out}
+  // The address of a Lisp object, from its Print tab: two panes of one object show one address.
+  const addressOf=async pane=>{await pane.getByRole('button',{name:'Print',exact:true}).first().click();const t=await pane.innerText();await pane.getByRole('button',{name:'Items',exact:true}).first().click();return (t.match(/\{([0-9A-F]{6,})\}/)||[])[1]}
+  // 1. A click on the sign of completed-from moves the Point.
   await sign('the-completion').dispatchEvent('click');await pointAt('the-completion')
   const completedFrom='completed-from(completed=the-completed-action,original=the-proposed-action)'
   await sign(completedFrom).dispatchEvent('click');await pointAt(completedFrom)
-  steps.push('Point → the-completion → completed-from')
-  // 3. Its Roles completed and original; its class and its reason, which the Topic Map does not carry.
+  steps.push('Point → the-completion → completed-from (the Point sign moved)')
+  // 2. The Point panel: class derived, the reason, the Topic Map's Scope not being the reason, and the two Roles with their players.
   text=await map.innerText()
-  for(const expected of ['derived','Why HyperDoc states it','equal in every field but the date','The Topic Map carries the class as the Scope','completed','original','the-completed-action','the-proposed-action'])assert(text.includes(expected),expected)
+  for(const expected of ['derived','Why HyperDoc states it','different objects and equal in every field but the date','The Topic Map carries the class as the Scope'])assert(text.includes(expected),expected)
   const roleRows=map.locator('tr.dreyeck-topicmap-workspace-association')
   assert.equal(await roleRows.count(),2)
   assert.deepEqual((await roleRows.locator('tt').allInnerTexts()).sort(),['completed','original'])
-  steps.push('completed-from: Roles completed and original, class derived, reason shown')
-  // 4. Follow each Role to its player.
-  await map.locator('tr.dreyeck-topicmap-workspace-association[data-association-id$=":completed:the-completed-action"] .inspector-action').first().click()
-  await pointAt('the-completed-action')
-  await map.locator('tr.dreyeck-topicmap-workspace-association').first().waitFor()
-  steps.push('Role completed → the-completed-action')
-  // 5. To the Lisp object: the completed Action, which holds the date.
-  await map.locator('p').filter({hasText:'Lisp object:'}).locator('.inspector-inspect').first().click()
-  await panes().nth(completion+1).locator('.inspector-title').filter({hasText:'HASH-TABLE'}).first().waitFor()
-  assert((await panes().nth(completion+1).innerText()).includes(String(date)))
-  steps.push('the-completed-action → the Lisp object (its date)')
-  // 6. The reason of the derived Association, found again; 7. back on the Topicmap, the Point goes on.
+  const roleTable=map.locator('table').filter({hasText:'Lisp object'}).first()
+  const players={};for(const tr of await roleTable.locator('tr').all()){const tds=await tr.locator('td').allInnerTexts();if(tds.length>=3)players[tds[1].trim()]=tds[2].trim()}
+  assert.deepEqual(players,{completed:'the-completed-action',original:'the-proposed-action'})
+  steps.push('completed-from: class derived, the reason, Roles completed → the-completed-action and original → the-proposed-action')
+  // 3. Follow original to the proposed Action and completed to the completed Action, and from each to its Lisp object; History records it.
+  const goRole=async(role,player)=>{await map.locator(`tr.dreyeck-topicmap-workspace-association[data-association-id$=":${role}:${player}"] .inspector-action`).first().click();await pointAt(player)}
+  const titleOf=async pane=>(await pane.locator('.inspector-title').first().innerText()).replace(/\s+/g,' ')
+  const lispObject=async(previousTitle)=>{await map.locator('p').filter({hasText:'Lisp object:'}).locator('.inspector-inspect').first().click()
+   const pane=panes().nth(completion+1);await pane.locator('.inspector-title').filter({hasText:'HASH-TABLE'}).first().waitFor()
+   // A later link replaces the pane to the right: wait until it is the new object, not the one that was there.
+   for(let n=0;n<100&&await titleOf(pane)===previousTitle;n++)await page.waitForTimeout(100)
+   return pane}
+  await goRole('original','the-proposed-action')
+  const proposedPane=await lispObject(null);const proposedTitle=await titleOf(proposedPane);const proposedAddress=await addressOf(proposedPane);const proposedItems=await itemsOf(proposedPane)
+  const proposedItemPane=await (async()=>{await proposedPane.locator('tr').filter({hasText:/^item/}).locator('td').nth(1).locator('.inspector-inspect').first().click();const p=panes().nth(completion+2);await p.locator('.inspector-title').filter({hasText:'HASH-TABLE'}).first().waitFor();await page.waitForTimeout(700);return p})()
+  const proposedItemAddress=await addressOf(proposedItemPane)
+  const proposedItem=await itemsOf(proposedItemPane)
+  await sign(completedFrom).dispatchEvent('click');await pointAt(completedFrom)   // back to the Association node
+  await goRole('completed','the-completed-action')
+  const completedPane=await lispObject(proposedTitle);const completedAddress=await addressOf(completedPane);const completedItems=await itemsOf(completedPane)
+  const completedItemPane=await (async()=>{await completedPane.locator('tr').filter({hasText:/^item/}).locator('td').nth(1).locator('.inspector-inspect').first().click();const p=panes().nth(completion+2);await p.locator('.inspector-title').filter({hasText:'HASH-TABLE'}).first().waitFor();await page.waitForTimeout(700);return p})()
+  const completedItem=await itemsOf(completedItemPane)
+  // The values of the Lisp objects, not the labels of the signs: two objects, equal but for the date.
+  assert.notEqual(proposedAddress,completedAddress,'the proposed and the completed Action are different Lisp objects')
+  assert.equal('date' in proposedItems,false,'the proposed Action has no date')
+  assert.equal(completedItems.date,String(date),'the completed Action has the completion\'s date')
+  assert.deepEqual(Object.keys(proposedItems).sort(),['id','item','type']);assert.deepEqual(Object.keys(completedItems).sort(),['date','id','item','type'])
+  assert.equal(proposedItems.type,completedItems.type);assert.equal(proposedItems.id,completedItems.id);assert.equal(proposedItems.id,e3)
+  assert.notEqual(proposedItemAddress,await addressOf(completedItemPane),'their Items are different objects too')
+  assert.deepEqual(proposedItem,completedItem,'every field of the Item is equal');assert(Object.keys(proposedItem).length>=3)
+  steps.push('original → the proposed Action and completed → the completed Action: two Lisp objects, equal but for the date')
+  // 4. The reason of the derived Association is found again, and the way back to its node.
   await sign(completedFrom).dispatchEvent('click');await pointAt(completedFrom)
-  assert((await map.innerText()).includes('equal in every field but the date'))
+  assert((await map.innerText()).includes('different objects and equal in every field but the date'))
+  // 5. The Point stays while the pane is drawn again: the tab CTM and back, and the pane's own refresh.
+  await map.getByRole('button',{name:'CTM',exact:true}).first().click()
+  await map.getByRole('heading',{name:`CTM of the completion of ${e3}`,exact:true}).waitFor()
+  await tabTopicmap();await pointAt(completedFrom)
+  await map.locator('.inspector-title-bar .inspector-button').first().click();await page.waitForTimeout(800)
+  await map.getByRole('heading',{name:`Topicmap of the completion of ${e3}`,exact:true}).waitFor();await pointAt(completedFrom)
+  // The History: the Workspace pane's own slot records the Points left, most recent first.
+  await map.getByText('Open the Workspace as a pane',{exact:true}).first().click()
+  const workspacePane=panes().nth(completion+1);await workspacePane.locator('.inspector-title').filter({hasText:/TOPICMAP-WORKSPACE/i}).first().waitFor()
+  await workspacePane.getByRole('button',{name:'Slots',exact:true}).first().click()
+  const slotText=(await workspacePane.innerText()).replace(/\s+/g,' ')
+  const history=slotText.slice(slotText.search(/HISTORY/i))
+  const left=[...history.matchAll(/the-completion|the-proposed-action|completed-from\(/g)].map(m=>m[0])
+  assert(left.includes('the-completion')&&left.includes('the-proposed-action')&&left.filter(x=>x==='completed-from(').length>=2,'History: '+history.slice(0,300))
+  steps.push('the Point survives CTM and back and a refresh; the Workspace History records the Points left')
+  // 6. The Point goes on from here, and the Point as a pane has Provenance and the way back to the Topicmap.
   await sign('the-proposed-action').dispatchEvent('click');await pointAt('the-proposed-action')
   assert((await map.innerText()).includes('An object of the Item edit'))
-  steps.push('completed-from again (reason), then the-proposed-action: the Point goes on')
-  // The Point's Topic as a pane: its Provenance, and the way back to the Topicmap.
   await map.locator('h3').filter({hasText:'Point'}).first().locator('xpath=following-sibling::p[1]').locator('.inspector-inspect').first().click()
   const topicPane=panes().nth(completion+1)
   await topicPane.getByRole('heading',{name:'the-proposed-action',exact:true}).waitFor()
   assert((await topicPane.innerText()).includes('Provenance in the HyperDoc projection'))
   await topicPane.getByText('Back to the Topicmap',{exact:true}).first().click()
   await panes().nth(completion+2).getByRole('heading',{name:`Topicmap of the completion of ${e3}`,exact:true}).waitFor()
-  steps.push('the Point as a pane: Provenance → back to the Topicmap')
-  // The schema Topics are not drawn and are listed.
+  steps.push('the Point goes on; the Point as a pane: Provenance → back to the Topicmap')
+  // 7. The schema Topics are not drawn and are reachable through the legend.
   text=await map.innerText();for(const expected of ['association type','role type','occurrence type','scope: how a statement is known'])assert(text.includes(expected),expected)
   assert.equal(await map.locator('.dreyeck-topicmap-topic[data-topic-id="date"]').count(),0)
-  steps.push('schema Topics: not drawn, listed')
-  // TALA: the same projection laid out again, on request, with Inspector actions on its groups.
+  for(const [key,use] of [['original','role type'],['completed-from','association type'],['date','occurrence type'],['derived','scope: how a statement is known']]){
+   const row=map.locator('tr').filter({has:page.locator('td',{hasText:new RegExp('^'+key+'$')})}).filter({hasText:use}).first()
+   await row.locator('.inspector-inspect').last().click()
+   await panes().nth(completion+1).locator('.inspector-title').filter({hasText:/TOPIC/i}).first().waitFor()}
+  steps.push('schema Topics: not drawn; original, completed-from, date and derived open through the legend')
+  // 8. TALA: the same projection laid out again, on request, and still the same Topics and Roles.
   await map.getByRole('button',{name:'Lay out with TALA',exact:true}).click()
   const tala=panes().nth(completion+1)
   await tala.locator('.inspector-title').filter({hasText:/TALA-RENDERING|PLIST|TALA/i}).first().waitFor({timeout:120000})
@@ -173,13 +228,24 @@ try{
   if(talaTabs.includes('TALA (interactive)')){
    await tala.getByRole('button',{name:'TALA (interactive)',exact:true}).click()
    await tala.locator('svg g[data-topic-id="the-completed-action"]').waitFor()
-   assert.equal(await tala.locator('svg g[data-topic-id]').count(),15)
-   assert.equal(await tala.locator('svg g[data-association-id]').count(),16)
+   const talaTopics=await tala.locator('svg g[data-topic-id]').evaluateAll(els=>els.map(e=>e.getAttribute('data-topic-id')).sort())
+   assert.deepEqual(talaTopics,(await map.locator('.dreyeck-topicmap-topic').evaluateAll(els=>els.map(e=>e.getAttribute('data-topic-id')).sort())),'the same fifteen Topics, under the same keys')
+   const talaEdges=await tala.locator('svg g[data-association-id]').evaluateAll(els=>els.map(e=>e.getAttribute('data-association-id')).sort())
+   assert.deepEqual(talaEdges,[...edgeIds].sort(),'the same sixteen Role edges')
+   // completed-from and its two Role edges stay reachable; a click on a Topic or an edge opens an Inspector object.
+   const cfEdges=talaEdges.filter(id=>id.startsWith('completed-from('));assert.deepEqual(cfEdges.map(id=>id.split(':').slice(-2).join(':')).sort(),['completed:the-completed-action','original:the-proposed-action'])
+   await tala.locator(`svg g[data-topic-id="${completedFrom}"]`).first().click()
+   await panes().nth(completion+2).getByRole('heading',{name:'completed-from',exact:true}).waitFor()
+   text=await panes().nth(completion+2).innerText();for(const expected of ['Provenance in the HyperDoc projection','derived','different objects and equal in every field but the date','the-completed-action','the-proposed-action'])assert(text.includes(expected),expected)
+   await tala.locator(`svg g[data-association-id="${cfEdges.find(id=>id.endsWith(':original:the-proposed-action'))}"]`).first().click()
+   await panes().nth(completion+2).getByRole('heading',{name:/original/}).waitFor()
    await tala.locator('svg g[data-topic-id="the-completed-action"]').first().click()
    await panes().nth(completion+2).getByRole('heading',{name:'the-completed-action',exact:true}).waitFor()
    assert((await panes().nth(completion+2).innerText()).includes('Provenance in the HyperDoc projection'))
-   steps.push('Lay out with TALA → TALA (interactive): 15 Topics, 16 Role edges, a click opens the Topic and its Provenance')
+   steps.push('Lay out with TALA → TALA (interactive): the same 15 Topics and 16 Role edges; completed-from, its Role edge original and a Topic open Inspector objects')
   }else steps.push('Lay out with TALA → no D2 here: '+talaTabs.join(', '))
+  // The test page, story and journal, is as it was.
+  {const now=JSON.parse(fs.readFileSync(pageFile,'utf8')),was=JSON.parse(fs.readFileSync(retained,'utf8'));assert.deepEqual(now.story,was.story);assert.deepEqual(now.journal,was.journal)}
   assert.equal(sha(pageFile),before)
  }
  await panes().nth(carrier).getByText('ctm-and-tmdm-in-hyperdoc',{exact:true}).first().click()
