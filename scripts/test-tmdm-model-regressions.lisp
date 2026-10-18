@@ -1,0 +1,8 @@
+(load (merge-pathnames "tmdm-model-bootstrap.lisp" *load-truename*))
+(asdf:test-system "dreyeck/work/tmdm-reading/tests")
+(asdf:test-system "dreyeck/work/reading/tests")
+(asdf:test-system "dreyeck/evaluation-record/tests")
+(asdf:test-system "dreyeck/git/tests")
+(asdf:test-system "dreyeck/topicmap/tests")
+(asdf:test-system "dreyeck/catalog-application/tests")
+(format t "~&TMDM-SLICE-12B-REGRESSIONS-PASS~%")

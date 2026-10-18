@@ -1,0 +1,191 @@
+{
+  "kind": "local Slice 12B validation; no publication or deployment proof",
+  "observedAtUTC": "2026-10-17T15:45:12.435676+00:00",
+  "hyperdocBranch": "codex/ctm-slice-12b",
+  "hyperdocBase": "aabbb983cbaaf713e7406856d853694c5166d5ef",
+  "baseParent": "44ebc23a934b6373b445d88f023332deeafd256c",
+  "baseTree": "b428328b80864aed864e90889d075413fb4b7271",
+  "topicMapsCommit": "788899aea1a20b9cd8237c6106e6613e180d7362",
+  "upstreamCorpusCommit": "cd165b150176c1d6842b37be9cc9051b40d4996b",
+  "sourceSHA256": {
+    "dreyeck.asd": "8717c5935d6adb6d0fadc13b330f36ad3d7ecb10a86b0eb6b70975d2776f1837",
+    "dreyeck/src/tmdm-model-navigation.lisp": "de7bc3d250f382e6d14bb094a1f7efd4b84f810fa950266acffc6176377f0d3b",
+    "dreyeck/work/tmdm-model-reading.lisp": "1e5dc77c80426032d4e1b7a1b2606d8807d8a3e8ab62cc387a55ef36d642845e",
+    "dreyeck/tests/tmdm-model-reading.lisp": "178aff090980f3598204633938451351b400f1922339bddd8c5ea0fd0e8621b5",
+    "scripts/tmdm-model-bootstrap.lisp": "abe36b8713c668138b2ed00a8e7f02a89ffc0cc24bd212b125fd88c647fa00ab",
+    "scripts/test-tmdm-model-regressions.lisp": "a0313694db8ffdcb75f44349aad467e663d9ef6c2e9231d086614f9c5bf719c8",
+    "scripts/test-tmdm-model-navigation.mjs": "96894680b9de09aeddb24474abf59da9e3ce598cbbde016b2bfcb813ce77e2ef",
+    "scripts/serve-tmdm-model-review.lisp": "521ba411eedd906835d85a7463dc2f2cefa0a6cb7718aae0e3ca78664214c0ed"
+  },
+  "hyperdocTests": {
+    "status": "PASS",
+    "runtime": "SBCL 2.4.10 (Nix packages)",
+    "freshProcess": true,
+    "systems": [
+      {
+        "system": "dreyeck/work/tmdm-reading/tests",
+        "status": "PASS"
+      },
+      {
+        "system": "dreyeck/work/reading/tests",
+        "status": "PASS"
+      },
+      {
+        "system": "dreyeck/evaluation-record/tests",
+        "status": "PASS"
+      },
+      {
+        "system": "dreyeck/git/tests",
+        "status": "PASS"
+      },
+      {
+        "system": "dreyeck/topicmap/tests",
+        "status": "PASS"
+      },
+      {
+        "system": "dreyeck/catalog-application/tests",
+        "status": "PASS"
+      }
+    ],
+    "adapterAssertions": 96,
+    "failedAssertions": 0,
+    "network": "existing read-only Wiki references allowed in legacy Work tests",
+    "conversationAssertions": 363,
+    "deploymentInspectionAssertions": 484,
+    "commands": [
+      "sbcl --noinform --no-sysinit --no-userinit --non-interactive --load scripts/test-tmdm-model-regressions.lisp"
+    ]
+  },
+  "offlineAdapterTests": {
+    "status": "PASS",
+    "assertions": 96,
+    "freshProcess": true,
+    "network": "deny network*",
+    "command": "sandbox-exec -p '(version 1)(allow default)(deny network*)' sbcl --noinform --no-sysinit --no-userinit --non-interactive --load scripts/tmdm-model-bootstrap.lisp --eval '(asdf:test-system \"dreyeck/work/tmdm-reading/tests\")'"
+  },
+  "browser": {
+    "status": "PASS",
+    "browser": "154.0.8037.98",
+    "freshLisp": true,
+    "development": true,
+    "host": "127.0.0.1",
+    "externalBrowserRequests": "blocked",
+    "writer": "ABSENT",
+    "steps": [
+      "Catalog → Work Breakdown → existing Work Topic",
+      "Default: Map → Topic → Name → actual Type Topic",
+      "Native Lineup: same-object revisit and Shift-preserved history",
+      "Actual loaded add-name function → Source code",
+      "Object → Evidence → pinned CTM source / actual CXTM / original baseline / stored evidence / derived interpretation",
+      "Runtime context: observed execution and inferred revision binding separated",
+      "Explicit: Map → Topic → Name → actual Type Topic",
+      "Native Lineup: same-object revisit and Shift-preserved history",
+      "Actual loaded add-name function → Source code",
+      "Object → Evidence → pinned CTM source / actual CXTM / original baseline / stored evidence / derived interpretation",
+      "Runtime context: observed execution and inferred revision binding separated",
+      "Existing Work Workspace Point/History",
+      "Retained Name handle → canonical Name → canonical Type Topic"
+    ],
+    "eqObservations": [
+      "MAP-EQ",
+      "TOPIC-EQ",
+      "NAME-PARENT-TYPE-EQ",
+      "TOPIC-EQ",
+      "REVISIT-EQ",
+      "MAP-EQ",
+      "REVISIT-EQ",
+      "TOPIC-EQ",
+      "DEFINITION-EQ",
+      "SOURCE-EQ",
+      "BASELINE-EQ",
+      "MAP-EQ",
+      "TOPIC-EQ",
+      "NAME-PARENT-TYPE-EQ",
+      "TOPIC-EQ",
+      "REVISIT-EQ",
+      "MAP-EQ",
+      "REVISIT-EQ",
+      "TOPIC-EQ",
+      "REVISIT-EQ",
+      "DEFINITION-EQ",
+      "SOURCE-EQ",
+      "BASELINE-EQ",
+      "NAME-PARENT-TYPE-EQ",
+      "RETAINED-NAME-EQ",
+      "NAME-PARENT-TYPE-EQ",
+      "TOPIC-EQ"
+    ],
+    "sourcesUnchanged": true,
+    "fixtureRoute": "test process only; not an application route"
+  },
+  "independentTopicMapsRegressions": {
+    "status": "PASS",
+    "runtime": "SBCL 2.5.4",
+    "freshProcess": true,
+    "network": "deny network*",
+    "totalLispChecks": 8629,
+    "regressionChecks": {
+      "FOUNDATION": 54,
+      "CTM-IDENTITY-SEMANTICS": 123,
+      "CTM-MERGING-SEMANTICS": 646,
+      "CTM-ASSOCIATIONS-SEMANTICS": 657,
+      "CXTM": 445,
+      "OCCURRENCES": 1101,
+      "PREFIX-DATATYPES": 150,
+      "INTEGERS": 665,
+      "DECIMALS": 715,
+      "DATES": 1806,
+      "DATETIMES": 217,
+      "TIMEZONES": 1944,
+      "TYPED-NAMES": 106
+    },
+    "importedStatuses": {
+      "pass": 64,
+      "fail": 2,
+      "unsupported": 0,
+      "not-run": 207
+    },
+    "positiveByteExactBaselines": 56,
+    "negativeContracts": 8,
+    "knownBaselineDiscrepancies": 2,
+    "command": "PYTHONDONTWRITEBYTECODE=1 SBCL=sbcl TOPIC_MAPS_REPORT=/tmp/topic-maps-12b.json scripts/test.sh",
+    "qualification": "Assertions pass while the two known original DateTime contracts remain FAIL; 207 contracts NOT-RUN."
+  },
+  "notRun": [
+    {
+      "subject": "original private conversation transcript verification",
+      "status": "NOT-RUN",
+      "reason": "No new conversation import/verification; existing Lisp suite explicitly separates this external evidence."
+    },
+    {
+      "subject": "packaged Nix deployment of the opt-in TMDM adapter",
+      "status": "NOT-RUN",
+      "reason": "The adapter is deliberately not added to default Catalog/Nix dependencies; browser evidence concerns the isolated fresh development process."
+    },
+    {
+      "subject": "production activation",
+      "status": "NOT-RUN",
+      "reason": "Not authorized."
+    }
+  ],
+  "boundaries": {
+    "topicMapsRepositoryUnchanged": true,
+    "existingWorkConversationAndNixSourcesUnchanged": true,
+    "longLivedImagesUntouched": true,
+    "publicProjectionOrRedaction": false,
+    "historicalNestedActionsPublicationConditions": "still open; no path-free-history claim"
+  },
+  "rawLogs": "Retained locally outside repository; excerpts below are filtered/redacted. Source hashes qualify this pre-commit test execution.",
+  "rawLogSHA256": {
+    "hyperdoc": "20a0300d9a9e2c1127365fdbe2d3601087bc235ac7572cc0cfcc7ceb014e0691",
+    "offlineAdapter": "6b114d3da778ed61228c9c31e88a557cfd28d47f06a428466dc2920e5cffae26",
+    "topicMaps": "0cb07c599ac0f1103b10aad88dd8b69cb888bdd5c701055a150d523caa3b967a",
+    "browserLisp": "33acd12d413f8c87a9f63fcd7eea379433ef078eca56b2301000662b008db023"
+  },
+  "developmentEnvironment": {
+    "status": "PASS",
+    "command": "nix develop .#tala --offline --command sbcl --version",
+    "actual": "SBCL 2.4.10",
+    "qualification": "Default Catalog dependency built as part of entering the Nix shell. This is not a packaged/served proof of the opt-in adapter."
+  }
+}

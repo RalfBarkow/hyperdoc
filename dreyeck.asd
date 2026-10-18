@@ -3101,3 +3101,22 @@
   :perform (test-op (op component)
              (declare (ignore op component))
              (uiop:symbol-call :dreyeck/clog-tutorial/reading/tests :run-tests)))
+
+;; Local, opt-in adapters. The default Catalog and independent model stay separate.
+(asdf:defsystem "dreyeck/inspector/tmdm"
+  :description "Inspector navigation of actual TMDM Maps, Topics and Names"
+  :depends-on ("topic-maps/tmdm" "html-inspector-views" "dreyeck/evaluation-record")
+  :components ((:file "dreyeck/src/tmdm-model-navigation")))
+
+(asdf:defsystem "dreyeck/work/tmdm-reading"
+  :description "Local CTM/TMDM readings using existing Work and evaluation records"
+  :depends-on ("dreyeck/inspector/tmdm" "dreyeck/work/reading" "dreyeck/evaluation-record"
+               "topic-maps" "topic-maps/ctm" "topic-maps/cxtm" "ironclad" "babel")
+  :components ((:file "dreyeck/work/tmdm-model-reading")))
+
+(asdf:defsystem "dreyeck/work/tmdm-reading/tests"
+  :depends-on ("dreyeck/work/tmdm-reading")
+  :components ((:file "dreyeck/tests/tmdm-model-reading"))
+  :perform (asdf:test-op (operation component)
+             (declare (ignore operation component))
+             (uiop:symbol-call :dreyeck/work/tmdm-reading/tests :run-tests)))
