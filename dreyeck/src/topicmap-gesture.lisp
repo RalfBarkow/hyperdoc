@@ -375,12 +375,29 @@ cancelled interaction leaves nothing on the page."
                    (dreyeck/gesture/clog:menu-bindings window target kind))))
     (values (elements :radial-menu) (elements :learned-mark))))
 
+(defparameter *association-role-bindings*
+  (loop for kind in '(:radial-menu :learned-mark)
+        collect (dreyeck/gesture-binding-witness::%make-gesture-binding
+                 :id (format nil "binding/~(~A~)-association-inspect-represented-object" kind)
+                 :kind kind :sector-center 180.0d0 :sector-half-width 30.0d0
+                 :target-type :topicmap-association :enabled-p t
+                 :operation (dreyeck/gesture-binding-witness:inspect-represented-object-operation)))
+  "Inspect represented object for the sign of an Association that stands for a TMDM Role, where Topic signs have it: at 180 degrees.")
+
+(defun association-sign-bindings (association)
+  "What the sign of ASSOCIATION offers, by what it has: Inspect relation contract if it has a Relation Contract, Inspect represented object if it stands for a TMDM Role
+(its :TMDM-ROLE), and nothing for what has neither."
+  (let ((properties (dreyeck/topicmap:topicmap-association-properties-of association)))
+    (append (when (getf properties :relation-contract)
+              (dreyeck/gesture-binding-witness:make-association-binding-catalog))
+            (when (getf properties :tmdm-role) *association-role-bindings*))))
+
 (defun bind-association-sign (pane parent element association)
   (let* ((token (symbol-name (gensym "association-sign-")))
          ;; The exact Association is the target; IDs and labels are not.
          (target (list :type :topicmap-association :association association))
          (window (dreyeck/gesture/clog:make-gesture-window
-                  :bindings (dreyeck/gesture-binding-witness:make-association-binding-catalog))))
+                  :bindings (association-sign-bindings association))))
     (multiple-value-bind (labels marks)
         (%make-sign-menu window target parent "dreyeck-association-gesture-menu")
       (setf (dreyeck/gesture/clog::gesture-window-projection window)
@@ -474,9 +491,16 @@ cancelled interaction leaves nothing on the page."
 
 (defmethod operation-inspectable-object
     ((operation (eql (dreyeck/gesture-binding-witness:inspect-represented-object-operation))) target)
-  (or (dreyeck/topicmap:topicmap-topic-object-of (%topic-operation-topic operation target))
-      (error 'operation-not-applicable :operation operation :target target
-             :reason "the Topic has no represented object")))
+  ;; Applicability is the exact target's: a Topic sign shows its Topic's object; the sign of an Association that stands for a TMDM Role shows that Role itself.
+  (if (eq :topicmap-association (getf target :type))
+      (let ((association (getf target :association)))
+        (or (and (typep association 'dreyeck/topicmap:topicmap-association)
+                 (getf (dreyeck/topicmap:topicmap-association-properties-of association) :tmdm-role))
+            (error 'operation-not-applicable :operation operation :target target
+                   :reason "the Association stands for no TMDM Role")))
+      (or (dreyeck/topicmap:topicmap-topic-object-of (%topic-operation-topic operation target))
+          (error 'operation-not-applicable :operation operation :target target
+                 :reason "the Topic has no represented object"))))
 
 (defmethod operation-inspectable-object (operation target)
   "The inspectable object OPERATION shows for TARGET, a Gesture target plist.

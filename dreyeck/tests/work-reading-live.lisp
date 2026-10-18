@@ -314,14 +314,15 @@ when an interaction ends, and completion still opens an Operation Request."
           (assert (equal "" (%live-visible-menus)))))
       (assert (not (eq a1 a2)))
       (format t "~&EXPERT-PASS: A1 and A2 each marked without a menu, the same Operation, and each showed the same contract Topic; no mark or menu remained, also past 500 ms.~%")
-      ;; An Association without a contract: selected, refused, nothing opened.
+      ;; An Association without a contract offers nothing: no menu entry, no selection, nothing opened.
       (let* ((id (id-of requires)) (before (%live-panes)))
-        (%live-pointers id '(("pointerdown" 2 2 0) ("pointermove" -1 2 70) ("pointerup" 2 0 70)))
-        (%live-await (lambda () (equal "not-applicable" (%live-sign-attribute id "data-association-gesture-outcome")))
-                     :what "the refusal")
-        (assert (search "refers to no Relation Contract"
-                        (%live-sign-attribute id "data-association-gesture-refusal")))
+        (%live-pointers id '(("pointerdown" 2 2 0)))
+        (sleep 0.8)
+        (assert (equal "" (%live-visible-menus)))
+        (%live-pointers id '(("pointermove" -1 2 70) ("pointerup" 2 0 70)))
         (sleep 0.5)
+        (assert (not (equal "not-applicable" (%live-sign-attribute id "data-association-gesture-outcome"))))
+        (assert (not (equal "shown" (%live-sign-attribute id "data-association-gesture-outcome"))))
         (assert (equal before (%live-panes)))
         (assert (equal "" (%live-visible-menus))))
       ;; Cancelled: released with the menu open but no sector, and cancelled by

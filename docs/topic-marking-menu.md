@@ -147,7 +147,14 @@ the same Operations. Right and down are vacant (no Work Topic, no page). Nothing
 
 `TALA (interactive)` gave its Topic groups only the PRIMARY Inspector reference, so SECONDARY did nothing there. `interactive-tala-svg` now registers each Topic group's reference as a
 Topic sign (`register-topic-sign`, next to `register-association-sign`); the existing `create-view-element :after` method binds the same gesture script, Gesture Window, Bindings and
-Operations to it. PRIMARY is unchanged (it opens the projected Topic). The Role edges of that drawing already took the Association gesture; its only Operation, *Inspect relation
-contract*, does not apply to a projected Role edge, so a selection there is refused and opens nothing.
+Operations to it. PRIMARY is unchanged (it opens the projected Topic).
+
+### What an Association sign offers
+
+The Association sign used to offer *Inspect relation contract* whether or not the Association had a Relation Contract, and refused only when the Operation ran: on a projected TMDM Role
+edge the menu opened, and the selection did nothing. `association-sign-bindings` now offers what the Association has: *Inspect relation contract* (right) only if it has `:relation-contract`;
+*Inspect represented object* (left, the same identity and angle as on a Topic sign) if it stands for a TMDM Role (`:tmdm-role`), whose execution passes that very Role object to the
+Inspector; and nothing if it has neither. Applicability is read from the exact gesture target. A Work Association with a Relation Contract keeps its Operation; one without now offers nothing
+(the live witness `run-live-interactive-tala-test` asserts that; it fails earlier at its baseline in a headless run, so that part is not executed). The Role edges of the native renderer are not signs and take no gesture.
 
 Browser evidence: `scripts/test-ctm-page-authoring-documentation.mjs` drives the production DOM with synthetic pointer events (`isTrusted=false`), as the 2026-10-05 proof did.

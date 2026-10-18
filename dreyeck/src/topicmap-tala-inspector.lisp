@@ -230,7 +230,7 @@ Call it while a view is being built: the references belong to it."
 (views:defview 👀tala-interactive (rendering tala:tala-rendering)
   (views:html-view :title "TALA (interactive)" :priority 2
     (views:html
-      (:p "The same TALA layout, inline. Click an edge or its label to inspect that Association; click a shape to inspect its Topic. Right-click an edge to inspect its relation contract: hold for the menu, or move right at once to mark. Inspecting changes nothing.")
+      (:p "The same TALA layout, inline. Click an edge or its label to inspect that Association; click a shape to inspect its Topic. Press the secondary button on a shape or an edge and hold for the menu of what that sign offers, or move at once toward an Operation to mark it. A shape offers Inspect represented object (left) and Inspect Topicmap sign (up). An edge that stands for a TMDM Role offers Inspect represented object (left), the Role itself. An edge of a relation with a Relation Contract offers Inspect relation contract (right); an edge with neither offers nothing. Inspecting changes nothing.")
       (views:str (interactive-tala-svg rendering)))))
 
 (views:defview 👀tala-result (rendering tala:tala-rendering)

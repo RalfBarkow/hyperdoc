@@ -229,7 +229,7 @@ try{
    const t=(await w.innerText()).replace(/\s+/g,' ');return t.slice(t.search(/HISTORY/i))}
   const press=(loc,name,button,buttons,dx,dy)=>loc.evaluate((e,a)=>{const r=e.getBoundingClientRect();const ev=new PointerEvent(a.name,{bubbles:true,pointerId:77,pointerType:'mouse',button:a.button,buttons:a.buttons,clientX:r.x+r.width/2+a.dx,clientY:r.y+r.height/2+a.dy,isPrimary:true});e.dispatchEvent(ev);return ev.isTrusted},{name,button,buttons,dx,dy})
   const gstate=loc=>loc.evaluate(e=>({state:e.dataset.topicGestureState,mode:e.dataset.topicGestureMode,menu:e.dataset.topicGestureMenuVisible,binding:e.dataset.topicGestureBinding,outcome:e.dataset.topicGestureOutcome,bound:typeof e.__disposeTopicGesture==='function'}))
-  const visibleMenu=()=>page.evaluate(()=>[...document.querySelectorAll('.dreyeck-topic-gesture-menu')].filter(x=>{const c=getComputedStyle(x),b=x.getBoundingClientRect();return c.display!=='none'&&c.visibility!=='hidden'&&b.width>0}).map(x=>x.textContent).sort())
+  const visibleMenu=()=>page.evaluate(()=>[...document.querySelectorAll('.dreyeck-topic-gesture-menu,.dreyeck-association-gesture-menu')].filter(x=>{const c=getComputedStyle(x),b=x.getBoundingClientRect();return c.display!=='none'&&c.visibility!=='hidden'&&b.width>0}).map(x=>x.textContent).sort())
   const LEFT=[-70,0],UP=[0,-70]
   // One selection by the radial menu (press, wait for the menu, move, release) or by the learned mark (press, move, release at once).
   const select=async(loc,where,dir,rightPane)=>{
@@ -306,12 +306,36 @@ try{
     assert(id===completedFrom?/^association.*ASSOCIATION 2 roles/.test(m.title):/^topicTopic #the-completed-action/.test(m.title),m.title)
     const u=await select(loc,'mark',UP,rightPane);assert(/^item-edit-topic/.test(u.title))
    }
-   // Its Role edges carry the Association gesture, whose only Operation, Inspect relation contract, does not apply to a Role edge: a refusal, and nothing opens.
-   const edge=tala.locator(`svg g[data-association-id$=":original:the-proposed-action"]`).first();await edge.scrollIntoViewIfNeeded()
-   assert.equal(await edge.evaluate(e=>typeof e.__disposeTopicGesture==='function'),true)
-   await press(edge,'pointerdown',2,2,0,0);await press(edge,'pointermove',-1,2,70,0);await press(edge,'pointerup',2,0,70,0);await page.waitForTimeout(800)
-   assert.equal(await edge.evaluate(e=>e.dataset.associationGestureOutcome),'not-applicable')
-   steps.push('Lay out with TALA → TALA (interactive): the same 15 Topics and 16 Role edges; completed-from, its Role edge original and a Topic open Inspector objects')
+   // A Role edge offers Inspect represented object, the TMDM Role it stands for, and not Inspect relation contract (it has no Relation Contract).
+   const roleEdge=tala.locator(`svg g[data-association-id^="completes("][data-association-id$=":completion:the-completion"]`).first();await roleEdge.scrollIntoViewIfNeeded()
+   assert.equal((await gstate(roleEdge)).bound,true,'the Role edge takes the gesture')
+   const edgeSelect=async(how)=>{assert.equal(await press(roleEdge,'pointerdown',2,2,0,0),false)
+    let labels=null;if(how==='menu'){await page.waitForTimeout(900);labels=await visibleMenu()}
+    await press(roleEdge,'pointermove',-1,2,-70,0);await press(roleEdge,'pointerup',2,0,-70,0);await page.waitForTimeout(900)
+    const g=await roleEdge.evaluate(e=>({outcome:e.dataset.associationGestureOutcome,state:e.dataset.associationGestureState,binding:e.dataset.associationGestureBinding,menu:e.dataset.associationGestureMenuVisible,mode:e.dataset.associationGestureMode}))
+    return {labels,g,title:await titleOf(panes().nth(completion+2))}}
+   const viaMenu=await edgeSelect('menu')
+   assert.deepEqual(viaMenu.labels,['Inspect represented object'],'the menu offers Inspect represented object and not Inspect relation contract')
+   assert.equal(viaMenu.g.outcome,'shown');assert.equal(viaMenu.g.binding,'binding/radial-menu-association-inspect-represented-object')
+   const viaMark=await edgeSelect('mark')
+   assert.equal(viaMark.g.outcome,'shown');assert.equal(viaMark.g.binding,'binding/learned-mark-association-inspect-represented-object')
+   assert.equal(viaMark.title,viaMenu.title,'the mark opens the same object as the menu')
+   assert(/^association-role#<ASSOCIATION-ROLE \{[0-9A-F]+\}>/.test(viaMenu.title),'the TMDM Role itself: '+viaMenu.title)
+   // From the Role: its Association, its Role type and its player are inspectable.
+   const rolePane=panes().nth(completion+2);await rolePane.getByRole('button',{name:'Slots',exact:true}).first().click();await page.waitForTimeout(800)
+   const follow=async(slot,expected)=>{await rolePane.locator('tr').filter({hasText:new RegExp('^'+slot)}).locator('td').nth(1).locator('.inspector-inspect').first().click()
+    const next=panes().nth(completion+3);await next.locator('.inspector-title').first().waitFor();for(let n=0;n<50&&!expected.test(await titleOf(next));n++)await page.waitForTimeout(100)
+    assert(expected.test(await titleOf(next)),slot+' → '+await titleOf(next))}
+   await follow('parent',/^association#<ASSOCIATION 2 roles/);await follow('type',/^topicTopic #completion$/);await follow('player',/^topicTopic #the-completion$/)
+   // The same Role as the Association node shows in its Provenance (native drawing): one object, not a copy.
+   const roleAddress=viaMenu.title.match(/\{([0-9A-F]+)\}/)[1]
+   const completesNode='completes(completion=the-completion,preview=the-preview)'
+   await sign(completesNode).dispatchEvent('click');await pointAt(completesNode)
+   const provenance=map.locator('table').filter({hasText:'Lisp object'}).first()
+   await provenance.locator('tr').filter({has:page.locator('td',{hasText:/^completion$/})}).first().locator('td').first().locator('.inspector-inspect').first().click()
+   const nativeRole=panes().nth(completion+1);await nativeRole.locator('.inspector-title').filter({hasText:/ASSOCIATION-ROLE/}).first().waitFor()
+   assert.equal((await titleOf(nativeRole)).match(/\{([0-9A-F]+)\}/)[1],roleAddress,'the edge and the Provenance table show the same TMDM Role object')
+   steps.push('Lay out with TALA → TALA (interactive): the same 15 Topics and 16 Role edges; the Role edge completion offers Inspect represented object only (menu and mark open the TMDM Role; its Association, Role type and player open); Topic groups take the gesture too')
   }else steps.push('Lay out with TALA → no D2 here: '+talaTabs.join(', '))
   // The test page, story and journal, is as it was.
   {const now=JSON.parse(fs.readFileSync(pageFile,'utf8')),was=JSON.parse(fs.readFileSync(retained,'utf8'));assert.deepEqual(now.story,was.story);assert.deepEqual(now.journal,was.journal)}

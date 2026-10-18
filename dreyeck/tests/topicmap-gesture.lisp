@@ -228,6 +228,35 @@ tokens and Gesture Windows; input to one does not reach the other."
       (m:invalidate-workspace-action-sign-occurrence occurrence)
       (assert (search "No longer current" (html))))))
 
+(defun test-association-signs-offer-what-they-have ()
+  ;; The sign of an Association offers what that Association has: a Relation Contract gives Inspect relation contract (right), a TMDM Role gives Inspect
+  ;; represented object (left), and one with neither offers nothing. The Operation follows the exact target.
+  (let* ((contract (tm:make-topicmap-topic :id "contract" :label "Contract"))
+         (role (list :a-tmdm-role))
+         (with-contract (tm:make-topicmap-association :id "c" :type :x :from "a" :to "b" :properties (list :relation-contract contract)))
+         (with-role (tm:make-topicmap-association :id "r" :type "role-type" :from "a" :to "b" :properties (list :tmdm-role role)))
+         (with-both (tm:make-topicmap-association :id "both" :type :x :from "a" :to "b" :properties (list :relation-contract contract :tmdm-role role)))
+         (with-neither (tm:make-topicmap-association :id "n" :type :x :from "a" :to "b"))
+         (contract-op (w:inspect-relation-contract-operation)) (object-op (w:inspect-represented-object-operation)))
+    (flet ((offered (association) (sort (mapcar (lambda (b) (list (w:gesture-binding-kind b) (w:semantic-operation-identity-id (w:gesture-binding-operation b)) (w:gesture-binding-sector-center b)))
+                                                (m::association-sign-bindings association))
+                                        #'string< :key (lambda (x) (format nil "~A~A" (second x) (first x)))))
+           (target (association) (list :type :topicmap-association :association association)))
+      (assert (equal '((:learned-mark "operation/inspect-relation-contract" 0.0d0) (:radial-menu "operation/inspect-relation-contract" 0.0d0)) (offered with-contract)))
+      (assert (equal '((:learned-mark "operation/inspect-represented-object" 180.0d0) (:radial-menu "operation/inspect-represented-object" 180.0d0)) (offered with-role)))
+      (assert (= 4 (length (offered with-both))))
+      (assert (null (offered with-neither)))
+      ;; Menu and mark share the Operation identity and the angle; the sectors of the two Operations do not meet.
+      (assert (eq contract-op (w:gesture-binding-operation (first (m::association-sign-bindings with-contract)))))
+      (assert (eq object-op (w:gesture-binding-operation (first (m::association-sign-bindings with-role)))))
+      ;; The Role itself is what Inspect represented object shows for the Role sign: the exact object, not a copy.
+      (assert (eq role (m:operation-inspectable-object object-op (target with-role))))
+      (assert (eq contract (m:operation-inspectable-object contract-op (target with-contract))))
+      ;; Not applicable where the exact target has none: no Role for a contract-only Association, no contract for a Role-only one.
+      (assert (handler-case (progn (m:operation-inspectable-object object-op (target with-contract)) nil) (m:operation-not-applicable () t)))
+      (assert (handler-case (progn (m:operation-inspectable-object contract-op (target with-role)) nil) (m:operation-not-applicable () t)))
+      (assert (handler-case (progn (m:operation-inspectable-object object-op '(:type :topicmap-association :association :not-an-association)) nil) (m:operation-not-applicable () t))))))
+
 (defun run-workspace-action-sign-tests ()
   (let* ((workspace (reading-workspace))
          (topic (%topic workspace *reachable-topic-id*)))
@@ -240,6 +269,7 @@ tokens and Gesture Windows; input to one does not reach the other."
     (test-primary-refused workspace topic)
     (test-an-ended-occurrence-takes-no-input workspace topic)
     (test-occurrence-overview workspace topic)
+    (test-association-signs-offer-what-they-have)
     (format t "~&WORKSPACE-ACTION-SIGN-OCCURRENCE-PASS: production inspections share identities/angles, exact targets and disjoint sectors; with test-only Bindings a radial and a mark complete on ~
 the exact occurrence; two occurrences of one Topic are distinct; the ~
 inspectable object is not the Topic; inputs record isTrusted; an ended ~
