@@ -28,6 +28,11 @@
 Projection and Workspace it was rendered for. It is still an Inspector
 action, not a Gesture Operation."))
 
+(defclass association-action-reference (views:thunk)
+  ((association :initarg :association :reader action-association))
+  (:documentation "The Inspector action on the hit line of a native Role edge: it does nothing when clicked, so PRIMARY is unchanged, and carries the exact Association, to which the
+Association gesture is bound."))
+
 (defclass workspace-action-sign-occurrence ()
   ((reference :initarg :reference :reader occurrence-reference)
    (element :initarg :element :reader occurrence-element)
@@ -429,6 +434,8 @@ cancelled interaction leaves nothing on the page."
                                         :pane pane :view view)))
          (bind-workspace-action-sign-occurrence occurrence parent)
          (push (sb-ext:make-weak-pointer occurrence) *workspace-action-sign-occurrences*)))
+      ((typep (cdr entry) 'association-action-reference)
+       (bind-association-sign pane parent (clog:attach-as-child parent (car entry)) (action-association (cdr entry))))
       ((gethash (car entry) *topic-sign-ids*)
        (destructuring-bind (topic . projection) (gethash (car entry) *topic-sign-ids*)
          (let ((occurrence (make-instance 'workspace-action-sign-occurrence

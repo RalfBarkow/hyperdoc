@@ -262,6 +262,52 @@ try{
   // Reading Operations: the Point and the History are as before.
   await pointAt('the-completion');assert.equal(await historyText(),history0,'the History is unchanged by SECONDARY')
   steps.push('SECONDARY on the-completion and completed-from (synthetic events): radial menu lists the two applicable Operations; menu and mark open the same objects; Point and History unchanged')
+  // The native Role edge takes SECONDARY too: its transparent hit line is hit by the browser (elementFromPoint), the Topic signs stay on top of it.
+  const nativeEdgeId='completes(completion=the-completion,preview=the-preview):completion:the-completion'
+  const nativeEdge=map.locator(`.dreyeck-topicmap-association[data-association-id="${nativeEdgeId}"]`)
+  const hitLine=nativeEdge.locator('line.dreyeck-topicmap-association-hit');await hitLine.scrollIntoViewIfNeeded()
+  assert.equal(await hitLine.count(),1,'one hit line for the Role edge')
+  const hits=await nativeEdge.evaluate(g=>{const hit=g.querySelector('line.dreyeck-topicmap-association-hit'),r=hit.getBoundingClientRect();
+   const at=(x,y)=>{const el=document.elementFromPoint(x,y);return el&&{hit:el===hit,topic:!!el.closest('.dreyeck-topicmap-topic'),edge:el.closest('.dreyeck-topicmap-association')?.getAttribute('data-association-id')||null}}
+   const topicSigns=[...document.querySelectorAll('.dreyeck-topicmap-topic')].map(t=>t.getBoundingClientRect())
+   const x1=+hit.getAttribute('x1'),y1=+hit.getAttribute('y1'),x2=+hit.getAttribute('x2'),y2=+hit.getAttribute('y2'),svg=hit.ownerSVGElement,m=svg.getScreenCTM()
+   const pt=(x,y)=>({x:m.a*x+m.e,y:m.d*y+m.f})
+   const mid=pt((x1+x2)/2,(y1+y2)/2),len=Math.hypot(x2-x1,y2-y1)||1,off=pt((x1+x2)/2-30*(y2-y1)/len,(y1+y2)/2+30*(x2-x1)/len)
+   return {mid:at(mid.x,mid.y),farAway:at(off.x,off.y),pointerEvents:getComputedStyle(hit).pointerEvents,stroke:getComputedStyle(hit).stroke,width:getComputedStyle(hit).strokeWidth}})
+  assert.equal(hits.mid.hit,true,'elementFromPoint at the middle of the Role edge is its hit line: '+JSON.stringify(hits))
+  assert.equal(hits.farAway&&hits.farAway.hit,false,'a point 30px away is not the hit line')
+  assert.equal(hits.pointerEvents,'stroke')
+  // A Topic sign keeps its click: the hit line lies below every sign.
+  const signHit=await sign('the-completion').evaluate(e=>{const r=e.getBoundingClientRect(),el=document.elementFromPoint(r.x+r.width/2,r.y+r.height/2);return el&&el.closest('.dreyeck-topicmap-workspace-action')===e})
+  assert.equal(signHit,true,'the centre of a Topic sign is the sign, not an edge')
+  assert.equal(await hitLine.evaluate(e=>typeof e.__disposeTopicGesture==='function'),true,'the hit line is bound to the Gesture transport')
+  const edgeG=()=>hitLine.evaluate(e=>({outcome:e.dataset.associationGestureOutcome,state:e.dataset.associationGestureState,binding:e.dataset.associationGestureBinding}))
+  const pointBefore=await map.locator('p').filter({hasText:/^Point:/}).first().locator('code').innerText()
+  // PRIMARY on the edge: nothing opens and the Point stays.
+  const rightBefore=await titleOf(panes().nth(completion+1));const paneCount=await panes().count()
+  await hitLine.dispatchEvent('click');await page.waitForTimeout(700)
+  assert.equal(await panes().count(),paneCount,'PRIMARY on the native edge opens no pane')
+  assert.equal(await titleOf(panes().nth(completion+1)),rightBefore)
+  assert.equal(await map.locator('p').filter({hasText:/^Point:/}).first().locator('code').innerText(),pointBefore,'PRIMARY on the native edge keeps the Point')
+  // SECONDARY: menu and mark.
+  const nativeEdgeSelect=async how=>{assert.equal(await press(hitLine,'pointerdown',2,2,0,0),false)
+   let labels=null;if(how==='menu'){await page.waitForTimeout(900);labels=await visibleMenu()}
+   await press(hitLine,'pointermove',-1,2,-70,0);await press(hitLine,'pointerup',2,0,-70,0);await page.waitForTimeout(900)
+   return {labels,g:await edgeG(),title:await titleOf(panes().nth(completion+1))}}
+  const nm=await nativeEdgeSelect('menu')
+  assert.deepEqual(nm.labels,['Inspect represented object'],'the native Role edge offers Inspect represented object and nothing else')
+  assert.equal(nm.g.outcome,'shown');assert.equal(nm.g.binding,'binding/radial-menu-association-inspect-represented-object')
+  const nk=await nativeEdgeSelect('mark')
+  assert.equal(nk.g.outcome,'shown');assert.equal(nk.g.binding,'binding/learned-mark-association-inspect-represented-object')
+  assert.equal(nk.title,nm.title,'the mark opens the same object as the menu')
+  assert(/^association-role#<ASSOCIATION-ROLE \{[0-9A-F]+\}>/.test(nm.title),'the TMDM Role: '+nm.title)
+  const nativeRolePane=panes().nth(completion+1);await nativeRolePane.getByRole('button',{name:'Slots',exact:true}).first().click();await page.waitForTimeout(800)
+  const nativeFollow=async(slot,expected)=>{await nativeRolePane.locator('tr').filter({hasText:new RegExp('^'+slot)}).locator('td').nth(1).locator('.inspector-inspect').first().click()
+   const next=panes().nth(completion+2);await next.locator('.inspector-title').first().waitFor();for(let n=0;n<50&&!expected.test(await titleOf(next));n++)await page.waitForTimeout(100)
+   assert(expected.test(await titleOf(next)),slot+' → '+await titleOf(next))}
+  await nativeFollow('parent',/^association#<ASSOCIATION 2 roles/);await nativeFollow('type',/^topicTopic #completion$/);await nativeFollow('player',/^topicTopic #the-completion$/)
+  await pointAt('the-completion');assert.equal(await historyText(),history0,'the History is unchanged by SECONDARY on the native edge')
+  steps.push('native Role edge: elementFromPoint hits the hit line and not a Topic sign; PRIMARY opens nothing; SECONDARY menu and mark (synthetic) open the same TMDM Role, reachable Association, Role type and player; Point and History unchanged')
   // PRIMARY is unchanged: it moves the Point.
   await sign('the-completed-action').dispatchEvent('click');await pointAt('the-completed-action')
   assert.notEqual(await historyText(),history0,'PRIMARY records History')

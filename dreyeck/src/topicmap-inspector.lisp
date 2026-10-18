@@ -99,7 +99,7 @@
                 (X2 (+ TO-X 105))
                 (Y2 (+ TO-Y 30)))
             (FORMAT STREAM
-                    "<g class='dreyeck-topicmap-association' data-association-id='~A' data-association-type='~A' data-presentation='RELATION'><line x1='~D' y1='~D' x2='~D' y2='~D' marker-end='url(#dreyeck-topicmap-arrow)'></line><text x='~D' y='~D'>~A</text></g>"
+                    "<g class='dreyeck-topicmap-association' data-association-id='~A' data-association-type='~A' data-presentation='RELATION'><line x1='~D' y1='~D' x2='~D' y2='~D' marker-end='url(#dreyeck-topicmap-arrow)'></line><text x='~D' y='~D'>~A</text>~A</g>"
                     (TOPICMAP-HTML-ESCAPE
                      (DREYECK/TOPICMAP:TOPICMAP-ASSOCIATION-ID-OF ASSOCIATION))
                     (TOPICMAP-HTML-ESCAPE
@@ -111,7 +111,19 @@
                      (OR (DREYECK/TOPICMAP:TOPICMAP-ASSOCIATION-RELATION-LABEL
                           ASSOCIATION)
                          (DREYECK/TOPICMAP:TOPICMAP-ASSOCIATION-TYPE-OF
-                          ASSOCIATION))))))))))
+                          ASSOCIATION)))
+                    (%native-relation-hit-sign association x1 y1 x2 y2))))))))
+
+(defun %native-relation-hit-sign (association x1 y1 x2 y2)
+  "The element that takes the gesture of a Role edge: a transparent, wider line over the visible one, drawn last in the edge's group so it is also over the label, and
+under the Topic signs, which are drawn after every edge. Its reference is an ordinary Inspector action that does nothing (PRIMARY is as it was: no pane, no Point),
+registered so that the Association gesture is bound to this very element. Only an Association that stands for a TMDM Role has one; a Work relation's native edge is as it was."
+  (if (getf (dreyeck/topicmap:topicmap-association-properties-of association) :tmdm-role)
+      (format nil "<line id='~A' class='dreyeck-topicmap-association-hit inspector-action' x1='~D' y1='~D' x2='~D' y2='~D' style='stroke:transparent;stroke-width:14;pointer-events:stroke;cursor:default'></line>"
+              (topicmap-html-escape
+               (views:action-id (make-instance 'association-action-reference :association association :fn (lambda () nil))))
+              x1 y1 x2 y2)
+      ""))
 
 (DEFUN %RENDER-NATIVE-TOPICMAP-STRUCTURAL-CONTAINMENT-SIGN
        (PROJECTION ASSOCIATION STREAM)
