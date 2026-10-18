@@ -82,6 +82,14 @@
           (when (search "(optional-object" text)
             (check (not (stringp (let ((*package* (find-package "DREYECK/WORK/CTM-PAGE-AUTHORING"))) (eval (read-from-string text))))))))))))
 
+(defun check-page-object-link ()
+  ;; The page that is edited is linked as the HyperBook page object, not only named.
+  (check (search "(registered-page \"fedwiki:dreyeck.ch\" \"ctm-and-tmdm-in-hyperdoc\")" (page-source "Authoring the CTM Plan Page")))
+  ;; Without a registered wiki the link is an explanation, no condition and no wiki made by the lookup.
+  (let ((registered (find-symbol "REGISTERED-PAGE" "DREYECK/WORK/CTM-PAGE-AUTHORING")) (before (length (hyperbook::hyperbooks-of hyperbook::*catalog*))))
+    (check (stringp (funcall registered "fedwiki:no-such-wiki.example" "x")))
+    (check (= before (length (hyperbook::hyperbooks-of hyperbook::*catalog*))))))
+
 (defun check-states-are-kept-apart ()
   ;; The implementation state names the six statements and does not let one stand for another.
   (let ((source (page-source "Authoring the CTM Plan Page")))
@@ -95,6 +103,7 @@
     (check-pages)
     (check-reachability)
     (check-optional-objects)
+    (check-page-object-link)
     (check-states-are-kept-apart)
     (format t "~&CTM-PAGE-AUTHORING-DOCUMENTATION-PASS: ~D checks; every expression link of the three pages evaluates to an object in its package, every page link names a page, the new page is reachable from the Work item, the Item page and the derivation, and the six statements of the implementation state are named.~%" *checks*)
     t))

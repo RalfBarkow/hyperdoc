@@ -6,7 +6,7 @@
                     (#:v #:html-inspector-views))
   (:export #:read-ctm-authoring #:validate-ctm-authoring #:ctm-authoring-structure-error
            #:ctm-authoring-plan #:ctm-wbs #:ctm-authoring-workspace #:ctm-authoring-projection
-           #:optional-object))
+           #:optional-object #:registered-page))
 (in-package #:dreyeck/work/ctm-page-authoring)
 (hyperdoc:see (hyperdoc:page "Authoring the CTM Plan Page" :hyperbook "dreyeck/work/reading"))
 (hyperdoc:see (hyperdoc:page "CTM Plan Page WBS Dictionary" :hyperbook "dreyeck/work/reading"))
@@ -25,6 +25,15 @@ local review Catalog loads; in a served Catalog such a link must open an explana
          (object (and symbol (ecase kind (:class (find-class symbol nil)) (:function (and (fboundp symbol) (fdefinition symbol)))))))
     (or object
         (format nil "~A is not loaded in this Catalog. The system ~A provides it, and only the local review Catalog loads that system." name system))))
+
+(defun registered-page (hyperbook-id page-id)
+  "The page PAGE-ID of the HyperBook HYPERBOOK-ID if this image has registered that HyperBook and it has the page;
+otherwise a string that says so. Unlike a link by HyperBook id, it never makes the catalog create a HyperBook (for a
+fedwiki: id, a remote wiki): the Catalog that serves a site registers its own wiki, and only that one is meant."
+  (let* ((book (find hyperbook-id (hyperbook::hyperbooks-of hyperbook::*catalog*) :key #'hyperbook:id-of :test #'equal))
+         (page (and book (hyperbook:find-page book page-id :signal-error? nil))))
+    (or page
+        (format nil "No Catalog here registers ~A with the page ~A. The Catalog that serves the wiki's site root does." hyperbook-id page-id))))
 
 (defparameter +plan-page+ "Authoring the CTM Plan Page")
 (defparameter +dictionary-page+ "CTM Plan Page WBS Dictionary")

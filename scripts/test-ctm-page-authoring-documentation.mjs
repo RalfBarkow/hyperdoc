@@ -8,6 +8,7 @@ import fs from 'node:fs'
 import path from 'node:path'
 import os from 'node:os'
 import net from 'node:net'
+import crypto from 'node:crypto'
 import assert from 'node:assert/strict'
 import {spawn} from 'node:child_process'
 import {pathToFileURL} from 'node:url'
@@ -17,6 +18,9 @@ if(!output||!topicMaps)throw Error('LISP_WRAPPER PLAYWRIGHT_DIRECTORY CHROME OUT
 fs.mkdirSync(output,{recursive:true})
 const temp=fs.mkdtempSync(path.join(os.tmpdir(),'ctm-documentation-browser-'))
 const site=path.join(temp,'site');fs.mkdirSync(path.join(site,'pages'),{recursive:true})
+const retained=path.resolve(path.dirname(new URL(import.meta.url).pathname),'../dreyeck/work/ctm-page-evidence/site/pages/ctm-and-tmdm-in-hyperdoc')
+const pageFile=path.join(site,'pages','ctm-and-tmdm-in-hyperdoc');fs.copyFileSync(retained,pageFile)
+const sha=f=>crypto.createHash('sha256').update(fs.readFileSync(f)).digest('hex'),before=sha(pageFile)
 const port=await new Promise(r=>{const s=net.createServer();s.listen(0,'127.0.0.1',()=>{const p=s.address().port;s.close(()=>r(p))})})
 const stop=path.join(temp,'stop'),script=path.join(temp,'witness.lisp'),log=path.join(output,'lisp.log')
 fs.writeFileSync(script,`(require :asdf)
@@ -53,7 +57,13 @@ try{
  text=await last().innerText()
  for(const expected of ['Implementation state of packages 2 to 4','Integrated in source','Locally executable','Tested on temporary copies','Read in the local Inspector','Served on dreyeck.ch','Accepted'])assert(text.includes(expected),expected)
  steps.push('carrier page: implementation state')
- await click('Item Edit Path in HyperDoc');await heading('Item Edit Path in HyperDoc')
+ // The edited page is a link to the page object itself, not a URL and not a slug in code.
+ await click('ctm-and-tmdm-in-hyperdoc')
+ await last().locator('.inspector-title').filter({hasText:'CTM and TMDM in HyperDoc'}).first().waitFor();steps.push('the linked FedWiki page → its local-fedwiki-page')
+ await page.getByRole('button',{name:'Page source',exact:true}).last().waitFor()
+ // back on the carrier page for the next link
+ await page.locator('.inspector-pane').filter({has:page.getByRole('heading',{name:'Authoring the CTM Plan Page',exact:true})}).last().getByText('Item Edit Path in HyperDoc',{exact:true}).first().click()
+ await heading('Item Edit Path in HyperDoc')
  text=await last().innerText()
  for(const expected of ['The path and its objects','Three statements about an execution','ASDF systems','Operation','Known limits'])assert(text.includes(expected),expected)
  steps.push('Item Edit Path in HyperDoc')
@@ -67,7 +77,7 @@ try{
  await panes().nth(docIndex+1).getByRole('button',{name:'Source code',exact:true}).waitFor();steps.push('execute-completed-edit → the function, with its Source code')
  await open('edit-fedwiki-page-item','EDIT-FEDWIKI-PAGE-ITEM');steps.push('edit-fedwiki-page-item → the writer')
  await open('dreyeck/ctm-page-authoring/local','dreyeck/ctm-page-authoring/local');steps.push('the local system')
- assert.deepEqual(errors,[]);assert.deepEqual(fs.readdirSync(path.join(site,'pages')),[])
+ assert.deepEqual(errors,[]);assert.equal(sha(pageFile),before);assert.deepEqual(fs.readdirSync(path.join(site,'pages')),['ctm-and-tmdm-in-hyperdoc'])
  fs.writeFileSync(path.join(output,'result.json'),JSON.stringify({status:'PASS',development:false,policy:'ENFORCED',nothingWritten:true,steps},null,2))
  console.log('DOCUMENTATION-BROWSER-PASS: '+steps.join(' → ')+' | clicks '+JSON.stringify(readiness))
 }catch(e){
