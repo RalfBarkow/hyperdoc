@@ -59,7 +59,11 @@ topic-maps reader, and navigable as TMDM objects, with the Lisp objects each Top
 
 Start page → *Working on HyperDoc* → *Text pages* → *Work Breakdown* → *Author the CTM Plan Page through HyperDoc* → *E3* → tab `Edit` → button *Prepare edit proposal* →
 change the proposed text (an unchanged text is answered as "no change") → button *Preview* → tab `Execution` → button *Complete the Action with a date*. The new pane is the
-`item-edit-completion` (its title shows the class and the view name `Completed Action`); its tabs are `Completed Action`, `CTM`, `Slots`, `Print`, `Operations`, `Playground`.
+`item-edit-completion` (its title shows the class and the view name `Completed Action`); its tabs are `Completed Action`, `CTM`, `Topicmap`, `Slots`, `Print`, `Operations`, `Playground`.
 Click the tab `CTM`; the link *the TMDM Topic Map* opens the Topic Map. The link *this one* inside `Completed Action` opens the completed Action, a different object without a `CTM` view.
 A Catalog started before `dreyeck/item-edit-ctm` existed (or without `dreyeck/ctm-page-authoring/local`) shows no `CTM` tab: restart it. `scripts/test-ctm-page-authoring-documentation.mjs`
 follows exactly this path.
+
+The tab `Topicmap` right after `CTM` draws the Topic Map at once: the seven objects as Topics, the eight Associations as nodes with one edge for each Role (named by the
+Role type), each marked observed or derived. Click a sign to move the Point; its panel gives the reason and the Lisp objects. *Lay out with TALA* runs D2 once and gives an interactive
+TALA view of the same projection.

@@ -8,8 +8,10 @@
                     (#:tmdm #:topic-maps.tmdm)
                     (#:ctm #:topic-maps.ctm)
                     (#:tm #:dreyeck/topicmap)
+                    (#:native #:dreyeck/inspector/topicmap)
+                    (#:tala #:dreyeck/topicmap/tala)
                     (#:v #:html-inspector-views))
-  (:export #:project-item-edit #:item-edit-ctm #:item-edit-ctm-refused
+  (:export #:project-item-edit #:current-projection #:item-edit-ctm #:item-edit-ctm-refused #:item-edit-topic #:ctm-workspace #:tala-layout
            #:ctm-origin #:ctm-stage #:ctm-text #:ctm-map #:ctm-document-iri #:ctm-sha256
            #:ctm-topics #:ctm-statements #:ctm-binding #:ctm-topic-of))
 (in-package #:dreyeck/item-edit-ctm)
@@ -60,21 +62,11 @@
    (text :initarg :text :reader ctm-text)
    (sha256 :initarg :sha256 :reader ctm-sha256)
    (map :initarg :map :reader ctm-map)
-   (projections :initform (make-hash-table :test 'equal) :reader %projections)
-   (workspaces :initform (make-hash-table :test 'equal) :reader %workspaces))
+   (native :initform nil :accessor %native)
+   (workspace :initform nil :accessor %workspace))
   (:documentation "The CTM text derived from ORIGIN, an ITEM-EDIT-COMPLETION, ITEM-EDIT-PREVIEW or ITEM-EDIT-PROPOSAL, and the TMDM
 Topic Map the topic-maps reader makes of it. STAGE says which of the three it was made from."))
 
-;;; The native projection (dreyeck/topicmap) is the one of DREYECK/TOPIC-MAPS-READING; this object answers what it asks of a reading.
-(defmethod tr:reading-map ((c item-edit-ctm)) (ctm-map c))
-(defmethod tr::reading-projections ((c item-edit-ctm)) (%projections c))
-(defmethod tr::reading-workspaces ((c item-edit-ctm)) (%workspaces c))
-(defun native-projection (c)
-  "The Association-as-node projection with the type Topics hidden: the Topics that play a Role. The reader's type-instance Role types have
-no item identifier, and the projection keys its Topics by identifier."
-  (tr:reading-projection c :association-node nil))
-(defun native-workspace (c) (tr:reading-workspace c :association-node nil))
-(defmethod tm:topicmap-projection-of ((c item-edit-ctm)) (native-projection c))
 (defmethod v:text-representation ((c item-edit-ctm))
   (format nil "CTM of the ~(~A~) of ~A" (ctm-stage c) (ctm-item-id c)))
 
@@ -232,7 +224,7 @@ Reads OBJECT and its page source as they are held; changes nothing and writes no
     (:completion "A completion is the previewed Action copied with a date, and the body to be signed. It is not an authorization, and it shows neither execution nor persistence.")))
 
 (defun %ctm-section (object)
-  (let ((projection (handler-case (project-item-edit object) (item-edit-ctm-refused (condition) (princ-to-string condition)))))
+  (let ((projection (handler-case (current-projection object) (item-edit-ctm-refused (condition) (princ-to-string condition)))))
     (if (stringp projection)
         (v:html (:h2 "CTM") (:p (v:esc projection)))
         (v:html
@@ -242,7 +234,7 @@ Reads OBJECT and its page source as they are held; changes nothing and writes no
               "It is read with the topic-maps reader " (:code "topic-maps.ctm:deserialize-string") ", which yields the TMDM Topic Map linked here.")
           (:p (ref projection "The derived projection: its Topics, Associations and the Lisp objects they stand for" "TMDM objects") " / "
               (ref (ctm-map projection) "the TMDM Topic Map") " / "
-              (ref (native-workspace projection) "native Topicmap workspace"))
+              (ref projection "Topicmap: the diagram, with Point and History, and the TALA layout" "Topicmap"))
           (:h3 "CTM text")
           (:pre (v:esc (ctm-text projection)))
           (:table :class "inspector-table"
@@ -272,7 +264,7 @@ Reads OBJECT and its page source as they are held; changes nothing and writes no
         (:p "The TMDM Topic Map the topic-maps reader made of the CTM text, and, for each Topic, the Lisp object it stands for. The binding is kept by this projection alone; "
             "TMDM objects carry no reference to Lisp objects, and nothing is registered globally.")
         (:p (ref map "the TMDM Topic Map") (v:esc (format nil " — ~D Topics, ~D Associations" (length (tmdm:topic-map-topics map)) (length (tmdm:topic-map-associations map))))
-            " / " (ref (native-workspace c) "native Topicmap workspace") " / " (ref (ctm-origin c) "the object it was derived from"))
+            " / " (ref (ctm-workspace c) "native Topicmap workspace") " / " (ref (ctm-origin c) "the object it was derived from"))
         (:h3 "Topics for the objects of the Item edit")
         (:table :class "inspector-table"
           (:tr (:th "Id") (:th "TMDM Topic") (:th "Type") (:th "Lisp object") (:th "Known by"))
@@ -302,8 +294,7 @@ Reads OBJECT and its page source as they are held; changes nothing and writes no
 (v:defview item-edit-ctm-projections (c item-edit-ctm)
   (v:html-view :title "Projections" :priority -1
     (v:html
-      (:h2 "The native Topicmap projection")
-      (:p "The Topics and Associations of the Topic Map drawn with " (:code "dreyeck/topicmap") ", as the example of the topic-maps reading draws its TMDM objects. "
-          "A projected Topic keeps the TMDM object it stands for; its view leads back here.")
-      (:p (ref (native-workspace c) "Topicmap workspace") " / " (ref (native-projection c) "projection")
-          " / " (ref c "Back to the TMDM objects" "TMDM objects")))))
+      (:h2 "The Topicmap projection")
+      (:p "The Topic Map is shown as one projection, in " (ref c "the Topicmap view" "Topicmap") ": the objects of the Item edit and their Associations drawn as nodes with their Role edges, "
+          "the schema Topics (types, Role types, Occurrence types, Scopes) kept out of the drawing but listed. Its Workspace is " (ref (ctm-workspace c) "the Topicmap workspace")
+          ", which holds the Point and its History. " (ref c "Back to the TMDM objects" "TMDM objects")))))

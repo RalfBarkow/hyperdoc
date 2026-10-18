@@ -159,7 +159,7 @@ catalog of its own."
   ;; The completion's section names the CTM view and says what is observed, what is derived and that nothing is hypothetical.
   (let ((source (page-source "Item Edit Path in HyperDoc")))
     (dolist (text '("id=\"ctm-view\"" "CTM view of the completion" "Observed" "Derived" "No relation is hypothetical" "A completion is not an authorization"
-                    "dreyeck/item-edit-ctm" "href=\"#ctm-view\""))
+                    "dreyeck/item-edit-ctm" "href=\"#ctm-view\"" "Lay out with TALA" "TALA (interactive)" "why HyperDoc states it" "one edge for each Role"))
       (check (search text source)))))
 
 (defun check-states-are-kept-apart ()

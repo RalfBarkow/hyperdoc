@@ -101,6 +101,7 @@ try{
   await panes().nth(preview).getByRole('button',{name:'Complete the Action with a date',exact:true}).click()
   const completion=preview+1
   await panes().nth(completion).getByRole('heading',{name:'The Action that would be authorized',exact:true}).waitFor()
+  const date=(await panes().nth(completion).innerText()).match(/date added: (\d+)/)[1]   // the completion's date, to be found again in the completed Action
   const title=(await panes().nth(completion).locator('.inspector-title').first().innerText()).replace(/\s+/g,' ')
   assert(title.includes('item-edit-completion')&&title.includes('Completed Action'),title)   // the completion pane, not the completed Action
   const tabNames=(await panes().nth(completion).getByRole('button').allInnerTexts()).filter(Boolean)
@@ -110,8 +111,76 @@ try{
   assert((await panes().nth(completion).innerText()).includes('completed-from(completed: the-completed-action, original: the-proposed-action) @derived'))
   await panes().nth(completion).getByText('the TMDM Topic Map',{exact:true}).first().click()
   await panes().nth(completion+1).locator('.inspector-title').filter({hasText:'TOPIC-MAP'}).first().waitFor()
-  assert.equal(sha(pageFile),before)
   steps.push('… → Execution → Complete the Action with a date → the item-edit-completion pane (tabs '+tabNames.join(', ')+') → CTM → the TMDM Topic Map')
+  // The tab Topicmap, right after CTM: the diagram at once, then real Inspector actions on it.
+  const order=tabNames.slice(tabNames.indexOf('Completed Action',2));assert.deepEqual(order.slice(0,3),['Completed Action','CTM','Topicmap'],order.join('|'))
+  const map=panes().nth(completion)
+  await map.getByRole('button',{name:'Topicmap',exact:true}).first().click()
+  await map.getByRole('heading',{name:`Topicmap of the completion of ${e3}`,exact:true}).waitFor()
+  assert.equal(await map.locator('svg.dreyeck-topicmap-canvas').count(),1)
+  for(const id of ['the-proposal','the-preview','the-proposed-action','the-completion','the-completed-action','the-expected-item','the-signed-body'])
+    assert.equal(await map.locator(`.dreyeck-topicmap-topic[data-topic-id="${id}"]`).count(),1,id)
+  assert.equal(await map.locator('.dreyeck-topicmap-topic[data-topic-id*="("]').count(),8,'eight Associations drawn as nodes')
+  assert.equal(await map.locator('.dreyeck-topicmap-association').count(),16,'one edge for each Role')
+  steps.push('Topicmap: seven objects, eight Association nodes, sixteen Role edges')
+  const sign=id=>map.locator(`.dreyeck-topicmap-workspace-action[data-topic-id="${id}"]`)
+  const pointAt=async id=>map.locator(`.dreyeck-topicmap-point-sign[data-topic-id="${id}"]`).waitFor()
+  // 1. the-completion.  2. completed-from.
+  await sign('the-completion').dispatchEvent('click');await pointAt('the-completion')
+  const completedFrom='completed-from(completed=the-completed-action,original=the-proposed-action)'
+  await sign(completedFrom).dispatchEvent('click');await pointAt(completedFrom)
+  steps.push('Point → the-completion → completed-from')
+  // 3. Its Roles completed and original; its class and its reason, which the Topic Map does not carry.
+  text=await map.innerText()
+  for(const expected of ['derived','Why HyperDoc states it','equal in every field but the date','The Topic Map carries the class as the Scope','completed','original','the-completed-action','the-proposed-action'])assert(text.includes(expected),expected)
+  const roleRows=map.locator('tr.dreyeck-topicmap-workspace-association')
+  assert.equal(await roleRows.count(),2)
+  assert.deepEqual((await roleRows.locator('tt').allInnerTexts()).sort(),['completed','original'])
+  steps.push('completed-from: Roles completed and original, class derived, reason shown')
+  // 4. Follow each Role to its player.
+  await map.locator('tr.dreyeck-topicmap-workspace-association[data-association-id$=":completed:the-completed-action"] .inspector-action').first().click()
+  await pointAt('the-completed-action')
+  await map.locator('tr.dreyeck-topicmap-workspace-association').first().waitFor()
+  steps.push('Role completed → the-completed-action')
+  // 5. To the Lisp object: the completed Action, which holds the date.
+  await map.locator('p').filter({hasText:'Lisp object:'}).locator('.inspector-inspect').first().click()
+  await panes().nth(completion+1).locator('.inspector-title').filter({hasText:'HASH-TABLE'}).first().waitFor()
+  assert((await panes().nth(completion+1).innerText()).includes(String(date)))
+  steps.push('the-completed-action → the Lisp object (its date)')
+  // 6. The reason of the derived Association, found again; 7. back on the Topicmap, the Point goes on.
+  await sign(completedFrom).dispatchEvent('click');await pointAt(completedFrom)
+  assert((await map.innerText()).includes('equal in every field but the date'))
+  await sign('the-proposed-action').dispatchEvent('click');await pointAt('the-proposed-action')
+  assert((await map.innerText()).includes('An object of the Item edit'))
+  steps.push('completed-from again (reason), then the-proposed-action: the Point goes on')
+  // The Point's Topic as a pane: its Provenance, and the way back to the Topicmap.
+  await map.locator('h3').filter({hasText:'Point'}).first().locator('xpath=following-sibling::p[1]').locator('.inspector-inspect').first().click()
+  const topicPane=panes().nth(completion+1)
+  await topicPane.getByRole('heading',{name:'the-proposed-action',exact:true}).waitFor()
+  assert((await topicPane.innerText()).includes('Provenance in the HyperDoc projection'))
+  await topicPane.getByText('Back to the Topicmap',{exact:true}).first().click()
+  await panes().nth(completion+2).getByRole('heading',{name:`Topicmap of the completion of ${e3}`,exact:true}).waitFor()
+  steps.push('the Point as a pane: Provenance → back to the Topicmap')
+  // The schema Topics are not drawn and are listed.
+  text=await map.innerText();for(const expected of ['association type','role type','occurrence type','scope: how a statement is known'])assert(text.includes(expected),expected)
+  assert.equal(await map.locator('.dreyeck-topicmap-topic[data-topic-id="date"]').count(),0)
+  steps.push('schema Topics: not drawn, listed')
+  // TALA: the same projection laid out again, on request, with Inspector actions on its groups.
+  await map.getByRole('button',{name:'Lay out with TALA',exact:true}).click()
+  const tala=panes().nth(completion+1)
+  await tala.locator('.inspector-title').filter({hasText:/TALA-RENDERING|PLIST|TALA/i}).first().waitFor({timeout:120000})
+  const talaTabs=(await tala.getByRole('button').allInnerTexts()).filter(Boolean)
+  if(talaTabs.includes('TALA (interactive)')){
+   await tala.getByRole('button',{name:'TALA (interactive)',exact:true}).click()
+   await tala.locator('svg g[data-topic-id="the-completed-action"]').waitFor()
+   assert.equal(await tala.locator('svg g[data-topic-id]').count(),15)
+   assert.equal(await tala.locator('svg g[data-association-id]').count(),16)
+   await tala.locator('svg g[data-topic-id="the-completed-action"]').first().click()
+   await panes().nth(completion+2).getByRole('heading',{name:'the-completed-action',exact:true}).waitFor()
+   assert((await panes().nth(completion+2).innerText()).includes('Provenance in the HyperDoc projection'))
+   steps.push('Lay out with TALA → TALA (interactive): 15 Topics, 16 Role edges, a click opens the Topic and its Provenance')
+  }else steps.push('Lay out with TALA → no D2 here: '+talaTabs.join(', '))
+  assert.equal(sha(pageFile),before)
  }
  await panes().nth(carrier).getByText('ctm-and-tmdm-in-hyperdoc',{exact:true}).first().click()
  await panes().nth(carrier+1).locator('.inspector-title').filter({hasText:'CTM and TMDM in HyperDoc'}).first().waitFor();steps.push('the linked FedWiki page → its local-fedwiki-page')

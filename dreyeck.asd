@@ -1695,8 +1695,10 @@
   :version "0.0.1"
   ;; Needs the topic-maps checkout, like the readings it builds on. It loads the execution (and so the writer) for the completion class.
   :depends-on ("dreyeck/fedwiki-item-edit-execution" "dreyeck/topic-maps-reading" "dreyeck/inspector/tmdm" "dreyeck/topicmap"
+               "dreyeck/inspector/topicmap" "dreyeck/topicmap/tala" "dreyeck/inspector/topicmap/tala"
                "html-inspector-views" "shasht" "ironclad")
-  :components ((:file "dreyeck/work/item-edit-ctm"))
+  :components ((:file "dreyeck/work/item-edit-ctm")
+               (:file "dreyeck/work/item-edit-topicmap" :depends-on ("dreyeck/work/item-edit-ctm")))
   :in-order-to ((test-op (test-op "dreyeck/item-edit-ctm/tests"))))
 
 (defsystem "dreyeck/item-edit-ctm/tests"
