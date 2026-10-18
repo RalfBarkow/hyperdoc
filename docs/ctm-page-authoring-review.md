@@ -24,6 +24,22 @@ TOPIC_MAPS_ROOT=$PWD/../topic-maps-hyperdoc HYPERDOC_FEDWIKI_SITE_ROOT=$HOME/.wi
 
 Then open `http://127.0.0.1:18773/view/ctm-and-tmdm-in-hyperdoc` (port: `HYPERDOC_CTM_PORT`).
 
+### Review copy: the DITA topics on Topicmap inspection
+
+To read the four DITA topics (the Work item `topicmap-interaction-documentation`) without a wiki directory, ask for the review copy. The script then
+makes a fresh temporary directory (its name contains `TEST-COPY`, and it holds `THIS-IS-A-TEST-COPY.txt`) with copies of the two retained pages
+`ctm-and-tmdm-in-hyperdoc` and `topicmap-inspection-dita`, serves that as the site root, and removes it when the Catalog stops. The repository's files stay
+the authority; no wiki directory is read or written. The default port is 18775, so it does not meet a Catalog on 18773.
+
+```sh
+TOPIC_MAPS_ROOT=$PWD/../topic-maps-hyperdoc HYPERDOC_CTM_REVIEW_COPY=1 \
+  nix develop .#tala -c sbcl --noinform --no-userinit --load scripts/serve-ctm-page-authoring.lisp
+```
+
+The start prints `REVIEW-MODE`, `SITE-ROOT` and `HYPERDOC-COMMIT`. Open `http://127.0.0.1:18775/`, then *Working on HyperDoc* → *Text pages* → *Work Breakdown* →
+*Document the Topicmap Interaction in DITA* → a topic; or `http://127.0.0.1:18775/view/topicmap-inspection-dita` for the page. `HYPERDOC_CTM_REVIEW_COPY=1` together with
+`HYPERDOC_FEDWIKI_SITE_ROOT` is refused. `scripts/test-ctm-review-copy.mjs` starts the script in both modes and walks the path to the objects.
+
 ## Tests
 
 `dreyeck/work/tmdm-reading/tests` and `dreyeck/topic-maps-reading` need the topic-maps checkout in the ASDF registry.
