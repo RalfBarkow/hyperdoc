@@ -32,3 +32,11 @@ Then open `http://127.0.0.1:18773/view/ctm-and-tmdm-in-hyperdoc` (port: `HYPERDO
 `CATALOG_SYSTEM` makes `test-item-edit-execution.mjs` serve another system, for example the local one (with `TOPIC_MAPS_ROOT`).
 `dreyeck/ctm-page-authoring/tests` follows every link of the pages that document the path (the Work page *Item Edit Path in HyperDoc*,
 the carrier page and the WBS Dictionary) and needs the topic-maps checkout; `scripts/test-ctm-page-authoring-documentation.mjs` reads them in a served local Catalog.
+
+## Which Catalog shows `Edit`
+
+The `Edit` tab of a Story Item comes from `dreyeck/fedwiki-item-edit-preview`; a Catalog that does not load that system shows only
+the tab `Story item`, for every way of opening the Item (the E3 link of the carrier page as well as Page source → E3). The review
+Catalog of `scripts/serve-tmdm-model-review.lisp` loads the TMDM readings and not the preview, so it shows no `Edit`; use
+`scripts/serve-ctm-page-authoring.lisp`. `scripts/test-ctm-page-authoring-documentation.mjs` opens `Edit → Prepare edit proposal → Preview`
+by both ways, in the local Catalog and (`CATALOG_SYSTEM=dreyeck/ctm-page-authoring`) in the served-sized one, which has no writer, no execution and no topic-maps.
