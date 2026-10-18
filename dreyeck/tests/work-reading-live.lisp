@@ -71,6 +71,15 @@ ON-CONNECT, if given, is called with the rendering on every new page, reload inc
     (%live-await (lambda () *live-inspector*) :timeout connect-timeout :what "a browser")
     rendering))
 
+(defun %authored-informs-statements ()
+  "The (FROM TO) of every <li data-relation=\"work:relation/informs\"> the authored Work Breakdown page declares, read
+from the page file itself: independent of the projection, of the contract page and of the pane under test."
+  (let ((document (plump:parse (uiop:read-file-string
+                                (asdf:system-relative-pathname "dreyeck" "dreyeck/pages/work/Work Breakdown.html")))))
+    (loop for li in (coerce (plump:get-elements-by-tag-name document "li") 'list)
+          when (equal "work:relation/informs" (plump:attribute li "data-relation"))
+            collect (list (plump:attribute li "data-from") (plump:attribute li "data-to")))))
+
 (defun run-live-interactive-tala-test (&key (port 18090) (open-browser t) (connect-timeout 120))
   (let* ((pages (work-page-sources))
          (rendering (start-interactive-tala-inspector :port port :open-browser open-browser
@@ -128,10 +137,29 @@ ON-CONNECT, if given, is called with the rendering on every new page, reload inc
           (let* ((content (%live-view page-pane "Content"))
                  (uses (find-if #'consp (mapcar #'cdr (views:view-references content))))
                  (uses-pane (%live-open page-pane "Content" uses)))
-            (assert (equal (list (tm:topicmap-association-id-of a1) (tm:topicmap-association-id-of a2))
-                           (mapcar #'tm:topicmap-association-id-of
-                                   (clog-moldable-inspector::pane-object uses-pane)))))))
-      (format t "~&CONTRACT-PASS: both Associations reach the same contract Topic and Page by Inspector clicks; the Page lists both uses.~%")
+            ;; The expected uses come from the authored declarations, not from the pane. The layout example projects the areas only, so
+            ;; the page's uses are matched against the whole Work Breakdown: each declared (from to) must be exactly one Association there.
+            ;; The pane belongs to another projection of the same source, so the comparison is by Association ID.
+            (let* ((declared (%authored-informs-statements))
+                   (whole (work:project-work-breakdown
+                           (asdf:system-relative-pathname "dreyeck" "dreyeck/pages/work/Work Breakdown.html")
+                           :source :live-witness))
+                   (expected (mapcar (lambda (statement)
+                                       (tm:topicmap-association-id-of
+                                        (association-between whole (first statement) (second statement))))
+                                     declared))
+                   (listed (mapcar #'tm:topicmap-association-id-of
+                                   (clog-moldable-inspector::pane-object uses-pane))))
+              (assert (= (length declared) (length (remove-duplicates declared :test #'equal))))
+              (assert (= (length declared) (length (work:relation-uses whole "work:relation/informs"))))
+              ;; a1 and a2 are still declared, and are the concrete objects of the projection the diagram shows.
+              (dolist (association (list a1 a2))
+                (assert (member association (tm:topicmap-projection-associations-of projection) :test #'eq))
+                (assert (member (tm:topicmap-association-id-of association) expected :test #'equal)))
+              (assert (and (= (length expected) (length listed))
+                           (subsetp expected listed :test #'equal) (subsetp listed expected :test #'equal))
+                      () "The contract page lists ~S; the authored declarations name ~S." listed expected)))))
+      (format t "~&CONTRACT-PASS: both Associations reach the same contract Topic and Page by Inspector clicks; the Page lists exactly the uses the authored page declares.~%")
       ;; Refresh: the old groups leave the page, the new ones map as before.
       (let ((old-id (%live-reference-id (%live-view tala-pane "TALA (interactive)") a1)))
         (clog-moldable-inspector::refresh tala-pane)
