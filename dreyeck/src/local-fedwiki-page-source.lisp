@@ -56,17 +56,24 @@ its SHA-256, its length in octets and the JSON parsed from those octets."))
   (:documentation "The INDEXth story Item of the page as SOURCE observed it.
 Its id and content are read from SOURCE's JSON; nothing is copied out."))
 
+(defvar *story-item-classes* (make-hash-table :test #'equal)
+  "The Item type (the \"type\" string of the Item JSON) -> the subclass of LOCAL-STORY-ITEM that reads Items of that type. A type with no
+entry is read as a LOCAL-STORY-ITEM. A subclass adds views and nothing else: the id, type and text stay the Item's own.")
+
+(defun %story-item-class (json)
+  (gethash (gethash "type" json) *story-item-classes* 'local-story-item))
+
 (defun source-story-items (source)
   "One LOCAL-STORY-ITEM per story Item of SOURCE, in story order."
   (loop for item in (%source-story source)
         for index from 0
-        collect (make-instance 'local-story-item :source source :index index)))
+        collect (make-instance (%story-item-class item) :source source :index index)))
 
 (defun find-story-item (source item-id)
   "The LOCAL-STORY-ITEM of SOURCE whose id is ITEM-ID, or NIL. The id is the identity; the index is where the
 Item stands in this observation and changes when the story is reordered."
   (let ((index (position item-id (%source-story source) :key (lambda (json) (gethash "id" json)) :test #'equal)))
-    (and index (make-instance 'local-story-item :source source :index index))))
+    (and index (make-instance (%story-item-class (nth index (%source-story source))) :source source :index index))))
 
 (defun story-item-json (item)
   "A copy of ITEM's JSON exactly as its source observed it."

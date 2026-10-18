@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE reference PUBLIC "-//OASIS//DTD DITA Reference//EN" "reference.dtd">
+<reference id="topicmap-gesture-operations" xml:lang="en">
+  <title>Topicmap Gesture Operations</title>
+  <shortdesc>The read-only Operations that a secondary press on a Topicmap sign offers: Inspect Topicmap sign, Inspect represented object and Inspect relation contract. For each: its identity, its Bindings, its target, where it applies, the sector it is chosen in, and the object it returns.</shortdesc>
+  <refbody>
+    <section>
+      <title>Scope of this list</title>
+      <p>The list is read from the source code of <filepath>dreyeck/src/topicmap-gesture.lisp</filepath> and <filepath>dreyeck/src/gesture-binding-witness.lisp</filepath>: the Bindings <xref href="hyperdoc:variable:dreyeck/inspector/topicmap:*workspace-action-sign-bindings*" scope="external" format="hyperdoc">workspace-action-sign-bindings</xref> of a Topic sign, <xref href="hyperdoc:variable:dreyeck/inspector/topicmap:*association-role-bindings*" scope="external" format="hyperdoc">association-role-bindings</xref> of the sign of a TMDM Role, and the Bindings of <xref href="hyperdoc:function:dreyeck/gesture-binding-witness:make-association-binding-catalog" scope="external" format="hyperdoc">make-association-binding-catalog</xref>. Other systems add Operations for the Topics of their own domain through a method on <codeph>workspace-action-sign-bindings</codeph>; those are not listed here, and this list makes no claim about the Operations of other HyperDoc domains. A Binding comes in two kinds with one Operation: the radial menu, which a press-and-wait reveals after 500 ms, and the learned mark, a direction move made at once.</p>
+    </section>
+    <section>
+      <title>Inspect Topicmap sign</title>
+      <simpletable><sthead><stentry>Property</stentry><stentry>Value</stentry><stentry>Notes</stentry></sthead>
+        <strow><stentry>Operation identity</stentry><stentry><xref href="hyperdoc:operation:inspect-topicmap-sign" scope="external" format="hyperdoc"><codeph>operation/inspect-topicmap-sign</codeph></xref></stentry><stentry>Title: Inspect Topicmap sign. Data only: it names what is asked and holds no executor.</stentry></strow>
+        <strow><stentry>Bindings</stentry><stentry><codeph>binding/radial-menu-inspect-topicmap-sign</codeph>, <codeph>binding/learned-mark-inspect-topicmap-sign</codeph></stentry><stentry>One for the menu and one for the mark, in the same sector.</stentry></strow>
+        <strow><stentry>Gesture target</stentry><stentry><codeph>:workspace-action-sign-occurrence</codeph></stentry><stentry>The occurrence of a Topic sign: its Topic, projection and Workspace.</stentry></strow>
+        <strow><stentry>Applies to</stentry><stentry>The sign of a Topic</stentry><stentry>The native workspace action sign of a Topic and the Topic group of TALA (interactive). Not the sign of an Association.</stentry></strow>
+        <strow><stentry>Sector</stentry><stentry>center 270 degrees (up), half width 30 degrees</stentry><stentry>Degrees are measured so that 0 is to the right, 180 to the left and 270 up.</stentry></strow>
+        <strow><stentry>Returns</stentry><stentry>The projected Topic of the occurrence</stentry><stentry>A topicmap-topic of the projection; for the Topicmap of an Item edit an item-edit-topic. It is the object that PRIMARY opens on a TALA Topic group.</stentry></strow>
+        <strow><stentry>Not applicable when</stentry><stentry>The target carries no Topic sign occurrence</stentry><stentry>The Operation signals operation-not-applicable; nothing opens.</stentry></strow>
+      </simpletable>
+    </section>
+    <section>
+      <title>Inspect represented object</title>
+      <simpletable><sthead><stentry>Property</stentry><stentry>Value</stentry><stentry>Notes</stentry></sthead>
+        <strow><stentry>Operation identity</stentry><stentry><xref href="hyperdoc:operation:inspect-represented-object" scope="external" format="hyperdoc"><codeph>operation/inspect-represented-object</codeph></xref></stentry><stentry>Title: Inspect represented object.</stentry></strow>
+        <strow><stentry>Bindings on a Topic sign</stentry><stentry><codeph>binding/radial-menu-inspect-represented-object</codeph>, <codeph>binding/learned-mark-inspect-represented-object</codeph></stentry><stentry>Target type :workspace-action-sign-occurrence. Omitted for an occurrence whose Topic has no represented object.</stentry></strow>
+        <strow><stentry>Bindings on a Role sign</stentry><stentry><codeph>binding/radial-menu-association-inspect-represented-object</codeph>, <codeph>binding/learned-mark-association-inspect-represented-object</codeph></stentry><stentry>Target type :topicmap-association. Offered only for an Association that stands for a TMDM Role, one that has the property :tmdm-role.</stentry></strow>
+        <strow><stentry>Gesture target</stentry><stentry><codeph>:workspace-action-sign-occurrence</codeph> or <codeph>:topicmap-association</codeph></stentry><stentry>For an Association the target carries the exact Association object under :association; an id or a label names none.</stentry></strow>
+        <strow><stentry>Applies to</stentry><stentry>The sign of a Topic that has a represented object; the edge of a TMDM Role</stentry><stentry>The native Role edge (its hit line) and the Association edge of TALA (interactive).</stentry></strow>
+        <strow><stentry>Sector</stentry><stentry>center 180 degrees (left), half width 30 degrees</stentry><stentry>The same sector on a Topic sign and on a Role edge.</stentry></strow>
+        <strow><stentry>Returns</stentry><stentry>On a Topic sign, the object the Topic represents; on a Role edge, the TMDM Role</stentry><stentry>For a Topic sign it is the value of topicmap-topic-object-of: a TMDM Topic or a TMDM Association. For a Role edge it is the association-role itself, not the Association, the Role type or the player.</stentry></strow>
+        <strow><stentry>Not applicable when</stentry><stentry>The Topic has no represented object; the Association stands for no TMDM Role</stentry><stentry>The Operation signals operation-not-applicable and nothing opens.</stentry></strow>
+      </simpletable>
+    </section>
+    <section>
+      <title>Inspect relation contract</title>
+      <simpletable><sthead><stentry>Property</stentry><stentry>Value</stentry><stentry>Notes</stentry></sthead>
+        <strow><stentry>Operation identity</stentry><stentry><xref href="hyperdoc:operation:inspect-relation-contract" scope="external" format="hyperdoc"><codeph>operation/inspect-relation-contract</codeph></xref></stentry><stentry>Title: Inspect relation contract.</stentry></strow>
+        <strow><stentry>Bindings</stentry><stentry><codeph>binding/radial-inspect-relation-contract</codeph>, <codeph>binding/mark-inspect-relation-contract</codeph></stentry><stentry>Target type :topicmap-association.</stentry></strow>
+        <strow><stentry>Gesture target</stentry><stentry><codeph>:topicmap-association</codeph></stentry><stentry>The exact Association.</stentry></strow>
+        <strow><stentry>Applies to</stentry><stentry>An Association that has a Relation Contract</stentry><stentry>It is offered when the Association has the property :relation-contract, as the Work relations of a Work Topicmap do. A TMDM Role edge of an Item edit has none, so it never offers this Operation.</stentry></strow>
+        <strow><stentry>Sector</stentry><stentry>center 0 degrees (right), half width 30 degrees</stentry><stentry>Not the sector of Inspect represented object, so that an Association that has both offers two distinct directions.</stentry></strow>
+        <strow><stentry>Returns</stentry><stentry>The Relation Contract Topic of the Association</stentry><stentry>The Topic that the :relation-contract property holds.</stentry></strow>
+        <strow><stentry>Not applicable when</stentry><stentry>The Association refers to no Relation Contract</stentry><stentry>The Operation signals operation-not-applicable and nothing opens.</stentry></strow>
+      </simpletable>
+    </section>
+    <section>
+      <title>PRIMARY and SECONDARY on each surface</title>
+      <simpletable>
+        <sthead><stentry>Surface</stentry><stentry>PRIMARY click</stentry><stentry>SECONDARY offers</stentry><stentry>Point and History</stentry></sthead>
+        <strow><stentry>Native Topicmap, Topic sign</stentry><stentry>Moves the Workspace Point to the Topic (topicmap-workspace-go-to).</stentry><stentry>Inspect Topicmap sign and, if there is a represented object, Inspect represented object.</stentry><stentry>PRIMARY moves the Point and records the Point it left in the History. SECONDARY changes neither.</stentry></strow>
+        <strow><stentry>Native Topicmap, edge of a TMDM Role</stentry><stentry>Nothing: no pane opens and the Point stays.</stentry><stentry>Inspect represented object only.</stentry><stentry>Neither changes the Point or the History.</stentry></strow>
+        <strow><stentry>Native Topicmap, edge of a Work relation</stentry><stentry>Nothing: the drawn edge has neither an Inspector reference nor a gesture.</stentry><stentry>Nothing: this edge takes no gesture.</stentry><stentry>Not applicable.</stentry></strow>
+        <strow><stentry>TALA (interactive), Topic group</stentry><stentry>Opens the projected Topic as an Inspector object.</stentry><stentry>The same two Operations as the native sign. There is no Workspace here.</stentry><stentry>There is no Workspace in this drawing, so neither click touches a Point or a History.</stentry></strow>
+        <strow><stentry>TALA (interactive), Association group</stentry><stentry>Opens the Association (a projected-tmdm-association for a Role) as an Inspector object.</stentry><stentry>Inspect relation contract if the Association has a Relation Contract; Inspect represented object if it stands for a TMDM Role; nothing if it has neither.</stentry><stentry>No Workspace here either.</stentry></strow>
+      </simpletable>
+    </section>
+    <section>
+      <title>Where the claims come from</title>
+      <ul>
+        <li>The sectors, Binding ids and target types are the values of the three Binding catalogues named above; the tests of this documentation compare this topic with them.</li>
+        <li>The returned objects are the methods of <xref href="hyperdoc:function:dreyeck/inspector/topicmap:operation-inspectable-object" scope="external" format="hyperdoc">operation-inspectable-object</xref> for the Operation and the target.</li>
+        <li>The surfaces are the renderer <filepath>dreyeck/src/topicmap-inspector.lisp</filepath> (the native Topicmap), <filepath>dreyeck/src/topicmap-tala-inspector.lisp</filepath> (TALA (interactive)) and the binder in <filepath>dreyeck/src/topicmap-gesture.lisp</filepath>.</li>
+      </ul>
+    </section>
+  </refbody>
+</reference>

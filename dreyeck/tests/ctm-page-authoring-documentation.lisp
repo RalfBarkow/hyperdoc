@@ -10,7 +10,7 @@
 (defvar *checks* 0)
 (defmacro check (form) `(progn (incf *checks*) (assert ,form)))
 
-(defparameter +pages+ '("Item Edit Path in HyperDoc" "Authoring the CTM Plan Page" "CTM Plan Page WBS Dictionary"))
+(defparameter +pages+ '("Item Edit Path in HyperDoc" "Authoring the CTM Plan Page" "CTM Plan Page WBS Dictionary" "Topicmap Interaction Documentation"))
 
 (defun page-source (title)
   (uiop:read-file-string (asdf:system-relative-pathname "dreyeck/work/reading" (format nil "dreyeck/pages/work/~A.html" title))
@@ -54,7 +54,7 @@
                         (remove "html" (uiop:directory-files (asdf:system-relative-pathname "dreyeck/work/reading" "dreyeck/pages/work/"))
                                 :key #'pathname-type :test-not #'equal))))
     (check (member "Item Edit Path in HyperDoc" titles :test #'equal))
-    (dolist (title '("Item Edit Path in HyperDoc" "CTM Plan Page WBS Dictionary"))
+    (dolist (title '("Item Edit Path in HyperDoc" "CTM Plan Page WBS Dictionary" "Topicmap Interaction Documentation"))
       (dolist (target (attribute-values (page-source title) "page"))
         (check (member target titles :test #'equal))))))
 
@@ -64,7 +64,10 @@
       (check (member new (attribute-values (page-source from) "page") :test #'equal)))
     ;; and back to the pages it describes
     (check (member "Authoring the CTM Plan Page" (attribute-values (page-source new) "page") :test #'equal))
-    (check (member "Work Breakdown" (attribute-values (page-source new) "page") :test #'equal))))
+    (check (member "Work Breakdown" (attribute-values (page-source new) "page") :test #'equal))
+    ;; the Work item that documents the Topicmap interaction is reached from the Work Breakdown and leads back to it
+    (check (member "Topicmap Interaction Documentation" (attribute-values (page-source "Work Breakdown") "page") :test #'equal))
+    (check (member "Work Breakdown" (attribute-values (page-source "Topicmap Interaction Documentation") "page") :test #'equal))))
 
 (defun check-optional-objects ()
   ;; Where the system is loaded the link is the real object; where it is not, it is an explanation and no condition.

@@ -53,7 +53,9 @@
     "work:ctm-plan-page-authoring:applies:hyperdoc-authoring-interaction"
     "work:dogfooding:current-work:ctm-plan-page-authoring"
     "work:planning:contains:conversation-coordinates"
-    "work:dogfooding:current-work:conversation-coordinates"))
+    "work:dogfooding:current-work:conversation-coordinates"
+    "work:interaction:contains:topicmap-interaction-documentation"
+    "work:dogfooding:current-work:topicmap-interaction-documentation"))
 
 (defparameter *expected-work-topics*
   '("interaction"
@@ -82,7 +84,8 @@
     "ward-hub-trail-selection"
     "collaborative-planning-case"
     "ctm-plan-page-authoring"
-    "conversation-coordinates"))
+    "conversation-coordinates"
+    "topicmap-interaction-documentation"))
 
 (defun check-projection-integrity (projection)
   (let* ((topics (tm:topicmap-projection-topics-of projection))

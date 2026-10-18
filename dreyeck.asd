@@ -1689,6 +1689,23 @@
 ;;   dreyeck/ctm-page-authoring        Edit proposal, Preview, Action context. Needs nothing outside the repository.
 ;;   dreyeck/ctm-page-authoring/local  adds the execution (loads the writer; nothing is authorized by loading it)
 ;;                                     and the TMDM readings (need the topic-maps checkout in the ASDF registry).
+(defsystem "dreyeck/dita-story-item"
+  :description "Story Items of type dita: a DITA 1.3 topic as the Item's XML text, read in the Inspector as a structured topic beside its XML source"
+  :license "BSD"
+  :version "0.0.1"
+  :pathname "dreyeck/src/"
+  :serial t
+  :depends-on ("dreyeck/local-fedwiki-view" "plump" "cl-who" "str" "html-inspector-views")
+  :components ((:file "dita-story-item-package") (:file "dita-story-item")))
+
+(defsystem "dreyeck/dita-story-item/tests"
+  :description "The four DITA topics on Topicmap inspection: Items, validation against DITA 1.3, the Inspector's reading, and what they say about the code. Local review: needs DITA-OT and Java to validate, and the topic-maps checkout"
+  :depends-on ("dreyeck/dita-story-item" "dreyeck/ctm-page-authoring/local" "dreyeck/work/reading" "ironclad")
+  :components ((:file "dreyeck/tests/dita-story-item"))
+  :perform (test-op (op component)
+             (declare (ignore op component))
+             (uiop:symbol-call :dreyeck/dita-story-item/tests :run-tests)))
+
 (defsystem "dreyeck/item-edit-ctm"
   :description "Optional, local review: CTM views of the Item edit objects, read back as TMDM objects with the topic-maps reader"
   :license "BSD"
@@ -1696,9 +1713,10 @@
   ;; Needs the topic-maps checkout, like the readings it builds on. It loads the execution (and so the writer) for the completion class.
   :depends-on ("dreyeck/fedwiki-item-edit-execution" "dreyeck/topic-maps-reading" "dreyeck/inspector/tmdm" "dreyeck/topicmap"
                "dreyeck/inspector/topicmap" "dreyeck/topicmap/tala" "dreyeck/inspector/topicmap/tala"
-               "html-inspector-views" "shasht" "ironclad")
+               "dreyeck/dita-story-item" "html-inspector-views" "shasht" "ironclad")
   :components ((:file "dreyeck/work/item-edit-ctm")
-               (:file "dreyeck/work/item-edit-topicmap" :depends-on ("dreyeck/work/item-edit-ctm")))
+               (:file "dreyeck/work/item-edit-topicmap" :depends-on ("dreyeck/work/item-edit-ctm"))
+               (:file "dreyeck/work/topicmap-inspection-examples" :depends-on ("dreyeck/work/item-edit-topicmap")))
   :in-order-to ((test-op (test-op "dreyeck/item-edit-ctm/tests"))))
 
 (defsystem "dreyeck/item-edit-ctm/tests"
@@ -1710,8 +1728,8 @@
              (uiop:symbol-call :dreyeck/item-edit-ctm/tests :run-tests)))
 
 (defsystem "dreyeck/ctm-page-authoring"
-  :description "Optional: the Item edit proposal and preview with their Inspector views, without writer and without topic-maps"
-  :depends-on ("dreyeck/work/item-edit-proposal" "dreyeck/fedwiki-item-edit-preview"))
+  :description "Optional: the Item edit proposal and preview with their Inspector views, without writer and without topic-maps; and the reading of DITA Story Items"
+  :depends-on ("dreyeck/work/item-edit-proposal" "dreyeck/fedwiki-item-edit-preview" "dreyeck/dita-story-item"))
 
 (defsystem "dreyeck/ctm-page-authoring/local"
   :description "Local review only: the proposal and preview plus execution, the CTM example read with the topic-maps reader, and the TMDM model navigation"

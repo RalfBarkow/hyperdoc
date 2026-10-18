@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE task PUBLIC "-//OASIS//DTD DITA Task//EN" "task.dtd">
+<task id="inspect-a-topicmap-sign" xml:lang="en">
+  <title>Inspect a Topicmap Sign</title>
+  <shortdesc>Open the Topicmap of an edit proposal in the local Catalog, press on a Topic sign and on a Role edge, and reach the projected Topic, the TMDM object and the TMDM Role that they stand for.</shortdesc>
+  <taskbody>
+    <prereq>
+      <p>A local review Catalog started with <filepath>scripts/serve-ctm-page-authoring.lisp</filepath> from a commit that has the Role edge gesture or a later one, serving a site root that holds the page <codeph>ctm-and-tmdm-in-hyperdoc</codeph>. A Catalog started from an older commit does not offer the gesture on a Role edge. The concepts are in <xref href="hyperdoc:item:4f1c7a92b3d85e01" scope="local" format="dita">Topicmap Signs and Represented Objects</xref> and <xref href="hyperdoc:item:4f1c7a92b3d85e02" scope="local" format="dita">TMDM Roles and Projected Edges</xref>; the Operations are in <xref href="hyperdoc:item:4f1c7a92b3d85e03" scope="local" format="dita">Topicmap Gesture Operations</xref>.</p>
+    </prereq>
+    <context>
+      <p>Each step names the view or the Operation that it uses. Nothing in this task writes to the wiki: preparing a proposal and looking at its Topicmap are reading.</p>
+    </context>
+    <steps>
+      <step>
+        <cmd>Open the Item and prepare a proposal.</cmd>
+        <info>Open the Item E3 (<xref href="hyperdoc:function:dreyeck/work/ctm-page-authoring:registered-story-item" scope="external" format="hyperdoc">registered-story-item</xref>) from the Work Breakdown page <codeph>Author the CTM Plan Page</codeph>. In its Edit view choose <b>Prepare edit proposal</b>. The pane to the right shows an <xref href="hyperdoc:class:dreyeck/fedwiki-item-edit-preview:item-edit-proposal" scope="external" format="hyperdoc">item-edit-proposal</xref>. A completion shows the same Topicmap with more objects.</info>
+      </step>
+      <step>
+        <cmd>Open the Topicmap view of the proposal.</cmd>
+        <info>Choose the tab <b>Topicmap</b>. The native Topicmap draws the objects of the Item edit, each Association as a node of its own and one edge for each Role. The Point panel below the drawing names the Topic at the Point. The Point starts at the proposal.</info>
+      </step>
+      <step>
+        <cmd>Press the secondary button on the node <codeph>proposes</codeph> and wait.</cmd>
+        <info>Hold the secondary button on the sign of the Association node for about half a second. The radial menu appears with two entries: <b>Inspect represented object</b> to the left and <b>Inspect Topicmap sign</b> upward. Move in the direction of the entry and release. Releasing without a move chooses nothing and opens nothing. This is the Binding of the radial menu.</info>
+      </step>
+      <step>
+        <cmd>Do the same without waiting.</cmd>
+        <info>Press the secondary button, move to the left at once and release. This is the learned mark; it completes with the same Operation and opens the same object as the menu, which you can check by the identical object address in the pane title.</info>
+      </step>
+      <step>
+        <cmd>Inspect a Topic sign.</cmd>
+        <info>Upward opens the projected Topic, an item-edit-topic whose Provenance view says how HyperDoc knows the Association and why. To the left opens the TMDM Association it represents. The two are different objects (see the concept topic).</info>
+        <stepresult>The Point and the History are as they were: a secondary press is a reading Operation.</stepresult>
+      </step>
+      <step>
+        <cmd>Inspect a Role edge.</cmd>
+        <info>Press the secondary button on the edge between <codeph>proposes</codeph> and <codeph>the-proposed-action</codeph>. The edge has a transparent hit line about 14 pixels wide, below the Topic signs. The menu offers only <b>Inspect represented object</b>; there is no Relation Contract. Choosing it, by the menu or by a mark to the left, opens the TMDM Role.</info>
+      </step>
+      <step>
+        <cmd>Navigate from the Role to its objects.</cmd>
+        <info>In the pane of the Role choose the tab <b>Slots</b>. The slots <codeph>parent</codeph>, <codeph>type</codeph> and <codeph>player</codeph> open the TMDM Association, the Role type and the player.</info>
+      </step>
+      <step>
+        <cmd>Return to the projection and its provenance.</cmd>
+        <info>In the Topicmap choose a Topic with a primary click: the Point moves there and its panel shows the provenance and the Roles. The Provenance view of a projected Topic ends in a link back to the Topicmap. The History is shown by <b>Open the Workspace as a pane</b>.</info>
+      </step>
+      <step>
+        <cmd>Compare PRIMARY in the native Topicmap and in TALA.</cmd>
+        <info>In the native Topicmap a primary click on a Topic sign moves the Point and records the History; a primary click on a Role edge does nothing. Choose <b>Lay out with TALA</b> and then the tab <b>TALA (interactive)</b>: there a primary click on a Topic or an edge opens its object in a pane and no Point exists. A secondary press offers the same Operations on the Topic groups, and on a Role edge the single Operation Inspect represented object.</info>
+      </step>
+    </steps>
+    <result>
+      <p>Every object named in the steps is an object of the running image: the pane titles carry its class and address, and two panes of one object show one address.</p>
+    </result>
+    <postreq>
+      <p>What this task cannot show: the automated browser tests dispatch synthetic pointer events (<codeph>isTrusted</codeph> is false). They exercise the element, the Gesture transport, the reducer and the Operations, and prove nothing about a physical mouse or trackpad, for example whether a trackpad delivers a secondary press, a move and a release as one sequence. Try the steps with a mouse first and with the trackpad second; if the mouse works and the trackpad does not, the input device is the cause, not the Operations.</p>
+    </postreq>
+  </taskbody>
+</task>

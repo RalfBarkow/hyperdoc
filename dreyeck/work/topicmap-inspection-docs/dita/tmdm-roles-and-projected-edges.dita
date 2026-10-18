@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE concept PUBLIC "-//OASIS//DTD DITA Concept//EN" "concept.dtd">
+<concept id="tmdm-roles-and-projected-edges" xml:lang="en">
+  <title>TMDM Roles and Projected Edges</title>
+  <shortdesc>A TMDM Association has Roles, and each Role has a type and a player. The Topicmap draws one edge for each Role; the edge is an object of the HyperDoc projection and the direction it is drawn in comes from the projection, not from the Role.</shortdesc>
+  <conbody>
+    <section>
+      <title>Six things around one Role</title>
+      <p>The example is the Role <codeph>action</codeph> of the Association <codeph>proposes</codeph> in the Topicmap of the edit proposal for the Item E3 (see <xref href="hyperdoc:item:4f1c7a92b3d85e01" scope="local" format="dita">Topicmap Signs and Represented Objects</xref>).</p>
+      <dl>
+        <dlentry>
+          <dt>TMDM Association</dt>
+          <dd><xref href="hyperdoc:example:proposes-association" scope="external" format="hyperdoc">proposes</xref>: a statement with a type, a Scope and a set of Roles. It has no first or second Role.</dd>
+        </dlentry>
+        <dlentry>
+          <dt>TMDM Association Role</dt>
+          <dd><xref href="hyperdoc:example:proposes-role-action" scope="external" format="hyperdoc">The Role action of proposes</xref>, an <xref href="hyperdoc:class:topic-maps.tmdm:association-role" scope="external" format="hyperdoc">association-role</xref>. It has a parent Association, a type and a player, and nothing else.</dd>
+        </dlentry>
+        <dlentry>
+          <dt>Role Type</dt>
+          <dd><xref href="hyperdoc:example:role-type-action" scope="external" format="hyperdoc">The Topic action</xref>, a TMDM Topic that names what the player is in this Association.</dd>
+        </dlentry>
+        <dlentry>
+          <dt>Role Player</dt>
+          <dd><xref href="hyperdoc:example:player-the-proposed-action" scope="external" format="hyperdoc">The Topic the-proposed-action</xref>, the TMDM Topic that plays the Role. Its projected Topic is <xref href="hyperdoc:example:player-topic-the-proposed-action" scope="external" format="hyperdoc">the-proposed-action</xref> and the Lisp object it was made from is <xref href="hyperdoc:example:the-proposed-action-object" scope="external" format="hyperdoc">the proposed Action</xref>.</dd>
+        </dlentry>
+        <dlentry>
+          <dt>projected-tmdm-association</dt>
+          <dd><xref href="hyperdoc:example:proposes-edge-action" scope="external" format="hyperdoc">The HyperDoc object for the Role</xref>, an object of the class <xref href="hyperdoc:class:dreyeck/topic-maps-reading:projected-tmdm-association" scope="external" format="hyperdoc">projected-tmdm-association</xref>, which is a topicmap-association of the projection. Its id is <codeph>proposes(action=the-proposed-action,proposal=the-proposal):action:the-proposed-action</codeph>; its type is the Role type <codeph>action</codeph>; its <codeph>from</codeph> is the id of the Association node and its <codeph>to</codeph> is the id of the player. Its properties hold the TMDM Role (<codeph>:tmdm-role</codeph>), the Role type, the TMDM Association and the Association type. Where the projection stands for a Role, that is the object the edge represents.</dd>
+        </dlentry>
+        <dlentry>
+          <dt>SVG edge</dt>
+          <dd>The element a renderer draws for the projected-tmdm-association. The native renderer draws a line, and over it a transparent wider hit line of class <codeph>dreyeck-topicmap-association-hit</codeph>; the hit line takes the gesture. TALA (interactive) draws the group of the edge, with the attribute <codeph>data-association-id</codeph>, and that group takes the gesture. Neither element is the Role; each is bound to the projected-tmdm-association that stands for it.</dd>
+        </dlentry>
+      </dl>
+    </section>
+    <section>
+      <title>The direction of an edge</title>
+      <p>For every Role of an Association node the projection sets <codeph>from</codeph> to the node and <codeph>to</codeph> to the player, whatever the Role type is. The two edges of <codeph>proposes</codeph> therefore both leave the node, one to the proposal and one to the Action, although the Roles are of two different types. The native renderer puts an arrowhead at the end of the player. The way an edge is drawn tells which Association node and which player it joins. It states nothing about the Role: a TMDM Role has a type and a player and no direction, and no reading of the drawing may infer that the player acts on, or is acted on by, the Association. The Role type that is written on the edge is what says what the player is.</p>
+    </section>
+    <section>
+      <title>Reaching the objects</title>
+      <p>Inspect represented object on the edge opens the TMDM Role. From the Role, the Slots view links its parent Association, its type and its player, so that the Association, the Role type and the player are reachable from the edge. Inspect represented object on the Association node opens the TMDM Association instead; Inspect Topicmap sign on the node opens the projected Topic. How to press is in <xref href="hyperdoc:item:4f1c7a92b3d85e04" scope="local" format="dita">Inspect a Topicmap Sign</xref>.</p>
+    </section>
+  </conbody>
+</concept>

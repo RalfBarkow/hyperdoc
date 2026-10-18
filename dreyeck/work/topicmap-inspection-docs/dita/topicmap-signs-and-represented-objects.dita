@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE concept PUBLIC "-//OASIS//DTD DITA Concept//EN" "concept.dtd">
+<concept id="topicmap-signs-and-represented-objects" xml:lang="en">
+  <title>Topicmap Signs and Represented Objects</title>
+  <shortdesc>The sign you press on, the Topic that the Topicmap projection holds for it, the TMDM object that Topic represents and the Lisp objects the projection was derived from are five different things. Inspect Topicmap sign opens the projected Topic; Inspect represented object opens the TMDM object it represents.</shortdesc>
+  <conbody>
+    <section>
+      <title>Five things</title>
+      <p>The Topicmap of an Item edit is drawn from a Topic Map that the topic-maps reader makes of a CTM text. The CTM text is derived from the Lisp objects of the Item edit. Between the Lisp objects and the pixels there are five distinct things, and the two inspection Operations of the marking menu (see <xref href="hyperdoc:item:4f1c7a92b3d85e03" scope="local" format="dita">Topicmap Gesture Operations</xref>) reach two of them.</p>
+      <dl>
+        <dlentry>
+          <dt>Browser SVG sign, a concrete gesture occurrence</dt>
+          <dd>One SVG element drawn for one Topic in one pane. In the native Topicmap it is the transparent rectangle of class <codeph>dreyeck-topicmap-workspace-action</codeph> over the Topic; in <codeph>TALA (interactive)</codeph> it is the group <codeph>g</codeph> of the Topic. Gesture input is bound to this element. An occurrence (<xref href="hyperdoc:class:dreyeck/inspector/topicmap:workspace-action-sign-occurrence" scope="external" format="hyperdoc">workspace-action-sign-occurrence</xref>) records the Topic, the projection, the Workspace if there is one, the pane and the element. A refresh replaces the element and the occurrence ends with it; the same Topic drawn again is a new occurrence.</dd>
+        </dlentry>
+        <dlentry>
+          <dt>HyperDoc Topicmap projection</dt>
+          <dd>A <xref href="hyperdoc:class:dreyeck/topicmap:topicmap-projection" scope="external" format="hyperdoc">topicmap-projection</xref>: the Topics and Associations that the renderers draw, with their positions and visibility. It is derived from the Lisp objects each time a view is shown; <xref href="hyperdoc:function:dreyeck/item-edit-ctm:current-projection" scope="external" format="hyperdoc">current-projection</xref> keeps the last one of an origin object while its CTM text is unchanged, so that the Workspace Point survives a refresh.</dd>
+        </dlentry>
+        <dlentry>
+          <dt>Projected Topic</dt>
+          <dd>An <xref href="hyperdoc:class:dreyeck/item-edit-ctm:item-edit-topic" scope="external" format="hyperdoc">item-edit-topic</xref>. It has an id (its key in the Topic Map), a label, view properties, the TMDM object it represents, and its origin, the CTM of the Item edit. It also carries the provenance: it is an object of the Item edit, an Association of the Item edit, or a schema Topic.</dd>
+        </dlentry>
+        <dlentry>
+          <dt>Represented TMDM object</dt>
+          <dd>What <xref href="hyperdoc:function:dreyeck/topicmap:topicmap-topic-object-of" scope="external" format="hyperdoc">topicmap-topic-object-of</xref> returns for the projected Topic: a TMDM Topic (<xref href="hyperdoc:class:topic-maps.tmdm:topic" scope="external" format="hyperdoc">topic</xref>) or a TMDM Association (<xref href="hyperdoc:class:topic-maps.tmdm:association" scope="external" format="hyperdoc">association</xref>) of the Topic Map that the topic-maps reader made.</dd>
+        </dlentry>
+        <dlentry>
+          <dt>Original Lisp objects</dt>
+          <dd>The objects the CTM text is derived from: the edit proposal, the preview or the completion, the Story Item as observed, the Action. <xref href="hyperdoc:function:dreyeck/item-edit-ctm:project-item-edit" scope="external" format="hyperdoc">project-item-edit</xref> reads them and changes nothing. The projection keeps for every Topic which Lisp object it came from and how that is known, observed or derived. That provenance is part of the HyperDoc projection and is not stated in the Topic Map.</dd>
+        </dlentry>
+      </dl>
+    </section>
+    <section>
+      <title>Example: the Association node proposes</title>
+      <p>The example is the edit proposal for the Item E3 (<codeph>ed37e9bac2fcd548</codeph>) of the page <codeph>ctm-and-tmdm-in-hyperdoc</codeph>. The Topicmap of a completion draws the same node among more objects. The references below open the objects of the proposal that the Catalog prepares from that page file; preparing it writes nothing, and a Catalog that does not serve that page answers with an explanation instead.</p>
+      <ol>
+        <li>The Association <codeph>proposes</codeph> is drawn as a node of its own, with the id <codeph>proposes(action=the-proposed-action,proposal=the-proposal)</codeph>. Two edges join it to its players, one for each Role. The proposal itself is <xref href="hyperdoc:example:proposal" scope="external" format="hyperdoc">the proposal</xref> and the Topicmap is made from <xref href="hyperdoc:example:ctm" scope="external" format="hyperdoc">its CTM</xref>.</li>
+        <li><b>Inspect Topicmap sign</b> on the node opens the projected Topic <xref href="hyperdoc:example:proposes-topic" scope="external" format="hyperdoc">proposes</xref>, an <codeph>item-edit-topic</codeph>. Its Provenance view says that it is an Association of the Item edit, known as derived, because the function <codeph>proposal-action</codeph> makes the Action from the proposal now and the proposal holds none.</li>
+        <li><b>Inspect represented object</b> on the same node opens the TMDM Association <xref href="hyperdoc:example:proposes-association" scope="external" format="hyperdoc">proposes</xref> that the projected Topic represents: a TMDM Association of type <codeph>proposes</codeph> with the Scope <codeph>derived</codeph> and two Roles.</li>
+        <li>From the projected Topic, the Provenance table links the Lisp objects: <xref href="hyperdoc:example:proposal" scope="external" format="hyperdoc">the proposal</xref> as player of the Role <codeph>proposal</codeph> and <xref href="hyperdoc:example:the-proposed-action-object" scope="external" format="hyperdoc">the proposed Action</xref> as player of the Role <codeph>action</codeph>.</li>
+      </ol>
+    </section>
+    <section>
+      <title>Why the projected Topic and the TMDM object are not the same</title>
+      <ul>
+        <li>They are objects of different classes with different content. The projected Topic holds the provenance, the position and the visibility; the TMDM Association holds its type, its Scope and its Roles and nothing else. The reason why HyperDoc states the Association as derived is kept in the projection; the Topic Map carries only the class as the Scope.</li>
+        <li>They have different lifetimes. The projection is made again when a view is shown, and the Topic Map is read from the CTM text; an equal CTM text gives a new Topic Map object.</li>
+        <li>They are joined by one link: the projected Topic holds the TMDM object and reports it as <codeph>topicmap-topic-object-of</codeph>. Inspect Topicmap sign ends at the projected Topic; Inspect represented object follows that link and ends at the other side of it.</li>
+        <li>The key of the projected Topic is not an identifier of the TMDM object. For an Association node it is made from the type and the Roles, <codeph>type(role=player,...)</codeph>, so that two reads of one CTM text give the same key.</li>
+      </ul>
+    </section>
+  </conbody>
+</concept>

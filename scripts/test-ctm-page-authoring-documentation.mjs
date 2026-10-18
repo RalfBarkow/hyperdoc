@@ -26,7 +26,9 @@ const temp=fs.mkdtempSync(path.join(os.tmpdir(),'ctm-documentation-browser-'))
 const site=path.join(temp,'site');fs.mkdirSync(path.join(site,'pages'),{recursive:true})
 const retained=path.resolve(path.dirname(new URL(import.meta.url).pathname),'../dreyeck/work/ctm-page-evidence/site/pages/ctm-and-tmdm-in-hyperdoc')
 const pageFile=path.join(site,'pages','ctm-and-tmdm-in-hyperdoc');fs.copyFileSync(retained,pageFile)
-const sha=f=>crypto.createHash('sha256').update(fs.readFileSync(f)).digest('hex'),before=sha(pageFile)
+const retainedDita=path.resolve(path.dirname(new URL(import.meta.url).pathname),'../dreyeck/work/topicmap-inspection-docs/site/pages/topicmap-inspection-dita')
+const ditaFile=path.join(site,'pages','topicmap-inspection-dita');fs.copyFileSync(retainedDita,ditaFile)
+const sha=f=>crypto.createHash('sha256').update(fs.readFileSync(f)).digest('hex'),before=sha(pageFile),beforeDita=sha(ditaFile)
 const port=await new Promise(r=>{const s=net.createServer();s.listen(0,'127.0.0.1',()=>{const p=s.address().port;s.close(()=>r(p))})})
 const stop=path.join(temp,'stop'),script=path.join(temp,'witness.lisp'),log=path.join(output,'lisp.log')
 fs.writeFileSync(script,`(require :asdf)
@@ -62,6 +64,7 @@ try{
  await page.getByRole('button',{name:'Text pages',exact:true}).last().click()
  await page.locator('tr.inspector-inspect:visible').filter({hasText:'Work Breakdown'}).last().click()
  await heading('Work Breakdown')
+ const workBreakdown=await page.locator('.inspector-pane').count()-1   // a captured index: last() would follow the newest pane
  let text=await last().innerText()
  for(const expected of ['How this page uses its terms','PMBOK Guide 2000','Agile Practice Guide 2017','HERMES Online','Reference basis'])assert(text.includes(expected),expected)
  steps.push('Work Breakdown: terms and reference basis')
@@ -396,8 +399,95 @@ try{
  await panes().nth(carrier+2).getByRole('heading',{name:'Story Item ed37e9bac2fcd548',exact:true}).waitFor()
  assert.equal(await normalized(panes().nth(carrier+2)),viaLink);steps.push('Page source → E3: the same Item')
  await editPath(carrier+2);steps.push('Page source → E3 → Edit → Prepare edit proposal → Preview')
+
+ // The DITA documentation of the Topicmap interaction: Work Breakdown → the Work item → a DITA topic → the objects it names.
+ // Only reading: the page files are compared at the end.
+ {
+  const wb=workBreakdown,address=title=>(title.match(/\{([0-9A-F]+)\}/)||[])[1]
+  await panes().nth(wb).getByText('Document the Topicmap Interaction in DITA',{exact:true}).first().click()
+  const work=panes().nth(wb+1);await work.getByRole('heading',{name:'Topicmap Interaction Documentation',exact:true}).waitFor()
+  const workText=await work.innerText()
+  for(const expected of ['Deliverable','Acceptance criterion','Evidence','Plan step','Status','technical documentation','not a work package of the WBS'])assert(workText.includes(expected),expected)
+  steps.push('Work Breakdown → Document the Topicmap Interaction in DITA → the Work item with deliverable, acceptance, evidence, plan step, status')
+  // A topic is a Story Item of type dita: the structured reading first, the XML source as its own tab.
+  const openTopic=async(label,id)=>{await work.getByText(label,{exact:true}).first().click()
+   const pane=panes().nth(wb+2);await pane.locator('.inspector-title').filter({hasText:new RegExp('dita '+id)}).first().waitFor();return pane}
+  const topic=await openTopic('Topicmap Signs and Represented Objects','4f1c7a92b3d85e01')
+  await topic.getByRole('heading',{name:'Topicmap Signs and Represented Objects',exact:true}).waitFor()
+  const tabs=(await topic.getByRole('button').allInnerTexts()).filter(Boolean)
+  assert(tabs.indexOf('DITA topic')>=0&&tabs.indexOf('Story item')>tabs.indexOf('DITA topic'),tabs.join('|'))
+  const reading=await topic.innerText()
+  for(const expected of ['Information type','concept','DITA version','1.3','Five things','Inspect Topicmap sign','Inspect represented object','Why the projected Topic and the TMDM object are not the same'])assert(reading.includes(expected),expected)
+  assert(!reading.includes('<!DOCTYPE concept PUBLIC')&&!reading.includes('<conbody>'),'the structured reading is not the XML')   // the title bar's excerpt of the text is not the view
+  await topic.getByRole('button',{name:'Story item',exact:true}).first().click()
+  await topic.getByRole('heading',{name:'Story Item 4f1c7a92b3d85e01',exact:true}).waitFor()
+  assert((await topic.innerText()).includes('<!DOCTYPE concept PUBLIC "-//OASIS//DTD DITA Concept//EN" "concept.dtd">'),'the XML source is its own tab')
+  await topic.getByRole('button',{name:'DITA topic',exact:true}).first().click()
+  await topic.getByRole('heading',{name:'Topicmap Signs and Represented Objects',exact:true}).waitFor()
+  steps.push('the DITA topic: structured reading ('+tabs.join(', ')+') and the XML source as its own tab')
+  // A reference to an object is seen as a link: underlined, with the pointer.
+  const decoration=await topic.locator('.dita-xref').first().evaluate(e=>getComputedStyle(e).textDecorationLine+'|'+getComputedStyle(e.querySelector('.inspector-inspect')).cursor)
+  assert.equal(decoration,'underline|pointer')
+  const xref=(pane,href)=>pane.locator(`.dita-xref[title="${href}"] .inspector-inspect`).first()
+  const objectPane=async(pane,href)=>{await xref(pane,href).click();const next=panes().nth(wb+3);await next.locator('.inspector-title').first().waitFor();await page.waitForTimeout(400);return next}
+  const titleOf=async pane=>(await pane.locator('.inspector-title').first().innerText()).replace(/\s+/g,' ')
+  if(servedSized){
+   // This Catalog has no system that builds the example: the reference is an explanation, not an error.
+   const explained=await objectPane(topic,'hyperdoc:example:proposes-topic')
+   assert((await explained.innerText()).includes('not available in this Catalog'),await explained.innerText())
+   steps.push('served-sized: the example references answer with an explanation')
+  }else{
+   // The two Operations reach two different objects of one chain: the projected Topic and the TMDM Association it represents.
+   const sign=await objectPane(topic,'hyperdoc:example:proposes-topic'),signTitle=await titleOf(sign)
+   assert(/^item-edit-topic/.test(signTitle),signTitle)
+   await sign.getByRole('button',{name:'Provenance',exact:true}).first().click()
+   await sign.getByRole('heading',{name:'Provenance in the HyperDoc projection',exact:true}).waitFor()
+   const provenance=await sign.innerText()
+   for(const expected of ['An Association of the Item edit','derived','PROPOSAL-ACTION'])assert(provenance.includes(expected),expected)
+   const represented=await objectPane(topic,'hyperdoc:example:proposes-association'),representedTitle=await titleOf(represented)
+   assert(/^association.*ASSOCIATION 2 roles/.test(representedTitle),representedTitle)
+   assert.notEqual(address(signTitle),address(representedTitle),'the projected Topic and the TMDM Association are different objects')
+   steps.push('Inspect Topicmap sign → '+signTitle.slice(0,40)+'… ; Inspect represented object → '+representedTitle.slice(0,40)+'… : two objects')
+   // The proposal of the chain, and its Lisp objects.
+   const proposal=await objectPane(topic,'hyperdoc:example:proposal');assert(/ITEM-EDIT-PROPOSAL/i.test(await titleOf(proposal)),await titleOf(proposal))
+   // The cross reference to the next topic: the Operations as a reference.
+   await topic.locator('.dita-xref[title="hyperdoc:item:4f1c7a92b3d85e03"] .inspector-inspect').first().click()
+   const reference=panes().nth(wb+3);await reference.locator('.inspector-title').filter({hasText:/dita 4f1c7a92b3d85e03/}).first().waitFor()
+   await reference.getByRole('heading',{name:'Topicmap Gesture Operations',exact:true}).waitFor()
+   const operations=await reference.innerText()
+   for(const expected of ['operation/inspect-topicmap-sign','operation/inspect-represented-object','operation/inspect-relation-contract','binding/radial-menu-inspect-topicmap-sign','binding/learned-mark-association-inspect-represented-object','center 270 degrees (up)','center 180 degrees (left)','center 0 degrees (right)','Native Topicmap, edge of a TMDM Role','TALA (interactive), Topic group'])assert(operations.includes(expected),expected)
+   // The Operation of the reference is the Operation object itself.
+   await reference.locator('.dita-xref[title="hyperdoc:operation:inspect-topicmap-sign"] .inspector-inspect').first().click()
+   const operation=panes().nth(wb+4);await operation.locator('.inspector-title').first().waitFor();await page.waitForTimeout(400)
+   assert(/inspect-topicmap-sign|Inspect Topicmap sign/i.test(await operation.innerText()),await titleOf(operation))
+   steps.push('the reference topic lists the Operations, their Bindings and sectors; operation/inspect-topicmap-sign is the Operation object')
+   // The Role topic: the Role of the example, and its Association as the Role's parent: one chain.
+   const roles=await (async()=>{await work.getByText('TMDM Roles and Projected Edges',{exact:true}).first().click()
+    const pane=panes().nth(wb+2);await pane.locator('.inspector-title').filter({hasText:/dita 4f1c7a92b3d85e02/}).first().waitFor();return pane})()
+   await roles.getByRole('heading',{name:'TMDM Roles and Projected Edges',exact:true}).waitFor()
+   assert((await roles.innerText()).includes('a TMDM Role has a type and a player and no direction'))
+   const role=await objectPane(roles,'hyperdoc:example:proposes-role-action'),roleTitle=await titleOf(role)
+   assert(/^association-role#<ASSOCIATION-ROLE \{[0-9A-F]+\}>/.test(roleTitle),roleTitle)
+   await role.getByRole('button',{name:'Slots',exact:true}).first().click();await page.waitForTimeout(800)
+   await role.locator('tr').filter({hasText:/^parent/}).locator('td').nth(1).locator('.inspector-inspect').first().click()
+   const parent=panes().nth(wb+4);await parent.locator('.inspector-title').filter({hasText:/ASSOCIATION 2 roles/}).first().waitFor()
+   assert.equal(address(await titleOf(parent)),address(representedTitle),'the Role of the example belongs to the Association of the example')
+   steps.push('the Role topic: the Role action of proposes → its parent is the Association that Inspect represented object opened')
+  }
+  // The task topic is a task: its steps are an ordered list, and it says what the synthetic tests do not show.
+  await work.getByText('Inspect a Topicmap Sign',{exact:true}).first().click()
+  const task=panes().nth(wb+2);await task.locator('.inspector-title').filter({hasText:/dita 4f1c7a92b3d85e04/}).first().waitFor()
+  await task.getByRole('heading',{name:'Inspect a Topicmap Sign',exact:true}).waitFor()
+  assert.equal(await task.locator('ol.dita-steps > li').count(),9)
+  const taskText=await task.innerText()
+  for(const expected of ['Press the secondary button on the node','Prepare edit proposal','TALA (interactive)','isTrusted','trackpad'])assert(taskText.includes(expected),expected)
+  steps.push('the task topic: nine ordered steps, with the limit of synthetic input')
+  // Back to the carrier page for the steps that follow.
+  await panes().nth(wb).getByText('Author the CTM Plan Page through HyperDoc',{exact:true}).first().click()
+  await heading('Authoring the CTM Plan Page')
+ }
  if(servedSized){
-  assert.deepEqual(errors,[]);assert.equal(sha(pageFile),before)
+  assert.deepEqual(errors,[]);assert.equal(sha(pageFile),before);assert.equal(sha(ditaFile),beforeDita)
   fs.writeFileSync(path.join(output,'result.json'),JSON.stringify({status:'PASS',catalogSystem,servedSized,packages,development:false,policy:'ENFORCED',nothingWritten:true,steps},null,2))
   console.log('DOCUMENTATION-BROWSER-PASS (served-sized: '+packages+'): '+steps.join(' → ')+' | clicks '+JSON.stringify(readiness))
  }else{
@@ -416,7 +506,7 @@ try{
   await panes().nth(docIndex+1).getByRole('button',{name:'Source code',exact:true}).waitFor();steps.push('execute-completed-edit → the function, with its Source code')
   await open('edit-fedwiki-page-item','EDIT-FEDWIKI-PAGE-ITEM');steps.push('edit-fedwiki-page-item → the writer')
   await open('dreyeck/ctm-page-authoring/local','dreyeck/ctm-page-authoring/local');steps.push('the local system')
-  assert.deepEqual(errors,[]);assert.equal(sha(pageFile),before);assert.deepEqual(fs.readdirSync(path.join(site,'pages')),['ctm-and-tmdm-in-hyperdoc'])
+  assert.deepEqual(errors,[]);assert.equal(sha(pageFile),before);assert.equal(sha(ditaFile),beforeDita);assert.deepEqual(fs.readdirSync(path.join(site,'pages')),['ctm-and-tmdm-in-hyperdoc','topicmap-inspection-dita'])
   fs.writeFileSync(path.join(output,'result.json'),JSON.stringify({status:'PASS',catalogSystem,packages,syntheticPointerInput:syntheticInput,development:false,policy:'ENFORCED',nothingWritten:true,steps},null,2))
   console.log('DOCUMENTATION-BROWSER-PASS: '+steps.join(' → ')+' | clicks '+JSON.stringify(readiness))
  }
