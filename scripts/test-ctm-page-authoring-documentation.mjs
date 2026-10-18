@@ -44,7 +44,7 @@ const fd=fs.openSync(log,'w'),child=spawn(lisp,['--load',script],{stdio:['ignore
 const logText=()=>fs.readFileSync(log,'utf8')
 const {chromium}=await import(pathToFileURL(path.join(pw,'index.mjs')))
 const browser=await chromium.launch({headless:true,executablePath:chrome})
-const steps=[]
+const steps=[];let syntheticInput=false   // pointer events dispatched by script are synthetic (isTrusted=false)
 try{
  for(let n=0;n<6000;n++){if(child.exitCode!==null)throw Error(logText().slice(-4000));if(logText().includes('DOCUMENTATION-BROWSER-READY'))break;await new Promise(r=>setTimeout(r,100))}
  const packages=(logText().match(/PACKAGES [^\n]*/)||[''])[0]
@@ -220,6 +220,59 @@ try{
    await row.locator('.inspector-inspect').last().click()
    await panes().nth(completion+1).locator('.inspector-title').filter({hasText:/TOPIC/i}).first().waitFor()}
   steps.push('schema Topics: not drawn; original, completed-from, date and derived open through the legend')
+  // 8. The marking menu (Zettel 5697) on the native signs. The pointer events are SYNTHETIC (dispatched by script, isTrusted=false): they go through the production
+  // DOM element, the CLOG handlers, the reducer and the Operation methods, and prove nothing about a physical mouse or trackpad.
+  syntheticInput=true
+  const historyText=async()=>{await map.getByText('Open the Workspace as a pane',{exact:true}).first().click()
+   const w=panes().nth(completion+1);await w.locator('.inspector-title').filter({hasText:/TOPICMAP-WORKSPACE/i}).first().waitFor()
+   await w.getByRole('button',{name:'Slots',exact:true}).first().click();await page.waitForTimeout(300)
+   const t=(await w.innerText()).replace(/\s+/g,' ');return t.slice(t.search(/HISTORY/i))}
+  const press=(loc,name,button,buttons,dx,dy)=>loc.evaluate((e,a)=>{const r=e.getBoundingClientRect();const ev=new PointerEvent(a.name,{bubbles:true,pointerId:77,pointerType:'mouse',button:a.button,buttons:a.buttons,clientX:r.x+r.width/2+a.dx,clientY:r.y+r.height/2+a.dy,isPrimary:true});e.dispatchEvent(ev);return ev.isTrusted},{name,button,buttons,dx,dy})
+  const gstate=loc=>loc.evaluate(e=>({state:e.dataset.topicGestureState,mode:e.dataset.topicGestureMode,menu:e.dataset.topicGestureMenuVisible,binding:e.dataset.topicGestureBinding,outcome:e.dataset.topicGestureOutcome,bound:typeof e.__disposeTopicGesture==='function'}))
+  const visibleMenu=()=>page.evaluate(()=>[...document.querySelectorAll('.dreyeck-topic-gesture-menu')].filter(x=>{const c=getComputedStyle(x),b=x.getBoundingClientRect();return c.display!=='none'&&c.visibility!=='hidden'&&b.width>0}).map(x=>x.textContent).sort())
+  const LEFT=[-70,0],UP=[0,-70]
+  // One selection by the radial menu (press, wait for the menu, move, release) or by the learned mark (press, move, release at once).
+  const select=async(loc,where,dir,rightPane)=>{
+   const [dx,dy]=dir;assert.equal(await press(loc,'pointerdown',2,2,0,0),false,'synthetic: isTrusted is false')
+   let labels=null
+   if(where==='menu'){await page.waitForTimeout(900);labels=await visibleMenu();assert.deepEqual(await gstate(loc).then(g=>[g.state,g.menu]),['menu-visible','true'])}
+   await press(loc,'pointermove',-1,2,dx,dy);await press(loc,'pointerup',2,0,dx,dy);await page.waitForTimeout(900)
+   const g=await gstate(loc);assert.equal(g.state,'completed');assert.equal(g.outcome,'shown');assert.equal(g.menu,'false')
+   assert.equal(g.mode,where==='menu'?'menu-visible':'marking');return {labels,binding:g.binding,title:await titleOf(rightPane)}}
+  await sign('the-completion').dispatchEvent('click');await pointAt('the-completion')
+  const history0=await historyText()   // opens the Workspace pane; the pane to the right is replaced again by each gesture
+  const nativeResults={}
+  for(const [id,left,up] of [['the-completion',/^topicTopic #the-completion/,/^item-edit-topic/],[completedFrom,/^association.*ASSOCIATION 2 roles/,/^item-edit-topic/]]){
+   const loc=sign(id);await loc.scrollIntoViewIfNeeded()
+   assert.equal((await gstate(loc)).bound,true,'the sign is bound to the Gesture transport: '+id)
+   const rightPane=panes().nth(completion+1)
+   const m1=await select(loc,'menu',LEFT,rightPane),k1=await select(loc,'mark',LEFT,rightPane)
+   assert.deepEqual(m1.labels,['Inspect Topicmap sign','Inspect represented object'].sort(),'the applicable Operations, no others')
+   assert.equal(m1.binding,'binding/radial-menu-inspect-represented-object');assert.equal(k1.binding,'binding/learned-mark-inspect-represented-object')
+   assert(left.test(m1.title),m1.title);assert.equal(k1.title,m1.title,'menu and mark open the same Lisp object (same address)')
+   const m2=await select(loc,'menu',UP,rightPane),k2=await select(loc,'mark',UP,rightPane)
+   assert.equal(m2.binding,'binding/radial-menu-inspect-topicmap-sign');assert.equal(k2.binding,'binding/learned-mark-inspect-topicmap-sign')
+   assert(up.test(m2.title),m2.title);assert.equal(k2.title,m2.title)
+   assert((await rightPane.innerText()).includes('Provenance in the HyperDoc projection'))
+   assert((await rightPane.innerText()).includes(id==='the-completion'?'the-completion':'completed-from'))
+   nativeResults[id]={represented:m1.title,sign:m2.title}
+  }
+  // The represented objects differ by the sign that was hit, not by the Point.
+  assert.notEqual(nativeResults['the-completion'].represented,nativeResults[completedFrom].represented)
+  // Reading Operations: the Point and the History are as before.
+  await pointAt('the-completion');assert.equal(await historyText(),history0,'the History is unchanged by SECONDARY')
+  steps.push('SECONDARY on the-completion and completed-from (synthetic events): radial menu lists the two applicable Operations; menu and mark open the same objects; Point and History unchanged')
+  // PRIMARY is unchanged: it moves the Point.
+  await sign('the-completed-action').dispatchEvent('click');await pointAt('the-completed-action')
+  assert.notEqual(await historyText(),history0,'PRIMARY records History')
+  // After a redraw (the tab CTM and back) the new signs take the gesture again, and on the new Point's sign too.
+  await map.getByRole('button',{name:'CTM',exact:true}).first().click();await map.getByRole('heading',{name:`CTM of the completion of ${e3}`,exact:true}).waitFor()
+  await tabTopicmap();await pointAt('the-completed-action')
+  const again=sign(completedFrom);await again.scrollIntoViewIfNeeded();assert.equal((await gstate(again)).bound,true)
+  const rightAfter=await select(again,'mark',LEFT,panes().nth(completion+1))
+  assert(/^association.*ASSOCIATION 2 roles/.test(rightAfter.title))
+  await pointAt('the-completed-action')
+  steps.push('PRIMARY moves the Point and records History; after CTM and back the redrawn signs take the gesture again')
   // 8. TALA: the same projection laid out again, on request, and still the same Topics and Roles.
   await map.getByRole('button',{name:'Lay out with TALA',exact:true}).click()
   const tala=panes().nth(completion+1)
@@ -242,6 +295,22 @@ try{
    await tala.locator('svg g[data-topic-id="the-completed-action"]').first().click()
    await panes().nth(completion+2).getByRole('heading',{name:'the-completed-action',exact:true}).waitFor()
    assert((await panes().nth(completion+2).innerText()).includes('Provenance in the HyperDoc projection'))
+   // The groups of TALA (interactive) take the same SECONDARY: the same Bindings, Operations and objects as the native signs.
+   const grp=id=>tala.locator(`svg g[data-topic-id="${id}"]`).first()
+   for(const id of ['the-completed-action',completedFrom]){
+    const loc=grp(id);await loc.scrollIntoViewIfNeeded();assert.equal((await gstate(loc)).bound,true,'TALA group bound: '+id)
+    const rightPane=panes().nth(completion+2)
+    const m=await select(loc,'menu',LEFT,rightPane),k=await select(loc,'mark',LEFT,rightPane)
+    assert.deepEqual(m.labels,['Inspect Topicmap sign','Inspect represented object'].sort())
+    assert.equal(k.title,m.title,'TALA: menu and mark open the same object')
+    assert(id===completedFrom?/^association.*ASSOCIATION 2 roles/.test(m.title):/^topicTopic #the-completed-action/.test(m.title),m.title)
+    const u=await select(loc,'mark',UP,rightPane);assert(/^item-edit-topic/.test(u.title))
+   }
+   // Its Role edges carry the Association gesture, whose only Operation, Inspect relation contract, does not apply to a Role edge: a refusal, and nothing opens.
+   const edge=tala.locator(`svg g[data-association-id$=":original:the-proposed-action"]`).first();await edge.scrollIntoViewIfNeeded()
+   assert.equal(await edge.evaluate(e=>typeof e.__disposeTopicGesture==='function'),true)
+   await press(edge,'pointerdown',2,2,0,0);await press(edge,'pointermove',-1,2,70,0);await press(edge,'pointerup',2,0,70,0);await page.waitForTimeout(800)
+   assert.equal(await edge.evaluate(e=>e.dataset.associationGestureOutcome),'not-applicable')
    steps.push('Lay out with TALA → TALA (interactive): the same 15 Topics and 16 Role edges; completed-from, its Role edge original and a Topic open Inspector objects')
   }else steps.push('Lay out with TALA → no D2 here: '+talaTabs.join(', '))
   // The test page, story and journal, is as it was.
@@ -278,7 +347,7 @@ try{
   await open('edit-fedwiki-page-item','EDIT-FEDWIKI-PAGE-ITEM');steps.push('edit-fedwiki-page-item → the writer')
   await open('dreyeck/ctm-page-authoring/local','dreyeck/ctm-page-authoring/local');steps.push('the local system')
   assert.deepEqual(errors,[]);assert.equal(sha(pageFile),before);assert.deepEqual(fs.readdirSync(path.join(site,'pages')),['ctm-and-tmdm-in-hyperdoc'])
-  fs.writeFileSync(path.join(output,'result.json'),JSON.stringify({status:'PASS',catalogSystem,packages,development:false,policy:'ENFORCED',nothingWritten:true,steps},null,2))
+  fs.writeFileSync(path.join(output,'result.json'),JSON.stringify({status:'PASS',catalogSystem,packages,syntheticPointerInput:syntheticInput,development:false,policy:'ENFORCED',nothingWritten:true,steps},null,2))
   console.log('DOCUMENTATION-BROWSER-PASS: '+steps.join(' → ')+' | clicks '+JSON.stringify(readiness))
  }
 }catch(e){

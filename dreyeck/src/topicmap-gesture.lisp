@@ -257,6 +257,16 @@ beside the occurrence's. A refusal opens nothing."
 (defvar *association-sign-ids* (make-hash-table :test 'eq :weakness :key)
   "Reference IDs rendered as Association signs, held while their View is.")
 
+(defvar *topic-sign-ids* (make-hash-table :test 'eq :weakness :key)
+  "Reference IDs rendered as Topic signs by a renderer that is not the native one, each with its Topic and Projection, held while their View is.")
+
+(defun register-topic-sign (html-id topic projection)
+  "Declare that the Inspector reference HTML-ID is the sign of TOPIC in PROJECTION, and return HTML-ID. PRIMARY keeps what the reference does; the sign
+then also takes SECONDARY: the same element, script, reveal deadline, Bindings and Operations as a native workspace action sign, with an occurrence
+for the exact Topic. There is no Workspace here: the Operations are read-only and never ask for one."
+  (setf (gethash html-id *topic-sign-ids*) (cons topic projection))
+  html-id)
+
 (defun register-association-sign (html-id)
   "Declare that the Inspector reference HTML-ID is an Association's sign."
   (setf (gethash html-id *association-sign-ids*) t)
@@ -402,6 +412,15 @@ cancelled interaction leaves nothing on the page."
                                         :pane pane :view view)))
          (bind-workspace-action-sign-occurrence occurrence parent)
          (push (sb-ext:make-weak-pointer occurrence) *workspace-action-sign-occurrences*)))
+      ((gethash (car entry) *topic-sign-ids*)
+       (destructuring-bind (topic . projection) (gethash (car entry) *topic-sign-ids*)
+         (let ((occurrence (make-instance 'workspace-action-sign-occurrence
+                                          :reference (make-instance 'topic-action-reference :topic topic :projection projection :workspace nil
+                                                                    :fn (lambda () nil))
+                                          :element (clog:attach-as-child parent (car entry))
+                                          :pane pane :view view)))
+           (bind-workspace-action-sign-occurrence occurrence parent)
+           (push (sb-ext:make-weak-pointer occurrence) *workspace-action-sign-occurrences*))))
       ((and (typep (cdr entry) 'dreyeck/topicmap:topicmap-association)
             (gethash (car entry) *association-sign-ids*))
        (bind-association-sign pane parent (clog:attach-as-child parent (car entry))

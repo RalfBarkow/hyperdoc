@@ -137,3 +137,17 @@ implementation/package and Work authoring production files are byte-identical
 to the reference commit. Point/Projection lifetime, subject resolution, temporal
 selection, Point panel, inspection table, Work status correctness fix, authority
 policy, and Association operation semantics are outside this change.
+
+## CTM Topicmap and TALA (interactive)
+
+The `Topicmap` tab of an `item-edit-completion`, `item-edit-preview` or `item-edit-proposal` (see `docs/ctm-page-authoring-review.md`) is drawn by the native renderer with a
+Workspace, so each sign is a workspace action sign and takes SECONDARY unchanged: on `the-completion` and on the Association node `completed-from` the radial menu lists
+*Inspect represented object* (left: the TMDM Topic or TMDM Association) and *Inspect Topicmap sign* (up: the projected Topic with its Provenance), and the learned marks select
+the same Operations. Right and down are vacant (no Work Topic, no page). Nothing about the Operations changed.
+
+`TALA (interactive)` gave its Topic groups only the PRIMARY Inspector reference, so SECONDARY did nothing there. `interactive-tala-svg` now registers each Topic group's reference as a
+Topic sign (`register-topic-sign`, next to `register-association-sign`); the existing `create-view-element :after` method binds the same gesture script, Gesture Window, Bindings and
+Operations to it. PRIMARY is unchanged (it opens the projected Topic). The Role edges of that drawing already took the Association gesture; its only Operation, *Inspect relation
+contract*, does not apply to a projected Role edge, so a selection there is refused and opens nothing.
+
+Browser evidence: `scripts/test-ctm-page-authoring-documentation.mjs` drives the production DOM with synthetic pointer events (`isTrusted=false`), as the 2026-10-05 proof did.
