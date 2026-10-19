@@ -1,0 +1,17 @@
+<h1>Project Work Exchange WBS Dictionary</h1>
+<p><strong>Draft.</strong> This page is not a source of the project CTM. It proposes what the WBS Dictionary of the proposed Deliverable <code>project-work-ctm-exchange</code> would state, in the form of the <a page="CTM Plan Page WBS Dictionary" hyperbook="dreyeck/work/reading">CTM Plan Page WBS Dictionary</a>: for each work package its scope, acceptance criterion, authority, effect, the evidence it requires, and its controls. The work packages it describes stay proposals on <a page="Implementation Assignments">Implementation Assignments</a> until the user declares them; this page declares nothing.</p>
+<p>The <em>evidence</em> field states the evidence a package <em>requires</em>. It is not an observation: what an executor observed and reports is the evidence of an assignment on Implementation Assignments, and whether a package was accepted is stated only by a record on <a page="Acceptance Records">Acceptance Records</a>.</p>
+<p>Only <code>pwc-wp-8</code> is drafted. The acceptance criterion is the user's own acceptance condition for the reader-scaling assignment; the other fields describe that assignment's scope as the user gave it. The entries for <code>pwc-wp-1</code> to <code>pwc-wp-7</code> are not drafted.</p>
+
+<section data-wbs-entry="pwc-wp-8">
+<h2>pwc-wp-8 Read the complete project CTM with the topic-maps reader in practical time</h2>
+<p data-field="scope">Read the complete HyperDoc project CTM with the topic-maps reader in practical time, through a correction in the topic-maps repository that leaves the TMDM semantics of the reader unchanged, and let HyperDoc depend on the corrected revision.</p>
+<p data-field="acceptance">The full HyperDoc project CTM is read correctly, in practical time, without weakening TMDM semantics.</p>
+<p data-field="authority">The user decides whether the package is accepted. The executor of an assignment does not; its report is evidence, not a decision. Committing in topic-maps and changing HyperDoc's dependency need the user's approval.</p>
+<p data-field="effect">A topic-maps commit on a branch of its own, and HyperDoc's dependency on it. No change to TMDM semantics, to the project model or to its identities.</p>
+<p data-field="evidence">The complete topic-maps suite with outputs equal to the 963f2a0 run; regression tests of merge and reification semantics recorded with the unchanged 963f2a0 before the change; a fresh-process read of the complete project CTM within a stated budget, traced against its source pages; a byte-identical export of the unchanged CTM.</p>
+<ul data-field="controls">
+<li data-control="project-ctm-read-back" data-coverage="existing" data-test="dreyeck/tests/project-ctm.lisp" data-marker="PROJECT-CTM-READBACK-PASS">The complete project CTM is read back, traced against its source pages, compared through CXTM and exported byte-identically.</li>
+<li data-control="topic-maps-suite" data-coverage="external">The topic-maps suite, including tests/normalization.lisp, run in the topic-maps repository on commit 5a4a668; it is not a file of this repository.</li>
+</ul>
+</section>

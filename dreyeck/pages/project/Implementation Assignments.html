@@ -107,3 +107,41 @@
 <p data-field="observed-state">Reported by the executor: committed in topic-maps as 5a4a668 after the user approved the commit; HyperDoc's dependency was updated to it after the user approved the update, both on 2026-10-19. Not pushed. This report is not an acceptance.</p>
 <p data-field="acceptance">No acceptance by the user is recorded.</p>
 </section>
+
+<section data-assignment="cc-2026-10-19-acceptance-model-draft">
+<h3>Claude Code: Work Package, Evidence and Acceptance (draft)</h3>
+<p data-field="issued">Given by the user on 2026-10-19 in the same Claude Code session (Claude Opus 5.5), after the walk of the Project Workspace showed that pwc-wp-8 has no evidence or acceptance of its own: prepare an explicit acceptance concept that the project CTM can state, without recording any acceptance.</p>
+<p data-field="goal">Make three things distinguishable and navigable: a work package with its acceptance criterion and required evidence, an implementation assignment with its observed evidence and result, and an acceptance record with its decision, deciding authority and the evidence it considered. Demonstrate the record only on a synthetic fixture; record no acceptance of pwc-wp-8.</p>
+<p data-field="work-item" data-ref="project-work-ctm">The proposed Work Item above. It is not declared on the Work Breakdown.</p>
+<p data-field="delivers" data-ref="pwc-wp-6">The proposed work package "A record of acceptance, distinct from work status" above.</p>
+<p data-field="plan-step">No Plan Step is confirmed for this assignment. Its text cannot make one.</p>
+<ul data-field="source-authorities">
+<li data-reads="dreyeck/pages/work/Authoring the CTM Plan Page.html">reads the produces contract and the declared work packages</li>
+<li data-reads="dreyeck/pages/work/CTM Plan Page WBS Dictionary.html">reads the form of a WBS Dictionary entry: scope, acceptance criterion, authority, effect, required evidence, controls</li>
+<li data-changes="dreyeck/pages/project/Project Work Exchange WBS Dictionary.html">adds a draft WBS Dictionary for project-work-ctm-exchange; not a source of the project CTM until the user decides</li>
+<li data-changes="dreyeck/pages/project/Acceptance Records.html">adds a draft Acceptance Records page without records; not a source of the project CTM until the user decides</li>
+<li data-changes="dreyeck/work/project/project-ctm.lisp">reads a draft dictionary and an Acceptance Records page when they are sources, and writes their vocabulary only then</li>
+<li data-changes="dreyeck/work/project/project-workspace.lisp">shows acceptance records, criteria and authorities in the Workspace</li>
+<li data-changes="dreyeck/tests/project-ctm.lisp">adds the acceptance tests</li>
+<li data-changes="dreyeck/tests/fixtures/project-acceptance/README.txt">adds the synthetic fixture, whose identifiers all start with synthetic-</li>
+<li data-changes="docs/project-acceptance-model.md">states the proposal and the decisions it needs</li>
+</ul>
+<ul data-field="preconditions">
+<li>No acceptance is recorded for pwc-wp-8 or any other package; the record form is shown only on a synthetic fixture.</li>
+<li>Existing subject identifiers and Work relations stay unchanged; no Work declaration changes.</li>
+<li>No commit, push or deployment without the user's approval.</li>
+</ul>
+<ul data-field="acceptance-criteria">
+<li>Work package, implementation assignment and acceptance record stay distinguishable.</li>
+<li>Required evidence is not given out as observed evidence.</li>
+<li>An assignment's evidence does not become a work package's acceptance.</li>
+<li>No acceptance record exists without an explicitly declared decision.</li>
+<li>Subject identifiers and existing Work relations are preserved.</li>
+<li>The CTM is reproducible and its projection in the Inspector traceable.</li>
+</ul>
+<ul data-field="evidence">
+<li data-test="dreyeck/tests/project-ctm.lisp">acceptance tests of system dreyeck/work/project/tests, on the synthetic fixture and on the drafts</li>
+</ul>
+<p data-field="observed-state">Reported by the executor: a draft in the working tree, not committed. The draft pages are not sources of the project CTM; making them sources is the user's decision. This report is not an acceptance.</p>
+<p data-field="acceptance">No acceptance by the user is recorded.</p>
+</section>

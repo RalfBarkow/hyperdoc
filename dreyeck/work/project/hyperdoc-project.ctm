@@ -6,7 +6,7 @@
 #   dreyeck/pages/work/Work Breakdown.html  a7dc3d53a1a7312e6feba2350bde7251c222b2acd321ef5a109116f5cf616e13
 #   dreyeck/pages/work/Authoring the CTM Plan Page.html  fced413ad5e893e49973df1fa8fb5ca14dee87695c50100e72ddd12d4d2de75a
 #   dreyeck/pages/work/CTM Plan Page WBS Dictionary.html  de3f372912e0a257a85990686fdcd354f79481af7aecb1ecc5d1ffb171e9d9b5
-#   dreyeck/pages/project/Implementation Assignments.html  acb51ffd11db427cfd7a9e65bb3d90de55371a2c37c566ed61e5f997b27ee6be
+#   dreyeck/pages/project/Implementation Assignments.html  4c109f5bbeed6a1c26049b412d3ef2970725a22712cfa57910f7d9221dc2b868
 # Other files read: the test files WBS Dictionary controls name, to derive test marker found:
 #   dreyeck/tests/fedwiki-page-authoring.lisp  0fcd02078576bde7a0438620797ea30c805900201ac443b8bc20ac8b146671d1
 #   dreyeck/tests/fedwiki-item-edit-execution.lisp  d215e10c48f94b401248d60e7c8fe95db5c693ea8a489f60b368c7f8102c755d
@@ -509,7 +509,7 @@ s:role-work-relation-depends-on-target
     s:hyperbook-id: "dreyeck/work/project" ;
     s:page-id: "Implementation Assignments" ;
     s:repository-path: "dreyeck/pages/project/Implementation Assignments.html" ;
-    s:source-sha256: "acb51ffd11db427cfd7a9e65bb3d90de55371a2c37c566ed61e5f997b27ee6be" .
+    s:source-sha256: "4c109f5bbeed6a1c26049b412d3ef2970725a22712cfa57910f7d9221dc2b868" .
 
 <tag:dreyeck.ch,2026:hyperdoc/hyperbook/dreyeck/work/project>
     isa s:hyperbook ;
@@ -1430,6 +1430,56 @@ w:pwc-wp-8
     s:evidence-note: "complete project CTM: 7.4 s with the correction; the unchanged reader did not complete within 300 s" ;
     s:evidence-note: "HyperDoc read-back of the complete project CTM with the pinned revision" .
 
+<tag:dreyeck.ch,2026:hyperdoc/assignment/cc-2026-10-19-acceptance-model-draft>
+    isa s:implementation-assignment ;
+    - "Claude Code: Work Package, Evidence and Acceptance (draft)" ;
+    s:issued: "Given by the user on 2026-10-19 in the same Claude Code session (Claude Opus 5.5), after the walk of the Project Workspace showed that pwc-wp-8 has no evidence or acceptance of its own: prepare an explicit acceptance concept that the project CTM can state, without recording any acceptance." ;
+    s:goal: "Make three things distinguishable and navigable: a work package with its acceptance criterion and required evidence, an implementation assignment with its observed evidence and result, and an acceptance record with its decision, deciding authority and the evidence it considered. Demonstrate the record only on a synthetic fixture; record no acceptance of pwc-wp-8." ;
+    s:plan-step-note: "No Plan Step is confirmed for this assignment. Its text cannot make one." ;
+    s:observed-state: "Reported by the executor: a draft in the working tree, not committed. The draft pages are not sources of the project CTM; making them sources is the user's decision. This report is not an acceptance." ;
+    s:acceptance: "No acceptance by the user is recorded." ;
+    s:precondition: "No acceptance is recorded for pwc-wp-8 or any other package; the record form is shown only on a synthetic fixture." ;
+    s:precondition: "Existing subject identifiers and Work relations stay unchanged; no Work declaration changes." ;
+    s:precondition: "No commit, push or deployment without the user's approval." ;
+    s:acceptance-criterion: "Work package, implementation assignment and acceptance record stay distinguishable." ;
+    s:acceptance-criterion: "Required evidence is not given out as observed evidence." ;
+    s:acceptance-criterion: "An assignment's evidence does not become a work package's acceptance." ;
+    s:acceptance-criterion: "No acceptance record exists without an explicitly declared decision." ;
+    s:acceptance-criterion: "Subject identifiers and existing Work relations are preserved." ;
+    s:acceptance-criterion: "The CTM is reproducible and its projection in the Inspector traceable." ;
+    s:source-authority-note: "reads the produces contract and the declared work packages" ;
+    s:source-authority-note: "reads the form of a WBS Dictionary entry: scope, acceptance criterion, authority, effect, required evidence, controls" ;
+    s:source-authority-note: "adds a draft WBS Dictionary for project-work-ctm-exchange; not a source of the project CTM until the user decides" ;
+    s:source-authority-note: "adds a draft Acceptance Records page without records; not a source of the project CTM until the user decides" ;
+    s:source-authority-note: "reads a draft dictionary and an Acceptance Records page when they are sources, and writes their vocabulary only then" ;
+    s:source-authority-note: "shows acceptance records, criteria and authorities in the Workspace" ;
+    s:source-authority-note: "adds the acceptance tests" ;
+    s:source-authority-note: "adds the synthetic fixture, whose identifiers all start with synthetic-" ;
+    s:source-authority-note: "states the proposal and the decisions it needs" ;
+    s:evidence-note: "acceptance tests of system dreyeck/work/project/tests, on the synthetic fixture and on the drafts" .
+
+<tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/project-work-exchange-wbs-dictionary>
+    isa s:hyperdoc-page ;
+    - "Project Work Exchange WBS Dictionary" ;
+    s:hyperbook-id: "dreyeck/work/project" ;
+    s:page-id: "Project Work Exchange WBS Dictionary" .
+
+<tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/acceptance-records>
+    isa s:hyperdoc-page ;
+    - "Acceptance Records" ;
+    s:hyperbook-id: "dreyeck/work/project" ;
+    s:page-id: "Acceptance Records" .
+
+<tag:dreyeck.ch,2026:hyperdoc/file/dreyeck/tests/fixtures/project-acceptance/README.txt>
+    isa s:repository-file ;
+    - "dreyeck/tests/fixtures/project-acceptance/README.txt" ;
+    s:repository-path: "dreyeck/tests/fixtures/project-acceptance/README.txt" .
+
+<tag:dreyeck.ch,2026:hyperdoc/file/docs/project-acceptance-model.md>
+    isa s:repository-file ;
+    - "docs/project-acceptance-model.md" ;
+    s:repository-path: "docs/project-acceptance-model.md" .
+
 <tag:dreyeck.ch,2026:hyperdoc/gap/work-item-without-breakdown/connections-example>
     isa s:plan-gap ;
     - "connections-example has no declared breakdown or plan" ;
@@ -1513,6 +1563,11 @@ w:pwc-wp-8
 <tag:dreyeck.ch,2026:hyperdoc/gap/assignment-without-plan-step/cc-2026-10-19-topic-maps-reader-scaling>
     isa s:plan-gap ;
     - "cc-2026-10-19-topic-maps-reader-scaling has no confirmed Plan Step" ;
+    s:gap-rule: "The assignment names no confirmed Plan Step. Its own text cannot declare one." .
+
+<tag:dreyeck.ch,2026:hyperdoc/gap/assignment-without-plan-step/cc-2026-10-19-acceptance-model-draft>
+    isa s:plan-gap ;
+    - "cc-2026-10-19-acceptance-model-draft has no confirmed Plan Step" ;
     s:gap-rule: "The assignment names no confirmed Plan Step. Its own text cannot declare one." .
 
 <tag:dreyeck.ch,2026:hyperdoc/gap/uncontracted-relation-word/word-models>
@@ -1911,6 +1966,21 @@ s:assignment-for(s:assignment: <tag:dreyeck.ch,2026:hyperdoc/assignment/cc-2026-
 s:assignment-delivers(s:assignment: <tag:dreyeck.ch,2026:hyperdoc/assignment/cc-2026-10-19-topic-maps-reader-scaling>, s:work-package: w:pwc-wp-8)
 s:changes-source(s:assignment: <tag:dreyeck.ch,2026:hyperdoc/assignment/cc-2026-10-19-topic-maps-reader-scaling>, s:file: <tag:dreyeck.ch,2026:hyperdoc/file/dreyeck/work/project/project-workspace.lisp>)
 s:evidenced-by-test(s:assignment: <tag:dreyeck.ch,2026:hyperdoc/assignment/cc-2026-10-19-topic-maps-reader-scaling>, s:test-file: <tag:dreyeck.ch,2026:hyperdoc/file/dreyeck/tests/project-ctm.lisp>)
+s:declared-on(s:declaration: <tag:dreyeck.ch,2026:hyperdoc/assignment/cc-2026-10-19-acceptance-model-draft>, s:source-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/implementation-assignments>)
+s:assignment-for(s:assignment: <tag:dreyeck.ch,2026:hyperdoc/assignment/cc-2026-10-19-acceptance-model-draft>, s:work-item: w:project-work-ctm)
+s:assignment-delivers(s:assignment: <tag:dreyeck.ch,2026:hyperdoc/assignment/cc-2026-10-19-acceptance-model-draft>, s:work-package: w:pwc-wp-6)
+s:reads-source(s:assignment: <tag:dreyeck.ch,2026:hyperdoc/assignment/cc-2026-10-19-acceptance-model-draft>, s:source: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/reading/authoring-the-ctm-plan-page>)
+s:reads-source(s:assignment: <tag:dreyeck.ch,2026:hyperdoc/assignment/cc-2026-10-19-acceptance-model-draft>, s:source: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/reading/ctm-plan-page-wbs-dictionary>)
+s:contains-page(s:hyperbook-role: <tag:dreyeck.ch,2026:hyperdoc/hyperbook/dreyeck/work/project>, s:page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/project-work-exchange-wbs-dictionary>)
+s:changes-source(s:assignment: <tag:dreyeck.ch,2026:hyperdoc/assignment/cc-2026-10-19-acceptance-model-draft>, s:file: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/project-work-exchange-wbs-dictionary>)
+s:contains-page(s:hyperbook-role: <tag:dreyeck.ch,2026:hyperdoc/hyperbook/dreyeck/work/project>, s:page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/acceptance-records>)
+s:changes-source(s:assignment: <tag:dreyeck.ch,2026:hyperdoc/assignment/cc-2026-10-19-acceptance-model-draft>, s:file: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/acceptance-records>)
+s:changes-source(s:assignment: <tag:dreyeck.ch,2026:hyperdoc/assignment/cc-2026-10-19-acceptance-model-draft>, s:file: <tag:dreyeck.ch,2026:hyperdoc/file/dreyeck/work/project/project-ctm.lisp>)
+s:changes-source(s:assignment: <tag:dreyeck.ch,2026:hyperdoc/assignment/cc-2026-10-19-acceptance-model-draft>, s:file: <tag:dreyeck.ch,2026:hyperdoc/file/dreyeck/work/project/project-workspace.lisp>)
+s:changes-source(s:assignment: <tag:dreyeck.ch,2026:hyperdoc/assignment/cc-2026-10-19-acceptance-model-draft>, s:file: <tag:dreyeck.ch,2026:hyperdoc/file/dreyeck/tests/project-ctm.lisp>)
+s:changes-source(s:assignment: <tag:dreyeck.ch,2026:hyperdoc/assignment/cc-2026-10-19-acceptance-model-draft>, s:file: <tag:dreyeck.ch,2026:hyperdoc/file/dreyeck/tests/fixtures/project-acceptance/README.txt>)
+s:changes-source(s:assignment: <tag:dreyeck.ch,2026:hyperdoc/assignment/cc-2026-10-19-acceptance-model-draft>, s:file: <tag:dreyeck.ch,2026:hyperdoc/file/docs/project-acceptance-model.md>)
+s:evidenced-by-test(s:assignment: <tag:dreyeck.ch,2026:hyperdoc/assignment/cc-2026-10-19-acceptance-model-draft>, s:test-file: <tag:dreyeck.ch,2026:hyperdoc/file/dreyeck/tests/project-ctm.lisp>)
 s:gap-concerns(s:gap: <tag:dreyeck.ch,2026:hyperdoc/gap/work-item-without-breakdown/connections-example>, s:subject: w:connections-example)
 s:gap-concerns(s:gap: <tag:dreyeck.ch,2026:hyperdoc/gap/work-item-without-breakdown/fedwiki-item-authoring>, s:subject: w:fedwiki-item-authoring)
 s:gap-concerns(s:gap: <tag:dreyeck.ch,2026:hyperdoc/gap/work-item-without-breakdown/production-authoring-authority>, s:subject: w:production-authoring-authority)
@@ -1930,6 +2000,7 @@ s:gap-concerns(s:gap: <tag:dreyeck.ch,2026:hyperdoc/gap/work-item-deliverable-un
 s:gap-concerns(s:gap: <tag:dreyeck.ch,2026:hyperdoc/gap/work-item-deliverable-unlinked/project-work-ctm/project-work-ctm-exchange>, s:subject: w:project-work-ctm-exchange)
 s:gap-concerns(s:gap: <tag:dreyeck.ch,2026:hyperdoc/gap/assignment-without-plan-step/cc-2026-10-18-project-work-ctm>, s:subject: <tag:dreyeck.ch,2026:hyperdoc/assignment/cc-2026-10-18-project-work-ctm>)
 s:gap-concerns(s:gap: <tag:dreyeck.ch,2026:hyperdoc/gap/assignment-without-plan-step/cc-2026-10-19-topic-maps-reader-scaling>, s:subject: <tag:dreyeck.ch,2026:hyperdoc/assignment/cc-2026-10-19-topic-maps-reader-scaling>)
+s:gap-concerns(s:gap: <tag:dreyeck.ch,2026:hyperdoc/gap/assignment-without-plan-step/cc-2026-10-19-acceptance-model-draft>, s:subject: <tag:dreyeck.ch,2026:hyperdoc/assignment/cc-2026-10-19-acceptance-model-draft>)
 s:gap-concerns(s:gap: <tag:dreyeck.ch,2026:hyperdoc/gap/uncontracted-relation-word/word-models>, s:subject: s:relation-word-models)
 s:gap-concerns(s:gap: <tag:dreyeck.ch,2026:hyperdoc/gap/uncontracted-relation-word/word-observes>, s:subject: s:relation-word-observes)
 s:gap-concerns(s:gap: <tag:dreyeck.ch,2026:hyperdoc/gap/uncontracted-relation-word/word-uses>, s:subject: s:relation-word-uses)

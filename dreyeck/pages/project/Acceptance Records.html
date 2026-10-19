@@ -1,0 +1,30 @@
+<h1>Acceptance Records</h1>
+<p><strong>Draft.</strong> This page is not a source of the project CTM. Once the user makes it one, it is the only page that states that a work package was accepted or rejected, or that an earlier record is withdrawn. It records <strong>no decision</strong>: nothing on any page has been accepted.</p>
+<p>A record is written by the user. The executor of an assignment never writes one, and no test result, passed suite, completed assignment, work status or evidence entry makes one. A judgment states one decision, accepted or rejected, on one declared work package, against an explicitly named revision of that package's acceptance criterion in a declared WBS Dictionary, by an authority this page declares, at a time, and names the evidence entries it considered. A record is never changed or removed: a correction is a new record that supersedes the earlier one, and a withdrawal supersedes without judging. Which record is in force follows from supersession alone, never from a time; two records that nothing supersedes leave the work package undecided. The project CTM checks each record and refuses an incomplete one rather than complete it.</p>
+
+<h2>Authorities</h2>
+<p>Who may decide on acceptance, as declared here. A declaration, not an authentication.</p>
+<ul>
+<li><a data-authority="project-owner">The owner of the HyperDoc project</a> — the user. How the user is named here is the user's decision.</li>
+</ul>
+
+<h2>Records</h2>
+<p>None.</p>
+
+<h2>Form of a record</h2>
+<p>A judgment would be written as follows; this example is text, not a record.</p>
+<pre>&lt;section data-acceptance-record="ID"&gt;
+&lt;h3&gt;Title&lt;/h3&gt;
+&lt;p data-field="work-package" data-ref="WORK-PACKAGE-ID"&gt;the declared work package decided on&lt;/p&gt;
+&lt;p data-field="criterion" data-ref="WORK-PACKAGE-ID" data-revision="sha256-HEX"&gt;the revision of its acceptance criterion applied: sha256- and the SHA-256 of the criterion's text&lt;/p&gt;
+&lt;p data-field="decision" data-decision="accepted|rejected"&gt;the decision&lt;/p&gt;
+&lt;p data-field="decided-at" data-datetime="YYYY-MM-DDThh:mm:ssZ"&gt;when&lt;/p&gt;
+&lt;p data-field="authority" data-ref="AUTHORITY-ID"&gt;who decided, as declared above&lt;/p&gt;
+&lt;ul data-field="considered-evidence"&gt;
+&lt;li data-evidence="ASSIGNMENT-ID/ENTRY-ID"&gt;an identified evidence entry of an assignment&lt;/li&gt;
+&lt;/ul&gt;
+&lt;ul data-field="supersedes"&gt;
+&lt;li data-record="EARLIER-RECORD-ID"&gt;why, when this record corrects an earlier one of the same work package&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/section&gt;</pre>
+<p>A withdrawal is written with <code>&lt;p data-field="disposition" data-disposition="withdrawn"&gt;</code> in place of the decision. It names the work package, the time and the authority, and supersedes at least one earlier record of the same work package; it names no criterion and considers no evidence.</p>

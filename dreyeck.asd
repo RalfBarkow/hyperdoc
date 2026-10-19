@@ -3198,13 +3198,22 @@
                              (:static-file "hyperdoc-project.ctm.sha256")
                              (:static-file "topic-maps-5a4a668-recovery.txt")))
                (:module "dreyeck/pages/project"
-                :components ((:static-file "HyperDoc Project Workspace.html") (:static-file "Implementation Assignments.html"))))
+                :components ((:static-file "HyperDoc Project Workspace.html") (:static-file "Implementation Assignments.html")
+                             ;; Drafts: pages of the HyperBook, not sources of the project CTM until the user decides.
+                             (:static-file "Project Work Exchange WBS Dictionary.html") (:static-file "Acceptance Records.html"))))
   :in-order-to ((test-op (test-op "dreyeck/work/project/tests"))))
 
 (defsystem "dreyeck/work/project/tests"
   :description "The project CTM: read, traced to its declarations, roundtrip in octets and CXTM, refusals, the Workspace path, no wiki written"
   :depends-on ("dreyeck/work/project" "ironclad" "cl-base64")
-  :components ((:file "dreyeck/tests/project-ctm"))
+  :components ((:file "dreyeck/tests/project-ctm")
+               (:module "dreyeck/tests/fixtures/project-acceptance"
+                :components ((:static-file "README.txt") (:static-file "synthetic-work.html") (:static-file "synthetic-assignments-addition.html")
+                             (:static-file "synthetic-dictionary-c1.html") (:static-file "synthetic-dictionary-c2.html")
+                             (:static-file "synthetic-second-dictionary.html") (:static-file "synthetic-proposed-dictionary.html")
+                             (:static-file "synthetic-records-s1.html") (:static-file "synthetic-records-s3.html")
+                             (:static-file "synthetic-records-conflict.html") (:static-file "synthetic-records-withdrawn.html")
+                             (:static-file "synthetic-records-withdrawal-conflict.html"))))
   :perform (test-op (op component)
              (declare (ignore op component))
              (uiop:symbol-call :dreyeck/work/project/tests :run-tests)))

@@ -172,6 +172,84 @@ statement is in MAP as declared and MAP has no Work Topic, declaration or statem
               (problem "the Work Topic ~A is in the Topic Map and declared nowhere" si))))))
     (nreverse problems)))
 
+;;; Acceptance, explained from a Topic Map: the records on a work package, the one in force, its criterion revision and evidence
+
+(defclass acceptance-explanation ()
+  ((package :initarg :package :reader explanation-package)       ; the TMDM Topic of the work package
+   (state :initarg :state :reader explanation-state)             ; "accepted", "rejected" or "undecided"
+   (reason :initarg :reason :reader explanation-reason)          ; :in-force, :no-record, :withdrawn or :conflict
+   (records :initarg :records :reader explanation-records)       ; every record on the package
+   (open :initarg :open :reader explanation-open)                ; the records no record supersedes
+   (record :initarg :record :reader explanation-record))         ; the judgment in force, or NIL
+  (:documentation "Why a work package is accepted, rejected or undecided, read from a Topic Map alone: its records, the ones no record
+supersedes, and the judgment in force if exactly one record is unsuperseded and it is a judgment. No time enters. What a record applied
+and considered is RECORD-EXPLANATION."))
+(defmethod v:text-representation ((x acceptance-explanation))
+  (format nil "Acceptance of ~A: ~A" (%name (explanation-package x)) (explanation-state x)))
+
+(defun %eq (a b) (and a b (eq (tmdm:canonical-topic a) (tmdm:canonical-topic b))))
+(defun %players (map type role-of role-in topic)
+  "The players of ROLE-OF in the Associations of TYPE in which TOPIC plays ROLE-IN."
+  (loop for a in (%of-type map (schema-iri type))
+        when (%eq (%player a (schema-iri role-in)) topic) collect (tmdm:canonical-topic (%player a (schema-iri role-of)))))
+(defun %withdrawal-p (map record) (member (schema-iri "withdrawal-record") (mapcar #'%si (%types map record)) :test #'equal))
+
+(defun explain-acceptance (map package)
+  "The ACCEPTANCE-EXPLANATION of the work package PACKAGE, a Topic of MAP."
+  (let* ((package (tmdm:canonical-topic package))
+         (records (sort (remove-duplicates (append (%players map "acceptance-decision" "acceptance-record-role" "work-package" package)
+                                                   (%players map "withdrawal" "withdrawal-record-role" "work-package" package)))
+                        #'string< :key #'%si))
+         (superseded (mapcar (lambda (a) (tmdm:canonical-topic (%player a (schema-iri "superseded-record")))) (%of-type map (schema-iri "supersedes"))))
+         (open (remove-if (lambda (r) (member r superseded)) records))
+         (judgment (and open (null (rest open)) (not (%withdrawal-p map (first open))) (first open))))
+    (make-instance 'acceptance-explanation :package package :records records :open open :record judgment
+                   :state (if judgment (first (%occurrences judgment (schema-iri "decision"))) "undecided")
+                   :reason (cond ((null records) :no-record) ((rest open) :conflict) (judgment :in-force) (t :withdrawn)))))
+
+(defun record-explanation (map record)
+  "What the record RECORD states, read from MAP, as a plist: :decision (accepted, rejected or withdrawn), :decided-at, :package,
+:authority, :criterion (the revision Topic), :criterion-text and :criterion-current (the occurrence the revision reifies, current or
+retained), :evidence (evidence entry Topics), :supersedes and :superseded-by (record Topics)."
+  (let* ((record (tmdm:canonical-topic record))
+         (withdrawal (%withdrawal-p map record))
+         (from (if withdrawal '("withdrawal" "withdrawal-record-role") '("acceptance-decision" "acceptance-record-role")))
+         (package (first (%players map (first from) "work-package" (second from) record)))
+         (criterion (first (%players map "acceptance-decision" "applied-criterion" "acceptance-record-role" record)))
+         (stated (and criterion package
+                      (find-if (lambda (o) (%eq (tmdm:item-reifier o) criterion)) (tmdm:topic-occurrences package)))))
+    (list :decision (if withdrawal "withdrawn" (first (%occurrences record (schema-iri "decision"))))
+          :decided-at (first (%occurrences record (schema-iri "decided-at")))
+          :package package
+          :authority (first (%players map (first from) "deciding-authority" (second from) record))
+          :criterion criterion
+          :criterion-text (and stated (tmdm:occurrence-value stated))
+          :criterion-current (and stated (equal (%si (tmdm:occurrence-type stated)) (schema-iri "wbs-acceptance-criterion")))
+          :evidence (%players map "considers-evidence" "considered-evidence" "acceptance-record-role" record)
+          :supersedes (%players map "supersedes" "superseded-record" "superseding-record" record)
+          :superseded-by (%players map "supersedes" "superseding-record" "superseded-record" record))))
+
+(defun evidence-explanation (map entry)
+  "What the evidence entry ENTRY reports, read from MAP, as a plist: :assignment and :text (the evidence occurrence it reifies), and for
+an execution report the facts of its run as the report states them."
+  (declare (ignore map))
+  (let ((stated (tmdm:topic-reified (tmdm:canonical-topic entry))))
+    (list* :assignment (and stated (tmdm:canonical-topic (tmdm:occurrence-parent stated)))
+           :text (and stated (tmdm:occurrence-value stated))
+           (loop for name in '("source-repository" "test-path" "tested-revision" "tree-state" "content-reference" "observation" "observed-at" "reconstruction")
+                 append (list (intern (string-upcase name) :keyword) (first (%occurrences entry (schema-iri name))))))))
+
+(defun %explanation-sentence (map x)
+  (let ((record (explanation-record x)))
+    (ecase (explanation-reason x)
+      (:in-force (let ((r (record-explanation map record)))
+                   (format nil "~A by ~A, against criterion revision ~A (~:[retained~;current~])" (explanation-state x) (%name record)
+                           (subseq (topic-key (%si (getf r :criterion))) (1+ (position #\/ (topic-key (%si (getf r :criterion))) :from-end t)))
+                           (getf r :criterion-current))))
+      (:no-record "undecided: no record")
+      (:withdrawn (format nil "undecided: withdrawn by ~A" (%name (first (explanation-open x)))))
+      (:conflict (format nil "undecided: ~D records in conflict (~{~A~^, ~})" (length (explanation-open x)) (mapcar #'%name (explanation-open x)))))))
+
 ;;; The projection into a native Topicmap
 
 (defclass project-topic (tm:topicmap-topic)
@@ -193,12 +271,15 @@ Topic's subject identifier without +BASE+ (and without work/topic/ for a Work To
   '(("contains-page" . "hyperbook-role") ("declared-on" . "source-page") ("proposed-on" . "source-page")
     ("carried-by" . "carried") ("defined-in-dictionary" . "work-package") ("planned-control-of" . "work-package")
     ("exercised-by" . "control") ("gap-concerns" . "subject") ("assignment-for" . "assignment") ("assignment-delivers" . "assignment")
-    ("reads-source" . "assignment") ("changes-source" . "assignment") ("evidenced-by-test" . "assignment"))
+    ("reads-source" . "assignment") ("changes-source" . "assignment") ("evidenced-by-test" . "assignment")
+    ("proposed-in-dictionary" . "work-package") ("acceptance-decision" . "acceptance-record-role") ("considers-evidence" . "acceptance-record-role")
+    ("withdrawal" . "withdrawal-record-role") ("supersedes" . "superseding-record") ("reports-execution-of" . "execution-report"))
   "Which Role an edge starts from, by Association type. A statement starts from its source Role. Direction is presentation: in TMDM
 a Role has none.")
 (defparameter +layers+
   '("HyperBook" "HyperDoc page" "area" "work item" "deliverable" "work package" "plan step" "precondition" "Implementation assignment"
-    "Planned control" "Repository file" "relation" "concept" "Plan gap")
+    "Acceptance record" "Withdrawal record" "WBS criterion" "Authority" "Evidence entry" "Test execution report" "Planned control"
+    "Repository file" "relation" "concept" "Plan gap")
   "Rows of the derived layout, by kind. A derived grid; no authored coordinates exist.")
 
 (defun %from-role (map association)
@@ -230,17 +311,33 @@ a Role has none.")
           (when row (incf y (* 120 (1+ (floor (1- (length row)) 8))))))))
     (dolist (association (tmdm:topic-map-associations map))
       (let ((roles (%roles association)))
-        (when (and (= 2 (length roles)) (every (lambda (role) (gethash (tmdm:canonical-topic (cdr role)) ids)) roles))
+        (when (and (>= (length roles) 2) (every (lambda (role) (gethash (tmdm:canonical-topic (cdr role)) ids)) roles)
+                   (or (= 2 (length roles)) (%from-role map association)))
+          ;; Two Roles: one edge. More Roles: one edge from the Role the direction rule names to each other Role.
           (let* ((from-role (or (%from-role map association) (car (first roles))))
                  (from (cdr (or (assoc from-role roles :test #'equal) (first roles))))
-                 (to (cdr (find from roles :key #'cdr :test-not #'eq)))
-                 (from-id (gethash (tmdm:canonical-topic from) ids)) (to-id (gethash (tmdm:canonical-topic (or to from)) ids)))
+                 (from-id (gethash (tmdm:canonical-topic from) ids)))
+            (dolist (other (remove from roles :key #'cdr :test #'eq))
+              (let ((to-id (gethash (tmdm:canonical-topic (cdr other)) ids)))
+                (push (tm:make-topicmap-association
+                       :id (format nil "~A:~A:~A:~D" (%name (tmdm:association-type association)) from-id to-id (length edges))
+                       :type (if (= 2 (length roles)) (%name (tmdm:association-type association))
+                                 (format nil "~A (~A)" (%name (tmdm:association-type association)) (%name (gethash (car other) (%index map)))))
+                       :from from-id :to to-id
+                       :properties (list :tmdm-association association
+                                         :tmdm-role (find from (tmdm:association-roles association) :key #'tmdm:association-role-player :test #'eq)
+                                         :reifier (tmdm:item-reifier association)))
+                      edges)))))))
+    ;; A Topic that reifies an occurrence of a drawn Topic: one edge from the reifier to that Topic. Presentation of TMDM reification
+    ;; (a criterion revision and its work package, an evidence entry and its assignment), not an Association of the map.
+    (dolist (topic drawn)
+      (dolist (o (tmdm:topic-occurrences topic))
+        (let* ((reifier (tmdm:item-reifier o)) (from-id (and reifier (gethash (tmdm:canonical-topic reifier) ids))) (to-id (gethash topic ids)))
+          (when (and from-id to-id)
             (push (tm:make-topicmap-association
-                   :id (format nil "~A:~A:~A:~D" (%name (tmdm:association-type association)) from-id to-id (length edges))
-                   :type (%name (tmdm:association-type association)) :from from-id :to to-id
-                   :properties (list :tmdm-association association
-                                     :tmdm-role (find from (tmdm:association-roles association) :key #'tmdm:association-role-player :test #'eq)
-                                     :reifier (tmdm:item-reifier association)))
+                   :id (format nil "reifies:~A:~A:~D" from-id to-id (length edges))
+                   :type (format nil "reifies (~A)" (%name (tmdm:occurrence-type o))) :from from-id :to to-id
+                   :properties (list :tmdm-occurrence o :reifier reifier))
                   edges)))))
     (tm:make-topicmap-projection :source reading :topics (nreverse topics) :associations (nreverse edges)
                                  :view-properties (list :width 2400 :height (max 720 (+ y 120))))))
@@ -290,6 +387,12 @@ a Role has none.")
         *reading*
         (let ((reading (make-instance 'project-reading :model model :document document)))
           (if texts reading (setf *reading* reading))))))
+(defun scenario-reading (&key texts extra (label "scenario"))
+  "A reading of the CTM materialized now from the sources with TEXTS and EXTRA (see READ-PROJECT-SOURCES): a draft page shown as it
+would read, or a synthetic fixture. Its document is that materialization read once; no file is read or written."
+  (let ((model (build-project-model (read-project-sources :texts texts :extra extra))))
+    (make-instance 'project-reading :model model :document (ctm-revision-from-octets (%utf8 (model-text model)) :label label))))
+
 (defun import-project-ctm-revision (pathname &optional (reading (project-workspace)))
   "Read the CTM file PATHNAME once as a revision of its own, beside READING. Nothing is written back to any page."
   (let ((revision (observe-ctm-revision (pathname pathname))))
@@ -333,6 +436,22 @@ a Role has none.")
           (:h3 "Implementation assignments")
           (:ul (dolist (a (model-assignments model))
                  (v:html (:li (%go-to workspace (format nil "assignment/~A" (assignment-id a)) (assignment-title a))))))
+          (:h3 "Acceptance")
+          (if (null (model-acceptance model))
+              (v:html (:p (v:esc "No acceptance is recorded: no source of this project CTM is an Acceptance Records page. An assignment's evidence is not an acceptance.")))
+              (let* ((map (revision-map (reading-document reading))) (index (%index map)))
+                (v:html (:p "Each work package with an entry in a declared WBS Dictionary, as the Topic Map states it: the record in force is the one record no record supersedes. "
+                            "A time decides nothing; a withdrawal or two unsuperseded records leave the package undecided.")
+                        (:ul (dolist (entry (model-entries model))
+                               (let ((id (plan::entry-element-id entry)))
+                                 (v:html (:li (%go-to workspace id id)
+                                              (v:esc (format nil " — ~A" (%explanation-sentence map (explain-acceptance map (gethash (topic-iri id) index)))))))))))
+                (when (acceptance-records (model-acceptance model))
+                  (v:html (:p "Records, in page order:")
+                          (:ul (dolist (r (acceptance-records (model-acceptance model)))
+                                 (v:html (:li (%go-to workspace (format nil "acceptance/~A" (record-id r)) (record-title r))
+                                              (v:esc (format nil " — ~A ~A, ~A~@[, supersedes ~{~A~^, ~}~]" (record-decision r) (record-package r)
+                                                             (record-decided-at r) (record-supersedes r)))))))))))
           (:h3 "Proposals")
           (:p "Not declared: proposed on the page Implementation Assignments, without status.")
           (:ul (dolist (d (model-proposals model)) (v:html (:li (%go-to workspace (declaration-id d) (declaration-label d)) (v:esc (format nil " (~A)" (declaration-kind d)))))))
@@ -432,7 +551,14 @@ a Role has none.")
             (loop for item in (sources-items (model-sources model))
                   when (equal key (topic-key (source-page-iri item))) collect (list "Source page" (source-page item) nil))
             (let ((rest (and (eql 0 (search "file/" key)) (subseq key 5))))
-              (when rest (list (list "Repository file" (merge-pathnames rest (repository-root)) nil)))))))
+              (when rest (list (list "Repository file" (merge-pathnames rest (repository-root)) nil))))
+            (let ((acceptance (model-acceptance model)))
+              (when (and acceptance (or (eql 0 (search "acceptance/" key)) (eql 0 (search "authority/" key)))
+                         (source-page (acceptance-source-item acceptance)))
+                (list (list "Declared on" (source-page (acceptance-source-item acceptance)) nil))))
+            (let ((entry (find key (model-evidence-entries model) :key (lambda (e) (topic-key (entry-iri e))) :test #'equal)))
+              (when (and entry (source-page (assignment-source (entry-assignment entry))))
+                (list (list "Reported on" (source-page (assignment-source (entry-assignment entry))) nil)))))))
 
 (defmethod native::render-workspace-point-editor ((workspace tm:topicmap-workspace) (topic project-topic))
   (let ((tmdm-topic (tm:topicmap-topic-object-of topic)))
@@ -444,7 +570,46 @@ a Role has none.")
           (v:html (:tr (:td (v:esc (first source))) (:td (ref (second source)) (when (third source) (v:html " " (ref (third source) "the declaration in the page source"))))))))
       (:table :class "inspector-table"
         (dolist (o (tmdm:topic-occurrences tmdm-topic))
-          (v:html (:tr (:td (v:esc (%name (tmdm:occurrence-type o)))) (:td (v:esc (tmdm:occurrence-value o))))))))))
+          (v:html (:tr (:td (v:esc (%name (tmdm:occurrence-type o)))) (:td (v:esc (tmdm:occurrence-value o))))))))
+    (%render-acceptance-point workspace topic tmdm-topic)))
+
+(defun %render-acceptance-point (workspace topic tmdm-topic)
+  "For a work package of a reading with an Acceptance Records source: why it is accepted, rejected or undecided. For a record: what it
+applied, considered and supersedes. For an evidence entry: what it reifies. All read from the Topic Map; buttons move the Point."
+  (let* ((reading (project-topic-reading topic)) (model (reading-model reading)) (map (revision-map (reading-document reading)))
+         (key (tm:topicmap-topic-id-of topic)))
+    (labels ((link (other) (%go-to workspace (topic-key (%si other)) (%name other)))
+             (record-rows (r)
+               (let ((x (record-explanation map r)))
+                 (v:html (:tr (:td "Decision") (:td (v:esc (format nil "~A, at ~A" (getf x :decision) (getf x :decided-at)))))
+                         (:tr (:td "Deciding authority") (:td (when (getf x :authority) (link (getf x :authority))) " (declared, not authenticated)"))
+                         (when (getf x :criterion)
+                           (v:html (:tr (:td "Applied criterion") (:td (link (getf x :criterion))
+                                                                       (v:esc (format nil " (~:[retained~;current~]): ~A" (getf x :criterion-current) (getf x :criterion-text)))))))
+                         (dolist (e (getf x :evidence))
+                           (let ((ev (evidence-explanation map e)))
+                             (v:html (:tr (:td "Considered evidence")
+                                          (:td (link e) (v:esc (format nil ": ~A~@[ — observed: ~A~]~@[; revision ~A~]~@[, tree ~A~]~@[; ~A~]" (getf ev :text) (getf ev :observation)
+                                                                     (getf ev :tested-revision) (getf ev :tree-state) (getf ev :reconstruction))))))))
+                         (dolist (other (getf x :supersedes)) (v:html (:tr (:td "Supersedes") (:td (link other)))))
+                         (dolist (other (getf x :superseded-by)) (v:html (:tr (:td "Superseded by") (:td (link other)))))))))
+      (cond ((and (model-acceptance model) (find key (model-entries model) :key #'plan::entry-element-id :test #'equal))
+             (let ((x (explain-acceptance map tmdm-topic)))
+               (v:html (:h4 "Acceptance")
+                       (:p (v:esc (%explanation-sentence map x)))
+                       (:table :class "inspector-table"
+                         (when (explanation-record x) (record-rows (explanation-record x)))
+                         (dolist (r (explanation-records x))
+                           (v:html (:tr (:td (v:esc (if (member r (explanation-open x)) "Record, unsuperseded" "Record, superseded")))
+                                        (:td (link r) (v:esc (format nil " — ~A" (getf (record-explanation map r) :decision)))))))))))
+            ((eql 0 (search "acceptance/" key))
+             (v:html (:h4 "Record") (:table :class "inspector-table" (record-rows tmdm-topic))))
+            ((eql 0 (search "evidence/" key))
+             (let ((ev (evidence-explanation map tmdm-topic)))
+               (v:html (:h4 "Evidence entry")
+                       (:p "Reported by the executor on " (when (getf ev :assignment) (link (getf ev :assignment)))
+                           (v:esc (format nil ": ~A. A report, not an acceptance~:[~;; it states that a run was reported, not that it happened~]."
+                                          (getf ev :text) (getf ev :observation)))))))))))
 
 (hyperdoc:defhyperdoc *project-hyperdoc*
   :id "dreyeck/work/project" :title "HyperDoc Project Workspace"

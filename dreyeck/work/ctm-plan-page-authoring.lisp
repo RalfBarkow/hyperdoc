@@ -97,9 +97,12 @@ and label are those of its Work Topic declaration on the plan page."))
   ((element-id :initarg :element-id :reader entry-element-id)
    (title :initarg :title :reader entry-title)
    (fields :initarg :fields :reader entry-fields)
-   (controls :initarg :controls :accessor entry-controls))
+   (controls :initarg :controls :accessor entry-controls)
+   (retained :initarg :retained :initform nil :reader entry-retained-criteria))
   (:documentation "One WBS Dictionary entry: scope, acceptance criterion,
-authority, effect and evidence of one work package, with its planned controls."))
+authority, effect and evidence of one work package, with its planned controls.
+RETAINED are acceptance criteria the entry stated before and keeps, in page
+order; the current criterion is the field acceptance."))
 
 (defclass planned-control ()
   ((id :initarg :id :reader control-id)
@@ -192,6 +195,20 @@ that needs. It records no grant: none exists, and a plan cannot make one."))
 (defun %text (node)
   (string-trim '(#\Space #\Tab #\Newline #\Return) (plump:decode-entities (plump:text node))))
 
+(defun %retained-criteria (id named current)
+  "The texts of the list retained-acceptance among NAMED, in page order. A criterion the entry keeps is neither empty, nor
+stated twice, nor the CURRENT one: each text is one revision of the criterion."
+  (let ((lists (remove "retained-acceptance" named :key (lambda (node) (plump:attribute node "data-field")) :test-not #'equal)))
+    (when (rest lists) (%refuse "dictionary entry ~A states retained-acceptance ~D times" id (length lists)))
+    (let ((texts (loop for item in (and lists (%descendants (first lists)))
+                       when (equal "li" (plump:tag-name item)) collect (%text item))))
+      (dolist (text texts)
+        (when (zerop (length text)) (%refuse "dictionary entry ~A retains an empty acceptance criterion" id))
+        (when (equal text current) (%refuse "dictionary entry ~A retains its current acceptance criterion" id)))
+      (unless (= (length texts) (length (remove-duplicates texts :test #'equal)))
+        (%refuse "dictionary entry ~A retains one acceptance criterion twice" id))
+      texts)))
+
 (defun read-wbs-dictionary (source)
   "The dictionary entries of SOURCE, the dictionary page's HTML, in page order."
   (loop for section in (plump:get-elements-by-tag-name (%dom source) "section")
@@ -202,7 +219,7 @@ that needs. It records no grant: none exists, and a plan cannot make one."))
                  (named (remove-if-not (lambda (node) (plump:attribute node "data-field")) inner))
                  (heading (first (plump:get-elements-by-tag-name section "h2"))))
             (dolist (node named)
-              (unless (member (plump:attribute node "data-field") (cons "controls" +fields+) :test #'equal)
+              (unless (member (plump:attribute node "data-field") (list* "controls" "retained-acceptance" +fields+) :test #'equal)
                 (%refuse "dictionary entry ~A has an unknown field ~S" id (plump:attribute node "data-field"))))
             (let* ((fields (loop for name in +fields+
                                  collect (let ((nodes (remove name named :key (lambda (node) (plump:attribute node "data-field"))
@@ -216,6 +233,7 @@ that needs. It records no grant: none exists, and a plan cannot make one."))
                    (lists (remove "controls" named :key (lambda (node) (plump:attribute node "data-field"))
                                                    :test-not #'equal))
                    (entry (make-instance 'wbs-dictionary-entry :element-id id :fields fields
+                                         :retained (%retained-criteria id named (cdr (assoc "acceptance" fields :test #'equal)))
                                          :title (if heading (%text heading) id))))
               (unless (= 1 (length lists)) (%refuse "dictionary entry ~A needs one list of controls" id))
               (setf (entry-controls entry)
