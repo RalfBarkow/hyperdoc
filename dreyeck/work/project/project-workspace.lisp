@@ -575,7 +575,8 @@ would read, or a synthetic fixture. Its document is that materialization read on
 
 (defun %render-acceptance-point (workspace topic tmdm-topic)
   "For a work package of a reading with an Acceptance Records source: why it is accepted, rejected or undecided. For a record: what it
-applied, considered and supersedes. For an evidence entry: what it reifies. All read from the Topic Map; buttons move the Point."
+applied, considered and supersedes. For a criterion revision or an evidence entry: the occurrence it reifies. All read from the Topic
+Map; buttons move the Point."
   (let* ((reading (project-topic-reading topic)) (model (reading-model reading)) (map (revision-map (reading-document reading)))
          (key (tm:topicmap-topic-id-of topic)))
     (labels ((link (other) (%go-to workspace (topic-key (%si other)) (%name other)))
@@ -604,6 +605,23 @@ applied, considered and supersedes. For an evidence entry: what it reifies. All 
                                         (:td (link r) (v:esc (format nil " — ~A" (getf (record-explanation map r) :decision)))))))))))
             ((eql 0 (search "acceptance/" key))
              (v:html (:h4 "Record") (:table :class "inspector-table" (record-rows tmdm-topic))))
+            ((eql 0 (search "criterion/" key))
+             ;; The text of a revision is the value of the occurrence it reifies (TMDM 5.3.5), current or retained on its package.
+             (let* ((stated (tmdm:topic-reified tmdm-topic))
+                    (package (and stated (tmdm:canonical-topic (tmdm:occurrence-parent stated))))
+                    (current (and stated (equal (%si (tmdm:occurrence-type stated)) (schema-iri "wbs-acceptance-criterion")))))
+               (v:html (:h4 "WBS criterion revision")
+                       (:table :class "inspector-table"
+                         (:tr (:td "Subject identifier") (:td (:code (v:esc (%si tmdm-topic)))))
+                         (:tr (:td "Reifies")
+                              (:td (v:esc (if stated
+                                              (format nil "the occurrence ~A of the work package below (~:[retained~;current~])"
+                                                      (%name (tmdm:occurrence-type stated)) current)
+                                              "no occurrence"))))
+                         (when package (v:html (:tr (:td "Stated on") (:td (link package)))))
+                         (when stated (v:html (:tr (:td "Criterion text") (:td (v:esc (tmdm:occurrence-value stated))))))
+                         (dolist (r (%players map "acceptance-decision" "acceptance-record-role" "applied-criterion" tmdm-topic))
+                           (v:html (:tr (:td "Applied by") (:td (link r) (v:esc (format nil " — ~A" (getf (record-explanation map r) :decision)))))))))))
             ((eql 0 (search "evidence/" key))
              (let ((ev (evidence-explanation map tmdm-topic)))
                (v:html (:h4 "Evidence entry")

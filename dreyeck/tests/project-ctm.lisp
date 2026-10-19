@@ -475,6 +475,20 @@ RECORDS and RECORDS-TEXT are NIL). The records page always has the same title, s
     (and (p:revision-map document) (null (p:revision-refusal document)) (p:revision-cxtm document)
          (equalp (p:revision-export-octets document) (p:revision-octets document))
          (null (p:trace-project-map (p:revision-map document) (p:reading-model reading))))))
+;; The Point panel as rendered: a section of the Workspace's Topicmap view, and its buttons pressed as a click evaluates them.
+(defun %panel-section (ws marker)
+  "The part of the rendered Point panel of WS from MARKER to the represented object, or NIL if the panel has no MARKER."
+  (let* ((html (v:view-html (find "Topicmap" (v:all-views ws) :key #'v:view-title :test #'equal))) (at (search marker html)))
+    (and at (subseq html at (search "Represented object" html :start2 at)))))
+(defun %press (ws label)
+  "Press the button LABEL of the rendered Point panel of WS: evaluate the thunk the view rendered under that button's id."
+  (let* ((view (find "Topicmap" (v:all-views ws) :key #'v:view-title :test #'equal)) (html (v:view-html view))
+         (at (search (format nil ">~A</button>" label) html))
+         (start (and at (search "id='" html :from-end t :end2 at)))
+         (id (and start (subseq html (+ start 4) (position #\' html :start (+ start 4)))))
+         (reference (assoc id (v:view-references view) :test #'equal)))
+    (assert reference () "no button ~S in the Point panel" label)
+    (v:eval-thunk (cdr reference))))
 (defun %neighbours (ws key)
   (dreyeck/topicmap:topicmap-workspace-go-to ws key)
   (mapcar (lambda (a) (dreyeck/topicmap::topicmap-association-other-topic-id ws a)) (dreyeck/topicmap::topicmap-associations-of-point ws)))
@@ -679,6 +693,45 @@ RECORDS and RECORDS-TEXT are NIL). The records page always has the same title, s
                (let ((html (v:view-html (find "Project" (v:all-views s3) :key #'v:view-title :test #'equal))))
                  (and (search "rejected by SYNTHETIC synthetic-record-2, against criterion revision sha256-bd81f3b6" html)
                       (search "accepted by SYNTHETIC synthetic-record-3" html) (= 6 (%count "undecided: no record" html))))))))
+  ;; 3b. A criterion revision at Point: the occurrence it reifies, read with TOPIC-REIFIED and rendered in the Point panel.
+  (let* ((s1 (%scenario "S1" :dictionary "synthetic-dictionary-c1.html" :records "synthetic-records-s1.html"))
+         (s2 (%scenario "S2" :records "synthetic-records-s1.html"))
+         (s3 (%scenario "S3"))
+         (c1 (p:topic-key (%criterion +c1+))) (c2 (p:topic-key (%criterion +c2+))))
+    (flet ((panel (reading key)
+             (let ((ws (p:reading-workspace reading)))
+               (dreyeck/topicmap:topicmap-workspace-go-to ws key)
+               (%panel-section ws "<h4>WBS criterion revision")))
+           (shows (panel &rest parts) (and panel (every (lambda (part) (search part panel)) parts))))
+      (let ((s1-c1 (panel s1 c1)) (s2-c1 (panel s2 c1)) (s3-c1 (panel s3 c1)) (s3-c2 (panel s3 c2))
+            (identifier (format nil "<code>~A</code>" (%criterion +c1+))))
+        (check "criterion-point:S1:C1-current-30-s"
+               (shows s1-c1 identifier "the occurrence WBS acceptance criterion of the work package below (current)"
+                      (format nil "<td>Criterion text</td><td>~A</td>" +c1+) ">SYNTHETIC package one</button>" ">SYNTHETIC synthetic-record-1</button>"))
+        (check "criterion-point:S2:C1-same-identity-and-text-retained"
+               (shows s2-c1 identifier "the occurrence retained WBS acceptance criterion of the work package below (retained)"
+                      (format nil "<td>Criterion text</td><td>~A</td>" +c1+) ">SYNTHETIC package one</button>"))
+        (check "criterion-point:S3:C1-retained-its-own-text"
+               (and (shows s3-c1 identifier "(retained)" (format nil "<td>Criterion text</td><td>~A</td>" +c1+) ">SYNTHETIC synthetic-record-1</button>")
+                    (not (search +c2+ s3-c1)) (not (search "synthetic-record-2" s3-c1))))
+        (check "criterion-point:S3:C2-current-its-own-text"
+               (and (shows s3-c2 (format nil "<code>~A</code>" (%criterion +c2+)) "the occurrence WBS acceptance criterion of the work package below (current)"
+                           (format nil "<td>Criterion text</td><td>~A</td>" +c2+) ">SYNTHETIC synthetic-record-2</button>")
+                    (not (search +c1+ s3-c2))))
+        (check "criterion-point:only-at-a-criterion-revision"
+               (let ((ws (p:reading-workspace s3)))
+                 (dreyeck/topicmap:topicmap-workspace-go-to ws "synthetic-wp-1")
+                 (null (%panel-section ws "<h4>WBS criterion revision")))))
+      ;; Pressing the panel's buttons moves the Point to the package and to a record; History keeps the walk in order.
+      (let ((ws (p:reading-workspace s3)))
+        (dreyeck/topicmap:topicmap-workspace-go-to ws c1)
+        (%press ws "SYNTHETIC package one")
+        (check "criterion-point:button-to-the-package" (equal "synthetic-wp-1" (dreyeck/topicmap::topicmap-workspace-point-of ws)))
+        (dreyeck/topicmap:topicmap-workspace-go-to ws c1)
+        (%press ws "SYNTHETIC synthetic-record-1")
+        (check "criterion-point:button-to-the-record" (equal "acceptance/synthetic-record-1" (dreyeck/topicmap::topicmap-workspace-point-of ws)))
+        (check "criterion-point:history-keeps-the-walk"
+               (equal (subseq (dreyeck/topicmap::topicmap-workspace-history-of ws) 0 3) (list c1 "synthetic-wp-1" c1))))))
   ;; 4. Lifecycle without time: an earlier date decides nothing; a conflict and a withdrawal leave the package undecided.
   (let* ((earlier (%scenario "earlier" :records-text (%replace (%fixture "synthetic-records-s3.html") "data-datetime=\"2000-01-03T12:00:00Z\"" "data-datetime=\"1999-01-01T00:00:00Z\"")))
          (conflict (%scenario "conflict" :records "synthetic-records-conflict.html"))
