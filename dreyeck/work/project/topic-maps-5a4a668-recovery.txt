@@ -1,0 +1,29 @@
+Recovery evidence for the topic-maps revision HyperDoc's project CTM depends on
+================================================================================
+
+Dependency   topic-maps 5a4a66850403cdfe2755c6c88083a8e31af89628
+             branch claude/ctm-reader-normalization-scaling (963f2a0, Slice 17B, plus the indexed search for equal
+             Topics and Associations); tree bb0ea5cd724706044a35dc68393b1b42b32f54db
+Why          The topic-maps repository has no remote. Without this bundle the commit exists only in the local
+             repository /Users/rgb/workspace/topic-maps and its clone /Users/rgb/workspace/topic-maps-hyperdoc-5a4a668.
+
+Bundle       /Users/rgb/Backups/topic-maps-bundles/topic-maps-claude-ctm-reader-normalization-scaling-5a4a668.bundle
+             998941 octets, SHA-256 5bd3b89f2c9d95ebc62717a8926d412fba0f647f435e933f308a42868e240424
+             Created 2026-10-19 with: git bundle create <bundle> claude/ctm-reader-normalization-scaling
+             (in /Users/rgb/workspace/topic-maps). Outside any Git working tree and any temporary directory.
+
+Verified     git bundle verify <bundle>
+               "... is okay"; it contains the one ref
+               5a4a66850403cdfe2755c6c88083a8e31af89628 refs/heads/claude/ctm-reader-normalization-scaling
+               "The bundle records a complete history." (no prerequisite commits); hash algorithm sha1
+
+Recovered    In a fresh temporary directory, from the bundle alone:
+               git clone --no-local <bundle> recover -b claude/ctm-reader-normalization-scaling
+             HEAD 5a4a66850403cdfe2755c6c88083a8e31af89628, tree bb0ea5cd724706044a35dc68393b1b42b32f54db (equal to
+             the original); 22 commits (equal to the original); no alternates; git fsck --full --strict exit 0;
+             git ls-tree -r equal to the original commit; src/tmdm/merging.lisp, src/tmdm/associations.lisp and
+             tests/normalization.lisp byte-identical to the pinned checkout.
+
+To recover   git clone --no-local <bundle> topic-maps-hyperdoc-5a4a668
+             git -C topic-maps-hyperdoc-5a4a668 checkout --detach 5a4a668
+             and set TOPIC_MAPS_ROOT to that checkout (see docs/ctm-page-authoring-review.md).

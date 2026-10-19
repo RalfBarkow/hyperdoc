@@ -2,7 +2,7 @@
 ;;; Execution (no request is attached, so nothing can be written) and the TMDM readings.
 ;;; No existing Lisp image is contacted. Environment:
 ;;;   TOPIC_MAPS_ROOT           a CLEAN topic-maps checkout (required): the commit 788899ae or a descendant whose reading inputs are
-;;;                             unchanged since (tested with 963f2a0). Not a working repository that is being developed.
+;;;                             unchanged since (tested with 5a4a668). Not a working repository that is being developed.
 ;;;   HYPERDOC_FEDWIKI_SITE_ROOT the FedWiki site directory to read, e.g. ~/.wiki/localhost/ (required, unless the review copy is asked for)
 ;;;   HYPERDOC_CTM_REVIEW_COPY  "1": read a TEMPORARY COPY of the two retained pages instead (the review mode). The copy is made from the repository's
 ;;;                             files into a fresh directory of the temporary directory, marked as a test copy, and removed on shutdown. Nothing is

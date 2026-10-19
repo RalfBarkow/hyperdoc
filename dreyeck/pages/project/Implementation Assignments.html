@@ -1,0 +1,109 @@
+<h1>Implementation Assignments</h1>
+<p>This page records implementation assignments given to Claude Code, and the proposals they bring with them. It is the authority for exactly that: that an assignment was given, what it asks for, and what its executor reports. It is not a Work declaration page. A proposal below uses <code>data-proposed-topic</code>, <code>data-proposed-from</code>, <code>data-proposed-relation</code> and <code>data-proposed-to</code>, never <code>data-topic</code> or <code>data-from</code>, so the ordinary Work reader never reads a proposal as a declaration. A proposal has no work status. It becomes Work only when the user declares it on a Work page, under the same ID.</p>
+<p>An assignment does not change a status or a dependency on the <a page="Work Breakdown" hyperbook="dreyeck/work/reading">Work Breakdown</a> or the <a page="Authoring the CTM Plan Page" hyperbook="dreyeck/work/reading">CTM plan page</a>. An execution by Claude Code is not an acceptance.</p>
+
+<h2>Proposed Work</h2>
+<p>The Work Item and the Deliverable of the assignment below, and the work packages that would follow it. None of them is declared.</p>
+<ul>
+<li><a page="HyperDoc Project Workspace" hyperbook="dreyeck/work/project" data-proposed-topic="project-work-ctm" data-kind="work item">Represent Project Work as an Exchangeable CTM Topic Map</a> — make HyperDoc's declared project work a subject of HyperDoc and exchange it as a CTM document.</li>
+<li><a page="HyperDoc Project Workspace" hyperbook="dreyeck/work/project" data-proposed-topic="project-work-ctm-exchange" data-kind="deliverable">Exchangeable CTM of HyperDoc's declared project work</a> — a CTM document derived from the Work pages, read back into a navigable Workspace, with a byte-exact and a CXTM roundtrip.</li>
+<li><a page="HyperDoc Project Workspace" hyperbook="dreyeck/work/project" data-proposed-topic="pwc-wp-1" data-kind="work package">Materialize the declared project work as CTM, with roundtrip and Project Workspace</a> — the deliverable of the assignment below.</li>
+<li><a page="HyperDoc Project Workspace" hyperbook="dreyeck/work/project" data-proposed-topic="pwc-wp-2" data-kind="work package">Confirm the Work Item and a Plan Step for exchanging project work</a> — a human decision: declare <code>project-work-ctm</code> on the Work Breakdown, or reject it, and name the Plan Step later assignments belong to.</li>
+<li><a page="HyperDoc Project Workspace" hyperbook="dreyeck/work/project" data-proposed-topic="pwc-wp-3" data-kind="work package">Declare how a Work Item relates to the Deliverable on its carrier page</a> — no Relation Contract states it yet; the CTM shows the gap.</li>
+<li><a page="HyperDoc Project Workspace" hyperbook="dreyeck/work/project" data-proposed-topic="pwc-wp-4" data-kind="work package">Check the project CTM with an independent Topic Maps engine</a> — only the topic-maps reader of this project has read it so far.</li>
+<li><a page="HyperDoc Project Workspace" hyperbook="dreyeck/work/project" data-proposed-topic="pwc-wp-5" data-kind="work package">Materialize the declarations of Deriving HyperDoc Authoring Constraints</a> — its Constraints, Milestones and evidence relations are not in the project CTM yet.</li>
+<li><a page="HyperDoc Project Workspace" hyperbook="dreyeck/work/project" data-proposed-topic="pwc-wp-6" data-kind="work package">A record of acceptance, distinct from work status</a> — the WBS Dictionary states acceptance criteria, but no page can record that a result was accepted.</li>
+<li><a page="HyperDoc Project Workspace" hyperbook="dreyeck/work/project" data-proposed-topic="pwc-wp-7" data-kind="work package">Compare an external CTM revision item by item</a> — today a revision is compared as equal or unequal in CXTM, with the Topics and Associations only one side has.</li>
+<li><a page="HyperDoc Project Workspace" hyperbook="dreyeck/work/project" data-proposed-topic="pwc-wp-8" data-kind="work package">Read the complete project CTM with the topic-maps reader in practical time</a> — the reader of topic-maps 963f2a0 did not read the project CTM within 300 s; the second assignment below delivers the correction.</li>
+</ul>
+<ul>
+<li data-proposed-from="project-work-ctm-exchange" data-proposed-relation="work:relation/decomposes-into" data-proposed-to="pwc-wp-1">Exchangeable CTM → Materialize as CTM: decomposes into.</li>
+<li data-proposed-from="project-work-ctm-exchange" data-proposed-relation="work:relation/decomposes-into" data-proposed-to="pwc-wp-2">Exchangeable CTM → Confirm Work Item and Plan Step: decomposes into.</li>
+<li data-proposed-from="project-work-ctm-exchange" data-proposed-relation="work:relation/decomposes-into" data-proposed-to="pwc-wp-3">Exchangeable CTM → Work Item and Deliverable: decomposes into.</li>
+<li data-proposed-from="project-work-ctm-exchange" data-proposed-relation="work:relation/decomposes-into" data-proposed-to="pwc-wp-4">Exchangeable CTM → Independent check: decomposes into.</li>
+<li data-proposed-from="project-work-ctm-exchange" data-proposed-relation="work:relation/decomposes-into" data-proposed-to="pwc-wp-5">Exchangeable CTM → Deriving page: decomposes into.</li>
+<li data-proposed-from="project-work-ctm-exchange" data-proposed-relation="work:relation/decomposes-into" data-proposed-to="pwc-wp-6">Exchangeable CTM → Acceptance record: decomposes into.</li>
+<li data-proposed-from="project-work-ctm-exchange" data-proposed-relation="work:relation/decomposes-into" data-proposed-to="pwc-wp-7">Exchangeable CTM → Revision comparison: decomposes into.</li>
+<li data-proposed-from="project-work-ctm-exchange" data-proposed-relation="work:relation/decomposes-into" data-proposed-to="pwc-wp-8">Exchangeable CTM → Reader in practical time: decomposes into.</li>
+</ul>
+
+<h2>Assignments</h2>
+<section data-assignment="cc-2026-10-18-project-work-ctm">
+<h3>Claude Code: Project Work as an Exchangeable CTM Topic Map</h3>
+<p data-field="issued">Given by the user on 2026-10-18 in a Claude Code session (Claude Opus 5.5, high effort), after an architecture review of CTM roundtrips in HyperDoc.</p>
+<p data-field="goal">Show the declared Work Breakdown and project plan of HyperDoc as one CTM Topic Map: derived from the Work pages, read back with the topic-maps reader, navigable in a HyperDoc Project Workspace, and exported as a CTM file that other Topic Maps authors can read without HyperDoc.</p>
+<p data-field="work-item" data-ref="project-work-ctm">The proposed Work Item above. It is not declared on the Work Breakdown.</p>
+<p data-field="delivers" data-ref="pwc-wp-1">The proposed work package above.</p>
+<p data-field="plan-step">No Plan Step is confirmed for this assignment. Its text cannot make one.</p>
+<ul data-field="source-authorities">
+<li data-reads="dreyeck/pages/work/Work Breakdown.html">reads the Work Breakdown, authoritative for its Work declarations</li>
+<li data-reads="dreyeck/pages/work/Authoring the CTM Plan Page.html">reads the CTM plan page, authoritative for its WBS, plan steps and preconditions</li>
+<li data-reads="dreyeck/pages/work/CTM Plan Page WBS Dictionary.html">reads the WBS Dictionary, authoritative for scope, acceptance criteria, authority, effect, evidence and controls</li>
+<li data-reads="dreyeck/pages/project/Implementation Assignments.html">reads this page, authoritative for assignments and proposals</li>
+<li data-changes="dreyeck/work/project/project-ctm.lisp">adds the Work CTM emitter</li>
+<li data-changes="dreyeck/work/project/project-workspace.lisp">adds the import, comparison and the Project Workspace</li>
+<li data-changes="dreyeck/work/project/hyperdoc-project.ctm">adds the derived CTM document</li>
+<li data-changes="dreyeck/pages/project/HyperDoc Project Workspace.html">adds the Catalog entry page</li>
+<li data-changes="dreyeck/pages/project/Implementation Assignments.html">adds this page</li>
+<li data-changes="dreyeck.asd">adds the systems dreyeck/work/project and dreyeck/work/project/tests</li>
+<li data-changes="dreyeck/work/project/hyperdoc-project.ctm.sha256">adds the digest of the derived CTM document, kept beside it</li>
+<li data-changes="dreyeck/tests/project-ctm.lisp">adds the tests of the emitter, the read-back, the comparison, the export and the Workspace</li>
+<li data-changes="scripts/serve-project-workspace.lisp">adds a loopback review Catalog over a temporary test copy</li>
+<li data-changes="scripts/test-project-workspace.mjs">adds the browser navigation test in that isolated Catalog</li>
+<li data-changes="docs/ctm-page-authoring-review.md">names the topic-maps revision HyperDoc is tested with</li>
+<li data-changes="scripts/serve-ctm-page-authoring.lisp">names the topic-maps revision HyperDoc is tested with</li>
+</ul>
+<ul data-field="preconditions">
+<li>A clean topic-maps checkout at 963f2a0 (Slice 17B) in the ASDF registry; the reader is not packaged.</li>
+<li>No commit, push, deployment or SSH; no wiki file is written.</li>
+<li>The Work pages stay authoritative; the CTM is derived from them and changes nothing on them.</li>
+</ul>
+<ul data-field="acceptance-criteria">
+<li>The CTM file is read by the topic-maps reader.</li>
+<li>Its Topics have identifiers that depend neither on names nor on positions.</li>
+<li>Every Work Topic and statement in it is traced to its declaration, and every declaration is in it.</li>
+<li>WBS decomposition and plan dependencies stay distinct Association types with their own Role types.</li>
+<li>An unchanged export is byte-identical to the imported file; a semantically changed file is recognized through CXTM.</li>
+<li>An unsupported or invalid CTM file is refused with its reason.</li>
+<li>In a local Catalog the Project Workspace leads from the project to a Work Item, its Work Package and a Plan Step, and to source and evidence.</li>
+<li>No wiki file is changed.</li>
+</ul>
+<ul data-field="evidence">
+<li data-test="dreyeck/tests/project-ctm.lisp">Lisp tests of system dreyeck/work/project/tests</li>
+<li data-test="scripts/test-project-workspace.mjs">browser navigation in an isolated Catalog with a temporary copy</li>
+</ul>
+<p data-field="observed-state">Reported by the executor: implemented in the working tree and not committed. On 2026-10-19, with topic-maps 5a4a668, the executor ran the source and read-back tests of dreyeck/work/project, the HyperDoc suites topic-maps-reading, tmdm-reading, item-edit-ctm, ctm-page-authoring, work/reading and dita-story-item, the topic-maps suite, and the browser navigation test in an isolated Catalog; all passed. The counts are in the session report. This report is not an acceptance.</p>
+<p data-field="acceptance">No acceptance by the user is recorded.</p>
+</section>
+
+<section data-assignment="cc-2026-10-19-topic-maps-reader-scaling">
+<h3>Claude Code: Read the complete project CTM in practical time</h3>
+<p data-field="issued">Given by the user on 2026-10-19 in the same Claude Code session (Claude Opus 5.5, high effort), after the topic-maps reader of 963f2a0 did not read the generated project CTM: fix its scaling as a slice of its own in the topic-maps repository, with its test suite as the gate.</p>
+<p data-field="goal">Read the complete project CTM with the topic-maps reader in practical time, without weakening TMDM semantics, so that the project CTM can be read back, compared and navigated.</p>
+<p data-field="work-item" data-ref="project-work-ctm">The proposed Work Item above. It is not declared on the Work Breakdown.</p>
+<p data-field="delivers" data-ref="pwc-wp-8">The proposed work package above.</p>
+<p data-field="plan-step">No Plan Step is confirmed for this assignment. Its text cannot make one.</p>
+<ul data-field="source-authorities">
+<li>topic-maps 963f2a0 (Slice 17B), the reference implementation; its checkout topic-maps-hyperdoc is not changed</li>
+<li>topic-maps src/tmdm/merging.lisp and src/tmdm/associations.lisp, changed in the separate worktree topic-maps-normalization</li>
+<li data-changes="dreyeck/work/project/project-workspace.lisp">records the topic-maps revision HyperDoc is tested with and shows the loaded reader's source identity</li>
+</ul>
+<ul data-field="preconditions">
+<li>No change to the pinned checkout topic-maps-hyperdoc; no push, deployment or SSH; no commit without the user's approval.</li>
+<li>The emitter, its identities and the project model are not changed to accommodate the reader.</li>
+</ul>
+<ul data-field="acceptance-criteria">
+<li>The complete project CTM is read correctly in practical time.</li>
+<li>Merge and reification semantics are unchanged: regression tests recorded with the unchanged 963f2a0 before the change pass after it.</li>
+<li>The complete topic-maps test suite passes with outputs equal to the 963f2a0 run.</li>
+</ul>
+<ul data-field="evidence">
+<li>topic-maps commit 5a4a668 on branch claude/ctm-reader-normalization-scaling: EQUAL-TOPIC-PAIR and EQUAL-ASSOCIATION-PAIR return the pairs EQUAL-PAIR returns, through an index</li>
+<li>topic-maps suite in its pinned shell, on the clean commit: exit 0; every PASS line and all 20 report files equal to the 963f2a0 run; NORMALIZATION-PASS 77 checks</li>
+<li>differential: 273 corpus files with equal outcomes; equal CXTM on every benchmark input the unchanged reader completed</li>
+<li>complete project CTM: 7.4 s with the correction; the unchanged reader did not complete within 300 s</li>
+<li data-test="dreyeck/tests/project-ctm.lisp">HyperDoc read-back of the complete project CTM with the pinned revision</li>
+</ul>
+<p data-field="observed-state">Reported by the executor: committed in topic-maps as 5a4a668 after the user approved the commit; HyperDoc's dependency was updated to it after the user approved the update, both on 2026-10-19. Not pushed. This report is not an acceptance.</p>
+<p data-field="acceptance">No acceptance by the user is recorded.</p>
+</section>

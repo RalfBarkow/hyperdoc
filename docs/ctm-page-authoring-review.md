@@ -17,8 +17,8 @@ until topic-maps is packaged.
 ## Local review Catalog
 
 ```sh
-git clone --no-hardlinks <topic-maps repository> topic-maps-hyperdoc && git -C topic-maps-hyperdoc checkout --detach 963f2a0
-TOPIC_MAPS_ROOT=$PWD/../topic-maps-hyperdoc HYPERDOC_FEDWIKI_SITE_ROOT=$HOME/.wiki/localhost/ \
+git clone --no-hardlinks <topic-maps repository> topic-maps-hyperdoc-5a4a668 && git -C topic-maps-hyperdoc-5a4a668 checkout --detach 5a4a668
+TOPIC_MAPS_ROOT=$PWD/../topic-maps-hyperdoc-5a4a668 HYPERDOC_FEDWIKI_SITE_ROOT=$HOME/.wiki/localhost/ \
   nix develop .#tala -c sbcl --noinform --no-userinit --load scripts/serve-ctm-page-authoring.lisp
 ```
 
@@ -63,7 +63,12 @@ The TMDM reading (`dreyeck/work/tmdm-reading`) accepts a clean checkout of topic
 `788899aea1a20b9cd8237c6106e6613e180d7362` (Slice 12A) or a descendant of it, and for a descendant it checks that the inputs of the
 reading (the CTM source, its CXTM baseline, the stored Slice 12A evidence and the interpretation text) are the same blobs as at the pin.
 What the newer reader then does with those inputs is what the run observes: it must still reproduce the baseline. Tested on
-2026-10-18 with commit `963f2a0` (branch `codex/ctm-slice-17b`): the reading, the TMDM navigation and the page documentation pass. A
+2026-10-19 with commit `5a4a668` (branch `claude/ctm-reader-normalization-scaling`: `963f2a0`, Slice 17B, plus the indexed search for
+equal Topics and Associations, which reads the HyperDoc project CTM in seconds instead of not within 300 s): the reading, the TMDM
+navigation, the page documentation, the CTM views of the Item edit and the project CTM (`dreyeck/work/project`) pass. `963f2a0`
+was tested on 2026-10-18 and gives the same results on these inputs, but not on a document of the project CTM's size. The
+topic-maps repository has no remote: `5a4a668` is kept as a verified Git bundle, and how to recover it is in
+`dreyeck/work/project/topic-maps-5a4a668-recovery.txt`. A
 working repository that is being developed is not a suitable `TOPIC_MAPS_ROOT`: it is refused while it has local changes, and a
 half-edited tree does not load. Slice 12A (`788899ae`) stays the historical test state; after switching between checkouts, force a
 recompile (`(asdf:load-system "dreyeck/work/tmdm-reading" :force t)`), because the compiled HyperDoc code depends on the structures of topic-maps.

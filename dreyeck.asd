@@ -3181,3 +3181,30 @@
   :perform (asdf:test-op (operation component)
              (declare (ignore operation component))
              (uiop:symbol-call :dreyeck/work/tmdm-reading/tests :run-tests)))
+
+;; HyperDoc project work as an exchangeable CTM Topic Map. Local only: it needs the topic-maps checkout in the ASDF registry,
+;; which is not packaged (E1 of the historical integration proposal is not a decision). The Work pages stay authoritative;
+;; hyperdoc-project.ctm is derived from them by WRITE-PROJECT-CTM.
+(defsystem "dreyeck/work/project"
+  :description "HyperDoc's declared project work materialized as a CTM Topic Map, read back with topic-maps, compared through CXTM and navigable in the HyperDoc Project Workspace"
+  :license "BSD"
+  :version "0.0.1"
+  :depends-on ("dreyeck/work/reading" "dreyeck/topicmap" "dreyeck/inspector/topicmap" "dreyeck/inspector/tmdm"
+               "topic-maps/ctm" "topic-maps/cxtm" "html-inspector-views" "html-inspector-views/reactive" "lwcells"
+               "plump" "ironclad" "cl-base64")
+  :components ((:module "dreyeck/work/project"
+                :serial t
+                :components ((:file "project-ctm") (:file "project-workspace") (:static-file "hyperdoc-project.ctm")
+                             (:static-file "hyperdoc-project.ctm.sha256")
+                             (:static-file "topic-maps-5a4a668-recovery.txt")))
+               (:module "dreyeck/pages/project"
+                :components ((:static-file "HyperDoc Project Workspace.html") (:static-file "Implementation Assignments.html"))))
+  :in-order-to ((test-op (test-op "dreyeck/work/project/tests"))))
+
+(defsystem "dreyeck/work/project/tests"
+  :description "The project CTM: read, traced to its declarations, roundtrip in octets and CXTM, refusals, the Workspace path, no wiki written"
+  :depends-on ("dreyeck/work/project" "ironclad" "cl-base64")
+  :components ((:file "dreyeck/tests/project-ctm"))
+  :perform (test-op (op component)
+             (declare (ignore op component))
+             (uiop:symbol-call :dreyeck/work/project/tests :run-tests)))

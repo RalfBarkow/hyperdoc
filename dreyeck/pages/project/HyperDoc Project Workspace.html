@@ -1,0 +1,29 @@
+<h1>HyperDoc Project Workspace</h1>
+<p>HyperDoc's declared project work as one Topic Map. The Work declarations of the <a page="Work Breakdown" hyperbook="dreyeck/work/reading">Work Breakdown</a>, the WBS, plan steps and preconditions of <a page="Authoring the CTM Plan Page" hyperbook="dreyeck/work/reading">Authoring the CTM Plan Page</a>, the entries of the <a page="CTM Plan Page WBS Dictionary" hyperbook="dreyeck/work/reading">CTM Plan Page WBS Dictionary</a> and the assignments and proposals of <a page="Implementation Assignments">Implementation Assignments</a> are written as a CTM document, read back with the topic-maps reader, and drawn with the native Topicmap renderer.</p>
+<p><a expr="(dreyeck/work/project:project-workspace)" view="Project">Open the HyperDoc Project Workspace</a>: the project and its Work Areas, the Work Items, the assignments, the proposals and the gaps, each a way into the Workspace. In the Workspace, the Point panel names where the Topic at Point is declared, links that declaration in its page source, and lists its Associations. Following an Association moves the Point; History keeps where it was.</p>
+<p><a expr="(dreyeck/work/project:project-ctm-document)" view="CTM document">The project CTM document</a>: its octets, their SHA-256, what the topic-maps reader made of them, and the download of exactly those octets.</p>
+
+<h2>Authority</h2>
+<p>The pages named above stay authoritative for what they declare. The CTM document <code>dreyeck/work/project/hyperdoc-project.ctm</code> is derived from them by <code>write-project-ctm</code> and is not edited by hand; a test fails when it is not what the pages give now. A CTM document read later, for example one an exchange partner changed, is a revision of its own: it is read, inspected and compared, and nothing of it is written back to a page.</p>
+
+<h2>Identity</h2>
+<p>Every Topic has a subject identifier: a <code>tag:</code> IRI under <code>tag:dreyeck.ch,2026:hyperdoc/</code>, which names and does not locate.</p>
+<ul>
+<li>A Work Topic is <code>work/topic/</code> followed by its <code>data-topic</code> ID. A proposal has the ID it would be declared with, so a later declaration is the same Topic.</li>
+<li>A page is <code>page/</code>, its HyperBook ID and its page ID in that HyperBook, lowercased with each other run of characters a hyphen. Renaming a page changes it.</li>
+<li>An authored statement is <code>statement/</code>, its page, its <code>data-from</code>, <code>data-relation</code> and <code>data-to</code>, and a number that counts equal statements on that page in authored order.</li>
+<li>A control is <code>control/</code>, its work package and its <code>data-control</code> ID; a repository file is <code>file/</code> and its repository path; an assignment is <code>assignment/</code> and its <code>data-assignment</code> ID; a derived gap is <code>gap/</code>, its rule and its subject.</li>
+<li>Types, Role types and Occurrence types are <code>schema/</code> and a name; each has a name and, where it matters, a description in the document.</li>
+</ul>
+<p>No name, label, position or line number is part of an identifier. The Document IRI <code>tag:dreyeck.ch,2026:hyperdoc/project.ctm</code> is fixed for every revision; it names no Topic, and CXTM comparisons use it as base locator.</p>
+
+<h2>What the document states</h2>
+<ul>
+<li>A declaration is a Topic typed by its <code>data-kind</code>, with its label as name, its <code>data-status</code> as the occurrence <em>work status</em>, and its sentence as <em>declaration text</em>. <em>declared on</em> names the page that declares it, <em>carried by</em> the page its declaration names.</li>
+<li>An authored statement is an Association of the type its <code>data-relation</code> names: the Relation Contract Topic for a <code>work:relation/…</code> reference, otherwise a relation word. Its Roles are the source and target Role types of that type, played by the Topics of <code>data-from</code> and <code>data-to</code>. The statement Topic reifies it and is <em>stated on</em> its page. Direction comes from the authored attributes, never from a drawn edge.</li>
+<li>WBS decomposition (<em>decomposes into</em>), plan dependency (<em>depends on</em>) and result (<em>produces</em>) are three Association types with their own Role types.</li>
+<li>A WBS Dictionary entry gives its work package the occurrences scope, acceptance criterion, authority, effect and evidence, and its controls; a control with a test names the test file that exercises it, and whether that file contains the stated marker.</li>
+<li>A proposal is <em>proposed on</em> Implementation Assignments, has no work status and is never <em>declared on</em> a page. An assignment records its goal, Work Item, deliverable, source authorities, preconditions, acceptance criteria, evidence and the state its executor reports. No acceptance is recorded by an execution.</li>
+<li>A gap is derived by a stated rule where the declarations do not say enough, and concerns the Topics it names. It adds no relation of the Work.</li>
+</ul>
+<p>Work status is an occurrence; provenance is in <em>declared on</em>, <em>proposed on</em> and <em>stated on</em>; no scope is used.</p>
