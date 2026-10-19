@@ -32,7 +32,7 @@ makes a fresh temporary directory (its name contains `TEST-COPY`, and it holds `
 the authority; no wiki directory is read or written. The default port is 18775, so it does not meet a Catalog on 18773.
 
 ```sh
-TOPIC_MAPS_ROOT=$PWD/../topic-maps-hyperdoc HYPERDOC_CTM_REVIEW_COPY=1 \
+TOPIC_MAPS_ROOT=$PWD/../topic-maps-hyperdoc-5a4a668 HYPERDOC_CTM_REVIEW_COPY=1 \
   nix develop .#tala -c sbcl --noinform --no-userinit --load scripts/serve-ctm-page-authoring.lisp
 ```
 
