@@ -6,7 +6,7 @@
 #   dreyeck/pages/work/Work Breakdown.html  a7dc3d53a1a7312e6feba2350bde7251c222b2acd321ef5a109116f5cf616e13
 #   dreyeck/pages/work/Authoring the CTM Plan Page.html  fced413ad5e893e49973df1fa8fb5ca14dee87695c50100e72ddd12d4d2de75a
 #   dreyeck/pages/work/CTM Plan Page WBS Dictionary.html  de3f372912e0a257a85990686fdcd354f79481af7aecb1ecc5d1ffb171e9d9b5
-#   dreyeck/pages/project/Implementation Assignments.html  4c109f5bbeed6a1c26049b412d3ef2970725a22712cfa57910f7d9221dc2b868
+#   dreyeck/pages/project/Implementation Assignments.html  643bccccf0cffa0aee20423a9ae2c939246fb4c95316c541a358297363ea38f8
 # Other files read: the test files WBS Dictionary controls name, to derive test marker found:
 #   dreyeck/tests/fedwiki-page-authoring.lisp  0fcd02078576bde7a0438620797ea30c805900201ac443b8bc20ac8b146671d1
 #   dreyeck/tests/fedwiki-item-edit-execution.lisp  d215e10c48f94b401248d60e7c8fe95db5c693ea8a489f60b368c7f8102c755d
@@ -509,7 +509,7 @@ s:role-work-relation-depends-on-target
     s:hyperbook-id: "dreyeck/work/project" ;
     s:page-id: "Implementation Assignments" ;
     s:repository-path: "dreyeck/pages/project/Implementation Assignments.html" ;
-    s:source-sha256: "4c109f5bbeed6a1c26049b412d3ef2970725a22712cfa57910f7d9221dc2b868" .
+    s:source-sha256: "643bccccf0cffa0aee20423a9ae2c939246fb4c95316c541a358297363ea38f8" .
 
 <tag:dreyeck.ch,2026:hyperdoc/hyperbook/dreyeck/work/project>
     isa s:hyperbook ;
@@ -1480,6 +1480,42 @@ w:pwc-wp-8
     - "docs/project-acceptance-model.md" ;
     s:repository-path: "docs/project-acceptance-model.md" .
 
+<tag:dreyeck.ch,2026:hyperdoc/assignment/cc-2026-10-20-ctm-exchange-review>
+    isa s:implementation-assignment ;
+    - "Claude Code: Review an external import of the project CTM (read-only)" ;
+    s:issued: "Given by the user on 2026-10-20 in a Claude Code session, after relaying Juergen's report that he had imported the project CTM into his own CTM editor." ;
+    s:goal: "Classify the five remarks on the model in Juergen's report against the project CTM, its emitter and the Work pages, and keep his report, the executor's inspection and the open modelling questions apart, without changing any of them. The review bears on the questions of the proposed work packages pwc-wp-4 (an independent check) and pwc-wp-7 (comparing an external revision); it delivers neither, and no Association leads from either package to this assignment." ;
+    s:plan-step-note: "No Plan Step is confirmed for this assignment. Its text cannot make one." ;
+    s:observed-state: "Reported by the executor: a read-only review; no conformance check, no re-import and no comparison was performed. This report is not an acceptance." ;
+    s:acceptance: "No acceptance by the user is recorded." ;
+    s:precondition: "No change to the emitter, the vocabulary, Subject Identifiers, source authority or Work status." ;
+    s:precondition: "None of the remarks is implemented; Juergen's TMCL schema is not compared until it is received." ;
+    s:acceptance-criterion: "Each of the five remarks is classified with the constructs it concerns and what a change would affect." ;
+    s:acceptance-criterion: "Juergen's report, the executor's inspection and open questions stay distinguishable." ;
+    s:acceptance-criterion: "The review claims no delivery, status or acceptance for pwc-wp-4 or pwc-wp-7." ;
+    s:source-authority-note: "records Juergen's report verbatim, attributed to him; the date of his message is not known, the user relayed it on 2026-10-20; his TMCL schema is not received" ;
+    s:source-authority-note: "reads the project CTM db9c5bf1 as committed in 306b7fd9" ;
+    s:source-authority-note: "reads the emitter: names, Role types, sections and datatypes" ;
+    s:source-authority-note: "reads the relation words and the definition of a work package" ;
+    s:source-authority-note: "reads the declaration of work:relation/decomposes-into and its uses" ;
+    s:source-authority-note: "reads the page Relation Contract: informs; named without a path, because the emitter would derive a second page id from its file name" ;
+    s:source-authority-note: "records the classification and the open modelling questions" ;
+    s:evidence-note: "Inspected at 306b7fd9: the Topic types and Role types work item and work package share their names; the Topic types and Occurrence types plan step and precondition share theirs; every subject identifier differs" ;
+    s:evidence-note: "Inspected at 306b7fd9: 32 relation-specific Role types for 16 relation types in use, 4 Relation Contracts and 12 relation words; the Role type s:source, named source, already belongs to reads source" ;
+    s:evidence-note: "Inspected at 306b7fd9: the emitter writes the relation-word types and all Role types in the Schema section, the declared Relation Contract Topics in the Topics section" ;
+    s:evidence-note: "Inspected at 306b7fd9: the contract decomposes-into names a target deliverable; its 13 uses have a target of data-kind work package; whether deliverable means the WBS concept or the kind is open" ;
+    s:evidence-note: "Inspected at 306b7fd9: all 484 Occurrences are strings; issued is prose that contains a date; HyperDoc and the pinned topic-maps have no TMCL" .
+
+<tag:dreyeck.ch,2026:hyperdoc/file/docs/exchange/2026-10-20-juergen-ctm-import-feedback.md>
+    isa s:repository-file ;
+    - "docs/exchange/2026-10-20-juergen-ctm-import-feedback.md" ;
+    s:repository-path: "docs/exchange/2026-10-20-juergen-ctm-import-feedback.md" .
+
+<tag:dreyeck.ch,2026:hyperdoc/file/docs/project-ctm-exchange-review.md>
+    isa s:repository-file ;
+    - "docs/project-ctm-exchange-review.md" ;
+    s:repository-path: "docs/project-ctm-exchange-review.md" .
+
 <tag:dreyeck.ch,2026:hyperdoc/gap/work-item-without-breakdown/connections-example>
     isa s:plan-gap ;
     - "connections-example has no declared breakdown or plan" ;
@@ -1568,6 +1604,11 @@ w:pwc-wp-8
 <tag:dreyeck.ch,2026:hyperdoc/gap/assignment-without-plan-step/cc-2026-10-19-acceptance-model-draft>
     isa s:plan-gap ;
     - "cc-2026-10-19-acceptance-model-draft has no confirmed Plan Step" ;
+    s:gap-rule: "The assignment names no confirmed Plan Step. Its own text cannot declare one." .
+
+<tag:dreyeck.ch,2026:hyperdoc/gap/assignment-without-plan-step/cc-2026-10-20-ctm-exchange-review>
+    isa s:plan-gap ;
+    - "cc-2026-10-20-ctm-exchange-review has no confirmed Plan Step" ;
     s:gap-rule: "The assignment names no confirmed Plan Step. Its own text cannot declare one." .
 
 <tag:dreyeck.ch,2026:hyperdoc/gap/uncontracted-relation-word/word-models>
@@ -1981,6 +2022,14 @@ s:changes-source(s:assignment: <tag:dreyeck.ch,2026:hyperdoc/assignment/cc-2026-
 s:changes-source(s:assignment: <tag:dreyeck.ch,2026:hyperdoc/assignment/cc-2026-10-19-acceptance-model-draft>, s:file: <tag:dreyeck.ch,2026:hyperdoc/file/dreyeck/tests/fixtures/project-acceptance/README.txt>)
 s:changes-source(s:assignment: <tag:dreyeck.ch,2026:hyperdoc/assignment/cc-2026-10-19-acceptance-model-draft>, s:file: <tag:dreyeck.ch,2026:hyperdoc/file/docs/project-acceptance-model.md>)
 s:evidenced-by-test(s:assignment: <tag:dreyeck.ch,2026:hyperdoc/assignment/cc-2026-10-19-acceptance-model-draft>, s:test-file: <tag:dreyeck.ch,2026:hyperdoc/file/dreyeck/tests/project-ctm.lisp>)
+s:declared-on(s:declaration: <tag:dreyeck.ch,2026:hyperdoc/assignment/cc-2026-10-20-ctm-exchange-review>, s:source-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/implementation-assignments>)
+s:assignment-for(s:assignment: <tag:dreyeck.ch,2026:hyperdoc/assignment/cc-2026-10-20-ctm-exchange-review>, s:work-item: w:project-work-ctm)
+s:changes-source(s:assignment: <tag:dreyeck.ch,2026:hyperdoc/assignment/cc-2026-10-20-ctm-exchange-review>, s:file: <tag:dreyeck.ch,2026:hyperdoc/file/docs/exchange/2026-10-20-juergen-ctm-import-feedback.md>)
+s:reads-source(s:assignment: <tag:dreyeck.ch,2026:hyperdoc/assignment/cc-2026-10-20-ctm-exchange-review>, s:source: <tag:dreyeck.ch,2026:hyperdoc/file/dreyeck/work/project/hyperdoc-project.ctm>)
+s:reads-source(s:assignment: <tag:dreyeck.ch,2026:hyperdoc/assignment/cc-2026-10-20-ctm-exchange-review>, s:source: <tag:dreyeck.ch,2026:hyperdoc/file/dreyeck/work/project/project-ctm.lisp>)
+s:reads-source(s:assignment: <tag:dreyeck.ch,2026:hyperdoc/assignment/cc-2026-10-20-ctm-exchange-review>, s:source: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/reading/work-breakdown>)
+s:reads-source(s:assignment: <tag:dreyeck.ch,2026:hyperdoc/assignment/cc-2026-10-20-ctm-exchange-review>, s:source: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/reading/authoring-the-ctm-plan-page>)
+s:changes-source(s:assignment: <tag:dreyeck.ch,2026:hyperdoc/assignment/cc-2026-10-20-ctm-exchange-review>, s:file: <tag:dreyeck.ch,2026:hyperdoc/file/docs/project-ctm-exchange-review.md>)
 s:gap-concerns(s:gap: <tag:dreyeck.ch,2026:hyperdoc/gap/work-item-without-breakdown/connections-example>, s:subject: w:connections-example)
 s:gap-concerns(s:gap: <tag:dreyeck.ch,2026:hyperdoc/gap/work-item-without-breakdown/fedwiki-item-authoring>, s:subject: w:fedwiki-item-authoring)
 s:gap-concerns(s:gap: <tag:dreyeck.ch,2026:hyperdoc/gap/work-item-without-breakdown/production-authoring-authority>, s:subject: w:production-authoring-authority)
@@ -2001,6 +2050,7 @@ s:gap-concerns(s:gap: <tag:dreyeck.ch,2026:hyperdoc/gap/work-item-deliverable-un
 s:gap-concerns(s:gap: <tag:dreyeck.ch,2026:hyperdoc/gap/assignment-without-plan-step/cc-2026-10-18-project-work-ctm>, s:subject: <tag:dreyeck.ch,2026:hyperdoc/assignment/cc-2026-10-18-project-work-ctm>)
 s:gap-concerns(s:gap: <tag:dreyeck.ch,2026:hyperdoc/gap/assignment-without-plan-step/cc-2026-10-19-topic-maps-reader-scaling>, s:subject: <tag:dreyeck.ch,2026:hyperdoc/assignment/cc-2026-10-19-topic-maps-reader-scaling>)
 s:gap-concerns(s:gap: <tag:dreyeck.ch,2026:hyperdoc/gap/assignment-without-plan-step/cc-2026-10-19-acceptance-model-draft>, s:subject: <tag:dreyeck.ch,2026:hyperdoc/assignment/cc-2026-10-19-acceptance-model-draft>)
+s:gap-concerns(s:gap: <tag:dreyeck.ch,2026:hyperdoc/gap/assignment-without-plan-step/cc-2026-10-20-ctm-exchange-review>, s:subject: <tag:dreyeck.ch,2026:hyperdoc/assignment/cc-2026-10-20-ctm-exchange-review>)
 s:gap-concerns(s:gap: <tag:dreyeck.ch,2026:hyperdoc/gap/uncontracted-relation-word/word-models>, s:subject: s:relation-word-models)
 s:gap-concerns(s:gap: <tag:dreyeck.ch,2026:hyperdoc/gap/uncontracted-relation-word/word-observes>, s:subject: s:relation-word-observes)
 s:gap-concerns(s:gap: <tag:dreyeck.ch,2026:hyperdoc/gap/uncontracted-relation-word/word-uses>, s:subject: s:relation-word-uses)

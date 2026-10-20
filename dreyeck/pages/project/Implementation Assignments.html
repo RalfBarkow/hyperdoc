@@ -145,3 +145,38 @@
 <p data-field="observed-state">Reported by the executor: a draft in the working tree, not committed. The draft pages are not sources of the project CTM; making them sources is the user's decision. This report is not an acceptance.</p>
 <p data-field="acceptance">No acceptance by the user is recorded.</p>
 </section>
+
+<section data-assignment="cc-2026-10-20-ctm-exchange-review">
+<h3>Claude Code: Review an external import of the project CTM (read-only)</h3>
+<p data-field="issued">Given by the user on 2026-10-20 in a Claude Code session, after relaying Juergen's report that he had imported the project CTM into his own CTM editor.</p>
+<p data-field="goal">Classify the five remarks on the model in Juergen's report against the project CTM, its emitter and the Work pages, and keep his report, the executor's inspection and the open modelling questions apart, without changing any of them. The review bears on the questions of the proposed work packages pwc-wp-4 (an independent check) and pwc-wp-7 (comparing an external revision); it delivers neither, and no Association leads from either package to this assignment.</p>
+<p data-field="work-item" data-ref="project-work-ctm">The proposed Work Item above. It is not declared on the Work Breakdown.</p>
+<p data-field="plan-step">No Plan Step is confirmed for this assignment. Its text cannot make one.</p>
+<ul data-field="source-authorities">
+<li data-changes="docs/exchange/2026-10-20-juergen-ctm-import-feedback.md">records Juergen's report verbatim, attributed to him; the date of his message is not known, the user relayed it on 2026-10-20; his TMCL schema is not received</li>
+<li data-reads="dreyeck/work/project/hyperdoc-project.ctm">reads the project CTM db9c5bf1 as committed in 306b7fd9</li>
+<li data-reads="dreyeck/work/project/project-ctm.lisp">reads the emitter: names, Role types, sections and datatypes</li>
+<li data-reads="dreyeck/pages/work/Work Breakdown.html">reads the relation words and the definition of a work package</li>
+<li data-reads="dreyeck/pages/work/Authoring the CTM Plan Page.html">reads the declaration of work:relation/decomposes-into and its uses</li>
+<li>reads the page Relation Contract: informs; named without a path, because the emitter would derive a second page id from its file name</li>
+<li data-changes="docs/project-ctm-exchange-review.md">records the classification and the open modelling questions</li>
+</ul>
+<ul data-field="preconditions">
+<li>No change to the emitter, the vocabulary, Subject Identifiers, source authority or Work status.</li>
+<li>None of the remarks is implemented; Juergen's TMCL schema is not compared until it is received.</li>
+</ul>
+<ul data-field="acceptance-criteria">
+<li>Each of the five remarks is classified with the constructs it concerns and what a change would affect.</li>
+<li>Juergen's report, the executor's inspection and open questions stay distinguishable.</li>
+<li>The review claims no delivery, status or acceptance for pwc-wp-4 or pwc-wp-7.</li>
+</ul>
+<ul data-field="evidence">
+<li>Inspected at 306b7fd9: the Topic types and Role types work item and work package share their names; the Topic types and Occurrence types plan step and precondition share theirs; every subject identifier differs</li>
+<li>Inspected at 306b7fd9: 32 relation-specific Role types for 16 relation types in use, 4 Relation Contracts and 12 relation words; the Role type s:source, named source, already belongs to reads source</li>
+<li>Inspected at 306b7fd9: the emitter writes the relation-word types and all Role types in the Schema section, the declared Relation Contract Topics in the Topics section</li>
+<li>Inspected at 306b7fd9: the contract decomposes-into names a target deliverable; its 13 uses have a target of data-kind work package; whether deliverable means the WBS concept or the kind is open</li>
+<li>Inspected at 306b7fd9: all 484 Occurrences are strings; issued is prose that contains a date; HyperDoc and the pinned topic-maps have no TMCL</li>
+</ul>
+<p data-field="observed-state">Reported by the executor: a read-only review; no conformance check, no re-import and no comparison was performed. This report is not an acceptance.</p>
+<p data-field="acceptance">No acceptance by the user is recorded.</p>
+</section>
