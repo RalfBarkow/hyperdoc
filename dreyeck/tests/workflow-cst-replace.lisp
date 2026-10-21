@@ -379,6 +379,27 @@ is, so the key needs no HyperDoc package to compute."
                "(cl-user::defexample cl-user::other (list 1))"))))))
   t)
 
+(defun test-a-hyperdoc-key-names-one-hyperdoc ()
+  "A HyperDoc DEFHYPERDOC is recognised by its operator's name, as DEFEXAMPLE
+is, and addressed by the variable that names the HyperDoc."
+  (let ((key
+         (wf:form-key
+          (read-from-string
+           "(cl-user::defhyperdoc cl-user::*probe-doc* :title \"Probe\" :main-page-id \"A\")"))))
+    (assert (equal (list :hyperdoc (intern "*PROBE-DOC*" :cl-user)) key))
+    (assert
+     (not
+      (equal key
+             (wf:form-key
+              (read-from-string
+               "(cl-user::defhyperdoc cl-user::*other-doc* :title \"Probe\")")))))
+    (assert
+     (not
+      (equal key
+             (wf:form-key
+              (read-from-string "(defparameter cl-user::*probe-doc* nil)"))))))
+  t)
+
 (defun test-a-class-key-names-one-class ()
   "A class is addressed by its name, as a function is."
   (let ((key
@@ -567,6 +588,7 @@ DEFVAR again leaves the object already bound; a DEFPARAMETER replaces it."
     (test-refuses-zero-and-ambiguous-package-keys)
     (test-a-method-key-names-one-method)
     (test-an-example-key-names-one-example)
+    (test-a-hyperdoc-key-names-one-hyperdoc)
     (test-a-class-key-names-one-class)
     (test-a-view-key-names-one-method)
     (test-a-macro-key-names-one-macro)

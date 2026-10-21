@@ -51,7 +51,8 @@
                        :key #'hyperbook:id-of :test #'equal))
            "the Catalog contains the companion once")
     (check (equal "TRAVERSE Reading Companion" (hyperbook:title-of book)))
-    (check (equal (first +texts+) (hyperbook:main-page-id-of book)))
+    (check (hyperbook:find-page book (first +texts+) :signal-error? nil)
+           "the first technical page stays in the companion")
     (check (eq (c:companion-page (first +texts+)) (hyperbook:lookup-path book (list (first +texts+)))))))
 
 (defun check-pages ()

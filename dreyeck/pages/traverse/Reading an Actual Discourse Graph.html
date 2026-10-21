@@ -1,0 +1,29 @@
+<html><head><title>Reading an Actual Discourse Graph</title></head><body><in-package>dreyeck/traverse</in-package><h1>Reading an Actual Discourse Graph</h1>
+<p>The results on this page come from a replay. The tested bundle (<code>19b14c31…</code>) ran the Mech items of the retained pages in Node. Every page came from the snapshot of 2026-10-21, and the network was disabled. Reading this page runs nothing. <a expr="(discourse-replay)">The recorded replay</a>.</p>
+<p>The replay is not an observation of the production Wiki in a browser; no such observation was supplied. It also assumes a neighborhood that contains discourse.dreyeck.ch. <code>NEIGHBORS discourse</code> would drop any other site whose domain lacks "discourse".</p>
+<h2>What EXTRACT finds</h2>
+<p>In 110 pages EXTRACT finds 86 typed edges: 60 question, 16 support, 5 claim and 5 oppose.</p>
+<ul>
+<li>19 targets resolve.</li>
+<li>18 targets name pages of discourse.dreyeck.ch that its sitemap does not list.</li>
+<li>49 targets name another site, so in this neighborhood they cannot resolve.</li>
+</ul>
+<h2>Why TRAVERSE on Discourse Graphs finds nothing</h2>
+<p><a href="https://discourse.dreyeck.ch/view/discourse-graphs">Discourse Graphs</a> holds <a expr="(dg-item &quot;discourse-graphs&quot; &quot;268693278cf3e65b&quot;)" view="Story item">a TRAVERSE program</a>. The page has only two pagefolds, <a expr="(dg-item &quot;discourse-graphs&quot; &quot;31cd4154a6e53700&quot;)" view="Story item"><code>.</code></a> and <a expr="(dg-item &quot;discourse-graphs&quot; &quot;59247f94e50fec78&quot;)" view="Story item"><code>~</code></a>, and neither names a role. Its links, such as <a expr="(dg-item &quot;discourse-graphs&quot; &quot;31bd93ad173f651c&quot;)" view="Story item">[[Claim Template]]</a>, come before any fold.</p>
+<p>So no edge starts at the page, and TRAVERSE reports that it "found no question/claim/support/oppose relations from discourse.dreyeck.ch+discourse-graphs". SOLO then has no aspect to hand over. <a expr="(failed-traversal)" view="Replay">The replayed case</a>.</p>
+<p>The page proposes the graph; it is not a node of it.</p>
+<h2>A path that succeeds</h2>
+<p><a href="https://discourse.dreyeck.ch/view/can-a-wiki-page-represent-a-claim">Can a Wiki Page Represent a Claim?</a> was written for this on 2026-10-20 (<a expr="(wiki-page-of &quot;discourse.dreyeck.ch&quot; &quot;can-a-wiki-page-represent-a-claim&quot;)" view="Wiki page">retained</a>). Step by step:</p>
+<ol>
+<li><a expr="(dg-item &quot;can-a-wiki-page-represent-a-claim&quot; &quot;7324b5ac4d729ea7&quot;)" view="Story item">The pagefold <code>Claims</code></a> is followed by <a expr="(dg-item &quot;can-a-wiki-page-represent-a-claim&quot; &quot;c790b11985cb2099&quot;)" view="Story item">the story item <code>[[A Wiki Page Can Represent a Claim]]</code></a>.</li>
+<li>EXTRACT derives <a expr="(edge-between &quot;discourse.dreyeck.ch+can-a-wiki-page-represent-a-claim&quot; &quot;claim&quot; &quot;discourse.dreyeck.ch+a-wiki-page-can-represent-a-claim&quot;)" view="Extracted edge">the edge</a> with the role claim.</li>
+<li>Its target is listed in the sitemap, so resolveEdges marks it resolved.</li>
+<li><a expr="(claim-traversal)" view="Replay">TRAVERSE claim</a> reports <code>1 relations, 2 nodes, 0 unresolved</code>, and SOLO receives one batch.</li>
+</ol>
+<p>Each step with its value and its JavaScript definition: <a expr="(first (claim-reading-path))" view="Path step">the fold</a>, <a expr="(third (claim-reading-path))" view="Path step">the edge</a>, <a expr="(fifth (claim-reading-path))" view="Path step">the TRAVERSE result</a>, <a expr="(seventh (claim-reading-path))" view="Path step">the SOLO batch</a>. <a expr="(claim-reading-path)">The whole path</a>.</p>
+<h2>Derived is not asserted</h2>
+<p><a href="https://discourse.dreyeck.ch/view/how-i-use-my-wiki">How I Use My Wiki</a> also has a claim fold. <a expr="(dg-item &quot;how-i-use-my-wiki&quot; &quot;adc19b81ea613b59&quot;)" view="Story item">One of its items</a> links to Claim Link Survey, so TRAVERSE claim yields the relation <a expr="(edge-between &quot;discourse.dreyeck.ch+how-i-use-my-wiki&quot; &quot;claim&quot; &quot;discourse.dreyeck.ch+claim-link-survey&quot;)" view="Extracted edge">How I Use My Wiki —claim→ Claim Link Survey</a>.</p>
+<p>The role comes from where the link stands, not from what the target says. That A Wiki Page Can Represent a Claim answers its question is <a expr="(answer-assertion)" view="Open statement">a claim that nothing here checks</a>.</p>
+<p>The two-page fixture of <a page="From PageFold to Discourse Graph">From PageFold to Discourse Graph</a> remains as the isolated technical test of the same stages. <a expr="(implementation-workspace)" view="Topicmap">The Implementation/Execution projection</a> starts at the story item and leads to both runs.</p>
+<p>Previous: <a page="From WALK to TRAVERSE">From WALK to TRAVERSE</a>. Next: <a page="What Remains to Be Demonstrated?">What Remains to Be Demonstrated?</a>. Code pages: <a page="Wiki Pages Retained from the Experiment">Wiki Pages Retained from the Experiment</a> · <a page="Replaying Mech on the Retained Pages">Replaying Mech on the Retained Pages</a> · <a page="Experiment and Implementation Projections">Experiment and Implementation Projections</a>.</p>
+</body></html>

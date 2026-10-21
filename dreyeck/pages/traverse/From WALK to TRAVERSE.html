@@ -1,0 +1,31 @@
+<html><head><title>From WALK to TRAVERSE</title></head><body><in-package>dreyeck/traverse</in-package><h1>From WALK to TRAVERSE</h1>
+<p>Ward proposed browsing the graph with WALK. On <a href="https://discourse.dreyeck.ch/view/discourse-graphs">Discourse Graphs on discourse.dreyeck.ch</a> his program changed step by step; its journal records each step. Then a second command was added beside it.</p>
+<h2>The program's history</h2>
+<p>All steps are edits of <a expr="(dg-item &quot;discourse-graphs&quot; &quot;44fac82ef4111fc2&quot;)" view="Story item">one story item</a>, which keeps Ward's id:</p>
+<ol>
+<li><a expr="(first-step-with (dg-item &quot;discourse-graphs&quot; &quot;44fac82ef4111fc2&quot;) &quot;ClaimLinkSurvey&quot;)" view="Journal step">Ward's text</a>, 2025-11-21.</li>
+<li><a expr="(first-step-with (dg-item &quot;discourse-graphs&quot; &quot;44fac82ef4111fc2&quot;) &quot;EXTRACT&quot;)" view="Journal step">EXTRACT added</a>, 2026-01-06.</li>
+<li><a expr="(first-step-with (dg-item &quot;discourse-graphs&quot; &quot;44fac82ef4111fc2&quot;) &quot;EDGES&quot;)" view="Journal step">EDGES added</a>, 2026-01-13.</li>
+<li><a expr="(first-step-with (dg-item &quot;discourse-graphs&quot; &quot;44fac82ef4111fc2&quot;) &quot;Claim Link Survey&quot;)" view="Journal step">The survey placed under <code>NEIGHBORS discourse</code></a>, 2026-01-20.</li>
+</ol>
+<p>On 2026-10-20 a second item was written: <a expr="(dg-item &quot;discourse-graphs&quot; &quot;268693278cf3e65b&quot;)" view="Story item">a TRAVERSE program</a>. <a expr="(first-step-with (dg-item &quot;discourse-graphs&quot; &quot;268693278cf3e65b&quot;) &quot;TRAVERSE&quot;)" view="Journal step">Its first text</a>.</p>
+<h2>WALK selects</h2>
+<p><a expr="(discourse-source &quot;upstream:walk_emit&quot;)" view="Source definition">Ward's walk_emit</a> knows ways such as steps, days, hubs, lineup and references, but no ways named after roles. <a expr="(discourse-source &quot;composition:installDiscourse&quot;)" view="Source definition">installDiscourse</a> wraps WALK: a role way goes to <a expr="(discourse-source &quot;composition:role_walk_emit&quot;)" view="Source definition">role_walk_emit</a>, and every other way to Ward's code unchanged.</p>
+<p><a expr="(discourse-source &quot;composition:walks&quot;)" view="Source definition">walks</a> picks pages that have an EXTRACT edge of the role. It prefers pages in the lineup, sorts them by sitemap date and takes the count. For each picked page it draws a graph from the sitemap: back links as parents, links as children. These relations carry no type. <a expr="(dg-item &quot;claim-link-survey-probe&quot; &quot;02516bef95b6c7ac&quot;)" view="Story item">A remark on the probe page</a> says the same: WALK acts "as a selector", not as a traversal.</p>
+<p><a expr="(role-walk-selection)" view="Replay">The replay of this program</a> on the retained pages gives:</p>
+<ul>
+<li><code>WALK 60 questions ⇒ 6 aspects, 29 nodes</code>;</li>
+<li><code>WALK 30 claims ⇒ 3 aspects, 15 nodes</code>.</li>
+</ul>
+<p>Only the program's own page was in the lineup, and it has no question edges, so walks fell back to every page.</p>
+<h2>TRAVERSE follows</h2>
+<p><a expr="(discourse-source &quot;composition:traverse_emit&quot;)" view="Source definition">traverse_emit</a> works from typed edges instead. <a expr="(discourse-source &quot;composition:rootOf&quot;)" view="Source definition">rootOf</a> takes the page that holds the Mech item as the root. Then the edges go through three functions:</p>
+<ul>
+<li><a expr="(discourse-source &quot;composition:resolveEdges&quot;)" view="Source definition">resolveEdges</a> looks each target up in the sitemap of its declared site and never substitutes another site;</li>
+<li><a expr="(discourse-source &quot;composition:traverse&quot;)" view="Source definition">traverse</a> follows the listed roles breadth-first;</li>
+<li><a expr="(discourse-source &quot;composition:presentGraph&quot;)" view="Source definition">presentGraph</a> builds a graph whose relations are typed by role.</li>
+</ul>
+<p>The difference is the starting point. WALK starts from a selection of the neighborhood. TRAVERSE starts from the page it stands on, and it finds nothing when that page has no typed links.</p>
+<p>How TRAVERSE is installed and bundled is the technical reading <a page="How TRAVERSE Enters Mech">How TRAVERSE Enters Mech</a>. <a expr="(implementation-workspace)" view="Topicmap">The Implementation/Execution projection</a> shows the wrapper, both commands and their replays.</p>
+<p>Previous: <a page="How Were Discourse Relations Collected?">How Were Discourse Relations Collected?</a>. Next: <a page="Reading an Actual Discourse Graph">Reading an Actual Discourse Graph</a>. Code pages: <a page="Wiki Pages Retained from the Experiment">Wiki Pages Retained from the Experiment</a> · <a page="Replaying Mech on the Retained Pages">Replaying Mech on the Retained Pages</a> · <a page="Experiment and Implementation Projections">Experiment and Implementation Projections</a>.</p>
+</body></html>

@@ -155,7 +155,7 @@ Association identities derive from endpoints and type, never from positions."
   :asdf-system-name "dreyeck/traverse/reading"
   :subdirectory "dreyeck/pages/traverse"
   :code-subdirectory "dreyeck/traverse"
-  :main-page-id "From Git Revision to Nix Package")
+  :main-page-id "What Did Ward Propose?")
 
 (dolist (name '(retained-reading package-chain traverse-entry two-page-example deployment-evidence
                 source-workspace dataflow-workspace))

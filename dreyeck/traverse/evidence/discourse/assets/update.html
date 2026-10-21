@@ -1,0 +1,82 @@
+<button onclick="doupdate(event)">update</button> <span id="site"></span>
+
+<script type="module">
+ // Use HTTPS to avoid mixed-content blocking when this page is served over HTTPS.
+ const CODE_WIKI = 'https://discourse.dreyeck.ch';
+ const HOME = `${CODE_WIKI}/assets/pages/site-survey-factory`;
+
+ function defaultTitleFromModule(moduleName) {
+     return String(moduleName || '').replaceAll(/([a-z])([A-Z])/g, '$1 $2');
+ }
+
+ try {
+     const frame = await import(`${CODE_WIKI}/assets/v1/frame.js`);
+     const index = await import(`${CODE_WIKI}/assets/v1/index.js`);
+
+     const params = Object.fromEntries(new URLSearchParams(location.search).entries());
+     const moduleName = params['probe'] || 'ImageTagSurvey';
+
+     const neighbors = await frame.neighbors();
+     const domain = params['domain'] || neighbors[0];
+
+     const probes = `${HOME}/probes`;
+
+     // Import probe module and honor optional exported title/resultTitle.
+     const mod = await import(`${probes}/${moduleName}.js`);
+     const { version, probe, format, summary } = mod;
+     const pageTitle = mod.title || mod.resultTitle || defaultTitleFromModule(moduleName);
+
+     // Show status early so we know initialization succeeded.
+     window.site.textContent = `${domain} survey`;
+
+     const update = {
+         text: `${HOME}/update.html?probe=${moduleName}&version=${version}&domain=${domain}\nHEIGHT 30`
+     };
+
+     const factory = {
+         site: 'code.fed.wiki',
+         slug: 'site-survey-factory',
+         title: 'Site Survey Factory',
+         text: 'Create and maintain a site survey by selecting and repeatedly applying a probe.'
+     };
+
+     const site = await index.site(domain);
+
+     // IMPORTANT: update.html expects to be run *inside* an existing survey page context
+     // that already has an item with `.survey` in the story.
+     const context = await frame.context();
+     const frameItem = context?.page?.story?.find(item => item && item.survey);
+     if (!frameItem || !Array.isArray(frameItem.survey)) {
+         throw new Error('No existing survey array found in page context. Open this via a survey page frame.');
+     }
+
+     const survey = frameItem.survey;
+     const status = index.index(site, survey);
+     window.site.textContent = `${domain} ${status}`;
+
+     window.doupdate = async (event) => {
+         window.site.textContent = 'working';
+
+         const asof = new Date().toLocaleString();
+         const indexed = await index.update(site, survey, probe);
+
+         window.site.textContent = `${indexed.length} more pages indexed.`;
+
+         const story = [
+             { type: 'paragraph', text: `Survey results from ${asof}.` },
+             { type: 'html', text: format(survey) },
+             { type: 'reference', ...factory },
+             { type: 'frame', ...update, survey }
+         ];
+
+         if (summary) story.splice(1, 0, summary(survey));
+
+         frame.open({ title: pageTitle, story }, event.shiftKey);
+     };
+ } catch (err) {
+     console.error('update.html failed to initialize', err);
+     const msg = err && (err.stack || err.message) ? (err.stack || err.message) : String(err);
+     window.site.textContent = `ERROR: ${msg}`;
+     window.doupdate = () => alert('Update page failed to initialize. See console for details.');
+ }
+</script>

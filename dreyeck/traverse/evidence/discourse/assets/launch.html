@@ -1,0 +1,69 @@
+<button onclick="dolaunch(event)">launch</button> <span id="site"></span>
+
+<script type="module">
+ // Use HTTPS to avoid mixed-content blocking when this page is served over HTTPS.
+ const CODE_WIKI = 'https://discourse.dreyeck.ch';
+ const HOME = `${CODE_WIKI}/assets/pages/site-survey-factory`;
+
+ function defaultTitleFromModule(moduleName) {
+     return String(moduleName || '').replaceAll(/([a-z])([A-Z])/g, '$1 $2');
+ }
+
+ try {
+     const frame = await import(`${CODE_WIKI}/assets/v1/frame.js`);
+     const index = await import(`${CODE_WIKI}/assets/v1/index.js`);
+
+     const params = Object.fromEntries(new URLSearchParams(location.search).entries());
+     const moduleName = params['probe'] || 'ImageTagSurvey';
+
+     const neighbors = await frame.neighbors();
+     const domain = neighbors[0];
+
+     const probes = `${HOME}/probes`;
+
+     // Import probe module and honor optional exported title/resultTitle.
+     const mod = await import(`${probes}/${moduleName}.js`);
+     const { version, probe, format, summary } = mod;
+     const pageTitle = mod.title || mod.resultTitle || defaultTitleFromModule(moduleName);
+
+     window.site.textContent = `${pageTitle}: ${domain}`;
+
+     const update = {
+         text: `${HOME}/update.html?probe=${moduleName}&version=${version}&domain=${domain}\nHEIGHT 30`
+     };
+
+     const factory = {
+         site: 'code.fed.wiki',
+         slug: 'site-survey-factory',
+         title: 'Site Survey Factory',
+         text: 'Create and maintain a site survey by selecting and repeatedly applying a probe.'
+     };
+
+     window.dolaunch = async (event) => {
+         window.site.textContent = 'working';
+
+         const site = await index.site(domain);
+         const survey = [];
+         const asof = new Date().toLocaleString();
+
+         const indexed = await index.update(site, survey, probe);
+         window.site.textContent = `${indexed.length} of ${site.sitemap.length} pages indexed.`;
+
+         const story = [
+             { type: 'paragraph', text: `Survey results from ${asof}.` },
+             { type: 'html', text: format(survey) },
+             { type: 'reference', ...factory },
+             { type: 'frame', ...update, survey }
+         ];
+
+         if (summary) story.splice(1, 0, summary(survey));
+
+         frame.open({ title: pageTitle, story }, event.shiftKey);
+     };
+ } catch (err) {
+     console.error('launch.html failed to initialize', err);
+     const msg = err && (err.stack || err.message) ? (err.stack || err.message) : String(err);
+     window.site.textContent = `ERROR: ${msg}`;
+     window.dolaunch = () => alert('Launch page failed to initialize. See console for details.');
+ }
+</script>

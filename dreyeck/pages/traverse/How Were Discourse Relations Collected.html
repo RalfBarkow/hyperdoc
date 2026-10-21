@@ -1,0 +1,35 @@
+<html><head><title>How Were Discourse Relations Collected?</title></head><body><in-package>dreyeck/traverse</in-package><h1>How Were Discourse Relations Collected?</h1>
+<p>Two mechanisms read the same fold structure. The survey runs from time to time and stores its result in a Wiki page. EXTRACT reads the pages afresh each time its Mech block runs.</p>
+<h2>The survey: probe, store, read back</h2>
+<p><a href="https://discourse.dreyeck.ch/view/claim-link-survey-probe">Claim Link Survey Probe</a> (<a expr="(wiki-page-of &quot;discourse.dreyeck.ch&quot; &quot;claim-link-survey-probe&quot;)" view="Wiki page">retained</a>) holds <a expr="(dg-item &quot;claim-link-survey-probe&quot; &quot;9454d527598e4c32&quot;)" view="Story item">a frame</a> that launches the Site Survey Factory with <code>probe=ClaimLinkSurveyProbe</code>. <a expr="(dg-item &quot;claim-link-survey-probe&quot; &quot;22139cc15b83b317&quot;)" view="Story item">A code item</a> describes the record it produces for each page: folds, links by fold, and edges.</p>
+<p>The probe is a JavaScript module served by discourse.dreyeck.ch as an asset, not taken from Git:</p>
+<ul>
+<li><a expr="(discourse-source &quot;probe:analysePage&quot;)" view="Source definition">analysePage</a> walks the story and starts a new fold at each pagefold;</li>
+<li><a expr="(discourse-source &quot;probe:normalizeFoldName&quot;)" view="Source definition">normalizeFoldName</a> also accepts <code>objection</code>;</li>
+<li><a expr="(discourse-source &quot;probe:extractLinksFromItem&quot;)" view="Source definition">extractLinksFromItem</a> reads paragraph, markdown, html and reference items.</li>
+</ul>
+<p>Only a link inside a recognized fold becomes an edge, and an edge names slugs, not sites. <a expr="(discourse-source &quot;survey:update&quot;)" view="Source definition">The survey's update</a> applies the probe to the site's pages and opens a new page with the result, which an author then saves.</p>
+<p><a href="https://discourse.dreyeck.ch/view/claim-link-survey">Claim Link Survey</a> is that saved page, created on 2026-01-21. <a expr="(dg-item &quot;claim-link-survey&quot; &quot;99228553003555422208&quot;)" view="Story item">Its frame item</a> carries the survey array: 107 pages and 87 edges. In the Mech program, NEIGHBORS reads this array when the line <code>Claim Link Survey</code> is indented under it, and <a expr="(discourse-source &quot;upstream:neighbors_emit&quot;)" view="Source definition">neighbors_emit</a> merges each page's record into its sitemap entry.</p>
+<h2>EXTRACT: direct, at run time</h2>
+<p><a expr="(discourse-source &quot;composition:extract_emit&quot;)" view="Source definition">extract_emit</a> fetches every page of the neighborhood when it runs. <a expr="(discourse-source &quot;composition:extract_edges_from_story&quot;)" view="Source definition">extract_edges_from_story</a> then turns each link in a paragraph or reference item under a recognized fold into an edge from page to <code>site+slug</code>. Three helpers do the details:</p>
+<ul>
+<li><a expr="(discourse-source &quot;composition:normalize_fold&quot;)" view="Source definition">normalize_fold</a> and <a expr="(discourse-source &quot;composition:canonicalize_fold&quot;)" view="Source definition">canonicalize_fold</a> name the role;</li>
+<li><a expr="(discourse-source &quot;upstream:asSlug&quot;)" view="Source definition">Ward's asSlug</a> makes the slug.</li>
+</ul>
+<p>The edge records the page, the fold and the target. It does not record the story item; this reading finds that item again for each edge.</p>
+<h2>The same snapshot, three counts</h2>
+<p><a expr="(collection-comparison)">Compare the counts</a>:</p>
+<ul>
+<li><strong>Stored survey, 2026-01-21:</strong> 87 edges on 107 pages.</li>
+<li><strong>Probe, applied to the retained snapshot:</strong> 91 edges on 110 pages.</li>
+<li><strong>EXTRACT, on the same snapshot:</strong> 86 edges.</li>
+</ul>
+<p>Between the probe and EXTRACT, two rules explain every difference:</p>
+<ul>
+<li>Five probe edges come from markdown items, which EXTRACT does not read.</li>
+<li>Eight edges point at titles with a dash between spaces. asSlug turns "Popitz – Power Forms" into <code>popitz--power-forms</code>, while the probe collapses it to <code>popitz-power-forms</code>.</li>
+</ul>
+<p>The stored survey is older than the snapshot, so it differs from both for a third reason as well: the pages changed in between.</p>
+<p><a expr="(implementation-workspace)" view="Topicmap">The Implementation/Execution projection</a> holds the probe, EXTRACT and the comparison together.</p>
+<p>Previous: <a page="What Did Ward Propose?">What Did Ward Propose?</a>. Next: <a page="From WALK to TRAVERSE">From WALK to TRAVERSE</a>. Code pages: <a page="Wiki Pages Retained from the Experiment">Wiki Pages Retained from the Experiment</a> · <a page="Replaying Mech on the Retained Pages">Replaying Mech on the Retained Pages</a> · <a page="Experiment and Implementation Projections">Experiment and Implementation Projections</a>.</p>
+</body></html>

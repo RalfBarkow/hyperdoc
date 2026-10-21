@@ -1,0 +1,26 @@
+<html><head><title>What Did Ward Propose?</title></head><body><in-package>dreyeck/traverse</in-package><h1>What Did Ward Propose?</h1>
+<p>Ward Cunningham's page <a href="http://ward.dojo.fed.wiki/view/discourse-graphs">Discourse Graphs on ward.dojo.fed.wiki</a> starts the experiment. The page was written on 2025-11-21. This reading holds the version fetched on 2026-10-21 and checks its SHA-256 when it loads: <a expr="(wiki-page-of &quot;ward.dojo.fed.wiki&quot; &quot;discourse-graphs&quot;)" view="Wiki page">Ward's page as retained</a>. Links to a live Wiki open the current version, which may differ from the retained one.</p>
+<h2>A graph spread over cooperating sites</h2>
+<p>Ward's central sentence is <a expr="(wiki-item-of &quot;ward.dojo.fed.wiki&quot; &quot;discourse-graphs&quot; &quot;31bd93ad173f651c&quot;)" view="Story item">story item 31bd93ad173f651c</a>. He proposes the discourse graph "as a distributed graph across cooperating federated wiki sites". The schema lives in one page, Claim Template. Its PageFolds mark paragraphs and links as "question", "claim", "support" or "oppose".</p>
+<p><a expr="(wiki-item-of &quot;ward.dojo.fed.wiki&quot; &quot;discourse-graphs&quot; &quot;12bff3a6dc2858a9&quot;)" view="Story item">The next item</a> places the whole graph in the sitemaps. A link's type comes from the fold it sits in. A ClaimLinkSurvey would keep this classification up to date. <a expr="(wiki-item-of &quot;ward.dojo.fed.wiki&quot; &quot;discourse-graphs&quot; &quot;79996e4ee54798bc&quot;)" view="Story item">A third item</a> proposes browsing as an extension of Mech's WALK block: first assemble a neighborhood, then retrieve the most recent questions or claims as aspects.</p>
+<p><a expr="(wiki-item-of &quot;ward.dojo.fed.wiki&quot; &quot;discourse-graphs&quot; &quot;44fac82ef4111fc2&quot;)" view="Story item">His Mech program</a> says exactly that: <code>CLICK / NEIGHBORS / ClaimLinkSurvey / WALK 10 questions / WALK 30 claims / CLICK / SOLO</code>.</p>
+<h2>Three stages</h2>
+<p>Ward expected collaborative software to be hard to test without collaborators, so he proposed three stages:</p>
+<ol>
+<li><a expr="(wiki-item-of &quot;ward.dojo.fed.wiki&quot; &quot;discourse-graphs&quot; &quot;3609030d33cdc14c&quot;)" view="Story item">A pod of at least three collaborators</a>, the Claim Template, and a site for each.</li>
+<li><a expr="(wiki-item-of &quot;ward.dojo.fed.wiki&quot; &quot;discourse-graphs&quot; &quot;8e619a6f86d55cd5&quot;)" view="Story item">The Claim Link Survey Probe</a> and a weekly review of its results.</li>
+<li><a expr="(wiki-item-of &quot;ward.dojo.fed.wiki&quot; &quot;discourse-graphs&quot; &quot;688d96db5d86ef13&quot;)" view="Story item">Mech WALK functions</a>, once the pod holds ten questions and thirty claims.</li>
+</ol>
+<h2>Where it was taken up</h2>
+<p>The page was forked to <a href="https://discourse.dreyeck.ch/view/discourse-graphs">Discourse Graphs on discourse.dreyeck.ch</a>. <a expr="(first (page-forks (wiki-page-of &quot;discourse.dreyeck.ch&quot; &quot;discourse-graphs&quot;)))" view="Journal step">The journal's fork entry</a> names ward.dojo.fed.wiki and 2025-11-26. The fork keeps Ward's item ids, so <a expr="(dg-item &quot;discourse-graphs&quot; &quot;44fac82ef4111fc2&quot;)" view="Story item">the same Mech item</a> can be followed through every later edit. The page also adds a roster, a second program with TRAVERSE, and links to the pages that implement the stages.</p>
+<p><a href="https://discourse.dreyeck.ch/view/claim-template">Claim Template</a> was written on 2025-12-02: <a expr="(wiki-page-of &quot;discourse.dreyeck.ch&quot; &quot;claim-template&quot;)" view="Wiki page">the retained template</a>. <a expr="(dg-item &quot;claim-template&quot; &quot;3ddf39004dc76970&quot;)" view="Story item">Its notes</a> ask authors to keep the four fold names exactly and to put links inside paragraphs, "so surveys can classify edges".</p>
+<p><a expr="(experiment-workspace)" view="Topicmap">The Experiment/History projection</a> starts at Ward's sentence. It separates four kinds of association:</p>
+<ul>
+<li>links written in a page;</li>
+<li>journal history;</li>
+<li>edges derived from a fold;</li>
+<li>claims nobody has checked.</li>
+</ul>
+<p><a expr="(experiment-snapshot)" view="Snapshot">All retained pages and sources</a>.</p>
+<p>Next: <a page="How Were Discourse Relations Collected?">How Were Discourse Relations Collected?</a>. Code pages: <a page="Wiki Pages Retained from the Experiment">Wiki Pages Retained from the Experiment</a> · <a page="Replaying Mech on the Retained Pages">Replaying Mech on the Retained Pages</a> · <a page="Experiment and Implementation Projections">Experiment and Implementation Projections</a>. Technical reading: <a page="From Git Revision to Nix Package">From Git Revision to Nix Package</a>.</p>
+</body></html>

@@ -1,0 +1,25 @@
+<html><head><title>What Remains to Be Demonstrated?</title></head><body><in-package>dreyeck/traverse</in-package><h1>What Remains to Be Demonstrated?</h1>
+<p>Here Ward's three stages are measured against what the retained pages and the replay show. Anything that is not shown is named as open, not inferred.</p>
+<h2>Shown</h2>
+<ul>
+<li><a expr="(wiki-page-of &quot;discourse.dreyeck.ch&quot; &quot;claim-template&quot;)" view="Wiki page">The Claim Template</a> exists with the four folds, and other pages reuse its fold items. The claim fold of How I Use My Wiki has <a expr="(dg-item &quot;how-i-use-my-wiki&quot; &quot;29c28902048db774&quot;)" view="Story item">the template's item id</a>.</li>
+<li><a expr="(wiki-page-of &quot;discourse.dreyeck.ch&quot; &quot;claim-link-survey-probe&quot;)" view="Wiki page">The probe</a> exists. <a expr="(dg-item &quot;claim-link-survey&quot; &quot;99228553003555422208&quot;)" view="Story item">One survey was stored</a>, on 2026-01-21.</li>
+<li>WALK selects by role, and TRAVERSE follows typed edges from a page; both were replayed on the retained pages. <a expr="(claim-traversal)" view="Replay">A traversal with one resolved relation</a> was handed to SOLO.</li>
+<li>The deployed sites serve the bundle that was replayed: see <a page="What the Deployment Proves">What the Deployment Proves</a> and <a page="From Git Revision to Nix Package">From Git Revision to Nix Package</a>.</li>
+</ul>
+<h2>Not shown</h2>
+<ul>
+<li><strong>Collaboration across sites.</strong> Ward asked for "cooperating federated wiki sites". Every replay ran in one neighborhood, discourse.dreyeck.ch.
+  <ul>
+  <li><a expr="(discourse-source &quot;upstream:neighborhood&quot;)" view="Source definition">neighborhood(want)</a> keeps only domains that contain its argument, so <code>NEIGHBORS discourse</code> drops <a expr="(dg-item &quot;discourse-graphs&quot; &quot;bbaf2c391987718a&quot;)" view="Story item">the roster's</a> wow.dreyeck.ch.</li>
+  <li><a href="https://discourse.dreyeck.ch/view/zachs-lineup">Zach's Lineup</a> has 49 question links to wiki.planetnineisaspaceship.com. <a expr="(cross-site-question)" view="Replay">Computed from the recorded edges</a>, every one of those targets stays unresolved.</li>
+  </ul>
+  So <a expr="(federation-gap)" view="Open statement">processing across sites is not demonstrated</a>. It would need a concrete case: two cooperating sites in one neighborhood, a typed link from one to the other, and a resolved, traversed relation between them.</li>
+<li><strong>The pod and its cadence.</strong> The retained pages do not show three committed collaborators, a site for each, or weekly reviews.</li>
+<li><strong>The threshold of stage three.</strong> In the snapshot, 6 pages have links under a question fold and 3 under a claim fold, as the role WALK replay selects them. That is short of ten questions and thirty claims.</li>
+<li><strong>Behaviour in the browser.</strong> No observation of these Mech items running on the production Wiki was supplied. The replay shows what the bundle does with the retained bytes, not what a reader saw.</li>
+<li><strong>Claims about the subject matter.</strong> That a page answers a question stays <a expr="(answer-assertion)" view="Open statement">asserted, not verified</a>.</li>
+</ul>
+<p><a expr="(experiment-workspace)" view="Topicmap">The Experiment/History projection</a> ends both open questions in topics marked not demonstrated and asserted.</p>
+<p>Previous: <a page="Reading an Actual Discourse Graph">Reading an Actual Discourse Graph</a>. Start: <a page="What Did Ward Propose?">What Did Ward Propose?</a>. Code pages: <a page="Wiki Pages Retained from the Experiment">Wiki Pages Retained from the Experiment</a> · <a page="Replaying Mech on the Retained Pages">Replaying Mech on the Retained Pages</a> · <a page="Experiment and Implementation Projections">Experiment and Implementation Projections</a>.</p>
+</body></html>

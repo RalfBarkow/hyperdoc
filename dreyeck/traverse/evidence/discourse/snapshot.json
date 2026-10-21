@@ -1,0 +1,1454 @@
+{
+ "kind": "discourse-snapshot/1",
+ "retained": "2026-10-21",
+ "method": "plain HTTP GET without credentials, one request per file, by a Claude Code session; nothing was written",
+ "note": "A snapshot of the versions served at fetch time. The live wiki may differ; links to it are not retained evidence.",
+ "neighborhood": {
+  "site": "discourse.dreyeck.ch",
+  "pages": 110
+ },
+ "files": [
+  {
+   "file": "ward/discourse-graphs.json",
+   "kind": "page",
+   "url": "http://ward.dojo.fed.wiki/discourse-graphs.json",
+   "fetchedAt": "2026-10-21T06:23:48Z",
+   "httpStatus": 200,
+   "bytes": 9856,
+   "sha256": "c0df047f3e35de42f3063c82eb8a90ea626a0aae603df20d6e8f8100bcbcdfa0",
+   "site": "ward.dojo.fed.wiki",
+   "slug": "discourse-graphs"
+  },
+  {
+   "file": "sitemap.json",
+   "kind": "sitemap",
+   "url": "https://discourse.dreyeck.ch/system/sitemap.json",
+   "fetchedAt": "2026-10-21T06:23:57Z",
+   "httpStatus": 200,
+   "bytes": 51262,
+   "sha256": "09249c16aed6bdb475f1777bab719ce7d8b9d4dad88dbf00b56bd9fac0afceca",
+   "site": "discourse.dreyeck.ch"
+  },
+  {
+   "file": "site/a-mentoring-course-on-smalltalk.json",
+   "kind": "page",
+   "url": "https://discourse.dreyeck.ch/a-mentoring-course-on-smalltalk.json",
+   "fetchedAt": "2026-10-21T06:25:45Z",
+   "httpStatus": 200,
+   "bytes": 202813,
+   "sha256": "0143fb487d85cc778c3ad0dddf358753334c9e7ce8d6f88cc0c27af2b573d0db",
+   "site": "discourse.dreyeck.ch",
+   "slug": "a-mentoring-course-on-smalltalk"
+  },
+  {
+   "file": "site/a-new-kind-of-renaissance.json",
+   "kind": "page",
+   "url": "https://discourse.dreyeck.ch/a-new-kind-of-renaissance.json",
+   "fetchedAt": "2026-10-21T06:25:46Z",
+   "httpStatus": 200,
+   "bytes": 32652,
+   "sha256": "fefe775feb35fba5b99546ab744d06fc690c4d769e386a652c184c16d8bfafb6",
+   "site": "discourse.dreyeck.ch",
+   "slug": "a-new-kind-of-renaissance"
+  },
+  {
+   "file": "site/a-wiki-page-can-represent-a-claim.json",
+   "kind": "page",
+   "url": "https://discourse.dreyeck.ch/a-wiki-page-can-represent-a-claim.json",
+   "fetchedAt": "2026-10-21T06:26:26Z",
+   "httpStatus": 200,
+   "bytes": 758,
+   "sha256": "312c456ace2beae05167cf39fd82700a81148672408ef2cf4a7e072304bd5524",
+   "site": "discourse.dreyeck.ch",
+   "slug": "a-wiki-page-can-represent-a-claim"
+  },
+  {
+   "file": "site/aesthetic-theory-questions.json",
+   "kind": "page",
+   "url": "https://discourse.dreyeck.ch/aesthetic-theory-questions.json",
+   "fetchedAt": "2026-10-21T06:25:46Z",
+   "httpStatus": 200,
+   "bytes": 17883,
+   "sha256": "7efe79560f8f7eed8a7fca8d74a13d26388595ce3d4ff55ffd092c6e6f637e0e",
+   "site": "discourse.dreyeck.ch",
+   "slug": "aesthetic-theory-questions"
+  },
+  {
+   "file": "site/agency-as-model-maintenance-and-model-change.json",
+   "kind": "page",
+   "url": "https://discourse.dreyeck.ch/agency-as-model-maintenance-and-model-change.json",
+   "fetchedAt": "2026-10-21T06:25:46Z",
+   "httpStatus": 200,
+   "bytes": 26364,
+   "sha256": "bfaf8218ae6a2b57363c80545d19ca48417826d18747076f92f89c1b669efc59",
+   "site": "discourse.dreyeck.ch",
+   "slug": "agency-as-model-maintenance-and-model-change"
+  },
+  {
+   "file": "site/algorithmic-forgetting-and-the-right-to-be-forgotten.json",
+   "kind": "page",
+   "url": "https://discourse.dreyeck.ch/algorithmic-forgetting-and-the-right-to-be-forgotten.json",
+   "fetchedAt": "2026-10-21T06:25:47Z",
+   "httpStatus": 200,
+   "bytes": 24105,
+   "sha256": "f00995efc5204475ba9e2746d49addb523700ae19c14e883c08590a5e0782618",
+   "site": "discourse.dreyeck.ch",
+   "slug": "algorithmic-forgetting-and-the-right-to-be-forgotten"
+  },
+  {
+   "file": "site/archology-of-media.json",
+   "kind": "page",
+   "url": "https://discourse.dreyeck.ch/archology-of-media.json",
+   "fetchedAt": "2026-10-21T06:25:47Z",
+   "httpStatus": 200,
+   "bytes": 4001,
+   "sha256": "724bd234da2ffa04d30b4d97e23954ace66c89d6eecc9942ea638481a7238ae2",
+   "site": "discourse.dreyeck.ch",
+   "slug": "archology-of-media"
+  },
+  {
+   "file": "site/autopoiesis-of-society-in-the-medium-of-games.json",
+   "kind": "page",
+   "url": "https://discourse.dreyeck.ch/autopoiesis-of-society-in-the-medium-of-games.json",
+   "fetchedAt": "2026-10-21T06:25:48Z",
+   "httpStatus": 200,
+   "bytes": 9843,
+   "sha256": "e83700c3e6eced6c93aa1aa3c7a0d25778f850e40d1ea740bb1a595bc9898b77",
+   "site": "discourse.dreyeck.ch",
+   "slug": "autopoiesis-of-society-in-the-medium-of-games"
+  },
+  {
+   "file": "site/awe.json",
+   "kind": "page",
+   "url": "https://discourse.dreyeck.ch/awe.json",
+   "fetchedAt": "2026-10-21T06:25:48Z",
+   "httpStatus": 200,
+   "bytes": 2010,
+   "sha256": "0fff43055cec6bc3449f08c656c4fa2b0fa6aa55cc229ec1058c52c6c554b314",
+   "site": "discourse.dreyeck.ch",
+   "slug": "awe"
+  },
+  {
+   "file": "site/can-a-wiki-page-represent-a-claim.json",
+   "kind": "page",
+   "url": "https://discourse.dreyeck.ch/can-a-wiki-page-represent-a-claim.json",
+   "fetchedAt": "2026-10-21T06:26:26Z",
+   "httpStatus": 200,
+   "bytes": 1753,
+   "sha256": "2e2102538601471441c695da14fb57217608b584dfd13e1a6a7351c6581c4ab5",
+   "site": "discourse.dreyeck.ch",
+   "slug": "can-a-wiki-page-represent-a-claim"
+  },
+  {
+   "file": "site/caring-for-your-data.json",
+   "kind": "page",
+   "url": "https://discourse.dreyeck.ch/caring-for-your-data.json",
+   "fetchedAt": "2026-10-21T06:25:48Z",
+   "httpStatus": 200,
+   "bytes": 10754,
+   "sha256": "c2c0af82a6fdfe3f22d201891ae95423d27fb691fbcb03cbead5ec0e9bd8760e",
+   "site": "discourse.dreyeck.ch",
+   "slug": "caring-for-your-data"
+  },
+  {
+   "file": "site/catalog-of-mech-blocks.json",
+   "kind": "page",
+   "url": "https://discourse.dreyeck.ch/catalog-of-mech-blocks.json",
+   "fetchedAt": "2026-10-21T06:25:49Z",
+   "httpStatus": 200,
+   "bytes": 15991,
+   "sha256": "b1cac8c24f44aaab0f39e79fcd6623f3c35b4416466dd4b4564b24912675f418",
+   "site": "discourse.dreyeck.ch",
+   "slug": "catalog-of-mech-blocks"
+  },
+  {
+   "file": "site/catalog-of-survey-probes.json",
+   "kind": "page",
+   "url": "https://discourse.dreyeck.ch/catalog-of-survey-probes.json",
+   "fetchedAt": "2026-10-21T06:25:49Z",
+   "httpStatus": 200,
+   "bytes": 8495,
+   "sha256": "9c60dc90560467f7633cad4284103ecc81473b9742f6ddf7cd208b5ab75a9491",
+   "site": "discourse.dreyeck.ch",
+   "slug": "catalog-of-survey-probes"
+  },
+  {
+   "file": "site/claim-link-survey-probe.json",
+   "kind": "page",
+   "url": "https://discourse.dreyeck.ch/claim-link-survey-probe.json",
+   "fetchedAt": "2026-10-21T06:25:50Z",
+   "httpStatus": 200,
+   "bytes": 265929,
+   "sha256": "1efec8784fbad81f4372b9059c165d6eb0cfe458253343332e870f0efd6b4ed1",
+   "site": "discourse.dreyeck.ch",
+   "slug": "claim-link-survey-probe"
+  },
+  {
+   "file": "site/claim-link-survey-results.json",
+   "kind": "page",
+   "url": "https://discourse.dreyeck.ch/claim-link-survey-results.json",
+   "fetchedAt": "2026-10-21T06:25:50Z",
+   "httpStatus": 200,
+   "bytes": 12170,
+   "sha256": "7694c3b49cc57f8a9d4a55d034b1e1d782b57982c2cc0c5f078c57ff5698eda2",
+   "site": "discourse.dreyeck.ch",
+   "slug": "claim-link-survey-results"
+  },
+  {
+   "file": "site/claim-link-survey.json",
+   "kind": "page",
+   "url": "https://discourse.dreyeck.ch/claim-link-survey.json",
+   "fetchedAt": "2026-10-21T06:25:49Z",
+   "httpStatus": 200,
+   "bytes": 160230,
+   "sha256": "168a5fe17d35d623eb6dbbbe8e496dd5998b319628220a8aef55f0f5a6a4eeb6",
+   "site": "discourse.dreyeck.ch",
+   "slug": "claim-link-survey"
+  },
+  {
+   "file": "site/claim-template.json",
+   "kind": "page",
+   "url": "https://discourse.dreyeck.ch/claim-template.json",
+   "fetchedAt": "2026-10-21T06:25:51Z",
+   "httpStatus": 200,
+   "bytes": 20570,
+   "sha256": "06df1b48156d7ec0e03696ef0f75b77d983de9fb6e667262205b4f9ab6675142",
+   "site": "discourse.dreyeck.ch",
+   "slug": "claim-template"
+  },
+  {
+   "file": "site/communication-with-an-artificial-partner.json",
+   "kind": "page",
+   "url": "https://discourse.dreyeck.ch/communication-with-an-artificial-partner.json",
+   "fetchedAt": "2026-10-21T06:25:51Z",
+   "httpStatus": 200,
+   "bytes": 49179,
+   "sha256": "565409752be38635d9ca71cc77a9c251e0f6fee89df188ae7f8882d36a1bb8ee",
+   "site": "discourse.dreyeck.ch",
+   "slug": "communication-with-an-artificial-partner"
+  },
+  {
+   "file": "site/complexity-rent-toolkit.json",
+   "kind": "page",
+   "url": "https://discourse.dreyeck.ch/complexity-rent-toolkit.json",
+   "fetchedAt": "2026-10-21T06:25:51Z",
+   "httpStatus": 200,
+   "bytes": 39963,
+   "sha256": "3b6b6eae94b843726e6303bc814a518dd55ac48caddfc1cce75d5367e5b29a73",
+   "site": "discourse.dreyeck.ch",
+   "slug": "complexity-rent-toolkit"
+  },
+  {
+   "file": "site/culture-as-widerstreit-against-society.json",
+   "kind": "page",
+   "url": "https://discourse.dreyeck.ch/culture-as-widerstreit-against-society.json",
+   "fetchedAt": "2026-10-21T06:25:52Z",
+   "httpStatus": 200,
+   "bytes": 77199,
+   "sha256": "199465fda68b698d9096598ce08212b4d1dc8c8c45c4391eb87ee817d9e97aa7",
+   "site": "discourse.dreyeck.ch",
+   "slug": "culture-as-widerstreit-against-society"
+  },
+  {
+   "file": "site/design-principles-behind-smalltalk.json",
+   "kind": "page",
+   "url": "https://discourse.dreyeck.ch/design-principles-behind-smalltalk.json",
+   "fetchedAt": "2026-10-21T06:25:52Z",
+   "httpStatus": 200,
+   "bytes": 26880,
+   "sha256": "558c73343dcb0692bb14a0cbefa1ac8259149fd3587081620a1a98fc1b5f9108",
+   "site": "discourse.dreyeck.ch",
+   "slug": "design-principles-behind-smalltalk"
+  },
+  {
+   "file": "site/discourse-graphs.json",
+   "kind": "page",
+   "url": "https://discourse.dreyeck.ch/discourse-graphs.json",
+   "fetchedAt": "2026-10-21T06:25:53Z",
+   "httpStatus": 200,
+   "bytes": 24083,
+   "sha256": "f0e82d2cfe1750a3c110373a82be1e87973c7f45fa7d9f0053e1d096646e40dc",
+   "site": "discourse.dreyeck.ch",
+   "slug": "discourse-graphs"
+  },
+  {
+   "file": "site/ecotones-of-cooperation.json",
+   "kind": "page",
+   "url": "https://discourse.dreyeck.ch/ecotones-of-cooperation.json",
+   "fetchedAt": "2026-10-21T06:25:53Z",
+   "httpStatus": 200,
+   "bytes": 41658,
+   "sha256": "2a4dad480238de2833a014f9d0e605c9bc383ee2bab94b4bb6500b7930caf678",
+   "site": "discourse.dreyeck.ch",
+   "slug": "ecotones-of-cooperation"
+  },
+  {
+   "file": "site/endless-accumulation.json",
+   "kind": "page",
+   "url": "https://discourse.dreyeck.ch/endless-accumulation.json",
+   "fetchedAt": "2026-10-21T06:25:53Z",
+   "httpStatus": 200,
+   "bytes": 39418,
+   "sha256": "38807611bce1d6f932cd634e8b58b8d78909bb800b349ac93001c38d6d98e5a8",
+   "site": "discourse.dreyeck.ch",
+   "slug": "endless-accumulation"
+  },
+  {
+   "file": "site/endless-payments.json",
+   "kind": "page",
+   "url": "https://discourse.dreyeck.ch/endless-payments.json",
+   "fetchedAt": "2026-10-21T06:25:54Z",
+   "httpStatus": 200,
+   "bytes": 13644,
+   "sha256": "470173030f782fabb2adb6b683eb189fdffa0e74a3ea710b0e4c07ac55ce2f1c",
+   "site": "discourse.dreyeck.ch",
+   "slug": "endless-payments"
+  },
+  {
+   "file": "site/epistemic-quine.json",
+   "kind": "page",
+   "url": "https://discourse.dreyeck.ch/epistemic-quine.json",
+   "fetchedAt": "2026-10-21T06:25:54Z",
+   "httpStatus": 200,
+   "bytes": 19475,
+   "sha256": "4adb1ddb974ad0a756fb8d183acf64b6c30cbaf19a7052aafebda5bf540aa81d",
+   "site": "discourse.dreyeck.ch",
+   "slug": "epistemic-quine"
+  },
+  {
+   "file": "site/falsifier.json",
+   "kind": "page",
+   "url": "https://discourse.dreyeck.ch/falsifier.json",
+   "fetchedAt": "2026-10-21T06:25:55Z",
+   "httpStatus": 200,
+   "bytes": 2297,
+   "sha256": "5a46fcaeca5ed4779e4d00b5451e4b288167d11714ba5a5fa1121bc6199d7910",
+   "site": "discourse.dreyeck.ch",
+   "slug": "falsifier"
+  },
+  {
+   "file": "site/from-gabor-memory-to-self-organizing-maps.json",
+   "kind": "page",
+   "url": "https://discourse.dreyeck.ch/from-gabor-memory-to-self-organizing-maps.json",
+   "fetchedAt": "2026-10-21T06:25:55Z",
+   "httpStatus": 200,
+   "bytes": 51474,
+   "sha256": "ad643376f1a17cc7942806feaee47c0457f5201a37083f2f8b9cb923edc65d55",
+   "site": "discourse.dreyeck.ch",
+   "slug": "from-gabor-memory-to-self-organizing-maps"
+  },
+  {
+   "file": "site/from-zettelkasten-to-algorithmic-forgetting.json",
+   "kind": "page",
+   "url": "https://discourse.dreyeck.ch/from-zettelkasten-to-algorithmic-forgetting.json",
+   "fetchedAt": "2026-10-21T06:25:55Z",
+   "httpStatus": 200,
+   "bytes": 8882,
+   "sha256": "03d1c1b3c0458a70476b392c43fb1df84f9b9ca1d9d7c0dbc8a30326b86f25a7",
+   "site": "discourse.dreyeck.ch",
+   "slug": "from-zettelkasten-to-algorithmic-forgetting"
+  },
+  {
+   "file": "site/gekrnkte-freiheit.json",
+   "kind": "page",
+   "url": "https://discourse.dreyeck.ch/gekrnkte-freiheit.json",
+   "fetchedAt": "2026-10-21T06:25:56Z",
+   "httpStatus": 200,
+   "bytes": 10035,
+   "sha256": "e777404dd105c38cbbe89b735fc9214e2dc299174dad597859664283051b8adc",
+   "site": "discourse.dreyeck.ch",
+   "slug": "gekrnkte-freiheit"
+  },
+  {
+   "file": "site/giving-sense-to-the-senseless.json",
+   "kind": "page",
+   "url": "https://discourse.dreyeck.ch/giving-sense-to-the-senseless.json",
+   "fetchedAt": "2026-10-21T06:25:56Z",
+   "httpStatus": 200,
+   "bytes": 24029,
+   "sha256": "658fde40effcf7fa700350532b3326d02bf708a10d0022a17e7d2aec4e31e4ca",
+   "site": "discourse.dreyeck.ch",
+   "slug": "giving-sense-to-the-senseless"
+  },
+  {
+   "file": "site/graphviz-json-output-a-falsified-limitation-claim.json",
+   "kind": "page",
+   "url": "https://discourse.dreyeck.ch/graphviz-json-output-a-falsified-limitation-claim.json",
+   "fetchedAt": "2026-10-21T06:25:56Z",
+   "httpStatus": 200,
+   "bytes": 19830,
+   "sha256": "f384adf64edd744e622ed02c3ed1517f01309d1a504bbc75704d1138ab36350f",
+   "site": "discourse.dreyeck.ch",
+   "slug": "graphviz-json-output-a-falsified-limitation-claim"
+  },
+  {
+   "file": "site/how-i-use-my-wiki.json",
+   "kind": "page",
+   "url": "https://discourse.dreyeck.ch/how-i-use-my-wiki.json",
+   "fetchedAt": "2026-10-21T06:25:57Z",
+   "httpStatus": 200,
+   "bytes": 24244,
+   "sha256": "d028420f303d4d00a6c3ddc0c2e2c27bc43e47ebb4896e7516dc11a5dacc8fa7",
+   "site": "discourse.dreyeck.ch",
+   "slug": "how-i-use-my-wiki"
+  },
+  {
+   "file": "site/how-we-survey-pages.json",
+   "kind": "page",
+   "url": "https://discourse.dreyeck.ch/how-we-survey-pages.json",
+   "fetchedAt": "2026-10-21T06:25:57Z",
+   "httpStatus": 200,
+   "bytes": 29765,
+   "sha256": "65b30cb7318c686459a35d0355623ae195300ea9b302d4057d550457d97f27a4",
+   "site": "discourse.dreyeck.ch",
+   "slug": "how-we-survey-pages"
+  },
+  {
+   "file": "site/ibis-discourse.json",
+   "kind": "page",
+   "url": "https://discourse.dreyeck.ch/ibis-discourse.json",
+   "fetchedAt": "2026-10-21T06:25:58Z",
+   "httpStatus": 200,
+   "bytes": 3798,
+   "sha256": "fa4b2e6fdd06c1f2e9fb8d24f2db432eab8f7962a7b08967a836557ec7279505",
+   "site": "discourse.dreyeck.ch",
+   "slug": "ibis-discourse"
+  },
+  {
+   "file": "site/journal-fork-survey.json",
+   "kind": "page",
+   "url": "https://discourse.dreyeck.ch/journal-fork-survey.json",
+   "fetchedAt": "2026-10-21T06:25:58Z",
+   "httpStatus": 200,
+   "bytes": 30498,
+   "sha256": "66e89ebc03925e0160a183a4dcb1c0d956a6d4996ade92abd0321fac0587cd77",
+   "site": "discourse.dreyeck.ch",
+   "slug": "journal-fork-survey"
+  },
+  {
+   "file": "site/konrad-hinsen.json",
+   "kind": "page",
+   "url": "https://discourse.dreyeck.ch/konrad-hinsen.json",
+   "fetchedAt": "2026-10-21T06:25:58Z",
+   "httpStatus": 200,
+   "bytes": 10559,
+   "sha256": "871adcab4d1857596034c9fc687241f2a442864d90f1a8728739df1b4024396d",
+   "site": "discourse.dreyeck.ch",
+   "slug": "konrad-hinsen"
+  },
+  {
+   "file": "site/kula-ring-as-better-model-for-open-source.json",
+   "kind": "page",
+   "url": "https://discourse.dreyeck.ch/kula-ring-as-better-model-for-open-source.json",
+   "fetchedAt": "2026-10-21T06:25:59Z",
+   "httpStatus": 200,
+   "bytes": 77220,
+   "sha256": "c2b8e8da05d214094b1905b050808f1190c0c88d7af43c42f54d45622c944b10",
+   "site": "discourse.dreyeck.ch",
+   "slug": "kula-ring-as-better-model-for-open-source"
+  },
+  {
+   "file": "site/legitimation-durch-verfahren-and-the-anti-archimedean-protocol.json",
+   "kind": "page",
+   "url": "https://discourse.dreyeck.ch/legitimation-durch-verfahren-and-the-anti-archimedean-protocol.json",
+   "fetchedAt": "2026-10-21T06:25:59Z",
+   "httpStatus": 200,
+   "bytes": 19801,
+   "sha256": "8f7d81c60ee052bf91dd96de44d468f18d705a18da903cea97ef0cb81ef07ac5",
+   "site": "discourse.dreyeck.ch",
+   "slug": "legitimation-durch-verfahren-and-the-anti-archimedean-protocol"
+  },
+  {
+   "file": "site/legitimation-without-consensus.json",
+   "kind": "page",
+   "url": "https://discourse.dreyeck.ch/legitimation-without-consensus.json",
+   "fetchedAt": "2026-10-21T06:26:00Z",
+   "httpStatus": 200,
+   "bytes": 33054,
+   "sha256": "62e9c34e208fd078c72691533f775b4a47e83d792442871064b488d81e2b9f23",
+   "site": "discourse.dreyeck.ch",
+   "slug": "legitimation-without-consensus"
+  },
+  {
+   "file": "site/levers-in-the-ai-political-economy.json",
+   "kind": "page",
+   "url": "https://discourse.dreyeck.ch/levers-in-the-ai-political-economy.json",
+   "fetchedAt": "2026-10-21T06:26:00Z",
+   "httpStatus": 200,
+   "bytes": 69168,
+   "sha256": "b942f9a5594703f6ef100be518f405d1d17439a9c4f9f25c7cd225cf8cbd7e70",
+   "site": "discourse.dreyeck.ch",
+   "slug": "levers-in-the-ai-political-economy"
+  },
+  {
+   "file": "site/levin-and-friston-chat.json",
+   "kind": "page",
+   "url": "https://discourse.dreyeck.ch/levin-and-friston-chat.json",
+   "fetchedAt": "2026-10-21T06:26:00Z",
+   "httpStatus": 200,
+   "bytes": 32261,
+   "sha256": "140abea5f947e2dbeff63add53f86cb820a17a4981ff80d4cbae518910eb5060",
+   "site": "discourse.dreyeck.ch",
+   "slug": "levin-and-friston-chat"
+  },
+  {
+   "file": "site/luhmann-vertrauen.json",
+   "kind": "page",
+   "url": "https://discourse.dreyeck.ch/luhmann-vertrauen.json",
+   "fetchedAt": "2026-10-21T06:26:01Z",
+   "httpStatus": 200,
+   "bytes": 732,
+   "sha256": "1a62c80f9a59dbed8e55ac3d11ce0ad0460baea1f750d234b7e01b7b3d32de96",
+   "site": "discourse.dreyeck.ch",
+   "slug": "luhmann-vertrauen"
+  },
+  {
+   "file": "site/macht-and-recht-popitz-festschrift.json",
+   "kind": "page",
+   "url": "https://discourse.dreyeck.ch/macht-and-recht-popitz-festschrift.json",
+   "fetchedAt": "2026-10-21T06:26:01Z",
+   "httpStatus": 200,
+   "bytes": 23479,
+   "sha256": "9a2d1f4ce0cc931ad4e64ec70e4d9c4d9ffc20aa77ac9fadfa69379b694a14d5",
+   "site": "discourse.dreyeck.ch",
+   "slug": "macht-and-recht-popitz-festschrift"
+  },
+  {
+   "file": "site/make-uptake-inspectable.json",
+   "kind": "page",
+   "url": "https://discourse.dreyeck.ch/make-uptake-inspectable.json",
+   "fetchedAt": "2026-10-21T06:26:01Z",
+   "httpStatus": 200,
+   "bytes": 6422,
+   "sha256": "5b07d182e3e3db8e7756050c23e4445d2f560b8fb046f518fa9603f9f4bfdde1",
+   "site": "discourse.dreyeck.ch",
+   "slug": "make-uptake-inspectable"
+  },
+  {
+   "file": "site/maschinensturm-ki-3.json",
+   "kind": "page",
+   "url": "https://discourse.dreyeck.ch/maschinensturm-ki-3.json",
+   "fetchedAt": "2026-10-21T06:26:02Z",
+   "httpStatus": 200,
+   "bytes": 1573,
+   "sha256": "ee77d10c023cfee5457befce03f495fbe8598d96cd957b941e09a9046722290b",
+   "site": "discourse.dreyeck.ch",
+   "slug": "maschinensturm-ki-3"
+  },
+  {
+   "file": "site/misreading-by-extraction.json",
+   "kind": "page",
+   "url": "https://discourse.dreyeck.ch/misreading-by-extraction.json",
+   "fetchedAt": "2026-10-21T06:26:02Z",
+   "httpStatus": 200,
+   "bytes": 45610,
+   "sha256": "beb16555d2c8f4eebedaeefc14a9e82c64d6f0b08b374a7c5f57b4c91625ca50",
+   "site": "discourse.dreyeck.ch",
+   "slug": "misreading-by-extraction"
+  },
+  {
+   "file": "site/monadic-exploration.json",
+   "kind": "page",
+   "url": "https://discourse.dreyeck.ch/monadic-exploration.json",
+   "fetchedAt": "2026-10-21T06:26:02Z",
+   "httpStatus": 200,
+   "bytes": 7436,
+   "sha256": "3e874e56b0811ff9dda66517d84f59042a5ac2cbd86115f7c7965db0544302b3",
+   "site": "discourse.dreyeck.ch",
+   "slug": "monadic-exploration"
+  },
+  {
+   "file": "site/moral-responsibility-under-totalitarian-dictatorships.json",
+   "kind": "page",
+   "url": "https://discourse.dreyeck.ch/moral-responsibility-under-totalitarian-dictatorships.json",
+   "fetchedAt": "2026-10-21T06:26:03Z",
+   "httpStatus": 200,
+   "bytes": 39507,
+   "sha256": "7b9f5326f02bc673662bdd687edc4e929f0d9393d5c44a89acd5e5ee549fe3f9",
+   "site": "discourse.dreyeck.ch",
+   "slug": "moral-responsibility-under-totalitarian-dictatorships"
+  },
+  {
+   "file": "site/most-visible-federation.json",
+   "kind": "page",
+   "url": "https://discourse.dreyeck.ch/most-visible-federation.json",
+   "fetchedAt": "2026-10-21T06:26:03Z",
+   "httpStatus": 200,
+   "bytes": 14124,
+   "sha256": "b52c4fe498b273ce1a537b7e97fd0f397f2338e853d1630afc916209db879348",
+   "site": "discourse.dreyeck.ch",
+   "slug": "most-visible-federation"
+  },
+  {
+   "file": "site/narrative-charts-tell-the-tale.json",
+   "kind": "page",
+   "url": "https://discourse.dreyeck.ch/narrative-charts-tell-the-tale.json",
+   "fetchedAt": "2026-10-21T06:26:04Z",
+   "httpStatus": 200,
+   "bytes": 1846,
+   "sha256": "634779cc73ce12b6901461afa005e5c51611e90796dd40a93387fe624b2ff3cb",
+   "site": "discourse.dreyeck.ch",
+   "slug": "narrative-charts-tell-the-tale"
+  },
+  {
+   "file": "site/narrative-path.json",
+   "kind": "page",
+   "url": "https://discourse.dreyeck.ch/narrative-path.json",
+   "fetchedAt": "2026-10-21T06:26:04Z",
+   "httpStatus": 200,
+   "bytes": 17662,
+   "sha256": "6ced199d1eaab1833c99e4f926eeb4c496197d5479461325102e494a664822b2",
+   "site": "discourse.dreyeck.ch",
+   "slug": "narrative-path"
+  },
+  {
+   "file": "site/narrative-walk.json",
+   "kind": "page",
+   "url": "https://discourse.dreyeck.ch/narrative-walk.json",
+   "fetchedAt": "2026-10-21T06:26:04Z",
+   "httpStatus": 200,
+   "bytes": 1657,
+   "sha256": "ac79ec820a2135387fb9164071f4dcdd7965f230af205c2b9d29aa9077b9fc0b",
+   "site": "discourse.dreyeck.ch",
+   "slug": "narrative-walk"
+  },
+  {
+   "file": "site/narrative-walks.json",
+   "kind": "page",
+   "url": "https://discourse.dreyeck.ch/narrative-walks.json",
+   "fetchedAt": "2026-10-21T06:26:05Z",
+   "httpStatus": 200,
+   "bytes": 34053,
+   "sha256": "6b317248dc51e37ef6516830afbd099374e2c9f6639cd043e4461a363894aff6",
+   "site": "discourse.dreyeck.ch",
+   "slug": "narrative-walks"
+  },
+  {
+   "file": "site/negation.json",
+   "kind": "page",
+   "url": "https://discourse.dreyeck.ch/negation.json",
+   "fetchedAt": "2026-10-21T06:26:05Z",
+   "httpStatus": 200,
+   "bytes": 33466,
+   "sha256": "64318523317bafe22e4fd0233dd881731211c1400126b606fdd457667eb09d4a",
+   "site": "discourse.dreyeck.ch",
+   "slug": "negation"
+  },
+  {
+   "file": "site/negative-language-and-reflexion-stories.json",
+   "kind": "page",
+   "url": "https://discourse.dreyeck.ch/negative-language-and-reflexion-stories.json",
+   "fetchedAt": "2026-10-21T06:26:05Z",
+   "httpStatus": 200,
+   "bytes": 4071,
+   "sha256": "7882886215ba8358e76d515b33bcedb26de410267b0b65a1a57a3a6294bd0747",
+   "site": "discourse.dreyeck.ch",
+   "slug": "negative-language-and-reflexion-stories"
+  },
+  {
+   "file": "site/new-aspects-for-solo.json",
+   "kind": "page",
+   "url": "https://discourse.dreyeck.ch/new-aspects-for-solo.json",
+   "fetchedAt": "2026-10-21T06:26:06Z",
+   "httpStatus": 200,
+   "bytes": 24342,
+   "sha256": "96939c658436b01746b4359bafa5e3fe2e98febe735920869bc91e8fabe71150",
+   "site": "discourse.dreyeck.ch",
+   "slug": "new-aspects-for-solo"
+  },
+  {
+   "file": "site/non-inspectable-interaction.json",
+   "kind": "page",
+   "url": "https://discourse.dreyeck.ch/non-inspectable-interaction.json",
+   "fetchedAt": "2026-10-21T06:26:06Z",
+   "httpStatus": 200,
+   "bytes": 4647,
+   "sha256": "2d7a257e4fcf6a6b0704b0bbfc6c7d22c4d32b526749cf23f27dcc08fc7be8e8",
+   "site": "discourse.dreyeck.ch",
+   "slug": "non-inspectable-interaction"
+  },
+  {
+   "file": "site/observers-among-themselves-as-culture-theory.json",
+   "kind": "page",
+   "url": "https://discourse.dreyeck.ch/observers-among-themselves-as-culture-theory.json",
+   "fetchedAt": "2026-10-21T06:26:06Z",
+   "httpStatus": 200,
+   "bytes": 23748,
+   "sha256": "4604ee3cfaccd9da2d03ef4e5cd39f2cd65e2744bb7ae178cbb7377ab9aaabe2",
+   "site": "discourse.dreyeck.ch",
+   "slug": "observers-among-themselves-as-culture-theory"
+  },
+  {
+   "file": "site/observers-as-black-boxes.json",
+   "kind": "page",
+   "url": "https://discourse.dreyeck.ch/observers-as-black-boxes.json",
+   "fetchedAt": "2026-10-21T06:26:07Z",
+   "httpStatus": 200,
+   "bytes": 3969,
+   "sha256": "d8c01938764cb8062a60937f0bf8081578aa86f16b7756e85f1d96547a4d477a",
+   "site": "discourse.dreyeck.ch",
+   "slug": "observers-as-black-boxes"
+  },
+  {
+   "file": "site/on-graeber-potlatch--gift-economies-e13.json",
+   "kind": "page",
+   "url": "https://discourse.dreyeck.ch/on-graeber-potlatch--gift-economies-e13.json",
+   "fetchedAt": "2026-10-21T06:26:07Z",
+   "httpStatus": 200,
+   "bytes": 94418,
+   "sha256": "9119de36e9b5a886a0eb3da0cb46af899141cea3f175f5d9348c00de6c2a65d9",
+   "site": "discourse.dreyeck.ch",
+   "slug": "on-graeber-potlatch--gift-economies-e13"
+  },
+  {
+   "file": "site/on-the-three-economies-e14.json",
+   "kind": "page",
+   "url": "https://discourse.dreyeck.ch/on-the-three-economies-e14.json",
+   "fetchedAt": "2026-10-21T06:26:08Z",
+   "httpStatus": 200,
+   "bytes": 115753,
+   "sha256": "469dbf277401974b35bb0617802a150534ea5c386b2ce4d545900eaf448f01a8",
+   "site": "discourse.dreyeck.ch",
+   "slug": "on-the-three-economies-e14"
+  },
+  {
+   "file": "site/optional-structure-only.json",
+   "kind": "page",
+   "url": "https://discourse.dreyeck.ch/optional-structure-only.json",
+   "fetchedAt": "2026-10-21T06:26:08Z",
+   "httpStatus": 200,
+   "bytes": 2588,
+   "sha256": "b9340b2ae6a3d8666719d3843f0492441232c3ad1d4aa86bbf7bfeac6e1a2076",
+   "site": "discourse.dreyeck.ch",
+   "slug": "optional-structure-only"
+  },
+  {
+   "file": "site/owning-the-means-of-meaning-making.json",
+   "kind": "page",
+   "url": "https://discourse.dreyeck.ch/owning-the-means-of-meaning-making.json",
+   "fetchedAt": "2026-10-21T06:26:08Z",
+   "httpStatus": 200,
+   "bytes": 53348,
+   "sha256": "589e04685e884ed82da73c3616397dd553bcb2504008af25af25b0831951b069",
+   "site": "discourse.dreyeck.ch",
+   "slug": "owning-the-means-of-meaning-making"
+  },
+  {
+   "file": "site/pattern-literacy.json",
+   "kind": "page",
+   "url": "https://discourse.dreyeck.ch/pattern-literacy.json",
+   "fetchedAt": "2026-10-21T06:26:09Z",
+   "httpStatus": 200,
+   "bytes": 40827,
+   "sha256": "a2d7cd69ba841a4480a9e96ff3bc80bf7d349464c274ae755497a24d0cf18312",
+   "site": "discourse.dreyeck.ch",
+   "slug": "pattern-literacy"
+  },
+  {
+   "file": "site/personal-responsibility-under-dictatorship.json",
+   "kind": "page",
+   "url": "https://discourse.dreyeck.ch/personal-responsibility-under-dictatorship.json",
+   "fetchedAt": "2026-10-21T06:26:09Z",
+   "httpStatus": 200,
+   "bytes": 9081,
+   "sha256": "242b25d4a28841716af442f471676424ee2f2c396ddd039097157447aa55f4e6",
+   "site": "discourse.dreyeck.ch",
+   "slug": "personal-responsibility-under-dictatorship"
+  },
+  {
+   "file": "site/point-of-view.json",
+   "kind": "page",
+   "url": "https://discourse.dreyeck.ch/point-of-view.json",
+   "fetchedAt": "2026-10-21T06:26:10Z",
+   "httpStatus": 200,
+   "bytes": 5229,
+   "sha256": "e59433775edeefced10c1fae4ebdf93951c755ebe13e96db505c8085bcee091f",
+   "site": "discourse.dreyeck.ch",
+   "slug": "point-of-view"
+  },
+  {
+   "file": "site/politics-of-de--and-contrainfrastructuring.json",
+   "kind": "page",
+   "url": "https://discourse.dreyeck.ch/politics-of-de--and-contrainfrastructuring.json",
+   "fetchedAt": "2026-10-21T06:26:10Z",
+   "httpStatus": 200,
+   "bytes": 26978,
+   "sha256": "a578b603ba0252e4f68e60443c407341b8161528a2b3f945e33a6e9f5c19d07b",
+   "site": "discourse.dreyeck.ch",
+   "slug": "politics-of-de--and-contrainfrastructuring"
+  },
+  {
+   "file": "site/pollution-is-colonialism.json",
+   "kind": "page",
+   "url": "https://discourse.dreyeck.ch/pollution-is-colonialism.json",
+   "fetchedAt": "2026-10-21T06:26:10Z",
+   "httpStatus": 200,
+   "bytes": 24161,
+   "sha256": "538a45c19694d0ce2a6d7e52e2f28adf9a0e5e6be6839960a23381ac2b477d81",
+   "site": "discourse.dreyeck.ch",
+   "slug": "pollution-is-colonialism"
+  },
+  {
+   "file": "site/preview.json",
+   "kind": "page",
+   "url": "https://discourse.dreyeck.ch/preview.json",
+   "fetchedAt": "2026-10-21T06:26:11Z",
+   "httpStatus": 200,
+   "bytes": 4169,
+   "sha256": "d2af0d6cf3e69cdb2f7a170b04f65ac04d2a895bd79baa7f4481daecdd5e6388",
+   "site": "discourse.dreyeck.ch",
+   "slug": "preview"
+  },
+  {
+   "file": "site/ralf-barkow.json",
+   "kind": "page",
+   "url": "https://discourse.dreyeck.ch/ralf-barkow.json",
+   "fetchedAt": "2026-10-21T06:26:11Z",
+   "httpStatus": 200,
+   "bytes": 11907,
+   "sha256": "11eab6561997a55af3cf83c0ff6f2634025276180146129491e936e1fcb473db",
+   "site": "discourse.dreyeck.ch",
+   "slug": "ralf-barkow"
+  },
+  {
+   "file": "site/reverse-centaur-as-pointing-device.json",
+   "kind": "page",
+   "url": "https://discourse.dreyeck.ch/reverse-centaur-as-pointing-device.json",
+   "fetchedAt": "2026-10-21T06:26:11Z",
+   "httpStatus": 200,
+   "bytes": 23198,
+   "sha256": "6f10db340cbbd51976ad829a6622bec4ecf9b4711336d108ed8be1fe8ed6ada7",
+   "site": "discourse.dreyeck.ch",
+   "slug": "reverse-centaur-as-pointing-device"
+  },
+  {
+   "file": "site/rvergessenesposito.json",
+   "kind": "page",
+   "url": "https://discourse.dreyeck.ch/rvergessenesposito.json",
+   "fetchedAt": "2026-10-21T06:26:12Z",
+   "httpStatus": 200,
+   "bytes": 7027,
+   "sha256": "df50c45093e37d319e77f1079612eed1b7e42704f4772f54a5574fd71064d011",
+   "site": "discourse.dreyeck.ch",
+   "slug": "rvergessenesposito"
+  },
+  {
+   "file": "site/scientific-falsification.json",
+   "kind": "page",
+   "url": "https://discourse.dreyeck.ch/scientific-falsification.json",
+   "fetchedAt": "2026-10-21T06:26:12Z",
+   "httpStatus": 200,
+   "bytes": 2722,
+   "sha256": "f94936afe5aec259c2d17b5af7a6cf9ace7237b07227c0dd086527bdab027ef3",
+   "site": "discourse.dreyeck.ch",
+   "slug": "scientific-falsification"
+  },
+  {
+   "file": "site/semantic-inflation-of-growth.json",
+   "kind": "page",
+   "url": "https://discourse.dreyeck.ch/semantic-inflation-of-growth.json",
+   "fetchedAt": "2026-10-21T06:26:12Z",
+   "httpStatus": 200,
+   "bytes": 26218,
+   "sha256": "d247f6c7c3630de6283e419ffd3256fe7822cebdf22e2f69fc8510e06123bd8c",
+   "site": "discourse.dreyeck.ch",
+   "slug": "semantic-inflation-of-growth"
+  },
+  {
+   "file": "site/side-road.json",
+   "kind": "page",
+   "url": "https://discourse.dreyeck.ch/side-road.json",
+   "fetchedAt": "2026-10-21T06:26:13Z",
+   "httpStatus": 200,
+   "bytes": 5918,
+   "sha256": "db669bbe81f1129d0ef04941a9062eca7202b1e3cf74c768ca1c9f52d63d0bf0",
+   "site": "discourse.dreyeck.ch",
+   "slug": "side-road"
+  },
+  {
+   "file": "site/site-survey-factory.json",
+   "kind": "page",
+   "url": "https://discourse.dreyeck.ch/site-survey-factory.json",
+   "fetchedAt": "2026-10-21T06:26:13Z",
+   "httpStatus": 200,
+   "bytes": 8881,
+   "sha256": "a6442ae82c30405ed7fcfa64c246984954ce87d8f645be2f3de4dcbaaee4f385",
+   "site": "discourse.dreyeck.ch",
+   "slug": "site-survey-factory"
+  },
+  {
+   "file": "site/sociocybernetics-and-autopoietic-systems.json",
+   "kind": "page",
+   "url": "https://discourse.dreyeck.ch/sociocybernetics-and-autopoietic-systems.json",
+   "fetchedAt": "2026-10-21T06:26:14Z",
+   "httpStatus": 200,
+   "bytes": 15313,
+   "sha256": "c83aeffad94c6e345655ba8e0271c6e51ef04a1b9027cb09ccdde8890d6a1271",
+   "site": "discourse.dreyeck.ch",
+   "slug": "sociocybernetics-and-autopoietic-systems"
+  },
+  {
+   "file": "site/solo.json",
+   "kind": "page",
+   "url": "https://discourse.dreyeck.ch/solo.json",
+   "fetchedAt": "2026-10-21T06:26:14Z",
+   "httpStatus": 200,
+   "bytes": 3888,
+   "sha256": "ce8d6afd2b254d3c668af118ce2c7e93929f604f1615d2b471a3fab0f26d2e3a",
+   "site": "discourse.dreyeck.ch",
+   "slug": "solo"
+  },
+  {
+   "file": "site/soziales-vergessen.json",
+   "kind": "page",
+   "url": "https://discourse.dreyeck.ch/soziales-vergessen.json",
+   "fetchedAt": "2026-10-21T06:26:14Z",
+   "httpStatus": 200,
+   "bytes": 9013,
+   "sha256": "7e49f42f7fb214854bbb3c55c613ff6c0f3f2884fd65209dc5e5f0ac64649eed",
+   "site": "discourse.dreyeck.ch",
+   "slug": "soziales-vergessen"
+  },
+  {
+   "file": "site/spatialized-time.json",
+   "kind": "page",
+   "url": "https://discourse.dreyeck.ch/spatialized-time.json",
+   "fetchedAt": "2026-10-21T06:26:15Z",
+   "httpStatus": 200,
+   "bytes": 8822,
+   "sha256": "cb7e5bf8a1df890dbb15901e56ff095836579a049cab20ffe5a7f4992abf6b61",
+   "site": "discourse.dreyeck.ch",
+   "slug": "spatialized-time"
+  },
+  {
+   "file": "site/start-of-the-walk.json",
+   "kind": "page",
+   "url": "https://discourse.dreyeck.ch/start-of-the-walk.json",
+   "fetchedAt": "2026-10-21T06:26:15Z",
+   "httpStatus": 200,
+   "bytes": 23058,
+   "sha256": "14d487143e7d0b0efdfd49dc10f6f7e27f58592611156b1dd6a8804b515551bc",
+   "site": "discourse.dreyeck.ch",
+   "slug": "start-of-the-walk"
+  },
+  {
+   "file": "site/subjectivity-welcome-here.json",
+   "kind": "page",
+   "url": "https://discourse.dreyeck.ch/subjectivity-welcome-here.json",
+   "fetchedAt": "2026-10-21T06:26:15Z",
+   "httpStatus": 200,
+   "bytes": 3312,
+   "sha256": "75443b1677bb4cfc95c8558ace3fed10fbb2de19a1b9c08d8466efcabef61fbc",
+   "site": "discourse.dreyeck.ch",
+   "slug": "subjectivity-welcome-here"
+  },
+  {
+   "file": "site/systematically-manufactured-lack-of-structure.json",
+   "kind": "page",
+   "url": "https://discourse.dreyeck.ch/systematically-manufactured-lack-of-structure.json",
+   "fetchedAt": "2026-10-21T06:26:16Z",
+   "httpStatus": 200,
+   "bytes": 14637,
+   "sha256": "01971dbf14ae9522d9fd6650c1e5ae8d1865867a74750f1e166f71113752c201",
+   "site": "discourse.dreyeck.ch",
+   "slug": "systematically-manufactured-lack-of-structure"
+  },
+  {
+   "file": "site/testing-neighbor-mech.json",
+   "kind": "page",
+   "url": "https://discourse.dreyeck.ch/testing-neighbor-mech.json",
+   "fetchedAt": "2026-10-21T06:26:16Z",
+   "httpStatus": 200,
+   "bytes": 16871,
+   "sha256": "a1770b5634a553ece458fac1a2b0c9f27ff2938e78b8710927c83787c8983d73",
+   "site": "discourse.dreyeck.ch",
+   "slug": "testing-neighbor-mech"
+  },
+  {
+   "file": "site/the-a--b--c-move-ladder.json",
+   "kind": "page",
+   "url": "https://discourse.dreyeck.ch/the-a--b--c-move-ladder.json",
+   "fetchedAt": "2026-10-21T06:26:16Z",
+   "httpStatus": 200,
+   "bytes": 42850,
+   "sha256": "b0e8b13dbcd88a7d86b7c3df2a0364ffa582a2584cc41f81b8101f321e5bb00a",
+   "site": "discourse.dreyeck.ch",
+   "slug": "the-a--b--c-move-ladder"
+  },
+  {
+   "file": "site/the-falsifiers-drift-into-destruction.json",
+   "kind": "page",
+   "url": "https://discourse.dreyeck.ch/the-falsifiers-drift-into-destruction.json",
+   "fetchedAt": "2026-10-21T06:26:17Z",
+   "httpStatus": 200,
+   "bytes": 17912,
+   "sha256": "540351a822cb03782569e2d109571a2304ad1e0fd611bb7f8cd6f46b1907fbd9",
+   "site": "discourse.dreyeck.ch",
+   "slug": "the-falsifiers-drift-into-destruction"
+  },
+  {
+   "file": "site/the-mech-handbook.json",
+   "kind": "page",
+   "url": "https://discourse.dreyeck.ch/the-mech-handbook.json",
+   "fetchedAt": "2026-10-21T06:26:17Z",
+   "httpStatus": 200,
+   "bytes": 5428,
+   "sha256": "24b181c2e3019df57ea37e8e676487865d7734cc61a423747c7e4164fac3b379",
+   "site": "discourse.dreyeck.ch",
+   "slug": "the-mech-handbook"
+  },
+  {
+   "file": "site/the-politics-of-manufactured-chaos.json",
+   "kind": "page",
+   "url": "https://discourse.dreyeck.ch/the-politics-of-manufactured-chaos.json",
+   "fetchedAt": "2026-10-21T06:26:17Z",
+   "httpStatus": 200,
+   "bytes": 29045,
+   "sha256": "8101e975778341cd1c88070a27b32bdf189769bb417ac35f263323301fa3e96e",
+   "site": "discourse.dreyeck.ch",
+   "slug": "the-politics-of-manufactured-chaos"
+  },
+  {
+   "file": "site/the-proemialrelation-doesnt-solve-problems--it-dissolves-them.json",
+   "kind": "page",
+   "url": "https://discourse.dreyeck.ch/the-proemialrelation-doesnt-solve-problems--it-dissolves-them.json",
+   "fetchedAt": "2026-10-21T06:26:18Z",
+   "httpStatus": 200,
+   "bytes": 22434,
+   "sha256": "d8bccefff399d2e689619fbe61c8d18b123a4447370faebbdfaa2b4671abd4bd",
+   "site": "discourse.dreyeck.ch",
+   "slug": "the-proemialrelation-doesnt-solve-problems--it-dissolves-them"
+  },
+  {
+   "file": "site/the-tetrad-analogy-productive-misreading-of-the-proemialrelation.json",
+   "kind": "page",
+   "url": "https://discourse.dreyeck.ch/the-tetrad-analogy-productive-misreading-of-the-proemialrelation.json",
+   "fetchedAt": "2026-10-21T06:26:18Z",
+   "httpStatus": 200,
+   "bytes": 36498,
+   "sha256": "e7defb3a89a1b01e62333032d0df5e6f90801d5a1f23224a8c5d8f87f4450a31",
+   "site": "discourse.dreyeck.ch",
+   "slug": "the-tetrad-analogy-productive-misreading-of-the-proemialrelation"
+  },
+  {
+   "file": "site/the-whole-of-society-as-ecological-form.json",
+   "kind": "page",
+   "url": "https://discourse.dreyeck.ch/the-whole-of-society-as-ecological-form.json",
+   "fetchedAt": "2026-10-21T06:26:19Z",
+   "httpStatus": 200,
+   "bytes": 4079,
+   "sha256": "d63c930c4d846fd139bdd76d4aa7682f0e069030ea785c85cc4385b85cc022df",
+   "site": "discourse.dreyeck.ch",
+   "slug": "the-whole-of-society-as-ecological-form"
+  },
+  {
+   "file": "site/tony-hirst.json",
+   "kind": "page",
+   "url": "https://discourse.dreyeck.ch/tony-hirst.json",
+   "fetchedAt": "2026-10-21T06:26:19Z",
+   "httpStatus": 200,
+   "bytes": 2062,
+   "sha256": "77499b8053c5c1db0dab875ace8d4d4b762c5bdc061503aa4a42fd7f9957c61d",
+   "site": "discourse.dreyeck.ch",
+   "slug": "tony-hirst"
+  },
+  {
+   "file": "site/triangles-without-apexes.json",
+   "kind": "page",
+   "url": "https://discourse.dreyeck.ch/triangles-without-apexes.json",
+   "fetchedAt": "2026-10-21T06:26:19Z",
+   "httpStatus": 200,
+   "bytes": 25104,
+   "sha256": "9bfeac1111d9ce4b71d7ccb2db57149896bce89cea885a68b66c52817b9fdee3",
+   "site": "discourse.dreyeck.ch",
+   "slug": "triangles-without-apexes"
+  },
+  {
+   "file": "site/trust-rent-and-the-motorboat-moment-of-ai.json",
+   "kind": "page",
+   "url": "https://discourse.dreyeck.ch/trust-rent-and-the-motorboat-moment-of-ai.json",
+   "fetchedAt": "2026-10-21T06:26:20Z",
+   "httpStatus": 200,
+   "bytes": 17764,
+   "sha256": "437f7ac360dfe631e5d54de1297aa5a30a01d32453d811f2e2f4f5239f48e9c1",
+   "site": "discourse.dreyeck.ch",
+   "slug": "trust-rent-and-the-motorboat-moment-of-ai"
+  },
+  {
+   "file": "site/value-flows-as-forms.json",
+   "kind": "page",
+   "url": "https://discourse.dreyeck.ch/value-flows-as-forms.json",
+   "fetchedAt": "2026-10-21T06:26:20Z",
+   "httpStatus": 200,
+   "bytes": 1220,
+   "sha256": "fc123a882aa25f1f6f718100348a4c019e33ac5340bf8703ac179ecae20a2de1",
+   "site": "discourse.dreyeck.ch",
+   "slug": "value-flows-as-forms"
+  },
+  {
+   "file": "site/value-of-federation.json",
+   "kind": "page",
+   "url": "https://discourse.dreyeck.ch/value-of-federation.json",
+   "fetchedAt": "2026-10-21T06:26:20Z",
+   "httpStatus": 200,
+   "bytes": 1482,
+   "sha256": "e89c5f613c3f62a5d610f63923eb82b78f07383d1c950a21a8d60ec083df6fad",
+   "site": "discourse.dreyeck.ch",
+   "slug": "value-of-federation"
+  },
+  {
+   "file": "site/vertrauen.json",
+   "kind": "page",
+   "url": "https://discourse.dreyeck.ch/vertrauen.json",
+   "fetchedAt": "2026-10-21T06:26:21Z",
+   "httpStatus": 200,
+   "bytes": 45202,
+   "sha256": "3d7ab513dd6ea2edec9b8cc6820ea1cb70e0a9f6cb96a99eca7408b2bd11b8c2",
+   "site": "discourse.dreyeck.ch",
+   "slug": "vertrauen"
+  },
+  {
+   "file": "site/walk.json",
+   "kind": "page",
+   "url": "https://discourse.dreyeck.ch/walk.json",
+   "fetchedAt": "2026-10-21T06:26:21Z",
+   "httpStatus": 200,
+   "bytes": 5748,
+   "sha256": "49c2736b150654e689f8668f594363c2d35163ccaed6143a275ef05cb4b4fefc",
+   "site": "discourse.dreyeck.ch",
+   "slug": "walk"
+  },
+  {
+   "file": "site/welcome-visitors.json",
+   "kind": "page",
+   "url": "https://discourse.dreyeck.ch/welcome-visitors.json",
+   "fetchedAt": "2026-10-21T06:26:21Z",
+   "httpStatus": 200,
+   "bytes": 4039,
+   "sha256": "b0f47879c5ac8638e474738c59f47f8e3d49d6450dbc8178e87c99b754fc4ab4",
+   "site": "discourse.dreyeck.ch",
+   "slug": "welcome-visitors"
+  },
+  {
+   "file": "site/what-problem-does-the-proemialrelation-solve.json",
+   "kind": "page",
+   "url": "https://discourse.dreyeck.ch/what-problem-does-the-proemialrelation-solve.json",
+   "fetchedAt": "2026-10-21T06:26:22Z",
+   "httpStatus": 200,
+   "bytes": 23362,
+   "sha256": "cb1671c15b158134941718246fac92695dd18b7dd3f9dc2a99fd009bfac471a2",
+   "site": "discourse.dreyeck.ch",
+   "slug": "what-problem-does-the-proemialrelation-solve"
+  },
+  {
+   "file": "site/when-replicators-unite.json",
+   "kind": "page",
+   "url": "https://discourse.dreyeck.ch/when-replicators-unite.json",
+   "fetchedAt": "2026-10-21T06:26:22Z",
+   "httpStatus": 200,
+   "bytes": 34562,
+   "sha256": "58259bae9e3cc199efb099048fee5f9e8574351bf87bee06a54b241e7b8196cc",
+   "site": "discourse.dreyeck.ch",
+   "slug": "when-replicators-unite"
+  },
+  {
+   "file": "site/why-most-interventions-fail.json",
+   "kind": "page",
+   "url": "https://discourse.dreyeck.ch/why-most-interventions-fail.json",
+   "fetchedAt": "2026-10-21T06:26:23Z",
+   "httpStatus": 200,
+   "bytes": 23861,
+   "sha256": "df004ab0d7a0465c14da43bd34f61ab8833863e5a44872abb04d78e48c3b35ca",
+   "site": "discourse.dreyeck.ch",
+   "slug": "why-most-interventions-fail"
+  },
+  {
+   "file": "site/wiki-plugin-zachup.json",
+   "kind": "page",
+   "url": "https://discourse.dreyeck.ch/wiki-plugin-zachup.json",
+   "fetchedAt": "2026-10-21T06:26:23Z",
+   "httpStatus": 200,
+   "bytes": 3417,
+   "sha256": "8c4a20035f429077d6142c4e18d0d17235665f29790986740c6d0bcde933ff2d",
+   "site": "discourse.dreyeck.ch",
+   "slug": "wiki-plugin-zachup"
+  },
+  {
+   "file": "site/willke-intervention-primitives-glossary--constraints.json",
+   "kind": "page",
+   "url": "https://discourse.dreyeck.ch/willke-intervention-primitives-glossary--constraints.json",
+   "fetchedAt": "2026-10-21T06:26:23Z",
+   "httpStatus": 200,
+   "bytes": 31252,
+   "sha256": "067ad32e992b9b41d28acd8203cf9d5fe9611287256e4292b63dbb181a2b3484",
+   "site": "discourse.dreyeck.ch",
+   "slug": "willke-intervention-primitives-glossary--constraints"
+  },
+  {
+   "file": "site/z7527.json",
+   "kind": "page",
+   "url": "https://discourse.dreyeck.ch/z7527.json",
+   "fetchedAt": "2026-10-21T06:26:24Z",
+   "httpStatus": 200,
+   "bytes": 4572,
+   "sha256": "e2feedf0616fab236af388465c20f98874ff6fa7902056971a5fc235475b4301",
+   "site": "discourse.dreyeck.ch",
+   "slug": "z7527"
+  },
+  {
+   "file": "site/z8030.json",
+   "kind": "page",
+   "url": "https://discourse.dreyeck.ch/z8030.json",
+   "fetchedAt": "2026-10-21T06:26:24Z",
+   "httpStatus": 200,
+   "bytes": 2026,
+   "sha256": "d75cf4fc712e7363cc34a43111bc69b5ff78299dc1684852839cfd0ab633a4c9",
+   "site": "discourse.dreyeck.ch",
+   "slug": "z8030"
+  },
+  {
+   "file": "site/zach-babb--dorkbot-pdx--8-dec-2025.json",
+   "kind": "page",
+   "url": "https://discourse.dreyeck.ch/zach-babb--dorkbot-pdx--8-dec-2025.json",
+   "fetchedAt": "2026-10-21T06:26:24Z",
+   "httpStatus": 200,
+   "bytes": 34886,
+   "sha256": "e75beb243971b3878a47358ce1041a9885ba93e05b41b3beec6af2a12d59df80",
+   "site": "discourse.dreyeck.ch",
+   "slug": "zach-babb--dorkbot-pdx--8-dec-2025"
+  },
+  {
+   "file": "site/zachs-lineup.json",
+   "kind": "page",
+   "url": "https://discourse.dreyeck.ch/zachs-lineup.json",
+   "fetchedAt": "2026-10-21T06:26:25Z",
+   "httpStatus": 200,
+   "bytes": 65565,
+   "sha256": "2d95096f23e26739d0625bd179fca78113d6aff99b3cefe9416a0964854d0c27",
+   "site": "discourse.dreyeck.ch",
+   "slug": "zachs-lineup"
+  },
+  {
+   "file": "site/zerstrungslust.json",
+   "kind": "page",
+   "url": "https://discourse.dreyeck.ch/zerstrungslust.json",
+   "fetchedAt": "2026-10-21T06:26:25Z",
+   "httpStatus": 200,
+   "bytes": 120694,
+   "sha256": "57ec9d8545e104fa5dc61cd5672752505216be5248a54193346d6f3d8e0f669c",
+   "site": "discourse.dreyeck.ch",
+   "slug": "zerstrungslust"
+  },
+  {
+   "file": "assets/ClaimLinkSurveyProbe.js",
+   "kind": "asset",
+   "url": "https://discourse.dreyeck.ch/assets/pages/site-survey-factory/probes/ClaimLinkSurveyProbe.js",
+   "fetchedAt": "2026-10-21T06:29:08Z",
+   "httpStatus": 200,
+   "bytes": 7494,
+   "sha256": "f6beef1678db8fbcb857e399dbfb12e8adc51a883b7ebfa7fbb0e469820e80c3",
+   "site": "discourse.dreyeck.ch"
+  },
+  {
+   "file": "assets/index.js",
+   "kind": "asset",
+   "url": "https://discourse.dreyeck.ch/assets/v1/index.js",
+   "fetchedAt": "2026-10-21T06:29:08Z",
+   "httpStatus": 200,
+   "bytes": 5017,
+   "sha256": "0b9a52a8401cbd38aa83b2038275e653cb591241943aee4ef576b9bbb4d04199",
+   "site": "discourse.dreyeck.ch"
+  },
+  {
+   "file": "assets/frame.js",
+   "kind": "asset",
+   "url": "https://discourse.dreyeck.ch/assets/v1/frame.js",
+   "fetchedAt": "2026-10-21T06:29:08Z",
+   "httpStatus": 200,
+   "bytes": 3469,
+   "sha256": "513bc93a17ddb8ff532a14becc052440a817ce8aaedc735ae9b512071ee679b3",
+   "site": "discourse.dreyeck.ch"
+  },
+  {
+   "file": "assets/launch.html",
+   "kind": "asset",
+   "url": "https://discourse.dreyeck.ch/assets/pages/site-survey-factory/launch.html",
+   "fetchedAt": "2026-10-21T06:29:02Z",
+   "httpStatus": 200,
+   "bytes": 2664,
+   "sha256": "5ab63a3ee29fe9326018ff1a2233554137452a56380d909d783c17c3b9401317",
+   "site": "discourse.dreyeck.ch"
+  },
+  {
+   "file": "assets/update.html",
+   "kind": "asset",
+   "url": "https://discourse.dreyeck.ch/assets/pages/site-survey-factory/update.html",
+   "fetchedAt": "2026-10-21T06:29:02Z",
+   "httpStatus": 200,
+   "bytes": 3283,
+   "sha256": "cee1281603d715482365e9060953d001e18f40ffab67a3fd20a12c8e9805de1e",
+   "site": "discourse.dreyeck.ch"
+  }
+ ],
+ "referencedFiles": [
+  {
+   "file": "composition/discourse-traverse.mjs",
+   "sha256": "18cc68eee3ea2a2d6f21e3c1a3882d574965ed0406506f2ea2c4cd817fae2d20"
+  },
+  {
+   "file": "composition/discourse.mjs",
+   "sha256": "2ed678f4458d69251688837b62f68a7151e04d06640901feb455ea700073cda8"
+  },
+  {
+   "file": "discourse/assets/ClaimLinkSurveyProbe.js",
+   "sha256": "f6beef1678db8fbcb857e399dbfb12e8adc51a883b7ebfa7fbb0e469820e80c3"
+  },
+  {
+   "file": "discourse/assets/index.js",
+   "sha256": "0b9a52a8401cbd38aa83b2038275e653cb591241943aee4ef576b9bbb4d04199"
+  },
+  {
+   "file": "upstream/blocks.js",
+   "sha256": "388ee024299ce3674c607b83ec671f8d3df0cb9ba9e584960768fd359fff6d9d"
+  },
+  {
+   "file": "upstream/mech.js",
+   "sha256": "4019d7d03891fe1ba8a647eb6bdd62dda3b6100a506805b37eb4ddee1ca76678",
+   "revision": "a028b4bba04e539dcaa090423d38a00a0050489d",
+   "authority": "https://github.com/WardCunningham/wiki-plugin-mech",
+   "path": "src/client/mech.js",
+   "retainedBy": "git show a028b4bba04e539dcaa090423d38a00a0050489d:src/client/mech.js"
+  }
+ ],
+ "excerpts": [
+  {
+   "key": "upstream:asSlug",
+   "file": "upstream/mech.js",
+   "start": 256,
+   "end": 374,
+   "sha256": "7bbd8e220ee809c72257cc653cf64d5840be9c393e85aa2e2f82d2ce529d5dac"
+  },
+  {
+   "key": "upstream:neighborhood",
+   "file": "upstream/blocks.js",
+   "start": 3006,
+   "end": 3293,
+   "sha256": "c79198e0d836bc84df363f32c481bef4009ef9ffa14964babae8929064b3b70f"
+  },
+  {
+   "key": "upstream:click_emit",
+   "file": "upstream/blocks.js",
+   "start": 7553,
+   "end": 7830,
+   "sha256": "061ebbb743d0dc971c260a7b1396cc4037973bd667b8c054df95448b3654af08"
+  },
+  {
+   "key": "upstream:neighbors_emit",
+   "file": "upstream/blocks.js",
+   "start": 14319,
+   "end": 15729,
+   "sha256": "1b597cd6dc73f4f6b5aede0afc4f3f8262a060f673cecf21aec5e58fecf8d0fc"
+  },
+  {
+   "key": "upstream:walk_emit",
+   "file": "upstream/blocks.js",
+   "start": 15731,
+   "end": 17787,
+   "sha256": "0f2ebe8183aba7fea79806f48a6461740ffcdb31187b886b3292f86cccb01a4e"
+  },
+  {
+   "key": "composition:normalize_fold",
+   "file": "composition/discourse.mjs",
+   "start": 1431,
+   "end": 1546,
+   "sha256": "3e7abe3bb242577c1da1f9e4746c524e3f5b47bebe3c474c5e95f65146959ab1"
+  },
+  {
+   "key": "composition:update_fold_stats",
+   "file": "composition/discourse.mjs",
+   "start": 1729,
+   "end": 2108,
+   "sha256": "08bd0bf492badfe690fb00fc0d0fa95f62149be91be1798ce5ac2c24cdb73e55"
+  },
+  {
+   "key": "composition:extract_emit",
+   "file": "composition/discourse.mjs",
+   "start": 3912,
+   "end": 6370,
+   "sha256": "f12b10ae47de9975cd93042e2ef2a277433e0d4d95a4c4ea70b7e8862867ca6d"
+  },
+  {
+   "key": "composition:edges_emit",
+   "file": "composition/discourse.mjs",
+   "start": 9915,
+   "end": 10376,
+   "sha256": "43940d4f0af6a5227c88194eb790319ad0fdc51c524c04f02aa3e8607cf334dd"
+  },
+  {
+   "key": "composition:parse_walk_command",
+   "file": "composition/discourse.mjs",
+   "start": 10877,
+   "end": 11322,
+   "sha256": "ce3b719f82a8efa655e0fb34e57942087099f3983e621e4aa02d697c4dd8804e"
+  },
+  {
+   "key": "composition:walks",
+   "file": "composition/discourse.mjs",
+   "start": 11650,
+   "end": 15049,
+   "sha256": "d49a4a012c7c710d219f6b08d72f38b48054d58ec354fc2c493970b312fb23c2"
+  },
+  {
+   "key": "composition:role_walk_emit",
+   "file": "composition/discourse.mjs",
+   "start": 15050,
+   "end": 17492,
+   "sha256": "8128432dbad01a32f722aec2dcf0fe4848d23d9dbb78ad802c90720c9fb5feea"
+  },
+  {
+   "key": "composition:rootOf",
+   "file": "composition/discourse-traverse.mjs",
+   "start": 4963,
+   "end": 5276,
+   "sha256": "08f86a77442449b0bf85d563c71e6ad66b588eb859eabe587e3481d118db1802"
+  },
+  {
+   "key": "probe:normalizeFoldName",
+   "file": "discourse/assets/ClaimLinkSurveyProbe.js",
+   "start": 1112,
+   "end": 1495,
+   "sha256": "4e0c5e43dd46ed29d94c35f938d57a312c76933d175807e644a26ae79abcfa23"
+  },
+  {
+   "key": "probe:extractLinksFromItem",
+   "file": "discourse/assets/ClaimLinkSurveyProbe.js",
+   "start": 2133,
+   "end": 2831,
+   "sha256": "6c90b28a06491094260e6ab171df36414e3346f8a58c2d6356e726dd4cb83405"
+  },
+  {
+   "key": "probe:analysePage",
+   "file": "discourse/assets/ClaimLinkSurveyProbe.js",
+   "start": 3341,
+   "end": 5272,
+   "sha256": "8fc65e5f33f272538df7469d8a3e70ea852f486421d24ed51deaab356619cc6d"
+  },
+  {
+   "key": "survey:update",
+   "file": "discourse/assets/index.js",
+   "start": 3697,
+   "end": 5011,
+   "sha256": "391e47150bdb6915ceb7310b144cc5f40795b4f2f390570501966494c781fcdf"
+  }
+ ],
+ "replay": {
+  "driver": "replay-driver.mjs",
+  "output": "replay-run.json",
+  "driverSha256": "90b92e05c49b7e7e76e549caa0ed123466932f7b905f88b0755188ec7d93e54c",
+  "outputSha256": "c0d371a5acab233935399e1e2f22a1182b31eafdd003608950222ef69197b302",
+  "phase": "local-execution",
+  "ranAt": "2026-10-21",
+  "bundle": "19b14c31c62f0ce92c4ecaacf78477b230d83f0fdefea48033128cb575190efd",
+  "command": "node replay-driver.mjs <discourse-profile client/mech.js> <evidence/discourse>"
+ }
+}

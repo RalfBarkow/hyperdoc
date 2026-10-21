@@ -1,4 +1,5 @@
 <html><head><title>How TRAVERSE Enters Mech</title></head><body><in-package>dreyeck/traverse</in-package><h1>How TRAVERSE Enters Mech</h1>
+<p>A technical deepening of the Discourse Graph experiment, which starts at <a page="What Did Ward Propose?">What Did Ward Propose?</a>.</p>
 <p>Mech runs a block by looking up its command name in one exported, mutable object: Ward's <a expr="(source-by-key (retained-reading) &quot;upstream:blocks&quot;)" view="Source definition">blocks catalog</a> at WardCunningham/wiki-plugin-mech <code>a028b4bba04e539dcaa090423d38a00a0050489d</code>, used by the unchanged <a expr="(source-by-key (retained-reading) &quot;upstream:run&quot;)" view="Source definition">run</a>. Nothing in Ward's source is edited.</p>
 <h2>Two entries, two profiles</h2>
 <p>The <a expr="(source-by-key (retained-reading) &quot;composition:upstream-entry&quot;)" view="Source definition">upstream entry</a> only re-exports Ward's modules. The <a expr="(source-by-key (retained-reading) &quot;composition:discourse-entry&quot;)" view="Source definition">discourse entry</a> imports the same catalog and calls two installers before exporting it:</p>

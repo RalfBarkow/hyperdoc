@@ -44,7 +44,7 @@
                                     CODE)))
 
 (DEFUN FORM-KEY (FORM)
-       "Only explicit top-level DEFUN, DEFMACRO, DEFPARAMETER, DEFVAR, DEFINE-CONDITION, DEFCLASS, DEFPACKAGE, DEFMETHOD, DEFSYSTEM, HyperDoc DEFEXAMPLE and html-inspector-views DEFVIEW ownership is supported. A DEFVAR takes a DEFPARAMETER's key: both define the special variable of that name and differ only in when its value is set, so a file defining one variable both ways names it ambiguously. A package key carries the designator's string rather than the designator: #:FOO read twice yields two uninterned symbols that are never EQUAL, and EQUAL is what key comparison uses. A method is one function among several with its name, so its key carries its qualifiers and the specializers of its required parameters, which is what distinguishes it from its siblings. DEFEXAMPLE is recognised by name, like DEFSYSTEM, because this package does not depend on HyperDoc. A view is one method of a view function, so its key carries the name and the class it is for; DEFVIEW is recognised by name as well."
+       "Only explicit top-level DEFUN, DEFMACRO, DEFPARAMETER, DEFVAR, DEFINE-CONDITION, DEFCLASS, DEFPACKAGE, DEFMETHOD, DEFSYSTEM, HyperDoc DEFEXAMPLE and DEFHYPERDOC and html-inspector-views DEFVIEW ownership is supported. A DEFVAR takes a DEFPARAMETER's key: both define the special variable of that name and differ only in when its value is set, so a file defining one variable both ways names it ambiguously. A package key carries the designator's string rather than the designator: #:FOO read twice yields two uninterned symbols that are never EQUAL, and EQUAL is what key comparison uses. A method is one function among several with its name, so its key carries its qualifiers and the specializers of its required parameters, which is what distinguishes it from its siblings. DEFEXAMPLE is recognised by name, like DEFSYSTEM, because this package does not depend on HyperDoc. A view is one method of a view function, so its key carries the name and the class it is for; DEFVIEW is recognised by name as well. A DEFHYPERDOC is recognised by name for the same reason and addressed by the variable it defines, which names one HyperDoc."
        (WHEN (AND (CONSP FORM) (SYMBOLP (FIRST FORM)))
              (COND
                    ((EQ (FIRST FORM) (QUOTE DEFUN))
@@ -75,6 +75,8 @@
                           (AND (CONSP (THIRD FORM)) (SECOND (THIRD FORM)))))
                    ((STRING= (SYMBOL-NAME (FIRST FORM)) "DEFEXAMPLE")
                     (LIST :EXAMPLE (SECOND FORM)))
+                   ((STRING= (SYMBOL-NAME (FIRST FORM)) "DEFHYPERDOC")
+                    (LIST :HYPERDOC (SECOND FORM)))
                    ((STRING= (SYMBOL-NAME (FIRST FORM)) "DEFSYSTEM")
                     (LIST :SYSTEM (STRING-DOWNCASE (STRING (SECOND FORM))))))))
 
