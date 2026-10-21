@@ -1,0 +1,26 @@
+{
+  "kind": "traverse-companion-served-state/1",
+  "observedAt": "2026-10-20T22:04:55Z",
+  "observer": "Claude Code, HTTP GET from a client machine; no server access",
+  "method": "curl https://<host>/plugins/mech/mech.js | sha256; curl https://<host>/system/version.json",
+  "observations": [
+    {
+      "host": "discourse.dreyeck.ch",
+      "mechJs": { "status": 200, "sha256": "19b14c31c62f0ce92c4ecaacf78477b230d83f0fdefea48033128cb575190efd" },
+      "version": { "wiki": "0.39.2", "wiki-server": "0.26.2", "wiki-client": "0.31.6", "wiki-plugin-mech": "0.1.48-3", "wiki-plugin-solo": "0.1.30-1" }
+    },
+    {
+      "host": "hyperdoc.dreyeck.ch",
+      "mechJs": { "status": 200, "sha256": "19b14c31c62f0ce92c4ecaacf78477b230d83f0fdefea48033128cb575190efd" },
+      "version": { "wiki": "0.39.2", "wiki-server": "0.26.2", "wiki-client": "0.31.6", "wiki-plugin-mech": "0.1.48-3", "wiki-plugin-solo": "0.1.30-1" }
+    },
+    {
+      "host": "wiki.dreyeck.ch",
+      "mechJs": { "status": 400 },
+      "note": "not a site of the farm; no version.json"
+    }
+  ],
+  "establishes": "Both farm hosts served the bundle tested end to end (AT-9) at that time, and the reported component versions were those of the production recipe.",
+  "doesNotEstablish": "The running store path, wiki.service ExecStart, the system generation and the content of /etc/nixos/wiki.nix. These are server facts; no operator output of the activation was supplied to this reading.",
+  "operatorActivationObservation": null
+}

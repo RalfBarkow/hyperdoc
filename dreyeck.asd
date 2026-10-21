@@ -731,6 +731,56 @@
   (ASDF/LISP-ACTION:TEST-OP (OP COMPONENT) (DECLARE (IGNORE OP COMPONENT))
    (UIOP/PACKAGE:SYMBOL-CALL :DREYECK/MECH-INTAKE/TESTS :RUN-TALA-TESTS)))
 
+(ASDF/PARSE-DEFSYSTEM:DEFSYSTEM "dreyeck/traverse/reading"
+  :DESCRIPTION
+  "Reading companion for the Dreyeck Wiki composition with TRAVERSE, from retained sources at fixed revisions"
+  :SERIAL
+  T
+  :DEPENDS-ON
+  ("dreyeck/mech-intake/reading")
+  :COMPONENTS
+  ((:MODULE "dreyeck/traverse" :SERIAL T :COMPONENTS
+    ((:FILE "revisions") (:FILE "entry") (:FILE "example") (:FILE "deployment")
+     (:FILE "workspace")
+     (:MODULE "evidence" :COMPONENTS
+      ((:STATIC-FILE "sources.json") (:STATIC-FILE "example-driver.mjs")
+       (:STATIC-FILE "example-run.json")
+       (:MODULE "composition" :COMPONENTS
+        ((:STATIC-FILE "discourse-traverse.mjs")
+         (:STATIC-FILE "discourse-entry.mjs") (:STATIC-FILE "discourse.mjs")
+         (:STATIC-FILE "upstream-entry.mjs") (:STATIC-FILE "build.mjs")
+         (:STATIC-FILE "traverse.test.mjs") (:STATIC-FILE "mech.nix")
+         (:STATIC-FILE "mech-build.mjs") (:STATIC-FILE "wiki-profile.nix")
+         (:STATIC-FILE "mech-pins.json")))
+       (:MODULE "dreyeck" :COMPONENTS
+        ((:STATIC-FILE "flake.nix") (:STATIC-FILE "flake.lock")
+         (:STATIC-FILE "mech-profile-consumer-acceptance-traverse.json")))
+       (:MODULE "upstream" :COMPONENTS
+        ((:STATIC-FILE "blocks.js") (:STATIC-FILE "graph.js")))
+       (:MODULE "predeployment" :COMPONENTS
+        ((:STATIC-FILE "AT9-RESULT.md") (:STATIC-FILE "at9-report.json")
+         (:STATIC-FILE "release-identity.txt")))
+       (:MODULE "postdeployment" :COMPONENTS
+        ((:STATIC-FILE "http-observation.json")))))))
+   (:MODULE "dreyeck/pages/traverse" :COMPONENTS
+    ((:STATIC-FILE "From Git Revision to Nix Package.html")
+     (:STATIC-FILE "How TRAVERSE Enters Mech.html")
+     (:STATIC-FILE "From PageFold to Discourse Graph.html")
+     (:STATIC-FILE "What the Deployment Proves.html"))))
+  :IN-ORDER-TO
+  ((ASDF/LISP-ACTION:TEST-OP
+    (ASDF/LISP-ACTION:TEST-OP "dreyeck/traverse/reading/tests"))))
+
+(ASDF/PARSE-DEFSYSTEM:DEFSYSTEM "dreyeck/traverse/reading/tests"
+  :DEPENDS-ON
+  ("dreyeck/traverse/reading")
+  :COMPONENTS
+  ((:FILE "dreyeck/tests/traverse-companion"))
+  :PERFORM
+  (ASDF/LISP-ACTION:TEST-OP (ASDF/USER::OP ASDF/COMPONENT:COMPONENT)
+   (DECLARE (IGNORE ASDF/USER::OP ASDF/COMPONENT:COMPONENT))
+   (UIOP/PACKAGE:SYMBOL-CALL :DREYECK/TRAVERSE/TESTS :RUN-TESTS)))
+
 (ASDF/PARSE-DEFSYSTEM:DEFSYSTEM "dreyeck/fedwiki-config/reading" :DESCRIPTION
                                 "Reading declared Wiki recipes, Mech compositions and independent fork observations"
                                 :SERIAL T :DEPENDS-ON
@@ -875,7 +925,8 @@
                                  "dreyeck/gesture/reading"
                                  "dreyeck/work/reading"
                                  "dreyeck/authority/reading"
-                                 "dreyeck/clog-tutorial/reading")
+                                 "dreyeck/clog-tutorial/reading"
+                                 "dreyeck/traverse/reading")
                                 :IN-ORDER-TO
                                 ((ASDF/LISP-ACTION:TEST-OP
                                                            (ASDF/LISP-ACTION:TEST-OP

@@ -1,0 +1,453 @@
+{
+ "kind": "traverse-companion-evidence/1",
+ "retainedOn": "2026-10-20",
+ "revisions": {
+  "composition": {
+   "authority": "https://github.com/RalfBarkow/wiki",
+   "oid": "a83c3e0d6662a10af000696fc3f1401524cef818"
+  },
+  "module": {
+   "authority": "https://github.com/RalfBarkow/wiki",
+   "oid": "1dbedae7b776ca38c36dc04302796be7a07b9371"
+  },
+  "dreyeck": {
+   "authority": "https://github.com/RalfBarkow/wiki",
+   "oid": "916ea5bf61bd81de961c26c57016556e10d57eba"
+  },
+  "upstream": {
+   "authority": "https://github.com/WardCunningham/wiki-plugin-mech",
+   "oid": "a028b4bba04e539dcaa090423d38a00a0050489d"
+  }
+ },
+ "files": [
+  {
+   "file": "composition/discourse-traverse.mjs",
+   "authority": "https://github.com/RalfBarkow/wiki",
+   "revision": "a83c3e0d6662a10af000696fc3f1401524cef818",
+   "path": "integrations/mech/src/discourse-traverse.mjs",
+   "sha256": "18cc68eee3ea2a2d6f21e3c1a3882d574965ed0406506f2ea2c4cd817fae2d20",
+   "retainedBy": "git show a83c3e0d6662a10af000696fc3f1401524cef818:integrations/mech/src/discourse-traverse.mjs"
+  },
+  {
+   "file": "composition/discourse-entry.mjs",
+   "authority": "https://github.com/RalfBarkow/wiki",
+   "revision": "a83c3e0d6662a10af000696fc3f1401524cef818",
+   "path": "integrations/mech/src/discourse-entry.mjs",
+   "sha256": "2b20b3629b201291f05e0520c25adeff1a7f680c29ced67af3cd76964f09a308",
+   "retainedBy": "git show a83c3e0d6662a10af000696fc3f1401524cef818:integrations/mech/src/discourse-entry.mjs"
+  },
+  {
+   "file": "composition/discourse.mjs",
+   "authority": "https://github.com/RalfBarkow/wiki",
+   "revision": "a83c3e0d6662a10af000696fc3f1401524cef818",
+   "path": "integrations/mech/src/discourse.mjs",
+   "sha256": "2ed678f4458d69251688837b62f68a7151e04d06640901feb455ea700073cda8",
+   "retainedBy": "git show a83c3e0d6662a10af000696fc3f1401524cef818:integrations/mech/src/discourse.mjs"
+  },
+  {
+   "file": "composition/upstream-entry.mjs",
+   "authority": "https://github.com/RalfBarkow/wiki",
+   "revision": "a83c3e0d6662a10af000696fc3f1401524cef818",
+   "path": "integrations/mech/src/upstream-entry.mjs",
+   "sha256": "96147b62cc42f6a7d9e22826601dea95f7388bfb54ac4c40ffa42f58ca51a96f",
+   "retainedBy": "git show a83c3e0d6662a10af000696fc3f1401524cef818:integrations/mech/src/upstream-entry.mjs"
+  },
+  {
+   "file": "composition/build.mjs",
+   "authority": "https://github.com/RalfBarkow/wiki",
+   "revision": "a83c3e0d6662a10af000696fc3f1401524cef818",
+   "path": "integrations/mech/scripts/build.mjs",
+   "sha256": "0da3d8aa619dd7e31f9778e0c79875fb75dfd283ab18deeaa204bbac1c562e28",
+   "retainedBy": "git show a83c3e0d6662a10af000696fc3f1401524cef818:integrations/mech/scripts/build.mjs"
+  },
+  {
+   "file": "composition/traverse.test.mjs",
+   "authority": "https://github.com/RalfBarkow/wiki",
+   "revision": "a83c3e0d6662a10af000696fc3f1401524cef818",
+   "path": "integrations/mech/test/traverse.mjs",
+   "sha256": "51012c89c44983d66a69656e7601948b9e73c70499db5e64315f9dee640ca737",
+   "retainedBy": "git show a83c3e0d6662a10af000696fc3f1401524cef818:integrations/mech/test/traverse.mjs"
+  },
+  {
+   "file": "composition/mech.nix",
+   "authority": "https://github.com/RalfBarkow/wiki",
+   "revision": "a83c3e0d6662a10af000696fc3f1401524cef818",
+   "path": "nix/mech.nix",
+   "sha256": "addfcdbd343ecbb12aaf7affd1a9b481e84fb235327e58223aa4b4150c5e43f4",
+   "retainedBy": "git show a83c3e0d6662a10af000696fc3f1401524cef818:nix/mech.nix"
+  },
+  {
+   "file": "composition/mech-build.mjs",
+   "authority": "https://github.com/RalfBarkow/wiki",
+   "revision": "a83c3e0d6662a10af000696fc3f1401524cef818",
+   "path": "nix/mech-build.mjs",
+   "sha256": "2c19dc2fcf79f545b99db74fb8b6bafd3e416ebafeadd478a2eae76447b160a9",
+   "retainedBy": "git show a83c3e0d6662a10af000696fc3f1401524cef818:nix/mech-build.mjs"
+  },
+  {
+   "file": "composition/wiki-profile.nix",
+   "authority": "https://github.com/RalfBarkow/wiki",
+   "revision": "a83c3e0d6662a10af000696fc3f1401524cef818",
+   "path": "nix/wiki-profile.nix",
+   "sha256": "a0ed89ea30333e2a25804d945032164a87847390de8115fa82aeae40ca6882bf",
+   "retainedBy": "git show a83c3e0d6662a10af000696fc3f1401524cef818:nix/wiki-profile.nix"
+  },
+  {
+   "file": "composition/mech-pins.json",
+   "authority": "https://github.com/RalfBarkow/wiki",
+   "revision": "a83c3e0d6662a10af000696fc3f1401524cef818",
+   "path": "nix/mech-pins.json",
+   "sha256": "9a77d50902849eb11417b494844a56b895be144de2d2b8a10a3639214811f36d",
+   "retainedBy": "git show a83c3e0d6662a10af000696fc3f1401524cef818:nix/mech-pins.json"
+  },
+  {
+   "file": "dreyeck/flake.nix",
+   "authority": "https://github.com/RalfBarkow/wiki",
+   "revision": "916ea5bf61bd81de961c26c57016556e10d57eba",
+   "path": "flake.nix",
+   "sha256": "e2ff24679d16d6de1fa35078782337a9b54fc2e58f9ef6fda21c3bc5c71a6d2a",
+   "retainedBy": "git show 916ea5bf61bd81de961c26c57016556e10d57eba:flake.nix"
+  },
+  {
+   "file": "dreyeck/flake.lock",
+   "authority": "https://github.com/RalfBarkow/wiki",
+   "revision": "916ea5bf61bd81de961c26c57016556e10d57eba",
+   "path": "flake.lock",
+   "sha256": "1a86f4ea38f7bdfa46a9b9f4bfc8e817d9e2d7ed8cf3c6e8b6a48e610ab170cf",
+   "retainedBy": "git show 916ea5bf61bd81de961c26c57016556e10d57eba:flake.lock"
+  },
+  {
+   "file": "dreyeck/mech-profile-consumer-acceptance-traverse.json",
+   "authority": "https://github.com/RalfBarkow/wiki",
+   "revision": "916ea5bf61bd81de961c26c57016556e10d57eba",
+   "path": "docs/mech-profile-consumer-acceptance-traverse.json",
+   "sha256": "aff2467ed144c4efe55e541ca6edfccad965189bdf4bd6f29a733aea2d68d8d2",
+   "retainedBy": "git show 916ea5bf61bd81de961c26c57016556e10d57eba:docs/mech-profile-consumer-acceptance-traverse.json"
+  },
+  {
+   "file": "upstream/blocks.js",
+   "authority": "https://github.com/WardCunningham/wiki-plugin-mech",
+   "revision": "a028b4bba04e539dcaa090423d38a00a0050489d",
+   "path": "src/client/blocks.js",
+   "sha256": "388ee024299ce3674c607b83ec671f8d3df0cb9ba9e584960768fd359fff6d9d",
+   "retainedBy": "git show a028b4bba04e539dcaa090423d38a00a0050489d:src/client/blocks.js"
+  },
+  {
+   "file": "upstream/graph.js",
+   "authority": "https://github.com/WardCunningham/wiki-plugin-mech",
+   "revision": "a028b4bba04e539dcaa090423d38a00a0050489d",
+   "path": "src/client/graph/graph.js",
+   "sha256": "fd3132b5cf4b5a796205ad8c000320d4c5439a8e8e90c47e4458c156356543ed",
+   "retainedBy": "git show a028b4bba04e539dcaa090423d38a00a0050489d:src/client/graph/graph.js"
+  }
+ ],
+ "sources": [
+  {
+   "key": "dreyeck:mech-composition-input",
+   "file": "dreyeck/flake.nix",
+   "authority": "https://github.com/RalfBarkow/wiki",
+   "revision": "916ea5bf61bd81de961c26c57016556e10d57eba",
+   "path": "flake.nix",
+   "definition": "flake input mech-composition",
+   "start": 202,
+   "end": 297,
+   "sha256": "ec41b4476cb397e42fb2b739faa96ab9477f0c4c33202aaef5c87bcb6ac1f695"
+  },
+  {
+   "key": "dreyeck:profile-packages",
+   "file": "dreyeck/flake.nix",
+   "authority": "https://github.com/RalfBarkow/wiki",
+   "revision": "916ea5bf61bd81de961c26c57016556e10d57eba",
+   "path": "flake.nix",
+   "definition": "profilePackages (wiki-discourse = withMech ...)",
+   "start": 2450,
+   "end": 2741,
+   "sha256": "522afa06931b9535b95c3762b97d1cb0fe2168225fac1ba6dd43e28e286e625a"
+  },
+  {
+   "key": "dreyeck:with-mech",
+   "file": "dreyeck/flake.nix",
+   "authority": "https://github.com/RalfBarkow/wiki",
+   "revision": "916ea5bf61bd81de961c26c57016556e10d57eba",
+   "path": "flake.nix",
+   "definition": "withMech: base wiki + profile Mech",
+   "start": 2228,
+   "end": 2449,
+   "sha256": "9e83c667e28bc1c8277da3d37bf38ae22d141368665c4de31de28089ec91dc60"
+  },
+  {
+   "key": "dreyeck:lock-node",
+   "file": "dreyeck/flake.lock",
+   "authority": "https://github.com/RalfBarkow/wiki",
+   "revision": "916ea5bf61bd81de961c26c57016556e10d57eba",
+   "path": "flake.lock",
+   "definition": "flake.lock node mech-composition",
+   "start": 4045,
+   "end": 4757,
+   "sha256": "db2b8eae3fb08163b37223a2b18b7c54d802319dbc86ae8b07de20625cad897d"
+  },
+  {
+   "key": "composition:mech-nix",
+   "file": "composition/mech.nix",
+   "authority": "https://github.com/RalfBarkow/wiki",
+   "revision": "a83c3e0d6662a10af000696fc3f1401524cef818",
+   "path": "nix/mech.nix",
+   "definition": "nix/mech.nix (profile build)",
+   "start": 0,
+   "end": 1487,
+   "sha256": "addfcdbd343ecbb12aaf7affd1a9b481e84fb235327e58223aa4b4150c5e43f4"
+  },
+  {
+   "key": "composition:mech-build-checks",
+   "file": "composition/mech-build.mjs",
+   "authority": "https://github.com/RalfBarkow/wiki",
+   "revision": "a83c3e0d6662a10af000696fc3f1401524cef818",
+   "path": "nix/mech-build.mjs",
+   "definition": "nix/mech-build.mjs (digest checks, then buildProfiles)",
+   "start": 0,
+   "end": 2087,
+   "sha256": "2c19dc2fcf79f545b99db74fb8b6bafd3e416ebafeadd478a2eae76447b160a9"
+  },
+  {
+   "key": "composition:wiki-profile",
+   "file": "composition/wiki-profile.nix",
+   "authority": "https://github.com/RalfBarkow/wiki",
+   "revision": "a83c3e0d6662a10af000696fc3f1401524cef818",
+   "path": "nix/wiki-profile.nix",
+   "definition": "nix/wiki-profile.nix (replace wiki-plugin-mech in the base package)",
+   "start": 0,
+   "end": 2688,
+   "sha256": "a0ed89ea30333e2a25804d945032164a87847390de8115fa82aeae40ca6882bf"
+  },
+  {
+   "key": "composition:pins-module",
+   "file": "composition/mech-pins.json",
+   "authority": "https://github.com/RalfBarkow/wiki",
+   "revision": "a83c3e0d6662a10af000696fc3f1401524cef818",
+   "path": "nix/mech-pins.json",
+   "definition": "mech-pins.json module pin",
+   "start": 805,
+   "end": 1174,
+   "sha256": "cd356b751397561f9e05b956907f6b701be8bdc4b7a6bdfcfa953a170c5177b3"
+  },
+  {
+   "key": "composition:moduleIdentity",
+   "file": "composition/build.mjs",
+   "authority": "https://github.com/RalfBarkow/wiki",
+   "revision": "a83c3e0d6662a10af000696fc3f1401524cef818",
+   "path": "integrations/mech/scripts/build.mjs",
+   "definition": "moduleIdentity (content digest)",
+   "start": 1304,
+   "end": 1795,
+   "sha256": "b63b90c1ea0852c11a79a5bac8e2005951d4b4f07a12f71b32dbe877f1c602db"
+  },
+  {
+   "key": "composition:discourse-entry",
+   "file": "composition/discourse-entry.mjs",
+   "authority": "https://github.com/RalfBarkow/wiki",
+   "revision": "a83c3e0d6662a10af000696fc3f1401524cef818",
+   "path": "integrations/mech/src/discourse-entry.mjs",
+   "definition": "discourse-entry.mjs",
+   "start": 0,
+   "end": 622,
+   "sha256": "2b20b3629b201291f05e0520c25adeff1a7f680c29ced67af3cd76964f09a308"
+  },
+  {
+   "key": "composition:upstream-entry",
+   "file": "composition/upstream-entry.mjs",
+   "authority": "https://github.com/RalfBarkow/wiki",
+   "revision": "a83c3e0d6662a10af000696fc3f1401524cef818",
+   "path": "integrations/mech/src/upstream-entry.mjs",
+   "definition": "upstream-entry.mjs",
+   "start": 0,
+   "end": 342,
+   "sha256": "96147b62cc42f6a7d9e22826601dea95f7388bfb54ac4c40ffa42f58ca51a96f"
+  },
+  {
+   "key": "composition:installDiscourse",
+   "file": "composition/discourse.mjs",
+   "authority": "https://github.com/RalfBarkow/wiki",
+   "revision": "a83c3e0d6662a10af000696fc3f1401524cef818",
+   "path": "integrations/mech/src/discourse.mjs",
+   "definition": "installDiscourse",
+   "start": 17526,
+   "end": 18891,
+   "sha256": "32e9f751947f0f7ec85796020386f8f8cc6ed84dfeca2231c9853c2c983dd4a6"
+  },
+  {
+   "key": "composition:installDiscourseTraverse",
+   "file": "composition/discourse-traverse.mjs",
+   "authority": "https://github.com/RalfBarkow/wiki",
+   "revision": "a83c3e0d6662a10af000696fc3f1401524cef818",
+   "path": "integrations/mech/src/discourse-traverse.mjs",
+   "definition": "installDiscourseTraverse",
+   "start": 6674,
+   "end": 7256,
+   "sha256": "08180b0295a00750944baa914217492919a1d4a6e659b6ca1b7f29df2c76690e"
+  },
+  {
+   "key": "composition:traverse_emit",
+   "file": "composition/discourse-traverse.mjs",
+   "authority": "https://github.com/RalfBarkow/wiki",
+   "revision": "a83c3e0d6662a10af000696fc3f1401524cef818",
+   "path": "integrations/mech/src/discourse-traverse.mjs",
+   "definition": "traverse_emit (the TRAVERSE block)",
+   "start": 5278,
+   "end": 6640,
+   "sha256": "6fd372ff371e86baa322f30cd56fb661c8b8a176e9ff4a50c55aeca395d0849a"
+  },
+  {
+   "key": "composition:parse_links",
+   "file": "composition/discourse.mjs",
+   "authority": "https://github.com/RalfBarkow/wiki",
+   "revision": "a83c3e0d6662a10af000696fc3f1401524cef818",
+   "path": "integrations/mech/src/discourse.mjs",
+   "definition": "parse_links",
+   "start": 2373,
+   "end": 3072,
+   "sha256": "e82f2056ac1a8fa344388bd557246cd6dbe20bd2b61865afc79543daa99f661e"
+  },
+  {
+   "key": "composition:extract_edges_from_story",
+   "file": "composition/discourse.mjs",
+   "authority": "https://github.com/RalfBarkow/wiki",
+   "revision": "a83c3e0d6662a10af000696fc3f1401524cef818",
+   "path": "integrations/mech/src/discourse.mjs",
+   "definition": "extract_edges_from_story",
+   "start": 3074,
+   "end": 3910,
+   "sha256": "a4774addf279a53173128b3b6a4fc21c025c5fc75a449824ac59729d5a4c03c6"
+  },
+  {
+   "key": "composition:canonicalize_fold",
+   "file": "composition/discourse.mjs",
+   "authority": "https://github.com/RalfBarkow/wiki",
+   "revision": "a83c3e0d6662a10af000696fc3f1401524cef818",
+   "path": "integrations/mech/src/discourse.mjs",
+   "definition": "canonicalize_fold",
+   "start": 1548,
+   "end": 1727,
+   "sha256": "d04ffe5df5ee8f239868141358b25ddf830fb031d5c284c988884ba67acf9f92"
+  },
+  {
+   "key": "composition:traverse-header",
+   "file": "composition/discourse-traverse.mjs",
+   "authority": "https://github.com/RalfBarkow/wiki",
+   "revision": "a83c3e0d6662a10af000696fc3f1401524cef818",
+   "path": "integrations/mech/src/discourse-traverse.mjs",
+   "definition": "module header: Read, Resolve, Traverse, Present",
+   "start": 0,
+   "end": 830,
+   "sha256": "6311993b1300e8e2cca05c91af291dbbcd7689b43839a41fe0271634873ad11a"
+  },
+  {
+   "key": "composition:resolveEdges",
+   "file": "composition/discourse-traverse.mjs",
+   "authority": "https://github.com/RalfBarkow/wiki",
+   "revision": "a83c3e0d6662a10af000696fc3f1401524cef818",
+   "path": "integrations/mech/src/discourse-traverse.mjs",
+   "definition": "resolveEdges",
+   "start": 1409,
+   "end": 2131,
+   "sha256": "63f55e7e0ce5980ce5662839600bc835a9337801c5b11cd3489b1eddccc96738"
+  },
+  {
+   "key": "composition:traverse",
+   "file": "composition/discourse-traverse.mjs",
+   "authority": "https://github.com/RalfBarkow/wiki",
+   "revision": "a83c3e0d6662a10af000696fc3f1401524cef818",
+   "path": "integrations/mech/src/discourse-traverse.mjs",
+   "definition": "traverse",
+   "start": 2322,
+   "end": 3527,
+   "sha256": "b8f58d12783c0cf772ea438c944b1a90531a955c8832d5398ef635aac6d45615"
+  },
+  {
+   "key": "composition:presentGraph",
+   "file": "composition/discourse-traverse.mjs",
+   "authority": "https://github.com/RalfBarkow/wiki",
+   "revision": "a83c3e0d6662a10af000696fc3f1401524cef818",
+   "path": "integrations/mech/src/discourse-traverse.mjs",
+   "definition": "presentGraph",
+   "start": 3699,
+   "end": 4582,
+   "sha256": "8f455c7eee82e1791faf0e8e1b8557e5bd8576d0f32c1e9c43055e3b26faa85e"
+  },
+  {
+   "key": "upstream:blocks",
+   "file": "upstream/blocks.js",
+   "authority": "https://github.com/WardCunningham/wiki-plugin-mech",
+   "revision": "a028b4bba04e539dcaa090423d38a00a0050489d",
+   "path": "src/client/blocks.js",
+   "definition": "exported blocks catalog",
+   "start": 47379,
+   "end": 48391,
+   "sha256": "16c80bac6e529e67657923a2a268ad99113bde95cdac173cefa43dd1130a19d9"
+  },
+  {
+   "key": "upstream:run",
+   "file": "upstream/blocks.js",
+   "authority": "https://github.com/WardCunningham/wiki-plugin-mech",
+   "revision": "a028b4bba04e539dcaa090423d38a00a0050489d",
+   "path": "src/client/blocks.js",
+   "definition": "run (dispatcher)",
+   "start": 6686,
+   "end": 7535,
+   "sha256": "993178e3ee48e444bde7bcc278a3179611987911c0715b196944f4514457ae49"
+  },
+  {
+   "key": "upstream:solo_emit",
+   "file": "upstream/blocks.js",
+   "authority": "https://github.com/WardCunningham/wiki-plugin-mech",
+   "revision": "a028b4bba04e539dcaa090423d38a00a0050489d",
+   "path": "src/client/blocks.js",
+   "definition": "solo_emit",
+   "start": 35520,
+   "end": 36991,
+   "sha256": "31fe9f00103c4f939fee76b0a06ba2c4e1672ad24290a3d016c9a9a1948b3927"
+  }
+ ],
+ "records": [
+  {
+   "file": "example-driver.mjs",
+   "kind": "execution-driver",
+   "origin": "authored for this reading, 2026-10-20",
+   "sha256": "023d029981bbdbc295d18ce8b36c2861be908bdf1d9ca0866adcc460239c330c"
+  },
+  {
+   "file": "example-run.json",
+   "kind": "execution-record",
+   "origin": "node example-driver.mjs on the release-check bundle /nix/store/0829y1dx0snsx89q28j9qnnqnad7x2dc-wiki-plugin-mech-discourse-0.1.48-3/client/mech.js (sha256 19b14c31...), run twice with identical output",
+   "sha256": "614c8b5479a387895caf82dab6648fc93087c825b8ecc10373da10de00b324a6",
+   "phase": "local-execution"
+  },
+  {
+   "file": "predeployment/AT9-RESULT.md",
+   "kind": "acceptance-report",
+   "origin": "~/workspace/discourse-e2e/AT9-RESULT.md, byte copy",
+   "sha256": "a031cc1be51de4e84a7d7a4b8d3942ebef96d922c36c9e3e3640470811a094e9",
+   "phase": "before-deployment"
+  },
+  {
+   "file": "predeployment/at9-report.json",
+   "kind": "acceptance-verdicts",
+   "origin": "~/workspace/discourse-e2e/results/at9-report.json, byte copy",
+   "sha256": "8d3979b31f30a04f8719006c4ced48cbce90aee1c6fabe23b438040393007757",
+   "phase": "before-deployment"
+  },
+  {
+   "file": "predeployment/release-identity.txt",
+   "kind": "release-identity",
+   "origin": "~/workspace/discourse-e2e/release/run-20261020T204030/release-identity.txt, byte copy",
+   "sha256": "ae9728c4de85f07a7f320a31d16f7c366677c5f09b78347195d6dfadd8e04e59",
+   "phase": "before-deployment"
+  },
+  {
+   "file": "postdeployment/http-observation.json",
+   "kind": "served-state-observation",
+   "origin": "HTTP GET 2026-10-20T22:04:55Z, recorded for this reading",
+   "sha256": "02dba5ec3827f227276cfec1ac2c140886d6c16e166025a57344f2ad23a55533",
+   "phase": "after-deployment"
+  }
+ ]
+}

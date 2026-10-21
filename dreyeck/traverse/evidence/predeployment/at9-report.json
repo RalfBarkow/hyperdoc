@@ -1,0 +1,178 @@
+{
+  "kind": "at9-report/1",
+  "resultFile": "results/at9.json",
+  "started": "2026-10-20T17:13:07.681Z",
+  "finished": "2026-10-20T17:13:18.219Z",
+  "verdicts": [
+    {
+      "id": "9.0",
+      "name": "the driver finished without error",
+      "verdict": "PASS",
+      "detail": "2026-10-20T17:13:18.219Z"
+    },
+    {
+      "id": "9.1",
+      "name": "the footer toggle was clicked for real and enabled the editor",
+      "verdict": "PASS",
+      "detail": {
+        "before": [
+          {
+            "display": "none",
+            "w": 0
+          }
+        ],
+        "after": [
+          {
+            "display": "inline",
+            "w": 11
+          }
+        ]
+      }
+    },
+    {
+      "id": "9.2",
+      "name": "the editor opened on the item, held the old text, and the new text was entered by key input",
+      "verdict": "PASS",
+      "detail": {
+        "before": "Evidence Two",
+        "textareaValue": "[[Evidence One]]"
+      }
+    },
+    {
+      "id": "9.3",
+      "name": "exactly one PUT edit request was sent, with the expected body, and the server answered 200",
+      "verdict": "PASS",
+      "detail": {
+        "url": "http://localhost:3021/page/claim-a/action",
+        "body": "action=%7B%22type%22%3A%22edit%22%2C%22id%22%3A%22a200000000000007%22%2C%22item%22%3A%7B%22type%22%3A%22paragraph%22%2C%22id%22%3A%22a200000000000007%22%2C%22text%22%3A%22%5B%5BEvidence+One%5D%5D%22%7D%2C%22date%22%3A1792516396271%7D",
+        "action": {
+          "type": "edit",
+          "id": "a200000000000007",
+          "item": {
+            "type": "paragraph",
+            "id": "a200000000000007",
+            "text": "[[Evidence One]]"
+          },
+          "date": 1792516396271
+        },
+        "responses": [
+          {
+            "url": "http://localhost:3021/page/claim-a/action",
+            "status": 200,
+            "statusText": "OK"
+          }
+        ]
+      }
+    },
+    {
+      "id": "9.4",
+      "name": "the stored page has the new text in exactly that item; every other item is unchanged",
+      "verdict": "PASS",
+      "detail": {
+        "changedItems": [
+          "a200000000000007"
+        ],
+        "before": {
+          "type": "paragraph",
+          "id": "a200000000000007",
+          "text": "[[Evidence Two]]"
+        },
+        "after": {
+          "type": "paragraph",
+          "id": "a200000000000007",
+          "text": "[[Evidence One]]"
+        }
+      }
+    },
+    {
+      "id": "9.5",
+      "name": "the journal gained exactly one entry, an edit of that item, dated after the run started",
+      "verdict": "PASS",
+      "detail": {
+        "entry": {
+          "type": "edit",
+          "id": "a200000000000007",
+          "item": {
+            "type": "paragraph",
+            "id": "a200000000000007",
+            "text": "[[Evidence One]]"
+          },
+          "date": 1792516396271
+        },
+        "seedJournalLength": 1,
+        "journalLength": 2
+      }
+    },
+    {
+      "id": "9.6",
+      "name": "the served page equals the stored file",
+      "verdict": "PASS"
+    },
+    {
+      "id": "9.7",
+      "name": "site B: every file byte-identical to the seed",
+      "verdict": "PASS",
+      "detail": {
+        "localhost:3022/claim-a": "d5e8115ae7856ae6",
+        "localhost:3022/evidence-one": "1be14d508b15b09c",
+        "localhost:3022/evidence-three": "9ada01a1f43c8d8c"
+      }
+    },
+    {
+      "id": "9.8",
+      "name": "site A: only claim-a differs from the seed",
+      "verdict": "PASS"
+    },
+    {
+      "id": "9.9",
+      "name": "before the edit: the 8 expected relations and 9 nodes in the real client",
+      "verdict": "PASS"
+    },
+    {
+      "id": "9.10",
+      "name": "after the edit and a fresh reload: the oppose edge moved to Evidence One; Evidence Two is no longer reached",
+      "verdict": "PASS",
+      "detail": {
+        "removed": [
+          "localhost:3021/claim-a oppose localhost:3021/evidence-two"
+        ],
+        "added": [
+          "localhost:3021/claim-a oppose localhost:3021/evidence-one"
+        ]
+      }
+    },
+    {
+      "id": "9.11",
+      "name": "support and oppose now run between the same two endpoints (claim-a and evidence-one on A)",
+      "verdict": "PASS",
+      "detail": {
+        "before": [
+          "support"
+        ],
+        "after": [
+          "oppose",
+          "support"
+        ]
+      }
+    },
+    {
+      "id": "9.12",
+      "name": "the typed edges of EXTRACT after the edit show the same change (8 edges)",
+      "verdict": "PASS"
+    },
+    {
+      "id": "9.13",
+      "name": "the edit sent nothing to site B and the only non-GET requests were the one PUT to site A",
+      "verdict": "PASS"
+    },
+    {
+      "id": "9.14",
+      "name": "no trouble was reported by any block in either run",
+      "verdict": "PASS"
+    }
+  ],
+  "summary": {
+    "pass": 15,
+    "fail": 0
+  }
+}

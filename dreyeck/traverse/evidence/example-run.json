@@ -1,0 +1,424 @@
+{
+  "kind": "traverse-companion-example/1",
+  "bundle": {
+    "path": "/nix/store/0829y1dx0snsx89q28j9qnnqnad7x2dc-wiki-plugin-mech-discourse-0.1.48-3/client/mech.js",
+    "sha256": "19b14c31c62f0ce92c4ecaacf78477b230d83f0fdefea48033128cb575190efd"
+  },
+  "frozenNow": 1792540800000,
+  "networkAttempts": 0,
+  "fixture": {
+    "site": "companion.example",
+    "pages": {
+      "question": {
+        "title": "Question",
+        "story": [
+          {
+            "type": "pagefold",
+            "id": "f000000000000001",
+            "text": "Claims"
+          },
+          {
+            "type": "paragraph",
+            "id": "p000000000000002",
+            "text": "[[Claim A]]"
+          },
+          {
+            "type": "pagefold",
+            "id": "f000000000000003",
+            "text": "Graph"
+          },
+          {
+            "type": "mech",
+            "id": "m000000000000004",
+            "text": "NEIGHBORS\nEXTRACT\nTRAVERSE claim\nSOLO"
+          }
+        ],
+        "journal": [
+          {
+            "type": "create",
+            "date": 1792540798000
+          }
+        ]
+      },
+      "claim-a": {
+        "title": "Claim A",
+        "story": [
+          {
+            "type": "paragraph",
+            "id": "p000000000000005",
+            "text": "A statement offered as a claim."
+          }
+        ],
+        "journal": [
+          {
+            "type": "create",
+            "date": 1792540799000
+          }
+        ]
+      }
+    },
+    "sitemap": [
+      {
+        "domain": "companion.example",
+        "slug": "question",
+        "title": "Question",
+        "date": 1792540798000,
+        "synopsis": "",
+        "links": {
+          "claim-a": "p000000000000002"
+        }
+      },
+      {
+        "domain": "companion.example",
+        "slug": "claim-a",
+        "title": "Claim A",
+        "date": 1792540799000,
+        "synopsis": "A statement offered as a claim."
+      }
+    ]
+  },
+  "program": [
+    "NEIGHBORS",
+    "EXTRACT",
+    "TRAVERSE claim",
+    "SOLO"
+  ],
+  "stages": {
+    "observedLink": {
+      "page": "question",
+      "item": {
+        "type": "paragraph",
+        "id": "p000000000000002",
+        "text": "[[Claim A]]"
+      },
+      "fold": {
+        "type": "pagefold",
+        "id": "f000000000000001",
+        "text": "Claims"
+      }
+    },
+    "neighbors": [
+      {
+        "domain": "companion.example",
+        "slug": "question",
+        "title": "Question",
+        "date": 1792540798000,
+        "synopsis": "",
+        "links": {
+          "claim-a": "p000000000000002"
+        }
+      },
+      {
+        "domain": "companion.example",
+        "slug": "claim-a",
+        "title": "Claim A",
+        "date": 1792540799000,
+        "synopsis": "A statement offered as a claim."
+      }
+    ],
+    "extract": {
+      "identity": "domain+slug",
+      "edges": [
+        {
+          "fromId": "companion.example+question",
+          "toId": "companion.example+claim-a",
+          "role": "claim",
+          "source": {
+            "pageId": "companion.example+question",
+            "fold": "claim",
+            "extractorVersion": "extract-fold-aware-v1"
+          }
+        }
+      ],
+      "metadata": {
+        "extractorVersion": "extract-fold-aware-v1",
+        "timestamp": "2026-10-21T00:00:00.000Z",
+        "pagesInScope": 2,
+        "pagesFetched": 2,
+        "pagesParsed": 2,
+        "fetchFailures": 0,
+        "parseFailures": 0,
+        "unparsedPages": [],
+        "edgesExtracted": 1,
+        "edgesByRole": {
+          "question": 0,
+          "claim": 1,
+          "support": 0,
+          "oppose": 0
+        },
+        "foldsEncountered": {
+          "claim": 1,
+          "graph": 1
+        },
+        "foldsUnknown": {
+          "graph": 1
+        },
+        "note": "fetch"
+      }
+    },
+    "resolveEdges": [
+      {
+        "fromId": "companion.example+question",
+        "toId": "companion.example+claim-a",
+        "role": "claim",
+        "source": {
+          "pageId": "companion.example+question",
+          "fold": "claim",
+          "extractorVersion": "extract-fold-aware-v1"
+        },
+        "from": {
+          "status": "resolved",
+          "declaredSite": "companion.example",
+          "slug": "question",
+          "title": "Question"
+        },
+        "target": {
+          "status": "resolved",
+          "declaredSite": "companion.example",
+          "slug": "claim-a",
+          "title": "Claim A"
+        }
+      }
+    ],
+    "traverse": [
+      {
+        "fromId": "companion.example+question",
+        "toId": "companion.example+claim-a",
+        "role": "claim",
+        "source": {
+          "pageId": "companion.example+question",
+          "fold": "claim",
+          "extractorVersion": "extract-fold-aware-v1"
+        },
+        "from": {
+          "status": "resolved",
+          "declaredSite": "companion.example",
+          "slug": "question",
+          "title": "Question"
+        },
+        "target": {
+          "status": "resolved",
+          "declaredSite": "companion.example",
+          "slug": "claim-a",
+          "title": "Claim A"
+        },
+        "count": 1
+      }
+    ],
+    "presentGraph": {
+      "nodes": [
+        {
+          "type": "WikiPage",
+          "in": [],
+          "out": [
+            0
+          ],
+          "props": {
+            "name": "companion.example/question",
+            "site": "companion.example",
+            "slug": "question",
+            "title": "Question",
+            "id": "companion.example+question"
+          }
+        },
+        {
+          "type": "WikiPage",
+          "in": [
+            0
+          ],
+          "out": [],
+          "props": {
+            "name": "companion.example/claim-a",
+            "site": "companion.example",
+            "slug": "claim-a",
+            "title": "Claim A",
+            "id": "companion.example+claim-a"
+          }
+        }
+      ],
+      "rels": [
+        {
+          "type": "claim",
+          "from": 0,
+          "to": 1,
+          "props": {
+            "fold": "claim",
+            "declaredOn": "companion.example+question",
+            "extractorVersion": "extract-fold-aware-v1"
+          }
+        }
+      ]
+    },
+    "traverseBlock": {
+      "traversal": {
+        "root": "companion.example+question",
+        "roles": [
+          "claim"
+        ],
+        "depth": 4,
+        "edges": [
+          {
+            "fromId": "companion.example+question",
+            "toId": "companion.example+claim-a",
+            "role": "claim",
+            "source": {
+              "pageId": "companion.example+question",
+              "fold": "claim",
+              "extractorVersion": "extract-fold-aware-v1"
+            },
+            "from": {
+              "status": "resolved",
+              "declaredSite": "companion.example",
+              "slug": "question",
+              "title": "Question"
+            },
+            "target": {
+              "status": "resolved",
+              "declaredSite": "companion.example",
+              "slug": "claim-a",
+              "title": "Claim A"
+            },
+            "count": 1
+          }
+        ]
+      },
+      "aspect": [
+        {
+          "id": "b2",
+          "result": [
+            {
+              "name": "TRAVERSE claim",
+              "graph": {
+                "nodes": [
+                  {
+                    "type": "WikiPage",
+                    "in": [],
+                    "out": [
+                      0
+                    ],
+                    "props": {
+                      "name": "companion.example/question",
+                      "site": "companion.example",
+                      "slug": "question",
+                      "title": "Question",
+                      "id": "companion.example+question"
+                    }
+                  },
+                  {
+                    "type": "WikiPage",
+                    "in": [
+                      0
+                    ],
+                    "out": [],
+                    "props": {
+                      "name": "companion.example/claim-a",
+                      "site": "companion.example",
+                      "slug": "claim-a",
+                      "title": "Claim A",
+                      "id": "companion.example+claim-a"
+                    }
+                  }
+                ],
+                "rels": [
+                  {
+                    "type": "claim",
+                    "from": 0,
+                    "to": 1,
+                    "props": {
+                      "fold": "claim",
+                      "declaredOn": "companion.example+question",
+                      "extractorVersion": "extract-fold-aware-v1"
+                    }
+                  }
+                ]
+              }
+            }
+          ],
+          "source": "TRAVERSE claim"
+        }
+      ]
+    },
+    "solo": [
+      {
+        "url": "/plugins/solo/dialog/#",
+        "name": "solo",
+        "data": {
+          "type": "batch",
+          "sources": [
+            {
+              "source": "TRAVERSE claim",
+              "aspects": [
+                {
+                  "name": "TRAVERSE claim",
+                  "graph": {
+                    "nodes": [
+                      {
+                        "type": "WikiPage",
+                        "in": [],
+                        "out": [
+                          0
+                        ],
+                        "props": {
+                          "name": "companion.example/question",
+                          "site": "companion.example",
+                          "slug": "question",
+                          "title": "Question",
+                          "id": "companion.example+question"
+                        }
+                      },
+                      {
+                        "type": "WikiPage",
+                        "in": [
+                          0
+                        ],
+                        "out": [],
+                        "props": {
+                          "name": "companion.example/claim-a",
+                          "site": "companion.example",
+                          "slug": "claim-a",
+                          "title": "Claim A",
+                          "id": "companion.example+claim-a"
+                        }
+                      }
+                    ],
+                    "rels": [
+                      {
+                        "type": "claim",
+                        "from": 0,
+                        "to": 1,
+                        "props": {
+                          "fold": "claim",
+                          "declaredOn": "companion.example+question",
+                          "extractorVersion": "extract-fold-aware-v1"
+                        }
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          ],
+          "pageKey": "k-question"
+        }
+      }
+    ]
+  },
+  "statuses": [
+    "NEIGHBORS⇒ 2 pages, 1 sites",
+    "EXTRACT ⇒ parsed 2/2 pages, 1 typed edges (claim: 1; unknown folds: 1)",
+    "TRAVERSE claim ⇒ 1 relations, 2 nodes, 0 unresolved",
+    "SOLO",
+    "SOLO ⇒ 1 sources, 1 aspects"
+  ],
+  "troubles": [],
+  "fetches": [
+    "//companion.example/claim-a.json",
+    "//companion.example/question.json"
+  ],
+  "publications": [
+    {
+      "block": "b2",
+      "topic": "aspect"
+    }
+  ]
+}

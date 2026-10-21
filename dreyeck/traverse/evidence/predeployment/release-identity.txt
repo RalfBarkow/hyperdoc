@@ -1,0 +1,4 @@
+C1 1dbedae7b776ca38c36dc04302796be7a07b9371
+C2 a83c3e0d6662a10af000696fc3f1401524cef818
+expected x86_64-linux wiki-discourse /nix/store/ka7nw9n09d1iqqk2in7v9pdbskdf1qb7-wiki-dreyeck-discourse-0.39.2
+production base /nix/store/idhgz3kwwj5z24s6kdazsggdgjqngri3-wiki-0.39.2

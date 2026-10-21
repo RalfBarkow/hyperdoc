@@ -1,0 +1,21 @@
+<html><head><title>What the Deployment Proves</title></head><body><in-package>dreyeck/traverse</in-package><h1>What the Deployment Proves</h1>
+<p>The records of this reading fall into two groups by when they were made. Their phase is part of each record, so an older statement is never shown as a current fact. <a expr="(deployment-evidence)">Inspect both groups and what they establish</a>.</p>
+<h2>Before the deployment</h2>
+<ul>
+<li><a expr="(record-of (retained-reading) &quot;dreyeck/mech-profile-consumer-acceptance-traverse.json&quot;)" view="Record">The consumer acceptance</a>, committed on the branch, records the x86_64-linux store path of <code>wiki-discourse</code> as <em>evaluated, not built</em>. It also records the bundle <code>19b14c31…</code> and Solo 0.1.30-1.</li>
+<li><a expr="(record-of (retained-reading) &quot;predeployment/at9-report.json&quot;)" view="Record">The AT-9 verdicts</a> and <a expr="(record-of (retained-reading) &quot;predeployment/AT9-RESULT.md&quot;)" view="Record">their report</a> come from two isolated local wikis. They show that an edit through the real editor was stored with its journal entry and changed the traversed relations.</li>
+<li><a expr="(record-of (retained-reading) &quot;predeployment/release-identity.txt&quot;)" view="Record">The release identity</a> names the two commits and the expected store path.</li>
+</ul>
+<h2>After the deployment</h2>
+<p><a expr="(record-of (retained-reading) &quot;postdeployment/http-observation.json&quot;)" view="Record">One HTTP observation</a> from 2026-10-20T22:04:55Z: <code>discourse.dreyeck.ch</code> and <code>hyperdoc.dreyeck.ch</code> served <code>mech.js</code> with exactly the hash recorded before. They also reported the component versions of the production recipe.</p>
+<h2>What follows, and what does not</h2>
+<p>The same bundle hash appears in three places, and the reading checks this when it loads:</p>
+<ul>
+<li>the record from before the deployment;</li>
+<li>the example run;</li>
+<li>the served file.</li>
+</ul>
+<p>It follows that the farm serves the bytes that were tested end to end. It does <em>not</em> follow which store path runs, what <code>wiki.service</code> starts, or which system generation is active. Those are server facts. The operator's observation of the activation was not supplied to this reading, and it is recorded as missing rather than inferred.</p>
+<p><a expr="(source-workspace)" view="Topicmap">The Source/Composition projection</a> ends with the association from the record made before the deployment to the served bundle.</p>
+<p>Previous: <a page="From PageFold to Discourse Graph">From PageFold to Discourse Graph</a>. Start: <a page="From Git Revision to Nix Package">From Git Revision to Nix Package</a>. Code pages: <a page="Revisions, Sources and the Nix Package">Revisions, Sources and the Nix Package</a> · <a page="Installing TRAVERSE in the Discourse Entry">Installing TRAVERSE in the Discourse Entry</a> · <a page="The Two-Page Example, Stage by Stage">The Two-Page Example, Stage by Stage</a> · <a page="Records Before and After Deployment">Records Before and After Deployment</a> · <a page="Two Projections of the Companion">Two Projections of the Companion</a>.</p>
+</body></html>

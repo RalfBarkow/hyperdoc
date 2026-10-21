@@ -20,9 +20,9 @@
   '("asdf-systems" "dreyeck/authority/reading" "dreyeck/clog-tutorial/reading"
     "dreyeck/fedwiki-config/reading" "dreyeck/fedwiki-source-relations" "dreyeck/gesture/reading"
     "dreyeck/lisp-critic/reading" "dreyeck/lisp-image" "dreyeck/mech-intake/reading"
-    "dreyeck/nested-actions/reading" "dreyeck/topicmap/tala/reading" "dreyeck/upstream-intake"
-    "dreyeck/upstream-intake/temporal" "dreyeck/wiki-link" "dreyeck/work/reading"
-    "dreyeck/workflow/reading" "hyperbook" "hyperdoc" "hyperdoc/explorer"
+    "dreyeck/nested-actions/reading" "dreyeck/topicmap/tala/reading" "dreyeck/traverse/reading"
+    "dreyeck/upstream-intake" "dreyeck/upstream-intake/temporal" "dreyeck/wiki-link"
+    "dreyeck/work/reading" "dreyeck/workflow/reading" "hyperbook" "hyperdoc" "hyperdoc/explorer"
     "lisp-classes" "lisp-functions" "moldable-inspector"))
 
 (defun catalog-hyperbook-ids (&optional (catalog hyperbook:*catalog*))
