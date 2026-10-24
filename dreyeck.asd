@@ -742,6 +742,7 @@
   ((:MODULE "dreyeck/traverse" :SERIAL T :COMPONENTS
   ((:FILE "revisions") (:FILE "entry") (:FILE "example") (:FILE "deployment") (:FILE "workspace")
    (:FILE "wiki-snapshot") (:FILE "replay") (:FILE "experiment-workspace") (:FILE "wiki-topicmap")
+   (:FILE "item-search")
    (:MODULE "evidence" :COMPONENTS
     ((:STATIC-FILE "sources.json") (:STATIC-FILE "example-driver.mjs")
      (:STATIC-FILE "example-run.json")
@@ -852,7 +853,15 @@
          (:STATIC-FILE "zach-babb--dorkbot-pdx--8-dec-2025.json")
          (:STATIC-FILE "zachs-lineup.json") (:STATIC-FILE "zerstrungslust.json")))))
      (:MODULE "curiosity" :COMPONENTS
-      ((:STATIC-FILE "manifest.json") (:STATIC-FILE "curiosity-token.json")))))))
+      ((:STATIC-FILE "manifest.json") (:STATIC-FILE "curiosity-token.json")))
+     (:MODULE "search" :COMPONENTS
+      ((:STATIC-FILE "sources.json")
+       (:MODULE "wiki-client" :COMPONENTS ((:STATIC-FILE "neighborhood.js")))
+       (:MODULE "wiki-server" :COMPONENTS ((:STATIC-FILE "search.js")))
+       (:MODULE "wiki-plugin-search" :COMPONENTS ((:STATIC-FILE "search.js")))
+       (:MODULE "search" :COMPONENTS
+        ((:STATIC-FILE "scrape.rb") (:STATIC-FILE "rollup.rb") (:STATIC-FILE "found.rb")
+         (:STATIC-FILE "server.rb") (:STATIC-FILE "cron.sh")))))))))
  (:MODULE "dreyeck/pages/traverse" :COMPONENTS
   ((:STATIC-FILE "From Git Revision to Nix Package.html")
    (:STATIC-FILE "How TRAVERSE Enters Mech.html")
@@ -862,7 +871,8 @@
    (:STATIC-FILE "From WALK to TRAVERSE.html")
    (:STATIC-FILE "Reading an Actual Discourse Graph.html")
    (:STATIC-FILE "What Remains to Be Demonstrated.html")
-   (:STATIC-FILE "Curiosity Token as Topic Map.html"))))
+   (:STATIC-FILE "Curiosity Token as Topic Map.html")
+   (:STATIC-FILE "Federated Search Without a Central Index.html"))))
   :IN-ORDER-TO
   ((ASDF/LISP-ACTION:TEST-OP
     (ASDF/LISP-ACTION:TEST-OP "dreyeck/traverse/reading/tests"))))
@@ -872,14 +882,15 @@
   ("dreyeck/traverse/reading")
   :COMPONENTS
   ((:FILE "dreyeck/tests/traverse-companion") (:FILE "dreyeck/tests/traverse-discourse")
- (:FILE "dreyeck/tests/wiki-topicmap"))
+ (:FILE "dreyeck/tests/wiki-topicmap") (:FILE "dreyeck/tests/item-search"))
   :PERFORM
   (ASDF/LISP-ACTION:TEST-OP (ASDF/USER::OP ASDF/COMPONENT:COMPONENT)
    (DECLARE (IGNORE ASDF/USER::OP ASDF/COMPONENT:COMPONENT))
    (PROGN
  (UIOP/PACKAGE:SYMBOL-CALL :DREYECK/TRAVERSE/TESTS :RUN-TESTS)
  (UIOP/PACKAGE:SYMBOL-CALL :DREYECK/TRAVERSE/DISCOURSE-TESTS :RUN-TESTS)
- (UIOP/PACKAGE:SYMBOL-CALL :DREYECK/TRAVERSE/WIKI-TOPICMAP-TESTS :RUN-TESTS))))
+ (UIOP/PACKAGE:SYMBOL-CALL :DREYECK/TRAVERSE/WIKI-TOPICMAP-TESTS :RUN-TESTS)
+ (UIOP/PACKAGE:SYMBOL-CALL :DREYECK/TRAVERSE/ITEM-SEARCH-TESTS :RUN-TESTS))))
 
 (ASDF/PARSE-DEFSYSTEM:DEFSYSTEM "dreyeck/fedwiki-config/reading" :DESCRIPTION
                                 "Reading declared Wiki recipes, Mech compositions and independent fork observations"

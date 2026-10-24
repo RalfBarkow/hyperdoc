@@ -1,0 +1,65 @@
+<html><head><title>Federated Search Without a Central Index</title></head><body><in-package>dreyeck/traverse</in-package><h1>Federated Search Without a Central Index</h1>
+<p>Ward's item <code>SEARCH ITEMS cf80b0444c62866e</code> finds a story item on other sites. Who answers that question? Three searches exist around Federated Wiki, and they answer it differently. Their sources are retained here at fixed revisions: <a expr="(search-sources-reading)">the retained sources</a>.</p>
+<h2>The neighborhood search</h2>
+<p>The client searches the sites in the reader's current neighborhood, in the browser: <a expr="(search-source &quot;client:search&quot;)" view="Source definition">neighborhood.search</a> in fedwiki/wiki-client. It asks one index per site.</p>
+<ul>
+<li>The index normally comes from the site itself, as <code>system/site-index.json</code>. <a expr="(search-source &quot;server:site-index&quot;)" view="Source definition">The server builds it</a> from each page's title and text.</li>
+<li>When that index is missing, the client builds one from the sitemap's synopses.</li>
+<li><a expr="(search-source &quot;client:extractPageText&quot;)" view="Source definition">The text is taken</a> from paragraph, markdown, html, reference and a few other item types.</li>
+</ul>
+<p>Item ids are not indexed, and neither is the text of search items. A neighborhood search for <code>cf80b0444c62866e</code> finds pages whose text mentions the id, not pages that hold the item. Its search space is the neighborhood: no further site is asked.</p>
+<h2>The Search plugin and the search service</h2>
+<p>The Search plugin parses its text into a request, for example <code>find: items, query: cf80b0444c62866e</code>: <a expr="(search-source &quot;plugin:parse&quot;)" view="Source definition">parse</a>. It sends the request to <code>/match</code> of a search service: <a expr="(search-source &quot;plugin:search&quot;)" view="Source definition">search</a>. That service is <a expr="(search-source &quot;plugin:provider&quot;)" view="Source definition">query.search.federatedwiki.org</a> unless the item names another one in its <code>site</code> field.</p>
+<p>With the word SEARCH in its text, the item asks only when its button is pressed. Without it, the item asks as soon as it is shown: <a expr="(search-source &quot;plugin:handle&quot;)" view="Source definition">handle</a>.</p>
+<p>The service is Ward's <a href="https://github.com/WardCunningham/search">WardCunningham/search</a>:</p>
+<ul>
+<li><strong>Schedule:</strong> <a expr="(search-source &quot;crawler:schedule&quot;)" view="Source definition">Every six hours</a> its crawler reads the sitemap of each site it already holds. It then fetches the pages that changed since the last run: <a expr="(search-source &quot;crawler:incremental&quot;)" view="Source definition">the incremental scrape</a>.</li>
+<li><strong>What it indexes:</strong> it writes the words, links, sites, item ids and plugin types of every page. <a expr="(search-source &quot;crawler:items&quot;)" view="Source definition">For item ids it writes the alias, else the id.</a></li>
+<li><strong>Rollup:</strong> <a expr="(search-source &quot;crawler:rollup&quot;)" view="Source definition">Rollup</a> combines these lists per site and for the whole index.</li>
+<li><strong>Answer:</strong> <a expr="(search-source &quot;service:match&quot;)" view="Source definition">/match</a> first picks the sites whose combined list holds the query, then their pages: <a expr="(search-source &quot;service:sites-pages&quot;)" view="Source definition">sites and pages</a>. It answers with slugs and the sites that hold them: <a expr="(search-source &quot;service:references&quot;)" view="Source definition">references</a>.</li>
+</ul>
+<p>The answer comes from the service's own index, as fresh as its last crawl. The data stays federated, because every site remains the authority for its pages. Which sites a search reaches is decided by one index.</p>
+<h2>How the service learns of new sites</h2>
+<p>The crawler does not only read the sites it knows; it also discovers sites.</p>
+<ul>
+<li>From every page it records the sites the page names: <a expr="(search-source &quot;crawler:named-sites&quot;)" view="Source definition">the site of a reference or other item, the domains of a roster, the site of a journal entry such as a fork</a>.</li>
+<li><a expr="(search-source &quot;crawler:found&quot;)" view="Source definition">found.rb</a> compares all named sites with the sites it holds. It adds the missing ones, except local addresses, so the next crawl reads them.</li>
+</ul>
+<p>Discovery therefore exists, and it follows links, rosters and forks from the sites already known. It runs in one place, though, and its result is one index.</p>
+<h2>An item id search over the retained pages</h2>
+<p>This companion holds Wiki pages of three sites: <a expr="(retained-search-space)">the search space</a>.</p>
+<ul>
+<li>110 pages of discourse.dreyeck.ch, every page of its retained sitemap;</li>
+<li>Ward's Discourse Graphs page;</li>
+<li>Curiosity Token.</li>
+</ul>
+<p>Over these pages HyperDoc can search for an item id itself, with the crawler's rule (alias, else id), and without any request. The search keeps three things apart:</p>
+<ul>
+<li>what was asked;</li>
+<li>where it looked;</li>
+<li>which story items it observed.</li>
+</ul>
+<p>The results:</p>
+<ul>
+<li><a expr="(curiosity-token-search)" view="Search">ITEMS cf80b0444c62866e</a> observes one occurrence, on Curiosity Token. Only that page of found.ward.fed.wiki is retained, so this says nothing about the rest of that site or the federation.</li>
+<li><a expr="(forked-item-search)" view="Search">ITEMS 31bd93ad173f651c</a>, Ward's sentence about a distributed graph, occurs on two sites: ward.dojo.fed.wiki and discourse.dreyeck.ch, carried by a fork. <a expr="(item-search-topicmap)" view="Topicmap">The search as a Topicmap</a> shows both occurrences as separate items, related by their shared id. From either one, the Workspace can be reprojected onto the projection of its page.</li>
+<li><a expr="(template-item-search)" view="Search">ITEMS 29c28902048db774</a>, the claim fold of the Claim Template, occurs on 42 pages of discourse.dreyeck.ch. The template carries its item ids along, like a curiosity token.</li>
+</ul>
+<p>What the central index would answer is <a expr="(index-answer (curiosity-token-search))" view="Open statement">not recorded</a>. A recorded answer is the next step: it would show occurrences the index knows and this space does not, and occurrences the index reports that a page no longer holds. An index entry is a report; an item observed in a story is an occurrence. The two stay apart.</p>
+<h2>What independent discovery would need</h2>
+<p>The retained pages already name further sites. By the crawler's rule they name <a expr="(discovery-candidates)">160 sites outside the search space</a>. The most frequent is <a expr="(first (discovery-candidates))" view="Discovery candidate">wiki.ralfbarkow.ch</a>, named by 44 pages. None of them is fetched here. To search them without a central index, a reader would need to:</p>
+<ol>
+<li>choose which of them to include;</li>
+<li>fetch their sitemaps and pages;</li>
+<li>repeat the step for the sites those pages name.</li>
+</ol>
+<p>That is the crawler's loop, run for one reader's chosen neighborhood instead of for one index.</p>
+<h2>Three properties, not one</h2>
+<p>Federated data, federated search and decentralized discovery are different properties:</p>
+<ul>
+<li>A search service can run in one place and still report on federated data.</li>
+<li>Independent searches can exist and still miss sources they never discover.</li>
+</ul>
+<p>What this reading can show is where each search looks, what it observes, and what it does not reach.</p>
+<p>Code page: <a page="Searching Retained Pages for an Item Id">Searching Retained Pages for an Item Id</a>. Related: <a page="Curiosity Token as Topic Map">Curiosity Token as Topic Map</a> · <a page="What Remains to Be Demonstrated?">What Remains to Be Demonstrated?</a>.</p>
+</body></html>

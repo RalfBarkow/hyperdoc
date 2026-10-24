@@ -1,0 +1,286 @@
+{
+ "kind": "search-sources/1",
+ "retained": "2026-10-24",
+ "method": "git clone --filter=blob:none of the public repositories; files written by git show OID:PATH",
+ "revisions": {
+  "wiki-client": {
+   "authority": "https://github.com/fedwiki/wiki-client",
+   "oid": "d59dbd68c2a539d32add72e06d2fd74e9d6d60c2"
+  },
+  "wiki-server": {
+   "authority": "https://github.com/fedwiki/wiki-server",
+   "oid": "251c2881dc91bd11944fe8da4d3817602b60a333"
+  },
+  "wiki-plugin-search": {
+   "authority": "https://github.com/fedwiki/wiki-plugin-search",
+   "oid": "62fb3a5068dd1ba7be0e3781fd7c8faddc5a8a55"
+  },
+  "search": {
+   "authority": "https://github.com/WardCunningham/search",
+   "oid": "ecb09effc4f1b095abcb8917302d566589cf2c32"
+  }
+ },
+ "files": [
+  {
+   "file": "wiki-client/neighborhood.js",
+   "repo": "wiki-client",
+   "authority": "https://github.com/fedwiki/wiki-client",
+   "revision": "d59dbd68c2a539d32add72e06d2fd74e9d6d60c2",
+   "path": "lib/neighborhood.js",
+   "sha256": "3777ec77ca92e4955183e3af0a1c56435daaa4e4c50a166557db816e86435ba5",
+   "retainedBy": "git show d59dbd68c2a539d32add72e06d2fd74e9d6d60c2:lib/neighborhood.js"
+  },
+  {
+   "file": "wiki-server/search.js",
+   "repo": "wiki-server",
+   "authority": "https://github.com/fedwiki/wiki-server",
+   "revision": "251c2881dc91bd11944fe8da4d3817602b60a333",
+   "path": "lib/search.js",
+   "sha256": "ee874cd4794947be385e2534c374026411ed26b127bab28d3d7a10eaa191f560",
+   "retainedBy": "git show 251c2881dc91bd11944fe8da4d3817602b60a333:lib/search.js"
+  },
+  {
+   "file": "wiki-plugin-search/search.js",
+   "repo": "wiki-plugin-search",
+   "authority": "https://github.com/fedwiki/wiki-plugin-search",
+   "revision": "62fb3a5068dd1ba7be0e3781fd7c8faddc5a8a55",
+   "path": "client/search.js",
+   "sha256": "a53ac2348c503c9a312c7bdc2e4ea8c7d9badd061a2feea50af61b3f93b885da",
+   "retainedBy": "git show 62fb3a5068dd1ba7be0e3781fd7c8faddc5a8a55:client/search.js"
+  },
+  {
+   "file": "search/scrape.rb",
+   "repo": "search",
+   "authority": "https://github.com/WardCunningham/search",
+   "revision": "ecb09effc4f1b095abcb8917302d566589cf2c32",
+   "path": "scrape.rb",
+   "sha256": "584dbf8b327146ef27a10778006a9de168235c86296c470d0109e47402e13ca3",
+   "retainedBy": "git show ecb09effc4f1b095abcb8917302d566589cf2c32:scrape.rb"
+  },
+  {
+   "file": "search/rollup.rb",
+   "repo": "search",
+   "authority": "https://github.com/WardCunningham/search",
+   "revision": "ecb09effc4f1b095abcb8917302d566589cf2c32",
+   "path": "rollup.rb",
+   "sha256": "34fb7ab98ac8d32a069f155944a50b31a3eba4945c4c4fe7ca02236e829ecb31",
+   "retainedBy": "git show ecb09effc4f1b095abcb8917302d566589cf2c32:rollup.rb"
+  },
+  {
+   "file": "search/found.rb",
+   "repo": "search",
+   "authority": "https://github.com/WardCunningham/search",
+   "revision": "ecb09effc4f1b095abcb8917302d566589cf2c32",
+   "path": "found.rb",
+   "sha256": "f9ca0072adb3765ae4f8534ccd3d71dc9a1af8a4f518194886bbb82cc8070744",
+   "retainedBy": "git show ecb09effc4f1b095abcb8917302d566589cf2c32:found.rb"
+  },
+  {
+   "file": "search/server.rb",
+   "repo": "search",
+   "authority": "https://github.com/WardCunningham/search",
+   "revision": "ecb09effc4f1b095abcb8917302d566589cf2c32",
+   "path": "server.rb",
+   "sha256": "6c072d3f4a8981719f03ddadde0ba1fffe4612221bd7b387129f4a602e65659d",
+   "retainedBy": "git show ecb09effc4f1b095abcb8917302d566589cf2c32:server.rb"
+  },
+  {
+   "file": "search/cron.sh",
+   "repo": "search",
+   "authority": "https://github.com/WardCunningham/search",
+   "revision": "ecb09effc4f1b095abcb8917302d566589cf2c32",
+   "path": "cron.sh",
+   "sha256": "0f76de6ed0476f9f8cff0f99631a4cc42166705de46719979ad8d962cfcc17c8",
+   "retainedBy": "git show ecb09effc4f1b095abcb8917302d566589cf2c32:cron.sh"
+  }
+ ],
+ "excerpts": [
+  {
+   "key": "client:extractPageText",
+   "repo": "wiki-client",
+   "path": "lib/neighborhood.js",
+   "file": "wiki-client/neighborhood.js",
+   "authority": "https://github.com/fedwiki/wiki-client",
+   "revision": "d59dbd68c2a539d32add72e06d2fd74e9d6d60c2",
+   "start": 5779,
+   "end": 7055,
+   "sha256": "497042648c017574809ab4372b83bd11f2dbb1703e28d7681487b5ec67b06bed"
+  },
+  {
+   "key": "client:search",
+   "repo": "wiki-client",
+   "path": "lib/neighborhood.js",
+   "file": "wiki-client/neighborhood.js",
+   "authority": "https://github.com/fedwiki/wiki-client",
+   "revision": "d59dbd68c2a539d32add72e06d2fd74e9d6d60c2",
+   "start": 8191,
+   "end": 10870,
+   "sha256": "61831cd83677d7981ad41198317b19ec08b04fa892583a47ba9f31b1663c58b0"
+  },
+  {
+   "key": "server:site-index",
+   "repo": "wiki-server",
+   "path": "lib/search.js",
+   "file": "wiki-server/search.js",
+   "authority": "https://github.com/fedwiki/wiki-server",
+   "revision": "251c2881dc91bd11944fe8da4d3817602b60a333",
+   "start": 7328,
+   "end": 8192,
+   "sha256": "037329be31bfb08e610efe9b3ede4e159132c238ccd77720540bda1348f3ae8d"
+  },
+  {
+   "key": "plugin:provider",
+   "repo": "wiki-plugin-search",
+   "path": "client/search.js",
+   "file": "wiki-plugin-search/search.js",
+   "authority": "https://github.com/fedwiki/wiki-plugin-search",
+   "revision": "62fb3a5068dd1ba7be0e3781fd7c8faddc5a8a55",
+   "start": 0,
+   "end": 63,
+   "sha256": "e196f5e9777215980a62a8ece368d811d8f8ebe18a4f6a2f52b70ebd39487802"
+  },
+  {
+   "key": "plugin:search",
+   "repo": "wiki-plugin-search",
+   "path": "client/search.js",
+   "file": "wiki-plugin-search/search.js",
+   "authority": "https://github.com/fedwiki/wiki-plugin-search",
+   "revision": "62fb3a5068dd1ba7be0e3781fd7c8faddc5a8a55",
+   "start": 1348,
+   "end": 1826,
+   "sha256": "22f90a9224c1ce6ed6ca46313c58a89ae3fb12efb32e37e7a119bd5b0e682721"
+  },
+  {
+   "key": "plugin:handle",
+   "repo": "wiki-plugin-search",
+   "path": "client/search.js",
+   "file": "wiki-plugin-search/search.js",
+   "authority": "https://github.com/fedwiki/wiki-plugin-search",
+   "revision": "62fb3a5068dd1ba7be0e3781fd7c8faddc5a8a55",
+   "start": 2082,
+   "end": 2500,
+   "sha256": "9047b8157de72ac5f5c6bab64d117d2efe5fe257404e3777627a3c22448980d9"
+  },
+  {
+   "key": "plugin:parse",
+   "repo": "wiki-plugin-search",
+   "path": "client/search.js",
+   "file": "wiki-plugin-search/search.js",
+   "authority": "https://github.com/fedwiki/wiki-plugin-search",
+   "revision": "62fb3a5068dd1ba7be0e3781fd7c8faddc5a8a55",
+   "start": 2501,
+   "end": 3245,
+   "sha256": "58556552eab63d6c810ef9989a39b48db68490750827cc5767535cd8fae08e0e"
+  },
+  {
+   "key": "crawler:sites",
+   "repo": "search",
+   "path": "scrape.rb",
+   "file": "search/scrape.rb",
+   "authority": "https://github.com/WardCunningham/search",
+   "revision": "ecb09effc4f1b095abcb8917302d566589cf2c32",
+   "start": 202,
+   "end": 963,
+   "sha256": "65e9a22cf85db2d21a46932e8bf45f0b96f7eb5837c7e7c2eb7b88533e31d0c1"
+  },
+  {
+   "key": "crawler:named-sites",
+   "repo": "search",
+   "path": "scrape.rb",
+   "file": "search/scrape.rb",
+   "authority": "https://github.com/WardCunningham/search",
+   "revision": "ecb09effc4f1b095abcb8917302d566589cf2c32",
+   "start": 2504,
+   "end": 3510,
+   "sha256": "7869515ee40cc9ff5472941d4ac3b341a77125dc376128a18103beccf37d75a5"
+  },
+  {
+   "key": "crawler:items",
+   "repo": "search",
+   "path": "scrape.rb",
+   "file": "search/scrape.rb",
+   "authority": "https://github.com/WardCunningham/search",
+   "revision": "ecb09effc4f1b095abcb8917302d566589cf2c32",
+   "start": 3511,
+   "end": 3712,
+   "sha256": "5ff159d7a4027ea5528d30ea438ba6c8873f202bb8762c8209f8df1a761e8c6e"
+  },
+  {
+   "key": "crawler:incremental",
+   "repo": "search",
+   "path": "scrape.rb",
+   "file": "search/scrape.rb",
+   "authority": "https://github.com/WardCunningham/search",
+   "revision": "ecb09effc4f1b095abcb8917302d566589cf2c32",
+   "start": 4168,
+   "end": 4564,
+   "sha256": "1b4d7e1c848e03135cb85a413777886f157494e8914314303b7dfd1bff1c956b"
+  },
+  {
+   "key": "crawler:rollup",
+   "repo": "search",
+   "path": "rollup.rb",
+   "file": "search/rollup.rb",
+   "authority": "https://github.com/WardCunningham/search",
+   "revision": "ecb09effc4f1b095abcb8917302d566589cf2c32",
+   "start": 634,
+   "end": 860,
+   "sha256": "ad056ebf63bc777929dc3e82b536b9a7352b2eccf5fb29b8db959d1f889ccc1d"
+  },
+  {
+   "key": "crawler:found",
+   "repo": "search",
+   "path": "found.rb",
+   "file": "search/found.rb",
+   "authority": "https://github.com/WardCunningham/search",
+   "revision": "ecb09effc4f1b095abcb8917302d566589cf2c32",
+   "start": 0,
+   "end": 613,
+   "sha256": "92dd9a0da02c54b40fb5337dfc2768fefbf648dbae5237b1ffa9aa625f1220a8"
+  },
+  {
+   "key": "crawler:schedule",
+   "repo": "search",
+   "path": "cron.sh",
+   "file": "search/cron.sh",
+   "authority": "https://github.com/WardCunningham/search",
+   "revision": "ecb09effc4f1b095abcb8917302d566589cf2c32",
+   "start": 0,
+   "end": 297,
+   "sha256": "9acec791a9ddc0f3fb47dcad1da20f2f4838e8e1744af79f2684f7e969ba9444"
+  },
+  {
+   "key": "service:match",
+   "repo": "search",
+   "path": "server.rb",
+   "file": "search/server.rb",
+   "authority": "https://github.com/WardCunningham/search",
+   "revision": "ecb09effc4f1b095abcb8917302d566589cf2c32",
+   "start": 4844,
+   "end": 5280,
+   "sha256": "4c4282f1cfeaa295699e91afaa42b93ff50f68c010f6b351742fe6ed326b2b51"
+  },
+  {
+   "key": "service:sites-pages",
+   "repo": "search",
+   "path": "server.rb",
+   "file": "search/server.rb",
+   "authority": "https://github.com/WardCunningham/search",
+   "revision": "ecb09effc4f1b095abcb8917302d566589cf2c32",
+   "start": 818,
+   "end": 1269,
+   "sha256": "568a2e5f33f406a5162fc7c68ebb46a5964e23a25ab57fb9985bc3c99c4a2d63"
+  },
+  {
+   "key": "service:references",
+   "repo": "search",
+   "path": "server.rb",
+   "file": "search/server.rb",
+   "authority": "https://github.com/WardCunningham/search",
+   "revision": "ecb09effc4f1b095abcb8917302d566589cf2c32",
+   "start": 1270,
+   "end": 1472,
+   "sha256": "9310efb6d894bfed0660f6570bb7aeba9c6004465ec1b82af0bb67f37ace5f07"
+  }
+ ]
+}
