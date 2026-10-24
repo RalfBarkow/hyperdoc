@@ -1,0 +1,18 @@
+{
+ "kind": "wiki-page-retention/1",
+ "method": "plain HTTP GET without credentials by a Claude Code session; nothing was written",
+ "note": "The version served at fetch time. The live page may differ; links to it are not retained evidence. Search results of the page's SEARCH items are not part of this record.",
+ "files": [
+  {
+   "file": "curiosity-token.json",
+   "kind": "page",
+   "url": "http://found.ward.fed.wiki/curiosity-token.json",
+   "fetchedAt": "2026-10-24T06:14:16Z",
+   "httpStatus": 200,
+   "bytes": 8623,
+   "sha256": "2971697e03c0ef2db03b4646cedab0688366410188eae46a8fa06f2028827070",
+   "site": "found.ward.fed.wiki",
+   "slug": "curiosity-token"
+  }
+ ]
+}

@@ -73,8 +73,8 @@
   (let ((scheme (subseq (page-url page) 0 (search "://" (page-url page)))))
     (format nil "~A://~A/view/~A" scheme (page-site page) (page-slug page))))
 
-(defun make-wiki-page (entry)
-  (let* ((json (read-json (concatenate 'string "discourse/" (gethash "file" entry))))
+(defun make-wiki-page (entry &optional (evidence-directory "discourse/"))
+  (let* ((json (read-json (concatenate 'string evidence-directory (gethash "file" entry))))
          (page (make-instance 'wiki-page
                               :site (gethash "site" entry) :slug (gethash "slug" entry)
                               :title (gethash "title" json) :file (gethash "file" entry)

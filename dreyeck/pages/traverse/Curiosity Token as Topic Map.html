@@ -1,0 +1,38 @@
+<html><head><title>Curiosity Token as Topic Map</title></head><body><in-package>dreyeck/traverse</in-package><h1>Curiosity Token as Topic Map</h1>
+<p>Ward's page <a href="http://found.ward.fed.wiki/view/curiosity-token">Curiosity Token on found.ward.fed.wiki</a> is shown here a second time, as a Topicmap of the objects it consists of. Nothing is drawn by hand: every topic is an object read from the page's JSON.</p>
+<ul>
+<li><a expr="(curiosity-token-page)" view="Wiki page">The page as retained</a>, fetched on 2026-10-24.</li>
+<li><a expr="(curiosity-token-record)">The record of the retained JSON</a>: its URL, fetch time, status and SHA-256, which is checked when the page loads.</li>
+<li><a expr="(page-json (curiosity-token-page))">The JSON itself, as parsed</a>.</li>
+</ul>
+<h2>The token is an item id</h2>
+<p><a expr="(curiosity-item &quot;cf80b0444c62866e&quot;)" view="Story item">Story item cf80b0444c62866e</a> is a markdown item whose text is <code># Curiosity</code>. It is the third of eleven items, and it is not a pagefold. What makes it a token is its id, not its text or its type. <a expr="(curiosity-item &quot;8c19d21cff076dc0&quot;)" view="Story item">The page itself says so</a>: the token keeps its "referential power" when its text or its type changes.</p>
+<p>The page's own journal shows such a change. <a expr="(curiosity-item &quot;e1708c9ae711cfa0&quot;)" view="Story item">Item e1708c9ae711cfa0</a> was added as a paragraph and later edited to markdown, keeping its id.</p>
+<h2>Where the item came from</h2>
+<p>The journal entry that added the item records <a expr="(curiosity-attribution)" view="Attribution">an attribution</a>: page Photo Rotator on photos.ward.dojo.fed.wiki. This is documented provenance. It does not tell on which other pages the id occurs today; Photo Rotator itself is not retained here.</p>
+<h2>Who looks for it</h2>
+<p>Two items are SEARCH items:</p>
+<ul>
+<li><a expr="(curiosity-search)" view="Search expression"><code>SEARCH ITEMS cf80b0444c62866e</code></a> names exactly this item's id.</li>
+<li><a expr="(curiosity-word-search)" view="Search expression"><code>SEARCH WORDS curiosity</code></a> names a word.</li>
+</ul>
+<p>So does <a expr="(curiosity-item &quot;85fdb82d3aa3b7db&quot;)" view="Story item">a paragraph</a>, which writes the id out in its text.</p>
+<p>The search commands are read, not run. What a search finds depends on the sites a reader's Wiki can see, and no search result is recorded here.</p>
+<h2>The Topicmap</h2>
+<p><a expr="(curiosity-token-topicmap)" view="Topicmap">Curiosity Token as Topic Map</a> opens with Point on cf80b0444c62866e. It holds:</p>
+<ul>
+<li>the page;</li>
+<li>its eleven items, numbered by position;</li>
+<li>all 33 journal entries;</li>
+<li>the attribution and the page it names;</li>
+<li>the two search commands.</li>
+</ul>
+<p>Every association names where it comes from:</p>
+<ul>
+<li><strong>story:</strong> which items the page holds, and in which order;</li>
+<li><strong>journal:</strong> the entry that adds or edits an item, places it after another, or records an attribution;</li>
+<li><strong>derived:</strong> read by this projection from an item's text, such as the id a SEARCH command or a paragraph names.</li>
+</ul>
+<p>Topic ids begin with site and slug. A later, recorded search result can therefore add the same item id found on other pages as further topics, related by the shared id instead of merged with this item. That is the step from one page towards the distributed graph of <a page="What Remains to Be Demonstrated?">What Remains to Be Demonstrated?</a>.</p>
+<p>Code page: <a page="A Wiki Page as Topic Map">A Wiki Page as Topic Map</a>, built on <a page="Wiki Pages Retained from the Experiment">Wiki Pages Retained from the Experiment</a>.</p>
+</body></html>
