@@ -1,0 +1,16 @@
+<h1>Reviewing the CTM Reader</h1>
+<p>A falsifiable reading of one claim about the independent ANSI Common Lisp CTM reader in <code>topic-maps</code> at revision <code>b2eecffa05de4fce41c10ae1ada9ae11a0c6e7dc</code> (Slice 22U). The optional system is <code>dreyeck/work/topic-maps-ctm-review</code>. It reads nothing into a model of its own: Topic Maps, Topics and conditions are the reader's own objects.</p>
+
+<h2>The executable experiment</h2>
+<p><a expr="(dreyeck/work/topic-maps-ctm-review:claim-named &quot;scheme-plus&quot;)" view="Claim">Claim scheme-plus: an undelimited IRI whose scheme contains +</a>. Its view leads in order through the claim, its normative basis, the loaded Lisp definitions, the counterexample with its controls, the expected behaviour, the observed behaviour, the evaluation and the provenance.</p>
+<p>The experiment runs only when <em>Run the experiment</em> is pressed. Opening a page or a view runs nothing. A run gives each input to the reader once; the run's <em>Execution</em> view leads to each Topic Map read and to each condition signalled, as the original objects. A read Topic Map's <em>Evidence</em> view leads back to its observation.</p>
+
+<h2>Proposed investigations, not executed</h2>
+<ul>
+<li><a expr="(dreyeck/work/topic-maps-ctm-review:claim-named &quot;percent-identity&quot;)" view="Claim">Claim percent-identity</a>: whether <code>%2F</code> and <code>/</code> give different identities. The consulted CTM text and RFC 3986 disagree; this is a question about the norm first.</li>
+<li><a expr="(dreyeck/work/topic-maps-ctm-review:claim-named &quot;closing-parenthesis&quot;)" view="Claim">Claim closing-parenthesis</a>: whether <code>)</code> may occur inside an undelimited IRI. It depends on a character class that the consulted HTML renders garbled.</li>
+</ul>
+<p>Neither has a run, and neither is a finding.</p>
+
+<h2>What is observed and what is derived</h2>
+<p>What the reader returns or signals for an input is <strong>observed</strong> in this image. That the reader therefore does not conform for that input is <strong>derived</strong> from §3.3.3 of the public HTML text of ISO/IEC 13250-6:2010, consulted on 2026-10-26. The published ISO edition and its errata were not consulted. An evaluation concerns one claim and its inputs; it is never a PASS, and no corpus case is registered or changed.</p>

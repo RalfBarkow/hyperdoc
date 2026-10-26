@@ -3397,3 +3397,21 @@
   :perform (test-op (operation component)
              (declare (ignore operation component))
              (uiop:symbol-call :dreyeck/work/topic-maps-project-example/tests :run-tests)))
+
+;; Optional local review of one falsifiable claim about the Topic Maps 22U CTM reader. Not part of any service start.
+(defsystem "dreyeck/work/topic-maps-ctm-review"
+  :description "Read, execute on request and inspect one falsifiable claim about the pinned Topic Maps 22U CTM reader"
+  :depends-on ("dreyeck/work/topic-maps-project-example" "topic-maps/ctm" "topic-maps/cxtm" "dreyeck/inspector/tmdm"
+               "dreyeck/evaluation-record" "dreyeck/git" "ironclad")
+  :serial t
+  :components ((:file "dreyeck/work/topic-maps-ctm-review")
+               (:module "dreyeck/pages/topic-maps-ctm-review"
+                :components ((:static-file "Reviewing the CTM Reader.html"))))
+  :in-order-to ((test-op (test-op "dreyeck/work/topic-maps-ctm-review/tests"))))
+
+(defsystem "dreyeck/work/topic-maps-ctm-review/tests"
+  :depends-on ("dreyeck/work/topic-maps-ctm-review")
+  :components ((:file "dreyeck/tests/topic-maps-ctm-review"))
+  :perform (test-op (operation component)
+             (declare (ignore operation component))
+             (uiop:symbol-call :dreyeck/work/topic-maps-ctm-review/tests :run-tests)))
