@@ -1,0 +1,42 @@
+{
+  "profile": "/nix/store/ivf2bvcqq89hdhgr0j6q7v0jlhxzaqd1-nix-shell-env",
+  "binary": "/nix/store/8j4gxfa63znzgcba9x1mw68yz7cb0ywf-sbcl-with-packages/bin/sbcl",
+  "version": "SBCL 2.4.10",
+  "sources": [
+    {
+      "source": "/nix/store/7l95gid3niz995qqpkgclj6355k50phf-source",
+      "narHash": "sha256-NsmOHUj3dw73rtnr5afdlxH4DadZjD3Ozk0mZUvwfag=",
+      "lockInput": "clog-moldable-inspector"
+    },
+    {
+      "source": "/nix/store/w26nr9dxpfsyzbviphnaaydmcww2h3y6-source",
+      "narHash": "sha256-w85sPKIAaFuo+EmkB6m3rwg2JDkeogwpJ2hNWcCLw5s=",
+      "lockInput": "html-inspector-views"
+    },
+    {
+      "source": "/nix/store/ibq9zs9js02ln87vjmcl6xdafvpxzffx-source",
+      "narHash": "sha256-PapF0m5tiIhPC6OH/eL4SrEtb3mlQ0wf2WPWZ1X3vvo=",
+      "lockInput": "plump-inspector-views"
+    },
+    {
+      "source": "/nix/store/p62cd9zn5gnrd34wgbjjnqragxwx6dhh-source",
+      "narHash": "sha256-zI67bTVQ6gP7Qm17k9PydnOetTPM+H4NJ+HqKIosCt0=",
+      "lockInput": "lwcells"
+    },
+    {
+      "source": "/nix/store/w15dbn9gy780n3p9k5b69dr3rrr5lczr-source",
+      "narHash": "sha256-xfXyblX8aNUFFFH5SFibIYMiVWi2ySvhuwlWdSbVl54=",
+      "lockInput": "named-closure"
+    },
+    {
+      "source": "/nix/store/9zkvhs70z8w06kximfrw3zm099qa87vj-source",
+      "narHash": "sha256-A8DCCX7FNZoTh2J1KhwIgRO3OdOze+SmnS1GwdxVYS0=",
+      "lockInput": "njson"
+    }
+  ],
+  "standardDevShellAvailableOffline": false,
+  "standardDevShellError": "Unable to start any build; either increase --max-jobs or enable remote builds.",
+  "subsetRuntimeLoadVerified": true,
+  "downloads": 0,
+  "builds": 0
+}

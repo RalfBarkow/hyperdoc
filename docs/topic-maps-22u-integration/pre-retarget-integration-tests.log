@@ -1,0 +1,77 @@
+WARNING: System definition file #P"/nix/store/7kwvfxhgrx9d2nnainzdflxrd76c1aj3-sbcl-cl-who-20241012-git/cl-who.asd" contains definition for system "cl-who-test". Please only define "cl-who" and secondary systems with a name starting with "cl-who/" (e.g. "cl-who/test") in that file.
+WARNING: System definition file #P"/nix/store/37a33q8xchz47wpd24wf67lalz080hl5-sbcl-parse-float-20200218-git/parse-float.asd" contains definition for system "parse-float-tests". Please only define "parse-float" and secondary systems with a name starting with "parse-float/" (e.g. "parse-float/test") in that file.
+WARNING: System definition file #P"/nix/store/8nfp68p140k76rh833nfcv500k8ippr4-sbcl-cl-template-20130615-git/cl-template.asd" contains definition for system "cl-template-tests". Please only define "cl-template" and secondary systems with a name starting with "cl-template/" (e.g. "cl-template/test") in that file.
+WARNING: redefining DEFTYPE type to be a class: DBI.ERROR:<DBI-ERROR>
+WARNING: redefining DEFTYPE type to be a class: DBI.ERROR:<DBI-WARNING>
+WARNING: redefining DEFTYPE type to be a class: DBI.ERROR:<DBI-INTERFACE-ERROR>
+WARNING:
+   redefining DEFTYPE type to be a class: DBI.ERROR:<DBI-UNIMPLEMENTED-ERROR>
+WARNING: redefining DEFTYPE type to be a class: DBI.ERROR:<DBI-DATABASE-ERROR>
+WARNING: redefining DEFTYPE type to be a class: DBI.ERROR:<DBI-DATA-ERROR>
+WARNING:
+   redefining DEFTYPE type to be a class: DBI.ERROR:<DBI-OPERATIONAL-ERROR>
+WARNING: redefining DEFTYPE type to be a class: DBI.ERROR:<DBI-INTEGRITY-ERROR>
+WARNING: redefining DEFTYPE type to be a class: DBI.ERROR:<DBI-INTERNAL-ERROR>
+WARNING:
+   redefining DEFTYPE type to be a class: DBI.ERROR:<DBI-PROGRAMMING-ERROR>
+WARNING:
+   redefining DEFTYPE type to be a class: DBI.ERROR:<DBI-NOTSUPPORTED-ERROR>
+WARNING:
+   redefining DEFTYPE type to be a class: DBI.ERROR:<DBI-ALREADY-COMMITED-ERROR>
+WARNING:
+   redefining DEFTYPE type to be a class: DBI.ERROR:<DBI-ALREADY-ROLLED-BACK-ERROR>
+WARNING: redefining DEFTYPE type to be a class: DBI.DRIVER:<DBI-DRIVER>
+WARNING: redefining DEFTYPE type to be a class: DBI.DRIVER:<DBI-CONNECTION>
+WARNING: redefining DEFTYPE type to be a class: DBI.DRIVER:<DBI-QUERY>
+TOPIC-MAPS-22U-INSPECTOR-PASS: 38 assertions; project and disposition reached through native Role/Association references.
+Unhandled SIMPLE-ERROR in thread #<SB-THREAD:THREAD tid=259 "main thread" RUNNING
+                                    {70003C8103}>:
+  TMDM navigation check failed: UNSUPPORTED-NOT-PASS
+
+Backtrace for: #<SB-THREAD:THREAD tid=259 "main thread" RUNNING {70003C8103}>
+0: (SB-DEBUG::DEBUGGER-DISABLED-HOOK #<SIMPLE-ERROR "TMDM navigation check failed: ~A" {701D9770A3}> #<unused argument> :QUIT T)
+1: (SB-DEBUG::RUN-HOOK *INVOKE-DEBUGGER-HOOK* #<SIMPLE-ERROR "TMDM navigation check failed: ~A" {701D9770A3}>)
+2: (INVOKE-DEBUGGER #<SIMPLE-ERROR "TMDM navigation check failed: ~A" {701D9770A3}>)
+3: (ERROR "TMDM navigation check failed: ~A" :UNSUPPORTED-NOT-PASS)
+4: (DREYECK/WORK/TMDM-READING/TESTS::GENERIC-AND-MERGE-CHECKS)
+5: (DREYECK/WORK/TMDM-READING/TESTS:RUN-TESTS)
+6: ((SB-PCL::EMF ASDF/ACTION:PERFORM) #<unused argument> #<unused argument> #<ASDF/LISP-ACTION:TEST-OP > #<ASDF/SYSTEM:SYSTEM "dreyeck/work/tmdm-reading/tests">)
+7: ((LAMBDA NIL :IN ASDF/ACTION:CALL-WHILE-VISITING-ACTION))
+8: ((:METHOD ASDF/ACTION:PERFORM-WITH-RESTARTS :AROUND (T T)) #<ASDF/LISP-ACTION:TEST-OP > #<ASDF/SYSTEM:SYSTEM "dreyeck/work/tmdm-reading/tests">) [fast-method]
+9: ((:METHOD ASDF/PLAN:PERFORM-PLAN (T)) #<ASDF/PLAN:SEQUENTIAL-PLAN {70077597B3}>) [fast-method]
+10: ((FLET SB-C::WITH-IT :IN SB-C::%WITH-COMPILATION-UNIT))
+11: ((:METHOD ASDF/PLAN:PERFORM-PLAN :AROUND (T)) #<ASDF/PLAN:SEQUENTIAL-PLAN {70077597B3}>) [fast-method]
+12: ((:METHOD ASDF/OPERATE:OPERATE (ASDF/OPERATION:OPERATION ASDF/COMPONENT:COMPONENT)) #<ASDF/LISP-ACTION:TEST-OP > #<ASDF/SYSTEM:SYSTEM "dreyeck/work/tmdm-reading/tests"> :PLAN-CLASS NIL :PLAN-OPTIONS NIL) [fast-method]
+13: ((SB-PCL::EMF ASDF/OPERATE:OPERATE) #<unused argument> #<unused argument> #<ASDF/LISP-ACTION:TEST-OP > #<ASDF/SYSTEM:SYSTEM "dreyeck/work/tmdm-reading/tests">)
+14: ((LAMBDA NIL :IN ASDF/OPERATE:OPERATE))
+15: ((:METHOD ASDF/OPERATE:OPERATE :AROUND (T T)) #<ASDF/LISP-ACTION:TEST-OP > #<ASDF/SYSTEM:SYSTEM "dreyeck/work/tmdm-reading/tests">) [fast-method]
+16: ((SB-PCL::EMF ASDF/OPERATE:OPERATE) #<unused argument> #<unused argument> ASDF/LISP-ACTION:TEST-OP "dreyeck/work/tmdm-reading/tests")
+17: ((LAMBDA NIL :IN ASDF/OPERATE:OPERATE))
+18: ((:METHOD ASDF/OPERATE:OPERATE :AROUND (T T)) ASDF/LISP-ACTION:TEST-OP "dreyeck/work/tmdm-reading/tests") [fast-method]
+19: (ASDF/SESSION:CALL-WITH-ASDF-SESSION #<FUNCTION (LAMBDA NIL :IN ASDF/OPERATE:OPERATE) {7007763B3B}> :OVERRIDE T :KEY NIL :OVERRIDE-CACHE T :OVERRIDE-FORCING NIL)
+20: ((LAMBDA NIL :IN ASDF/OPERATE:OPERATE))
+21: (ASDF/SESSION:CALL-WITH-ASDF-SESSION #<FUNCTION (LAMBDA NIL :IN ASDF/OPERATE:OPERATE) {700771785B}> :OVERRIDE NIL :KEY NIL :OVERRIDE-CACHE NIL :OVERRIDE-FORCING NIL)
+22: ((:METHOD ASDF/OPERATE:OPERATE :AROUND (T T)) ASDF/LISP-ACTION:TEST-OP "dreyeck/work/tmdm-reading/tests") [fast-method]
+23: (ASDF/OPERATE:TEST-SYSTEM "dreyeck/work/tmdm-reading/tests")
+24: (SB-INT:SIMPLE-EVAL-IN-LEXENV (ASDF/OPERATE:TEST-SYSTEM "dreyeck/work/tmdm-reading/tests") #<NULL-LEXENV>)
+25: (EVAL-TLF (ASDF/OPERATE:TEST-SYSTEM "dreyeck/work/tmdm-reading/tests") 2 NIL)
+26: ((LABELS SB-FASL::EVAL-FORM :IN SB-INT:LOAD-AS-SOURCE) (ASDF/OPERATE:TEST-SYSTEM "dreyeck/work/tmdm-reading/tests") 2)
+27: ((LAMBDA (SB-KERNEL:FORM &KEY :CURRENT-INDEX &ALLOW-OTHER-KEYS) :IN SB-INT:LOAD-AS-SOURCE) (ASDF/OPERATE:TEST-SYSTEM "dreyeck/work/tmdm-reading/tests") :CURRENT-INDEX 2)
+28: (SB-C::%DO-FORMS-FROM-INFO #<FUNCTION (LAMBDA (SB-KERNEL:FORM &KEY :CURRENT-INDEX &ALLOW-OTHER-KEYS) :IN SB-INT:LOAD-AS-SOURCE) {C8FF3DB}> #<SB-C::SOURCE-INFO {7001832743}> SB-C::INPUT-ERROR-IN-LOAD)
+29: (SB-INT:LOAD-AS-SOURCE #<SB-SYS:FD-STREAM for "file /Users/rgb/workspace/hyperdoc-dreyeck-ch/scripts/test-topic-maps-project-example.lisp" {70003C91B3}> :VERBOSE NIL :PRINT NIL :CONTEXT "loading")
+30: ((LABELS SB-FASL::LOAD-STREAM-1 :IN LOAD) #<SB-SYS:FD-STREAM for "file /Users/rgb/workspace/hyperdoc-dreyeck-ch/scripts/test-topic-maps-project-example.lisp" {70003C91B3}> NIL)
+31: (SB-FASL::CALL-WITH-LOAD-BINDINGS #<FUNCTION (LABELS SB-FASL::LOAD-STREAM-1 :IN LOAD) {C8FF79B}> #<SB-SYS:FD-STREAM for "file /Users/rgb/workspace/hyperdoc-dreyeck-ch/scripts/test-topic-maps-project-example.lisp" {70003C91B3}> NIL #<SB-SYS:FD-STREAM for "file /Users/rgb/workspace/hyperdoc-dreyeck-ch/scripts/test-topic-maps-project-example.lisp" {70003C91B3}>)
+32: (LOAD #<SB-SYS:FD-STREAM for "file /Users/rgb/workspace/hyperdoc-dreyeck-ch/scripts/test-topic-maps-project-example.lisp" {70003C91B3}> :VERBOSE NIL :PRINT NIL :IF-DOES-NOT-EXIST :ERROR :EXTERNAL-FORMAT :DEFAULT)
+33: ((FLET SB-IMPL::LOAD-SCRIPT :IN SB-IMPL::PROCESS-SCRIPT) #<SB-SYS:FD-STREAM for "file /Users/rgb/workspace/hyperdoc-dreyeck-ch/scripts/test-topic-maps-project-example.lisp" {70003C91B3}>)
+34: ((FLET SB-UNIX::BODY :IN SB-IMPL::PROCESS-SCRIPT))
+35: ((FLET "WITHOUT-INTERRUPTS-BODY-" :IN SB-IMPL::PROCESS-SCRIPT))
+36: (SB-IMPL::PROCESS-SCRIPT "scripts/test-topic-maps-project-example.lisp")
+37: (SB-IMPL::TOPLEVEL-INIT)
+38: ((FLET SB-UNIX::BODY :IN SB-IMPL::START-LISP))
+39: ((FLET "WITHOUT-INTERRUPTS-BODY-3" :IN SB-IMPL::START-LISP))
+40: (SB-IMPL::%START-LISP)
+
+unhandled condition in --disable-debugger mode, quitting
+; 
+; compilation unit aborted
+;   caught 1 fatal ERROR condition

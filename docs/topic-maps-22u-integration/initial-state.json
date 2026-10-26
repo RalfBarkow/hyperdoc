@@ -1,0 +1,133 @@
+{
+  "observedAtUTC": "2026-10-26T04:17:27.353297+00:00",
+  "targetBranch": "dreyeck.ch",
+  "targetBase": "a9daaf8c1245bbaca79822be2cdabdab134b2fd7",
+  "originalCheckoutBranch": "codex/nixos-migration-topic-map",
+  "originalCheckoutCommit": "847a0743420712e5503cc1b343fa8ecd24fb018d",
+  "sourceCommit": "b2eecffa05de4fce41c10ae1ada9ae11a0c6e7dc",
+  "sourceRoot": "/Users/rgb/workspace/topic-maps",
+  "bothSelectedWorktreesInitiallyClean": true,
+  "protectedFilesSHA256": {
+    "dreyeck.asd": "fa1aefe1e615b770463529dbb540c85da34e0ced634bbfd7a4050c71d4cc885c",
+    "dreyeck/src/tmdm-model-navigation.lisp": "de7bc3d250f382e6d14bb094a1f7efd4b84f810fa950266acffc6176377f0d3b",
+    "dreyeck/work/tmdm-model-reading.lisp": "2a97db5f53043d181975f021395656fd80ffcba26b4ba69b88c234f3600d4ca1",
+    "dreyeck/work/project/project-ctm.lisp": "dc3efe722ef1037b13d5f951ca063ee827a4c910443090c1ff75392342cfff5e",
+    "dreyeck/work/project/project-workspace.lisp": "41b5e8326d4d3b47f346fd3ea6f993d72abebe1675210ae5adc45efb88a56c14",
+    "flake.nix": "ce070ada1e29eb0f272954fd9752bac707a9776cf48efacf913fe7aac970920b",
+    "flake.lock": "f82401946af9fa2467191c454f8ee3f288d76164a00bc41f96f9b36441ede4bc",
+    "docs/tmdm-model-navigation-validation.json": "bd941a3caa6ae1a790da0c7bcd0cf4c5c62da7f2d235938a44061927b2649fac",
+    "docs/tmdm-model-navigation-validation.log": "023ce8ff8a9141fa92d980254d60275c25129d9e1a28eabb9a2a9250f574deba"
+  },
+  "worktrees": {
+    "hyperdoc": [
+      {
+        "path": "/Users/rgb/workspace/hyperdoc",
+        "head": "c4ebfd8d3d8bec5c9aead22ee8b4f5d046220d34",
+        "changes": []
+      },
+      {
+        "path": "/Users/rgb/.codex/worktrees/ctm-tmdm-model-navigation/hyperdoc-dreyeck-ch",
+        "head": "ab320e07e0aa67d309d51c3630215065acd88d08",
+        "changes": []
+      },
+      {
+        "path": "/Users/rgb/.codex/worktrees/gesture-binding-witness/hyperdoc-dreyeck-ch",
+        "head": "0f133fe23f28b0a2fb64ac16fcaa23f093292184",
+        "changes": []
+      },
+      {
+        "path": "/Users/rgb/workspace/hyperdoc-d2-baseline",
+        "head": "df65cdcbe98257f98b14c112fb3b7c8506e8d2a7",
+        "changes": []
+      },
+      {
+        "path": "/Users/rgb/workspace/hyperdoc-deployment-2026-10-03",
+        "head": "3746bf34422d5a04db1ac36de74fe9b203954468",
+        "changes": []
+      },
+      {
+        "path": "/Users/rgb/workspace/hyperdoc-deployment-witness",
+        "head": "b5ad6c489de4e49711108e4273718d80c3494ade",
+        "changes": [
+          "?? dreyeck/.DS_Store"
+        ]
+      },
+      {
+        "path": "/Users/rgb/workspace/hyperdoc-dreyeck-ch",
+        "head": "a9daaf8c1245bbaca79822be2cdabdab134b2fd7",
+        "changes": []
+      },
+      {
+        "path": "/Users/rgb/workspace/hyperdoc-dreyeck-ch-ctm-page-authoring",
+        "head": "46df20316fbff0687519c7682fb1295f34d68875",
+        "changes": []
+      },
+      {
+        "path": "/Users/rgb/workspace/hyperdoc-dreyeck-integration",
+        "head": "d45725b85b1fb8cebddf337bf9d9f05572a4715f",
+        "changes": []
+      },
+      {
+        "path": "/Users/rgb/workspace/hyperdoc-gesture-correction",
+        "head": "cd44542114dd2db425284b099166beed067ea3ea",
+        "changes": []
+      },
+      {
+        "path": "/Users/rgb/workspace/hyperdoc-hauptsache",
+        "head": "591f275fc26ebef7967cc8d3e3fb5a0efc19cc85",
+        "changes": []
+      },
+      {
+        "path": "/Users/rgb/workspace/hyperdoc-integration",
+        "head": "92773c8acf1b20e0660503aa3241fe0477e4846a",
+        "changes": []
+      },
+      {
+        "path": "/Users/rgb/workspace/hyperdoc-listen-lifecycle",
+        "head": "306b7fd99fc2611a248e0927ce52a808abb7cc76",
+        "changes": [
+          " M dreyeck.asd",
+          "?? dreyeck/mech-intake/evidence/listen-lifecycle/",
+          "?? dreyeck/mech-intake/listen-lifecycle.lisp",
+          "?? \"dreyeck/pages/mech-intake/Reading Ward's LISTEN Lifecycle.html\"",
+          "?? dreyeck/tests/mech-intake-listen-lifecycle.lisp"
+        ]
+      },
+      {
+        "path": "/Users/rgb/workspace/hyperdoc-querying-topicmaps",
+        "head": "ca3c46b6e37b8e5e253c4faabc4819ff36bc64e8",
+        "changes": []
+      },
+      {
+        "path": "/Users/rgb/workspace/hyperdoc-runtime-witness",
+        "head": "df65cdcbe98257f98b14c112fb3b7c8506e8d2a7",
+        "changes": []
+      },
+      {
+        "path": "/Users/rgb/workspace/hyperdoc-traverse-companion",
+        "head": "a9daaf8c1245bbaca79822be2cdabdab134b2fd7",
+        "changes": [
+          " M dreyeck.asd",
+          " M \"dreyeck/pages/traverse/Federated Search Without a Central Index.html\"",
+          " M dreyeck/src/topicmap-inspector.lisp",
+          " M dreyeck/tests/wiki-topicmap.lisp",
+          " M dreyeck/traverse/item-search.lisp",
+          " M dreyeck/traverse/wiki-topicmap.lisp",
+          "?? dreyeck/tests/search-navigation.lisp"
+        ]
+      }
+    ],
+    "topic-maps": [
+      {
+        "path": "/Users/rgb/workspace/topic-maps",
+        "head": "b2eecffa05de4fce41c10ae1ada9ae11a0c6e7dc",
+        "changes": []
+      },
+      {
+        "path": "/Users/rgb/workspace/topic-maps-normalization",
+        "head": "5a4a66850403cdfe2755c6c88083a8e31af89628",
+        "changes": []
+      }
+    ]
+  }
+}

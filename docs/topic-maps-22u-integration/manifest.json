@@ -1,0 +1,223 @@
+{
+  "createdAtUTC": "2026-10-26T04:52:13.923654+00:00",
+  "targetBase": "a9daaf8c1245bbaca79822be2cdabdab134b2fd7",
+  "sourceCommit": "b2eecffa05de4fce41c10ae1ada9ae11a0c6e7dc",
+  "targetFiles": {
+    "docs/topic-maps-22u-integration/README.md": {
+      "bytes": 13089,
+      "sha256": "caefa2aaa695948e594ceb719b94d1c21002c8e24f89bbc10b548856b58e5ae7"
+    },
+    "docs/topic-maps-22u-integration/before-snapshot-guard-pass.json": {
+      "bytes": 2766,
+      "sha256": "a77b2af196e561545e70deca8eece041a14945295e591cadc500b78fece1d0ac"
+    },
+    "docs/topic-maps-22u-integration/before-snapshot-guard-pass.log": {
+      "bytes": 3078,
+      "sha256": "f901d3b23095d06df2f0a18de20ad050dc04884e1e24d86be844ddf5de36a0de"
+    },
+    "docs/topic-maps-22u-integration/browser-lisp.log": {
+      "bytes": 2904,
+      "sha256": "e66675e47e0282f020c279a2e2225a32113118e190aa6e2457e8ae7bf1516261"
+    },
+    "docs/topic-maps-22u-integration/browser.json": {
+      "bytes": 3155,
+      "sha256": "9823a9d95ec2e473cd40094d4f3c53c2c2cb0a5bd3133ab0756901acff1593dd"
+    },
+    "docs/topic-maps-22u-integration/dev-shell-dry-run.json": {
+      "bytes": 135448,
+      "sha256": "2917c897d21d80e91ceac62f7bc97ec8ef1dec8f5cc082bcaf7b51e6264f951d"
+    },
+    "docs/topic-maps-22u-integration/disposition.png": {
+      "bytes": 61142,
+      "sha256": "a9e6cb676d031ade72b2d862ff9b01bd615cb328697b03cb45d1821db661bea5"
+    },
+    "docs/topic-maps-22u-integration/existing-preflight-fixed.log": {
+      "bytes": 2231,
+      "sha256": "7f4524f06f831fff494bd163eb9aca8e2ca919992183eb700508af3047e4b6db"
+    },
+    "docs/topic-maps-22u-integration/existing-preflight.log": {
+      "bytes": 27296,
+      "sha256": "ffa90b02b8d7c78d249d2baa77fffcdbf92e278bc5126207ec6f6f7c6a87e932"
+    },
+    "docs/topic-maps-22u-integration/explicit-test-system-pass.json": {
+      "bytes": 2651,
+      "sha256": "f2979e52a19a1387a396d9534044f5c928723fb027c2b9d30cc66c9a8f9a4861"
+    },
+    "docs/topic-maps-22u-integration/explicit-test-system-pass.log": {
+      "bytes": 3078,
+      "sha256": "f901d3b23095d06df2f0a18de20ad050dc04884e1e24d86be844ddf5de36a0de"
+    },
+    "docs/topic-maps-22u-integration/incompatible-project-pin-attempt.json": {
+      "bytes": 2818,
+      "sha256": "9d8d060245c3e76277a75729e756d5b40531369f14ffda0ec03726fd798bc4bb"
+    },
+    "docs/topic-maps-22u-integration/incompatible-project-pin-attempt.log": {
+      "bytes": 3186,
+      "sha256": "f1b998ad2580a19c8f2e139c5cf7ce182e47bc651612cf37bafd39005b9807c4"
+    },
+    "docs/topic-maps-22u-integration/initial-integration-tests.json": {
+      "bytes": 1129,
+      "sha256": "f654510ce21b58264a454a2b6865863d7bb1cd42e0cda0da7181edc40a8e8094"
+    },
+    "docs/topic-maps-22u-integration/initial-integration-tests.log": {
+      "bytes": 7680,
+      "sha256": "44431586cd080e18294aeb2ec834bb06a7bfdcb8648078c66e30da78d594c9ea"
+    },
+    "docs/topic-maps-22u-integration/initial-state.json": {
+      "bytes": 5221,
+      "sha256": "1b44f4f1d15f8fcd1f518665dbfd6b38bdd511a121bae9159f6a876043da711b"
+    },
+    "docs/topic-maps-22u-integration/integration-tests.json": {
+      "bytes": 2906,
+      "sha256": "1b69169f430de27382fddbced6d35db5b3cbebe8197206313eeabfb5ce0c46f1"
+    },
+    "docs/topic-maps-22u-integration/integration-tests.log": {
+      "bytes": 3078,
+      "sha256": "fd023f0ed62fef76764667d0c968b75e3e95399d495ff57d2a16185771afc2cd"
+    },
+    "docs/topic-maps-22u-integration/integrity.json": {
+      "bytes": 7100,
+      "sha256": "1cf7d45214a91321da6505708e89712980d5f31e6b6783d1ba43fd232b076f28"
+    },
+    "docs/topic-maps-22u-integration/native-eq.log": {
+      "bytes": 213,
+      "sha256": "f4c832414e674737f42e6f5ec61ece6b623c7b17e9da3c5c88d4a3867490f987"
+    },
+    "docs/topic-maps-22u-integration/pre-retarget-integration-tests.json": {
+      "bytes": 2538,
+      "sha256": "5f8e09af91e45ef1f44c200fffda7f6b989e5dff464d7be3784dc32621c4d731"
+    },
+    "docs/topic-maps-22u-integration/pre-retarget-integration-tests.log": {
+      "bytes": 7532,
+      "sha256": "54912e0af287d7d36e333f8cc1136c6628799ee7bf2809b958e42f4039f411ac"
+    },
+    "docs/topic-maps-22u-integration/project-acceptance.json": {
+      "bytes": 2985,
+      "sha256": "d98c33a065437dab1a736c00b6b6a6d92f41f41c5967c0d3d368f565dd12a3dc"
+    },
+    "docs/topic-maps-22u-integration/project-acceptance.log": {
+      "bytes": 3021,
+      "sha256": "3653dc64b936fb1ab9e269513349d2a4521f71d73a4548e5a22d3455573c1254"
+    },
+    "docs/topic-maps-22u-integration/project-registry-attempt.json": {
+      "bytes": 2292,
+      "sha256": "4f2a023985cc6e7438a00e82c03852042bfdee35e69c20cbc72d6aa88f1fafe4"
+    },
+    "docs/topic-maps-22u-integration/project-registry-attempt.log": {
+      "bytes": 33097,
+      "sha256": "64ad5877e3fdd46deec42d46396d0c20fda740b1319a490334c0fc66ef62e909"
+    },
+    "docs/topic-maps-22u-integration/project-tests.json": {
+      "bytes": 2634,
+      "sha256": "fb121548fce8877432fbe035f7a71f6bd4a002c3615c0f5981ce7ff8c031057d"
+    },
+    "docs/topic-maps-22u-integration/project-tests.log": {
+      "bytes": 2379,
+      "sha256": "d2551c35d956edeaa7dc05196a7dad1ea166cca9d42740751ced8a27ebc32d28"
+    },
+    "docs/topic-maps-22u-integration/project.png": {
+      "bytes": 55776,
+      "sha256": "2d95b914ef5872017e5640af38ed24789c7e4e52e967d125e518fb07c5e33f57"
+    },
+    "docs/topic-maps-22u-integration/rejected-retarget-integration-tests.json": {
+      "bytes": 2603,
+      "sha256": "f0e2aefada5d5af545dce8474f54bef76999c95d3155054ab52a536b2f46c7ea"
+    },
+    "docs/topic-maps-22u-integration/rejected-retarget-integration-tests.log": {
+      "bytes": 7532,
+      "sha256": "b27b69d3e40539c3a40f56657f41fb20d5f0c4fb12341b04c27776c98ec795f6"
+    },
+    "docs/topic-maps-22u-integration/retargeting.json": {
+      "bytes": 1191,
+      "sha256": "24a6366090a8ccd6b191049687a33af60c62be55f0c54257e848ceb73ccc25c4"
+    },
+    "docs/topic-maps-22u-integration/runtime-fixed.json": {
+      "bytes": 1560,
+      "sha256": "b2a4a609a531ec664b75879d48b801dbcd1ab6cd77928701a734d0087dcc56cb"
+    },
+    "docs/topic-maps-22u-integration/runtime-sources.json": {
+      "bytes": 1586,
+      "sha256": "ca807c736801162a2c4cc3461b2c36146c4e8e1728143e78738609cd98bf96c6"
+    },
+    "docs/topic-maps-22u-integration/runtime.json": {
+      "bytes": 1268,
+      "sha256": "a2e3ed36da0cc7ac2c2624776a46fa5683d07deae4f3d24ffcd690544c98f6ea"
+    },
+    "docs/topic-maps-22u-integration/serve-smoke.json": {
+      "bytes": 1148,
+      "sha256": "1b977b86bea664268b51cd024f3af4d28282de0faf7665a8f2eb1092f69335e2"
+    },
+    "docs/topic-maps-22u-integration/serve-smoke.log": {
+      "bytes": 2876,
+      "sha256": "0e6a4df094586c1e7c779a5610941685cb796d3b0b4d356a8f5e295c68431299"
+    },
+    "docs/topic-maps-22u-integration/summary.json": {
+      "bytes": 1523,
+      "sha256": "8841a0bc3b1924926e3a4d0780f5235efadeb6d3936ce4344af5b284120a8c5a"
+    },
+    "dreyeck.asd": {
+      "bytes": 153575,
+      "sha256": "d16888e249c3362de77a5ff899544c3c7f433547b49013b5c09c33e1a956c3f5"
+    },
+    "dreyeck/pages/topic-maps-project-example/Reading Slice 22U.html": {
+      "bytes": 1355,
+      "sha256": "028bfaa3ab76543be745c8b15af43616664d8f2d77036223cff7c202acf577aa"
+    },
+    "dreyeck/tests/tmdm-model-reading.lisp": {
+      "bytes": 15410,
+      "sha256": "4b62ddbc3af2a9038976963eac19c7fdbd49e00e83ceb41a406718bb46c80464"
+    },
+    "dreyeck/tests/topic-maps-project-example.lisp": {
+      "bytes": 7470,
+      "sha256": "2770bb3005021e945caf2c45bda566c4733310a4c2c12f2ea2eede365d6e8477"
+    },
+    "dreyeck/work/topic-maps-project-example.lisp": {
+      "bytes": 9790,
+      "sha256": "9847c3e204cf2231ed85302c78bdbdbf39fe1f003ad64ac4e9b95aab778ce0af"
+    },
+    "scripts/serve-topic-maps-project-example.lisp": {
+      "bytes": 877,
+      "sha256": "40e53f9ba1e09ad88074cdd1f26834effabb55511e52db52da02e5e0d2c17444"
+    },
+    "scripts/test-topic-maps-project-browser.mjs": {
+      "bytes": 8235,
+      "sha256": "ae287ca0cffe7f3209544e8ea76cdd4189423d90f51072cd1f39be21b867eb4b"
+    },
+    "scripts/test-topic-maps-project-example.lisp": {
+      "bytes": 663,
+      "sha256": "6a885f42f47bad6b82dfc8f2c688b9ffc5e0f722af0530546c3b81156d5f2b02"
+    },
+    "scripts/topic-maps-project-bootstrap.lisp": {
+      "bytes": 1602,
+      "sha256": "59277e726f6e88471edbf2effe57b78ebeb07d22fe3b76a99b938a00259d57c0"
+    }
+  },
+  "excludeSelf": true,
+  "allFinalTestedInputHashesVerified": true,
+  "commitPreparation": {
+    "verifiedAtUTC": "2026-10-26T07:21:18.788093+00:00",
+    "originalManifestSHA256": "d472dff56e93727deecab33cd1cac427480e42fa8fa2258be86aff553a036182",
+    "allOriginalManifestFilesMatchedBeforeDocumentationUpdate": true,
+    "sourceTrackedBlobsRechecked": 12228,
+    "protectedTargetFilesUnchanged": true,
+    "noTestsReexecuted": true,
+    "noImplementationOrTestChanges": true,
+    "documentationOnlyUpdate": {
+      "file": "docs/topic-maps-22u-integration/README.md",
+      "beforeSHA256": "2259b5b22fc723a444cde66f24d46a167c6dfd79971d4bd2e7545b003b0f9c81",
+      "afterSHA256": "caefa2aaa695948e594ceb719b94d1c21002c8e24f89bbc10b548856b58e5ae7"
+    },
+    "targetBranch": "dreyeck.ch",
+    "targetParent": "a9daaf8c1245bbaca79822be2cdabdab134b2fd7",
+    "whitespaceCheck": {
+      "implementationTestsAndDocumentation": "passed",
+      "rawLogsPreservedByteExactly": [
+        "docs/topic-maps-22u-integration/incompatible-project-pin-attempt.log",
+        "docs/topic-maps-22u-integration/initial-integration-tests.log",
+        "docs/topic-maps-22u-integration/pre-retarget-integration-tests.log",
+        "docs/topic-maps-22u-integration/rejected-retarget-integration-tests.log"
+      ],
+      "rawLogDiagnostic": "Four captured SBCL compiler-output lines contain semicolon followed by a space. No source whitespace errors; raw evidence not normalized."
+    }
+  }
+}

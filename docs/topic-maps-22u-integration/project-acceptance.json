@@ -1,0 +1,25 @@
+{
+  "command": [
+    "/usr/bin/sandbox-exec",
+    "-p",
+    "(version 1)(allow default)(deny network*)(deny file-write* (subpath \"/Users/rgb/workspace/hyperdoc-dreyeck-ch\"))(deny file-write* (subpath \"/Users/rgb/workspace/topic-maps-normalization\"))(deny file-write* (subpath \"/Users/rgb/workspace/topic-maps\"))",
+    "/nix/store/8j4gxfa63znzgcba9x1mw68yz7cb0ywf-sbcl-with-packages/bin/sbcl",
+    "--noinform",
+    "--no-sysinit",
+    "--no-userinit",
+    "--script",
+    "/var/folders/y1/yhhpj5wd7cb5325t8__1ct2r0000gn/T/hyperdoc-topic-maps-22u-z_gpmf_r/separate-project-acceptance.lisp"
+  ],
+  "script": "(require :asdf)\n(asdf:initialize-output-translations '(:output-translations (\"/Users/rgb/workspace/hyperdoc-dreyeck-ch/\" \"/var/folders/y1/yhhpj5wd7cb5325t8__1ct2r0000gn/T/hyperdoc-topic-maps-22u-z_gpmf_r/project-fasls/\") (\"/Users/rgb/workspace/topic-maps-normalization/\" \"/var/folders/y1/yhhpj5wd7cb5325t8__1ct2r0000gn/T/hyperdoc-topic-maps-22u-z_gpmf_r/project-source-fasls/\") :inherit-configuration))\n(asdf:initialize-source-registry\n `(:source-registry (:tree \"/Users/rgb/workspace/hyperdoc-dreyeck-ch/\") (:tree \"/Users/rgb/workspace/topic-maps-normalization/\")\n   ,@(loop for entry in (uiop:split-string (uiop:getenv \"CL_SOURCE_REGISTRY\") :separator \":\")\n           when (uiop:string-prefix-p \"/nix/store/\" entry)\n             collect `(:tree ,(uiop:ensure-directory-pathname (string-right-trim \"/\" entry))))\n   :ignore-inherited-configuration))\n(asdf:load-system \"dreyeck/work/project/tests\")\n;; Progress around the existing fixture constructor, without changing a source,\n;; result or scenario. The original function is called once, unmodified.\n(let* ((symbol (find-symbol \"%SCENARIO\" \"DREYECK/WORK/PROJECT/TESTS\"))\n       (original (symbol-function symbol)) (number 0))\n (unwind-protect\n  (progn\n   (setf (symbol-function symbol)\n    (lambda (&rest args)\n     (format t \"~&PROJECT-SCENARIO-START ~D ~A~%\" (incf number) (first args)) (finish-output)\n     (multiple-value-prog1 (apply original args)\n      (format t \"~&PROJECT-SCENARIO-DONE ~D~%\" number) (finish-output))))\n   (uiop:symbol-call :dreyeck/work/project/tests :run-acceptance-tests)\n   (format t \"~&SEPARATE-PROJECT-ACCEPTANCE-PASS~%\"))\n  (setf (symbol-function symbol) original)))\n",
+  "scriptSHA256": "fd1cea41c077359fe5c1ea9ac45ed320ec32c6cbbb0f354421e6052299c0bc9c",
+  "startedAtUTC": "2026-10-26T04:45:07.445626+00:00",
+  "sourceRevision": "5a4a66850403cdfe2755c6c88083a8e31af89628",
+  "freshProcess": true,
+  "networkDenied": true,
+  "repositoryWritesDenied": true,
+  "scope": "Remaining existing Project Workspace Acceptance phase only. Source and Readback phases already passed in project-tests.log. No source is edited; constructor wrapper only reports progress.",
+  "exitCode": 0,
+  "success": true,
+  "finishedAtUTC": "2026-10-26T04:48:25.440745+00:00",
+  "logSHA256": "3653dc64b936fb1ab9e269513349d2a4521f71d73a4548e5a22d3455573c1254"
+}

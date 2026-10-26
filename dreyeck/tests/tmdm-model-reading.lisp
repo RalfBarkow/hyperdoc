@@ -146,9 +146,23 @@
     (check :snapshot-does-not-alias-mutable-values (not (r:model-state-current-p run)))
     (let ((added (m:add-name owner "Later" :type (m:topic-name-type name))))
       (check :later-items-not-attributed-to-original-source (search "Items added later" (text added "Evidence")))))
+  ;; Reader evolution: the former Unsupported fixture is now an original PASS.
+  ;; Preserve that support and exercise an actual Unsupported outcome by reading
+  ;; the Include original without a resolver. The complete corpus executor has
+  ;; a resolver; this bounded reading intentionally does not. No corpus status changes.
   (let ((run (r:read-case "ctm/in/template-topic-nested.ctm")))
+    (check :former-unsupported-original-now-pass (eq :pass (ev:evaluation-status-of run))))
+  (let ((run (r:read-case "ctm/in/include.ctm")))
     (check :unsupported-not-pass (and (eq :unsupported (ev:evaluation-status-of run))
-                                     (null (r:run-map run))))
+                                     (null (r:run-map run))
+                                     (typep (ev:evaluation-failure-of run) 'topic-maps.ctm:ctm-unsupported)
+                                     (eq :resource-resolver-required
+                                         (topic-maps.ctm:error-code (ev:evaluation-failure-of run)))))
+    (format t "~&LEGACY-UNSUPPORTED-CONTROL: former template-topic-nested=PASS; include without resolver=~A; condition=~A code=~A line=~S column=~S~%"
+      (ev:evaluation-status-of run) (type-of (ev:evaluation-failure-of run))
+      (topic-maps.ctm:error-code (ev:evaluation-failure-of run))
+      (topic-maps.ctm:error-line (ev:evaluation-failure-of run))
+      (topic-maps.ctm:error-column (ev:evaluation-failure-of run)))
     (check :unsupported-diagnostic-and-navigation
            (and (search "No model was produced" (text run "Execution"))
                 (ev:evaluation-failure-of run) (selected-references-exist run "Execution"))))

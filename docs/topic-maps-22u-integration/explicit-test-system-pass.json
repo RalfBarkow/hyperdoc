@@ -1,0 +1,39 @@
+{
+  "command": [
+    "/usr/bin/sandbox-exec",
+    "-p",
+    "(version 1)(allow default)(deny network*)(deny file-write* (subpath \"/Users/rgb/workspace/hyperdoc-dreyeck-ch\"))(deny file-write* (subpath \"/Users/rgb/workspace/topic-maps\"))",
+    "/nix/store/8j4gxfa63znzgcba9x1mw68yz7cb0ywf-sbcl-with-packages/bin/sbcl",
+    "--noinform",
+    "--no-sysinit",
+    "--no-userinit",
+    "--script",
+    "scripts/test-topic-maps-project-example.lisp"
+  ],
+  "startedAtUTC": "2026-10-26T04:37:27.616120+00:00",
+  "runtime": "SBCL 2.4.10",
+  "sourceRevision": "b2eecffa05de4fce41c10ae1ada9ae11a0c6e7dc",
+  "targetBase": "a9daaf8c1245bbaca79822be2cdabdab134b2fd7",
+  "inputSHA256": {
+    "dreyeck.asd": "6c236ebdc83437bfd1d702ba305400f66cd2a1bed4e14c2be92913c1df871192",
+    "dreyeck/src/tmdm-model-navigation.lisp": "de7bc3d250f382e6d14bb094a1f7efd4b84f810fa950266acffc6176377f0d3b",
+    "dreyeck/work/tmdm-model-reading.lisp": "2a97db5f53043d181975f021395656fd80ffcba26b4ba69b88c234f3600d4ca1",
+    "dreyeck/tests/tmdm-model-reading.lisp": "4b62ddbc3af2a9038976963eac19c7fdbd49e00e83ceb41a406718bb46c80464",
+    "dreyeck/work/topic-maps-project-example.lisp": "0d64887a47a724b1325d1f719406f1f2be92976587208eaeb59d7b2511f32b31",
+    "dreyeck/tests/topic-maps-project-example.lisp": "1ab2d47f6a231e09974962fc8ab31f18e619c00cdcd783bbb8dab09b833ba206",
+    "dreyeck/pages/topic-maps-project-example/Reading Slice 22U.html": "028bfaa3ab76543be745c8b15af43616664d8f2d77036223cff7c202acf577aa",
+    "scripts/topic-maps-project-bootstrap.lisp": "59277e726f6e88471edbf2effe57b78ebeb07d22fe3b76a99b938a00259d57c0",
+    "scripts/test-topic-maps-project-example.lisp": "22774900ade711ea195ee18520108bef51a8ae97d0a3dba749d30d4b465b2827",
+    "scripts/serve-topic-maps-project-example.lisp": "40e53f9ba1e09ad88074cdd1f26834effabb55511e52db52da02e5e0d2c17444",
+    "flake.lock": "f82401946af9fa2467191c454f8ee3f288d76164a00bc41f96f9b36441ede4bc"
+  },
+  "registry": "/nix/store/7l95gid3niz995qqpkgclj6355k50phf-source//:/nix/store/w26nr9dxpfsyzbviphnaaydmcww2h3y6-source//:/nix/store/ibq9zs9js02ln87vjmcl6xdafvpxzffx-source//:/nix/store/p62cd9zn5gnrd34wgbjjnqragxwx6dhh-source//:/nix/store/w15dbn9gy780n3p9k5b69dr3rrr5lczr-source//:/nix/store/9zkvhs70z8w06kximfrw3zm099qa87vj-source//",
+  "networkDenied": true,
+  "bothRepositoryWritesDenied": true,
+  "retargeting": "retargeting.json",
+  "separateProjectRegression": "project-tests.json uses existing 5a4a668 source in a separate fresh process",
+  "exitCode": 0,
+  "success": true,
+  "finishedAtUTC": "2026-10-26T04:38:15.541821+00:00",
+  "logSHA256": "f901d3b23095d06df2f0a18de20ad050dc04884e1e24d86be844ddf5de36a0de"
+}

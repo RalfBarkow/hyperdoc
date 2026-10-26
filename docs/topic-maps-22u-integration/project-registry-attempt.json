@@ -1,0 +1,25 @@
+{
+  "command": [
+    "/usr/bin/sandbox-exec",
+    "-p",
+    "(version 1)(allow default)(deny network*)(deny file-write* (subpath \"/Users/rgb/workspace/hyperdoc-dreyeck-ch\"))(deny file-write* (subpath \"/Users/rgb/workspace/topic-maps-normalization\"))(deny file-write* (subpath \"/Users/rgb/workspace/topic-maps\"))",
+    "/nix/store/8j4gxfa63znzgcba9x1mw68yz7cb0ywf-sbcl-with-packages/bin/sbcl",
+    "--noinform",
+    "--no-sysinit",
+    "--no-userinit",
+    "--script",
+    "/var/folders/y1/yhhpj5wd7cb5325t8__1ct2r0000gn/T/hyperdoc-topic-maps-22u-z_gpmf_r/separate-project-tests.lisp"
+  ],
+  "startedAtUTC": "2026-10-26T04:37:46.542567+00:00",
+  "sourceRevision": "5a4a66850403cdfe2755c6c88083a8e31af89628",
+  "scope": "existing separate Project Workspace only; its own pinned normalization checkout, never mixed with 22U",
+  "freshProcess": true,
+  "networkDenied": true,
+  "repositoryWritesDenied": true,
+  "script": "(require :asdf)\n(asdf:initialize-output-translations '(:output-translations (\"/Users/rgb/workspace/hyperdoc-dreyeck-ch/\" \"/var/folders/y1/yhhpj5wd7cb5325t8__1ct2r0000gn/T/hyperdoc-topic-maps-22u-z_gpmf_r/project-fasls/\") (\"/Users/rgb/workspace/topic-maps-normalization/\" \"/var/folders/y1/yhhpj5wd7cb5325t8__1ct2r0000gn/T/hyperdoc-topic-maps-22u-z_gpmf_r/project-source-fasls/\") :inherit-configuration))\n(asdf:initialize-source-registry '(:source-registry (:tree \"/Users/rgb/workspace/hyperdoc-dreyeck-ch/\") (:tree \"/Users/rgb/workspace/topic-maps-normalization/\") (:tree \"/nix/store/7l95gid3niz995qqpkgclj6355k50phf-source/\") (:tree \"/nix/store/w26nr9dxpfsyzbviphnaaydmcww2h3y6-source/\") (:tree \"/nix/store/ibq9zs9js02ln87vjmcl6xdafvpxzffx-source/\") (:tree \"/nix/store/p62cd9zn5gnrd34wgbjjnqragxwx6dhh-source/\") (:tree \"/nix/store/w15dbn9gy780n3p9k5b69dr3rrr5lczr-source/\") (:tree \"/nix/store/9zkvhs70z8w06kximfrw3zm099qa87vj-source/\") :ignore-inherited-configuration))\n(asdf:test-system \"dreyeck/work/project/tests\")\n(format t \"~&SEPARATE-PROJECT-REGRESSIONS-PASS~%\")\n",
+  "scriptSHA256": "c23117f5fd0d107cd867fac3c197d1cf5194e0fd12ca12522943487cf495f37f",
+  "exitCode": 1,
+  "success": false,
+  "finishedAtUTC": "2026-10-26T04:37:48.008781+00:00",
+  "logSHA256": "64ad5877e3fdd46deec42d46396d0c20fda740b1319a490334c0fc66ef62e909"
+}

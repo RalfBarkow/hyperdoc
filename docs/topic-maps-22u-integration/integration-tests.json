@@ -1,0 +1,41 @@
+{
+  "command": [
+    "/usr/bin/sandbox-exec",
+    "-p",
+    "(version 1)(allow default)(deny network*)(deny file-write* (subpath \"/Users/rgb/workspace/hyperdoc-dreyeck-ch\"))(deny file-write* (subpath \"/Users/rgb/workspace/topic-maps\"))",
+    "/nix/store/8j4gxfa63znzgcba9x1mw68yz7cb0ywf-sbcl-with-packages/bin/sbcl",
+    "--noinform",
+    "--no-sysinit",
+    "--no-userinit",
+    "--script",
+    "scripts/test-topic-maps-project-example.lisp"
+  ],
+  "startedAtUTC": "2026-10-26T04:49:34.791982+00:00",
+  "runtime": "SBCL 2.4.10",
+  "sourceRevision": "b2eecffa05de4fce41c10ae1ada9ae11a0c6e7dc",
+  "targetBase": "a9daaf8c1245bbaca79822be2cdabdab134b2fd7",
+  "inputSHA256": {
+    "dreyeck.asd": "d16888e249c3362de77a5ff899544c3c7f433547b49013b5c09c33e1a956c3f5",
+    "dreyeck/src/tmdm-model-navigation.lisp": "de7bc3d250f382e6d14bb094a1f7efd4b84f810fa950266acffc6176377f0d3b",
+    "dreyeck/work/tmdm-model-reading.lisp": "2a97db5f53043d181975f021395656fd80ffcba26b4ba69b88c234f3600d4ca1",
+    "dreyeck/tests/tmdm-model-reading.lisp": "4b62ddbc3af2a9038976963eac19c7fdbd49e00e83ceb41a406718bb46c80464",
+    "dreyeck/work/topic-maps-project-example.lisp": "9847c3e204cf2231ed85302c78bdbdbf39fe1f003ad64ac4e9b95aab778ce0af",
+    "dreyeck/tests/topic-maps-project-example.lisp": "2770bb3005021e945caf2c45bda566c4733310a4c2c12f2ea2eede365d6e8477",
+    "dreyeck/pages/topic-maps-project-example/Reading Slice 22U.html": "028bfaa3ab76543be745c8b15af43616664d8f2d77036223cff7c202acf577aa",
+    "scripts/topic-maps-project-bootstrap.lisp": "59277e726f6e88471edbf2effe57b78ebeb07d22fe3b76a99b938a00259d57c0",
+    "scripts/test-topic-maps-project-example.lisp": "6a885f42f47bad6b82dfc8f2c688b9ffc5e0f722af0530546c3b81156d5f2b02",
+    "scripts/serve-topic-maps-project-example.lisp": "40e53f9ba1e09ad88074cdd1f26834effabb55511e52db52da02e5e0d2c17444",
+    "flake.lock": "f82401946af9fa2467191c454f8ee3f288d76164a00bc41f96f9b36441ede4bc"
+  },
+  "registry": "/nix/store/7l95gid3niz995qqpkgclj6355k50phf-source//:/nix/store/w26nr9dxpfsyzbviphnaaydmcww2h3y6-source//:/nix/store/ibq9zs9js02ln87vjmcl6xdafvpxzffx-source//:/nix/store/p62cd9zn5gnrd34wgbjjnqragxwx6dhh-source//:/nix/store/w15dbn9gy780n3p9k5b69dr3rrr5lczr-source//:/nix/store/9zkvhs70z8w06kximfrw3zm099qa87vj-source//",
+  "networkDenied": true,
+  "bothRepositoryWritesDenied": true,
+  "retargeting": "retargeting.json",
+  "separateProjectRegression": "project-tests.json uses existing 5a4a668 source in a separate fresh process",
+  "exitCode": 0,
+  "success": true,
+  "finishedAtUTC": "2026-10-26T04:50:30.873107+00:00",
+  "logSHA256": "fd023f0ed62fef76764667d0c968b75e3e95399d495ff57d2a16185771afc2cd",
+  "testEntry": "asdf:test-system on the parent optional system; follows :in-order-to and actually runs its tests",
+  "additionalCheck": "Dated observation copies mutable strings; a separate disposable Map mutation must be reported as later model state."
+}

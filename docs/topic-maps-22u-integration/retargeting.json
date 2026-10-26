@@ -1,0 +1,15 @@
+{
+  "file": "dreyeck/tests/tmdm-model-reading.lisp",
+  "beforeSHA256": "8f40b065eeee7176bfa77a8df6ee6607272a99be8af05c239ed979aa4180e3c8",
+  "afterSHA256": "4b62ddbc3af2a9038976963eac19c7fdbd49e00e83ceb41a406718bb46c80464",
+  "originalPurpose": "A truly Unsupported reader outcome must not count as PASS and must preserve diagnostic navigation without returning a Map.",
+  "formerFixture": "ctm/in/template-topic-nested.ctm",
+  "formerFixtureCurrentRegisteredStatus": "pass",
+  "replacementFixture": "ctm/in/include.ctm",
+  "replacementRegisteredStatusUnchanged": "pass in full corpus harness with resolver; this reading explicitly has no resolver",
+  "additionalRegression": "Former Unsupported fixture actually PASS. Include without resolver must return CTM-UNSUPPORTED/:resource-resolver-required, no Map and navigable diagnostic; never PASS.",
+  "normativeInterpretationChanged": false,
+  "corpusModified": false,
+  "actualOutcomeEvidence": "integration-tests.log LEGACY-UNSUPPORTED-CONTROL marker after successful new run",
+  "discardedCandidate": "template-subject-identifier2 produces CTM-REJECTION, so it cannot substantiate the Unsupported check. Failed run retained separately."
+}

@@ -1,0 +1,36 @@
+WARNING: System definition file #P"/nix/store/7kwvfxhgrx9d2nnainzdflxrd76c1aj3-sbcl-cl-who-20241012-git/cl-who.asd" contains definition for system "cl-who-test". Please only define "cl-who" and secondary systems with a name starting with "cl-who/" (e.g. "cl-who/test") in that file.
+WARNING: System definition file #P"/nix/store/37a33q8xchz47wpd24wf67lalz080hl5-sbcl-parse-float-20200218-git/parse-float.asd" contains definition for system "parse-float-tests". Please only define "parse-float" and secondary systems with a name starting with "parse-float/" (e.g. "parse-float/test") in that file.
+WARNING: System definition file #P"/nix/store/8nfp68p140k76rh833nfcv500k8ippr4-sbcl-cl-template-20130615-git/cl-template.asd" contains definition for system "cl-template-tests". Please only define "cl-template" and secondary systems with a name starting with "cl-template/" (e.g. "cl-template/test") in that file.
+WARNING: redefining DEFTYPE type to be a class: DBI.ERROR:<DBI-ERROR>
+WARNING: redefining DEFTYPE type to be a class: DBI.ERROR:<DBI-WARNING>
+WARNING: redefining DEFTYPE type to be a class: DBI.ERROR:<DBI-INTERFACE-ERROR>
+WARNING:
+   redefining DEFTYPE type to be a class: DBI.ERROR:<DBI-UNIMPLEMENTED-ERROR>
+WARNING: redefining DEFTYPE type to be a class: DBI.ERROR:<DBI-DATABASE-ERROR>
+WARNING: redefining DEFTYPE type to be a class: DBI.ERROR:<DBI-DATA-ERROR>
+WARNING:
+   redefining DEFTYPE type to be a class: DBI.ERROR:<DBI-OPERATIONAL-ERROR>
+WARNING: redefining DEFTYPE type to be a class: DBI.ERROR:<DBI-INTEGRITY-ERROR>
+WARNING: redefining DEFTYPE type to be a class: DBI.ERROR:<DBI-INTERNAL-ERROR>
+WARNING:
+   redefining DEFTYPE type to be a class: DBI.ERROR:<DBI-PROGRAMMING-ERROR>
+WARNING:
+   redefining DEFTYPE type to be a class: DBI.ERROR:<DBI-NOTSUPPORTED-ERROR>
+WARNING:
+   redefining DEFTYPE type to be a class: DBI.ERROR:<DBI-ALREADY-COMMITED-ERROR>
+WARNING:
+   redefining DEFTYPE type to be a class: DBI.ERROR:<DBI-ALREADY-ROLLED-BACK-ERROR>
+WARNING: redefining DEFTYPE type to be a class: DBI.DRIVER:<DBI-DRIVER>
+WARNING: redefining DEFTYPE type to be a class: DBI.DRIVER:<DBI-CONNECTION>
+WARNING: redefining DEFTYPE type to be a class: DBI.DRIVER:<DBI-QUERY>
+TOPIC-MAPS-22U-INSPECTOR-PASS: 38 assertions; project and disposition reached through native Role/Association references.
+LEGACY-UNSUPPORTED-CONTROL: former template-topic-nested=PASS; include without resolver=UNSUPPORTED; condition=CTM-UNSUPPORTED code=RESOURCE-RESOLVER-REQUIRED line=1 column=1
+TMDM-MODEL-NAVIGATION-PASS: 98 assertions, actual references, dated evidence and unchanged sources.
+Dreyeck Git commit inspection smoke tests passed.
+Dreyeck Git source slice smoke tests passed.
+Dreyeck Git source-slice Topicmap test passed.
+Dreyeck Git repository Topicmap smoke tests passed.
+Historical ASDF reference and generic Topicmap smoke tests passed.
+Generic renderer-independent Topicmap view tests passed.
+TALA input tests passed: real projection, deterministic IDs/endpoints, point independence, native availability, invalid output.
+TOPIC-MAPS-22U-INTEGRATION-REGRESSIONS-PASS

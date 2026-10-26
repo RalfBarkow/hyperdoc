@@ -1,0 +1,37 @@
+{
+  "command": [
+    "/usr/bin/sandbox-exec",
+    "-p",
+    "(version 1)(allow default)(deny network*)(deny file-write* (subpath \"/Users/rgb/workspace/hyperdoc-dreyeck-ch\"))(deny file-write* (subpath \"/Users/rgb/workspace/topic-maps\"))",
+    "/nix/store/8j4gxfa63znzgcba9x1mw68yz7cb0ywf-sbcl-with-packages/bin/sbcl",
+    "--noinform",
+    "--no-sysinit",
+    "--no-userinit",
+    "--script",
+    "scripts/test-topic-maps-project-example.lisp"
+  ],
+  "exitCode": 1,
+  "startedAtUTC": "2026-10-26T04:29:34.500433+00:00",
+  "finishedAtUTC": "2026-10-26T04:30:06.611220+00:00",
+  "runtime": "SBCL 2.4.10",
+  "sourceRevision": "b2eecffa05de4fce41c10ae1ada9ae11a0c6e7dc",
+  "targetBase": "a9daaf8c1245bbaca79822be2cdabdab134b2fd7",
+  "inputSHA256": {
+    "dreyeck.asd": "6c236ebdc83437bfd1d702ba305400f66cd2a1bed4e14c2be92913c1df871192",
+    "dreyeck/src/tmdm-model-navigation.lisp": "de7bc3d250f382e6d14bb094a1f7efd4b84f810fa950266acffc6176377f0d3b",
+    "dreyeck/work/tmdm-model-reading.lisp": "2a97db5f53043d181975f021395656fd80ffcba26b4ba69b88c234f3600d4ca1",
+    "dreyeck/tests/tmdm-model-reading.lisp": "e6f84dde448f8caf3b94ba648569be7f1603c65f04247cbe3a5432206df9c6ae",
+    "dreyeck/work/topic-maps-project-example.lisp": "0d64887a47a724b1325d1f719406f1f2be92976587208eaeb59d7b2511f32b31",
+    "dreyeck/tests/topic-maps-project-example.lisp": "1ab2d47f6a231e09974962fc8ab31f18e619c00cdcd783bbb8dab09b833ba206",
+    "dreyeck/pages/topic-maps-project-example/Reading Slice 22U.html": "028bfaa3ab76543be745c8b15af43616664d8f2d77036223cff7c202acf577aa",
+    "scripts/topic-maps-project-bootstrap.lisp": "59277e726f6e88471edbf2effe57b78ebeb07d22fe3b76a99b938a00259d57c0",
+    "scripts/test-topic-maps-project-example.lisp": "bb6f014b2a1138762829e562f99816869f080878bf71f780992c988dc64c7293",
+    "scripts/serve-topic-maps-project-example.lisp": "40e53f9ba1e09ad88074cdd1f26834effabb55511e52db52da02e5e0d2c17444",
+    "flake.lock": "f82401946af9fa2467191c454f8ee3f288d76164a00bc41f96f9b36441ede4bc"
+  },
+  "logSHA256": "b27b69d3e40539c3a40f56657f41fb20d5f0c4fb12341b04c27776c98ec795f6",
+  "registry": "/nix/store/7l95gid3niz995qqpkgclj6355k50phf-source//:/nix/store/w26nr9dxpfsyzbviphnaaydmcww2h3y6-source//:/nix/store/ibq9zs9js02ln87vjmcl6xdafvpxzffx-source//:/nix/store/p62cd9zn5gnrd34wgbjjnqragxwx6dhh-source//:/nix/store/w15dbn9gy780n3p9k5b69dr3rrr5lczr-source//:/nix/store/9zkvhs70z8w06kximfrw3zm099qa87vj-source//",
+  "networkDenied": true,
+  "bothRepositoryWritesDenied": true,
+  "retargeting": "retargeting.json; retain old Unsupported control purpose and assert old fixture now actually PASS"
+}

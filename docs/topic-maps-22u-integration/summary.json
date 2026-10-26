@@ -1,0 +1,38 @@
+{
+  "targetBranch": "dreyeck.ch",
+  "targetBaseCommit": "a9daaf8c1245bbaca79822be2cdabdab134b2fd7",
+  "targetDelivery": "uncommitted integration, exact file hashes in manifest.json; no commit requested/created",
+  "sourceCommit": "b2eecffa05de4fce41c10ae1ada9ae11a0c6e7dc",
+  "sourceRepositoryUnchanged": true,
+  "runtime": "SBCL 2.4.10 from existing local Nix payload; current complete devShell unavailable offline",
+  "acceptance": {
+    "newOptionalASDFSystemActuallyTested": true,
+    "newNativeInspectorChecks": 40,
+    "existingTMDMReadingChecks": 98,
+    "evaluationRecordGitTopicmapRegressions": true,
+    "freshHyperDocNativeNavigationBothPaths": true,
+    "directDocumentedStartHTTPStatus": 200,
+    "exerciseMapSeparate": true,
+    "corpusAndHistoricalInputsUnchanged": true
+  },
+  "additionalExistingProjectWorkspaceRegression": {
+    "sourceCommit": "5a4a66850403cdfe2755c6c88083a8e31af89628",
+    "sourceChecks": 265,
+    "readbackChecks": 175,
+    "acceptanceChecks": 125,
+    "totalChecks": 565,
+    "successAcrossTwoFreshProcesses": true,
+    "initialCombinedAttemptTimeoutSeconds": 300,
+    "notSimultaneouslyLoadedWith22U": true
+  },
+  "noOriginalCorpusRerunClaim": true,
+  "noDeploymentOrProductionServiceChange": true,
+  "evidence": {
+    "integration": "integration-tests.json",
+    "browser": "browser.json",
+    "directStart": "serve-smoke.json",
+    "existingProject": "project-tests.json and project-acceptance.json",
+    "integrity": "integrity.json",
+    "retargeting": "retargeting.json"
+  }
+}

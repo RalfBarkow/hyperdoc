@@ -1,0 +1,19 @@
+{
+  "command": [
+    "/usr/bin/sandbox-exec",
+    "-p",
+    "(version 1)(allow default)(deny network*)(deny file-write* (subpath \"/Users/rgb/workspace/hyperdoc-dreyeck-ch\"))(deny file-write* (subpath \"/Users/rgb/workspace/topic-maps\"))",
+    "/nix/store/8j4gxfa63znzgcba9x1mw68yz7cb0ywf-sbcl-with-packages/bin/sbcl",
+    "--noinform",
+    "--no-sysinit",
+    "--no-userinit",
+    "--script",
+    "/var/folders/y1/yhhpj5wd7cb5325t8__1ct2r0000gn/T/hyperdoc-topic-maps-22u-z_gpmf_r/existing-preflight.lisp"
+  ],
+  "exitCode": 1,
+  "registry": "/nix/store/7l95gid3niz995qqpkgclj6355k50phf-source//:/nix/store/w26nr9dxpfsyzbviphnaaydmcww2h3y6-source//:/nix/store/ibq9zs9js02ln87vjmcl6xdafvpxzffx-source//:/nix/store/p62cd9zn5gnrd34wgbjjnqragxwx6dhh-source//:/nix/store/w15dbn9gy780n3p9k5b69dr3rrr5lczr-source//:/nix/store/9zkvhs70z8w06kximfrw3zm099qa87vj-source//",
+  "runtime": "/nix/store/8j4gxfa63znzgcba9x1mw68yz7cb0ywf-sbcl-with-packages/bin/sbcl",
+  "profile": "/nix/store/ivf2bvcqq89hdhgr0j6q7v0jlhxzaqd1-nix-shell-env",
+  "ASDF_OUTPUT_TRANSLATIONS": "(:output-translations (t \"/var/folders/y1/yhhpj5wd7cb5325t8__1ct2r0000gn/T/hyperdoc-topic-maps-22u-z_gpmf_r/fasls/\") :ignore-inherited-configuration)",
+  "finishedAtUTC": "2026-10-26T04:14:09.696413+00:00"
+}

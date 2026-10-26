@@ -1,0 +1,205 @@
+{
+  "observedAtUTC": "2026-10-26T04:40:49.480822+00:00",
+  "targetBranch": "dreyeck.ch",
+  "targetBase": "a9daaf8c1245bbaca79822be2cdabdab134b2fd7",
+  "sourceBranch": "codex/project-work-slice-22u",
+  "sourceCommit": "b2eecffa05de4fce41c10ae1ada9ae11a0c6e7dc",
+  "sourceStatus": "",
+  "sourceAllTrackedGitBlobs": {
+    "checked": 12228,
+    "sections": {
+      "other": 322,
+      "reports": 9900,
+      "corpus": 2006
+    },
+    "mismatches": []
+  },
+  "protectedTargetFiles": {
+    "dreyeck/src/tmdm-model-navigation.lisp": {
+      "expectedSHA256": "de7bc3d250f382e6d14bb094a1f7efd4b84f810fa950266acffc6176377f0d3b",
+      "actualSHA256": "de7bc3d250f382e6d14bb094a1f7efd4b84f810fa950266acffc6176377f0d3b",
+      "unchanged": true
+    },
+    "dreyeck/work/tmdm-model-reading.lisp": {
+      "expectedSHA256": "2a97db5f53043d181975f021395656fd80ffcba26b4ba69b88c234f3600d4ca1",
+      "actualSHA256": "2a97db5f53043d181975f021395656fd80ffcba26b4ba69b88c234f3600d4ca1",
+      "unchanged": true
+    },
+    "dreyeck/work/project/project-ctm.lisp": {
+      "expectedSHA256": "dc3efe722ef1037b13d5f951ca063ee827a4c910443090c1ff75392342cfff5e",
+      "actualSHA256": "dc3efe722ef1037b13d5f951ca063ee827a4c910443090c1ff75392342cfff5e",
+      "unchanged": true
+    },
+    "dreyeck/work/project/project-workspace.lisp": {
+      "expectedSHA256": "41b5e8326d4d3b47f346fd3ea6f993d72abebe1675210ae5adc45efb88a56c14",
+      "actualSHA256": "41b5e8326d4d3b47f346fd3ea6f993d72abebe1675210ae5adc45efb88a56c14",
+      "unchanged": true
+    },
+    "flake.nix": {
+      "expectedSHA256": "ce070ada1e29eb0f272954fd9752bac707a9776cf48efacf913fe7aac970920b",
+      "actualSHA256": "ce070ada1e29eb0f272954fd9752bac707a9776cf48efacf913fe7aac970920b",
+      "unchanged": true
+    },
+    "flake.lock": {
+      "expectedSHA256": "f82401946af9fa2467191c454f8ee3f288d76164a00bc41f96f9b36441ede4bc",
+      "actualSHA256": "f82401946af9fa2467191c454f8ee3f288d76164a00bc41f96f9b36441ede4bc",
+      "unchanged": true
+    },
+    "docs/tmdm-model-navigation-validation.json": {
+      "expectedSHA256": "bd941a3caa6ae1a790da0c7bcd0cf4c5c62da7f2d235938a44061927b2649fac",
+      "actualSHA256": "bd941a3caa6ae1a790da0c7bcd0cf4c5c62da7f2d235938a44061927b2649fac",
+      "unchanged": true
+    },
+    "docs/tmdm-model-navigation-validation.log": {
+      "expectedSHA256": "023ce8ff8a9141fa92d980254d60275c25129d9e1a28eabb9a2a9250f574deba",
+      "actualSHA256": "023ce8ff8a9141fa92d980254d60275c25129d9e1a28eabb9a2a9250f574deba",
+      "unchanged": true
+    }
+  },
+  "worktrees": {
+    "hyperdoc": [
+      {
+        "path": "/Users/rgb/workspace/hyperdoc",
+        "headUnchanged": true,
+        "changesPreserved": true,
+        "changes": []
+      },
+      {
+        "path": "/Users/rgb/.codex/worktrees/ctm-tmdm-model-navigation/hyperdoc-dreyeck-ch",
+        "headUnchanged": true,
+        "changesPreserved": true,
+        "changes": []
+      },
+      {
+        "path": "/Users/rgb/.codex/worktrees/gesture-binding-witness/hyperdoc-dreyeck-ch",
+        "headUnchanged": true,
+        "changesPreserved": true,
+        "changes": []
+      },
+      {
+        "path": "/Users/rgb/workspace/hyperdoc-d2-baseline",
+        "headUnchanged": true,
+        "changesPreserved": true,
+        "changes": []
+      },
+      {
+        "path": "/Users/rgb/workspace/hyperdoc-deployment-2026-10-03",
+        "headUnchanged": true,
+        "changesPreserved": true,
+        "changes": []
+      },
+      {
+        "path": "/Users/rgb/workspace/hyperdoc-deployment-witness",
+        "headUnchanged": true,
+        "changesPreserved": true,
+        "changes": [
+          "?? dreyeck/.DS_Store"
+        ]
+      },
+      {
+        "path": "/Users/rgb/workspace/hyperdoc-dreyeck-ch",
+        "headUnchanged": true,
+        "changesPreserved": false,
+        "changes": [
+          " M dreyeck.asd",
+          " M dreyeck/tests/tmdm-model-reading.lisp",
+          "?? docs/topic-maps-22u-integration/",
+          "?? dreyeck/pages/topic-maps-project-example/",
+          "?? dreyeck/tests/topic-maps-project-example.lisp",
+          "?? dreyeck/work/topic-maps-project-example.lisp",
+          "?? scripts/serve-topic-maps-project-example.lisp",
+          "?? scripts/test-topic-maps-project-browser.mjs",
+          "?? scripts/test-topic-maps-project-example.lisp",
+          "?? scripts/topic-maps-project-bootstrap.lisp"
+        ]
+      },
+      {
+        "path": "/Users/rgb/workspace/hyperdoc-dreyeck-ch-ctm-page-authoring",
+        "headUnchanged": true,
+        "changesPreserved": true,
+        "changes": []
+      },
+      {
+        "path": "/Users/rgb/workspace/hyperdoc-dreyeck-integration",
+        "headUnchanged": true,
+        "changesPreserved": true,
+        "changes": []
+      },
+      {
+        "path": "/Users/rgb/workspace/hyperdoc-gesture-correction",
+        "headUnchanged": true,
+        "changesPreserved": true,
+        "changes": []
+      },
+      {
+        "path": "/Users/rgb/workspace/hyperdoc-hauptsache",
+        "headUnchanged": true,
+        "changesPreserved": true,
+        "changes": []
+      },
+      {
+        "path": "/Users/rgb/workspace/hyperdoc-integration",
+        "headUnchanged": true,
+        "changesPreserved": true,
+        "changes": []
+      },
+      {
+        "path": "/Users/rgb/workspace/hyperdoc-listen-lifecycle",
+        "headUnchanged": true,
+        "changesPreserved": true,
+        "changes": [
+          " M dreyeck.asd",
+          "?? dreyeck/mech-intake/evidence/listen-lifecycle/",
+          "?? dreyeck/mech-intake/listen-lifecycle.lisp",
+          "?? \"dreyeck/pages/mech-intake/Reading Ward's LISTEN Lifecycle.html\"",
+          "?? dreyeck/tests/mech-intake-listen-lifecycle.lisp"
+        ]
+      },
+      {
+        "path": "/Users/rgb/workspace/hyperdoc-querying-topicmaps",
+        "headUnchanged": true,
+        "changesPreserved": true,
+        "changes": []
+      },
+      {
+        "path": "/Users/rgb/workspace/hyperdoc-runtime-witness",
+        "headUnchanged": true,
+        "changesPreserved": true,
+        "changes": []
+      },
+      {
+        "path": "/Users/rgb/workspace/hyperdoc-traverse-companion",
+        "headUnchanged": true,
+        "changesPreserved": true,
+        "changes": [
+          " M dreyeck.asd",
+          " M \"dreyeck/pages/traverse/Federated Search Without a Central Index.html\"",
+          " M dreyeck/src/topicmap-inspector.lisp",
+          " M dreyeck/tests/wiki-topicmap.lisp",
+          " M dreyeck/traverse/item-search.lisp",
+          " M dreyeck/traverse/wiki-topicmap.lisp",
+          "?? dreyeck/tests/search-navigation.lisp"
+        ]
+      }
+    ],
+    "topic-maps": [
+      {
+        "path": "/Users/rgb/workspace/topic-maps",
+        "headUnchanged": true,
+        "changesPreserved": true,
+        "changes": []
+      },
+      {
+        "path": "/Users/rgb/workspace/topic-maps-normalization",
+        "headUnchanged": true,
+        "changesPreserved": true,
+        "changes": []
+      }
+    ]
+  },
+  "stagedChanges": "",
+  "targetDiffCheck": 0,
+  "commitCreated": false,
+  "productionServicesChanged": false,
+  "success": true
+}

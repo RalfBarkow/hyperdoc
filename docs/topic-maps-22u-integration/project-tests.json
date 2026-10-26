@@ -1,0 +1,39 @@
+{
+  "command": [
+    "/usr/bin/sandbox-exec",
+    "-p",
+    "(version 1)(allow default)(deny network*)(deny file-write* (subpath \"/Users/rgb/workspace/hyperdoc-dreyeck-ch\"))(deny file-write* (subpath \"/Users/rgb/workspace/topic-maps-normalization\"))(deny file-write* (subpath \"/Users/rgb/workspace/topic-maps\"))",
+    "/nix/store/8j4gxfa63znzgcba9x1mw68yz7cb0ywf-sbcl-with-packages/bin/sbcl",
+    "--noinform",
+    "--no-sysinit",
+    "--no-userinit",
+    "--script",
+    "/var/folders/y1/yhhpj5wd7cb5325t8__1ct2r0000gn/T/hyperdoc-topic-maps-22u-z_gpmf_r/separate-project-tests.lisp"
+  ],
+  "startedAtUTC": "2026-10-26T04:39:07.673499+00:00",
+  "sourceRevision": "5a4a66850403cdfe2755c6c88083a8e31af89628",
+  "scope": "existing separate Project Workspace only; its own pinned normalization checkout, never mixed with 22U",
+  "freshProcess": true,
+  "networkDenied": true,
+  "repositoryWritesDenied": true,
+  "script": "(require :asdf)\n(asdf:initialize-output-translations '(:output-translations (\"/Users/rgb/workspace/hyperdoc-dreyeck-ch/\" \"/var/folders/y1/yhhpj5wd7cb5325t8__1ct2r0000gn/T/hyperdoc-topic-maps-22u-z_gpmf_r/project-fasls/\") (\"/Users/rgb/workspace/topic-maps-normalization/\" \"/var/folders/y1/yhhpj5wd7cb5325t8__1ct2r0000gn/T/hyperdoc-topic-maps-22u-z_gpmf_r/project-source-fasls/\") :inherit-configuration))\n(asdf:initialize-source-registry\n `(:source-registry (:tree \"/Users/rgb/workspace/hyperdoc-dreyeck-ch/\") (:tree \"/Users/rgb/workspace/topic-maps-normalization/\")\n   ,@(loop for entry in (uiop:split-string (uiop:getenv \"CL_SOURCE_REGISTRY\") :separator \":\")\n           when (uiop:string-prefix-p \"/nix/store/\" entry)\n             collect `(:tree ,(uiop:ensure-directory-pathname (string-right-trim \"/\" entry))))\n   :ignore-inherited-configuration))\n(asdf:test-system \"dreyeck/work/project/tests\")\n(format t \"~&SEPARATE-PROJECT-REGRESSIONS-PASS~%\")\n",
+  "scriptSHA256": "898dcc4a4c50b82c6991e833890a4b6502d43e52c7deccb2f861fa59d7bf2c8e",
+  "registryCorrection": "Include the library registry added inside the existing SBCL wrapper; the six flake inputs alone do not include Alexandria.",
+  "exitCode": 124,
+  "success": false,
+  "finishedAtUTC": "2026-10-26T04:44:07.800416+00:00",
+  "logSHA256": "d2551c35d956edeaa7dc05196a7dad1ea166cca9d42740751ced8a27ebc32d28",
+  "timeoutSeconds": 300,
+  "completedPhases": {
+    "source": {
+      "checks": 265,
+      "success": true
+    },
+    "readback": {
+      "checks": 175,
+      "success": true,
+      "initialModelReadSeconds": 14.1
+    }
+  },
+  "incompletePhase": "acceptance; continued separately in project-acceptance.json"
+}

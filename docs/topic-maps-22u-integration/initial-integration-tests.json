@@ -1,0 +1,22 @@
+{
+  "command": [
+    "/usr/bin/sandbox-exec",
+    "-p",
+    "(version 1)(allow default)(deny network*)(deny file-write* (subpath \"/Users/rgb/workspace/hyperdoc-dreyeck-ch\"))(deny file-write* (subpath \"/Users/rgb/workspace/topic-maps\"))",
+    "/nix/store/8j4gxfa63znzgcba9x1mw68yz7cb0ywf-sbcl-with-packages/bin/sbcl",
+    "--noinform",
+    "--no-sysinit",
+    "--no-userinit",
+    "--script",
+    "scripts/test-topic-maps-project-example.lisp"
+  ],
+  "exitCode": 1,
+  "startedAtUTC": "2026-10-26T04:22:19.008070+00:00",
+  "finishedAtUTC": "2026-10-26T04:22:41.178772+00:00",
+  "runtime": "SBCL 2.4.10",
+  "sourceRevision": "b2eecffa05de4fce41c10ae1ada9ae11a0c6e7dc",
+  "targetBase": "a9daaf8c1245bbaca79822be2cdabdab134b2fd7",
+  "registry": "/nix/store/7l95gid3niz995qqpkgclj6355k50phf-source//:/nix/store/w26nr9dxpfsyzbviphnaaydmcww2h3y6-source//:/nix/store/ibq9zs9js02ln87vjmcl6xdafvpxzffx-source//:/nix/store/p62cd9zn5gnrd34wgbjjnqragxwx6dhh-source//:/nix/store/w15dbn9gy780n3p9k5b69dr3rrr5lczr-source//:/nix/store/9zkvhs70z8w06kximfrw3zm099qa87vj-source//",
+  "networkDenied": true,
+  "bothRepositoryWritesDenied": true
+}

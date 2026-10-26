@@ -3379,3 +3379,21 @@
   :perform (test-op (op component)
              (declare (ignore op component))
              (uiop:symbol-call :dreyeck/work/project/tests :run-tests)))
+
+
+;; Optional local Slice 22U reading. The independent checkout is not vendored.
+(defsystem "dreyeck/work/topic-maps-project-example"
+  :description "Execute and inspect the pinned Topic Maps 22U project example as native TMDM objects"
+  :depends-on ("topic-maps/project-work-example" "dreyeck/inspector/tmdm" "dreyeck/work/tmdm-reading")
+  :serial t
+  :components ((:file "dreyeck/work/topic-maps-project-example")
+               (:module "dreyeck/pages/topic-maps-project-example"
+                :components ((:static-file "Reading Slice 22U.html"))))
+  :in-order-to ((test-op (test-op "dreyeck/work/topic-maps-project-example/tests"))))
+
+(defsystem "dreyeck/work/topic-maps-project-example/tests"
+  :depends-on ("dreyeck/work/topic-maps-project-example")
+  :components ((:file "dreyeck/tests/topic-maps-project-example"))
+  :perform (test-op (operation component)
+             (declare (ignore operation component))
+             (uiop:symbol-call :dreyeck/work/topic-maps-project-example/tests :run-tests)))

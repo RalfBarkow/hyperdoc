@@ -1,0 +1,27 @@
+{
+  "command": [
+    "/usr/bin/sandbox-exec",
+    "-p",
+    "(version 1)(allow default)(deny network*)(allow network-inbound (local ip \"localhost:*\"))(allow network-outbound (remote ip \"localhost:*\"))(deny file-write* (subpath \"/Users/rgb/workspace/hyperdoc-dreyeck-ch\"))(deny file-write* (subpath \"/Users/rgb/workspace/topic-maps\"))",
+    "/nix/store/8j4gxfa63znzgcba9x1mw68yz7cb0ywf-sbcl-with-packages/bin/sbcl",
+    "--noinform",
+    "--no-sysinit",
+    "--no-userinit",
+    "--script",
+    "scripts/serve-topic-maps-project-example.lisp"
+  ],
+  "startedAtUTC": "2026-10-26T04:45:51.443434+00:00",
+  "port": 56113,
+  "siteRoot": "/var/folders/y1/yhhpj5wd7cb5325t8__1ct2r0000gn/T/hyperdoc-22u-start-kntqx3ai",
+  "freshProcess": true,
+  "loopbackOnly": true,
+  "bothRepositoryWritesDenied": true,
+  "scriptSHA256": "40e53f9ba1e09ad88074cdd1f26834effabb55511e52db52da02e5e0d2c17444",
+  "success": true,
+  "HTTPStatus": 200,
+  "responseBytes": 679,
+  "serverStopped": true,
+  "terminationExitCode": 0,
+  "finishedAtUTC": "2026-10-26T04:46:04.518117+00:00",
+  "logSHA256": "0e6a4df094586c1e7c779a5610941685cb796d3b0b4d356a8f5e295c68431299"
+}

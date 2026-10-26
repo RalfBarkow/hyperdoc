@@ -1,0 +1,54 @@
+{
+  "kind": "fresh-local-22U-Catalog-native-Inspector-navigation",
+  "startedAtUTC": "2026-10-26T04:50:09.117Z",
+  "finishedAtUTC": "2026-10-26T04:50:29.036Z",
+  "success": true,
+  "failure": null,
+  "steps": [
+    "Catalog → Reading Slice 22U → explicit execution → native Map",
+    "Question → native Roles → Betrifft Association → native Role Player → project",
+    "Question → native Roles → Dokumentiert durch Association → native Role Player → disposition"
+  ],
+  "command": [
+    "/usr/bin/sandbox-exec",
+    "-p",
+    "(version 1)(allow default)(deny network*)(allow network-inbound (local ip \"localhost:*\"))(allow network-outbound (remote ip \"localhost:*\"))(deny file-write* (subpath \"/Users/rgb/workspace/hyperdoc-dreyeck-ch\"))(deny file-write* (subpath \"/Users/rgb/workspace/topic-maps\"))",
+    "/nix/store/8j4gxfa63znzgcba9x1mw68yz7cb0ywf-sbcl-with-packages/bin/sbcl",
+    "--noinform",
+    "--no-sysinit",
+    "--no-userinit",
+    "--script",
+    "/var/folders/y1/yhhpj5wd7cb5325t8__1ct2r0000gn/T/hyperdoc-project-22u-browser-Nd8OCP/browser.lisp"
+  ],
+  "runtime": "/nix/store/8j4gxfa63znzgcba9x1mw68yz7cb0ywf-sbcl-with-packages/bin/sbcl",
+  "playwright": "/Users/rgb/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/playwright",
+  "chrome": "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
+  "sourceSHA256Before": "8f7012f3db2da4199a00029dc600ff7492747b9c9b081f4135dd817e66e9a85b",
+  "sourceSHA256After": "8f7012f3db2da4199a00029dc600ff7492747b9c9b081f4135dd817e66e9a85b",
+  "freshProcess": true,
+  "bothRepositoryWritesDenied": true,
+  "loopbackOnly": true,
+  "productionServiceContacted": false,
+  "testServerStopped": true,
+  "nodeTestCommand": [
+    "/usr/local/bin/node",
+    "scripts/test-topic-maps-project-browser.mjs",
+    "/nix/store/8j4gxfa63znzgcba9x1mw68yz7cb0ywf-sbcl-with-packages/bin/sbcl",
+    "/Users/rgb/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/playwright",
+    "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
+    "/private/tmp/hyperdoc-22u-browser-accepted"
+  ],
+  "testedSourceFilesSHA256": {
+    "dreyeck.asd": "d16888e249c3362de77a5ff899544c3c7f433547b49013b5c09c33e1a956c3f5",
+    "dreyeck/work/topic-maps-project-example.lisp": "9847c3e204cf2231ed85302c78bdbdbf39fe1f003ad64ac4e9b95aab778ce0af",
+    "scripts/test-topic-maps-project-browser.mjs": "ae287ca0cffe7f3209544e8ea76cdd4189423d90f51072cd1f39be21b867eb4b",
+    "scripts/topic-maps-project-bootstrap.lisp": "59277e726f6e88471edbf2effe57b78ebeb07d22fe3b76a99b938a00259d57c0"
+  },
+  "evidenceSHA256": {
+    "browser-lisp.log": "e66675e47e0282f020c279a2e2225a32113118e190aa6e2457e8ae7bf1516261",
+    "native-eq.log": "f4c832414e674737f42e6f5ec61ece6b623c7b17e9da3c5c88d4a3867490f987",
+    "project.png": "2d95b914ef5872017e5640af38ed24789c7e4e52e967d125e518fb07c5e33f57",
+    "disposition.png": "a9e6cb676d031ade72b2d862ff9b01bd615cb328697b03cb45d1821db661bea5"
+  },
+  "networkScope": "Lisp server sandbox permits only loopback. Browser context rejects non-origin HTTP requests and service workers; Chrome background networking disabled."
+}
