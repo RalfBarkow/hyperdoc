@@ -149,6 +149,28 @@
                        "2026-10-27" "Chrome and Playwright on the Mac, through a forwarder to a published port of the Linux builder; the executable stayed on its loopback"
                        (list (file-named "docs/topic-maps-deployment/evidence/after-guard-correction/x86_64-linux/walk-linux.mjs"))
                        '("\"success\"" "\"finishedAtUTC\"" "→"))
+               ;; The same on the exact tree of commit 7080162b (git tree 057d303f7c79d0163b8a3ddf6876e990955093cf).
+               (record "after-guard-correction/x86_64-linux/of-commit-7080162b/nix-build.log" "The Nix build on x86_64-linux of the exact tree of commit 7080162b"
+                       "2026-10-27 17:11:55–17:14:50 UTC" "the local Docker Linux builder, Nix sandbox off; tree 057d303f7c79d0163b8a3ddf6876e990955093cf, reproduced by the builder's own git write-tree"
+                       (list (excerpt "flake:variant") (file-named "nix/catalog-topic-maps-check.nix"))
+                       '("derivations will be built" "building" "nix build exit status" "start 20" "end 20" "tree 057d303f"))
+               (record "after-guard-correction/x86_64-linux/of-commit-7080162b/contract-lisp.log" "Package contract Lisp suites, the commit's own tree, x86_64-linux"
+                       "2026-10-27, within the build above" "the Nix check's own environment on the Linux builder"
+                       (list (file-named "scripts/test-catalog-topic-maps.lisp")) '("-PASS" "ASDF-ORIGIN topic-maps " "RUN-STARTED" "RUN-FINISHED"))
+               (record "after-guard-correction/x86_64-linux/of-commit-7080162b/asdf-methods.log" "ASDF method preservation inside the Linux Nix check, the commit's own tree"
+                       "2026-10-27, within the build above" "the Nix check's own environment on the Linux builder"
+                       (list (file-named "scripts/test-asdf-method-preservation.lisp")) '("ASDF-METHOD-PRESERVATION-PASS" "Counts"))
+               (record "after-guard-correction/x86_64-linux/of-commit-7080162b/executable.log" "Executable contract inside the Linux Nix check, the commit's own tree"
+                       "2026-10-27, within the build above" "the Nix check's own environment on the Linux builder"
+                       (list (file-named "tests/test_catalog_topic_maps_executable.py")) '("... ok" "Ran " "OK" "FAIL"))
+               (record "after-guard-correction/x86_64-linux/of-commit-7080162b/packaged-reading.log" "This reading in the Linux package of the commit's own tree"
+                       "2026-10-27 17:15:09–17:32:54 UTC" "the built package's own wrapper environment; the source is a store path with no .git"
+                       (list (file-named "docs/topic-maps-deployment/evidence/after-guard-correction/x86_64-linux/linux-validate.sh"))
+                       '("PASS" "Project Workspace loaded" "listening" "0100007F" "HTTP 200" "shutdown exit status"))
+               (record "after-guard-correction/x86_64-linux/of-commit-7080162b/browser-walk.json" "A browser walk through the Linux-served reading of the commit's own tree"
+                       "2026-10-27" "Chrome and Playwright on the Mac, through a forwarder to a published port; the executable stayed on its loopback"
+                       (list (file-named "docs/topic-maps-deployment/evidence/after-guard-correction/x86_64-linux/walk-linux.mjs"))
+                       '("\"success\"" "\"finishedAtUTC\"" "→"))
                (record "after-guard-correction/tested-files-sha256.txt" "The SHA-256 of every tested file, corrected candidate"
                        "computed 2026-10-27 before the runs, and equal after them" "shasum -a 256" nil '("  ")))))))
 (defun evidence (file) (or (find file (all-evidence) :key #'evidence-file :test #'string=) (error "No evidence ~S." file)))

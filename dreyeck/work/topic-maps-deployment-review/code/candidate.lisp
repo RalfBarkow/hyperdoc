@@ -67,7 +67,14 @@
     ("docs/topic-maps-deployment/evidence/after-guard-correction/x86_64-linux/browser-walk.json" :evidence)
     ("docs/topic-maps-deployment/evidence/after-guard-correction/x86_64-linux/linux-validate.sh" :evidence)
     ("docs/topic-maps-deployment/evidence/after-guard-correction/x86_64-linux/reading-suites.lisp" :evidence)
-    ("docs/topic-maps-deployment/evidence/after-guard-correction/x86_64-linux/walk-linux.mjs" :evidence))
+    ("docs/topic-maps-deployment/evidence/after-guard-correction/x86_64-linux/walk-linux.mjs" :evidence)
+    ("docs/topic-maps-deployment/evidence/after-guard-correction/x86_64-linux/of-commit-7080162b/nix-build.log" :evidence)
+    ("docs/topic-maps-deployment/evidence/after-guard-correction/x86_64-linux/of-commit-7080162b/contract-lisp.log" :evidence)
+    ("docs/topic-maps-deployment/evidence/after-guard-correction/x86_64-linux/of-commit-7080162b/asdf-methods.log" :evidence)
+    ("docs/topic-maps-deployment/evidence/after-guard-correction/x86_64-linux/of-commit-7080162b/executable.log" :evidence)
+    ("docs/topic-maps-deployment/evidence/after-guard-correction/x86_64-linux/of-commit-7080162b/topic-maps-asd" :evidence)
+    ("docs/topic-maps-deployment/evidence/after-guard-correction/x86_64-linux/of-commit-7080162b/packaged-reading.log" :evidence)
+    ("docs/topic-maps-deployment/evidence/after-guard-correction/x86_64-linux/of-commit-7080162b/browser-walk.json" :evidence))
   "The paths of the packaging candidate, each with its responsibility: the 43 presented for review on 2026-10-26, and the files the
 guard correction of 2026-10-27 and the packaging work after it added. The
 Candidate view checks this declaration against Git every time it is shown.")
@@ -114,7 +121,22 @@ reading says so and shows what it can: the SHA-256 of each file."
   (let ((pathname (root-path (file-path file)))) (and (probe-file pathname) (octets-of pathname))))
 (defun file-sha256-now (file) (let ((octets (file-octets-now file))) (and octets (sha256-hex octets))))
 (defun file-blob-now (file) (let ((octets (file-octets-now file))) (and octets (snap:git-object-id "blob" octets))))
-(defun file-blob-at (file revision) (git-line "rev-parse" "--verify" "--quiet" (format nil "~A:~A" revision (file-path file))))
+(defvar *git-cache* nil
+  "While one view renders: a table of what Git said, so that a view over many files asks Git for each tree once, not for each file.")
+(defun tree-blobs (revision)
+  "The blob id of every file of REVISION's tree, by path, from one `git ls-tree -r`."
+  (let ((table (make-hash-table :test #'equal)))
+    (dolist (line (git-lines "ls-tree" "-r" revision) table)
+      (let ((tab (position #\Tab line)))
+        (when tab
+          (setf (gethash (subseq line (1+ tab)) table) (subseq line (1+ (position #\Space line :from-end t :end tab)) tab)))))))
+(defun cached-git (key thunk)
+  (if *git-cache* (multiple-value-bind (value found) (gethash key *git-cache*) (if found value (setf (gethash key *git-cache*) (funcall thunk)))) (funcall thunk)))
+(defun head-commit () (cached-git :head (lambda () (git-line "rev-parse" "HEAD"))))
+(defun file-blob-at (file revision)
+  (if *git-cache*
+      (gethash (file-path file) (cached-git (list :tree revision) (lambda () (tree-blobs revision))))
+      (git-line "rev-parse" "--verify" "--quiet" (format nil "~A:~A" revision (file-path file)))))
 (defun file-matches-tested-p (file) (and (file-tested-sha256 file) (equal (file-tested-sha256 file) (file-sha256-now file))))
 
 (defun file-state (file)
@@ -125,13 +147,13 @@ blob (the candidate's change is gone), or :MISSING."
     (cond ((null now) :missing)
           ((not (git-available-p)) :no-git)
           ((equal now base) :as-in-base)
-          ((and (equal now head) (not (equal (git-line "rev-parse" "HEAD") +base-commit+))) :committed)
+          ((and (equal now head) (not (equal (head-commit) +base-commit+))) :committed)
           ((null base) :uncommitted-new)
           (t :uncommitted-modified))))
 
 (defun state-text (state)
   (ecase state
-    (:committed (format nil "committed in ~A" (subseq (git-line "rev-parse" "HEAD") 0 12)))
+    (:committed (format nil "committed in ~A" (subseq (head-commit) 0 12)))
     (:uncommitted-new "uncommitted, new (no such file at the base)")
     (:uncommitted-modified "uncommitted, modified against the base")
     (:as-in-base "equal to the base: the candidate's change is not there")
@@ -280,7 +302,8 @@ without Git. Untracked files are outside the candidate by construction: its new 
 
 (v:defview candidate-view (candidate candidate)
   (v:html-view :title "Candidate" :priority -10
-    (multiple-value-bind (changed untracked) (git-changed-paths)
+    (let ((*git-cache* (make-hash-table :test #'equal)))
+     (multiple-value-bind (changed untracked) (git-changed-paths)
       (declare (ignore changed))
       (v:html
         (:div :style "overflow-wrap:anywhere"
@@ -308,7 +331,7 @@ without Git. Untracked files are outside the candidate by construction: its new 
            (when others
              (v:html (:p "Neither the candidate nor this reading:")
                      (:ul (dolist (path others) (v:html (:li (:code (v:esc path)))))))))
-         (reading-links))))))
+         (reading-links)))))))
 
 (v:defview candidate-file-view (file candidate-file)
   (v:html-view :title "Candidate file" :priority -10

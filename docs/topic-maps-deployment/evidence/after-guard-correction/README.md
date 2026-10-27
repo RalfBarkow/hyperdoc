@@ -45,8 +45,10 @@ reproduced that hash.
 | `linux-validate.sh`, `reading-suites.lisp`, `walk-linux.mjs` | the procedures behind the last two records |
 
 **Relation to the commit.** The Linux runs are of tree `a2db8146…`. The tree of the commit that records them differs from it by
-these evidence files and by the reading's claims and pages that cite them (nothing in a tested program or test file). The run
-on the commit's own tree is recorded in the commit that follows it.
+these evidence files and by the reading's claims and pages that cite them (nothing in a tested program or test file). The same runs
+on the commit's own tree (`057d303f7c79d0163b8a3ddf6876e990955093cf`, commit `7080162b`) are in
+`x86_64-linux/of-commit-7080162b/`, recorded in the commit that follows it: built and checked on x86_64-linux with exit 0, the
+reading's suites 324, 267 and 76, the executable on 127.0.0.1 only with a clean shutdown, and an 8-step browser walk.
 
 **What carried the Topic Maps snapshot.** Not the 2.47 GB repository: the archive, created by `scripts/topic-maps-snapshot.py`
 from the read-only repository and reproducing `nix/topic-maps-b2eecffa.manifest` byte for byte, was unpacked in the builder and

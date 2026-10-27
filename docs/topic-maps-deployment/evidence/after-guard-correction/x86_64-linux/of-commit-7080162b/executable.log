@@ -1,0 +1,8 @@
+test_loopback_staging_http_and_shutdown (__main__.CatalogTopicMapsExecutableTests.test_loopback_staging_http_and_shutdown) ... ok
+test_project_workspace_refused (__main__.CatalogTopicMapsExecutableTests.test_project_workspace_refused) ... ok
+test_public_hosts_refused_before_loading (__main__.CatalogTopicMapsExecutableTests.test_public_hosts_refused_before_loading) ... ok
+
+----------------------------------------------------------------------
+Ran 3 tests in 57.370s
+
+OK
