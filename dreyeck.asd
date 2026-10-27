@@ -3384,7 +3384,7 @@
 ;; Optional local Slice 22U reading. The independent checkout is not vendored.
 (defsystem "dreyeck/work/topic-maps-project-example"
   :description "Execute and inspect the pinned Topic Maps 22U project example as native TMDM objects"
-  :depends-on ("topic-maps/project-work-example" "dreyeck/inspector/tmdm" "dreyeck/work/tmdm-reading")
+  :depends-on ("topic-maps/project-work-example" "dreyeck/inspector/tmdm" "dreyeck/work/tmdm-reading" "dreyeck/source-snapshot")
   :serial t
   :components ((:file "dreyeck/work/topic-maps-project-example")
                (:module "dreyeck/pages/topic-maps-project-example"
@@ -3402,7 +3402,7 @@
 (defsystem "dreyeck/work/topic-maps-ctm-review"
   :description "Read, execute on request and inspect one falsifiable claim about the pinned Topic Maps 22U CTM reader"
   :depends-on ("dreyeck/work/topic-maps-project-example" "topic-maps/ctm" "topic-maps/cxtm" "dreyeck/inspector/tmdm"
-               "dreyeck/evaluation-record" "dreyeck/git" "ironclad")
+               "dreyeck/evaluation-record" "dreyeck/git" "dreyeck/source-snapshot" "ironclad")
   :serial t
   :components ((:file "dreyeck/work/topic-maps-ctm-review")
                (:module "dreyeck/pages/topic-maps-ctm-review"
@@ -3415,3 +3415,32 @@
   :perform (test-op (operation component)
              (declare (ignore operation component))
              (uiop:symbol-call :dreyeck/work/topic-maps-ctm-review/tests :run-tests)))
+
+;; The pinned Topic Maps commit as a Nix store snapshot, verified without .git (docs/topic-maps-deployment).
+(defsystem "dreyeck/source-snapshot"
+  :description "Verify a /nix/store snapshot of a pinned Git commit without .git, from a manifest committed in HyperDoc"
+  :depends-on ("ironclad" "sb-posix" "html-inspector-views" "uiop")
+  :components ((:file "dreyeck/src/source-snapshot")
+               (:static-file "topic-maps-b2eecffa.manifest" :pathname "nix/topic-maps-b2eecffa.manifest"))
+  :in-order-to ((test-op (test-op "dreyeck/source-snapshot/tests"))))
+
+(defsystem "dreyeck/source-snapshot/tests"
+  :depends-on ("dreyeck/source-snapshot")
+  :components ((:file "dreyeck/tests/source-snapshot"))
+  :perform (test-op (operation component)
+             (declare (ignore operation component))
+             (uiop:symbol-call :dreyeck/source-snapshot/tests :run-tests)))
+
+;; The separate hyperdoc-catalog-topic-maps executable (nix/catalog-topic-maps.nix). hyperdoc-catalog does not load it.
+(defsystem "dreyeck/catalog-topic-maps"
+  :description "Catalog startup with the verified Topic Maps snapshot: origins checked, Project Workspace refused"
+  :depends-on ("dreyeck/catalog-application" "dreyeck/source-snapshot")
+  :components ((:file "dreyeck/src/catalog-topic-maps"))
+  :in-order-to ((test-op (test-op "dreyeck/catalog-topic-maps/tests"))))
+
+(defsystem "dreyeck/catalog-topic-maps/tests"
+  :depends-on ("dreyeck/catalog-topic-maps" "dreyeck/work/topic-maps-project-example")
+  :components ((:file "dreyeck/tests/catalog-topic-maps"))
+  :perform (test-op (operation component)
+             (declare (ignore operation component))
+             (uiop:symbol-call :dreyeck/catalog-topic-maps/tests :run-tests)))

@@ -1,0 +1,28 @@
+<html><head><title>Promoting the Proposals</title></head><body><in-package>topic-maps-deployment-review</in-package>
+<h1>Promoting the Proposals</h1>
+<p>How the reviewed proposals would become part of the project, in the smallest steps the existing model allows. There are two stages, each a change of its own, each only on your decision, and each with its own Local Commit Review Guide. Neither stage sets a work status you did not declare, and neither records an acceptance.</p>
+
+<h2>Stage A: the proposals recorded in the project, still proposals</h2>
+<p>This is decision 2(b), after the packaging candidate is committed.</p>
+<ol>
+<li>Append <a expr="(proposal-source :addition)" view="Proposal source">the addition</a>, unchanged, to <code>dreyeck/pages/project/Implementation Assignments.html</code>.</li>
+<li>Move <a expr="(proposal-source :draft-dictionary)" view="Proposal source">the draft dictionary</a> to <code>dreyeck/pages/project/Topic Maps Deployment WBS Dictionary.html</code> and list it in <code>dreyeck.asd</code> among the HyperBook's drafts (<a expr="(model-excerpt &quot;asd:project-pages&quot;)" view="Source excerpt">beside the existing one</a>). In the WBS proposal assignment, change the two <code>data-changes</code> paths to the page paths: a path in <code>dreyeck/pages/project/</code> becomes a page Topic (<a expr="(model-excerpt &quot;emitter:path-topic&quot;)" view="Source excerpt">the mapping</a>). Like the existing draft, it stays outside the CTM's sources.</li>
+<li>Regenerate <code>hyperdoc-project.ctm</code> and its <code>.sha256</code> with the emitter's <code>write-project-ctm</code>, in the 5a4a668 environment, never in this image; then run <code>dreyeck/work/project/tests</code> there. <a expr="(the-emitter-crosscheck)" view="Cross-check">The recorded reading</a> already shows that the emitter reads the page with the addition without refusal, with the gaps it derives for proposals.</li>
+<li>Point this reading at the page instead of its own copy: in <a expr="#'proposal-sources" view="Source code">proposal-sources</a>, the addition becomes the part of the page from its heading "Proposed Work: Deploying Topic Maps with HyperDoc on dreyeck.ch" on, and the dictionary its new path. Remove <code>proposals/</code>'s two files; the cross-check is no longer needed, as the project tests read the page.</li>
+</ol>
+<p>The files changed: the page, the CTM and its digest, <code>dreyeck.asd</code>, the moved dictionary, and this reading. Nothing is declared.</p>
+
+<h2>Stage B: declaration, package by package</h2>
+<p>Only on your decision to declare, and only for what you declare.</p>
+<ol>
+<li>Declare the Work Item <code>tmd</code> on <a page="Work Breakdown" hyperbook="dreyeck/work/reading">the Work Breakdown</a>, already a source of the CTM, with <code>data-topic</code>, <code>data-kind</code> and the <code>data-status</code> you give it.</li>
+<li>Declare the breakdown and the plan on a carrier Work page of their own, as <a page="Authoring the CTM Plan Page" hyperbook="dreyeck/work/reading">Authoring the CTM Plan Page</a> carries its WBS. Write its deliverables, work packages, plan steps and preconditions with the same IDs, its statements with <code>data-from</code>, <code>data-relation</code> and <code>data-to</code>, and its completeness and overlap argument. The page needs an entry in <code>dreyeck.asd</code> and in the emitter's <a expr="(model-excerpt &quot;emitter:sources&quot;)" view="Source excerpt">+sources+</a> as a Work source: a change to the emitter's code.</li>
+<li>Make the dictionary a declared WBS Dictionary: remove "Draft" and add it to +sources+ as a dictionary. A declared dictionary's entries must name declared packages (<a expr="(model-excerpt &quot;acceptance:d5&quot;)" view="Source excerpt">D5</a>).</li>
+<li>Remove the declared Topics' proposal anchors and the proposed statements from Implementation Assignments; otherwise the emitter reports each one as stale (<a expr="(model-excerpt &quot;emitter:status-gaps&quot;)" view="Source excerpt">proposal-already-declared</a>). Keep the assignments: their work-item and delivers references then name declarations.</li>
+<li>Regenerate the CTM in the 5a4a668 environment; run the project's tests and the CTM plan page's tests.</li>
+</ol>
+<p>Only after Stage B can a record on an Acceptance Records page decide on a package, against the criterion revision it names. Passed tests, completed assignments and executors' reports stay evidence.</p>
+
+<h2>What does not change</h2>
+<p>The IDs, the assignments and their evidence entries, the candidate, its recorded evidence and <a page="The ASDF Method Collision">the collision record</a>. The deployment's next real step is not part of either stage: correcting the guard, which needs your authorization to change tested files (<a expr="(proposed-topic &quot;tmd-p5&quot;)" view="Proposal">step 5</a>).</p>
+</body></html>

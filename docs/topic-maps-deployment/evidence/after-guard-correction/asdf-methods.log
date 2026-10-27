@@ -1,0 +1,803 @@
+NOT A NIX SANDBOX BUILD: run by hand, fresh process, empty HOME and cache; start 2026-10-27T15:55:54Z
+; compiling file "/private/var/folders/y1/yhhpj5wd7cb5325t8__1ct2r0000gn/T/asdf-preservation-7IMSNCWH/preservation-probe-before/probe.lisp" (written 27 OCT 2026 04:55:58 PM):
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/9d03f921-be88-4e1e-b222-9700198dcf8d/scratchpad/evidence/work.YcVpmK/cache/common-lisp/sbcl-2.4.10-macosx-x64/private/var/folders/y1/yhhpj5wd7cb5325t8__1ct2r0000gn/T/asdf-preservation-7IMSNCWH/preservation-probe-before/probe-tmpGHU3ALSV.fasl
+; compilation finished in 0:00:00.003
+ASDF 3.3.1; 159 generic functions with 357 methods; behaviour before: (:OUTPUT-DIRECTORY-CREATED-BY-ASDF
+                                                                       :SUCCEEDED
+                                                                       :LOAD-SYSTEM-COMPILES-INTO-CREATED-DIRECTORY
+                                                                       :SUCCEEDED
+                                                                       :VERSION-REQUIREMENT-REFUSED
+                                                                       :REFUSED
+                                                                       :ASDF-BINARY-LOCATIONS-REFUSED
+                                                                       :REFUSED)
+WARNING: System definition file #P"/nix/store/7kwvfxhgrx9d2nnainzdflxrd76c1aj3-sbcl-cl-who-20241012-git/cl-who.asd" contains definition for system "cl-who-test". Please only define "cl-who" and secondary systems with a name starting with "cl-who/" (e.g. "cl-who/test") in that file.
+WARNING: System definition file #P"/nix/store/37a33q8xchz47wpd24wf67lalz080hl5-sbcl-parse-float-20200218-git/parse-float.asd" contains definition for system "parse-float-tests". Please only define "parse-float" and secondary systems with a name starting with "parse-float/" (e.g. "parse-float/test") in that file.
+WARNING: System definition file #P"/nix/store/8nfp68p140k76rh833nfcv500k8ippr4-sbcl-cl-template-20130615-git/cl-template.asd" contains definition for system "cl-template-tests". Please only define "cl-template" and secondary systems with a name starting with "cl-template/" (e.g. "cl-template/test") in that file.
+;;; Computing Hangul syllable namesSTYLE-WARNING:
+   The new FTYPE proclamation for FSET::VECTOR-SET-BINARY-SEARCH-LO
+     (FUNCTION (SIMPLE-VECTOR T) FIXNUM)
+   does not match the derived return type
+     (FUNCTION (SIMPLE-VECTOR T)
+      (VALUES (INTEGER -4611686018427387904 4611686018427387904) &OPTIONAL))
+STYLE-WARNING:
+   The new FTYPE proclamation for FSET::WB-BAG-TREE-TOTAL-COUNT
+     (FUNCTION (FSET::WB-BAG-TREE) INTEGER)
+   does not match the derived return type
+     (FUNCTION ((OR LIST FSET::WB-BAG-TREE-NODE)) *)
+STYLE-WARNING:
+   The new FTYPE proclamation for FSET::HASH-VALUE-FIXNUM
+     (FUNCTION (T) FIXNUM)
+   does not match the derived return type
+     (FUNCTION (T) (VALUES INTEGER &OPTIONAL))
+STYLE-WARNING:
+   The new FTYPE proclamation for FSET::CH-SET-NODE-ENTRY-MASK
+     (FUNCTION (T) FIXNUM)
+   does not match the derived return type
+     (FUNCTION (SIMPLE-VECTOR) (VALUES T &OPTIONAL))
+STYLE-WARNING:
+   The new FTYPE proclamation for FSET::CH-SET-NODE-SUBNODE-MASK
+     (FUNCTION (T) FIXNUM)
+   does not match the derived return type
+     (FUNCTION (SIMPLE-VECTOR) (VALUES T &OPTIONAL))
+STYLE-WARNING:
+   The new FTYPE proclamation for FSET::CH-SET-NODE-SIZE
+     (FUNCTION (T) FIXNUM)
+   does not match the derived return type
+     (FUNCTION (SIMPLE-VECTOR) (VALUES T &OPTIONAL))
+STYLE-WARNING:
+   The new FTYPE proclamation for FSET::CH-SET-NODE-HASH-VALUE
+     (FUNCTION (T) FIXNUM)
+   does not match the derived return type
+     (FUNCTION (SIMPLE-VECTOR) (VALUES T &OPTIONAL))
+STYLE-WARNING:
+   The new FTYPE proclamation for FSET::CH-MAP-NODE-ENTRY-MASK
+     (FUNCTION (T) FIXNUM)
+   does not match the derived return type
+     (FUNCTION (SIMPLE-VECTOR) (VALUES T &OPTIONAL))
+STYLE-WARNING:
+   The new FTYPE proclamation for FSET::CH-MAP-NODE-SUBNODE-MASK
+     (FUNCTION (T) FIXNUM)
+   does not match the derived return type
+     (FUNCTION (SIMPLE-VECTOR) (VALUES T &OPTIONAL))
+STYLE-WARNING:
+   The new FTYPE proclamation for FSET::CH-MAP-NODE-SIZE
+     (FUNCTION (T) FIXNUM)
+   does not match the derived return type
+     (FUNCTION (SIMPLE-VECTOR) (VALUES T &OPTIONAL))
+STYLE-WARNING:
+   The new FTYPE proclamation for FSET::CH-MAP-NODE-HASH-VALUE
+     (FUNCTION (T) FIXNUM)
+   does not match the derived return type
+     (FUNCTION (SIMPLE-VECTOR) (VALUES T &OPTIONAL))
+STYLE-WARNING:
+   Generic function FSET:ITERATOR clobbers an earlier FTYPE proclamation
+   (FUNCTION (T &KEY &ALLOW-OTHER-KEYS) (VALUES FUNCTION &REST T)) for the same
+   name with (FUNCTION (T &KEY &ALLOW-OTHER-KEYS) *).
+STYLE-WARNING:
+   The new FTYPE proclamation for SWANK/BACKEND:GETPID
+     (FUNCTION NIL (VALUES (SIGNED-BYTE 32) &OPTIONAL))
+   does not match the derived return type
+     (FUNCTION NIL *)
+WARNING:
+   redefining EMACS-INSPECT (#<SB-PCL:SYSTEM-CLASS COMMON-LISP:T>) in DEFMETHOD
+WARNING:
+   redefining 👀PRINT-STRING (#<SB-PCL:SYSTEM-CLASS COMMON-LISP:T>) in DEFMETHOD
+WARNING:
+   The new FTYPE proclamation for CLSS:MATCH-SELECTOR
+     (FUNCTION (LIST (OR PLUMP-DOM:NODE VECTOR LIST) KEYWORD)
+      (VALUES (AND (VECTOR PLUMP-DOM:NODE) (NOT SIMPLE-ARRAY))))
+   does not match the old FTYPE proclamation
+     (FUNCTION (LIST (OR LIST PLUMP-DOM:NODE VECTOR) &OPTIONAL KEYWORD)
+      (VALUES (AND (VECTOR PLUMP-DOM:NODE) (NOT SIMPLE-ARRAY)) &REST T))
+WARNING: redefining CL-ISAAC:RAND32 in DEFUN
+WARNING: redefining CL-ISAAC:RAND64 in DEFUN
+WARNING:
+   bare references to struct types are deprecated. Please use (:POINTER
+                                                               (:STRUCT
+                                                                SQLITE3)) or (:STRUCT
+                                                                              SQLITE3) instead.
+WARNING:
+   bare references to struct types are deprecated. Please use (:POINTER
+                                                               (:STRUCT
+                                                                SQLITE3-STMT)) or (:STRUCT
+                                                                                   SQLITE3-STMT) instead.
+WARNING: redefining DEFTYPE type to be a class: DBI.ERROR:<DBI-ERROR>
+WARNING: redefining DEFTYPE type to be a class: DBI.ERROR:<DBI-WARNING>
+WARNING: redefining DEFTYPE type to be a class: DBI.ERROR:<DBI-INTERFACE-ERROR>
+WARNING:
+   redefining DEFTYPE type to be a class: DBI.ERROR:<DBI-UNIMPLEMENTED-ERROR>
+WARNING: redefining DEFTYPE type to be a class: DBI.ERROR:<DBI-DATABASE-ERROR>
+WARNING: redefining DEFTYPE type to be a class: DBI.ERROR:<DBI-DATA-ERROR>
+WARNING:
+   redefining DEFTYPE type to be a class: DBI.ERROR:<DBI-OPERATIONAL-ERROR>
+WARNING: redefining DEFTYPE type to be a class: DBI.ERROR:<DBI-INTEGRITY-ERROR>
+WARNING: redefining DEFTYPE type to be a class: DBI.ERROR:<DBI-INTERNAL-ERROR>
+WARNING:
+   redefining DEFTYPE type to be a class: DBI.ERROR:<DBI-PROGRAMMING-ERROR>
+WARNING:
+   redefining DEFTYPE type to be a class: DBI.ERROR:<DBI-NOTSUPPORTED-ERROR>
+WARNING:
+   redefining DEFTYPE type to be a class: DBI.ERROR:<DBI-ALREADY-COMMITED-ERROR>
+WARNING:
+   redefining DEFTYPE type to be a class: DBI.ERROR:<DBI-ALREADY-ROLLED-BACK-ERROR>
+WARNING: redefining DEFTYPE type to be a class: DBI.DRIVER:<DBI-DRIVER>
+WARNING: redefining DEFTYPE type to be a class: DBI.DRIVER:<DBI-CONNECTION>
+WARNING: redefining DEFTYPE type to be a class: DBI.DRIVER:<DBI-QUERY>
+WARNING: redefining IRONCLAD:BLOCK-LENGTH in DEFGENERIC
+WARNING: redefining CLOG:PARENT in DEFGENERIC
+WARNING: redefining CLOG::CONNECTION-ID in DEFGENERIC
+WARNING: redefining CLOG:HTML-ID in DEFGENERIC
+WARNING: redefining CLOG:WINDOW in DEFGENERIC
+WARNING: redefining CLOG:HTML-DOCUMENT in DEFGENERIC
+WARNING: redefining CLOG:LOCATION in DEFGENERIC
+WARNING: redefining CLOG:NAVIGATOR in DEFGENERIC
+WARNING: redefining CLOG:DOCUMENT-ELEMENT in DEFGENERIC
+WARNING: redefining CLOG:HEAD-ELEMENT in DEFGENERIC
+WARNING: redefining CLOG:DISABLEDP in DEFGENERIC
+WARNING: redefining (COMMON-LISP:SETF CLOG:DISABLEDP) in DEFGENERIC
+WARNING: redefining CLOG:VALUE in DEFGENERIC
+WARNING: redefining (COMMON-LISP:SETF CLOG:VALUE) in DEFGENERIC
+WARNING: redefining CLOG:MINIMUM in DEFGENERIC
+WARNING: redefining (COMMON-LISP:SETF CLOG:MINIMUM) in DEFGENERIC
+WARNING: redefining CLOG:MAXIMUM in DEFGENERIC
+WARNING: redefining (COMMON-LISP:SETF CLOG:MAXIMUM) in DEFGENERIC
+WARNING: redefining CLOG:URL-SRC in DEFGENERIC
+WARNING: redefining (COMMON-LISP:SETF CLOG:URL-SRC) in DEFGENERIC
+WARNING: redefining CLOG:ALT-TEXT in DEFGENERIC
+WARNING: redefining (COMMON-LISP:SETF CLOG:ALT-TEXT) in DEFGENERIC
+WARNING: redefining CLOG:CENTER-PANEL in DEFGENERIC
+WARNING: redefining CLOG:TOP-PANEL in DEFGENERIC
+WARNING: redefining CLOG:LEFT-PANEL in DEFGENERIC
+WARNING: redefining CLOG:BOTTOM-PANEL in DEFGENERIC
+WARNING: redefining CLOG:PANEL-BOX in DEFGENERIC
+WARNING: redefining CLOG:TREE-ROOT in DEFGENERIC
+WARNING: redefining CLOG:INDENT-LEVEL in DEFGENERIC
+WARNING: redefining CLOG:TOGGLE-STATE in DEFGENERIC
+WARNING: redefining CLOG:TREE-ITEM in DEFGENERIC
+WARNING: redefining CLOG:DATABASE-CONNECTION in DEFGENERIC
+WARNING: redefining CLOG:READ-ONLY-P in DEFGENERIC
+WARNING: redefining (COMMON-LISP:SETF CLOG:READ-ONLY-P) in DEFGENERIC
+WARNING:
+   redefining HV:👀PLAYGROUND (#<SB-PCL:SYSTEM-CLASS COMMON-LISP:T>) in DEFMETHOD
+WARNING:
+   redefining ENCODE-TO-STRING (#<SB-PCL:SYSTEM-CLASS COMMON-LISP:T>) in DEFMETHOD
+WARNING:
+   redefining HVS::👀OPERATIONS (#<SB-PCL:SYSTEM-CLASS COMMON-LISP:T>) in DEFMETHOD
+WARNING:
+   redefining HVS:RENDER-TOPLEVEL-CST :AROUND (#<SB-MOP:EQL-SPECIALIZER HYPERDOC:DEFEXAMPLE>
+                                               #<SB-PCL:SYSTEM-CLASS COMMON-LISP:T>
+                                               #<SB-PCL:SYSTEM-CLASS COMMON-LISP:T>
+                                               #<SB-PCL:SYSTEM-CLASS COMMON-LISP:T>) in DEFMETHOD
+WARNING:
+   redefining HTML-INSPECTOR-VIEWS:TITLE-BAR-ACTION-BUTTONS (#<STANDARD-CLASS HYPERBOOK/WIKIPEDIA::WIKIPEDIA-PAGE>) in DEFMETHOD
+
+Methods added to ASDF's generic functions by what was loaded, none replacing one:
+  (ASDF/ACTION:COMPONENT-DEPENDS-ON NIL
+                                    (ASDF/LISP-ACTION:PREPARE-OP
+                                     #<SB-MOP:EQL-SPECIALIZER #<ASDF/SYSTEM:SYSTEM "cl-unicode">>)
+                                    "/nix/store/ibh2jl8g2lyw45vcgbymwmf9h145jwq2-sbcl-cl-unicode-20241012-git/cl-unicode.asd")
+  (ASDF/ACTION:OPERATION-DONE-P NIL
+                                (ASDF/LISP-ACTION:TEST-OP
+                                 #<SB-MOP:EQL-SPECIALIZER #<ASDF/SYSTEM:SYSTEM "trivial-backtrace">>)
+                                "/nix/store/akw4d0i67mj0x2zqs1bgpkp69amnbg27-sbcl-trivial-backtrace-20230214-git/trivial-backtrace.asd")
+  (ASDF/ACTION:OPERATION-DONE-P NIL
+                                (ASDF/LISP-ACTION:TEST-OP
+                                 #<SB-MOP:EQL-SPECIALIZER #<ASDF/SYSTEM:SYSTEM "babel">>)
+                                "/nix/store/f5rvmqvnj9zjbbmgxpvdhla23wcp1d9k-sbcl-babel-20241012-git/babel.asd")
+  (ASDF/ACTION:OUTPUT-FILES NIL
+                            (ASDF/LISP-ACTION:LOAD-OP
+                             #<SB-MOP:EQL-SPECIALIZER #<ASDF/SYSTEM:SYSTEM "cl-unicode/build">>)
+                            "/nix/store/ibh2jl8g2lyw45vcgbymwmf9h145jwq2-sbcl-cl-unicode-20241012-git/cl-unicode.asd")
+  (ASDF/ACTION:PERFORM NIL
+                       (ASDF/LISP-ACTION:TEST-OP
+                        #<SB-MOP:EQL-SPECIALIZER #<ASDF/SYSTEM:SYSTEM "njson/tests">>)
+                       "/nix/store/9zkvhs70z8w06kximfrw3zm099qa87vj-source/njson.asd")
+  (ASDF/ACTION:PERFORM NIL
+                       (ASDF/LISP-ACTION:TEST-OP
+                        #<SB-MOP:EQL-SPECIALIZER #<ASDF/SYSTEM:SYSTEM "damn-fast-stable-priority-queue">>)
+                       "/nix/store/184hyckihvb36zydw1gnkkv4l3q8xybb-sbcl-damn-fast-stable-priority-queue-20241012-git/damn-fast-stable-priority-queue/damn-fast-stable-priority-queue.asd")
+  (ASDF/ACTION:PERFORM NIL
+                       (ASDF/LISP-ACTION:TEST-OP
+                        #<SB-MOP:EQL-SPECIALIZER #<ASDF/SYSTEM:SYSTEM "trivial-file-size/tests">>)
+                       "/nix/store/6ba2basiaakja33qg0ickqw507srr59v-sbcl-trivial-file-size-20241012-git/trivial-file-size.asd")
+  (ASDF/ACTION:PERFORM NIL
+                       (ASDF/LISP-ACTION:TEST-OP
+                        #<SB-MOP:EQL-SPECIALIZER #<ASDF/SYSTEM:SYSTEM "parse-number/tests">>)
+                       "/nix/store/awgr09bcab2hcqv0yq54ywrlk5nxxs5a-sbcl-parse-number-v1.8/parse-number.asd")
+  (ASDF/ACTION:PERFORM (:AFTER)
+                       (ASDF/LISP-ACTION:TEST-OP
+                        #<SB-MOP:EQL-SPECIALIZER #<ASDF/SYSTEM:SYSTEM "introspect-environment">>)
+                       "/nix/store/2bpnfsii27vgvi3ys9vxnq0pkvn3749x-sbcl-introspect-environment-20241012-git/introspect-environment.asd")
+  (ASDF/ACTION:PERFORM (:AFTER)
+                       (ASDF/LISP-ACTION:LOAD-OP
+                        #<SB-MOP:EQL-SPECIALIZER #<ASDF/SYSTEM:SYSTEM "trivia">>)
+                       "/nix/store/5drrz7zkx8iaih9plxns4as0gcxqlnjn-sbcl-trivia-20241012-git/trivia.asd")
+  (ASDF/ACTION:PERFORM NIL
+                       (ASDF/LISP-ACTION:TEST-OP
+                        #<SB-MOP:EQL-SPECIALIZER #<ASDF/SYSTEM:SYSTEM "serapeum/tests">>)
+                       "/nix/store/9jz4gpsich91mdlivrpimrn149nmirql-sbcl-serapeum-20241012-git/serapeum.asd")
+  (ASDF/ACTION:PERFORM NIL
+                       (ASDF/LISP-ACTION:TEST-OP
+                        #<SB-MOP:EQL-SPECIALIZER #<ASDF/SYSTEM:SYSTEM "3bmd-ext-code-blocks/tests">>)
+                       "/nix/store/bp58dg5f9pkr8n7dxf7gr247b99grrbq-sbcl-3bmd-ext-code-blocks-20241012-git/3bmd-ext-code-blocks.asd")
+  (ASDF/ACTION:PERFORM NIL
+                       (ASDF/LISP-ACTION:TEST-OP
+                        #<SB-MOP:EQL-SPECIALIZER #<ASDF/SYSTEM:SYSTEM "esrap/tests">>)
+                       "/nix/store/ccd24kirqz818cqni02macf641l68fj3-sbcl-esrap-20241012-git/esrap.asd")
+  (ASDF/ACTION:PERFORM (:AFTER)
+                       (ASDF/LISP-ACTION:LOAD-OP
+                        #<SB-MOP:EQL-SPECIALIZER #<ASDF/SYSTEM:SYSTEM "esrap">>)
+                       "/nix/store/ccd24kirqz818cqni02macf641l68fj3-sbcl-esrap-20241012-git/esrap.asd")
+  (ASDF/ACTION:PERFORM NIL
+                       (ASDF/LISP-ACTION:TEST-OP
+                        #<SB-MOP:EQL-SPECIALIZER #<ASDF/SYSTEM:SYSTEM "shasht/test">>)
+                       "/nix/store/2wnpjwp9q2kg9qwvhxl5dfprnh5di65h-sbcl-shasht-20241012-git/shasht.asd")
+  (ASDF/ACTION:PERFORM NIL
+                       (ASDF/LISP-ACTION:TEST-OP
+                        #<SB-MOP:EQL-SPECIALIZER #<ASDF/SYSTEM:SYSTEM "drakma">>)
+                       "/nix/store/hzk3w6dk610j6sr5vs0p4aayk6yidbm2-sbcl-drakma-v2.0.10/drakma.asd")
+  (ASDF/ACTION:PERFORM NIL
+                       (ASDF/LISP-ACTION:TEST-OP
+                        #<SB-MOP:EQL-SPECIALIZER #<ASDF/SYSTEM:SYSTEM "ironclad/tests">>)
+                       "/nix/store/qll8psdvm67r4dncbbpqqdrd5ibsq1n5-sbcl-ironclad-v0.61/ironclad.asd")
+  (ASDF/ACTION:PERFORM (:AFTER)
+                       (ASDF/LISP-ACTION:LOAD-OP
+                        #<SB-MOP:EQL-SPECIALIZER #<IRONCLAD-SYSTEM::IRONCLAD-SYSTEM "ironclad">>)
+                       "/nix/store/qll8psdvm67r4dncbbpqqdrd5ibsq1n5-sbcl-ironclad-v0.61/ironclad.asd")
+  (ASDF/ACTION:PERFORM (:AROUND)
+                       (ASDF/LISP-ACTION:LOAD-OP
+                        IRONCLAD-SYSTEM::IRONCLAD-SOURCE-FILE)
+                       "/nix/store/qll8psdvm67r4dncbbpqqdrd5ibsq1n5-sbcl-ironclad-v0.61/ironclad.asd")
+  (ASDF/ACTION:PERFORM (:AROUND)
+                       (ASDF/LISP-ACTION:COMPILE-OP
+                        IRONCLAD-SYSTEM::IRONCLAD-SOURCE-FILE)
+                       "/nix/store/qll8psdvm67r4dncbbpqqdrd5ibsq1n5-sbcl-ironclad-v0.61/ironclad.asd")
+  (ASDF/ACTION:PERFORM NIL
+                       (ASDF/LISP-ACTION:TEST-OP
+                        #<SB-MOP:EQL-SPECIALIZER #<ASDF/SYSTEM:SYSTEM "dbi/test">>)
+                       "/nix/store/ynn3zvpg9vszg461dblva5lgh0wh9a98-sbcl-dbi-20241012-git/dbi.asd")
+  (ASDF/ACTION:PERFORM NIL
+                       (ASDF/LISP-ACTION:TEST-OP
+                        #<SB-MOP:EQL-SPECIALIZER #<ASDF/SYSTEM:SYSTEM "sqlite">>)
+                       "/nix/store/6sjj2fg1rrajhm42glbilg348gspyl6b-sbcl-sqlite-20190813-git/sqlite.asd")
+  (ASDF/ACTION:PERFORM (:AFTER)
+                       (ASDF/LISP-ACTION:TEST-OP
+                        #<SB-MOP:EQL-SPECIALIZER #<ASDF/SYSTEM:SYSTEM "trivial-backtrace">>)
+                       "/nix/store/akw4d0i67mj0x2zqs1bgpkp69amnbg27-sbcl-trivial-backtrace-20230214-git/trivial-backtrace.asd")
+  (ASDF/ACTION:PERFORM NIL
+                       (ASDF/LISP-ACTION:TEST-OP
+                        #<SB-MOP:EQL-SPECIALIZER #<ASDF/SYSTEM:SYSTEM "hunchentoot">>)
+                       "/nix/store/7l28v3m0nig387r80bjzl0irhbk7axyg-sbcl-hunchentoot-v1.3.1/hunchentoot.asd")
+  (ASDF/ACTION:PERFORM NIL
+                       (ASDF/LISP-ACTION:TEST-OP
+                        #<SB-MOP:EQL-SPECIALIZER #<ASDF/SYSTEM:SYSTEM "cl+ssl">>)
+                       "/nix/store/0hfqblplwwm2ql3jm4b3dz4fdzb0z92g-sbcl-cl+ssl-20231021-git/cl+ssl.asd")
+  (ASDF/ACTION:PERFORM NIL
+                       (ASDF/LISP-ACTION:TEST-OP
+                        #<SB-MOP:EQL-SPECIALIZER #<ASDF/SYSTEM:SYSTEM "static-vectors/test">>)
+                       "/nix/store/52dcqlr54v5p4506s0585x31b6hb1pvn-sbcl-static-vectors-v1.9.3/static-vectors.asd")
+  (ASDF/ACTION:PERFORM NIL
+                       (ASDF/LISP-ACTION:TEST-OP
+                        #<SB-MOP:EQL-SPECIALIZER #<ASDF/SYSTEM:SYSTEM "split-sequence/tests">>)
+                       "/nix/store/6adk45v7n95wkf0mi8016ip618pfzz6y-sbcl-split-sequence-v2.0.1/split-sequence.asd")
+  (ASDF/ACTION:PERFORM NIL
+                       (ASDF/LISP-ACTION:TEST-OP
+                        #<SB-MOP:EQL-SPECIALIZER #<ASDF/SYSTEM:SYSTEM "cl-isaac/test">>)
+                       "/nix/store/wlziwmhj0ndhwimicghgngc61a3knbi0-sbcl-cl-isaac-20231021-git/cl-isaac.asd")
+  (ASDF/ACTION:PERFORM NIL
+                       (ASDF/LISP-ACTION:TEST-OP
+                        #<SB-MOP:EQL-SPECIALIZER #<ASDF/SYSTEM:SYSTEM "lack/tests">>)
+                       "/nix/store/ssjzkj4lnzl07dwlprqzarvs0jppdfcy-sbcl-lack-20241012-git/lack.asd")
+  (ASDF/ACTION:PERFORM NIL
+                       (ASDF/LISP-ACTION:TEST-OP
+                        #<SB-MOP:EQL-SPECIALIZER #<ASDF/SYSTEM:SYSTEM "trivial-package-local-nicknames">>)
+                       "/nix/store/1afsppq8xiqqfkrsvvpy8my81b5fqq7g-sbcl-trivial-package-local-nicknames-20220220-git/trivial-package-local-nicknames.asd")
+  (ASDF/ACTION:PERFORM (:AFTER)
+                       (ASDF/LISP-ACTION:LOAD-OP
+                        #<SB-MOP:EQL-SPECIALIZER #<ASDF/SYSTEM:SYSTEM "swank">>)
+                       "/nix/store/rwa1krvlq2ch8a8j0qbh1cixa3d23pw9-sbcl-swank-2.29.1/swank.asd")
+  (ASDF/ACTION:PERFORM (:AROUND) (T ASDF/INTERFACE:ORG)
+                       "/nix/store/b4vm6dwczah0z15p81g3xwkj4y6nybdp-source/lisp/asdf.lisp")
+  (ASDF/ACTION:PERFORM NIL
+                       (ASDF/LISP-ACTION:TEST-OP
+                        #<SB-MOP:EQL-SPECIALIZER #<ASDF/SYSTEM:SYSTEM "trivial-garbage/tests">>)
+                       "/nix/store/yyppgxv9j6iarn1bal3zrikpvapwci7x-sbcl-trivial-garbage-20231021-git/trivial-garbage.asd")
+  (ASDF/ACTION:PERFORM (:AFTER)
+                       (ASDF/LISP-ACTION:LOAD-OP
+                        #<SB-MOP:EQL-SPECIALIZER #<ASDF/SYSTEM:SYSTEM "global-vars">>)
+                       "/nix/store/drh08jbq1j24n7hlvyj6jbkmksxqn0lg-sbcl-global-vars-20141106-git/global-vars.asd")
+  (ASDF/ACTION:PERFORM NIL
+                       (ASDF/LISP-ACTION:TEST-OP
+                        #<SB-MOP:EQL-SPECIALIZER #<ASDF/SYSTEM:SYSTEM "global-vars">>)
+                       "/nix/store/drh08jbq1j24n7hlvyj6jbkmksxqn0lg-sbcl-global-vars-20141106-git/global-vars.asd")
+  (ASDF/ACTION:PERFORM NIL
+                       (ASDF/LISP-ACTION:TEST-OP
+                        #<SB-MOP:EQL-SPECIALIZER #<ASDF/SYSTEM:SYSTEM "bordeaux-threads/test">>)
+                       "/nix/store/l15vdnxxwss72xhsy56bi9i1kl2arfz8-sbcl-bordeaux-threads-v0.9.4/bordeaux-threads.asd")
+  (ASDF/ACTION:PERFORM NIL
+                       (ASDF/LISP-ACTION:TEST-OP
+                        #<SB-MOP:EQL-SPECIALIZER #<ASDF/SYSTEM:SYSTEM "cl-fad/test">>)
+                       "/nix/store/yw4k57m6si6sg37ggrh0nypgg0dmbc8f-sbcl-cl-fad-20220220-git/cl-fad.asd")
+  (ASDF/ACTION:PERFORM NIL
+                       (ASDF/LISP-ACTION:TEST-OP
+                        #<SB-MOP:EQL-SPECIALIZER #<ASDF/SYSTEM:SYSTEM "iterate/tests">>)
+                       "/nix/store/nkq6qljb8r6a1x7apv4dh43j98l9w8b9-sbcl-iterate-release-b0f9a9c6-git/iterate.asd")
+  (ASDF/ACTION:PERFORM NIL
+                       (ASDF/LISP-ACTION:TEST-OP
+                        #<SB-MOP:EQL-SPECIALIZER #<ASDF/SYSTEM:SYSTEM "local-time/test">>)
+                       "/nix/store/g74fr2398zlvfjw9dcg1x4ggczx8alz5-sbcl-local-time-20241012-git/local-time.asd")
+  (ASDF/ACTION:PERFORM (:AROUND)
+                       (ASDF/LISP-ACTION:COMPILE-OP
+                        ASDF/INTERFACE::NAMED-READTABLES-SOURCE-FILE)
+                       "/nix/store/xdljd594sln5gnzbhw6989dp2g5y7s1m-sbcl-named-readtables-20231021-git/named-readtables.asd")
+  (ASDF/ACTION:PERFORM NIL
+                       (ASDF/LISP-ACTION:TEST-OP
+                        #<SB-MOP:EQL-SPECIALIZER #<ASDF/SYSTEM:SYSTEM "misc-extensions">>)
+                       "/nix/store/s6wvnri0rnwn2h3lyyzgs4pc1k6cdjhb-sbcl-misc-extensions-20241012-git/misc-extensions.asd")
+  (ASDF/ACTION:PERFORM NIL
+                       (ASDF/LISP-ACTION:TEST-OP
+                        #<SB-MOP:EQL-SPECIALIZER #<ASDF/SYSTEM:SYSTEM "fset">>)
+                       "/nix/store/9gmf6byjk2n721gyik94250v5jzh33i8-sbcl-fset-20241012-git/fset.asd")
+  (ASDF/ACTION:PERFORM NIL
+                       (ASDF/LISP-ACTION:TEST-OP
+                        #<SB-MOP:EQL-SPECIALIZER #<ASDF/SYSTEM:SYSTEM "eclector/test">>)
+                       "/nix/store/0hh440b127z6d1wp79m5m7z8r77zzb62-sbcl-eclector-20241012-git/eclector.asd")
+  (ASDF/ACTION:PERFORM NIL
+                       (ASDF/LISP-ACTION:TEST-OP
+                        #<SB-MOP:EQL-SPECIALIZER #<ASDF/SYSTEM:SYSTEM "concrete-syntax-tree/test">>)
+                       "/nix/store/wjirhkmcddk0rs99sly4z7327miii4xr-sbcl-concrete-syntax-tree-20230618-git/concrete-syntax-tree.asd")
+  (ASDF/ACTION:PERFORM NIL
+                       (ASDF/LISP-ACTION:TEST-OP
+                        #<SB-MOP:EQL-SPECIALIZER #<ASDF/SYSTEM:SYSTEM "eclector-concrete-syntax-tree/test">>)
+                       "/nix/store/wjdzbnxsm0k0yfwc27pxczpbsd82gs8v-sbcl-eclector-concrete-syntax-tree-20241012-git/eclector-concrete-syntax-tree.asd")
+  (ASDF/ACTION:PERFORM NIL
+                       (ASDF/LISP-ACTION:TEST-OP
+                        #<SB-MOP:EQL-SPECIALIZER #<ASDF/SYSTEM:SYSTEM "cl-base64/test">>)
+                       "/nix/store/fahsc8csvwaxr2xgwcw735kgw9mqcrrm-sbcl-cl-base64-20201016-git/cl-base64.asd")
+  (ASDF/ACTION:PERFORM NIL
+                       (ASDF/LISP-ACTION:TEST-OP
+                        #<SB-MOP:EQL-SPECIALIZER #<ASDF/SYSTEM:SYSTEM "cffi">>)
+                       "/nix/store/yigl86dimfykl8yr1z3g3fs24cahcwh7-sbcl-cffi-20241012-git/cffi.asd")
+  (ASDF/ACTION:PERFORM NIL
+                       (ASDF/LISP-ACTION:TEST-OP
+                        #<SB-MOP:EQL-SPECIALIZER #<ASDF/SYSTEM:SYSTEM "trivial-features">>)
+                       "/nix/store/m0n5g3yng20cmf18r8v6yvbc9akjimr6-sbcl-trivial-features-20230618-git/trivial-features.asd")
+  (ASDF/ACTION:PERFORM NIL
+                       (ASDF/LISP-ACTION:TEST-OP
+                        #<SB-MOP:EQL-SPECIALIZER #<ASDF/SYSTEM:SYSTEM "babel">>)
+                       "/nix/store/f5rvmqvnj9zjbbmgxpvdhla23wcp1d9k-sbcl-babel-20241012-git/babel.asd")
+  (ASDF/ACTION:PERFORM (:AFTER)
+                       (ASDF/LISP-ACTION:LOAD-OP
+                        #<SB-MOP:EQL-SPECIALIZER #<ASDF/SYSTEM:SYSTEM "cl-change-case/test">>)
+                       "/nix/store/6g5dfv0spsfgpn9fhnxa788m7mj4bd4m-sbcl-cl-change-case-20231021-git/cl-change-case.asd")
+  (ASDF/ACTION:PERFORM NIL
+                       (ASDF/LISP-ACTION:TEST-OP
+                        #<SB-MOP:EQL-SPECIALIZER #<ASDF/SYSTEM:SYSTEM "cl-unicode/test">>)
+                       "/nix/store/ibh2jl8g2lyw45vcgbymwmf9h145jwq2-sbcl-cl-unicode-20241012-git/cl-unicode.asd")
+  (ASDF/ACTION:PERFORM NIL
+                       (ASDF/LISP-ACTION:LOAD-OP
+                        #<SB-MOP:EQL-SPECIALIZER #<ASDF/SYSTEM:SYSTEM "cl-unicode/build">>)
+                       "/nix/store/ibh2jl8g2lyw45vcgbymwmf9h145jwq2-sbcl-cl-unicode-20241012-git/cl-unicode.asd")
+  (ASDF/ACTION:PERFORM NIL
+                       (ASDF/LISP-ACTION:TEST-OP
+                        #<SB-MOP:EQL-SPECIALIZER #<ASDF/SYSTEM:SYSTEM "cl-ppcre-unicode/test">>)
+                       "/nix/store/vbba9gkspxyv62qwayx3hnbhc6vip8qb-sbcl-cl-ppcre-unicode-20241012-git/cl-ppcre-unicode.asd")
+  (ASDF/ACTION:PERFORM NIL
+                       (ASDF/LISP-ACTION:TEST-OP
+                        #<SB-MOP:EQL-SPECIALIZER #<ASDF/SYSTEM:SYSTEM "cl-ppcre/test">>)
+                       "/nix/store/8c6bb5r2y26a1pkrrs1zbb1r86rr2ggc-sbcl-cl-ppcre-20241012-git/cl-ppcre.asd")
+  (ASDF/ACTION:PERFORM NIL
+                       (ASDF/LISP-ACTION:TEST-OP
+                        #<SB-MOP:EQL-SPECIALIZER #<ASDF/SYSTEM:SYSTEM "flexi-streams">>)
+                       "/nix/store/nv10hy6bzwnmm187r5s90jgy2m6vncpl-sbcl-flexi-streams-20241012-git/flexi-streams.asd")
+  (ASDF/ACTION:PERFORM NIL
+                       (ASDF/LISP-ACTION:TEST-OP
+                        #<SB-MOP:EQL-SPECIALIZER #<ASDF/SYSTEM:SYSTEM "cl-base32/tests">>)
+                       "/nix/store/h4rgnbvmr8cv4s5747i786zmj18943dx-sbcl-cl-base32-20241012-git/cl-base32.asd")
+  (ASDF/ACTION:PERFORM NIL
+                       (ASDF/LISP-ACTION:TEST-OP
+                        #<SB-MOP:EQL-SPECIALIZER #<ASDF/SYSTEM:SYSTEM "cl-who">>)
+                       "/nix/store/7kwvfxhgrx9d2nnainzdflxrd76c1aj3-sbcl-cl-who-20241012-git/cl-who.asd")
+  (ASDF/ACTION:PERFORM NIL
+                       (ASDF/LISP-ACTION:TEST-OP
+                        #<SB-MOP:EQL-SPECIALIZER #<ASDF/SYSTEM:SYSTEM "puri/test">>)
+                       "/nix/store/dg73wlm88d1pkczw3jibkpq6cnjzn5hb-sbcl-puri-20201016-git/puri.asd")
+  (ASDF/ACTION:PERFORM NIL
+                       (ASDF/LISP-ACTION:TEST-OP
+                        #<SB-MOP:EQL-SPECIALIZER #<ASDF/SYSTEM:SYSTEM "alexandria/tests">>)
+                       "/nix/store/pdvm04v6rn4a0hhwd8j9avpxf1wv782n-sbcl-alexandria-20241012-git/alexandria.asd")
+  (ASDF/ACTION:PERFORM NIL
+                       (ASDF/LISP-ACTION:TEST-OP
+                        #<SB-MOP:EQL-SPECIALIZER #<ASDF/SYSTEM:SYSTEM "hyperbook/fedwiki/tests">>)
+                       "/nix/store/vnwn3hxa24760a7ihm4xl7nn1jmi89sf-source/hyperbook.asd")
+  (ASDF/ACTION:PERFORM NIL
+                       (ASDF/LISP-ACTION:TEST-OP
+                        #<SB-MOP:EQL-SPECIALIZER #<ASDF/SYSTEM:SYSTEM "dreyeck/catalog-topic-maps/tests">>)
+                       "/nix/store/vnwn3hxa24760a7ihm4xl7nn1jmi89sf-source/dreyeck.asd")
+  (ASDF/ACTION:PERFORM NIL
+                       (ASDF/LISP-ACTION:TEST-OP
+                        #<SB-MOP:EQL-SPECIALIZER #<ASDF/SYSTEM:SYSTEM "dreyeck/source-snapshot/tests">>)
+                       "/nix/store/vnwn3hxa24760a7ihm4xl7nn1jmi89sf-source/dreyeck.asd")
+  (ASDF/ACTION:PERFORM NIL
+                       (ASDF/LISP-ACTION:TEST-OP
+                        #<SB-MOP:EQL-SPECIALIZER #<ASDF/SYSTEM:SYSTEM "dreyeck/work/topic-maps-ctm-review/tests">>)
+                       "/nix/store/vnwn3hxa24760a7ihm4xl7nn1jmi89sf-source/dreyeck.asd")
+  (ASDF/ACTION:PERFORM NIL
+                       (ASDF/LISP-ACTION:TEST-OP
+                        #<SB-MOP:EQL-SPECIALIZER #<ASDF/SYSTEM:SYSTEM "dreyeck/work/topic-maps-project-example/tests">>)
+                       "/nix/store/vnwn3hxa24760a7ihm4xl7nn1jmi89sf-source/dreyeck.asd")
+  (ASDF/ACTION:PERFORM NIL
+                       (ASDF/LISP-ACTION:TEST-OP
+                        #<SB-MOP:EQL-SPECIALIZER #<ASDF/SYSTEM:SYSTEM "dreyeck/work/project/tests">>)
+                       "/nix/store/vnwn3hxa24760a7ihm4xl7nn1jmi89sf-source/dreyeck.asd")
+  (ASDF/ACTION:PERFORM NIL
+                       (ASDF/LISP-ACTION:TEST-OP
+                        #<SB-MOP:EQL-SPECIALIZER #<ASDF/SYSTEM:SYSTEM "dreyeck/work/tmdm-reading/tests">>)
+                       "/nix/store/vnwn3hxa24760a7ihm4xl7nn1jmi89sf-source/dreyeck.asd")
+  (ASDF/ACTION:PERFORM NIL
+                       (ASDF/LISP-ACTION:TEST-OP
+                        #<SB-MOP:EQL-SPECIALIZER #<ASDF/SYSTEM:SYSTEM "dreyeck/clog-tutorial/reading/tests">>)
+                       "/nix/store/vnwn3hxa24760a7ihm4xl7nn1jmi89sf-source/dreyeck.asd")
+  (ASDF/ACTION:PERFORM NIL
+                       (ASDF/LISP-ACTION:TEST-OP
+                        #<SB-MOP:EQL-SPECIALIZER #<ASDF/SYSTEM:SYSTEM "dreyeck/clog-tutorial/tests">>)
+                       "/nix/store/vnwn3hxa24760a7ihm4xl7nn1jmi89sf-source/dreyeck.asd")
+  (ASDF/ACTION:PERFORM NIL
+                       (ASDF/LISP-ACTION:TEST-OP
+                        #<SB-MOP:EQL-SPECIALIZER #<ASDF/SYSTEM:SYSTEM "dreyeck/catalog-application/tests">>)
+                       "/nix/store/vnwn3hxa24760a7ihm4xl7nn1jmi89sf-source/dreyeck.asd")
+  (ASDF/ACTION:PERFORM NIL
+                       (ASDF/LISP-ACTION:TEST-OP
+                        #<SB-MOP:EQL-SPECIALIZER #<ASDF/SYSTEM:SYSTEM "dreyeck/work/planning/tests">>)
+                       "/nix/store/vnwn3hxa24760a7ihm4xl7nn1jmi89sf-source/dreyeck.asd")
+  (ASDF/ACTION:PERFORM NIL
+                       (ASDF/LISP-ACTION:TEST-OP
+                        #<SB-MOP:EQL-SPECIALIZER #<ASDF/SYSTEM:SYSTEM "dreyeck/work/authoring/tests">>)
+                       "/nix/store/vnwn3hxa24760a7ihm4xl7nn1jmi89sf-source/dreyeck.asd")
+  (ASDF/ACTION:PERFORM NIL
+                       (ASDF/LISP-ACTION:TEST-OP
+                        #<SB-MOP:EQL-SPECIALIZER #<ASDF/SYSTEM:SYSTEM "dreyeck/work/reading/tests">>)
+                       "/nix/store/vnwn3hxa24760a7ihm4xl7nn1jmi89sf-source/dreyeck.asd")
+  (ASDF/ACTION:PERFORM NIL
+                       (ASDF/LISP-ACTION:TEST-OP
+                        #<SB-MOP:EQL-SPECIALIZER #<ASDF/SYSTEM:SYSTEM "dreyeck/topicmap/gesture/tests">>)
+                       "/nix/store/vnwn3hxa24760a7ihm4xl7nn1jmi89sf-source/dreyeck.asd")
+  (ASDF/ACTION:PERFORM NIL
+                       (ASDF/LISP-ACTION:TEST-OP
+                        #<SB-MOP:EQL-SPECIALIZER #<ASDF/SYSTEM:SYSTEM "dreyeck/topicmap/tala/tests">>)
+                       "/nix/store/vnwn3hxa24760a7ihm4xl7nn1jmi89sf-source/dreyeck.asd")
+  (ASDF/ACTION:PERFORM NIL
+                       (ASDF/LISP-ACTION:TEST-OP
+                        #<SB-MOP:EQL-SPECIALIZER #<ASDF/SYSTEM:SYSTEM "dreyeck/upstream-intake/temporal/tests">>)
+                       "/nix/store/vnwn3hxa24760a7ihm4xl7nn1jmi89sf-source/dreyeck.asd")
+  (ASDF/ACTION:PERFORM NIL
+                       (ASDF/LISP-ACTION:TEST-OP
+                        #<SB-MOP:EQL-SPECIALIZER #<ASDF/SYSTEM:SYSTEM "dreyeck/topicmap/tala/reading/tests">>)
+                       "/nix/store/vnwn3hxa24760a7ihm4xl7nn1jmi89sf-source/dreyeck.asd")
+  (ASDF/ACTION:PERFORM NIL
+                       (ASDF/LISP-ACTION:TEST-OP
+                        #<SB-MOP:EQL-SPECIALIZER #<ASDF/SYSTEM:SYSTEM "dreyeck/workflow/tests">>)
+                       "/nix/store/vnwn3hxa24760a7ihm4xl7nn1jmi89sf-source/dreyeck.asd")
+  (ASDF/ACTION:PERFORM NIL
+                       (ASDF/LISP-ACTION:TEST-OP
+                        #<SB-MOP:EQL-SPECIALIZER #<ASDF/SYSTEM:SYSTEM "dreyeck/workflow/reading/tests">>)
+                       "/nix/store/vnwn3hxa24760a7ihm4xl7nn1jmi89sf-source/dreyeck.asd")
+  (ASDF/ACTION:PERFORM NIL
+                       (ASDF/LISP-ACTION:TEST-OP
+                        #<SB-MOP:EQL-SPECIALIZER #<ASDF/SYSTEM:SYSTEM "dreyeck/workflow/authoring/tests">>)
+                       "/nix/store/vnwn3hxa24760a7ihm4xl7nn1jmi89sf-source/dreyeck.asd")
+  (ASDF/ACTION:PERFORM NIL
+                       (ASDF/LISP-ACTION:TEST-OP
+                        #<SB-MOP:EQL-SPECIALIZER #<ASDF/SYSTEM:SYSTEM "dreyeck/fedwiki-journal/topicmap/tests">>)
+                       "/nix/store/vnwn3hxa24760a7ihm4xl7nn1jmi89sf-source/dreyeck.asd")
+  (ASDF/ACTION:PERFORM NIL
+                       (ASDF/LISP-ACTION:TEST-OP
+                        #<SB-MOP:EQL-SPECIALIZER #<ASDF/SYSTEM:SYSTEM "dreyeck/fedwiki-publication/tests">>)
+                       "/nix/store/vnwn3hxa24760a7ihm4xl7nn1jmi89sf-source/dreyeck.asd")
+  (ASDF/ACTION:PERFORM NIL
+                       (ASDF/LISP-ACTION:TEST-OP
+                        #<SB-MOP:EQL-SPECIALIZER #<ASDF/SYSTEM:SYSTEM "dreyeck/issue/tests">>)
+                       "/nix/store/vnwn3hxa24760a7ihm4xl7nn1jmi89sf-source/dreyeck.asd")
+  (ASDF/ACTION:PERFORM NIL
+                       (ASDF/LISP-ACTION:TEST-OP
+                        #<SB-MOP:EQL-SPECIALIZER #<ASDF/SYSTEM:SYSTEM "dreyeck/image-audit/tests">>)
+                       "/nix/store/vnwn3hxa24760a7ihm4xl7nn1jmi89sf-source/dreyeck.asd")
+  (ASDF/ACTION:PERFORM NIL
+                       (ASDF/LISP-ACTION:TEST-OP
+                        #<SB-MOP:EQL-SPECIALIZER #<ASDF/SYSTEM:SYSTEM "dreyeck/sly-mrepl/recording/tests">>)
+                       "/nix/store/vnwn3hxa24760a7ihm4xl7nn1jmi89sf-source/dreyeck.asd")
+  (ASDF/ACTION:PERFORM NIL
+                       (ASDF/LISP-ACTION:TEST-OP
+                        #<SB-MOP:EQL-SPECIALIZER #<ASDF/SYSTEM:SYSTEM "dreyeck/evaluation-record/sly-mrepl/tests">>)
+                       "/nix/store/vnwn3hxa24760a7ihm4xl7nn1jmi89sf-source/dreyeck.asd")
+  (ASDF/ACTION:PERFORM NIL
+                       (ASDF/LISP-ACTION:TEST-OP
+                        #<SB-MOP:EQL-SPECIALIZER #<ASDF/SYSTEM:SYSTEM "dreyeck/slice-summary/tests">>)
+                       "/nix/store/vnwn3hxa24760a7ihm4xl7nn1jmi89sf-source/dreyeck.asd")
+  (ASDF/ACTION:PERFORM NIL
+                       (ASDF/LISP-ACTION:TEST-OP
+                        #<SB-MOP:EQL-SPECIALIZER #<ASDF/SYSTEM:SYSTEM "dreyeck/evaluation-record/workspace-operation/tests">>)
+                       "/nix/store/vnwn3hxa24760a7ihm4xl7nn1jmi89sf-source/dreyeck.asd")
+  (ASDF/ACTION:PERFORM NIL
+                       (ASDF/LISP-ACTION:TEST-OP
+                        #<SB-MOP:EQL-SPECIALIZER #<ASDF/SYSTEM:SYSTEM "dreyeck/workspace-operation/tests">>)
+                       "/nix/store/vnwn3hxa24760a7ihm4xl7nn1jmi89sf-source/dreyeck.asd")
+  (ASDF/ACTION:PERFORM NIL
+                       (ASDF/LISP-ACTION:TEST-OP
+                        #<SB-MOP:EQL-SPECIALIZER #<ASDF/SYSTEM:SYSTEM "dreyeck/evaluation-record/tests">>)
+                       "/nix/store/vnwn3hxa24760a7ihm4xl7nn1jmi89sf-source/dreyeck.asd")
+  (ASDF/ACTION:PERFORM NIL
+                       (ASDF/LISP-ACTION:TEST-OP
+                        #<SB-MOP:EQL-SPECIALIZER #<ASDF/SYSTEM:SYSTEM "dreyeck/lisp-critic/reading/tests">>)
+                       "/nix/store/vnwn3hxa24760a7ihm4xl7nn1jmi89sf-source/dreyeck.asd")
+  (ASDF/ACTION:PERFORM NIL
+                       (ASDF/LISP-ACTION:TEST-OP
+                        #<SB-MOP:EQL-SPECIALIZER #<ASDF/SYSTEM:SYSTEM "dreyeck/lisp-critic/federated-context/tests">>)
+                       "/nix/store/vnwn3hxa24760a7ihm4xl7nn1jmi89sf-source/dreyeck.asd")
+  (ASDF/ACTION:PERFORM NIL
+                       (ASDF/LISP-ACTION:TEST-OP
+                        #<SB-MOP:EQL-SPECIALIZER #<ASDF/SYSTEM:SYSTEM "dreyeck/lisp-critic/recorded/tests">>)
+                       "/nix/store/vnwn3hxa24760a7ihm4xl7nn1jmi89sf-source/dreyeck.asd")
+  (ASDF/ACTION:PERFORM NIL
+                       (ASDF/LISP-ACTION:TEST-OP
+                        #<SB-MOP:EQL-SPECIALIZER #<ASDF/SYSTEM:SYSTEM "dreyeck/lisp-critic/examples/tests">>)
+                       "/nix/store/vnwn3hxa24760a7ihm4xl7nn1jmi89sf-source/dreyeck.asd")
+  (ASDF/ACTION:PERFORM NIL
+                       (ASDF/LISP-ACTION:TEST-OP
+                        #<SB-MOP:EQL-SPECIALIZER #<ASDF/SYSTEM:SYSTEM "dreyeck/lisp-critic/critique/tests">>)
+                       "/nix/store/vnwn3hxa24760a7ihm4xl7nn1jmi89sf-source/dreyeck.asd")
+  (ASDF/ACTION:PERFORM NIL
+                       (ASDF/LISP-ACTION:TEST-OP
+                        #<SB-MOP:EQL-SPECIALIZER #<ASDF/SYSTEM:SYSTEM "dreyeck/lisp-critic/tests">>)
+                       "/nix/store/vnwn3hxa24760a7ihm4xl7nn1jmi89sf-source/dreyeck.asd")
+  (ASDF/ACTION:PERFORM NIL
+                       (ASDF/LISP-ACTION:TEST-OP
+                        #<SB-MOP:EQL-SPECIALIZER #<ASDF/SYSTEM:SYSTEM "dreyeck/gesture/reading/tests">>)
+                       "/nix/store/vnwn3hxa24760a7ihm4xl7nn1jmi89sf-source/dreyeck.asd")
+  (ASDF/ACTION:PERFORM NIL
+                       (ASDF/LISP-ACTION:TEST-OP
+                        #<SB-MOP:EQL-SPECIALIZER #<ASDF/SYSTEM:SYSTEM "dreyeck/gesture/clog/tests">>)
+                       "/nix/store/vnwn3hxa24760a7ihm4xl7nn1jmi89sf-source/dreyeck.asd")
+  (ASDF/ACTION:PERFORM NIL
+                       (ASDF/LISP-ACTION:TEST-OP
+                        #<SB-MOP:EQL-SPECIALIZER #<ASDF/SYSTEM:SYSTEM "dreyeck/gesture/operation-request/authoring/tests">>)
+                       "/nix/store/vnwn3hxa24760a7ihm4xl7nn1jmi89sf-source/dreyeck.asd")
+  (ASDF/ACTION:PERFORM NIL
+                       (ASDF/LISP-ACTION:TEST-OP
+                        #<SB-MOP:EQL-SPECIALIZER #<ASDF/SYSTEM:SYSTEM "dreyeck/gesture/operation-request/tests">>)
+                       "/nix/store/vnwn3hxa24760a7ihm4xl7nn1jmi89sf-source/dreyeck.asd")
+  (ASDF/ACTION:PERFORM NIL
+                       (ASDF/LISP-ACTION:TEST-OP
+                        #<SB-MOP:EQL-SPECIALIZER #<ASDF/SYSTEM:SYSTEM "dreyeck/gesture/transport/tests">>)
+                       "/nix/store/vnwn3hxa24760a7ihm4xl7nn1jmi89sf-source/dreyeck.asd")
+  (ASDF/ACTION:PERFORM NIL
+                       (ASDF/LISP-ACTION:TEST-OP
+                        #<SB-MOP:EQL-SPECIALIZER #<ASDF/SYSTEM:SYSTEM "dreyeck/gesture-binding-witness/tests">>)
+                       "/nix/store/vnwn3hxa24760a7ihm4xl7nn1jmi89sf-source/dreyeck.asd")
+  (ASDF/ACTION:PERFORM NIL
+                       (ASDF/LISP-ACTION:TEST-OP
+                        #<SB-MOP:EQL-SPECIALIZER #<ASDF/SYSTEM:SYSTEM "dreyeck/state-machine/tests">>)
+                       "/nix/store/vnwn3hxa24760a7ihm4xl7nn1jmi89sf-source/dreyeck.asd")
+  (ASDF/ACTION:PERFORM NIL
+                       (ASDF/LISP-ACTION:TEST-OP
+                        #<SB-MOP:EQL-SPECIALIZER #<ASDF/SYSTEM:SYSTEM "dreyeck/authoring-http/tests">>)
+                       "/nix/store/vnwn3hxa24760a7ihm4xl7nn1jmi89sf-source/dreyeck.asd")
+  (ASDF/ACTION:PERFORM NIL
+                       (ASDF/LISP-ACTION:TEST-OP
+                        #<SB-MOP:EQL-SPECIALIZER #<ASDF/SYSTEM:SYSTEM "dreyeck/authenticated-page-authoring/tests">>)
+                       "/nix/store/vnwn3hxa24760a7ihm4xl7nn1jmi89sf-source/dreyeck.asd")
+  (ASDF/ACTION:PERFORM NIL
+                       (ASDF/LISP-ACTION:TEST-OP
+                        #<SB-MOP:EQL-SPECIALIZER #<ASDF/SYSTEM:SYSTEM "dreyeck/ctm-page-authoring/tests">>)
+                       "/nix/store/vnwn3hxa24760a7ihm4xl7nn1jmi89sf-source/dreyeck.asd")
+  (ASDF/ACTION:PERFORM NIL
+                       (ASDF/LISP-ACTION:TEST-OP
+                        #<SB-MOP:EQL-SPECIALIZER #<ASDF/SYSTEM:SYSTEM "dreyeck/item-edit-ctm/tests">>)
+                       "/nix/store/vnwn3hxa24760a7ihm4xl7nn1jmi89sf-source/dreyeck.asd")
+  (ASDF/ACTION:PERFORM NIL
+                       (ASDF/LISP-ACTION:TEST-OP
+                        #<SB-MOP:EQL-SPECIALIZER #<ASDF/SYSTEM:SYSTEM "dreyeck/dita-story-item/tests">>)
+                       "/nix/store/vnwn3hxa24760a7ihm4xl7nn1jmi89sf-source/dreyeck.asd")
+  (ASDF/ACTION:PERFORM NIL
+                       (ASDF/LISP-ACTION:TEST-OP
+                        #<SB-MOP:EQL-SPECIALIZER #<ASDF/SYSTEM:SYSTEM "dreyeck/fedwiki-item-edit-execution/tests">>)
+                       "/nix/store/vnwn3hxa24760a7ihm4xl7nn1jmi89sf-source/dreyeck.asd")
+  (ASDF/ACTION:PERFORM NIL
+                       (ASDF/LISP-ACTION:TEST-OP
+                        #<SB-MOP:EQL-SPECIALIZER #<ASDF/SYSTEM:SYSTEM "dreyeck/topic-maps-reading/tests">>)
+                       "/nix/store/vnwn3hxa24760a7ihm4xl7nn1jmi89sf-source/dreyeck.asd")
+  (ASDF/ACTION:PERFORM NIL
+                       (ASDF/LISP-ACTION:TEST-OP
+                        #<SB-MOP:EQL-SPECIALIZER #<ASDF/SYSTEM:SYSTEM "dreyeck/work/item-edit-proposal/tests">>)
+                       "/nix/store/vnwn3hxa24760a7ihm4xl7nn1jmi89sf-source/dreyeck.asd")
+  (ASDF/ACTION:PERFORM NIL
+                       (ASDF/LISP-ACTION:TEST-OP
+                        #<SB-MOP:EQL-SPECIALIZER #<ASDF/SYSTEM:SYSTEM "dreyeck/fedwiki-item-edit-preview/tests">>)
+                       "/nix/store/vnwn3hxa24760a7ihm4xl7nn1jmi89sf-source/dreyeck.asd")
+  (ASDF/ACTION:PERFORM NIL
+                       (ASDF/LISP-ACTION:TEST-OP
+                        #<SB-MOP:EQL-SPECIALIZER #<ASDF/SYSTEM:SYSTEM "dreyeck/authoring-envelope/tests">>)
+                       "/nix/store/vnwn3hxa24760a7ihm4xl7nn1jmi89sf-source/dreyeck.asd")
+  (ASDF/ACTION:PERFORM NIL
+                       (ASDF/LISP-ACTION:TEST-OP
+                        #<SB-MOP:EQL-SPECIALIZER #<ASDF/SYSTEM:SYSTEM "dreyeck/fedwiki-page-authoring/tests">>)
+                       "/nix/store/vnwn3hxa24760a7ihm4xl7nn1jmi89sf-source/dreyeck.asd")
+  (ASDF/ACTION:PERFORM NIL
+                       (ASDF/LISP-ACTION:TEST-OP
+                        #<SB-MOP:EQL-SPECIALIZER #<ASDF/SYSTEM:SYSTEM "dreyeck/fedwiki-page-materialization/tests">>)
+                       "/nix/store/vnwn3hxa24760a7ihm4xl7nn1jmi89sf-source/dreyeck.asd")
+  (ASDF/ACTION:PERFORM NIL
+                       (ASDF/LISP-ACTION:TEST-OP
+                        #<SB-MOP:EQL-SPECIALIZER #<ASDF/SYSTEM:SYSTEM "dreyeck/local-fedwiki-view/tests">>)
+                       "/nix/store/vnwn3hxa24760a7ihm4xl7nn1jmi89sf-source/dreyeck.asd")
+  (ASDF/ACTION:PERFORM NIL
+                       (ASDF/LISP-ACTION:TEST-OP
+                        #<SB-MOP:EQL-SPECIALIZER #<ASDF/SYSTEM:SYSTEM "dreyeck/wiki-assets-acceptance/tests">>)
+                       "/nix/store/vnwn3hxa24760a7ihm4xl7nn1jmi89sf-source/dreyeck.asd")
+  (ASDF/ACTION:PERFORM NIL
+                       (ASDF/LISP-ACTION:TEST-OP
+                        #<SB-MOP:EQL-SPECIALIZER #<ASDF/SYSTEM:SYSTEM "dreyeck/local-fedwiki-page/activation-inspector/tests">>)
+                       "/nix/store/vnwn3hxa24760a7ihm4xl7nn1jmi89sf-source/dreyeck.asd")
+  (ASDF/ACTION:PERFORM NIL
+                       (ASDF/LISP-ACTION:TEST-OP
+                        #<SB-MOP:EQL-SPECIALIZER #<ASDF/SYSTEM:SYSTEM "dreyeck/local-fedwiki-page/tests">>)
+                       "/nix/store/vnwn3hxa24760a7ihm4xl7nn1jmi89sf-source/dreyeck.asd")
+  (ASDF/ACTION:PERFORM NIL
+                       (ASDF/LISP-ACTION:TEST-OP
+                        #<SB-MOP:EQL-SPECIALIZER #<ASDF/SYSTEM:SYSTEM "dreyeck/fedwiki-hyperdoc/tests">>)
+                       "/nix/store/vnwn3hxa24760a7ihm4xl7nn1jmi89sf-source/dreyeck.asd")
+  (ASDF/ACTION:PERFORM NIL
+                       (ASDF/LISP-ACTION:TEST-OP
+                        #<SB-MOP:EQL-SPECIALIZER #<ASDF/SYSTEM:SYSTEM "dreyeck/fedwiki-hyperdoc-demo/tests">>)
+                       "/nix/store/vnwn3hxa24760a7ihm4xl7nn1jmi89sf-source/dreyeck.asd")
+  (ASDF/ACTION:PERFORM NIL
+                       (ASDF/LISP-ACTION:TEST-OP
+                        #<SB-MOP:EQL-SPECIALIZER #<ASDF/SYSTEM:SYSTEM "dreyeck/page-attached-hyperdoc/tests">>)
+                       "/nix/store/vnwn3hxa24760a7ihm4xl7nn1jmi89sf-source/dreyeck.asd")
+  (ASDF/ACTION:PERFORM NIL
+                       (ASDF/LISP-ACTION:TEST-OP
+                        #<SB-MOP:EQL-SPECIALIZER #<ASDF/SYSTEM:SYSTEM "dreyeck/page-attached-system-projection/tests">>)
+                       "/nix/store/vnwn3hxa24760a7ihm4xl7nn1jmi89sf-source/dreyeck.asd")
+  (ASDF/ACTION:PERFORM NIL
+                       (ASDF/LISP-ACTION:TEST-OP
+                        #<SB-MOP:EQL-SPECIALIZER #<ASDF/SYSTEM:SYSTEM "dreyeck/page-attached-asdf/tests">>)
+                       "/nix/store/vnwn3hxa24760a7ihm4xl7nn1jmi89sf-source/dreyeck.asd")
+  (ASDF/ACTION:PERFORM NIL
+                       (ASDF/LISP-ACTION:TEST-OP
+                        #<SB-MOP:EQL-SPECIALIZER #<ASDF/SYSTEM:SYSTEM "dreyeck/fedwiki-journal/tests">>)
+                       "/nix/store/vnwn3hxa24760a7ihm4xl7nn1jmi89sf-source/dreyeck.asd")
+  (ASDF/ACTION:PERFORM NIL
+                       (ASDF/LISP-ACTION:TEST-OP
+                        #<SB-MOP:EQL-SPECIALIZER #<ASDF/SYSTEM:SYSTEM "dreyeck/fedwiki-assets/tests">>)
+                       "/nix/store/vnwn3hxa24760a7ihm4xl7nn1jmi89sf-source/dreyeck.asd")
+  (ASDF/ACTION:PERFORM NIL
+                       (ASDF/LISP-ACTION:TEST-OP
+                        #<SB-MOP:EQL-SPECIALIZER #<ASDF/SYSTEM:SYSTEM "dreyeck/lisp-image/topicmap/tests">>)
+                       "/nix/store/vnwn3hxa24760a7ihm4xl7nn1jmi89sf-source/dreyeck.asd")
+  (ASDF/ACTION:PERFORM NIL
+                       (ASDF/LISP-ACTION:TEST-OP
+                        #<SB-MOP:EQL-SPECIALIZER #<ASDF/SYSTEM:SYSTEM "dreyeck/catalog/tests">>)
+                       "/nix/store/vnwn3hxa24760a7ihm4xl7nn1jmi89sf-source/dreyeck.asd")
+  (ASDF/ACTION:PERFORM NIL
+                       (ASDF/LISP-ACTION:TEST-OP
+                        #<SB-MOP:EQL-SPECIALIZER #<ASDF/SYSTEM:SYSTEM "dreyeck/upstream-intake/tests">>)
+                       "/nix/store/vnwn3hxa24760a7ihm4xl7nn1jmi89sf-source/dreyeck.asd")
+  (ASDF/ACTION:PERFORM NIL
+                       (ASDF/LISP-ACTION:TEST-OP
+                        #<SB-MOP:EQL-SPECIALIZER #<ASDF/SYSTEM:SYSTEM "dreyeck/git/tests">>)
+                       "/nix/store/vnwn3hxa24760a7ihm4xl7nn1jmi89sf-source/dreyeck.asd")
+  (ASDF/ACTION:PERFORM NIL
+                       (ASDF/LISP-ACTION:TEST-OP
+                        #<SB-MOP:EQL-SPECIALIZER #<ASDF/SYSTEM:SYSTEM "dreyeck/fedwiki-config/tala/tests">>)
+                       "/nix/store/vnwn3hxa24760a7ihm4xl7nn1jmi89sf-source/dreyeck.asd")
+  (ASDF/ACTION:PERFORM NIL
+                       (ASDF/LISP-ACTION:TEST-OP
+                        #<SB-MOP:EQL-SPECIALIZER #<ASDF/SYSTEM:SYSTEM "dreyeck/fedwiki-config/reading/tests">>)
+                       "/nix/store/vnwn3hxa24760a7ihm4xl7nn1jmi89sf-source/dreyeck.asd")
+  (ASDF/ACTION:PERFORM NIL
+                       (ASDF/LISP-ACTION:TEST-OP
+                        #<SB-MOP:EQL-SPECIALIZER #<ASDF/SYSTEM:SYSTEM "dreyeck/traverse/reading/tests">>)
+                       "/nix/store/vnwn3hxa24760a7ihm4xl7nn1jmi89sf-source/dreyeck.asd")
+  (ASDF/ACTION:PERFORM NIL
+                       (ASDF/LISP-ACTION:TEST-OP
+                        #<SB-MOP:EQL-SPECIALIZER #<ASDF/SYSTEM:SYSTEM "dreyeck/mech-intake/tala/tests">>)
+                       "/nix/store/vnwn3hxa24760a7ihm4xl7nn1jmi89sf-source/dreyeck.asd")
+  (ASDF/ACTION:PERFORM NIL
+                       (ASDF/LISP-ACTION:TEST-OP
+                        #<SB-MOP:EQL-SPECIALIZER #<ASDF/SYSTEM:SYSTEM "dreyeck/mech-intake/reading/tests">>)
+                       "/nix/store/vnwn3hxa24760a7ihm4xl7nn1jmi89sf-source/dreyeck.asd")
+  (ASDF/ACTION:PERFORM NIL
+                       (ASDF/LISP-ACTION:TEST-OP
+                        #<SB-MOP:EQL-SPECIALIZER #<ASDF/SYSTEM:SYSTEM "dreyeck/nested-actions/tala/tests">>)
+                       "/nix/store/vnwn3hxa24760a7ihm4xl7nn1jmi89sf-source/dreyeck.asd")
+  (ASDF/ACTION:PERFORM NIL
+                       (ASDF/LISP-ACTION:TEST-OP
+                        #<SB-MOP:EQL-SPECIALIZER #<ASDF/SYSTEM:SYSTEM "dreyeck/nested-actions/portability/tests">>)
+                       "/nix/store/vnwn3hxa24760a7ihm4xl7nn1jmi89sf-source/dreyeck.asd")
+  (ASDF/ACTION:PERFORM NIL
+                       (ASDF/LISP-ACTION:TEST-OP
+                        #<SB-MOP:EQL-SPECIALIZER #<ASDF/SYSTEM:SYSTEM "dreyeck/nested-actions/reading/tests">>)
+                       "/nix/store/vnwn3hxa24760a7ihm4xl7nn1jmi89sf-source/dreyeck.asd")
+  (ASDF/ACTION:PERFORM NIL
+                       (ASDF/LISP-ACTION:TEST-OP
+                        #<SB-MOP:EQL-SPECIALIZER #<ASDF/SYSTEM:SYSTEM "dreyeck/authority-policy/tests">>)
+                       "/nix/store/vnwn3hxa24760a7ihm4xl7nn1jmi89sf-source/dreyeck.asd")
+  (ASDF/ACTION:PERFORM NIL
+                       (ASDF/LISP-ACTION:TEST-OP
+                        #<SB-MOP:EQL-SPECIALIZER #<ASDF/SYSTEM:SYSTEM "dreyeck/authority/reading/tests">>)
+                       "/nix/store/vnwn3hxa24760a7ihm4xl7nn1jmi89sf-source/dreyeck.asd")
+  (ASDF/ACTION:PERFORM NIL
+                       (ASDF/LISP-ACTION:TEST-OP
+                        #<SB-MOP:EQL-SPECIALIZER #<ASDF/SYSTEM:SYSTEM "dreyeck/wikipedia-title-bar/tests">>)
+                       "/nix/store/vnwn3hxa24760a7ihm4xl7nn1jmi89sf-source/dreyeck.asd")
+  (ASDF/ACTION:PERFORM NIL
+                       (ASDF/LISP-ACTION:TEST-OP
+                        #<SB-MOP:EQL-SPECIALIZER #<ASDF/SYSTEM:SYSTEM "dreyeck/asdf-source/tests">>)
+                       "/nix/store/vnwn3hxa24760a7ihm4xl7nn1jmi89sf-source/dreyeck.asd")
+  (ASDF/ACTION:PERFORM NIL
+                       (ASDF/LISP-ACTION:TEST-OP
+                        #<SB-MOP:EQL-SPECIALIZER #<ASDF/SYSTEM:SYSTEM "dreyeck/fedwiki-source-relations/tests">>)
+                       "/nix/store/vnwn3hxa24760a7ihm4xl7nn1jmi89sf-source/dreyeck.asd")
+  (ASDF/ACTION:PERFORM NIL
+                       (ASDF/LISP-ACTION:TEST-OP
+                        #<SB-MOP:EQL-SPECIALIZER #<ASDF/SYSTEM:SYSTEM "dreyeck/topicmap/tests">>)
+                       "/nix/store/vnwn3hxa24760a7ihm4xl7nn1jmi89sf-source/dreyeck.asd")
+  (ASDF/ACTION:PERFORM NIL
+                       (ASDF/LISP-ACTION:TEST-OP
+                        #<SB-MOP:EQL-SPECIALIZER #<ASDF/SYSTEM:SYSTEM "dreyeck/hyperdoc/curation/tests">>)
+                       "/nix/store/vnwn3hxa24760a7ihm4xl7nn1jmi89sf-source/dreyeck.asd")
+  (ASDF/ACTION:PERFORM NIL
+                       (ASDF/LISP-ACTION:TEST-OP
+                        #<SB-MOP:EQL-SPECIALIZER #<ASDF/SYSTEM:SYSTEM "dreyeck/topicmap/curation/tests">>)
+                       "/nix/store/vnwn3hxa24760a7ihm4xl7nn1jmi89sf-source/dreyeck.asd")
+  (ASDF/ACTION:PERFORM NIL
+                       (ASDF/LISP-ACTION:TEST-OP
+                        #<SB-MOP:EQL-SPECIALIZER #<ASDF/SYSTEM:SYSTEM "dreyeck/fedwiki-navigation/tests">>)
+                       "/nix/store/vnwn3hxa24760a7ihm4xl7nn1jmi89sf-source/dreyeck.asd")
+  (ASDF/ACTION:PERFORM NIL
+                       (ASDF/LISP-ACTION:TEST-OP
+                        #<SB-MOP:EQL-SPECIALIZER #<ASDF/SYSTEM:SYSTEM "dreyeck/wiki-link/tests">>)
+                       "/nix/store/vnwn3hxa24760a7ihm4xl7nn1jmi89sf-source/dreyeck.asd")
+  (ASDF/ACTION:PERFORM NIL
+                       (ASDF/LISP-ACTION:TEST-OP
+                        #<SB-MOP:EQL-SPECIALIZER #<ASDF/SYSTEM:SYSTEM "dreyeck/hyperdoc/library-tests">>)
+                       "/nix/store/vnwn3hxa24760a7ihm4xl7nn1jmi89sf-source/dreyeck.asd")
+  (ASDF/ACTION:PERFORM NIL
+                       (ASDF/LISP-ACTION:TEST-OP
+                        #<SB-MOP:EQL-SPECIALIZER #<ASDF/SYSTEM:SYSTEM "dreyeck/hyperdoc/boundary-tests">>)
+                       "/nix/store/vnwn3hxa24760a7ihm4xl7nn1jmi89sf-source/dreyeck.asd")
+  (ASDF/ACTION:PERFORM NIL
+                       (ASDF/LISP-ACTION:TEST-OP
+                        #<SB-MOP:EQL-SPECIALIZER #<ASDF/SYSTEM:SYSTEM "dreyeck/hyperdoc/compatibility-tests">>)
+                       "/nix/store/vnwn3hxa24760a7ihm4xl7nn1jmi89sf-source/dreyeck.asd")
+  (ASDF/ACTION:PERFORM NIL
+                       (ASDF/LISP-ACTION:TEST-OP
+                        #<SB-MOP:EQL-SPECIALIZER #<ASDF/SYSTEM:SYSTEM "dreyeck/hyperspec/tests">>)
+                       "/nix/store/vnwn3hxa24760a7ihm4xl7nn1jmi89sf-source/dreyeck.asd")
+  (ASDF/COMPONENT:VERSION-SATISFIES NIL
+                                    (#<SB-MOP:EQL-SPECIALIZER #<ASDF/SYSTEM:SYSTEM "cffi">>
+                                     T)
+                                    "/nix/store/yigl86dimfykl8yr1z3g3fs24cahcwh7-sbcl-cffi-20241012-git/cffi.asd")
+  (ASDF/SYSTEM:FIND-SYSTEM (:AROUND) (T)
+                           "/nix/store/b4vm6dwczah0z15p81g3xwkj4y6nybdp-source/lisp/asdf.lisp")
+Counts, for the record only (additions by other libraries grow them; the assertions compare the objects): operate 7 -> 7, perform 40 -> 187.
+; compiling file "/private/var/folders/y1/yhhpj5wd7cb5325t8__1ct2r0000gn/T/asdf-preservation-7IMSNCWH/preservation-probe-after/probe.lisp" (written 27 OCT 2026 04:56:10 PM):
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/9d03f921-be88-4e1e-b222-9700198dcf8d/scratchpad/evidence/work.YcVpmK/cache/common-lisp/sbcl-2.4.10-macosx-x64/private/var/folders/y1/yhhpj5wd7cb5325t8__1ct2r0000gn/T/asdf-preservation-7IMSNCWH/preservation-probe-after/probe-tmp5GEXGEG5.fasl
+; compilation finished in 0:00:00.009
+behaviour after: (:OUTPUT-DIRECTORY-CREATED-BY-ASDF :SUCCEEDED
+                  :LOAD-SYSTEM-COMPILES-INTO-CREATED-DIRECTORY :SUCCEEDED
+                  :VERSION-REQUIREMENT-REFUSED :REFUSED
+                  :ASDF-BINARY-LOCATIONS-REFUSED :REFUSED)
+NOT REFUSED: dreyeck/catalog
+NOT REFUSED: dreyeck/catalog-application
+NOT REFUSED: dreyeck/catalog-topic-maps
+NOT REFUSED: uiop
+NOT REFUSED: dreyeck/work/topic-maps-ctm-review
+NOT REFUSED: dreyeck/work/topic-maps-project-example
+WARNING:
+   redefining ASDF/OPERATE:OPERATE :BEFORE (#<SB-PCL:SYSTEM-CLASS COMMON-LISP:T>
+                                            #<SB-PCL:SYSTEM-CLASS COMMON-LISP:T>) in DEFMETHOD
+ASDF-METHOD-PRESERVATION-PASS: 183 assertions; ASDF 3.3.1 methods unchanged by identity, behaviour equal before and after, a control collision is seen.
+end 2026-10-27T15:56:12Z

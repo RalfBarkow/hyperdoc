@@ -1,0 +1,93 @@
+{
+ "kind": "topic-maps-runtime-snapshot-verification",
+ "startedAtUTC": "2026-10-26T11:06:36Z",
+ "finishedAtUTC": "2026-10-26T11:06:40Z",
+ "repository": "/Users/rgb/workspace/topic-maps",
+ "commit": "b2eecffa05de4fce41c10ae1ada9ae11a0c6e7dc",
+ "rootTree": "2b2ad0589082f3291dd6b1c2be2a0f470b17989b",
+ "archive": {
+  "name": "topic-maps-b2eecffa-runtime.tar.gz",
+  "sha256": "8a7b9755ecbe31fc25defca869fe0893b1b9b30268abf82ab6ff319147ba41b3",
+  "octets": 1033963
+ },
+ "narHash": "sha256-Nu7zDGGWj2rYEozoe4sVj6hiDC3HBHGdSvzOBaBcylw=",
+ "excluded": [
+  "reports"
+ ],
+ "excludedTrees": {
+  "reports": "44adbb2c63d01c9a531b78cb04937f05284151de"
+ },
+ "files": 2328,
+ "modes": {
+  "100644": 2325,
+  "100755": 3
+ },
+ "attributesOnIncludedPaths": [
+  [
+   "binary",
+   "set"
+  ],
+  [
+   "diff",
+   "unset"
+  ],
+  [
+   "eol",
+   "lf"
+  ],
+  [
+   "merge",
+   "unset"
+  ],
+  [
+   "text",
+   "set"
+  ],
+  [
+   "text",
+   "unset"
+  ],
+  [
+   "whitespace",
+   "unset"
+  ]
+ ],
+ "attributeFiles": {
+  ".gitattributes": "# Preserve raw tool output, including SBCL's semicolon-space diagnostic lines.\nreports/**/*.log -whitespace\n# This reading document embeds prefix-multiline.ctm verbatim, including its spaces.\ndocs/reading-prefixes-and-datatypes.md -whitespace\n# Verbatim integer corpus comments retain their original trailing spaces.\ndocs/reading-integer-occurrences.md -whitespace\n# Unified patches preserve upstream whitespace in context and removed lines.\npatches/*.patch -whitespace\n",
+  "vendor/cxtm/.gitattributes": "*.cxtm text eol=lf\n*.ctm binary\n*.xtm binary\n"
+ },
+ "attributedPaths": {
+  "binary=set": 607,
+  "diff=unset": 607,
+  "eol=lf": 874,
+  "merge=unset": 607,
+  "text=set": 874,
+  "text=unset": 607,
+  "whitespace=unset": 4
+ },
+ "git": "git version 2.50.1 (Apple Git-155)",
+ "nix": "nix (Determinate Nix 3.11.2) 2.31.1",
+ "checks": [
+  "manifest-format",
+  "manifest-commit",
+  "manifest-commit-object-is-git-object",
+  "commit-object-hashes-to-commit",
+  "manifest-root-tree",
+  "manifest-root-entries",
+  "manifest-archive-identity",
+  "excluded-is-reports-only",
+  "excluded-reports-is-a-root-entry",
+  "only-regular-and-executable-files",
+  "no-symlinks",
+  "no-submodules",
+  "no-content-changing-attributes",
+  "info-attributes-absent",
+  "archive-paths-equal-commit-paths",
+  "archive-modes-and-blobs-equal-commit",
+  "no-excluded-member",
+  "git-hash-object-equals-commit-blobs",
+  "nar-hash-equals-manifest"
+ ],
+ "failures": [],
+ "success": true
+}

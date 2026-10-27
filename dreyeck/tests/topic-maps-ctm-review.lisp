@@ -20,15 +20,33 @@
         append (loop for path in (dreyeck/work/topic-maps-ctm-review::claim-files claim)
                      collect (cons path (ironclad:byte-array-to-hex-string
                                          (ironclad:digest-file :sha256 (asdf:system-relative-pathname "topic-maps/ctm" path)))))))
-(defun porcelain (system) (dreyeck/git:git-run-string (asdf:system-source-directory system) "status" "--porcelain"))
+(defun expected-source-kind ()
+  "The source kind this run must find, stated by the caller and never inferred: a Git checkout unless
+HYPERDOC_EXPECTED_TOPIC_MAPS_SOURCE says nix-store-snapshot."
+  (let ((stated (uiop:getenv "HYPERDOC_EXPECTED_TOPIC_MAPS_SOURCE")))
+    (cond ((member stated '(nil "" "git-checkout") :test #'equal) :git-checkout)
+          ((equal stated "nix-store-snapshot") :nix-store-snapshot)
+          (t (error "Unknown HYPERDOC_EXPECTED_TOPIC_MAPS_SOURCE ~S." stated)))))
+(defun source-changes (system)
+  "What would show the reviewed source changed: Git's status of the checkout, or a refusal of a fresh verification of the
+store snapshot (which signals; a verified snapshot has no changes)."
+  (let ((root (asdf:system-source-directory system)))
+    (ecase (expected-source-kind)
+      (:git-checkout (dreyeck/git:git-run-string root "status" "--porcelain"))
+      (:nix-store-snapshot (dreyeck/source-snapshot:verify-store-snapshot root ex:+source-revision+) ""))))
 (defun input (role label text) (make-instance 'r:review-input :role role :label label :text text :expected "test input"))
 
 (defun run-tests ()
   (let* ((*checks* nil) (claim (r:claim-named "scheme-plus")) (digests (reviewed-file-digests))
-         (topic-maps-status (porcelain "topic-maps/ctm")) (page-book "dreyeck/work/topic-maps-ctm-review")
+         (topic-maps-status (source-changes "topic-maps/ctm")) (page-book "dreyeck/work/topic-maps-ctm-review")
          (page (hyperbook:find-page (hyperbook:find-hyperbook page-book :signal-error? t) "Reviewing the CTM Reader" :signal-error? t)))
-    ;; The reviewed checkout: every Topic Maps system from the one pinned, clean checkout.
-    (ex:checked-source-path)
+    ;; The reviewed source: every Topic Maps system from the one pinned, clean checkout or its verified store snapshot,
+    ;; and the kind is the one the caller stated.
+    (check :topic-maps-source-kind-as-stated
+           (eq (expected-source-kind) (dreyeck/source-snapshot:source-kind (asdf:system-source-directory "topic-maps/ctm"))))
+    (check :source-evidence-of-the-stated-kind
+           (eq (ex:source-evidence-kind (ex:checked-source-evidence))
+               (if (eq :git-checkout (expected-source-kind)) :git-checkout :verified-nix-store-snapshot)))
     (check :topic-maps-systems-from-one-checkout
            (every (lambda (s) (equal (truename (asdf:system-source-directory s)) (truename (asdf:system-source-directory "topic-maps/ctm"))))
                   '("topic-maps" "topic-maps/tmdm" "topic-maps/cxtm" "topic-maps/project-work-example")))
@@ -112,6 +130,16 @@
                     (search "not observed" text)))
         (check :run-view-holds-each-observation (every (lambda (o) (member o references :test #'eq)) observations))
         (check :run-view-holds-the-evaluation-rule (member #'r:evaluate-observations references :test #'eq))
+        ;; The run says how its sources are known, and a snapshot's verification is the object it refers to.
+        (let ((evidence (ev:evaluation-evidence-of run)))
+          (check :run-records-its-source-evidence
+                 (if (eq :git-checkout (expected-source-kind))
+                     (and (eq :git-checkout (getf evidence :topic-maps-source-evidence)) (search "clean Git checkout, checked by Git" text))
+                     (and (eq :verified-nix-store-snapshot (getf evidence :topic-maps-source-evidence))
+                          (search "verified /nix/store snapshot without .git, reports/ excluded" text)
+                          (some (lambda (o) (typep o 'dreyeck/source-snapshot:snapshot-verification)) references))))
+          (check :run-records-how-hyperdoc-is-known
+                 (member (getf evidence :hyperdoc-revision-evidence) '(:git-checkout :asserted-by-nix-package))))
         ;; Each observation reads as Input, Expected, Observed and Evidence; the full digest and report are kept under Evidence.
         (flet ((occurrences (needle)
                  (loop for start = 0 then (1+ found) for found = (search needle text :start2 start) while found count t)))
@@ -163,7 +191,7 @@
                             (r:observe-input (input :positive-control "unterminated" "<svn+ssh://example.org/x - \"A\"."))))))
     ;; Nothing written: the reviewed files and the reviewed checkout are unchanged.
     (check :reviewed-files-unchanged (equal digests (reviewed-file-digests)))
-    (check :reviewed-checkout-clean-after (zerop (length (porcelain "topic-maps/ctm"))))
+    (check :reviewed-checkout-clean-after (zerop (length (source-changes "topic-maps/ctm"))))
     (check :no-persistence-writer-loaded (not (find-package "DREYECK/FEDWIKI-PAGE-AUTHORING")))
     (format t "~&TOPIC-MAPS-CTM-REVIEW-PASS: ~D assertions; scheme-plus refuted by the reader's own condition, its control read, proposed claims unexecuted.~%"
             (length *checks*))

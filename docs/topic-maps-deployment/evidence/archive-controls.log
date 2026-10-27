@@ -1,0 +1,15 @@
+test_excluded_entry_shipped (__main__.SnapshotVerifierControls.test_excluded_entry_shipped) ... ok
+test_extra_file (__main__.SnapshotVerifierControls.test_extra_file) ... ok
+test_manifest_excluding_more (__main__.SnapshotVerifierControls.test_manifest_excluding_more) ... ok
+test_manifest_with_another_commit_object (__main__.SnapshotVerifierControls.test_manifest_with_another_commit_object) ... ok
+test_manifest_with_another_nar_hash (__main__.SnapshotVerifierControls.test_manifest_with_another_nar_hash) ... ok
+test_missing_file (__main__.SnapshotVerifierControls.test_missing_file) ... ok
+test_mode_changed (__main__.SnapshotVerifierControls.test_mode_changed) ... ok
+test_one_byte_changed (__main__.SnapshotVerifierControls.test_one_byte_changed) ... ok
+test_symlink_member (__main__.SnapshotVerifierControls.test_symlink_member) ... ok
+test_unaltered_archive_verifies (__main__.SnapshotVerifierControls.test_unaltered_archive_verifies) ... ok
+
+----------------------------------------------------------------------
+Ran 10 tests in 58.121s
+
+OK

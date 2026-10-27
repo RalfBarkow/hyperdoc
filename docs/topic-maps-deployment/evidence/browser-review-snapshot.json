@@ -1,0 +1,71 @@
+{
+ "kind": "fresh-local-CTM-review-Catalog-native-Inspector-navigation",
+ "startedAtUTC": "2026-10-26T11:01:46.858Z",
+ "finishedAtUTC": "2026-10-26T11:02:34.135Z",
+ "success": true,
+ "failure": null,
+ "steps": [
+  "Catalog → Topic Maps CTM Review (22U) → Text pages → Reviewing the CTM Reader",
+  "page link → Claim scheme-plus: eight parts, a link to §3.3.3 with its uncertainty, the registration statement, not executed",
+  "Claim → loaded definition next-token (the function object)",
+  "Claim → src/ctm/lexer.lisp at the pinned commit, read from the nix-store-snapshot",
+  "Run the experiment (explicit) → run: refuted; rejection at character 3; observed and derived kept apart",
+  "Execution view at 1280×800: five Input/Expected/Observed/Evidence blocks, no horizontal overflow collapsed or open; the check detects a planted overflow",
+  "Run → the reader's own CTM-REJECTION condition",
+  "Run → positive control's native Topic Map → Evidence → its observation",
+  "Run → back to the claim, now showing the run"
+ ],
+ "command": [
+  "/usr/bin/sandbox-exec",
+  "-p",
+  "(version 1)(allow default)(deny network*)(allow network-inbound (local ip \"localhost:*\"))(allow network-outbound (remote ip \"localhost:*\"))(deny file-write* (subpath \"/Users/rgb/workspace/hyperdoc-dreyeck-ch\"))(deny file-write* (subpath \"/nix/store/1l6im929rknvgp3jxx83i01crcf3ahmg-source\"))",
+  "/nix/store/8j4gxfa63znzgcba9x1mw68yz7cb0ywf-sbcl-with-packages/bin/sbcl",
+  "--noinform",
+  "--no-sysinit",
+  "--no-userinit",
+  "--script",
+  "/var/folders/y1/yhhpj5wd7cb5325t8__1ct2r0000gn/T/hyperdoc-ctm-review-browser-cH4M5Y/browser.lisp"
+ ],
+ "runtime": "/nix/store/8j4gxfa63znzgcba9x1mw68yz7cb0ywf-sbcl-with-packages/bin/sbcl",
+ "playwright": "/Users/rgb/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/playwright",
+ "chrome": "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
+ "topicMapsRoot": "/nix/store/1l6im929rknvgp3jxx83i01crcf3ahmg-source",
+ "topicMapsSourceKind": "nix-store-snapshot",
+ "reviewedSHA256Before": "ba029fdf237d6aabafc16bd9f61ed7adc541b137faec6435be28caf0bbc6bc5c 700c53d48cf11585c69f9355e4f12ca8500edaad5371fdf1d3662f980d97b7db 5d3d22c43dd8b59a6af4ec5570f660fd7cda0eb04160cf12ef890dacac6594ed",
+ "reviewedSHA256After": "ba029fdf237d6aabafc16bd9f61ed7adc541b137faec6435be28caf0bbc6bc5c 700c53d48cf11585c69f9355e4f12ca8500edaad5371fdf1d3662f980d97b7db 5d3d22c43dd8b59a6af4ec5570f660fd7cda0eb04160cf12ef890dacac6594ed",
+ "topicMapsStatusAfter": "",
+ "freshProcess": true,
+ "bothRepositoryWritesDenied": true,
+ "loopbackOnly": true,
+ "productionServiceContacted": false,
+ "testServerStopped": true,
+ "layout": {
+  "viewport": {
+   "width": 1280,
+   "height": 800
+  },
+  "collapsed": {
+   "paneScroll": 698,
+   "paneClient": 698,
+   "viewScroll": 688,
+   "viewClient": 688,
+   "beyond": []
+  },
+  "positiveControl": {
+   "paneScroll": 698,
+   "paneClient": 698,
+   "viewScroll": 5077,
+   "viewClient": 688,
+   "beyond": [
+    "DIV xxxxxxxx"
+   ]
+  },
+  "opened": {
+   "paneScroll": 698,
+   "paneClient": 698,
+   "viewScroll": 688,
+   "viewClient": 688,
+   "beyond": []
+  }
+ }
+}

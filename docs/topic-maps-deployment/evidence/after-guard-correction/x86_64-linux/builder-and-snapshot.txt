@@ -1,0 +1,24 @@
+# x86_64-linux builder and the snapshot reconstructed there
+# Builder: a local Docker Desktop Linux VM (container from nixos/nix:2.31.1), not the production server, not reachable from the network by anything but the image's own Nix.
+# Nix sandbox: OFF (the image's /etc/nix/nix.conf says: sandbox = false), so this is not a sandboxed build.
+# Tree built: git tree a2db814640299db0f0550a5d1ee2769d25128ea5 (exported with git archive, no .git; the builder's own git write-tree reproduced it); container commit 72290093e444a8696ffef69d3ca1d6efba9c687d.
+# Built outputs: package /nix/store/70imilpm8q1gpk4j291kgh1ykhzrdg0p-hyperdoc-catalog-topic-maps; check /nix/store/nqblv5hjck37kd5zx3wdaqpw5dbl2hhk-catalog-topic-maps-contract; HyperDoc source /nix/store/zvms70ahgl7fz5sm2f2g17fykxka6zqs-source
+# Snapshot: no .git of the Topic Maps repository and no 2.47 GB transfer: only the archive, 1,033,963 octets, unpacked and added by content.
+
+## snapshot reconstruction in the builder
+8a7b9755ecbe31fc25defca869fe0893b1b9b30268abf82ab6ff319147ba41b3
+octets 1033963
+sha256-Nu7zDGGWj2rYEozoe4sVj6hiDC3HBHGdSvzOBaBcylw=
+{"/nix/store/1l6im929rknvgp3jxx83i01crcf3ahmg-source":{"ca":"fixed:r:sha256:0p6abjh0bkpw9afp21675l665a4g2n5pps4c2bc6m3wnc46g7vin","deriver":null,"narHash":"sha256-Nu7zDGGWj2rYEozoe4sVj6hiDC3HBHGdSvzOBaBcylw=","narSize":5740208,"references":[],"registrationTime":1793116513,"signatures":[],"ultimate":
+## derivations
+packages.x86_64-linux.hyperdoc-catalog-topic-maps /nix/store/pvf3j435g7f2f03xfavz6f6pdlqa1hfn-hyperdoc-catalog-topic-maps.drv
+checks.x86_64-linux.catalog-topic-maps /nix/store/i06zwk2afklq2w3m9j94g1nm4vgwygwh-catalog-topic-maps-contract.drv
+packages.x86_64-linux.hyperdoc-catalog /nix/store/8cmxvx91sd6pxqsy6ia03ns12kwlw3zi-hyperdoc-catalog.drv
+packages.x86_64-linux.topic-maps-source /nix/store/fivq6wz9ac8hml9malc3h2nnna6qff9b-source.drv
+## environment
+nix (Nix) 2.31.1
+Linux 6.10.14-linuxkit x86_64
+error: unexpected argument 'sandbox'
+Try 'nix --help' for more information.
+nixos/nix:2.31.1 sha256:24196c350d146529a4101edea9c82129308640b500ebbc01d225ad36b6322cb6 03f1b7f4ef25
+Docker 28.0.4 Docker Desktop x86_64 cpus=8

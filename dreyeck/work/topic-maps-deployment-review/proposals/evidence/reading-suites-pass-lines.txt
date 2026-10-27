@@ -1,0 +1,4 @@
+TOPIC-MAPS-DEPLOYMENT-REVIEW-PASS: 270 assertions; 8 pages, 31 subjects, 36 warranted relations, 17 claims.
+TOPIC-MAPS-DEPLOYMENT-REVIEW-PROPOSALS-PASS: 267 assertions; 27 proposed Topics, 34 proposed statements, 4 assignments, 20 evidence entries, 7 draft entries, the emitter's reading agreed.
+TOPIC-MAPS-DEPLOYMENT-REVIEW-COLLISION-PASS: 71 assertions; replacement recorded, 8 claims (observed, derived, inferred, open).
+ALL-READING-SUITES-PASSED

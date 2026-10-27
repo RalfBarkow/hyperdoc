@@ -1,0 +1,35 @@
+# nix build --offline --no-link .#checks.x86_64-darwin.catalog-topic-maps   (run on the Darwin host that holds the candidate)
+# started 2026-10-27T15:59:19Z; HYPERDOC working tree 53ee999358f455a2dcb375743072d56d0f4c31cd plus uncommitted files
+these 1286 derivations will be built:
+error: Cannot build '/nix/store/ilg99m2gvazw3jhp4190lvn44vsvzwf4-bmake-20240921.tar.gz.drv'.
+       > curl: (22) The requested URL returned error: 404
+       > error: cannot download bmake-20240921.tar.gz from any mirror
+error: Cannot build '/nix/store/8nava54djr9blwsf3z5621qs141i64d8-bmake-20240921.drv'.
+error: Cannot build '/nix/store/1cshh67x3kqyld62wy4w0mrrp59rsapr-locale-118.drv'.
+error: Cannot build '/nix/store/1w504nl69xwsphxiaxdajxhhz1wwlhl2-locale-118.drv'.
+error: Cannot build '/nix/store/5drhv6fpg9hmflx7lmvmf78x3xn9ifhv-locale-118.drv'.
+error: Cannot build '/nix/store/a4zxnljjfzzwc9fzb8bh235djhqqxjj6-locale-118.drv'.
+error: Cannot build '/nix/store/2hag17baahm6y0jllkzq7mivpabigdsm-bootstrap-stage-xclang-stdenv-darwin.drv'.
+error: Cannot build '/nix/store/gvn6rvgd6b72mwz01r7q9ya0awfahpav-bootstrap-stage-xclang-stdenv-darwin.drv'.
+error: Cannot build '/nix/store/4cybk0zr71lj3cs7ffv55wz4y56wkssx-bootstrap-stage2-stdenv-darwin.drv'.
+error: Cannot build '/nix/store/pql0slwps47id7iq3mi72xfjkpjxwpdk-bootstrap-stage2-stdenv-darwin.drv'.
+error: Cannot build '/nix/store/pvy3gg7a3w317b3jwn6f6ywxds6ksrcw-bootstrap-stage2-stdenv-darwin.drv'.
+error: Cannot build '/nix/store/a4zd306lcps6zasayhv9q44y5dvnc4lz-bootstrap-stage3-stdenv-darwin.drv'.
+error: Cannot build '/nix/store/fywjnvh7xmhws0dx4z9vwvdxzmn7nya9-bootstrap-stage3-stdenv-darwin.drv'.
+error: Cannot build '/nix/store/s1hjp3602x86skk51jg73i402yva505b-bootstrap-stage4-stdenv-darwin.drv'.
+error: Cannot build '/nix/store/xcr0py9xab7y3hxfbahk9qmh1hjr88y2-bootstrap-stage4-stdenv-darwin.drv'.
+error: Cannot build '/nix/store/xah7dlfkgnsr2dcqnrg9qp19xn74263g-adv_cmds-231.drv'.
+error: Cannot build '/nix/store/ccffgb0nj0h71a3ag14ss693c41a0xs4-apple-sdk-10.12.2.drv'.
+error: Cannot build '/nix/store/rqi01fmqz2x9sb32s45na3qvnn773awa-bash-5.2p37.drv'.
+error: Cannot build '/nix/store/9k6xk760mzszcdx02gksiayim8qla5md-bzip2-1.0.8.drv'.
+error: Cannot build '/nix/store/q5xq4gkwsfz8vq1qmn0pdi77qx7x4x01-file-5.45.drv'.
+error: Cannot build '/nix/store/71zm87gp58dbgp1lsy5l5ry4fv8n0pdk-gmp-with-cxx-6.3.0.drv'.
+error: Cannot build '/nix/store/71zm87gp58dbgp1lsy5l5ry4fv8n0pdk-gmp-with-cxx-6.3.0.drv'.
+error: Cannot build '/nix/store/rfrh3qyckjz8fichk1210dwfrmsqxpl6-libffi-3.4.6.drv'.
+error: Cannot build '/nix/store/gn98hay260i6savglf8kxm25fda4xjlk-libtapi-1500.0.12.3.drv'.
+error: Cannot build '/nix/store/db4fkrnblimrsay35naqyc6nchhw3s1p-libunistring-1.2.drv'.
+error: Cannot build '/nix/store/1hwmyibxylk825jqask89djdv7r1x0b5-libutil-72.drv'.
+error: Cannot build '/nix/store/35rq1bph5g76a37iy9lnbb9q9ypjldc7-libxml2-2.13.8.drv'.
+# exit status of nix build: not captured by this recording (the pipeline hid it); the build failed, as the errors above show, and no result was produced
+# finished 2026-10-27T16:13:06Z
+# The first line of the real log: "these 1286 derivations will be built" — the Darwin stdenv bootstrap, not the candidate. Offline, the bootstrap sources (for example bmake-20240921.tar.gz) return 404.

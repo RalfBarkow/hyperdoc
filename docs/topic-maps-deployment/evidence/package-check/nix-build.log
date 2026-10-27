@@ -1,0 +1,11 @@
+warning: Git tree '/Users/rgb/workspace/hyperdoc-dreyeck-ch' has uncommitted changes
+these 2 derivations will be built:
+  /nix/store/xcfkyp0zva6j1w7lhcf3y4x6m4c4si92-hyperdoc-catalog-topic-maps.drv
+  /nix/store/v6lp4d6lmrb3vargiwdf36czszmzaqxi-catalog-topic-maps-contract.drv
+error: some outputs of '/nix/store/v6lp4d6lmrb3vargiwdf36czszmzaqxi-catalog-topic-maps-contract.drv' are not valid, so checking is not possible
+warning: Git tree '/Users/rgb/workspace/hyperdoc-dreyeck-ch' has uncommitted changes
+these 2 derivations will be built:
+  /nix/store/xcfkyp0zva6j1w7lhcf3y4x6m4c4si92-hyperdoc-catalog-topic-maps.drv
+  /nix/store/v6lp4d6lmrb3vargiwdf36czszmzaqxi-catalog-topic-maps-contract.drv
+building '/nix/store/xcfkyp0zva6j1w7lhcf3y4x6m4c4si92-hyperdoc-catalog-topic-maps.drv'...
+building '/nix/store/v6lp4d6lmrb3vargiwdf36czszmzaqxi-catalog-topic-maps-contract.drv'...

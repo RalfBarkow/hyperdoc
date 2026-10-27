@@ -1,0 +1,23 @@
+2026-10-27T16:56:32Z
+package /nix/store/70imilpm8q1gpk4j291kgh1ykhzrdg0p-hyperdoc-catalog-topic-maps
+wrapper 
+reading suites exit 0
+RUN-STARTED 4002108997 SBCL 2.4.10; source /nix/store/zvms70ahgl7fz5sm2f2g17fykxka6zqs-source/; git: NIL
+TOPIC-MAPS-DEPLOYMENT-REVIEW-PASS: 304 assertions; 8 pages, 31 subjects, 37 warranted relations, 19 claims.
+TOPIC-MAPS-DEPLOYMENT-REVIEW-PROPOSALS-PASS: 267 assertions; 27 proposed Topics, 34 proposed statements, 4 assignments, 20 evidence entries, 7 draft entries, the emitter's reading agreed.
+TOPIC-MAPS-DEPLOYMENT-REVIEW-COLLISION-PASS: 76 assertions; replacement recorded, 9 claims (observed, derived, inferred, open).
+Project Workspace loaded: NIL; Topic Maps from /nix/store/1l6im929rknvgp3jxx83i01crcf3ahmg-source/
+LINUX-READING-SUITES-PASSED
+seconds to listening: 19
+Topic Maps b2eecffa: /nix/store/1l6im929rknvgp3jxx83i01crcf3ahmg-source/
+Topic Maps snapshot verified without .git (commit-object-hashes-to-commit, commit-names-root-tree, root-listing-hashes-to-root-tree, root-entries-are-the-shipped-entries, shipped-entries-hash-to-the-c
+HTTP listening on    : 127.0.0.1:18781
+HyperBook Catalog listening on 127.0.0.1:18781
+-- listening sockets for the port (hex address:port; 0100007F is 127.0.0.1)
+0100007F:495D
+HTTP 200
+1
+shutdown exit status 0
+Stopping HyperBook Catalog
+2026-10-27T17:00:30Z
+DONE

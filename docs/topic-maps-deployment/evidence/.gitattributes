@@ -1,0 +1,2 @@
+# Raw tool output, kept byte-exact, including SBCL's semicolon-space diagnostic lines.
+*.log -whitespace

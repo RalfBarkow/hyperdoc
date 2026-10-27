@@ -19,7 +19,10 @@ const sock=net.createServer();await new Promise(r=>sock.listen(0,'127.0.0.1',r))
 const q=JSON.stringify
 const reviewed=['src/ctm/lexer.lisp','src/ctm/iri.lisp','src/ctm/unicode.lisp'].map(p=>path.join(process.env.TOPIC_MAPS_ROOT,p))
 const digest=()=>reviewed.map(f=>crypto.createHash('sha256').update(fs.readFileSync(f)).digest('hex')).join(' ')
-const status=()=>execFileSync('git',['-C',process.env.TOPIC_MAPS_ROOT,'status','--porcelain']).toString()
+// The reviewed source is a Git checkout (Git's status must stay empty) or a read-only /nix/store snapshot without .git.
+const sourceKind=fs.existsSync(path.join(process.env.TOPIC_MAPS_ROOT,'.git'))?'git-checkout':process.env.TOPIC_MAPS_ROOT.startsWith('/nix/store/')?'nix-store-snapshot':null
+assert(sourceKind,'TOPIC_MAPS_ROOT is neither a Git checkout nor a /nix/store snapshot')
+const status=()=>sourceKind==='git-checkout'?execFileSync('git',['-C',process.env.TOPIC_MAPS_ROOT,'status','--porcelain']).toString():''
 const before=digest(),statusBefore=status()
 fs.writeFileSync(script,`(load ${q(path.join(root,'scripts/topic-maps-project-bootstrap.lisp'))})
 (asdf:load-system "dreyeck/work/topic-maps-ctm-review")
@@ -48,7 +51,7 @@ fs.writeFileSync(script,`(load ${q(path.join(root,'scripts/topic-maps-project-bo
 const policy=`(version 1)(allow default)(deny network*)(allow network-inbound (local ip "localhost:*"))(allow network-outbound (remote ip "localhost:*"))(deny file-write* (subpath ${q(root)}))(deny file-write* (subpath ${q(process.env.TOPIC_MAPS_ROOT)}))`
 const log=path.join(output,'browser-lisp.log'),fd=fs.openSync(log,'w')
 const args=['-p',policy,lisp,'--noinform','--no-sysinit','--no-userinit','--script',script]
-const child=spawn('/usr/bin/sandbox-exec',args,{cwd:root,stdio:['ignore',fd,fd],env:{...process.env,HYPERDOC_22U_FASL_ROOT:path.join(temp,'fasls')}})
+const child=spawn('/usr/bin/sandbox-exec',args,{cwd:root,stdio:['ignore',fd,fd],env:{...process.env,HYPERDOC_22U_FASL_ROOT:path.join(temp,'fasls'),XDG_CACHE_HOME:path.join(temp,'cache')}})
 let browser,success=false,failure=null,layout=null
 const viewport={width:1280,height:800}
 const steps=[],started=new Date().toISOString()
@@ -90,11 +93,16 @@ try {
  steps.push('page link → Claim scheme-plus: eight parts, a link to §3.3.3 with its uncertainty, the registration statement, not executed')
  await claimPane().getByText('next-token',{exact:true}).first().click();await proved('FUNCTION-EQ')
  steps.push('Claim → loaded definition next-token (the function object)')
+ await claimPane().getByText('src/ctm/lexer.lisp at b2eecffa',{exact:true}).first().click()
+ await last().getByText('(defun next-token',{exact:false}).first().waitFor()
+ if(sourceKind==='nix-store-snapshot')assert((await last().innerText()).includes('Verified now'),'the snapshot file is read through a verification made when shown')
+ steps.push(`Claim → src/ctm/lexer.lisp at the pinned commit, read from the ${sourceKind}`)
  await claimPane().getByRole('button',{name:'Run the experiment',exact:true}).click()
  await heading(last(),'Run of claim scheme-plus');await proved('RUN-EQ')
  const runIndex=(await panes().count())-1,runPane=()=>panes().nth(runIndex)
  const runText=await runPane().innerText()
  for(const s of ['refuted','INVALID-OCCURRENCE-LITERAL','at character 3 (line 1, column 4)','Observed: what the reader returned or signalled','Derived: conformance assessment','b2eecffa05de4fce41c10ae1ada9ae11a0c6e7dc','of the UTF-8 octets as read'])assert(runText.includes(s),s)
+ assert(runText.includes(sourceKind==='git-checkout'?'clean Git checkout, checked by Git':'verified /nix/store snapshot without .git, reports/ excluded'),'the run names how its Topic Maps source is known')
  const inputDigest=crypto.createHash('sha256').update('svn+ssh://example.org/x - "A".').digest('hex')
  // Readability at the fixed viewport: one Input/Expected/Observed/Evidence block per observation; the full digest is collapsed.
  const execution=runPane().locator('.ctm-review-execution'),observationBlocks=execution.locator('section.ctm-review-observation')
@@ -142,6 +150,6 @@ finally {
  for(let n=0;n<100&&child.exitCode===null;n++)await new Promise(r=>setTimeout(r,100))
  if(child.exitCode===null)child.kill('SIGTERM')
  fs.closeSync(fd)
- fs.writeFileSync(path.join(output,'browser.json'),JSON.stringify({kind:'fresh-local-CTM-review-Catalog-native-Inspector-navigation',startedAtUTC:started,finishedAtUTC:new Date().toISOString(),success,failure,steps,command:['/usr/bin/sandbox-exec',...args],runtime:lisp,playwright:pw,chrome,reviewedSHA256Before:before,reviewedSHA256After:digest(),topicMapsStatusAfter:status(),freshProcess:true,bothRepositoryWritesDenied:true,loopbackOnly:true,productionServiceContacted:false,testServerStopped:child.exitCode!==null,layout},null,1))
+ fs.writeFileSync(path.join(output,'browser.json'),JSON.stringify({kind:'fresh-local-CTM-review-Catalog-native-Inspector-navigation',startedAtUTC:started,finishedAtUTC:new Date().toISOString(),success,failure,steps,command:['/usr/bin/sandbox-exec',...args],runtime:lisp,playwright:pw,chrome,topicMapsRoot:process.env.TOPIC_MAPS_ROOT,topicMapsSourceKind:sourceKind,reviewedSHA256Before:before,reviewedSHA256After:digest(),topicMapsStatusAfter:status(),freshProcess:true,bothRepositoryWritesDenied:true,loopbackOnly:true,productionServiceContacted:false,testServerStopped:child.exitCode!==null,layout},null,1))
 }
 if(!success)process.exitCode=1

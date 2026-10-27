@@ -1,0 +1,28 @@
+{
+ "command": "dreyeck/work/topic-maps-deployment-review/serve.sh 18777",
+ "cwd": "/Users/rgb/workspace/hyperdoc-dreyeck-ch",
+ "startedAtUTC": "2026-10-27T13:20:37Z",
+ "ready_url": "http://127.0.0.1:18777/",
+ "seconds_to_ready": 17,
+ "walk": [
+  "overview names the project work",
+  "six decisions",
+  "emitter cross-check record",
+  "proposed WBS",
+  "Workspace, Point at 2.3"
+ ],
+ "walk_ok": true,
+ "exit": 0,
+ "port_closed_after": true,
+ "site_root_removed": true,
+ "leftover_processes": [],
+ "finishedAtUTC": "2026-10-27T13:21:04Z",
+ "log_tail": [
+  "Local FedWiki /view route installed from /var/folders/y1/yhhpj5wd7cb5325t8__1ct2r0000gn/T/hyperdoc-review-site.6PO0Tx/",
+  "",
+  "Ready: http://127.0.0.1:18777/   (Ctrl-C stops the server)",
+  "New connection id - 0c4a5a832c457834a09fe1b5d8777d26 - #<SERVER {700A9AA2E3}>",
+  "Stopping HyperBook Catalog",
+  "Server stopped (exit status 0)."
+ ]
+}

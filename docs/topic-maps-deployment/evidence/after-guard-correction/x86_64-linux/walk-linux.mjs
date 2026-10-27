@@ -1,0 +1,51 @@
+// Walk the reading served by the PACKAGED Linux executable (through a forwarder to the container's published port).
+import {pathToFileURL} from 'node:url'
+import fs from 'node:fs'
+import assert from 'node:assert/strict'
+const [url,out]=process.argv.slice(2)
+const {chromium}=await import(pathToFileURL('/Users/rgb/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/playwright/index.mjs'))
+const {installBoundClicks}=await import(pathToFileURL('/Users/rgb/workspace/hyperdoc-dreyeck-ch/scripts/lib/inspector-ready.mjs'))
+fs.mkdirSync(out,{recursive:true})
+const started=new Date().toISOString(),steps=[]
+const browser=await chromium.launch({headless:true,executablePath:'/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'})
+const page=await (await browser.newContext({viewport:{width:1440,height:900}})).newPage();page.setDefaultTimeout(90000);installBoundClicks(page)
+const panes=()=>page.locator('.inspector-pane'),last=()=>panes().last()
+const shows=async(pane,text)=>pane.getByText(text,{exact:false}).first().waitFor()
+const click=async(pane,text)=>pane.getByText(text,{exact:true}).first().click()
+const shot=async n=>last().screenshot({path:`${out}/${n}.png`})
+let ok=false,failure=null
+try{
+ await page.goto(url)
+ await page.getByText('Deploying Topic Maps with HyperDoc',{exact:true}).and(page.locator(':visible')).first().click()
+ await last().getByRole('button',{name:'Text pages',exact:true}).first().click()
+ await last().locator('tr.inspector-inspect').filter({hasText:'Deploying Topic Maps with HyperDoc'}).first().click()
+ await last().getByRole('heading',{name:'The deployment as project work',exact:true}).first().waitFor()
+ const o=(await panes().count())-1,overview=()=>panes().nth(o)
+ steps.push('Catalog → Deploying Topic Maps with HyperDoc → Text pages → the overview, which names the project work');await shot('overview')
+ await click(overview(),'The history');await last().getByRole('heading',{name:'The ASDF Method Collision',exact:true}).first().waitFor()
+ const c=(await panes().count())-1,collision=()=>panes().nth(c)
+ await click(collision(),'the first guard\'s two methods');await shows(last(),'(defmethod asdf:operate :before');await shows(last(),'keeps the file verbatim');await shot('first-guard-kept')
+ steps.push('The ASDF Method Collision → the first guard\'s two methods, kept verbatim as historical source')
+ await click(collision(),'The probe\'s record');await shows(last(),'Recorded run.');await shows(last(),'Both identities move');await shot('probe-record')
+ steps.push('The ASDF Method Collision → the probe\'s record of the first version, unchanged')
+ await click(collision(),'the correction');await shows(last(),'The correction, as applied on 2026-10-27');await shows(last(),'free: no method has it');await shot('correction')
+ steps.push('The ASDF Method Collision → the correction, as applied; the identities a differently specialized method would take are still free')
+ await click(overview(),'which methods ASDF runs now');await shows(last(),'Neither is the guard');await shows(last(),'ASDF\'s own');await shot('method-origins')
+ steps.push('Overview → which methods ASDF runs now, asked of this Linux image: neither is the guard\'s, both are ASDF\'s own')
+ await click(overview(),'The candidate');await shows(last(),'This source has no .git');await shot('candidate-no-git')
+ steps.push('Overview → The candidate: this source has no .git, and the view says so, with each file\'s SHA-256')
+ await click(overview(),'The Six Open Decisions');await last().getByRole('heading',{name:'The Six Open Decisions',exact:true}).first().waitFor()
+ const d=(await panes().count())-1,decisions=()=>panes().nth(d)
+ await click(decisions(),'The emitter\'s own reading');await shows(last(),'No refusal:');await shot('cross-check')
+ steps.push('The Six Open Decisions → the emitter\'s recorded reading of the proposals')
+ await click(decisions(),'The Proposed Deployment WBS');await shows(last(),'Reported by the executor, not a status.')
+ await click(last(),'the proposal Workspace')
+ await last().locator('g.dreyeck-topicmap-topic').first().waitFor()
+ await last().locator('rect.dreyeck-topicmap-workspace-action[data-topic-id="tmd-wp-2-3"]').first().click()
+ await shows(last(),'At Point: 2.3 Catalog startup policy');await shows(last(),'No acceptance record.');await shot('point-at-2-3')
+ steps.push('The Proposed Deployment WBS → the proposal Workspace → Point at 2.3: proposed, no acceptance record')
+ ok=true
+}catch(e){failure=String(e.stack||e);try{await last().screenshot({path:`${out}/failure.png`})}catch{}}
+await browser.close()
+fs.writeFileSync(`${out}/walk.json`,JSON.stringify({kind:'linux-packaged-reading-browser-walk',url,startedAtUTC:started,finishedAtUTC:new Date().toISOString(),success:ok,failure,steps},null,1))
+console.log(ok?'WALK-PASSED '+steps.length+' steps':'WALK-FAILED '+failure)

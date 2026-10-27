@@ -43,12 +43,22 @@
         (check :selected-role-destinations-exist (selected-targets-exist item "Role")))
       (check :destination-native-Topic-view (selected-targets-exist target "Topic"))
       (list role association next target))))
+(defun stated-source-evidence ()
+  "The source evidence this run must produce, stated by the caller and never inferred: a Git checkout unless
+HYPERDOC_EXPECTED_TOPIC_MAPS_SOURCE says nix-store-snapshot."
+  (let ((stated (uiop:getenv "HYPERDOC_EXPECTED_TOPIC_MAPS_SOURCE")))
+    (cond ((member stated '(nil "" "git-checkout") :test #'equal) :git-checkout)
+          ((equal stated "nix-store-snapshot") :verified-nix-store-snapshot)
+          (t (error "Unknown HYPERDOC_EXPECTED_TOPIC_MAPS_SOURCE ~S." stated)))))
 (defun run-tests ()
   (let* ((*checks* nil) (path (p:checked-source-path)) (source (binary path))
          (run (p:run-example)) (map (p:run-map run))
          (question (e:find-topic map "urn:topic-maps:question:Q-XTM-LOOP"))
          (project (e:find-topic map "urn:topic-maps:project"))
          (disposition (e:local-topic map "disposition")) (state (e:model-view map)))
+    (check :source-evidence-of-the-stated-kind
+      (and (eq (stated-source-evidence) (p:source-evidence-kind (p:checked-source-evidence)))
+           (eq (stated-source-evidence) (getf (ev:evaluation-annotation-of run) :source-evidence))))
     (check :source-via-registered-ASDF (equal (truename path)
       (truename (asdf:system-relative-pathname "topic-maps/project-work-example" "examples/project-work.ctm"))))
     (check :productive-reader-native-result (typep map 'm:topic-map))

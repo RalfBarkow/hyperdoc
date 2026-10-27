@@ -1,0 +1,242 @@
+
+<h2>Proposed Work: Deploying Topic Maps with HyperDoc on dreyeck.ch</h2>
+<p>The Work Item, the Deliverable, the work packages and the plan of the assignments below. None of them is declared, and none has a work status. The work packages are described by the draft <code>Topic Maps Deployment WBS Dictionary</code>, which declares nothing either.</p>
+<p>Completeness: the five elements together are the whole defined scope. A source that can be verified (1), a package that serves it under a startup policy (2), a reading in which the package can be reviewed (3), a candidate validated where it will run (4), and the deployment activated and verified (5). What the scope needs and does not deliver are preconditions of the plan below: the user's authorizations and approvals, the decisions D2 to D5, an independent builder, and evidence of the server's state. Project management is not an element: the design and these proposals are assignments that deliver no package.</p>
+<p>Overlap: 1 and 2.1 meet in <code>flake.nix</code> and <code>dreyeck.asd</code>, which declare parts of both. 2.2 and 3 both make Topic Maps inspectable in HyperDoc: 2.2 in the package as it is served, 3 only locally, for the review. 2 and 4 meet at the reviewed revision: 4 changes no code, and a Linux fix is a new revision of 2. 4 ends with a staged, unactivated candidate; 5 begins with the activation. Verifying the deployment is the acceptance of 5, not an element of its own.</p>
+<ul>
+<li><a page="Implementation Assignments" hyperbook="dreyeck/work/project" data-proposed-topic="tmd" data-kind="work item">Deploying Topic Maps with HyperDoc on dreyeck.ch</a> — run the independent ANSI Common Lisp Topic Maps implementation, at b2eecffa, as a reproducible ASDF dependency of a separate Nix package on the NixOS server dreyeck.ch, inspectable in HyperDoc.</li>
+<li><a page="Implementation Assignments" hyperbook="dreyeck/work/project" data-proposed-topic="tmd-deployment" data-kind="deliverable">Topic Maps operating with HyperDoc on dreyeck.ch</a> — the defined scope: the verified source, the integrated Catalog package, its review reading, a validated Linux candidate, and the activated and verified deployment.</li>
+<li><a page="Implementation Assignments" hyperbook="dreyeck/work/project" data-proposed-topic="tmd-wp-1" data-kind="work package">1 Verified Topic Maps Source Distribution</a> — the runtime snapshot of b2eecffa without reports/, verifiable without .git and obtainable by a builder.</li>
+<li><a page="Implementation Assignments" hyperbook="dreyeck/work/project" data-proposed-topic="tmd-2" data-kind="deliverable">2 Integrated HyperDoc Catalog Package</a> — the separate package hyperdoc-catalog-topic-maps; a summary element of 2.1 to 2.3.</li>
+<li><a page="Implementation Assignments" hyperbook="dreyeck/work/project" data-proposed-topic="tmd-wp-2-1" data-kind="work package">2.1 Catalog package definition</a> — the Nix declarations and checks that build hyperdoc-catalog-topic-maps beside an unchanged hyperdoc-catalog.</li>
+<li><a page="Implementation Assignments" hyperbook="dreyeck/work/project" data-proposed-topic="tmd-wp-2-2" data-kind="work package">2.2 Provenance dispatch of the Topic Maps readings</a> — the 22U reading and the CTM review, reading Topic Maps from the verified snapshot or a Git checkout and saying which.</li>
+<li><a page="Implementation Assignments" hyperbook="dreyeck/work/project" data-proposed-topic="tmd-wp-2-3" data-kind="work package">2.3 Catalog startup policy</a> — loopback only, verified ASDF origins, the Project Workspace refused, ASDF's own methods preserved.</li>
+<li><a page="Implementation Assignments" hyperbook="dreyeck/work/project" data-proposed-topic="tmd-wp-3" data-kind="work package">3 Inspectable Project Documentation</a> — the local HyperDoc reading of the candidate, its sources and evidence, with its operator start.</li>
+<li><a page="Implementation Assignments" hyperbook="dreyeck/work/project" data-proposed-topic="tmd-wp-4" data-kind="work package">4 Validated Linux Deployment Candidate</a> — the reviewed revision built and checked for x86_64-linux on an independent builder, and staged on loopback on the NixOS host.</li>
+<li><a page="Implementation Assignments" hyperbook="dreyeck/work/project" data-proposed-topic="tmd-wp-5" data-kind="work package">5 Operational HyperDoc Deployment</a> — an activated NixOS generation with the package, verified in operation, with a rollback.</li>
+</ul>
+<ul>
+<li data-proposed-from="tmd-deployment" data-proposed-relation="work:relation/decomposes-into" data-proposed-to="tmd-wp-1">Topic Maps operating with HyperDoc → 1 Verified Source Distribution: decomposes into.</li>
+<li data-proposed-from="tmd-deployment" data-proposed-relation="work:relation/decomposes-into" data-proposed-to="tmd-2">Topic Maps operating with HyperDoc → 2 Integrated Catalog Package: decomposes into.</li>
+<li data-proposed-from="tmd-deployment" data-proposed-relation="work:relation/decomposes-into" data-proposed-to="tmd-wp-3">Topic Maps operating with HyperDoc → 3 Inspectable Project Documentation: decomposes into.</li>
+<li data-proposed-from="tmd-deployment" data-proposed-relation="work:relation/decomposes-into" data-proposed-to="tmd-wp-4">Topic Maps operating with HyperDoc → 4 Validated Linux Deployment Candidate: decomposes into.</li>
+<li data-proposed-from="tmd-deployment" data-proposed-relation="work:relation/decomposes-into" data-proposed-to="tmd-wp-5">Topic Maps operating with HyperDoc → 5 Operational HyperDoc Deployment: decomposes into.</li>
+<li data-proposed-from="tmd-2" data-proposed-relation="work:relation/decomposes-into" data-proposed-to="tmd-wp-2-1">2 Integrated Catalog Package → 2.1 Package definition: decomposes into.</li>
+<li data-proposed-from="tmd-2" data-proposed-relation="work:relation/decomposes-into" data-proposed-to="tmd-wp-2-2">2 Integrated Catalog Package → 2.2 Provenance dispatch: decomposes into.</li>
+<li data-proposed-from="tmd-2" data-proposed-relation="work:relation/decomposes-into" data-proposed-to="tmd-wp-2-3">2 Integrated Catalog Package → 2.3 Startup policy: decomposes into.</li>
+</ul>
+
+<h3>Proposed plan</h3>
+<p>Plan steps, each for one work package, and the preconditions the steps wait on. A precondition is something the scope needs and does not deliver: an approval, a decision, a builder, evidence from the server. No plan step or precondition grants authority.</p>
+<ul>
+<li><a page="Implementation Assignments" hyperbook="dreyeck/work/project" data-proposed-topic="tmd-p1" data-kind="plan step">Export, pin and verify the snapshot</a> — git archive without reports/, the manifest of Git objects, the NAR hash in Nix, the verifiers.</li>
+<li><a page="Implementation Assignments" hyperbook="dreyeck/work/project" data-proposed-topic="tmd-p2" data-kind="plan step">Define the Catalog package</a> — the derivation, its registry, wrapper and flake check, and the comparison with hyperdoc-catalog.</li>
+<li><a page="Implementation Assignments" hyperbook="dreyeck/work/project" data-proposed-topic="tmd-p3" data-kind="plan step">Dispatch the Topic Maps readings by provenance</a> — the 22U reading and the CTM review read the snapshot or a checkout and say which.</li>
+<li><a page="Implementation Assignments" hyperbook="dreyeck/work/project" data-proposed-topic="tmd-p4" data-kind="plan step">Enforce the startup policy</a> — loopback only, the origin check, the Project Workspace guard.</li>
+<li><a page="Implementation Assignments" hyperbook="dreyeck/work/project" data-proposed-topic="tmd-p5" data-kind="plan step">Correct the guard's method identities</a> — methods with specializers ASDF does not use, with fresh-process checks that ASDF's own methods stay ASDF's; the tested files and their evidence are made anew.</li>
+<li><a page="Implementation Assignments" hyperbook="dreyeck/work/project" data-proposed-topic="tmd-p6" data-kind="plan step">Build the HyperDoc review reading</a> — Text Pages, Code Pages and a Workspace over the candidate's objects and evidence, and its operator start.</li>
+<li><a page="Implementation Assignments" hyperbook="dreyeck/work/project" data-proposed-topic="tmd-p7" data-kind="plan step">Keep the snapshot alive for a reading session</a> — a garbage-collector root for the store path while the reading runs, removed when it stops.</li>
+<li><a page="Implementation Assignments" hyperbook="dreyeck/work/project" data-proposed-topic="tmd-p8" data-kind="plan step">Build, check and stage on x86_64-linux</a> — on an independent builder from the pushed revision, then a loopback staging run on the NixOS host.</li>
+<li><a page="Implementation Assignments" hyperbook="dreyeck/work/project" data-proposed-topic="tmd-p9" data-kind="plan step">Activate and verify the deployment</a> — activate the generation, verify identity, reachability and boundaries, show the rollback.</li>
+<li><a page="Implementation Assignments" hyperbook="dreyeck/work/project" data-proposed-topic="tmd-pre-change" data-kind="precondition">Authorization to change tested files</a> — the user's, for the files of the candidate: the guard correction changes dreyeck/src/catalog-topic-maps.lisp and its tests.</li>
+<li><a page="Implementation Assignments" hyperbook="dreyeck/work/project" data-proposed-topic="tmd-pre-commit" data-kind="precondition">Candidate committed on approval</a> — the reviewed candidate committed locally, on the user's approval after the review of its diff.</li>
+<li><a page="Implementation Assignments" hyperbook="dreyeck/work/project" data-proposed-topic="tmd-pre-push" data-kind="precondition">Approval to push dreyeck.ch</a> — the user's; decision D4 keeps the branch unpushed.</li>
+<li><a page="Implementation Assignments" hyperbook="dreyeck/work/project" data-proposed-topic="tmd-pre-archive" data-kind="precondition">Archive obtainable by the builder</a> — decision D2: published at a release URL, or transferred into the builder's store.</li>
+<li><a page="Implementation Assignments" hyperbook="dreyeck/work/project" data-proposed-topic="tmd-pre-builder" data-kind="precondition">Independent x86_64-linux builder</a> — decision D3: its configuration and capacity checked; not the production server.</li>
+<li><a page="Implementation Assignments" hyperbook="dreyeck/work/project" data-proposed-topic="tmd-pre-server" data-kind="precondition">Server state from the operator</a> — disk, current generation and service state of dreyeck.ch, gathered by the operator; Claude Code does not connect to the server.</li>
+<li><a page="Implementation Assignments" hyperbook="dreyeck/work/project" data-proposed-topic="tmd-pre-exposure" data-kind="precondition">Exposure decision</a> — decision D5: whether and how the Catalog is reachable beyond loopback, given its plain v:thunk buttons.</li>
+<li><a page="Implementation Assignments" hyperbook="dreyeck/work/project" data-proposed-topic="tmd-pre-activation" data-kind="precondition">Approval to activate</a> — the user's, for the generation on dreyeck.ch.</li>
+</ul>
+<ul>
+<li data-proposed-from="tmd-p1" data-proposed-relation="work:relation/produces" data-proposed-to="tmd-wp-1">Export, pin and verify the snapshot → 1 Verified Source Distribution: produces.</li>
+<li data-proposed-from="tmd-p2" data-proposed-relation="work:relation/produces" data-proposed-to="tmd-wp-2-1">Define the Catalog package → 2.1 Package definition: produces.</li>
+<li data-proposed-from="tmd-p3" data-proposed-relation="work:relation/produces" data-proposed-to="tmd-wp-2-2">Dispatch the readings by provenance → 2.2 Provenance dispatch: produces.</li>
+<li data-proposed-from="tmd-p4" data-proposed-relation="work:relation/produces" data-proposed-to="tmd-wp-2-3">Enforce the startup policy → 2.3 Startup policy: produces.</li>
+<li data-proposed-from="tmd-p5" data-proposed-relation="work:relation/produces" data-proposed-to="tmd-wp-2-3">Correct the guard's method identities → 2.3 Startup policy: produces.</li>
+<li data-proposed-from="tmd-p6" data-proposed-relation="work:relation/produces" data-proposed-to="tmd-wp-3">Build the review reading → 3 Inspectable Project Documentation: produces.</li>
+<li data-proposed-from="tmd-p7" data-proposed-relation="work:relation/produces" data-proposed-to="tmd-wp-3">Keep the snapshot alive for a session → 3 Inspectable Project Documentation: produces.</li>
+<li data-proposed-from="tmd-p8" data-proposed-relation="work:relation/produces" data-proposed-to="tmd-wp-4">Build, check and stage on x86_64-linux → 4 Validated Linux Deployment Candidate: produces.</li>
+<li data-proposed-from="tmd-p9" data-proposed-relation="work:relation/produces" data-proposed-to="tmd-wp-5">Activate and verify → 5 Operational HyperDoc Deployment: produces.</li>
+<li data-proposed-from="tmd-p2" data-proposed-relation="work:relation/depends-on" data-proposed-to="tmd-p1">Define the Catalog package → Export, pin and verify the snapshot: depends on.</li>
+<li data-proposed-from="tmd-p3" data-proposed-relation="work:relation/depends-on" data-proposed-to="tmd-p1">Dispatch the readings by provenance → Export, pin and verify the snapshot: depends on.</li>
+<li data-proposed-from="tmd-p4" data-proposed-relation="work:relation/depends-on" data-proposed-to="tmd-p2">Enforce the startup policy → Define the Catalog package: depends on.</li>
+<li data-proposed-from="tmd-p5" data-proposed-relation="work:relation/depends-on" data-proposed-to="tmd-p4">Correct the guard → Enforce the startup policy: depends on.</li>
+<li data-proposed-from="tmd-p5" data-proposed-relation="work:relation/depends-on" data-proposed-to="tmd-pre-change">Correct the guard → Authorization to change tested files: depends on.</li>
+<li data-proposed-from="tmd-p6" data-proposed-relation="work:relation/depends-on" data-proposed-to="tmd-p3">Build the review reading → Dispatch the readings by provenance: depends on.</li>
+<li data-proposed-from="tmd-p6" data-proposed-relation="work:relation/depends-on" data-proposed-to="tmd-p4">Build the review reading → Enforce the startup policy: depends on.</li>
+<li data-proposed-from="tmd-p7" data-proposed-relation="work:relation/depends-on" data-proposed-to="tmd-p6">Keep the snapshot alive → Build the review reading: depends on.</li>
+<li data-proposed-from="tmd-p8" data-proposed-relation="work:relation/depends-on" data-proposed-to="tmd-p5">Build, check and stage on Linux → Correct the guard: depends on.</li>
+<li data-proposed-from="tmd-p8" data-proposed-relation="work:relation/depends-on" data-proposed-to="tmd-pre-commit">Build, check and stage on Linux → The candidate committed: depends on.</li>
+<li data-proposed-from="tmd-p8" data-proposed-relation="work:relation/depends-on" data-proposed-to="tmd-pre-push">Build, check and stage on Linux → Approval to push: depends on.</li>
+<li data-proposed-from="tmd-p8" data-proposed-relation="work:relation/depends-on" data-proposed-to="tmd-pre-archive">Build, check and stage on Linux → The archive obtainable: depends on.</li>
+<li data-proposed-from="tmd-p8" data-proposed-relation="work:relation/depends-on" data-proposed-to="tmd-pre-builder">Build, check and stage on Linux → An independent builder: depends on.</li>
+<li data-proposed-from="tmd-p8" data-proposed-relation="work:relation/depends-on" data-proposed-to="tmd-pre-server">Build, check and stage on Linux → Evidence of the server's state: depends on.</li>
+<li data-proposed-from="tmd-p9" data-proposed-relation="work:relation/depends-on" data-proposed-to="tmd-p8">Activate and verify → Build, check and stage on Linux: depends on.</li>
+<li data-proposed-from="tmd-p9" data-proposed-relation="work:relation/depends-on" data-proposed-to="tmd-pre-exposure">Activate and verify → The exposure decision: depends on.</li>
+<li data-proposed-from="tmd-p9" data-proposed-relation="work:relation/depends-on" data-proposed-to="tmd-pre-activation">Activate and verify → Approval to activate: depends on.</li>
+</ul>
+
+<h2>Assignments: Deploying Topic Maps with HyperDoc on dreyeck.ch</h2>
+<section data-assignment="cc-2026-10-26-topic-maps-deployment-design">
+<h3>Claude Code: Design the deployment of Topic Maps with HyperDoc on dreyeck.ch</h3>
+<p data-field="issued">Given by the user on 2026-10-26 in a Claude Code session (Claude Opus 5.5), as the brief "Deploy Topic Maps with HyperDoc on dreyeck.ch (NixOS)" in four phases A to D; its first deliverable was the design, stopping before implementation.</p>
+<p data-field="goal">Design how Topic Maps b2eecffa becomes a reproducible ASDF dependency of a HyperDoc Catalog package on dreyeck.ch: the packaging route, the source distribution, the server's constraints and the exposure, with the decisions each phase needs from the user. The design is not a work package of the proposed WBS.</p>
+<p data-field="work-item" data-ref="tmd">The proposed Work Item above. It is not declared on the Work Breakdown.</p>
+<p data-field="plan-step">No Plan Step is confirmed for this assignment. Its text cannot make one.</p>
+<ul data-field="source-authorities">
+<li>reads the topic-maps repository at b2eecffa, read only</li>
+<li data-changes="docs/topic-maps-deployment/phase-a-design.md">adds the design</li>
+</ul>
+<ul data-field="preconditions">
+<li>No SSH to the server, no push, no change to production services, the firewall or the reverse proxy.</li>
+<li>The Topic Maps implementation and its normative corpus are read only.</li>
+</ul>
+<ul data-field="acceptance-criteria">
+<li>A design that stops before implementation.</li>
+<li>The decisions the user must take before each phase are named.</li>
+</ul>
+<ul data-field="evidence">
+<li data-evidence="tmd-design-document">the design as the executor wrote it, docs/topic-maps-deployment/phase-a-design.md</li>
+</ul>
+<p data-field="observed-state">Reported by the executor: the design was delivered on 2026-10-26; the user took the decisions D1 to D5 on it the same day, as the next assignment records. This report is not an acceptance.</p>
+<p data-field="acceptance">No acceptance by the user is recorded.</p>
+</section>
+
+<section data-assignment="cc-2026-10-26-topic-maps-local-packaging">
+<h3>Claude Code: Package Topic Maps b2eecffa locally as hyperdoc-catalog-topic-maps</h3>
+<p data-field="issued">Given by the user on 2026-10-26 in the same Claude Code session, with the decisions on the design: a separate package, production unchanged (D1); a content-addressed archive without reports/, verified locally and not published (D2); an independent x86_64-linux builder, not the production server (D3); no push (D4); loopback-only staging, no public plain v:thunk buttons, no change to proxy, service or authority policy (D5). Local packaging only; no commit until the user has reviewed the diff.</p>
+<p data-field="goal">Package Topic Maps b2eecffa locally as hyperdoc-catalog-topic-maps beside an unchanged hyperdoc-catalog, from a source distribution that verifies without .git, with recorded evidence. Its result falls under four proposed work packages, tmd-wp-1 and tmd-wp-2-1 to tmd-wp-2-3; an assignment's delivers field names one package, so this one names none.</p>
+<p data-field="work-item" data-ref="tmd">The proposed Work Item above. It is not declared on the Work Breakdown.</p>
+<p data-field="plan-step">No Plan Step is confirmed for this assignment. Its text cannot make one.</p>
+<ul data-field="source-authorities">
+<li>reads the topic-maps repository at b2eecffa, read only; the archive is made outside both repositories</li>
+<li data-changes="dreyeck.asd">adds the systems dreyeck/source-snapshot and dreyeck/catalog-topic-maps and their tests</li>
+<li data-changes="flake.nix">adds the packages topic-maps-source and hyperdoc-catalog-topic-maps and the check catalog-topic-maps</li>
+<li data-changes="nix/topic-maps-source.nix">adds the snapshot's Nix declaration, pinned by NAR hash</li>
+<li data-changes="nix/topic-maps-b2eecffa.manifest">adds the manifest of the commit object and root tree</li>
+<li data-changes="nix/catalog-topic-maps.nix">adds the package derivation</li>
+<li data-changes="nix/catalog-topic-maps-check.nix">adds the package contract check</li>
+<li data-changes="scripts/topic-maps-snapshot.py">adds the archive tool and verifier</li>
+<li data-changes="tests/test_topic_maps_snapshot.py">adds the archive verifier's tests</li>
+<li data-changes="dreyeck/src/source-snapshot.lisp">adds the Lisp snapshot verifier</li>
+<li data-changes="dreyeck/tests/source-snapshot.lisp">adds its tests</li>
+<li data-changes="dreyeck/work/topic-maps-project-example.lisp">changes the 22U reading's source dispatch</li>
+<li data-changes="dreyeck/work/topic-maps-ctm-review.lisp">changes the CTM review's source dispatch</li>
+<li data-changes="dreyeck/tests/topic-maps-project-example.lisp">changes the 22U reading's tests</li>
+<li data-changes="dreyeck/tests/topic-maps-ctm-review.lisp">changes the CTM review's tests</li>
+<li data-changes="scripts/test-topic-maps-ctm-review-browser.mjs">adds the CTM review's browser test</li>
+<li data-changes="dreyeck/src/catalog-topic-maps.lisp">adds the startup policy and the Project Workspace guard</li>
+<li data-changes="scripts/catalog-topic-maps-main.lisp">adds the executable's entry</li>
+<li data-changes="dreyeck/tests/catalog-topic-maps.lisp">adds the startup suite</li>
+<li data-changes="scripts/test-catalog-topic-maps.lisp">adds the package contract's Lisp runner</li>
+<li data-changes="tests/test_catalog_topic_maps_executable.py">adds the executable contract</li>
+<li data-changes="scripts/compare-catalog-derivation.py">adds the derivation comparison of hyperdoc-catalog</li>
+<li data-changes="docs/topic-maps-deployment/README.md">adds the candidate's documentation</li>
+<li data-changes="docs/topic-maps-22u-integration/README.md">records the FASL-cache correction</li>
+<li data-changes="docs/topic-maps-deployment/evidence/">adds the recorded evidence</li>
+</ul>
+<ul data-field="preconditions">
+<li>No commit, push, publication or deployment; the archive is prepared and verified locally, not published.</li>
+<li>Topic Maps and its corpus are read only; the CTM review's PASS, FAIL and NOT-RUN classifications stay as they are.</li>
+<li>hyperdoc-catalog stays unchanged.</li>
+</ul>
+<ul data-field="acceptance-criteria">
+<li>The archive's correspondence with the commit is demonstrated: .gitattributes, modes, symlinks and the excluded reports/.</li>
+<li>Snapshots are distinguished from checkouts without weakening the Git-only checks.</li>
+<li>ASDF origins are verified; the Project Workspace is never loaded silently.</li>
+<li>The CTM results are preserved.</li>
+<li>hyperdoc-catalog is unchanged.</li>
+<li>The FASL-cache correction is recorded.</li>
+<li>Rollback and storage are assessed.</li>
+<li>The design and the evidence are in docs/; nothing is committed until the user has reviewed the diff.</li>
+</ul>
+<ul data-field="evidence">
+<li data-evidence="tmd-run-archive-verification" data-test="scripts/topic-maps-snapshot.py" data-repository="codeberg.org/rgb/hyperdoc" data-revision="53ee999358f455a2dcb375743072d56d0f4c31cd" data-tree="modified" data-content="sha256:42bf6eb84ca1659387a6e3cfaadc8c24316fa77cb404eec1a8ada26f10103896 of docs/topic-maps-deployment/evidence/tested-files-sha256.txt, the tested SHA-256 of every program and test file" data-observation="&quot;success&quot;: true" data-observed-at="2026-10-26T11:06:40Z">the archive compared with the commit through Git, as reported; record docs/topic-maps-deployment/evidence/archive-verification.json</li>
+<li data-evidence="tmd-note-archive-controls">altered archives refused, 10 tests, OK, as reported; the record docs/topic-maps-deployment/evidence/archive-controls.log states no run time</li>
+<li data-evidence="tmd-run-package-contract" data-test="scripts/test-catalog-topic-maps.lisp" data-repository="codeberg.org/rgb/hyperdoc" data-revision="53ee999358f455a2dcb375743072d56d0f4c31cd" data-tree="modified" data-content="sha256:42bf6eb84ca1659387a6e3cfaadc8c24316fa77cb404eec1a8ada26f10103896 of docs/topic-maps-deployment/evidence/tested-files-sha256.txt, the tested SHA-256 of every program and test file" data-observation="CATALOG-TOPIC-MAPS-PASS: 13 assertions; SOURCE-SNAPSHOT-PASS: 34 assertions; TOPIC-MAPS-22U-INSPECTOR-PASS: 41 assertions; TOPIC-MAPS-CTM-REVIEW-PASS: 58 assertions; CATALOG-TOPIC-MAPS-PACKAGE-PASS" data-observed-at="2026-10-26T11:07:38Z">the package contract's Lisp suites in the Nix build sandbox, x86_64-darwin, as reported; record docs/topic-maps-deployment/evidence/package-check/lisp.log</li>
+<li data-evidence="tmd-run-executable-contract" data-test="tests/test_catalog_topic_maps_executable.py" data-repository="codeberg.org/rgb/hyperdoc" data-revision="53ee999358f455a2dcb375743072d56d0f4c31cd" data-tree="modified" data-content="sha256:42bf6eb84ca1659387a6e3cfaadc8c24316fa77cb404eec1a8ada26f10103896 of docs/topic-maps-deployment/evidence/tested-files-sha256.txt, the tested SHA-256 of every program and test file" data-observation="Ran 3 tests; OK" data-observed-at="2026-10-26T11:07:38Z">the built executable with a poisoned PATH and ASDF configuration, as reported; record docs/topic-maps-deployment/evidence/package-check/executable.log</li>
+<li data-evidence="tmd-run-production-check" data-test="nix/catalog-check.nix" data-repository="codeberg.org/rgb/hyperdoc" data-revision="53ee999358f455a2dcb375743072d56d0f4c31cd" data-tree="modified" data-content="sha256:42bf6eb84ca1659387a6e3cfaadc8c24316fa77cb404eec1a8ada26f10103896 of docs/topic-maps-deployment/evidence/tested-files-sha256.txt, the tested SHA-256 of every program and test file" data-observation="catalog-startup-contract: Ran 9 tests; Ran 2 tests" data-observed-at="2026-10-26T11:09:59Z">hyperdoc-catalog's own startup check on the candidate tree, as reported; record docs/topic-maps-deployment/evidence/production-check.log</li>
+<li data-evidence="tmd-run-unchanged-linux" data-test="scripts/compare-catalog-derivation.py" data-repository="codeberg.org/rgb/hyperdoc" data-revision="53ee999358f455a2dcb375743072d56d0f4c31cd" data-tree="modified" data-content="sha256:42bf6eb84ca1659387a6e3cfaadc8c24316fa77cb404eec1a8ada26f10103896 of docs/topic-maps-deployment/evidence/tested-files-sha256.txt, the tested SHA-256 of every program and test file" data-observation="&quot;equalExceptHyperDocSourceAndOutput&quot;: true; evaluated, nothing built" data-observed-at="2026-10-26T11:07:53Z">hyperdoc-catalog's derivation compared for x86_64-linux, as reported; record docs/topic-maps-deployment/evidence/catalog-unchanged-x86_64-linux.json</li>
+<li data-evidence="tmd-run-unchanged-darwin" data-test="scripts/compare-catalog-derivation.py" data-repository="codeberg.org/rgb/hyperdoc" data-revision="53ee999358f455a2dcb375743072d56d0f4c31cd" data-tree="modified" data-content="sha256:42bf6eb84ca1659387a6e3cfaadc8c24316fa77cb404eec1a8ada26f10103896 of docs/topic-maps-deployment/evidence/tested-files-sha256.txt, the tested SHA-256 of every program and test file" data-observation="&quot;equalExceptHyperDocSourceAndOutput&quot;: true; evaluated, nothing built" data-observed-at="2026-10-26T11:08:09Z">hyperdoc-catalog's derivation compared for x86_64-darwin, as reported; record docs/topic-maps-deployment/evidence/catalog-unchanged-x86_64-darwin.json</li>
+<li data-evidence="tmd-note-changed-wrapper">a changed wrapper detected by the same comparison, the positive control, as reported; the record docs/topic-maps-deployment/evidence/catalog-control-changed-wrapper.json states no run time</li>
+<li data-evidence="tmd-run-checkout-ctm-review" data-test="dreyeck/tests/topic-maps-ctm-review.lisp" data-repository="codeberg.org/rgb/hyperdoc" data-revision="53ee999358f455a2dcb375743072d56d0f4c31cd" data-tree="modified" data-content="sha256:42bf6eb84ca1659387a6e3cfaadc8c24316fa77cb404eec1a8ada26f10103896 of docs/topic-maps-deployment/evidence/tested-files-sha256.txt, the tested SHA-256 of every program and test file" data-observation="TOPIC-MAPS-CTM-REVIEW-PASS: 58 assertions" data-observed-at="2026-10-26T11:06:36Z">the CTM review's suite with Topic Maps from the clean checkout, as reported; record docs/topic-maps-deployment/evidence/checkout-review-22u.log</li>
+<li data-evidence="tmd-run-checkout-22u" data-test="dreyeck/tests/topic-maps-project-example.lisp" data-repository="codeberg.org/rgb/hyperdoc" data-revision="53ee999358f455a2dcb375743072d56d0f4c31cd" data-tree="modified" data-content="sha256:42bf6eb84ca1659387a6e3cfaadc8c24316fa77cb404eec1a8ada26f10103896 of docs/topic-maps-deployment/evidence/tested-files-sha256.txt, the tested SHA-256 of every program and test file" data-observation="TOPIC-MAPS-22U-INSPECTOR-PASS: 41 assertions" data-observed-at="2026-10-26T11:06:36Z">the 22U reading's suite with Topic Maps from the clean checkout, as reported; record docs/topic-maps-deployment/evidence/checkout-review-22u.log</li>
+<li data-evidence="tmd-run-checkout-snapshot-verifier" data-test="dreyeck/tests/source-snapshot.lisp" data-repository="codeberg.org/rgb/hyperdoc" data-revision="53ee999358f455a2dcb375743072d56d0f4c31cd" data-tree="modified" data-content="sha256:42bf6eb84ca1659387a6e3cfaadc8c24316fa77cb404eec1a8ada26f10103896 of docs/topic-maps-deployment/evidence/tested-files-sha256.txt, the tested SHA-256 of every program and test file" data-observation="SOURCE-SNAPSHOT-PASS: 34 assertions" data-observed-at="2026-10-26T11:06:36Z">the snapshot verifier's suite from the Git checkout, as reported; record docs/topic-maps-deployment/evidence/checkout-source-snapshot.log</li>
+<li data-evidence="tmd-run-browser-review-checkout" data-test="scripts/test-topic-maps-ctm-review-browser.mjs" data-repository="codeberg.org/rgb/hyperdoc" data-revision="53ee999358f455a2dcb375743072d56d0f4c31cd" data-tree="modified" data-content="sha256:42bf6eb84ca1659387a6e3cfaadc8c24316fa77cb404eec1a8ada26f10103896 of docs/topic-maps-deployment/evidence/tested-files-sha256.txt, the tested SHA-256 of every program and test file" data-observation="&quot;success&quot;: true; Topic Maps from the Git checkout" data-observed-at="2026-10-26T11:01:46Z">the CTM review in a browser, Topic Maps from the checkout, as reported; record docs/topic-maps-deployment/evidence/browser-review-checkout.json</li>
+<li data-evidence="tmd-run-browser-review-snapshot" data-test="scripts/test-topic-maps-ctm-review-browser.mjs" data-repository="codeberg.org/rgb/hyperdoc" data-revision="53ee999358f455a2dcb375743072d56d0f4c31cd" data-tree="modified" data-content="sha256:42bf6eb84ca1659387a6e3cfaadc8c24316fa77cb404eec1a8ada26f10103896 of docs/topic-maps-deployment/evidence/tested-files-sha256.txt, the tested SHA-256 of every program and test file" data-observation="&quot;success&quot;: true; Topic Maps from the store snapshot" data-observed-at="2026-10-26T11:02:34Z">the CTM review in a browser, Topic Maps from the store snapshot, as reported; record docs/topic-maps-deployment/evidence/browser-review-snapshot.json</li>
+<li data-evidence="tmd-run-browser-22u" data-test="scripts/test-topic-maps-project-browser.mjs" data-repository="codeberg.org/rgb/hyperdoc" data-revision="53ee999358f455a2dcb375743072d56d0f4c31cd" data-tree="modified" data-content="sha256:42bf6eb84ca1659387a6e3cfaadc8c24316fa77cb404eec1a8ada26f10103896 of docs/topic-maps-deployment/evidence/tested-files-sha256.txt, the tested SHA-256 of every program and test file" data-observation="&quot;success&quot;: true" data-observed-at="2026-10-26T11:03:38Z">the 22U navigation in a browser, from the checkout, as reported; record docs/topic-maps-deployment/evidence/browser-22u-checkout.json</li>
+<li data-evidence="tmd-note-mutants">mutants of the verifier and the review killed by the tests, as reported; record docs/topic-maps-deployment/evidence/mutants.log; the mutant script was a scratch file of the session and is not part of the candidate</li>
+<li data-evidence="tmd-note-tested-files">the SHA-256 of every program and test file as tested, computed on 2026-10-26 at 11:05:14 UTC; record docs/topic-maps-deployment/evidence/tested-files-sha256.txt</li>
+</ul>
+<p data-field="observed-state">Reported by the executor: implemented in the working tree of dreyeck.ch over 53ee9993 and not committed, new files intent-to-add; 43 files. Its diff, git diff --binary of the working tree, has the SHA-256 prefix 9b45a8ce892b92a4. On 2026-10-27 the review found that two methods of the guard replace two of ASDF's own; the review assignment below records the probe. This report is not an acceptance.</p>
+<p data-field="acceptance">No acceptance by the user is recorded.</p>
+</section>
+
+<section data-assignment="cc-2026-10-27-topic-maps-deployment-review">
+<h3>Claude Code: Review the Topic Maps deployment candidate in HyperDoc</h3>
+<p data-field="issued">Given by the user on 2026-10-27 in the same Claude Code session: review the uncommitted candidate inside HyperDoc itself, through Text Pages, Code Pages and a Workspace of its subjects, without changing the candidate. Extended the same day by two requests: a navigation path through the ASDF method collision that preserves the finding, and an operator-controlled start independent of Claude Code.</p>
+<p data-field="goal">Let the user understand and critically assess the candidate as a human reader, from questions to the actual objects and their recorded evidence, before deciding whether to commit it; and let the user start the reading without Claude Code.</p>
+<p data-field="work-item" data-ref="tmd">The proposed Work Item above. It is not declared on the Work Breakdown.</p>
+<p data-field="delivers" data-ref="tmd-wp-3">The proposed work package above.</p>
+<p data-field="plan-step">No Plan Step is confirmed for this assignment. Its text cannot make one.</p>
+<ul data-field="source-authorities">
+<li>reads the 43 files of the candidate and their recorded evidence; changes none of them</li>
+<li data-changes="dreyeck/work/topic-maps-deployment-review/">adds the reading, its ASDF Method Collision extension and serve.sh</li>
+<li data-changes="scripts/serve-topic-maps-deployment-review.lisp">adds a loopback review Catalog</li>
+<li data-changes="scripts/test-topic-maps-deployment-review-browser.mjs">adds the reading's browser test</li>
+</ul>
+<ul data-field="preconditions">
+<li>The candidate and its recorded evidence stay unchanged.</li>
+<li>No change to the Topic Maps implementation, the production Catalog, NixOS configuration or deployed services; no commit without the user's approval.</li>
+</ul>
+<ul data-field="acceptance-criteria">
+<li>In a real browser the user can open the review from the Catalog.</li>
+<li>The user can read the architectural rationale in Text Pages.</li>
+<li>The user can follow links into actual source definitions through Code Pages and Inspector views.</li>
+<li>The user can navigate the relevant subjects and relations in a Workspace.</li>
+<li>The user can follow a claim to its supporting test evidence.</li>
+<li>The user can identify which conclusions are observed, derived, inferred or still open.</li>
+<li>The user can return from the inspected objects to the review context.</li>
+</ul>
+<ul data-field="evidence">
+<li data-evidence="tmd-run-asdf-collision-probe" data-test="dreyeck/work/topic-maps-deployment-review/asdf-collision/probe-asdf-method-collision.lisp" data-repository="codeberg.org/rgb/hyperdoc" data-revision="53ee999358f455a2dcb375743072d56d0f4c31cd" data-tree="modified" data-content="sha256:511cf967ef7a0dc8771e54daecbb361c3d76d2f94afea464c785c5c4adde6b01 of dreyeck/src/catalog-topic-maps.lisp, its tested SHA-256" data-observation="after loading the guard, both method identities are defined in dreyeck/src/catalog-topic-maps.lisp and asdf:operate keeps 7 methods; an action relying on ASDF for its output directory failed" data-observed-at="2026-10-27T07:16:24Z">the method collision probe with the guard loaded, as reported; record dreyeck/work/topic-maps-deployment-review/asdf-collision/evidence/with-guard.sexp, beside the baseline baseline.sexp</li>
+<li data-evidence="tmd-note-snapshot-collected">the snapshot's store path was found missing before an operator start on 2026-10-27, garbage-collected; serve.sh recreates it from the archive and verifies it</li>
+</ul>
+<p data-field="observed-state">Reported by the executor: the reading, its collision extension and serve.sh are untracked files of the working tree. Their suites and browser runs passed on 2026-10-27; the records of those runs are in the session's scratchpad, not in the repository. This report is not an acceptance.</p>
+<p data-field="acceptance">No acceptance by the user is recorded.</p>
+</section>
+
+<section data-assignment="cc-2026-10-27-topic-maps-deployment-wbs-proposal">
+<h3>Claude Code: Propose the deployment's WBS, WBS Dictionary and plan</h3>
+<p data-field="issued">Given by the user on 2026-10-27 in the same Claude Code session, after an amendment to ground the deployment WBS in HyperDoc's existing Work model and in the WBS literature, and the user's decision to record the WBS first as proposals on this page.</p>
+<p data-field="goal">Propose the deployment's WBS, WBS Dictionary and plan in the form of this page and of a draft WBS Dictionary, readable in the review reading with the six open decisions, so that the user can decide whether to declare them.</p>
+<p data-field="work-item" data-ref="tmd">The proposed Work Item above. It is not declared on the Work Breakdown.</p>
+<p data-field="plan-step">No Plan Step is confirmed for this assignment. Its text cannot make one.</p>
+<ul data-field="source-authorities">
+<li data-reads="dreyeck/pages/work/Work Breakdown.html">reads the Work Breakdown, authoritative for its Work declarations</li>
+<li data-reads="dreyeck/pages/work/Authoring the CTM Plan Page.html">reads the CTM plan page: the WBS, plan steps, preconditions and Relation Contracts</li>
+<li data-reads="dreyeck/pages/work/CTM Plan Page WBS Dictionary.html">reads the form of a WBS Dictionary entry</li>
+<li data-reads="dreyeck/pages/project/Implementation Assignments.html">reads this page, authoritative for assignments and proposals</li>
+<li data-reads="docs/project-acceptance-model.md">reads the acceptance model and its decisions</li>
+<li data-changes="dreyeck/work/topic-maps-deployment-review/proposals/implementation-assignments-addition.html">adds this addition, not appended to this page</li>
+<li data-changes="dreyeck/work/topic-maps-deployment-review/proposals/topic-maps-deployment-wbs-dictionary.html">adds the draft WBS Dictionary of the proposed work packages</li>
+</ul>
+<ul data-field="preconditions">
+<li>Nothing is declared, and no work status is set or changed.</li>
+<li>The project CTM and its source pages stay unchanged until the user decides how the proposals enter them.</li>
+<li>The candidate, its evidence and the collision record stay unchanged; the guard is not corrected; no commit, push, publication or deployment.</li>
+</ul>
+<ul data-field="acceptance-criteria">
+<li>The six open decisions are shown with their alternatives, the constraint of the existing model, the consequence for the deployment WBS and a recommendation; none is decided for the user.</li>
+<li>The WBS, the dictionary entries and the plan are proposals in the existing conventions, with no competing Lisp-constant model and no second authoritative WBS.</li>
+<li>They are navigable in the reading through Text Pages, Code Pages and the Workspace.</li>
+<li>WBS decomposition, plan dependencies, observed execution evidence and acceptance records stay distinct; no passed test reads as an acceptance.</li>
+<li>The promotion procedure to the Work pages, the WBS Dictionary and the derived project CTM is exact and minimal.</li>
+<li>Runtime compatibility is verified without loading the Project Workspace's Topic Maps revision into the 22U image.</li>
+</ul>
+<ul data-field="evidence">
+<li data-evidence="tmd-note-emitter-crosscheck">the project CTM emitter, run in its own process with topic-maps 5a4a668, read the page with this addition and the draft dictionary and wrote nothing; record dreyeck/work/topic-maps-deployment-review/proposals/evidence/emitter-crosscheck.sexp</li>
+</ul>
+<p data-field="observed-state">Reported by the executor: written in the review reading's directory and not appended to this page. This report is not an acceptance.</p>
+<p data-field="acceptance">No acceptance by the user is recorded.</p>
+</section>

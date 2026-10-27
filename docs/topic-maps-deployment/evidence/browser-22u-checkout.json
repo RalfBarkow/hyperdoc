@@ -1,0 +1,33 @@
+{
+  "kind": "fresh-local-22U-Catalog-native-Inspector-navigation",
+  "startedAtUTC": "2026-10-26T11:02:57.071Z",
+  "finishedAtUTC": "2026-10-26T11:03:38.634Z",
+  "success": true,
+  "failure": null,
+  "steps": [
+    "Catalog → Reading Slice 22U → explicit execution → native Map",
+    "Question → native Roles → Betrifft Association → native Role Player → project",
+    "Question → native Roles → Dokumentiert durch Association → native Role Player → disposition"
+  ],
+  "command": [
+    "/usr/bin/sandbox-exec",
+    "-p",
+    "(version 1)(allow default)(deny network*)(allow network-inbound (local ip \"localhost:*\"))(allow network-outbound (remote ip \"localhost:*\"))(deny file-write* (subpath \"/Users/rgb/workspace/hyperdoc-dreyeck-ch\"))(deny file-write* (subpath \"/Users/rgb/workspace/topic-maps\"))",
+    "/nix/store/8j4gxfa63znzgcba9x1mw68yz7cb0ywf-sbcl-with-packages/bin/sbcl",
+    "--noinform",
+    "--no-sysinit",
+    "--no-userinit",
+    "--script",
+    "/var/folders/y1/yhhpj5wd7cb5325t8__1ct2r0000gn/T/hyperdoc-project-22u-browser-dNYT2L/browser.lisp"
+  ],
+  "runtime": "/nix/store/8j4gxfa63znzgcba9x1mw68yz7cb0ywf-sbcl-with-packages/bin/sbcl",
+  "playwright": "/Users/rgb/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/playwright",
+  "chrome": "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
+  "sourceSHA256Before": "8f7012f3db2da4199a00029dc600ff7492747b9c9b081f4135dd817e66e9a85b",
+  "sourceSHA256After": "8f7012f3db2da4199a00029dc600ff7492747b9c9b081f4135dd817e66e9a85b",
+  "freshProcess": true,
+  "bothRepositoryWritesDenied": true,
+  "loopbackOnly": true,
+  "productionServiceContacted": false,
+  "testServerStopped": true
+}

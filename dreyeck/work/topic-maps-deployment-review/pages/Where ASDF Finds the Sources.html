@@ -1,0 +1,11 @@
+<html><head><title>Where ASDF Finds the Sources</title></head><body><in-package>topic-maps-deployment-review</in-package>
+<h1>Where ASDF Finds the Sources</h1>
+<p>ASDF finds a system through its source registry: the trees it is told to search. The variant's wrapper sets that registry to the runtime's sources, then the verified snapshot, then HyperDoc's own source: <a expr="(excerpt &quot;nix:wrapper&quot;)" view="Source excerpt">the registry line</a>. Its startup script, like the production one, ignores every inherited configuration.</p>
+<p>Before it serves, the variant asks ASDF where each Topic Maps system comes from. <a expr="#'dreyeck/catalog-topic-maps:topic-maps-origins" view="Source code">topic-maps-origins</a> requires that all five come from one root and that this root verifies as the snapshot. The systems are defined in the snapshot's own <a expr="(excerpt &quot;topic-maps.asd:ctm&quot;)" view="Source excerpt">topic-maps.asd</a>.</p>
+
+<h2>In the package</h2>
+<p>The package contract printed one <code>ASDF-ORIGIN</code> line per system: <a expr="(evidence &quot;package-check/lisp.log&quot;)" view="Record">every Topic Maps system from the snapshot, dreyeck from its own store source</a>. The check also searched every registry tree for <code>topic-maps.asd</code> and found <a expr="(evidence &quot;package-check/topic-maps-asd&quot;)" view="Record">exactly one</a>. <a expr="(claim &quot;origins-are-the-snapshot&quot;)" view="Claim">The claim</a>.</p>
+
+<h2>In this image</h2>
+<p>This reading runs the way the snapshot-mode browser test did: HyperDoc from the working tree, so that you read the candidate as it is, and Topic Maps from the verified store snapshot. <a expr="(topic-maps-origins-now)" view="ASDF origins">Ask ASDF now</a>. The same view shows that <code>dreyeck/work/project</code> is found, because <code>dreyeck.asd</code> defines it, and is not loaded.</p>
+</body></html>

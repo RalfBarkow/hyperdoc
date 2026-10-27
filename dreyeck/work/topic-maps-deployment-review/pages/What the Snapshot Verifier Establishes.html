@@ -1,0 +1,23 @@
+<html><head><title>What the Snapshot Verifier Establishes</title></head><body><in-package>topic-maps-deployment-review</in-package>
+<h1>What the Snapshot Verifier Establishes</h1>
+<p>A Nix source snapshot has no <code>.git</code>, so no Git check can run against it. <a expr="#'dreyeck/source-snapshot:verify-snapshot-tree" view="Source code">verify-snapshot-tree</a> instead hashes the snapshot's files the way Git hashes them and checks a chain that ends in the pinned commit id.</p>
+
+<h2>The chain</h2>
+<ol>
+<li>The manifest's raw commit object hashes to <code>b2eecffa…</code>, the id the 22U reading and the CTM review already pin.</li>
+<li>That commit object names the root tree <code>2b2ad058…</code>.</li>
+<li>The manifest's root listing hashes to that tree.</li>
+<li>The snapshot's root entries are exactly the listing's entries without <code>reports/</code>: nothing more, nothing less, no <code>.git</code>.</li>
+<li>Every shipped file, mode and subtree hashes to the listing. Names come from <code>readdir</code> and kinds from <code>lstat</code>, so a symbolic link is refused, never followed.</li>
+</ol>
+<p><code>reports/</code> is named by its tree id and is neither shipped nor verified.</p>
+
+<h2>Where a tree is accepted as the loaded source</h2>
+<p>The tree check does not care where the tree lies. Whether a tree is accepted as the source ASDF loaded is a separate policy, <a expr="#'dreyeck/source-snapshot:source-kind" view="Source code">source-kind</a>. A directory with <code>.git</code> is a Git checkout, and Git's own checks apply unchanged. A read-only <code>/nix/store</code> path without <code>.git</code> is verified by <a expr="#'dreyeck/source-snapshot:verify-store-snapshot" view="Source code">verify-store-snapshot</a>. Anything else is refused. Only two readings dispatch on this, the 22U reading's <a expr="#'dreyeck/work/topic-maps-project-example:checked-source-evidence" view="Source code">checked-source-evidence</a> and the CTM review; <code>tmdm-reading</code>'s <a expr="(function-of :dreyeck/work/tmdm-reading &quot;CHECKED-REPOSITORY&quot;)" view="Source code">checked-repository</a> still requires a checkout (<a expr="(claim &quot;git-checks-unchanged&quot;)" view="Claim">derived</a>).</p>
+
+<h2>Run it</h2>
+<p><a expr="(the-verification-runner)" view="Verify now">Verify this image's Topic Maps source now</a>: the button runs the verifier on the store path ASDF loads Topic Maps from in this image, and the result is the verification object itself. Its recorded runs are <a expr="(evidence &quot;package-check/lisp.log&quot;)" view="Record">in the build sandbox</a> and <a expr="(evidence &quot;checkout-source-snapshot.log&quot;)" view="Record">from the checkout</a>, with 13 alterations refused. A mutant that skips the hashing is killed: <a expr="(evidence &quot;mutants.log&quot;)" view="Record">mutants</a>.</p>
+
+<h2>What it does not establish</h2>
+<p>Git's object ids are SHA-1. The SHA-256 NAR hash pins the same bytes independently, but the chain itself is as strong as SHA-1. The commit is SSH-signed, and the signature is not verified. The verifier says nothing about the archive's own bytes, only about the unpacked tree. <a expr="(claim &quot;snapshot-verified-without-git&quot;)" view="Claim">The claim</a>.</p>
+</body></html>

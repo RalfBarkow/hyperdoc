@@ -1,0 +1,10 @@
+NOT A NIX SANDBOX BUILD: tests/test_catalog_topic_maps_executable.py against a wrapper mirroring nix/catalog-topic-maps.nix; start 2026-10-27T15:56:12Z
+test_loopback_staging_http_and_shutdown (__main__.CatalogTopicMapsExecutableTests.test_loopback_staging_http_and_shutdown) ... ok
+test_project_workspace_refused (__main__.CatalogTopicMapsExecutableTests.test_project_workspace_refused) ... ok
+test_public_hosts_refused_before_loading (__main__.CatalogTopicMapsExecutableTests.test_public_hosts_refused_before_loading) ... ok
+
+----------------------------------------------------------------------
+Ran 3 tests in 90.301s
+
+OK
+end 2026-10-27T15:57:44Z

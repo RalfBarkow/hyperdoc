@@ -1,0 +1,18 @@
+{
+ "kind": "linux-packaged-reading-browser-walk",
+ "url": "http://127.0.0.1:18791/",
+ "startedAtUTC": "2026-10-27T16:55:39.742Z",
+ "finishedAtUTC": "2026-10-27T16:56:06.184Z",
+ "success": true,
+ "failure": null,
+ "steps": [
+  "Catalog → Deploying Topic Maps with HyperDoc → Text pages → the overview, which names the project work",
+  "The ASDF Method Collision → the first guard's two methods, kept verbatim as historical source",
+  "The ASDF Method Collision → the probe's record of the first version, unchanged",
+  "The ASDF Method Collision → the correction, as applied; the identities a differently specialized method would take are still free",
+  "Overview → which methods ASDF runs now, asked of this Linux image: neither is the guard's, both are ASDF's own",
+  "Overview → The candidate: this source has no .git, and the view says so, with each file's SHA-256",
+  "The Six Open Decisions → the emitter's recorded reading of the proposals",
+  "The Proposed Deployment WBS → the proposal Workspace → Point at 2.3: proposed, no acceptance record"
+ ]
+}

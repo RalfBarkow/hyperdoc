@@ -1,0 +1,14 @@
+<html><head><title>Why a Separate Nix Package</title></head><body><in-package>topic-maps-deployment-review</in-package>
+<h1>Why a Separate Nix Package</h1>
+<p>Because the reviewer decided so on the Phase A design: <a expr="(progn (the-workspace) (first (getf *subjects* :decisions)))" view="Decision">D1</a>. The production executable, <code>hyperdoc-catalog</code>, stays exactly as it is, and Topic Maps enters a second executable that the public service does not run.</p>
+
+<h2>What the two declarations are</h2>
+<p>The production package is <a expr="(excerpt &quot;flake:production&quot;)" view="Source excerpt">this attribute of flake.nix</a>, built by <a expr="(excerpt &quot;nix:production-wrapper&quot;)" view="Source excerpt">nix/catalog.nix</a>. Neither is changed: <code>nix/catalog.nix</code> is not a candidate file at all. The variant is <a expr="(excerpt &quot;flake:variant&quot;)" view="Source excerpt">a new attribute</a> built by <a expr="(excerpt &quot;nix:wrapper&quot;)" view="Source excerpt">nix/catalog-topic-maps.nix</a>: the same runtime, the verified snapshot added to the ASDF registry, HyperDoc's revision as the flake states it, and its own startup script.</p>
+
+<h2>How "unchanged" was shown</h2>
+<p>A derivation names everything that goes into a build. <a expr="(file-named &quot;scripts/compare-catalog-derivation.py&quot;)" view="Candidate file">compare-catalog-derivation.py</a> evaluated <code>hyperdoc-catalog</code> at the base and at the candidate and compared the two derivations field by field. They are equal except HyperDoc's own source path, which changes with any repository change, and the output path that follows from it; every input derivation is the same. Recorded for <a expr="(evidence &quot;catalog-unchanged-x86_64-linux.json&quot;)" view="Record">x86_64-linux</a> and <a expr="(evidence &quot;catalog-unchanged-x86_64-darwin.json&quot;)" view="Record">x86_64-darwin</a>. That the comparison can fail is shown by <a expr="(evidence &quot;catalog-control-changed-wrapper.json&quot;)" view="Record">a positive control</a>: one flag added to the wrapper is reported as different.</p>
+<p>The production Catalog's own startup check also ran on the candidate tree: <a expr="(evidence &quot;production-check.log&quot;)" view="Record">checks.x86_64-darwin.catalog</a>.</p>
+
+<h2>What this does not show</h2>
+<p>For Linux the comparison is an evaluation. <a expr="(claim &quot;separate-package&quot;)" view="Claim">The claim</a> says so, and <a expr="(claim &quot;linux-unbuilt&quot;)" view="Claim">the Linux build and its contract</a>, run separately, is a subject of its own in <a expr="(the-workspace)" view="Topicmap">the Topicmap</a>.</p>
+</body></html>

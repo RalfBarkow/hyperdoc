@@ -4,7 +4,7 @@
   (:use #:cl)
   (:local-nicknames (#:m #:topic-maps.tmdm) (#:ctm #:topic-maps.ctm) (#:cxtm #:topic-maps.cxtm)
                     (#:v #:html-inspector-views) (#:nav #:dreyeck/inspector/tmdm) (#:ev #:dreyeck/evaluation-record)
-                    (#:git #:dreyeck/git) (#:ex #:dreyeck/work/topic-maps-project-example))
+                    (#:git #:dreyeck/git) (#:ex #:dreyeck/work/topic-maps-project-example) (#:snap #:dreyeck/source-snapshot))
   (:export #:review-claim #:claim-named #:claims #:claim-id #:claim-status #:claim-runs
            #:review-input #:input-label #:input-role #:input-text
            #:review-observation #:observation-input #:observation-map #:observation-condition #:observation-cxtm
@@ -192,8 +192,10 @@ Never PASS: an evaluation is about one claim and one input, not about conformanc
    (observations :initarg :observations :reader run-observations)
    (evaluation :initarg :evaluation :reader run-evaluation) (reason :initarg :reason :reader run-reason)
    (topic-maps-revision :initarg :topic-maps-revision :reader run-topic-maps-revision)
+   (topic-maps-evidence :initarg :topic-maps-evidence :reader run-topic-maps-evidence)
    (hyperdoc-revision :initarg :hyperdoc-revision :reader run-hyperdoc-revision)
    (hyperdoc-dirty :initarg :hyperdoc-dirty :reader run-hyperdoc-dirty)
+   (hyperdoc-evidence :initarg :hyperdoc-evidence :reader run-hyperdoc-evidence)
    (lisp :initform (format nil "~A ~A" (lisp-implementation-type) (lisp-implementation-version)) :reader run-lisp)
    (started :initarg :started :reader run-started) (finished :initarg :finished :reader run-finished)
    (identity :initform (gensym "CTM-REVIEW-RUN-") :reader run-identity))
@@ -201,23 +203,34 @@ Never PASS: an evaluation is about one claim and one input, not about conformanc
 (defmethod v:text-representation ((run review-run))
   (format nil "Run of ~A: ~(~A~)" (claim-id (run-claim run)) (run-evaluation run)))
 (defun %hyperdoc-state ()
+  "HyperDoc's revision, whether it had uncommitted changes, and how that is known: Git's answer for a checkout, or the
+revision the Nix package wrapper states (flake self.rev, or self.dirtyRev) for a /nix/store source, which is not verified here."
   (let ((root (asdf:system-source-directory "dreyeck")))
-    (values (git:trim-git-output (git:git-run-string root "rev-parse" "HEAD"))
-            (plusp (length (git:git-run-string root "status" "--porcelain"))))))
+    (ecase (snap:source-kind root)
+      (:git-checkout
+       (values (git:trim-git-output (git:git-run-string root "rev-parse" "HEAD"))
+               (plusp (length (git:git-run-string root "status" "--porcelain")))
+               :git-checkout))
+      (:nix-store-snapshot
+       (let ((revision (uiop:getenv "HYPERDOC_SOURCE_REVISION")))
+         (unless (plusp (length revision)) (error "HyperDoc runs from ~A without .git, and its package states no revision." root))
+         (values revision (and (search "-dirty" revision) t) :asserted-by-nix-package)))
+      (:unverifiable (error "HyperDoc runs from ~A, neither a Git checkout nor a /nix/store source." root)))))
 (defun run-claim-experiment (claim)
   "Give each input of the executable CLAIM to the reader once, register each read Topic Map with its observation, and record the run.
-Refuses a proposed claim and a Topic Maps checkout other than the pinned clean one."
+Refuses a proposed claim, and a Topic Maps source that is neither the pinned clean checkout nor its verified store snapshot."
   (unless (eq :executable (claim-status claim)) (error "~A is a proposed investigation, not an executable experiment." (claim-id claim)))
-  (ex:checked-source-path)
-  (multiple-value-bind (revision dirty) (%hyperdoc-state)
-    (let* ((started (get-universal-time)) (observations (mapcar #'observe-input (claim-inputs claim))))
-      (dolist (o observations) (when (observation-map o) (nav:register-execution (observation-map o) o)))
-      (multiple-value-bind (evaluation reason) (evaluate-observations observations)
-        (let ((run (make-instance 'review-run :claim claim :observations observations :evaluation evaluation :reason reason
-                                  :topic-maps-revision ex:+source-revision+ :hyperdoc-revision revision :hyperdoc-dirty dirty
-                                  :started started :finished (get-universal-time))))
-          (push run (claim-runs claim))
-          run)))))
+  (let ((source-evidence (ex:checked-source-evidence)))
+    (multiple-value-bind (revision dirty hyperdoc-evidence) (%hyperdoc-state)
+      (let* ((started (get-universal-time)) (observations (mapcar #'observe-input (claim-inputs claim))))
+        (dolist (o observations) (when (observation-map o) (nav:register-execution (observation-map o) o)))
+        (multiple-value-bind (evaluation reason) (evaluate-observations observations)
+          (let ((run (make-instance 'review-run :claim claim :observations observations :evaluation evaluation :reason reason
+                                    :topic-maps-revision ex:+source-revision+ :topic-maps-evidence source-evidence
+                                    :hyperdoc-revision revision :hyperdoc-dirty dirty :hyperdoc-evidence hyperdoc-evidence
+                                    :started started :finished (get-universal-time))))
+            (push run (claim-runs claim))
+            run))))))
 (hyperdoc:defexample run-scheme-plus-experiment
   "Explicitly give the scheme-plus inputs to the pinned CTM reader once. Writes nothing."
   (run-claim-experiment (claim-named "scheme-plus")))
@@ -227,8 +240,10 @@ Refuses a proposed claim and a Topic Maps checkout other than the pinned clean o
 (defmethod ev:evaluation-status-of ((run review-run)) (run-evaluation run))
 (defmethod ev:evaluation-trace-of ((run review-run)) '(:checkout-checked :inputs-read :maps-registered :evaluated))
 (defmethod ev:evaluation-evidence-of ((run review-run))
-  (list :topic-maps-revision (run-topic-maps-revision run) :hyperdoc-revision (run-hyperdoc-revision run)
-        :hyperdoc-dirty (run-hyperdoc-dirty run) :lisp (run-lisp run)
+  (list :topic-maps-revision (run-topic-maps-revision run)
+        :topic-maps-source-evidence (ex:source-evidence-kind (run-topic-maps-evidence run))
+        :hyperdoc-revision (run-hyperdoc-revision run) :hyperdoc-dirty (run-hyperdoc-dirty run)
+        :hyperdoc-revision-evidence (run-hyperdoc-evidence run) :lisp (run-lisp run)
         :input-sha256 (mapcar (lambda (o) (cons (observation-input-label o) (observation-input-sha256 o))) (run-observations run))))
 (defmethod ev:evaluation-failure-of ((run review-run)) nil)
 (defmethod ev:evaluation-started-at-of ((run review-run)) (run-started run))
@@ -240,12 +255,16 @@ Refuses a proposed claim and a Topic Maps checkout other than the pinned clean o
 ;;; Views. Rendering reads the claim and its runs; it executes, registers and writes nothing.
 
 (defun %file-at-revision (path)
-  (git:make-git-file-at-commit
-   :commit (git:make-git-commit :repository (make-instance 'git:git-repository-checkout
-                                                           :root (asdf:system-source-directory "topic-maps/ctm")
-                                                           :root-source :asdf-system-source)
-                                :commit-ish ex:+source-revision+)
-   :path path))
+  "PATH at the pinned commit: a Git file of the checkout, or a file of the /nix/store snapshot verified when read."
+  (let ((root (asdf:system-source-directory "topic-maps/ctm")))
+    (ecase (snap:source-kind root)
+      (:git-checkout
+       (git:make-git-file-at-commit
+        :commit (git:make-git-commit :repository (make-instance 'git:git-repository-checkout :root root :root-source :asdf-system-source)
+                                     :commit-ish ex:+source-revision+)
+        :path path))
+      (:nix-store-snapshot (snap:make-snapshot-path root ex:+source-revision+ path))
+      (:unverifiable (error "~A is neither a Git checkout nor a /nix/store snapshot." root)))))
 (v:defview review-claim-view (claim review-claim)
   (v:html-view :title "Claim" :priority -10
     (let ((normative (claim-normative claim)) (run (first (claim-runs claim))))
@@ -335,9 +354,17 @@ Refuses a proposed claim and a Topic Maps checkout other than the pinned clean o
                      "Given productions [6] and [7] of §3.3.3 as published in the consulted HTML, the reader does not conform for this input. This is derived from the text, not observed; the published ISO edition was not consulted."
                      "No conformance assessment follows from this run.")))
       (:h3 "Provenance")
-      (:p (v:esc (format nil "topic-maps ~A (clean, checked); HyperDoc ~A~:[~; with uncommitted changes~]; ~A; ~A to ~A (universal time)."
-                         (run-topic-maps-revision run) (run-hyperdoc-revision run) (run-hyperdoc-dirty run) (run-lisp run)
-                         (run-started run) (run-finished run))))))))
+      (:p (v:esc (format nil "topic-maps ~A (~A); HyperDoc ~A~:[~; with uncommitted changes~] (~A); ~A; ~A to ~A (universal time)."
+                         (run-topic-maps-revision run)
+                         (if (eq :git-checkout (run-topic-maps-evidence run))
+                             "clean Git checkout, checked by Git"
+                             "verified /nix/store snapshot without .git, reports/ excluded")
+                         (run-hyperdoc-revision run) (run-hyperdoc-dirty run)
+                         (if (eq :git-checkout (run-hyperdoc-evidence run))
+                             "Git checkout" "as stated by the Nix package, not verified here")
+                         (run-lisp run) (run-started run) (run-finished run))))
+      (unless (eq :git-checkout (run-topic-maps-evidence run))
+        (v:html (:p (v:object-ref (run-topic-maps-evidence run) :display "The snapshot verification" :select "Source snapshot"))))))))
 
 (hyperdoc:defhyperdoc *topic-maps-ctm-review*
   :title "Topic Maps CTM Review (22U)"

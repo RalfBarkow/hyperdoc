@@ -1,0 +1,11 @@
+start 2026-10-27T16:44:18Z
+container commit 72290093e444a8696ffef69d3ca1d6efba9c687d tree a2db814640299db0f0550a5d1ee2769d25128ea5
+these 2 derivations will be built:
+  /nix/store/pvf3j435g7f2f03xfavz6f6pdlqa1hfn-hyperdoc-catalog-topic-maps.drv
+  /nix/store/i06zwk2afklq2w3m9j94g1nm4vgwygwh-catalog-topic-maps-contract.drv
+building '/nix/store/pvf3j435g7f2f03xfavz6f6pdlqa1hfn-hyperdoc-catalog-topic-maps.drv'...
+building '/nix/store/i06zwk2afklq2w3m9j94g1nm4vgwygwh-catalog-topic-maps-contract.drv'...
+/nix/store/nqblv5hjck37kd5zx3wdaqpw5dbl2hhk-catalog-topic-maps-contract
+/nix/store/70imilpm8q1gpk4j291kgh1ykhzrdg0p-hyperdoc-catalog-topic-maps
+nix build exit status 0
+end 2026-10-27T16:46:42Z

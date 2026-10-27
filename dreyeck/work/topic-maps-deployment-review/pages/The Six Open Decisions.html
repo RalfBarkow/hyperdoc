@@ -1,0 +1,70 @@
+<html><head><title>The Six Open Decisions</title></head><body><in-package>topic-maps-deployment-review</in-package>
+<h1>The Six Open Decisions</h1>
+<p>Before the deployment's work breakdown can be declared, six questions need your decision; the first is decided. For each: the alternatives, the constraint the existing model sets, what follows for the deployment's WBS, and a recommendation. Where the proposal already follows a recommendation, the items concerned are named, so a different decision changes exactly those. Nothing is declared either way. The proposal itself: <a page="The Proposed Deployment WBS">The Proposed Deployment WBS</a>.</p>
+
+<h2>1. Where the deployment's WBS is authoritative: decided</h2>
+<p><strong>Your decision of 2026-10-27:</strong> proposals first, on Implementation Assignments, with no declared pages yet. The alternative was to declare it at once on a new carrier Work page with its WBS Dictionary.</p>
+<p><strong>Constraint.</strong> <a expr="(model-excerpt &quot;ia:proposal-rule&quot;)" view="Source excerpt">Implementation Assignments</a>: a proposal uses only data-proposed attributes, has no work status, and becomes Work only when declared on a Work page under the same ID. <a expr="(work-reader-check)" view="Work reader">The ordinary Work reader</a> reads none of the proposal as a declaration.</p>
+<p><strong>Consequence.</strong> No package has a work status, and none can be accepted until declared (<a expr="(model-excerpt &quot;acceptance:d5&quot;)" view="Source excerpt">D5</a>). The IDs proposed now are the IDs to declare; a declaration under the same ID makes the proposal stale, and the emitter says so (<a expr="(model-excerpt &quot;emitter:status-gaps&quot;)" view="Source excerpt">its gaps</a>).</p>
+
+<h2>2. Whether, and how, the proposals enter the project CTM</h2>
+<p><strong>Constraint.</strong> Implementation Assignments is one of the <a expr="(model-excerpt &quot;emitter:sources&quot;)" view="Source excerpt">four sources of the derived project CTM</a>, and the project's tests require the retained CTM to be exactly what the pages give now (<a expr="(model-excerpt &quot;tests:determinism&quot;)" view="Source excerpt">the determinism check</a>). So the proposals cannot simply be written into the page.</p>
+<ul>
+<li><strong>(a)</strong> Keep them as an addition outside the page, read in memory, as the emitter reads an addition in the project's own tests (<a expr="(model-excerpt &quot;emitter:texts-extra&quot;)" view="Source excerpt">read-project-sources</a>). No tracked file changes, and the candidate's diff stays what was reviewed.</li>
+<li><strong>(b)</strong> Append the addition, move the draft dictionary into the project's HyperBook, and regenerate the CTM in the 5a4a668 environment, all in one change. That changes the page, <code>hyperdoc-project.ctm</code> and its digest file, and <code>dreyeck.asd</code>, which lists the HyperBook's pages (<a expr="(model-excerpt &quot;asd:project-pages&quot;)" view="Source excerpt">its draft pages</a>) and is also a file of the candidate.</li>
+<li><strong>(c)</strong> Append without regenerating. Not admissible: the determinism check would fail.</li>
+</ul>
+<p><strong>Consequence.</strong> <a expr="(the-emitter-crosscheck)" view="Cross-check">The emitter's own reading</a> shows what (b) would do: no refusal, a CTM nearly twice its present size, and 13 gaps for the proposals. A path outside the HyperBook's page directories becomes a file Topic, and its identifier may not contain spaces (<a expr="(model-excerpt &quot;emitter:identifier-part&quot;)" view="Source excerpt">the rule</a>, <a expr="(model-excerpt &quot;emitter:path-topic&quot;)" view="Source excerpt">the mapping</a>): the draft dictionary got a file name without spaces for that reason.</p>
+<p><strong>Recommendation:</strong> (a) now, and (b) after the candidate is committed, as a change of its own, so that the two diffs can be reviewed separately. <strong>The proposal follows (a).</strong></p>
+
+<h2>3. The decomposition</h2>
+<ul>
+<li><strong>3a. Element 2</strong>: a summary element with work packages 2.1, 2.2 and 2.3 (recommended), or a single work package. In PMI's terms the work package is the lowest level of the breakdown; with 2.1 to 2.3 the defect lies in exactly one of them, 2.3, and the other two need not wait for it.</li>
+<li><strong>3b. Verification</strong>: the acceptance of element 5 (recommended, PMI's reading), or an element of its own, as NASA's product-oriented usage admits integration, verification and test elements.</li>
+<li><strong>3c. Project management</strong>: not an element, with approvals and decisions as preconditions and the design and these proposals as assignments that deliver no package (recommended, the CTM plan page's own practice); or an element of its own, as PMI's 100% rule counts project management work and NASA's breakdown has a project management element.</li>
+</ul>
+<p><strong>Constraint.</strong> <a page="Authoring the CTM Plan Page" hyperbook="dreyeck/work/reading">The CTM plan page</a> defines its WBS as deliverable-oriented "in the sense of the PMBOK Guide 2000", uses the kinds deliverable and work package, and makes what the scope needs but does not deliver a precondition of the plan. The two texts the amendment names, the PMI Practice Standard for Work Breakdown Structures (3rd edition, 2019) and NASA's WBS Handbook (2021), are not in this repository: the distinctions above are stated from general knowledge of them and have not been checked against the texts.</p>
+<p><strong>The proposal follows 3a, 3b and 3c:</strong> <a expr="(proposed-topic &quot;tmd-2&quot;)" view="Proposal">element 2</a> and its three packages; <a expr="(proposed-entry &quot;tmd-wp-5&quot;)" view="Dictionary entry">element 5's criterion</a>, which includes the verification; and <a expr="(proposal-assignment &quot;cc-2026-10-26-topic-maps-deployment-design&quot;)" view="Assignment">the design assignment</a>, which delivers no package.</p>
+
+<h2>4. How an issue is represented</h2>
+<p>The model has no kind for an issue or a defect. Two have come up: the guard's ASDF method collision, and the snapshot's store path collected while a reading ran.</p>
+<ul>
+<li><strong>(a)</strong> The observation is evidence on the assignment that found it. The requirement goes into the package's acceptance criterion, with a planned control, and the correction is a plan step producing that package (recommended).</li>
+<li><strong>(b)</strong> A work package of its own, as the reader-scaling defect became the proposed package pwc-wp-8 on Implementation Assignments.</li>
+<li><strong>(c)</strong> A new kind, issue, which changes the Work reader's vocabulary and the emitter.</li>
+<li><strong>(d)</strong> A bounded Work item with a work status, which I recommended earlier. It cannot be done while it is a proposal, because a proposal has no status.</li>
+</ul>
+<p><strong>Consequence under (a).</strong> The breakdown stays deliverable-oriented.</p>
+<ul>
+<li><strong>The collision</strong> appears as:
+<ul>
+<li>the criterion of <a expr="(proposed-entry &quot;tmd-wp-2-3&quot;)" view="Dictionary entry">2.3</a> that ASDF's own methods stay ASDF's, with the planned control tmd-asdf-methods-preserved;</li>
+<li><a expr="(assignment-evidence &quot;tmd-run-asdf-collision-probe&quot;)" view="Evidence entry">the probe's execution report</a>;</li>
+<li><a expr="(proposed-topic &quot;tmd-p5&quot;)" view="Proposal">the correction step</a>, waiting on your authorization.</li>
+</ul></li>
+<li><strong>The store path</strong> appears as:
+<ul>
+<li>the criterion of <a expr="(proposed-entry &quot;tmd-wp-3&quot;)" view="Dictionary entry">3</a> that the reading stays usable for a whole session, with the planned control tmd-session-root;</li>
+<li><a expr="(assignment-evidence &quot;tmd-note-snapshot-collected&quot;)" view="Evidence entry">the note</a>;</li>
+<li><a expr="(proposed-topic &quot;tmd-p7&quot;)" view="Proposal">its step</a>.</li>
+</ul></li>
+</ul>
+<p><strong>Recommendation:</strong> (a). It replaces my earlier (d), which does not fit a proposal, and it keeps each defect where its acceptance is decided. <strong>The proposal follows (a).</strong></p>
+
+<h2>5. Exclusions</h2>
+<ul>
+<li><strong>(a)</strong> In the scope text, as its last sentence, "Excluded: …" (recommended).</li>
+<li><strong>(b)</strong> A dictionary field of their own.</li>
+</ul>
+<p><strong>Constraint.</strong> The WBS Dictionary reader refuses a field it does not know: <a expr="#'dreyeck/work/ctm-page-authoring::read-wbs-dictionary" view="Source code">read-wbs-dictionary</a>. A field for exclusions needs that reader changed, and the emitter's writing of dictionary entries with it.</p>
+<p><strong>The proposal follows (a):</strong> every entry's scope ends with its exclusions, for example <a expr="(proposed-entry &quot;tmd-wp-2-1&quot;)" view="Dictionary entry">2.1</a>, which excludes hyperdoc-catalog and its files.</p>
+
+<h2>6. How a conclusion is known</h2>
+<ul>
+<li><strong>(a)</strong> Observed, derived, inferred and hypothesized for claims; "open" only as a work status or for acceptance (recommended).</li>
+<li><strong>(b)</strong> Observed, derived, inferred and open, as this reading's claims use them now.</li>
+</ul>
+<p><strong>Constraint.</strong> Your review request of 2026-10-27 asked to tell conclusions that are observed, derived, inferred or still open, and this reading's claims do (<a page="Tested and Unverified">Tested and Unverified</a>); the amendment asks for observed, derived, inferred and hypothesized. The project model already keeps apart what an executor reports from what is observed: an assignment's observed state begins "Reported by the executor".</p>
+<p><strong>Consequence under (a).</strong> The reading's open claims, such as <a expr="(claim &quot;not-deployed&quot;)" view="Claim">nothing pushed or deployed</a>, would become the state of proposed work (step 8 not started) or hypotheses; the inferred ones stay. The proposal uses no epistemic class at all: its statements are proposed, its evidence is reported. This deliverable does not reclassify the existing claims.</p>
+<p><strong>Recommendation:</strong> (a), applied to the reading's claims in a later change that you authorize.</p>
+</body></html>

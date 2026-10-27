@@ -1,0 +1,48 @@
+<html><head><title>Tested and Unverified</title></head><body><in-package>topic-maps-deployment-review</in-package>
+<h1>Tested and Unverified</h1>
+<p>There are two sets of recorded runs. The first is from 2026-10-26 and describes the <em>first version</em> of the Project Workspace guard; it is unchanged. The second is from 2026-10-27 and describes the corrected candidate. <a expr="(evidence &quot;after-guard-correction/tested-files-sha256.txt&quot;)" view="Record">The SHA-256 of the 23 files tested in the second</a> was computed before its runs and was equal after them; <a expr="(evidence &quot;tested-files-sha256.txt&quot;)" view="Record">the first set's list</a> stays as it was. <a expr="(the-candidate)" view="Candidate">The Candidate view</a> compares each file with the corrected list now. Showing a record runs nothing; re-running is a separate, explicit act.</p>
+
+<h2>Recorded runs of the corrected candidate (2026-10-27, by hand, not Nix sandbox builds)</h2>
+<ul>
+<li><a expr="(evidence &quot;after-guard-correction/contract-lisp.log&quot;)" view="Record">The contract's four Lisp suites</a>, with the startup suite now covering the page-attached loader.</li>
+<li><a expr="(evidence &quot;after-guard-correction/asdf-methods.log&quot;)" view="Record">ASDF method preservation</a>, in a fresh process, before and after loading the guard: <a expr="(claim &quot;guard-replaces-asdf-methods&quot;)" view="Claim">the claim</a>.</li>
+<li><a expr="(evidence &quot;after-guard-correction/executable.log&quot;)" view="Record">The executable contract</a>.</li>
+<li><a expr="(evidence &quot;after-guard-correction/derivations-unchanged-x86_64-linux.json&quot;)" view="Record">hyperdoc-catalog unchanged, Linux</a> and <a expr="(evidence &quot;after-guard-correction/derivations-unchanged-x86_64-darwin.json&quot;)" view="Record">darwin</a>, evaluated.</li>
+<li><a expr="(evidence &quot;after-guard-correction/module-evaluation.json&quot;)" view="Record">The staging module</a>, evaluated in a minimal NixOS configuration; nothing started.</li>
+<li><a expr="(evidence &quot;after-guard-correction/nix-darwin-blocker.log&quot;)" view="Record">The Darwin Nix check did not build</a>: an environment blocker, recorded, not a result of the candidate.</li>
+</ul>
+
+<h2>Recorded runs on x86_64-linux (2026-10-27, in a local Docker builder, Nix sandbox off)</h2>
+<ul>
+<li><a expr="(evidence &quot;after-guard-correction/x86_64-linux/nix-build.log&quot;)" view="Record">The Nix build</a> of the package and its check: <a expr="(claim &quot;linux-unbuilt&quot;)" view="Claim">the claim</a>, with the contract's kept logs: <a expr="(evidence &quot;after-guard-correction/x86_64-linux/contract-lisp.log&quot;)" view="Record">Lisp suites</a>, <a expr="(evidence &quot;after-guard-correction/x86_64-linux/asdf-methods.log&quot;)" view="Record">ASDF preservation</a>, <a expr="(evidence &quot;after-guard-correction/x86_64-linux/executable.log&quot;)" view="Record">executable</a>.</li>
+<li><a expr="(evidence &quot;after-guard-correction/x86_64-linux/builder-and-snapshot.txt&quot;)" view="Record">The builder, and the snapshot reconstructed there</a> from its archive, without publishing it.</li>
+<li><a expr="(evidence &quot;after-guard-correction/x86_64-linux/packaged-reading.log&quot;)" view="Record">This reading's suites in the Linux package, and the executable's loopback start and shutdown</a>, and <a expr="(evidence &quot;after-guard-correction/x86_64-linux/browser-walk.json&quot;)" view="Record">a browser walk through it</a>: <a expr="(claim &quot;linux-reading-packaged&quot;)" view="Claim">the claim</a>.</li>
+</ul>
+
+<h2>Recorded runs of the first version (2026-10-26)</h2>
+
+<h2>Recorded runs</h2>
+<ul>
+<li><a expr="(evidence &quot;package-check/lisp.log&quot;)" view="Record">Package contract, Lisp</a>: the four suites in the build sandbox, from the package's own registry.</li>
+<li><a expr="(evidence &quot;package-check/executable.log&quot;)" view="Record">Package contract, executable</a>: public hosts refused, Project Workspace refused, loopback HTTP and clean stop.</li>
+<li><a expr="(evidence &quot;package-check/nix-build.log&quot;)" view="Record">The Nix build</a> of that check, a fresh derivation.</li>
+<li><a expr="(evidence &quot;production-check.log&quot;)" view="Record">Production startup check</a> on the candidate tree.</li>
+<li><a expr="(evidence &quot;catalog-unchanged-x86_64-linux.json&quot;)" view="Record">Derivation comparison, Linux</a>, <a expr="(evidence &quot;catalog-unchanged-x86_64-darwin.json&quot;)" view="Record">darwin</a>, <a expr="(evidence &quot;catalog-control-changed-wrapper.json&quot;)" view="Record">its positive control</a>.</li>
+<li><a expr="(evidence &quot;checkout-review-22u.log&quot;)" view="Record">Review and 22U suites from the checkout</a>, <a expr="(evidence &quot;checkout-source-snapshot.log&quot;)" view="Record">the verifier from the checkout</a>.</li>
+<li><a expr="(evidence &quot;browser-review-checkout.json&quot;)" view="Record">CTM review in a browser, checkout</a>, <a expr="(evidence &quot;browser-review-snapshot.json&quot;)" view="Record">store snapshot</a>, <a expr="(evidence &quot;browser-22u-checkout.json&quot;)" view="Record">22U navigation</a>.</li>
+<li><a expr="(evidence &quot;archive-verification.json&quot;)" view="Record">Archive verification</a> and <a expr="(evidence &quot;archive-controls.log&quot;)" view="Record">its controls</a>.</li>
+<li><a expr="(evidence &quot;mutants.log&quot;)" view="Record">Mutants</a>: five, all killed. Their script is a scratch file of the session, so this record says what was killed but its procedure is not inspectable here.</li>
+</ul>
+<p>Two of these were found while reviewing. <a expr="(claim &quot;scheme-plus-preserved&quot;)" view="Claim">The CTM review still refutes scheme-plus</a>, from the checkout and from the snapshot. <a expr="(claim &quot;fasl-cache-correction&quot;)" view="Claim">Earlier runs had compiled into the user-level cache</a>; the runs here use a fresh one.</p>
+
+<h2>Not shown by any run</h2>
+<ul>
+<li><a expr="(claim &quot;guard-replaces-asdf-methods&quot;)" view="Claim">The first guard replaced two ASDF methods</a>: corrected; the corrected guard's evidence is a by-hand run, not a Nix build (whether the contract passes in a completed Nix build is open: <a page="The ASDF Method Collision">The ASDF Method Collision</a>).</li>
+<li><a expr="(claim &quot;guard-scope&quot;)" view="Claim">The guard is a check made once at startup</a>: derived; what it does not protect is written down.</li>
+<li><a expr="(claim &quot;plain-thunks-ungated&quot;)" view="Claim">Plain thunk buttons are not gated</a>: derived from source, observable here (<a page="Execution Authority">Execution Authority</a>).</li>
+<li><a expr="(claim &quot;hyperdoc-revision-stated&quot;)" view="Claim">HyperDoc's revision in the package is stated, not verified</a>.</li>
+<li><a expr="(claim &quot;not-deployed&quot;)" view="Claim">Nothing pushed or deployed</a>, and no server touched.</li>
+<li><a expr="(claim &quot;unpublished&quot;)" view="Claim">The archive is not published</a> (D2).</li>
+<li><a expr="(claim &quot;not-deployed&quot;)" view="Claim">Nothing committed, pushed or deployed</a> (D4).</li>
+</ul>
+</body></html>

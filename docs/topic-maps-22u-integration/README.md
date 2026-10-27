@@ -68,6 +68,8 @@ env -u ASDF_OUTPUT_TRANSLATIONS /nix/store/8j4gxfa63znzgcba9x1mw68yz7cb0ywf-sbcl
 
 Der Nix-Wrapper ergänzt seine Bibliotheksregistrierung. Das Bootstrap übernimmt daraus ausschließlich Store-Einträge neben den beiden ausdrücklich ausgewählten Checkouts. FASLs der beiden Checkouts gehen in einen temporären Cache. ASDF-Output-Translations werden **innerhalb von Lisp** gesetzt; keine Lisp-Ausdruckszeichenfolge an die vom Wrapper ergänzte Colon-Variable anhängen.
 
+**Korrektur vom 26. Oktober 2026.** Die Aussage über den temporären Cache trifft nicht zu. Der SBCL-Wrapper setzt `ASDF_OUTPUT_TRANSLATIONS` selbst, sodass `env -u` davor wirkungslos ist, und die Übersetzung des Bootstraps griff in einer Probe nicht. Die hier berichteten Läufe kompilierten daher in den benutzerweiten Cache `~/.cache/common-lisp/sbcl-2.4.10-macosx-x64/`. Es waren frische Prozesse, aber keine nachweislich frische Kompilierung. Ein eigenes `XDG_CACHE_HOME` leitet den Cache verlässlich um. Näheres in [Topic Maps deployment](../topic-maps-deployment/README.md#corrections).
+
 Für die interaktive lokale Lektüre dieselben Variablen verwenden, dann einen leeren temporären Site-Root mit `pages/` erstellen und ausdrücklich starten:
 
 ```sh

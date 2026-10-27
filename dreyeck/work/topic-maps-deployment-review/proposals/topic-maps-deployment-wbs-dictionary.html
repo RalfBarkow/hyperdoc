@@ -1,0 +1,98 @@
+<h1>Topic Maps Deployment WBS Dictionary</h1>
+<p><strong>Draft.</strong> This page is not a source of the project CTM. It proposes what the WBS Dictionary of the proposed Deliverable <code>tmd-deployment</code> would state, in the form of the CTM Plan Page WBS Dictionary: for each proposed work package its scope, acceptance criterion, authority, effect, the evidence it requires, and its controls. The work packages stay proposals on Implementation Assignments until the user declares them; this page declares nothing.</p>
+<p>The <em>scope</em> field ends with what the package excludes. The <em>effect</em> field names the files of the repository the package adds or changes. The <em>evidence</em> field states the evidence a package <em>requires</em>; it is not an observation. What an executor observed and reports is the evidence of an assignment on Implementation Assignments, and whether a package was accepted is stated only by a record on Acceptance Records. A proposed package cannot be accepted until it is declared.</p>
+<p>The summary element <code>tmd-2</code> has no entry: its three work packages have one each.</p>
+
+<section data-wbs-entry="tmd-wp-1">
+<h2>tmd-wp-1 Verified Topic Maps Source Distribution</h2>
+<p data-field="scope">A runtime snapshot of Topic Maps b2eecffa: the commit's tree without reports/, exported as a content-addressed archive; a manifest of the commit object and the root tree with which the snapshot verifies without .git; a Nix declaration that pins it by NAR hash; and the tools that make and verify it. Excluded: any change to the Topic Maps implementation or its normative corpus; publishing or transferring the archive, which is a precondition of package 4.</p>
+<p data-field="acceptance">The archive holds the commit's tree without reports/, file for file, byte for byte and mode for mode; the snapshot verifies against the manifest as a chain of Git objects from the commit to every shipped file, without .git; every alteration is refused; Nix pins it by NAR hash and flake.lock is unchanged.</p>
+<p data-field="authority">The user decides whether the package is accepted; an executor's report is evidence, not a decision. Publishing the archive needs the user's decision D2.</p>
+<p data-field="effect">Adds <code>nix/topic-maps-source.nix</code>, <code>nix/topic-maps-b2eecffa.manifest</code>, <code>scripts/topic-maps-snapshot.py</code>, <code>tests/test_topic_maps_snapshot.py</code>, <code>dreyeck/src/source-snapshot.lisp</code> and <code>dreyeck/tests/source-snapshot.lisp</code>; in <code>flake.nix</code> the package topic-maps-source; in <code>dreyeck.asd</code> the system dreyeck/source-snapshot and its tests. Nothing in the Topic Maps repository changes.</p>
+<p data-field="evidence">The archive compared with the commit through Git; altered archives refused; the Lisp verifier run on the store snapshot in the build sandbox and from the Git checkout; a mutant that stops hashing the tree killed.</p>
+<ul data-field="controls">
+<li data-control="tmd-archive-equals-commit" data-coverage="existing" data-test="tests/test_topic_maps_snapshot.py" data-marker="def test_unaltered_archive_verifies">The archive verifies against the commit; an altered archive is refused.</li>
+<li data-control="tmd-snapshot-verifies-without-git" data-coverage="existing" data-test="dreyeck/tests/source-snapshot.lisp" data-marker="SOURCE-SNAPSHOT-PASS">The store snapshot verifies against the manifest without .git; every alteration is refused.</li>
+<li data-control="tmd-builder-obtains-archive" data-coverage="planned">The builder obtains the archive and Nix accepts it by its NAR hash.</li>
+</ul>
+</section>
+
+<section data-wbs-entry="tmd-wp-2-1">
+<h2>tmd-wp-2-1 Catalog package definition</h2>
+<p data-field="scope">The Nix declarations of the separate package hyperdoc-catalog-topic-maps: its derivation, its ASDF registry with the snapshot, its executable wrapper and its flake check; and the comparison that shows the production package hyperdoc-catalog unchanged. Excluded: any change to hyperdoc-catalog, <code>nix/catalog.nix</code> or <code>scripts/catalog-main.lisp</code>; the startup policy, package 2.3; a Linux build, package 4.</p>
+<p data-field="acceptance">The package builds; its contract passes in the build sandbox with an empty HOME and XDG_CACHE_HOME; every topic-maps.asd in its registry is the snapshot's; hyperdoc-catalog's derivation is unchanged apart from HyperDoc's source and output, and a changed wrapper is detected by the same comparison.</p>
+<p data-field="authority">The user decides whether the package is accepted; an executor's report is evidence, not a decision.</p>
+<p data-field="effect">Adds <code>nix/catalog-topic-maps.nix</code>, <code>nix/catalog-topic-maps-check.nix</code>, <code>scripts/test-catalog-topic-maps.lisp</code> and <code>scripts/compare-catalog-derivation.py</code>; in <code>flake.nix</code> the package hyperdoc-catalog-topic-maps and the check catalog-topic-maps.</p>
+<p data-field="evidence">The flake check catalog-topic-maps on each system it is offered for; the derivation comparison of hyperdoc-catalog for x86_64-linux and x86_64-darwin, with its positive control; hyperdoc-catalog's own startup check on the candidate tree.</p>
+<ul data-field="controls">
+<li data-control="tmd-package-contract" data-coverage="existing" data-test="scripts/test-catalog-topic-maps.lisp" data-marker="CATALOG-TOPIC-MAPS-PACKAGE-PASS">The package contract: the Lisp suites in the build sandbox with the package's own registry.</li>
+<li data-control="tmd-production-unchanged" data-coverage="existing" data-test="scripts/compare-catalog-derivation.py" data-marker="equalExceptHyperDocSourceAndOutput">hyperdoc-catalog's derivation is unchanged apart from HyperDoc's source and output.</li>
+</ul>
+</section>
+
+<section data-wbs-entry="tmd-wp-2-2">
+<h2>tmd-wp-2-2 Provenance dispatch of the Topic Maps readings</h2>
+<p data-field="scope">The 22U reading and the CTM review as the package serves them: each reads Topic Maps from the verified store snapshot or from a clean Git checkout, says which, and keeps the CTM review's results as recorded. Excluded: changing the review's ISO/IEC 13250-6 PASS, FAIL and NOT-RUN classifications; the Project Workspace.</p>
+<p data-field="acceptance">Both readings run with Topic Maps from the snapshot and from the checkout and name the kind of source they read; a source that is neither is refused; the CTM review's classifications are unchanged.</p>
+<p data-field="authority">The user decides whether the package is accepted; an executor's report is evidence, not a decision.</p>
+<p data-field="effect">Changes <code>dreyeck/work/topic-maps-project-example.lisp</code> and <code>dreyeck/work/topic-maps-ctm-review.lisp</code> and their tests <code>dreyeck/tests/topic-maps-project-example.lisp</code> and <code>dreyeck/tests/topic-maps-ctm-review.lisp</code>; adds <code>scripts/test-topic-maps-ctm-review-browser.mjs</code>; records the FASL-cache correction in <code>docs/topic-maps-22u-integration/README.md</code>.</p>
+<p data-field="evidence">Both suites from the Git checkout and in the build sandbox; the CTM review in a browser with Topic Maps from the checkout and from the snapshot; the 22U navigation in a browser.</p>
+<ul data-field="controls">
+<li data-control="tmd-ctm-review" data-coverage="existing" data-test="dreyeck/tests/topic-maps-ctm-review.lisp" data-marker="TOPIC-MAPS-CTM-REVIEW-PASS">The CTM review states its source kind and keeps its classifications.</li>
+<li data-control="tmd-22u-inspector" data-coverage="existing" data-test="dreyeck/tests/topic-maps-project-example.lisp" data-marker="TOPIC-MAPS-22U-INSPECTOR-PASS">The 22U reading reaches its project through native Role and Association references.</li>
+</ul>
+</section>
+
+<section data-wbs-entry="tmd-wp-2-3">
+<h2>tmd-wp-2-3 Catalog startup policy</h2>
+<p data-field="scope">The startup of hyperdoc-catalog-topic-maps: it serves only on 127.0.0.1 or ::1; before serving it checks that ASDF finds Topic Maps in the verified snapshot only; and it refuses the Project Workspace and everything depending on it before ASDF plans, by adding methods to ASDF, never by replacing one of ASDF's own. Excluded: the reverse proxy, the service and the authority policy, decision D5; exposure beyond loopback.</p>
+<p data-field="acceptance">The executable refuses any other host before loading; it starts only with the snapshot's origins; an ASDF operation on dreyeck/work/project is refused before anything of it is loaded; after the guard is loaded, every method ASDF defines is still ASDF's own.</p>
+<p data-field="authority">The user decides whether the package is accepted; an executor's report is evidence, not a decision. A correction changes tested files and needs the user's authorization.</p>
+<p data-field="effect">Adds <code>dreyeck/src/catalog-topic-maps.lisp</code>, <code>scripts/catalog-topic-maps-main.lisp</code>, <code>dreyeck/tests/catalog-topic-maps.lisp</code> and <code>tests/test_catalog_topic_maps_executable.py</code>; in <code>dreyeck.asd</code> the system dreyeck/catalog-topic-maps and its tests.</p>
+<p data-field="evidence">The startup suite in the build sandbox; the executable contract with a poisoned PATH and ASDF configuration; a fresh-process check that, after the guard is loaded, ASDF's methods for every identity the guard's methods could take are still ASDF's.</p>
+<ul data-field="controls">
+<li data-control="tmd-startup-suite" data-coverage="existing" data-test="dreyeck/tests/catalog-topic-maps.lisp" data-marker="CATALOG-TOPIC-MAPS-PASS">Loopback only, the snapshot's origins, the Project Workspace refused.</li>
+<li data-control="tmd-executable-contract" data-coverage="existing" data-test="tests/test_catalog_topic_maps_executable.py" data-marker="def test_project_workspace_refused">The built executable refuses public hosts and the Project Workspace.</li>
+<li data-control="tmd-asdf-methods-preserved" data-coverage="planned">After the guard is loaded, ASDF's own methods are still ASDF's, in a fresh process.</li>
+</ul>
+</section>
+
+<section data-wbs-entry="tmd-wp-3">
+<h2>tmd-wp-3 Inspectable Project Documentation</h2>
+<p data-field="scope">The local HyperDoc reading Deploying Topic Maps with HyperDoc: Text Pages, Code Pages and Workspaces over the candidate's actual objects, its recorded evidence, its claims with how each is known, the proposed project work, and an operator start independent of Claude Code. Excluded: the candidate's own evidence, which the reading reads and does not change; inspectability on the server, which belongs to packages 2.2 and 5.</p>
+<p data-field="acceptance">Rendering any page or view runs, writes and loads nothing; every link reaches its actual object; the operator can start, stop and restart the reading with one command and no Claude Code; it stays usable for a whole reading session.</p>
+<p data-field="authority">The user decides whether the package is accepted; an executor's report is evidence, not a decision.</p>
+<p data-field="effect">Adds the directory <code>dreyeck/work/topic-maps-deployment-review/</code>, <code>scripts/serve-topic-maps-deployment-review.lisp</code> and <code>scripts/test-topic-maps-deployment-review-browser.mjs</code>; changes no file of the candidate.</p>
+<p data-field="evidence">The reading's Lisp suites in a fresh process; its navigation in a real browser in a sandboxed loopback Catalog; the operator's start, stop and restart; a session long enough for the store's garbage collector to run.</p>
+<ul data-field="controls">
+<li data-control="tmd-reading-suite" data-coverage="existing" data-test="dreyeck/work/topic-maps-deployment-review/tests/review.lisp" data-marker="TOPIC-MAPS-DEPLOYMENT-REVIEW-PASS">Rendering runs nothing; every link reaches its object; every relation is warranted.</li>
+<li data-control="tmd-session-root" data-coverage="planned">The snapshot's store path survives a garbage collection while the reading runs.</li>
+</ul>
+</section>
+
+<section data-wbs-entry="tmd-wp-4">
+<h2>tmd-wp-4 Validated Linux Deployment Candidate</h2>
+<p data-field="scope">The reviewed revision of package 2, built for x86_64-linux on an independent builder, its package contract run there, and a loopback staging record from the NixOS host. Excluded: activation, package 5; building on the production server while its disk is uncertain, decision D3; any change of code: a Linux fix is a new revision of package 2.</p>
+<p data-field="acceptance">The package and its check build for x86_64-linux from the pushed revision; the package contract passes there; on the host the package starts on loopback with the snapshot's origins while the production service is untouched.</p>
+<p data-field="authority">The user decides whether the package is accepted. Pushing, publishing the archive and choosing the builder are the user's decisions D4, D2 and D3.</p>
+<p data-field="effect">No file of the repository; a build record from the builder and a staging record from the host.</p>
+<p data-field="evidence">The builder's build log and package contract output for x86_64-linux; the staging record from the host, with the production service's state before and after.</p>
+<ul data-field="controls">
+<li data-control="tmd-linux-build" data-coverage="planned">The package and its check build for x86_64-linux on the independent builder.</li>
+<li data-control="tmd-host-staging" data-coverage="planned">The package starts on loopback on the NixOS host; the production service is untouched.</li>
+</ul>
+</section>
+
+<section data-wbs-entry="tmd-wp-5">
+<h2>tmd-wp-5 Operational HyperDoc Deployment</h2>
+<p data-field="scope">An activated NixOS generation of dreyeck.ch that includes the package, verified in operation: the running process's identity and Topic Maps source, reachability under the exposure decision, the execution boundaries of its buttons, and a tested rollback. Excluded: changing the reverse proxy or the authority policy without the user's authorization.</p>
+<p data-field="acceptance">The running Catalog is the reviewed revision with the snapshot's Topic Maps; it is reachable exactly as decision D5 says; no ungated button is reachable beyond what D5 allows; a rollback to the previous generation is shown to work.</p>
+<p data-field="authority">The user decides whether the package is accepted, and approves the activation and the exposure.</p>
+<p data-field="effect">A NixOS generation on dreyeck.ch; no file of the repository.</p>
+<p data-field="evidence">The generation and the process identity observed on the host; reachability checks from loopback and, if D5 allows, from outside; the rollback record.</p>
+<ul data-field="controls">
+<li data-control="tmd-process-identity" data-coverage="planned">The running process is the reviewed revision with the snapshot's Topic Maps.</li>
+<li data-control="tmd-reachability" data-coverage="planned">The Catalog is reachable exactly as D5 decides.</li>
+<li data-control="tmd-rollback" data-coverage="planned">A rollback to the previous generation works.</li>
+</ul>
+</section>

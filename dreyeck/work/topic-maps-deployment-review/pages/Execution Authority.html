@@ -1,0 +1,14 @@
+<html><head><title>Execution Authority</title></head><body><in-package>topic-maps-deployment-review</in-package>
+<h1>Execution Authority</h1>
+<p>Three boundaries apply, and they are not the same.</p>
+
+<h2>1. Rendering runs nothing</h2>
+<p>Showing a page or a view of this reading, of the 22U reading or of the CTM review reads and hashes files and asks Git and ASDF questions. It runs no experiment, verification or load. Something runs only when its button is pressed.</p>
+
+<h2>2. The served Catalog's authority policy</h2>
+<p>In a served Catalog that is not in development mode, <a expr="(function-of :dreyeck/authority-policy &quot;POLICY-ENFORCED-P&quot;)" view="Source code">the policy is enforced</a>. An Operations method or a <code>DEFEXAMPLE</code> button runs only under a registered contract (<a expr="(function-of :dreyeck/authority-policy &quot;EXAMPLE-INVOCATION-DECISION&quot;)" view="Source code">example-invocation-decision</a>). This reading's Catalog is served that way. Open its Code page <em>Explicit Runs, ASDF Origins and the Reading's Entry</em>: before each <code>defexample</code> stands ▷, <em>not run here</em>, because no contract is registered for it.</p>
+<p>A plain <code>v:thunk</code> button is not an example and is not gated. The 22U reading's <em>Read a fresh 22U Map</em>, the CTM review's <em>Run the experiment</em> and this reading's two buttons are plain thunks. Press <a expr="(the-verification-runner)" view="Verify now">Verify the snapshot now</a>: the run records whether the policy was enforced when it ran. That a run is recorded <em>with</em> the policy enforced is the observation <a expr="(claim &quot;plain-thunks-ungated&quot;)" view="Claim">this claim</a> derives from source.</p>
+
+<h2>3. The variant serves loopback only</h2>
+<p>Because those buttons would run for anyone who can reach the Catalog, the variant refuses every host but <code>127.0.0.1</code> and <code>::1</code>, before anything is loaded: <a expr="(excerpt &quot;main:host&quot;)" view="Source excerpt">the check</a>, <a expr="(evidence &quot;package-check/executable.log&quot;)" view="Record">recorded</a>, <a expr="(claim &quot;loopback-only&quot;)" view="Claim">claim</a>. That is <a expr="(progn (the-workspace) (fifth (getf *subjects* :decisions)))" view="Decision">D5</a>. The production proxy, service and policy are unchanged. Public exposure would need its own decision.</p>
+</body></html>

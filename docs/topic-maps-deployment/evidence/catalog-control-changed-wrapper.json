@@ -1,0 +1,22 @@
+{
+ "kind": "hyperdoc-catalog-derivation-comparison",
+ "evaluatedAtUTC": "2026-10-26T11:08:25Z",
+ "system": "x86_64-linux",
+ "a": {
+  "ref": "git+file:///Users/rgb/workspace/hyperdoc-dreyeck-ch?rev=53ee999358f455a2dcb375743072d56d0f4c31cd",
+  "drv": "/nix/store/cfsw9cdg2pz0cm8lbg0ykqkbf2rva5cg-hyperdoc-catalog.drv",
+  "hyperdocSource": [
+   "/nix/store/x71ikzhxp5bb9p2wj9xq00q23n5g9bhy-source"
+  ]
+ },
+ "b": {
+  "ref": "git+file:///private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/1b0db06f-b39b-4115-a26c-11fc5606c943/scratchpad/deploy/control-clone",
+  "drv": "/nix/store/ak6r63b978gmqmf933yd0zbj5a4k3w6k-hyperdoc-catalog.drv",
+  "hyperdocSource": [
+   "/nix/store/mm6lqb9d5rs4q5cbgdnkxadp5i73kzbj-source"
+  ]
+ },
+ "inputDrvsEqual": true,
+ "equalExceptHyperDocSourceAndOutput": false,
+ "built": false
+}

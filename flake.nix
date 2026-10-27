@@ -115,6 +115,9 @@
         commonLispHyperSpec = self.packages.${system}.common-lisp-hyperspec;
       };
     in {
+      # Opt-in staging of hyperdoc-catalog-topic-maps on a NixOS host: loopback only, not enabled by default.
+      nixosModules.hyperdoc-catalog-topic-maps-staging = ./nix/nixos-staging.nix;
+
       packages = forAllSystems (
         system:
         let
@@ -126,6 +129,15 @@
             runtime = runtimeFor system;
             source = pkgs.lib.cleanSource self.outPath;
             d2-tala = self.packages.${system}.d2-tala;
+          };
+          # Separate from hyperdoc-catalog: the Catalog with the pinned Topic Maps snapshot, loopback only.
+          topic-maps-source = pkgs.callPackage ./nix/topic-maps-source.nix { };
+          hyperdoc-catalog-topic-maps = pkgs.callPackage ./nix/catalog-topic-maps.nix {
+            runtime = runtimeFor system;
+            source = pkgs.lib.cleanSource self.outPath;
+            topicMaps = self.packages.${system}.topic-maps-source;
+            d2-tala = self.packages.${system}.d2-tala;
+            revision = self.rev or self.dirtyRev or "";
           };
           d2-tala = pkgs.callPackage ./nix/d2-tala.nix { };
           common-lisp-hyperspec =
@@ -149,6 +161,14 @@
             catalog = self.packages.${system}.hyperdoc-catalog;
             runtime = runtimeFor system;
             source = pkgs.lib.cleanSource self.outPath;
+          };
+        catalog-topic-maps = let pkgs = import nixpkgs { inherit system; }; in
+          pkgs.callPackage ./nix/catalog-topic-maps-check.nix {
+            catalog = self.packages.${system}.hyperdoc-catalog-topic-maps;
+            runtime = runtimeFor system;
+            source = pkgs.lib.cleanSource self.outPath;
+            topicMaps = self.packages.${system}.topic-maps-source;
+            revision = self.rev or self.dirtyRev or "";
           };
       });
 

@@ -1,0 +1,37 @@
+<html><head><title>Deploying Topic Maps with HyperDoc</title></head><body><in-package>topic-maps-deployment-review</in-package>
+<h1>Deploying Topic Maps with HyperDoc</h1>
+<p>This reading reviews an <strong>uncommitted</strong> candidate: a separate Nix package, <code>hyperdoc-catalog-topic-maps</code>, that serves the HyperDoc Catalog with the independent Topic Maps implementation at commit <code>b2eecffa</code>. It was prepared on <code>dreyeck.ch</code> on top of <code>53ee9993</code>, the CTM review commit. Nothing of it is committed, pushed, published or deployed.</p>
+<p><a expr="(the-candidate)" view="Candidate">The candidate</a> is its files (43 when it was first presented, more since the guard was corrected and the package was completed), each identified by the bytes the source holds when you look: its SHA-256 now, its Git blob, whether HEAD holds it, and, for the program and test files, whether these are the bytes the tests ran on. The view also checks that Git's changed paths are exactly the declared ones; a source without .git, such as the package's own, says that it cannot. Once the candidate is committed, the same view says <em>committed in</em> and the commit.</p>
+
+<h2>The deployment as project work</h2>
+<p>The goal is the deployment on dreyeck.ch; this candidate is its local packaging. The deployment's work breakdown, dictionary and plan are <strong>proposed, not declared</strong>. <a page="The Proposed Deployment WBS">The Proposed Deployment WBS</a> reads them from their proposals and says where the deployment stands. <a page="The Six Open Decisions">The Six Open Decisions</a> sets out what you decide before anything is declared, and <a page="Promoting the Proposals">Promoting the Proposals</a> how it would become Work. Nothing in them is an acceptance.</p>
+
+<h2>First finding of this review, corrected</h2>
+<p>While this reading was being built, a defect of the candidate's first Project Workspace guard came to light: it defined two ASDF methods with qualifiers and specializers that ASDF itself already uses, so loading <code>dreyeck/catalog-topic-maps</code> <em>replaced</em> two of ASDF's own methods instead of adding to them. It was corrected on 2026-10-27: the guard is now an explicit check of the Catalog's startup and defines no method on ASDF. <a page="The ASDF Method Collision">The history</a>, with the records of the defect unchanged; <a expr="(method-origins)" view="Method origins">which methods ASDF runs now</a>; <a expr="(claim &quot;guard-replaces-asdf-methods&quot;)" view="Claim">the claim</a>.</p>
+
+<h2>The questions, one page each</h2>
+<ol>
+<li><a page="Why a Separate Nix Package">Why a separate Nix package?</a></li>
+<li><a page="From Git Commit to Verified Snapshot">How is the Topic Maps Git commit turned into a verified source snapshot?</a></li>
+<li><a page="What the Snapshot Verifier Establishes">What does the snapshot verifier actually establish?</a></li>
+<li><a page="Where ASDF Finds the Sources">How are ASDF source origins determined?</a></li>
+<li><a page="Keeping the Project Workspace Out">What prevents accidental loading of the incompatible Project Workspace?</a></li>
+<li><a page="Execution Authority">Which execution-authority boundaries apply?</a></li>
+<li><a page="Tested and Unverified">What has been tested, and what is still unverified?</a></li>
+</ol>
+
+<h2>The subjects and their relations</h2>
+<p><a expr="(the-workspace)" view="Topicmap">The deployment's subjects</a> are a Workspace over HyperDoc's own Topicmap protocol, which depends on no Topic Maps revision. Its Topics are the source revisions, the exported snapshot, the manifest and verification evidence, the ASDF systems, the two Nix packages, the startup policy, recorded test executions and the deployment decisions; each holds the real object. Clicking a Topic moves Point there; under the map, <em>Why these relations hold</em> gives each relation at Point its type, provenance, evidence and how it is known. <a expr="(the-workspace)" view="Relations">All relations at once</a>.</p>
+
+<h2>Code pages</h2>
+<p>This reading's own Lisp files are its Code pages: the candidate and its files, the recorded evidence, the claims, the subjects, and the two things that run only when you press their button (<a expr="(the-verification-runner)" view="Verify now">verify the snapshot now</a>, <a expr="(the-guard-trial)" view="Guard">try the Project Workspace under the guard</a>). From them, links lead into the candidate's definitions, such as <a expr="#'dreyeck/source-snapshot:verify-snapshot-tree" view="Source code">verify-snapshot-tree</a> and <a expr="#'dreyeck/catalog-topic-maps:main" view="Source code">the variant's main</a>.</p>
+
+<h2>How each conclusion is known</h2>
+<p>Every claim says which of four it is. <strong>Observed</strong>: a recorded run saw it, or this reading sees it when shown. <strong>Derived</strong>: it follows from source or evaluation, and nothing ran it. <strong>Inferred</strong>: expected, still to be tested. <strong>Open</strong>: not done or not known. The recorded runs are from 2026-10-26 (the first version of the guard) and 2026-10-27 (the corrected candidate, and Linux); showing them runs nothing.</p>
+<ul>
+<li>Observed: <a expr="(claim &quot;archive-is-the-commit&quot;)" view="Claim">the archive is the commit</a>, <a expr="(claim &quot;snapshot-verified-without-git&quot;)" view="Claim">the snapshot verifies without .git</a>, <a expr="(claim &quot;origins-are-the-snapshot&quot;)" view="Claim">ASDF loads Topic Maps from it</a>, <a expr="(claim &quot;separate-package&quot;)" view="Claim">hyperdoc-catalog is unchanged</a>, <a expr="(claim &quot;linux-unbuilt&quot;)" view="Claim">the package builds and passes its contract on x86_64-linux</a>, <a expr="(claim &quot;linux-reading-packaged&quot;)" view="Claim">this reading runs in the Linux package</a>, <a expr="(claim &quot;workspace-refused&quot;)" view="Claim">the Project Workspace is refused</a>, <a expr="(claim &quot;lineages-differ&quot;)" view="Claim">the two Topic Maps lineages differ</a>, <a expr="(claim &quot;guard-replaces-asdf-methods&quot;)" view="Claim">the first guard replaced two ASDF methods, the corrected one adds none</a>, <a expr="(claim &quot;loopback-only&quot;)" view="Claim">loopback only</a>, <a expr="(claim &quot;scheme-plus-preserved&quot;)" view="Claim">scheme-plus is still refuted</a>, <a expr="(claim &quot;production-startup-darwin&quot;)" view="Claim">production startup passes on darwin</a>, <a expr="(claim &quot;fasl-cache-correction&quot;)" view="Claim">the compilation-cache correction</a>.</li>
+<li>Derived: <a expr="(claim &quot;git-checks-unchanged&quot;)" view="Claim">Git-only checks are unchanged elsewhere</a>, <a expr="(claim &quot;plain-thunks-ungated&quot;)" view="Claim">plain thunk buttons are not gated</a>, <a expr="(claim &quot;hyperdoc-revision-stated&quot;)" view="Claim">HyperDoc's revision in the package is stated, not verified</a>.</li>
+<li>Open: <a expr="(claim &quot;unpublished&quot;)" view="Claim">the archive is not published</a>, <a expr="(claim &quot;not-deployed&quot;)" view="Claim">nothing pushed or deployed</a>.</li>
+</ul>
+<p>The written account of the same work, with its decisions, is <a expr="(file-named &quot;docs/topic-maps-deployment/README.md&quot;)" view="Candidate file">docs/topic-maps-deployment/README.md</a>, and the reviewed Phase A design is <a expr="(file-named &quot;docs/topic-maps-deployment/phase-a-design.md&quot;)" view="Candidate file">phase-a-design.md</a>.</p>
+</body></html>

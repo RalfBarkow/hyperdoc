@@ -1,0 +1,74 @@
+{
+ "kind": "deployment-review-proposals-browser-navigation",
+ "startedAtUTC": "2026-10-27T13:18:50.432Z",
+ "finishedAtUTC": "2026-10-27T13:19:56.339Z",
+ "success": true,
+ "failure": null,
+ "steps": [
+  "Catalog → Deploying Topic Maps with HyperDoc → Text pages → the overview → The Six Open Decisions",
+  "Decision 2: the emitter's sources and the determinism check (excerpts), the emitter's recorded reading; decision 5: read-wbs-dictionary (function); decision 1: the Work reader on the addition",
+  "Decision 4: the collision probe's execution report → its recorded probe",
+  "The Proposed Deployment WBS → the proposal Workspace → Point at 2.3: decomposition, plan, scope, evidence, acceptance apart → its draft entry (a planned control) → its implementation object",
+  "An execution report (run facts) → the recorded run it names",
+  "read-addition (source code) → Promoting the Proposals → the addition as a proposal source",
+  "Proposal source → Overview: back to the reading"
+ ],
+ "identity": [
+  "OTHER CATALOG",
+  "OTHER HYPERDOC",
+  "PAGE-EQ topic-maps-deployment-review Deploying Topic Maps with HyperDoc",
+  "PAGE-EQ topic-maps-deployment-review The Six Open Decisions",
+  "MODEL-EXCERPT-EQ emitter:sources",
+  "MODEL-EXCERPT-EQ tests:determinism",
+  "CROSSCHECK-EQ",
+  "FUNCTION-EQ read-wbs-dictionary",
+  "WORK-READER-EQ",
+  "EVIDENCE-ENTRY-EQ tmd-run-asdf-collision-probe",
+  "FINDING-EQ",
+  "PAGE-EQ topic-maps-deployment-review The Proposed Deployment WBS",
+  "PROPOSAL-WORKSPACE-EQ",
+  "ENTRY-EQ tmd-wp-2-3",
+  "CANDIDATE-FILE-EQ dreyeck/src/catalog-topic-maps.lisp",
+  "EVIDENCE-ENTRY-EQ tmd-run-package-contract",
+  "EVIDENCE-EQ package-check/lisp.log",
+  "FUNCTION-EQ read-addition",
+  "PAGE-EQ topic-maps-deployment-review Promoting the Proposals",
+  "SOURCE-EQ addition"
+ ],
+ "readiness": {
+  "waited": 22,
+  "unbound": 0,
+  "maxWaitMs": 0,
+  "settledReads": 0,
+  "unsettled": 0
+ },
+ "command": [
+  "/usr/bin/sandbox-exec",
+  "-p",
+  "(version 1)(allow default)(deny network*)(allow network-inbound (local ip \"localhost:*\"))(allow network-outbound (remote ip \"localhost:*\"))(deny file-write* (subpath \"/Users/rgb/workspace/hyperdoc-dreyeck-ch\"))(deny file-write* (subpath \"/Users/rgb/workspace/topic-maps\"))",
+  "/nix/store/8j4gxfa63znzgcba9x1mw68yz7cb0ywf-sbcl-with-packages/bin/sbcl",
+  "--noinform",
+  "--no-sysinit",
+  "--no-userinit",
+  "--script",
+  "/var/folders/y1/yhhpj5wd7cb5325t8__1ct2r0000gn/T/hyperdoc-proposals-browser-7p4ipU/browser.lisp"
+ ],
+ "runtime": "/nix/store/8j4gxfa63znzgcba9x1mw68yz7cb0ywf-sbcl-with-packages/bin/sbcl",
+ "playwright": "/Users/rgb/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/playwright",
+ "chrome": "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
+ "topicMapsRoot": "/nix/store/1l6im929rknvgp3jxx83i01crcf3ahmg-source",
+ "stateBefore": {
+  "status": " M docs/topic-maps-22u-integration/README.md\n A docs/topic-maps-deployment/README.md\n A docs/topic-maps-deployment/evidence/.gitattributes\n A docs/topic-maps-deployment/evidence/archive-controls.log\n A docs/topic-maps-deployment/evidence/archive-verification.json\n A docs/topic-maps-deployment/evidence/browser-22u-checkout.json\n A docs/topic-maps-deployment/evidence/browser-review-checkout.json\n A docs/topic-maps-deployment/evidence/browser-review-snapshot.json\n A docs/topic-maps-deployment/evidence/catalog-control-changed-wrapper.json\n A docs/topic-maps-deployment/evidence/catalog-unchanged-x86_64-darwin.json\n A docs/topic-maps-deployment/evidence/catalog-unchanged-x86_64-linux.json\n A docs/topic-maps-deployment/evidence/checkout-review-22u.log\n A docs/topic-maps-deployment/evidence/checkout-source-snapshot.log\n A docs/topic-maps-deployment/evidence/execution-view-snapshot.png\n A docs/topic-maps-deployment/evidence/mutants.log\n A docs/topic-maps-deployment/evidence/package-check/executable.log\n A docs/topic-maps-deployment/evidence/package-check/lisp.log\n A docs/topic-maps-deployment/evidence/package-check/nix-build.log\n A docs/topic-maps-deployment/evidence/package-check/topic-maps-asd\n A docs/topic-maps-deployment/evidence/production-check.log\n A docs/topic-maps-deployment/evidence/tested-files-sha256.txt\n A docs/topic-maps-deployment/phase-a-design.md\n M dreyeck.asd\n A dreyeck/src/catalog-topic-maps.lisp\n A dreyeck/src/source-snapshot.lisp\n A dreyeck/tests/catalog-topic-maps.lisp\n A dreyeck/tests/source-snapshot.lisp\n M dreyeck/tests/topic-maps-ctm-review.lisp\n M dreyeck/tests/topic-maps-project-example.lisp\n M dreyeck/work/topic-maps-ctm-review.lisp\n M dreyeck/work/topic-maps-project-example.lisp\n M flake.nix\n A nix/catalog-topic-maps-check.nix\n A nix/catalog-topic-maps.nix\n A nix/topic-maps-b2eecffa.manifest\n A nix/topic-maps-source.nix\n A scripts/catalog-topic-maps-main.lisp\n A scripts/compare-catalog-derivation.py\n A scripts/test-catalog-topic-maps.lisp\n M scripts/test-topic-maps-ctm-review-browser.mjs\n A scripts/topic-maps-snapshot.py\n A tests/test_catalog_topic_maps_executable.py\n A tests/test_topic_maps_snapshot.py\n?? dreyeck/work/topic-maps-deployment-review/\n?? scripts/serve-topic-maps-deployment-review.lisp\n?? scripts/test-topic-maps-deployment-review-browser.mjs\n",
+  "diff": "9b45a8ce892b92a4d5dd1918ef59e17cdf1e23db2efc6d572cf1c8c19635cf78",
+  "topicMaps": ""
+ },
+ "stateAfter": {
+  "status": " M docs/topic-maps-22u-integration/README.md\n A docs/topic-maps-deployment/README.md\n A docs/topic-maps-deployment/evidence/.gitattributes\n A docs/topic-maps-deployment/evidence/archive-controls.log\n A docs/topic-maps-deployment/evidence/archive-verification.json\n A docs/topic-maps-deployment/evidence/browser-22u-checkout.json\n A docs/topic-maps-deployment/evidence/browser-review-checkout.json\n A docs/topic-maps-deployment/evidence/browser-review-snapshot.json\n A docs/topic-maps-deployment/evidence/catalog-control-changed-wrapper.json\n A docs/topic-maps-deployment/evidence/catalog-unchanged-x86_64-darwin.json\n A docs/topic-maps-deployment/evidence/catalog-unchanged-x86_64-linux.json\n A docs/topic-maps-deployment/evidence/checkout-review-22u.log\n A docs/topic-maps-deployment/evidence/checkout-source-snapshot.log\n A docs/topic-maps-deployment/evidence/execution-view-snapshot.png\n A docs/topic-maps-deployment/evidence/mutants.log\n A docs/topic-maps-deployment/evidence/package-check/executable.log\n A docs/topic-maps-deployment/evidence/package-check/lisp.log\n A docs/topic-maps-deployment/evidence/package-check/nix-build.log\n A docs/topic-maps-deployment/evidence/package-check/topic-maps-asd\n A docs/topic-maps-deployment/evidence/production-check.log\n A docs/topic-maps-deployment/evidence/tested-files-sha256.txt\n A docs/topic-maps-deployment/phase-a-design.md\n M dreyeck.asd\n A dreyeck/src/catalog-topic-maps.lisp\n A dreyeck/src/source-snapshot.lisp\n A dreyeck/tests/catalog-topic-maps.lisp\n A dreyeck/tests/source-snapshot.lisp\n M dreyeck/tests/topic-maps-ctm-review.lisp\n M dreyeck/tests/topic-maps-project-example.lisp\n M dreyeck/work/topic-maps-ctm-review.lisp\n M dreyeck/work/topic-maps-project-example.lisp\n M flake.nix\n A nix/catalog-topic-maps-check.nix\n A nix/catalog-topic-maps.nix\n A nix/topic-maps-b2eecffa.manifest\n A nix/topic-maps-source.nix\n A scripts/catalog-topic-maps-main.lisp\n A scripts/compare-catalog-derivation.py\n A scripts/test-catalog-topic-maps.lisp\n M scripts/test-topic-maps-ctm-review-browser.mjs\n A scripts/topic-maps-snapshot.py\n A tests/test_catalog_topic_maps_executable.py\n A tests/test_topic_maps_snapshot.py\n?? dreyeck/work/topic-maps-deployment-review/\n?? scripts/serve-topic-maps-deployment-review.lisp\n?? scripts/test-topic-maps-deployment-review-browser.mjs\n",
+  "diff": "9b45a8ce892b92a4d5dd1918ef59e17cdf1e23db2efc6d572cf1c8c19635cf78",
+  "topicMaps": ""
+ },
+ "policyEnforced": true,
+ "repositoryWritesDenied": true,
+ "loopbackOnly": true,
+ "testServerStopped": true
+}

@@ -1,0 +1,21 @@
+warning: Git tree '/Users/rgb/workspace/hyperdoc-dreyeck-ch' has uncommitted changes
+these 2 derivations will be built:
+  /nix/store/s2fznkcnf1pxbl8lmxivy1qxyxmpas9v-hyperdoc-catalog.drv
+  /nix/store/w8ajn0hq51w81if6rcwyjyi0hcvimiva-catalog-startup-contract.drv
+error: some outputs of '/nix/store/w8ajn0hq51w81if6rcwyjyi0hcvimiva-catalog-startup-contract.drv' are not valid, so checking is not possible
+warning: Git tree '/Users/rgb/workspace/hyperdoc-dreyeck-ch' has uncommitted changes
+these 2 derivations will be built:
+  /nix/store/s2fznkcnf1pxbl8lmxivy1qxyxmpas9v-hyperdoc-catalog.drv
+  /nix/store/w8ajn0hq51w81if6rcwyjyi0hcvimiva-catalog-startup-contract.drv
+building '/nix/store/s2fznkcnf1pxbl8lmxivy1qxyxmpas9v-hyperdoc-catalog.drv'...
+building '/nix/store/w8ajn0hq51w81if6rcwyjyi0hcvimiva-catalog-startup-contract.drv'...
+catalog-startup-contract> .........
+catalog-startup-contract> ----------------------------------------------------------------------
+catalog-startup-contract> Ran 9 tests in 0.562s
+catalog-startup-contract> 
+catalog-startup-contract> OK
+catalog-startup-contract> ..
+catalog-startup-contract> ----------------------------------------------------------------------
+catalog-startup-contract> Ran 2 tests in 79.524s
+catalog-startup-contract> 
+catalog-startup-contract> OK
