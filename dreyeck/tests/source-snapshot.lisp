@@ -4,8 +4,8 @@
   (:export #:run-tests #:snapshot-root))
 (in-package #:dreyeck/source-snapshot/tests)
 
-(defparameter +commit+ "6162ed68c94ea4796b8cf2282edd347d9607b08c")
-;; Blob ids read with `git rev-parse 6162ed68:<path>` from the repository, an oracle independent of this verifier (equal at b2eecffa).
+(defparameter +commit+ "88994c1b9e1edbf13e665e984a5c9c3b2cdf7575")
+;; Blob ids read with `git rev-parse 88994c1b:<path>` from the repository, an oracle independent of this verifier (equal at b2eecffa and 6162ed68).
 (defparameter +oracle-blobs+ '(("examples/project-work.ctm" . "7548c7dd2d3547ea2c7d2dff751c5cc78d0e08dd")
                                ("src/ctm/lexer.lisp" . "2cb1fec9f23a1bbabfeb51d8f003a8da725b1a31")))
 (defvar *checks* nil)
@@ -40,7 +40,7 @@ other source is accepted, so a run without a snapshot fails instead of passing o
                     (equal (s:verification-checks verification)
                            '(:commit-object-hashes-to-commit :commit-names-root-tree :root-listing-hashes-to-root-tree
                              :root-entries-are-the-shipped-entries :shipped-entries-hash-to-the-commit)))
-             (check :all-shipped-files-hashed (= 2354 (s:verification-blob-count verification)))
+             (check :all-shipped-files-hashed (= 2384 (s:verification-blob-count verification)))
              (check :blobs-equal-git-oracle
                     (every (lambda (pair) (equal (cdr pair) (s:verification-blob-id verification (car pair)))) +oracle-blobs+))
              (check :excluded-not-shipped (and (equal '("reports") (s:manifest-excluded manifest))

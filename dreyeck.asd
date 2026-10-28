@@ -3422,7 +3422,8 @@
   :depends-on ("ironclad" "sb-posix" "html-inspector-views" "uiop")
   :components ((:file "dreyeck/src/source-snapshot")
                (:static-file "topic-maps-b2eecffa.manifest" :pathname "nix/topic-maps-b2eecffa.manifest") ; history: the previous pin
-               (:static-file "topic-maps-6162ed68.manifest" :pathname "nix/topic-maps-6162ed68.manifest"))
+               (:static-file "topic-maps-6162ed68.manifest" :pathname "nix/topic-maps-6162ed68.manifest") ; history: the previous pin
+               (:static-file "topic-maps-88994c1b.manifest" :pathname "nix/topic-maps-88994c1b.manifest"))
   :in-order-to ((test-op (test-op "dreyeck/source-snapshot/tests"))))
 
 (defsystem "dreyeck/source-snapshot/tests"

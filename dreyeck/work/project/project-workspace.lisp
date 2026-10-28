@@ -9,9 +9,10 @@
 
 ;;; The reader this reading depends on
 
-(defparameter +topic-maps-revision+ "6162ed68c94ea4796b8cf2282edd347d9607b08c"
+(defparameter +topic-maps-revision+ "88994c1b9e1edbf13e665e984a5c9c3b2cdf7575"
   "The topic-maps commit this system is tested with: b2eecffa (Slice 22U) plus the indexed Topic merge search of Task 1C
-(branch codex/project-work-slice-22u). The unchanged b2eecffa reads the project CTM correctly but not in practical time.
+(6162ed68) plus the indexed Association merge search of Task 1E (88994c1b; branch codex/project-work-slice-22u). The unchanged
+b2eecffa reads the project CTM correctly but not in practical time; 6162ed68 was the pin until the Task 1E integration.
 Before the integration of 2026-10-28 this was 5a4a668, a sibling lineage (963f2a0 plus an indexed search); its recovery
 evidence stays in topic-maps-5a4a668-recovery.txt.")
 

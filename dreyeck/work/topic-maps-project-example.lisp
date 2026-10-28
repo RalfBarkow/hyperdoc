@@ -8,7 +8,7 @@
            #:run-source #:run-revision #:run-state #:run-cxtm
            #:inspect-project-example #:exercise-project-example #:+source-revision+))
 (in-package #:dreyeck/work/topic-maps-project-example)
-(defparameter +source-revision+ "6162ed68c94ea4796b8cf2282edd347d9607b08c")
+(defparameter +source-revision+ "88994c1b9e1edbf13e665e984a5c9c3b2cdf7575")
 (hyperdoc:see (hyperdoc:page "Reading Slice 22U" :hyperbook "dreyeck/work/topic-maps-project-example"))
 (defun checked-source-evidence ()
   "Why ASDF's Topic Maps source is the pinned commit: :GIT-CHECKOUT after Git's checks of a clean checkout at the pin,
