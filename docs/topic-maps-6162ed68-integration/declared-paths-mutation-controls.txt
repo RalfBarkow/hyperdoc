@@ -1,0 +1,6 @@
+Mutation controls of the version-bound contract of topic-maps-deployment-review/tests (throwaway image, one redefinition at a time; the repository is not changed). 2026-10-28
+MUTANT M0-unmutated: SURVIVED (all checks passed)
+MUTANT M1-an-unlisted-protected-file-is-modified: KILLED by Deployment review check failed: PROTECTED-DRIFT-IS-ONLY-THE-NAMED-SUCCESSOR-CHANGES
+MUTANT M2-a-named-successor-change-is-removed-from-the-allowance: KILLED by Deployment review check failed: PROTECTED-DRIFT-IS-ONLY-THE-NAMED-SUCCESSOR-CHANGES
+MUTANT M3-bound-to-the-first-packaging-commit: KILLED by Deployment review check failed: DECLARED-PATHS-AGREE-AT-THE-REVIEWED-HEAD
+MUTANT M4-a-declared-path-is-dropped: KILLED by Deployment review check failed: DECLARED-PATHS-AGREE-AT-THE-REVIEWED-HEAD

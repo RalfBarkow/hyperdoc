@@ -1,0 +1,8 @@
+Mutation controls of the integration reading's tests (topic-maps-integration-review/tests), run in a throwaway image by redefining one thing at a time; the repository is not changed. 2026-10-28
+MUTANT M0-unmutated: SURVIVED (all checks passed)
+MUTANT M1-project-pin-differs-from-the-packaged-commit: KILLED by Integration review check failed: pins:catalog-and-22u-reading-and-workspace-and-reading-name-one-commit
+MUTANT M2-guard-removed: KILLED by Integration review check failed: workspace:the-guard-subject-is-the-refusing-function
+MUTANT M3-evidence-digests-wrong: KILLED by Integration review check failed: evidence:every-record-matches-SHA256SUMS
+MUTANT M4-observed-claim-without-evidence: KILLED by Integration review check failed: pages:every-claim-is-reached-from-a-page
+MUTANT M5-a-run-recorded-before-rendering-is-not-a-rendering-effect (control: counts compared, so this must SURVIVE): SURVIVED (all checks passed)
+MUTANT M6-experimental-row-unmarked: KILLED by Integration review check failed: performance:experimental-is-marked-and-not-counted-as-task-1c

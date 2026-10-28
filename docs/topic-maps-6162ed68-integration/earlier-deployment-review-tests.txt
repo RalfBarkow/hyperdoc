@@ -1,0 +1,18 @@
+The earlier deployment review's tests (asdf:test-system topic-maps-deployment-review), 2026-10-28, SBCL 2.4.10, fresh caches.
+
+== BEFORE: the unmodified checkout /Users/rgb/workspace/hyperdoc-dreyeck-ch (8e64e718) with the b2eecffa snapshot
+TOPIC-MAPS-DEPLOYMENT-REVIEW-PASS: 332 assertions; 8 pages, 27 subjects, 29 warranted relations, 20 claims.
+Unhandled SIMPLE-ERROR in thread #<SB-THREAD:THREAD tid=259 "main thread" RUNNING
+  Deployment review check failed: EVIDENCE-NAMES-ITS-RECORD
+0: (SB-DEBUG::DEBUGGER-DISABLED-HOOK #<SIMPLE-ERROR "Deployment review check failed: ~A" {70174DA613}> #<unused argument> :QUIT T)
+1: (SB-DEBUG::RUN-HOOK *INVOKE-DEBUGGER-HOOK* #<SIMPLE-ERROR "Deployment review check failed: ~A" {70174DA613}>)
+2: (INVOKE-DEBUGGER #<SIMPLE-ERROR "Deployment review check failed: ~A" {70174DA613}>)
+3: (ERROR "Deployment review check failed: ~A" :EVIDENCE-NAMES-ITS-RECORD)
+
+== AFTER: the integration worktree (pins retargeted, other paths changed) with the 6162ed68 snapshot
+Unhandled SIMPLE-ERROR in thread #<SB-THREAD:THREAD tid=259 "main thread" RUNNING
+  Deployment review check failed: DECLARED-PATHS-AGREE
+0: (SB-DEBUG::DEBUGGER-DISABLED-HOOK #<SIMPLE-ERROR "Deployment review check failed: ~A" {70127D8433}> #<unused argument> :QUIT T)
+1: (SB-DEBUG::RUN-HOOK *INVOKE-DEBUGGER-HOOK* #<SIMPLE-ERROR "Deployment review check failed: ~A" {70127D8433}>)
+2: (INVOKE-DEBUGGER #<SIMPLE-ERROR "Deployment review check failed: ~A" {70127D8433}>)
+3: (ERROR "Deployment review check failed: ~A" :DECLARED-PATHS-AGREE)
