@@ -1,0 +1,65 @@
+<h1>Regular HyperDoc Catalog</h1>
+<p>The Work item <code>topic-maps-regular-hyperdoc</code>, Regular HyperDoc Catalog with a Navigable Project Topic Map, is declared on the <a page="Work Breakdown">Work Breakdown</a>. This page states its Work Breakdown Structure and its plan. The WBS Dictionary that defines each work package is <a page="Regular HyperDoc Catalog WBS Dictionary">Regular HyperDoc Catalog WBS Dictionary</a>.</p>
+<p>The scope is distinct from two others and repeats no deliverable of either. The separate staging Catalog of the proposal <code>tmd-deployment</code> serves Topic Maps for review on loopback and is already installed on dreyeck.ch (Zettel 11353); this scope concerns the regular HyperDoc Catalog of the production service. The exchangeable project CTM of <code>project-work-ctm-exchange</code> is read by this scope and not changed by it.</p>
+<p>Every status on this page is <code>open</code>. A status states the state of the work, not an acceptance: no work package here is accepted, no plan step is verified, and an implementation assignment that reports a result on <a page="Implementation Assignments" hyperbook="dreyeck/work/project">Implementation Assignments</a> changes none of them.</p>
+
+<h2>Work Breakdown Structure</h2>
+<p>The Deliverable is the defined scope. It decomposes into six work packages, and decomposition asserts scope membership only: no order, no dependency, no status.</p>
+<ul><li><a page="Regular HyperDoc Catalog" data-topic="tm-regular-catalog" data-kind="deliverable" data-status="open">Regular HyperDoc Catalog with a Navigable Project Topic Map</a> — the defined scope: the integrated Topic Maps revision, the compatible Project Workspace, the inspectable project work, the safe public Inspector, the reproducible package and its verified deployment.</li>
+<li><a page="Regular HyperDoc Catalog WBS Dictionary" data-topic="tm-reg-wp-1" data-kind="work package" data-status="open">1 Integrated Topic Maps Revision</a> — WBS 1: the reviewed commit 6162ed68, its snapshot, manifest and pin, with the identity that HyperDoc checks.</li>
+<li><a page="Regular HyperDoc Catalog WBS Dictionary" data-topic="tm-reg-wp-2" data-kind="work package" data-status="open">2 Compatible Project Workspace</a> — WBS 2: the Project Workspace bound to that revision, reading the unchanged project CTM, telling a checkout, a verified snapshot and an unidentifiable directory apart.</li>
+<li><a page="Regular HyperDoc Catalog WBS Dictionary" data-topic="tm-reg-wp-3" data-kind="work package" data-status="open">3 Inspectable Project Work</a> — WBS 3: the project work navigable in the Workspace and the Inspector from a Work Item to its packages, assignments, evidence and source commits.</li>
+<li><a page="Regular HyperDoc Catalog WBS Dictionary" data-topic="tm-reg-wp-4" data-kind="work package" data-status="open">4 Safe Public Inspector</a> — WBS 4: every public view read-only; no view or button runs code, writes or discloses a host path; an independent security review.</li>
+<li><a page="Regular HyperDoc Catalog WBS Dictionary" data-topic="tm-reg-wp-5" data-kind="work package" data-status="open">5 Reproducible Catalog Package</a> — WBS 5: the regular Catalog package built and checked for Linux and Darwin with the verified snapshot.</li>
+<li><a page="Regular HyperDoc Catalog WBS Dictionary" data-topic="tm-reg-wp-6" data-kind="work package" data-status="open">6 Verified Production Deployment</a> — WBS 6: the package staged, verified, approved and activated on dreyeck.ch, with a rollback shown.</li></ul>
+<ul><li data-from="tm-regular-catalog" data-to="tm-reg-wp-1" data-relation="work:relation/decomposes-into">Regular Catalog → 1 Integrated Topic Maps Revision: decomposes into.</li>
+<li data-from="tm-regular-catalog" data-to="tm-reg-wp-2" data-relation="work:relation/decomposes-into">Regular Catalog → 2 Compatible Project Workspace: decomposes into.</li>
+<li data-from="tm-regular-catalog" data-to="tm-reg-wp-3" data-relation="work:relation/decomposes-into">Regular Catalog → 3 Inspectable Project Work: decomposes into.</li>
+<li data-from="tm-regular-catalog" data-to="tm-reg-wp-4" data-relation="work:relation/decomposes-into">Regular Catalog → 4 Safe Public Inspector: decomposes into.</li>
+<li data-from="tm-regular-catalog" data-to="tm-reg-wp-5" data-relation="work:relation/decomposes-into">Regular Catalog → 5 Reproducible Catalog Package: decomposes into.</li>
+<li data-from="tm-regular-catalog" data-to="tm-reg-wp-6" data-relation="work:relation/decomposes-into">Regular Catalog → 6 Verified Production Deployment: decomposes into.</li></ul>
+
+<h3>Completeness and overlap</h3>
+<p>Completeness: the six packages together are the whole defined scope. A Topic Maps revision whose identity can be checked (1), a Project Workspace that reads the unchanged project CTM with it (2), project work a reader can navigate and inspect in that Workspace (3), a public Inspector that is safe to expose (4), the regular Catalog package built reproducibly (5) and its verified deployment (6). What the scope needs and does not deliver appears below as plan preconditions: the user's admission of the Project Workspace to a served runtime, an independent security review, the decision to publish the archive and the approval of the production activation.</p>
+<p>Overlap: 1 and 5 meet at the snapshot: 1 makes the revision and its manifest verifiable, 5 builds the package that serves it. 2 and 3 both concern the Project Workspace: 2 that it reads the unchanged project CTM with the revision and refuses what it cannot identify, 3 what the project work shows and how it is navigated. 4 and 6 meet at exposure: 4 makes the views safe, 6 activates them. No relation contract relates a Work item to a Deliverable, so none is declared between <code>topic-maps-regular-hyperdoc</code> and <code>tm-regular-catalog</code>; the project CTM names that gap.</p>
+
+<h2>Plan</h2>
+<p>Plan steps, each for one work package, and the preconditions the steps wait on. A plan step is work to do, not a deliverable; a precondition is something the scope needs and does not deliver. No plan step or precondition grants authority.</p>
+<ul><li><a page="Regular HyperDoc Catalog" data-topic="tm-reg-p1" data-kind="plan step" data-status="open">P1 Integrate and verify Topic Maps 6162ed68</a> — fast-forward the Topic Maps line, pin the snapshot, verify it without .git and run the Topic Maps suite.</li>
+<li><a page="Regular HyperDoc Catalog" data-topic="tm-reg-p2" data-kind="plan step" data-status="open">P2 Verify the unchanged project CTM</a> — read it with the revision, within the operational limit, and compare the signature and the CXTM.</li>
+<li><a page="Regular HyperDoc Catalog" data-topic="tm-reg-p3" data-kind="plan step" data-status="open">P3 Integrate Project Workspace and Inspector navigation</a> — the project work navigable from the Work Item to its evidence, and the reading of the integration.</li>
+<li><a page="Regular HyperDoc Catalog" data-topic="tm-reg-p4" data-kind="plan step" data-status="open">P4 Verify and enforce public Inspector security</a> — read-only public views, gated run buttons, an independent review.</li>
+<li><a page="Regular HyperDoc Catalog" data-topic="tm-reg-p5" data-kind="plan step" data-status="open">P5 Build and test the regular Linux and Nix Catalog package</a> — on an independent builder, with the derivation compared.</li>
+<li><a page="Regular HyperDoc Catalog" data-topic="tm-reg-p6" data-kind="plan step" data-status="open">P6 Stage, verify, obtain production approval and deploy</a> — activate the generation, verify identity and boundaries, show the rollback.</li>
+<li><a page="Regular HyperDoc Catalog" data-topic="tm-reg-pre-admission" data-kind="precondition" data-status="open">Admission of the Project Workspace to a served runtime</a> — the user's decision; the Catalog's startup guard refuses the Workspace until it is made.</li>
+<li><a page="Regular HyperDoc Catalog" data-topic="tm-reg-pre-security-review" data-kind="precondition" data-status="open">Independent security review of the public Inspector</a> — a report by a reviewer who is not the executor.</li>
+<li><a page="Regular HyperDoc Catalog" data-topic="tm-reg-pre-publish" data-kind="precondition" data-status="open">Decision to publish or transfer the archive</a> — the user's; a builder must be able to obtain the Topic Maps snapshot.</li>
+<li><a page="Regular HyperDoc Catalog" data-topic="tm-reg-pre-production" data-kind="precondition" data-status="open">Approval of the production activation</a> — the user's, for the generation on dreyeck.ch, with the operator's record of the server's state.</li></ul>
+<ul><li data-from="tm-reg-p1" data-to="tm-reg-wp-1" data-relation="work:relation/produces">P1 → 1 Integrated Topic Maps Revision: produces.</li>
+<li data-from="tm-reg-p2" data-to="tm-reg-wp-2" data-relation="work:relation/produces">P2 → 2 Compatible Project Workspace: produces.</li>
+<li data-from="tm-reg-p3" data-to="tm-reg-wp-3" data-relation="work:relation/produces">P3 → 3 Inspectable Project Work: produces.</li>
+<li data-from="tm-reg-p4" data-to="tm-reg-wp-4" data-relation="work:relation/produces">P4 → 4 Safe Public Inspector: produces.</li>
+<li data-from="tm-reg-p5" data-to="tm-reg-wp-5" data-relation="work:relation/produces">P5 → 5 Reproducible Catalog Package: produces.</li>
+<li data-from="tm-reg-p6" data-to="tm-reg-wp-6" data-relation="work:relation/produces">P6 → 6 Verified Production Deployment: produces.</li>
+<li data-from="tm-reg-p2" data-to="tm-reg-p1" data-relation="work:relation/depends-on">P2 → P1: depends on.</li>
+<li data-from="tm-reg-p3" data-to="tm-reg-p2" data-relation="work:relation/depends-on">P3 → P2: depends on.</li>
+<li data-from="tm-reg-p4" data-to="tm-reg-p3" data-relation="work:relation/depends-on">P4 → P3: depends on.</li>
+<li data-from="tm-reg-p5" data-to="tm-reg-p1" data-relation="work:relation/depends-on">P5 → P1: depends on.</li>
+<li data-from="tm-reg-p5" data-to="tm-reg-p4" data-relation="work:relation/depends-on">P5 → P4: depends on.</li>
+<li data-from="tm-reg-p5" data-to="tm-reg-pre-admission" data-relation="work:relation/depends-on">P5 → Admission of the Project Workspace: depends on.</li>
+<li data-from="tm-reg-p5" data-to="tm-reg-pre-publish" data-relation="work:relation/depends-on">P5 → Decision to publish the archive: depends on.</li>
+<li data-from="tm-reg-p6" data-to="tm-reg-p5" data-relation="work:relation/depends-on">P6 → P5: depends on.</li>
+<li data-from="tm-reg-p6" data-to="tm-reg-pre-security-review" data-relation="work:relation/depends-on">P6 → Independent security review: depends on.</li>
+<li data-from="tm-reg-p6" data-to="tm-reg-pre-production" data-relation="work:relation/depends-on">P6 → Approval of the production activation: depends on.</li></ul>
+
+<h2>Relation contracts used</h2>
+<p>The three relations of this page are defined once, on <a page="Authoring the CTM Plan Page">Authoring the CTM Plan Page</a>, and mean there what they mean here. The Work reader checks a page's relations against contract Topics declared on that same page, so each is named here as a reference to that definition and states nothing of its own.</p>
+<ul><li><a page="Regular HyperDoc Catalog" data-topic="work:relation/decomposes-into" data-kind="relation" data-status="draft">decomposes into</a> — defined on Authoring the CTM Plan Page.</li>
+<li><a page="Regular HyperDoc Catalog" data-topic="work:relation/depends-on" data-kind="relation" data-status="draft">depends on</a> — defined on Authoring the CTM Plan Page.</li>
+<li><a page="Regular HyperDoc Catalog" data-topic="work:relation/produces" data-kind="relation" data-status="draft">produces</a> — defined on Authoring the CTM Plan Page.</li></ul>
+
+<h2>What this declaration does not do</h2>
+<ul><li>It records no acceptance. Whether a work package meets its criterion is the user's decision, stated on an Acceptance Records page; none exists.</li>
+<li>It gives no step a status other than open. P1 to P3 have implementation assignments that report results; those reports are not verification.</li>
+<li>It states no relation between the Work item and the Deliverable, for which no relation contract exists.</li>
+<li>It changes no Work item, relation contract or status declared elsewhere.</li></ul>

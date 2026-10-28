@@ -1,0 +1,18 @@
+9c9
+< #   dreyeck/pages/project/Implementation Assignments.html  bb3ad8dd7a638877485fcd9cf04a9b40e982864739c7703ff9da24a955642610
+---
+> #   dreyeck/pages/project/Implementation Assignments.html  059d90d04472ae5bc0975491106aa896f12989af7bfa17cf1c0d32d192984ce6
+512c512
+<     s:source-sha256: "bb3ad8dd7a638877485fcd9cf04a9b40e982864739c7703ff9da24a955642610" .
+---
+>     s:source-sha256: "059d90d04472ae5bc0975491106aa896f12989af7bfa17cf1c0d32d192984ce6" .
+1749,1750c1749,1750
+<     s:source-authority-note: "the handoff of the proposal: its state, its known defects and what prevents a fully verified review; uncommitted Stage 1 proposal material" ;
+<     s:source-authority-note: "the verification of the proposal on HyperDoc bc002546 and the Scope Declaration Review; uncommitted Stage 1 proposal material" ;
+---
+>     s:source-authority-note: "the handoff of the proposal: its state, its known defects and what prevents a fully verified review; Stage 1 proposal material — not declared or accepted" ;
+>     s:source-authority-note: "the verification of the proposal on HyperDoc bc002546 and the Scope Declaration Review; Stage 1 proposal material — not declared or accepted" ;
+1886c1886
+<     s:source-authority-note: "later step (Task 1E): reads the verification of the previous Stage 1 CTM on the combined tree; uncommitted Stage 1 proposal material, not a committed source" ;
+---
+>     s:source-authority-note: "later step (Task 1E): reads the verification of the previous Stage 1 CTM on the combined tree; Stage 1 proposal material — not declared or accepted" ;

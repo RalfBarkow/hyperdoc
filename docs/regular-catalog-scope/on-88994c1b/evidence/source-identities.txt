@@ -1,0 +1,38 @@
+# Stage 1 on HyperDoc bc002546: source identities, 2026-10-28
+
+New worktree: /Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b  branch claude/zettel-11359-stage1-on-88994c1b  HEAD bc0025464131781712e24da5ec05594d91637144  (uncommitted Stage 1 on top; nothing committed)
+Original Stage 1 worktree: /Users/rgb/workspace/hyperdoc-zettel-11359  branch claude/zettel-11359-regular-catalog-scope  HEAD 909bcab342c8107f3b2ed2d052f72307b43a9c7f  status entries        9  tracked diff sha256 c56f987e8017430d1de8356602799fdaa2f6c382c5e27f02c4790bb7c354f2e0  (unchanged)
+Topic Maps: 88994c1b9e1edbf13e665e984a5c9c3b2cdf7575 status lines        0
+Project CTM sha256 fe2955e93239704673a2a38492ea92e57f0d221f14313603dd1dd5f206b340b8 (the original Stage 1 bytes; not regenerated)
+
+## The nine entries of the original Stage 1 worktree (git status) and sha256 of each file at the start of this step
+ M dreyeck.asd  777b3ce31426806f668765d0806a11a7e6d54c81f26885405855b05c009b8c3c
+ M dreyeck/pages/project/Implementation Assignments.html  69c1da33f4ecf4b44a46921d896694a4ccc670463dbe3f807e011cea2b4aba44
+ M dreyeck/work/project/hyperdoc-project.ctm  fe2955e93239704673a2a38492ea92e57f0d221f14313603dd1dd5f206b340b8
+ M dreyeck/work/project/hyperdoc-project.ctm.sha256  a91280da3f94cb24f80d3e51cda1fff6506ec96963d02a631fe2fc98598948f3
+?? docs/.DS_Store  1d56617305290f59e964e43477e2387e570857579a3bda6f558e150277ed03b4  (macOS junk: NOT transferred)
+?? docs/regular-catalog-scope/  (7 files: HANDOFF.md 796bef4f…, evidence/extracts.txt 66b49341…, evidence/stage1-browser-walk-result.json 1935e6b3…, stage-2-draft/{Regular HyperDoc Catalog.html ed153362…, make-stage2.py 8a518bfd…, project-scope.stage2.lisp d70492a2…, test-project-workspace-scope.stage2.mjs 30e30db2…})
+?? dreyeck/pages/project/Regular Catalog WBS Dictionary.html  ae4647b42ff1028b270a0b615dd4d8585400fdc281547b0a7a38abc9a189a2f1
+?? dreyeck/tests/project-scope.lisp  80009f3f3135d0b20751c29fb229003cbd260ea859d52e4f8896dfcfa9fa298f
+?? scripts/test-project-workspace-scope.mjs  83fae014b2d57ce690db6dbeaa402c1a2da0d32d9adfb842dadbb6f38a03d58f
+
+dreyeck.asd in the combined tree (reconciled: the Stage 1 hunks and the 88994c1b manifest line both present): 1803b37b37e6a34150d3ddb1eb1985fc916ea1926d0ece2eb8243f169fe8c84c
+
+## git status of the combined worktree
+ M dreyeck.asd
+ M "dreyeck/pages/project/Implementation Assignments.html"
+ M dreyeck/work/project/hyperdoc-project.ctm
+ M dreyeck/work/project/hyperdoc-project.ctm.sha256
+?? docs/regular-catalog-scope/
+?? "dreyeck/pages/project/Regular Catalog WBS Dictionary.html"
+?? dreyeck/tests/project-scope.lisp
+?? scripts/test-project-workspace-scope.mjs
+
+## git diff --stat over bc002546 (tracked)
+ dreyeck.asd                                        |   7 +-
+ .../pages/project/Implementation Assignments.html  | 198 ++++++++
+ dreyeck/work/project/hyperdoc-project.ctm          | 534 ++++++++++++++++++++-
+ dreyeck/work/project/hyperdoc-project.ctm.sha256   |   2 +-
+ 4 files changed, 736 insertions(+), 5 deletions(-)
+
+## paths changed outside the Stage 1 set: none; paths changed under the historical readings, the 88994c1b reading, nix/, dreyeck/src, project-workspace.lisp, project-ctm.lisp, tests/project-ctm.lisp, tests/source-snapshot.lisp:        0

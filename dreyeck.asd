@@ -3362,13 +3362,15 @@
                (:module "dreyeck/pages/project"
                 :components ((:static-file "HyperDoc Project Workspace.html") (:static-file "Implementation Assignments.html")
                              ;; Drafts: pages of the HyperBook, not sources of the project CTM until the user decides.
-                             (:static-file "Project Work Exchange WBS Dictionary.html") (:static-file "Acceptance Records.html"))))
+                             (:static-file "Project Work Exchange WBS Dictionary.html") (:static-file "Acceptance Records.html")
+                             (:static-file "Regular Catalog WBS Dictionary.html"))))
   :in-order-to ((test-op (test-op "dreyeck/work/project/tests"))))
 
 (defsystem "dreyeck/work/project/tests"
   :description "The project CTM: read, traced to its declarations, roundtrip in octets and CXTM, refusals, the Workspace path, no wiki written"
   :depends-on ("dreyeck/work/project" "ironclad" "cl-base64")
   :components ((:file "dreyeck/tests/project-ctm")
+               (:file "dreyeck/tests/project-scope")
                (:module "dreyeck/tests/fixtures/project-acceptance"
                 :components ((:static-file "README.txt") (:static-file "synthetic-work.html") (:static-file "synthetic-assignments-addition.html")
                              (:static-file "synthetic-dictionary-c1.html") (:static-file "synthetic-dictionary-c2.html")
@@ -3378,7 +3380,8 @@
                              (:static-file "synthetic-records-withdrawal-conflict.html"))))
   :perform (test-op (op component)
              (declare (ignore op component))
-             (uiop:symbol-call :dreyeck/work/project/tests :run-tests)))
+             (uiop:symbol-call :dreyeck/work/project/tests :run-tests)
+             (uiop:symbol-call :dreyeck/work/project/tests :run-scope-tests)))
 
 
 ;; Optional local Slice 22U reading. The independent checkout is not vendored.

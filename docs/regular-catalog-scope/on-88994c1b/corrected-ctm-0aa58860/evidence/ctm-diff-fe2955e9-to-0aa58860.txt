@@ -1,0 +1,133 @@
+9c9
+< #   dreyeck/pages/project/Implementation Assignments.html  69c1da33f4ecf4b44a46921d896694a4ccc670463dbe3f807e011cea2b4aba44
+---
+> #   dreyeck/pages/project/Implementation Assignments.html  bb3ad8dd7a638877485fcd9cf04a9b40e982864739c7703ff9da24a955642610
+512c512
+<     s:source-sha256: "69c1da33f4ecf4b44a46921d896694a4ccc670463dbe3f807e011cea2b4aba44" .
+---
+>     s:source-sha256: "bb3ad8dd7a638877485fcd9cf04a9b40e982864739c7703ff9da24a955642610" .
+1723c1723
+<     s:goal: "Propose the Work Item topic-maps-regular-hyperdoc and the Deliverable tm-regular-catalog with six work packages, six plan steps and their relations, and describe the packages in a draft WBS Dictionary, all as proposals, navigable in the Project Workspace. Prepare, without applying it, the patch that would declare them. Change no Work declaration, status or acceptance, and no Topic Maps or Catalog package." ;
+---
+>     s:goal: "Propose the Work Item topic-maps-regular-hyperdoc and the Deliverable tm-regular-catalog with six work packages, six plan steps and their relations, and describe the packages in a draft WBS Dictionary, all as proposals, navigable in the Project Workspace. Prepare the Stage 2 declaration for review, without applying it: it has not been produced (no patch exists; only incomplete, unverified drafts are kept in docs/regular-catalog-scope/stage-2-draft/). Change no Work declaration, status or acceptance, and no Topic Maps or Catalog package." ;
+1725c1725
+<     s:observed-state: "Reported by the executor: a proposal in the working tree of a separate worktree, not committed, with a declaration prepared and not applied. Zettel 11353 (the existing staging installation) and Zettel 11359 are the user's; neither is an acceptance. This report is not an acceptance." ;
+---
+>     s:observed-state: "Reported by the executor: a proposal in the working tree of a separate worktree, not committed. The Stage 2 declaration is not produced: stage-2-declaration.patch is a Stage 2 artifact that does not exist yet and is not a source authority of this assignment; the drafts in docs/regular-catalog-scope/stage-2-draft/ are incomplete and unverified. Zettel 11353 (the existing staging installation) and Zettel 11359 are the user's; neither is an acceptance. This report is not an acceptance." ;
+1749,1750c1749,1752
+<     s:source-authority-note: "states the proposal, the graph, the walkthrough, the source identity report and the declaration diff awaiting approval" ;
+<     s:source-authority-note: "the declaration, prepared and not applied" ;
+---
+>     s:source-authority-note: "the handoff of the proposal: its state, its known defects and what prevents a fully verified review; uncommitted Stage 1 proposal material" ;
+>     s:source-authority-note: "the verification of the proposal on HyperDoc bc002546 and the Scope Declaration Review; uncommitted Stage 1 proposal material" ;
+>     s:source-authority-note: "reads the committed integration record of Topic Maps 88994c1b in HyperDoc (commit bc002546): its evidence, its commit plan and its open items" ;
+>     s:source-authority-note: "reads the preserved independent review of Task 1E (GO FOR LOCAL TASK 1E COMMIT); committed in HyperDoc e60d10ba" ;
+1770c1772
+< <tag:dreyeck.ch,2026:hyperdoc/file/docs/regular-catalog-scope/README.md>
+---
+> <tag:dreyeck.ch,2026:hyperdoc/file/docs/regular-catalog-scope/HANDOFF.md>
+1772,1773c1774,1775
+<     - "docs/regular-catalog-scope/README.md" ;
+<     s:repository-path: "docs/regular-catalog-scope/README.md" .
+---
+>     - "docs/regular-catalog-scope/HANDOFF.md" ;
+>     s:repository-path: "docs/regular-catalog-scope/HANDOFF.md" .
+1775c1777
+< <tag:dreyeck.ch,2026:hyperdoc/file/docs/regular-catalog-scope/stage-2-declaration.patch>
+---
+> <tag:dreyeck.ch,2026:hyperdoc/file/docs/regular-catalog-scope/on-88994c1b/SCOPE-DECLARATION-REVIEW.md>
+1777,1778c1779,1780
+<     - "docs/regular-catalog-scope/stage-2-declaration.patch" ;
+<     s:repository-path: "docs/regular-catalog-scope/stage-2-declaration.patch" .
+---
+>     - "docs/regular-catalog-scope/on-88994c1b/SCOPE-DECLARATION-REVIEW.md" ;
+>     s:repository-path: "docs/regular-catalog-scope/on-88994c1b/SCOPE-DECLARATION-REVIEW.md" .
+1779a1782,1791
+> <tag:dreyeck.ch,2026:hyperdoc/file/docs/topic-maps-88994c1b-integration/README.md>
+>     isa s:repository-file ;
+>     - "docs/topic-maps-88994c1b-integration/README.md" ;
+>     s:repository-path: "docs/topic-maps-88994c1b-integration/README.md" .
+> 
+> <tag:dreyeck.ch,2026:hyperdoc/file/dreyeck/work/topic-maps-task-1e-review/evidence/task1e-independent-review.md>
+>     isa s:repository-file ;
+>     - "dreyeck/work/topic-maps-task-1e-review/evidence/task1e-independent-review.md" ;
+>     s:repository-path: "dreyeck/work/topic-maps-task-1e-review/evidence/task1e-independent-review.md" .
+> 
+1786c1798
+<     s:observed-state: "Reported by the executor: committed locally as a55c4a0b on the branch claude/topic-maps-6162ed68-integration after the user authorized the four commits; not pushed. No independent check of the integrated revision has been made, and no Linux build. This report is not an acceptance." ;
+---
+>     s:observed-state: "Reported by the executor: committed locally as a55c4a0b on the branch claude/topic-maps-6162ed68-integration after the user authorized the four commits; not pushed. No independent check of the integrated revision has been made, and no Linux build. Later step (Task 1E): the revision was moved to 88994c1b and committed locally as d9da94d8 on the branch claude/topic-maps-88994c1b-integration, not pushed; the packaged Nix Catalog check was not run, no independent check of the integrated HyperDoc revision, no Linux build, the archive is not published. This report is not an acceptance." ;
+1789c1801
+<     s:precondition: "The experimental association index of Task 1C stays out; it is a separate task." ;
+---
+>     s:precondition: "The experimental association index of Task 1C stays out; it is a separate task. (Historical: it became the reviewed Task 1E change and was integrated later, see the evidence of the later step.)" ;
+1792a1805
+>     s:acceptance-criterion: "Later step (Task 1E): the authoritative line holds a tree equal to the reviewed Task 1E commit's, with 6162ed68 and b2eecffa preserved, and the 88994c1b snapshot verifies against its manifest without .git." ;
+1796a1810,1814
+>     s:source-authority-note: "later step (Task 1E): adds the manifest of Git objects of the 88994c1b snapshot; the 6162ed68 and b2eecffa manifests stay as history; committed in HyperDoc d9da94d8" ;
+>     s:source-authority-note: "later step (Task 1E): names the revision of the 22U reading; committed in HyperDoc d9da94d8. The same commit moves the manifest of the snapshot pin and the revision named in the entries above to 88994c1b" ;
+>     s:source-authority-note: "later step (Task 1E): reads the commit record of Topic Maps 88994c1b: parent, tree, files and the state of the primary checkout; committed in HyperDoc e60d10ba" ;
+>     s:source-authority-note: "later step (Task 1E): reads the independent verification of the 88994c1b archive against the commit with Git and Nix; committed in HyperDoc e60d10ba" ;
+>     s:source-authority-note: "later step (Task 1E): reads the preserved independent review of the Task 1E change, verdict GO FOR LOCAL TASK 1E COMMIT; committed in HyperDoc e60d10ba" ;
+1800c1818,1822
+<     s:evidence-note: "Reported by the executor and not independently checked: the project CTM is read in a 31.1 s median with the change (the baseline did not finish within 120 s); the 120 checks of the focused system pass; the Nix contract check of the integration passes on darwin. Not run on Linux or on the production host" .
+---
+>     s:evidence-note: "Reported by the executor and not independently checked: the project CTM is read in a 31.1 s median with the change (the baseline did not finish within 120 s); the 120 checks of the focused system pass; the Nix contract check of the integration passes on darwin. Not run on Linux or on the production host" ;
+>     s:evidence-note: "Later step, Task 1E, 2026-10-28: Topic Maps commit 88994c1b9e1edbf13e665e984a5c9c3b2cdf7575 (tree b0835676837d6a53457a87880d64046035140bb7, parent 6162ed68c94ea4796b8cf2282edd347d9607b08c), \"perf(tmdm): index association normalization merge candidates\": 33 files (3 modified, 30 added), the indexed search for the next Association merge; local, unpushed; the branch codex/project-work-slice-22u was fast-forwarded to it. Implemented and locally integrated; neither a declaration nor an acceptance" ;
+>     s:evidence-note: "Later step, Task 1E: independent review of the Task 1E change, 2026-10-28, verdict GO FOR LOCAL TASK 1E COMMIT, kept in /Users/rgb/workspace/topic-maps-task-1e-independent-review/REVIEW.md and preserved in HyperDoc in dreyeck/work/topic-maps-task-1e-review/evidence/task1e-independent-review.md. It reviewed the change, not the integrated HyperDoc revision, and is not an acceptance; it states what it does not establish: Linux, the Stage 2 CTM, peak memory on a 2 GiB host, performance at high arity and the Python Unicode checker mismatch" ;
+>     s:evidence-note: "Later step, Task 1E: HyperDoc commit d9da94d8b47f2f1b68c567d6c621e64a5202fdc0 (tree 4e9f34124a9a18fc423ac3f1b8f5828c3139f561), \"feat(topic-maps): integrate 88994c1b into HyperDoc\": local, unpushed; the manifest, the archive pin and the Catalog, 22U and verifier pins; tested as part of one candidate with the two commits after it (e60d10ba, bc002546), not by itself" ;
+>     s:evidence-note: "Later step, reported by the executor and not independently checked: the 88994c1b archive is reproducible (two create runs byte-identical, 2,384 files, 19 independent checks pass); the verifier, the 22U reading and the CTM review pass on the Git-free snapshot (34, 41 and 58 assertions)" .
+1821a1844,1863
+> <tag:dreyeck.ch,2026:hyperdoc/file/nix/topic-maps-88994c1b.manifest>
+>     isa s:repository-file ;
+>     - "nix/topic-maps-88994c1b.manifest" ;
+>     s:repository-path: "nix/topic-maps-88994c1b.manifest" .
+> 
+> <tag:dreyeck.ch,2026:hyperdoc/file/dreyeck/work/topic-maps-project-example.lisp>
+>     isa s:repository-file ;
+>     - "dreyeck/work/topic-maps-project-example.lisp" ;
+>     s:repository-path: "dreyeck/work/topic-maps-project-example.lisp" .
+> 
+> <tag:dreyeck.ch,2026:hyperdoc/file/dreyeck/work/topic-maps-task-1e-review/evidence/task1e-commit-record.md>
+>     isa s:repository-file ;
+>     - "dreyeck/work/topic-maps-task-1e-review/evidence/task1e-commit-record.md" ;
+>     s:repository-path: "dreyeck/work/topic-maps-task-1e-review/evidence/task1e-commit-record.md" .
+> 
+> <tag:dreyeck.ch,2026:hyperdoc/file/dreyeck/work/topic-maps-task-1e-review/evidence/snapshot-archive-verification.json>
+>     isa s:repository-file ;
+>     - "dreyeck/work/topic-maps-task-1e-review/evidence/snapshot-archive-verification.json" ;
+>     s:repository-path: "dreyeck/work/topic-maps-task-1e-review/evidence/snapshot-archive-verification.json" .
+> 
+1828c1870
+<     s:observed-state: "Reported by the executor: committed locally as df5cf16e, not pushed. The criterion of 90 seconds was met with the snapshot and not met with the Git checkout under load; no run is recorded on an idle machine, on Linux, or with the snapshot as the root of the browser walk. This report is not an acceptance." ;
+---
+>     s:observed-state: "Reported by the executor: committed locally as df5cf16e, not pushed. The criterion of 90 seconds was met with the snapshot and not met with the Git checkout under load; no run is recorded on an idle machine, on Linux, or with the snapshot as the root of the browser walk. Later step (Task 1E): the pin was moved to 88994c1b and committed locally as d9da94d8, e60d10ba and bc002546, not pushed; the criterion of 90 seconds was met on the combined tree on a previous revision of this proposal's CTM; no independent check of the integrated HyperDoc revision; the packaged Nix Catalog check was not run. This report is not an acceptance." ;
+1835a1878
+>     s:acceptance-criterion: "Later step (Task 1E): with Topic Maps 88994c1b as a checkout and as the verified snapshot the original project CTM and the Stage 1 proposal's CTM are read and modelled within the unchanged 90 seconds; the pin fails for another commit, including a clean checkout of 6162ed68." ;
+1841a1885,1886
+>     s:source-authority-note: "later step (Task 1E): reads the committed integration record of Topic Maps 88994c1b in HyperDoc (commit bc002546): its evidence, its commit plan and its open items" ;
+>     s:source-authority-note: "later step (Task 1E): reads the verification of the previous Stage 1 CTM on the combined tree; uncommitted Stage 1 proposal material, not a committed source" ;
+1845c1890,1893
+<     s:evidence-note: "Reported by the executor and not independently checked: a checkout of 5a4a668 and an unidentifiable export were refused as the pin (PIN-NOT-OK); the run against the b2eecffa snapshot reported PIN-NOT-OK and was stopped before its reader finished. The packaged Catalog's guard still refuses the Workspace" .
+---
+>     s:evidence-note: "Reported by the executor and not independently checked: a checkout of 5a4a668 and an unidentifiable export were refused as the pin (PIN-NOT-OK); the run against the b2eecffa snapshot reported PIN-NOT-OK and was stopped before its reader finished. The packaged Catalog's guard still refuses the Workspace" ;
+>     s:evidence-note: "Later step, Task 1E, 2026-10-28: the Workspace's pin was moved to 88994c1b in HyperDoc commit d9da94d8b47f2f1b68c567d6c621e64a5202fdc0 (tree 4e9f34124a9a18fc423ac3f1b8f5828c3139f561), followed by e60d10bad9aaaffb3f241e8022f2658eeed18241 (the review reading, tree 56ac6fbb700100cf28b9f2312049593277ee3a56) and bc0025464131781712e24da5ec05594d91637144 (the integration documentation, tree c36594ef725f6908946a0dc56a0263fd865441c7): local, unpushed; tested as one candidate, not each commit by itself. Implemented and locally integrated; neither a declaration nor an acceptance" ;
+>     s:evidence-note: "Later step, reported by the executor on the combined tree (bc002546 plus the uncommitted Stage 1 proposal, whose CTM then had SHA-256 fe2955e93239704673a2a38492ea92e57f0d221f14313603dd1dd5f206b340b8, a previous revision of the CTM), Topic Maps a clean Git checkout of 88994c1b, and not independently checked: the Project suite passed, with 345 source checks, 224 read-back checks with the model in 24.2 s against the unchanged 90-second check, 125 acceptance checks on synthetic fixtures and 196 scope checks; a browser walk of the Workspace and the scope passed. With the original CTM the integration script read the Workspace in 11.6 to 21.9 s and the Stage 1 CTM in 19.4 to 32.3 s on a busy machine; a control with the same Stage 1 bytes under 6162ed68 took 82.3 and 85.8 s against 23.7 s under 88994c1b (single observations). The results for the CTM this page now generates are recorded beside it, not here" ;
+>     s:evidence-note: "Later step, unresolved and preserved: the historical reading Integrating Topic Maps 6162ed68 is bound to 6162ed68 by design and its check pins:catalog-and-22u-reading-and-workspace-and-reading-name-one-commit fails in the current runtime, which is a failure and not a pass; the packaged Nix Catalog check was not run; the Stage 1 results come from a disposable copy and from a combined worktree of uncommitted Stage 1 material; not run on Linux, with the Stage 2 CTM, on the constrained host or at high arity" .
+2526,2527c2574,2577
+< s:changes-source(s:assignment: <tag:dreyeck.ch,2026:hyperdoc/assignment/cc-2026-10-28-regular-catalog-scope>, s:file: <tag:dreyeck.ch,2026:hyperdoc/file/docs/regular-catalog-scope/README.md>)
+< s:changes-source(s:assignment: <tag:dreyeck.ch,2026:hyperdoc/assignment/cc-2026-10-28-regular-catalog-scope>, s:file: <tag:dreyeck.ch,2026:hyperdoc/file/docs/regular-catalog-scope/stage-2-declaration.patch>)
+---
+> s:changes-source(s:assignment: <tag:dreyeck.ch,2026:hyperdoc/assignment/cc-2026-10-28-regular-catalog-scope>, s:file: <tag:dreyeck.ch,2026:hyperdoc/file/docs/regular-catalog-scope/HANDOFF.md>)
+> s:changes-source(s:assignment: <tag:dreyeck.ch,2026:hyperdoc/assignment/cc-2026-10-28-regular-catalog-scope>, s:file: <tag:dreyeck.ch,2026:hyperdoc/file/docs/regular-catalog-scope/on-88994c1b/SCOPE-DECLARATION-REVIEW.md>)
+> s:reads-source(s:assignment: <tag:dreyeck.ch,2026:hyperdoc/assignment/cc-2026-10-28-regular-catalog-scope>, s:source: <tag:dreyeck.ch,2026:hyperdoc/file/docs/topic-maps-88994c1b-integration/README.md>)
+> s:reads-source(s:assignment: <tag:dreyeck.ch,2026:hyperdoc/assignment/cc-2026-10-28-regular-catalog-scope>, s:source: <tag:dreyeck.ch,2026:hyperdoc/file/dreyeck/work/topic-maps-task-1e-review/evidence/task1e-independent-review.md>)
+2536a2587,2591
+> s:changes-source(s:assignment: <tag:dreyeck.ch,2026:hyperdoc/assignment/cc-2026-10-28-topic-maps-6162ed68-revision>, s:file: <tag:dreyeck.ch,2026:hyperdoc/file/nix/topic-maps-88994c1b.manifest>)
+> s:changes-source(s:assignment: <tag:dreyeck.ch,2026:hyperdoc/assignment/cc-2026-10-28-topic-maps-6162ed68-revision>, s:file: <tag:dreyeck.ch,2026:hyperdoc/file/dreyeck/work/topic-maps-project-example.lisp>)
+> s:reads-source(s:assignment: <tag:dreyeck.ch,2026:hyperdoc/assignment/cc-2026-10-28-topic-maps-6162ed68-revision>, s:source: <tag:dreyeck.ch,2026:hyperdoc/file/dreyeck/work/topic-maps-task-1e-review/evidence/task1e-commit-record.md>)
+> s:reads-source(s:assignment: <tag:dreyeck.ch,2026:hyperdoc/assignment/cc-2026-10-28-topic-maps-6162ed68-revision>, s:source: <tag:dreyeck.ch,2026:hyperdoc/file/dreyeck/work/topic-maps-task-1e-review/evidence/snapshot-archive-verification.json>)
+> s:reads-source(s:assignment: <tag:dreyeck.ch,2026:hyperdoc/assignment/cc-2026-10-28-topic-maps-6162ed68-revision>, s:source: <tag:dreyeck.ch,2026:hyperdoc/file/dreyeck/work/topic-maps-task-1e-review/evidence/task1e-independent-review.md>)
+2545a2601,2602
+> s:reads-source(s:assignment: <tag:dreyeck.ch,2026:hyperdoc/assignment/cc-2026-10-28-project-workspace-6162ed68>, s:source: <tag:dreyeck.ch,2026:hyperdoc/file/docs/topic-maps-88994c1b-integration/README.md>)
+> s:reads-source(s:assignment: <tag:dreyeck.ch,2026:hyperdoc/assignment/cc-2026-10-28-project-workspace-6162ed68>, s:source: <tag:dreyeck.ch,2026:hyperdoc/file/docs/regular-catalog-scope/on-88994c1b/SCOPE-DECLARATION-REVIEW.md>)

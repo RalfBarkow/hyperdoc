@@ -1,0 +1,945 @@
+diff --git a/dreyeck.asd b/dreyeck.asd
+index 97ef474c..71cb0d0c 100644
+--- a/dreyeck.asd
++++ b/dreyeck.asd
+@@ -3362,13 +3362,15 @@
+                (:module "dreyeck/pages/project"
+                 :components ((:static-file "HyperDoc Project Workspace.html") (:static-file "Implementation Assignments.html")
+                              ;; Drafts: pages of the HyperBook, not sources of the project CTM until the user decides.
+-                             (:static-file "Project Work Exchange WBS Dictionary.html") (:static-file "Acceptance Records.html"))))
++                             (:static-file "Project Work Exchange WBS Dictionary.html") (:static-file "Acceptance Records.html")
++                             (:static-file "Regular Catalog WBS Dictionary.html"))))
+   :in-order-to ((test-op (test-op "dreyeck/work/project/tests"))))
+ 
+ (defsystem "dreyeck/work/project/tests"
+   :description "The project CTM: read, traced to its declarations, roundtrip in octets and CXTM, refusals, the Workspace path, no wiki written"
+   :depends-on ("dreyeck/work/project" "ironclad" "cl-base64")
+   :components ((:file "dreyeck/tests/project-ctm")
++               (:file "dreyeck/tests/project-scope")
+                (:module "dreyeck/tests/fixtures/project-acceptance"
+                 :components ((:static-file "README.txt") (:static-file "synthetic-work.html") (:static-file "synthetic-assignments-addition.html")
+                              (:static-file "synthetic-dictionary-c1.html") (:static-file "synthetic-dictionary-c2.html")
+@@ -3378,7 +3380,8 @@
+                              (:static-file "synthetic-records-withdrawal-conflict.html"))))
+   :perform (test-op (op component)
+              (declare (ignore op component))
+-             (uiop:symbol-call :dreyeck/work/project/tests :run-tests)))
++             (uiop:symbol-call :dreyeck/work/project/tests :run-tests)
++             (uiop:symbol-call :dreyeck/work/project/tests :run-scope-tests)))
+ 
+ 
+ ;; Optional local Slice 22U reading. The independent checkout is not vendored.
+diff --git a/dreyeck/pages/project/Implementation Assignments.html b/dreyeck/pages/project/Implementation Assignments.html
+index 97fb35c6..7711f1df 100644
+--- a/dreyeck/pages/project/Implementation Assignments.html	
++++ b/dreyeck/pages/project/Implementation Assignments.html	
+@@ -27,6 +27,63 @@
+ <li data-proposed-from="project-work-ctm-exchange" data-proposed-relation="work:relation/decomposes-into" data-proposed-to="pwc-wp-8">Exchangeable CTM → Reader in practical time: decomposes into.</li>
+ </ul>
+ 
++<h2>Proposed Work: Regular HyperDoc Catalog with a Navigable Project Topic Map</h2>
++<p>The Work Item, the Deliverable, the work packages and the plan of Zettel 11359. None of them is declared, and none has a work status. The work packages are described by the draft <code>Regular Catalog WBS Dictionary</code>, which declares nothing either. This scope is distinct from <code>tmd-deployment</code>, the separate staging Catalog, and from <code>project-work-ctm-exchange</code>, the exchangeable project CTM; it repeats no deliverable of either.</p>
++<p>Completeness: the six elements together are the whole defined scope. A Topic Maps revision whose identity can be checked (1), a Project Workspace that reads the unchanged project CTM with it (2), project work a reader can navigate and inspect in that Workspace (3), a public Inspector that is safe to expose (4), the regular Catalog package built reproducibly (5) and its verified deployment (6). What the scope needs and does not deliver are preconditions of the plan below: the user's admission of the Project Workspace to a served runtime, an independent security review, the decision to publish the archive and the approval of the production activation. Project management is not an element: this scope proposal and the integration review deliver no package.</p>
++<p>Overlap: 1 and 5 meet at the snapshot: 1 makes the revision and its manifest verifiable, 5 builds the package that serves it. 2 and 3 both concern the Project Workspace: 2 that it reads the unchanged project CTM with the revision and refuses what it cannot identify, 3 what the project work shows and how it is navigated, including the reading of the integration. 4 and 6 meet at exposure: 4 makes the views safe, 6 activates them. Package 5 builds the same regular Catalog on which the separate staging package of <code>tmd-deployment</code> was modelled; it neither changes that package nor its running service.</p>
++<p>Gap: no Relation Contract relates a Work Item to a Deliverable, so none is proposed; the Deliverable <code>tm-regular-catalog</code> decomposes into the six packages and is related to its Work Item only by this text (see pwc-wp-3).</p>
++<ul>
++<li><a page="HyperDoc Project Workspace" hyperbook="dreyeck/work/project" data-proposed-topic="topic-maps-regular-hyperdoc" data-kind="work item">Regular HyperDoc Catalog with a Navigable Project Topic Map</a> — the regular HyperDoc Catalog, built on a reviewed Topic Maps revision, in which the project's work is itself a Topic Map that a reader can navigate and inspect.</li>
++<li><a page="HyperDoc Project Workspace" hyperbook="dreyeck/work/project" data-proposed-topic="tm-regular-catalog" data-kind="deliverable">Regular HyperDoc Catalog with a Navigable Project Topic Map</a> — the defined scope: the integrated Topic Maps revision, the compatible Project Workspace, the inspectable project work, the safe public Inspector, the reproducible package and its verified deployment.</li>
++<li><a page="HyperDoc Project Workspace" hyperbook="dreyeck/work/project" data-proposed-topic="tm-reg-wp-1" data-kind="work package">1 Integrated Topic Maps Revision</a> — the reviewed commit 6162ed68, its snapshot, manifest and pin, with the identity that HyperDoc checks.</li>
++<li><a page="HyperDoc Project Workspace" hyperbook="dreyeck/work/project" data-proposed-topic="tm-reg-wp-2" data-kind="work package">2 Compatible Project Workspace</a> — the Project Workspace bound to that revision, reading the unchanged project CTM, telling a checkout, a verified snapshot and an unidentifiable directory apart.</li>
++<li><a page="HyperDoc Project Workspace" hyperbook="dreyeck/work/project" data-proposed-topic="tm-reg-wp-3" data-kind="work package">3 Inspectable Project Work</a> — the project work navigable in the Workspace and the Inspector from a Work Item to its packages, assignments, evidence and source commits.</li>
++<li><a page="HyperDoc Project Workspace" hyperbook="dreyeck/work/project" data-proposed-topic="tm-reg-wp-4" data-kind="work package">4 Safe Public Inspector</a> — every public view read-only; no view or button runs code, writes or discloses a host path; an independent security review.</li>
++<li><a page="HyperDoc Project Workspace" hyperbook="dreyeck/work/project" data-proposed-topic="tm-reg-wp-5" data-kind="work package">5 Reproducible Catalog Package</a> — the regular Catalog package built and checked for Linux and Darwin with the verified snapshot.</li>
++<li><a page="HyperDoc Project Workspace" hyperbook="dreyeck/work/project" data-proposed-topic="tm-reg-wp-6" data-kind="work package">6 Verified Production Deployment</a> — the package staged, verified, approved and activated on dreyeck.ch, with a rollback shown.</li>
++</ul>
++<ul>
++<li data-proposed-from="tm-regular-catalog" data-proposed-relation="work:relation/decomposes-into" data-proposed-to="tm-reg-wp-1">Regular Catalog → 1 Integrated Topic Maps Revision: decomposes into.</li>
++<li data-proposed-from="tm-regular-catalog" data-proposed-relation="work:relation/decomposes-into" data-proposed-to="tm-reg-wp-2">Regular Catalog → 2 Compatible Project Workspace: decomposes into.</li>
++<li data-proposed-from="tm-regular-catalog" data-proposed-relation="work:relation/decomposes-into" data-proposed-to="tm-reg-wp-3">Regular Catalog → 3 Inspectable Project Work: decomposes into.</li>
++<li data-proposed-from="tm-regular-catalog" data-proposed-relation="work:relation/decomposes-into" data-proposed-to="tm-reg-wp-4">Regular Catalog → 4 Safe Public Inspector: decomposes into.</li>
++<li data-proposed-from="tm-regular-catalog" data-proposed-relation="work:relation/decomposes-into" data-proposed-to="tm-reg-wp-5">Regular Catalog → 5 Reproducible Catalog Package: decomposes into.</li>
++<li data-proposed-from="tm-regular-catalog" data-proposed-relation="work:relation/decomposes-into" data-proposed-to="tm-reg-wp-6">Regular Catalog → 6 Verified Production Deployment: decomposes into.</li>
++</ul>
++
++<h3>Proposed plan: Regular HyperDoc Catalog</h3>
++<p>Plan steps, each for one work package, and the preconditions the steps wait on. A plan step is work to do, not a deliverable; a precondition is something the scope needs and does not deliver. No plan step or precondition grants authority. The four preconditions are an addition to the six steps of Zettel 11359 and are put to the user for review.</p>
++<ul>
++<li><a page="HyperDoc Project Workspace" hyperbook="dreyeck/work/project" data-proposed-topic="tm-reg-p1" data-kind="plan step">Integrate and verify Topic Maps 6162ed68</a> — fast-forward the Topic Maps line, pin the snapshot, verify it without .git and run the Topic Maps suite.</li>
++<li><a page="HyperDoc Project Workspace" hyperbook="dreyeck/work/project" data-proposed-topic="tm-reg-p2" data-kind="plan step">Verify the unchanged project CTM</a> — read it with the revision, within the operational limit, and compare the signature and the CXTM.</li>
++<li><a page="HyperDoc Project Workspace" hyperbook="dreyeck/work/project" data-proposed-topic="tm-reg-p3" data-kind="plan step">Integrate Project Workspace and Inspector navigation</a> — the project work navigable from the Work Item to its evidence, and the reading of the integration.</li>
++<li><a page="HyperDoc Project Workspace" hyperbook="dreyeck/work/project" data-proposed-topic="tm-reg-p4" data-kind="plan step">Verify and enforce public Inspector security</a> — read-only public views, gated run buttons, an independent review.</li>
++<li><a page="HyperDoc Project Workspace" hyperbook="dreyeck/work/project" data-proposed-topic="tm-reg-p5" data-kind="plan step">Build and test the regular Linux and Nix Catalog package</a> — on an independent builder, with the derivation compared.</li>
++<li><a page="HyperDoc Project Workspace" hyperbook="dreyeck/work/project" data-proposed-topic="tm-reg-p6" data-kind="plan step">Stage, verify, obtain production approval and deploy</a> — activate the generation, verify identity and boundaries, show the rollback.</li>
++<li><a page="HyperDoc Project Workspace" hyperbook="dreyeck/work/project" data-proposed-topic="tm-reg-pre-admission" data-kind="precondition">Admission of the Project Workspace to a served runtime</a> — the user's decision; the Catalog's startup guard refuses the Workspace until it is made.</li>
++<li><a page="HyperDoc Project Workspace" hyperbook="dreyeck/work/project" data-proposed-topic="tm-reg-pre-security-review" data-kind="precondition">Independent security review of the public Inspector</a> — a report by a reviewer who is not the executor.</li>
++<li><a page="HyperDoc Project Workspace" hyperbook="dreyeck/work/project" data-proposed-topic="tm-reg-pre-publish" data-kind="precondition">Decision to publish or transfer the archive</a> — the user's; a builder must be able to obtain the Topic Maps snapshot.</li>
++<li><a page="HyperDoc Project Workspace" hyperbook="dreyeck/work/project" data-proposed-topic="tm-reg-pre-production" data-kind="precondition">Approval of the production activation</a> — the user's, for the generation on dreyeck.ch, with the operator's record of the server's state.</li>
++</ul>
++<ul>
++<li data-proposed-from="tm-reg-p1" data-proposed-relation="work:relation/produces" data-proposed-to="tm-reg-wp-1">Integrate and verify Topic Maps → 1 Integrated Topic Maps Revision: produces.</li>
++<li data-proposed-from="tm-reg-p2" data-proposed-relation="work:relation/produces" data-proposed-to="tm-reg-wp-2">Verify the unchanged project CTM → 2 Compatible Project Workspace: produces.</li>
++<li data-proposed-from="tm-reg-p3" data-proposed-relation="work:relation/produces" data-proposed-to="tm-reg-wp-3">Integrate Workspace and Inspector navigation → 3 Inspectable Project Work: produces.</li>
++<li data-proposed-from="tm-reg-p4" data-proposed-relation="work:relation/produces" data-proposed-to="tm-reg-wp-4">Verify and enforce Inspector security → 4 Safe Public Inspector: produces.</li>
++<li data-proposed-from="tm-reg-p5" data-proposed-relation="work:relation/produces" data-proposed-to="tm-reg-wp-5">Build and test the Catalog package → 5 Reproducible Catalog Package: produces.</li>
++<li data-proposed-from="tm-reg-p6" data-proposed-relation="work:relation/produces" data-proposed-to="tm-reg-wp-6">Stage, verify and deploy → 6 Verified Production Deployment: produces.</li>
++<li data-proposed-from="tm-reg-p2" data-proposed-relation="work:relation/depends-on" data-proposed-to="tm-reg-p1">Verify the unchanged project CTM → Integrate and verify Topic Maps: depends on.</li>
++<li data-proposed-from="tm-reg-p3" data-proposed-relation="work:relation/depends-on" data-proposed-to="tm-reg-p2">Integrate Workspace and Inspector navigation → Verify the unchanged project CTM: depends on.</li>
++<li data-proposed-from="tm-reg-p4" data-proposed-relation="work:relation/depends-on" data-proposed-to="tm-reg-p3">Verify and enforce Inspector security → Integrate Workspace and Inspector navigation: depends on.</li>
++<li data-proposed-from="tm-reg-p5" data-proposed-relation="work:relation/depends-on" data-proposed-to="tm-reg-p1">Build and test the Catalog package → Integrate and verify Topic Maps: depends on.</li>
++<li data-proposed-from="tm-reg-p5" data-proposed-relation="work:relation/depends-on" data-proposed-to="tm-reg-p4">Build and test the Catalog package → Verify and enforce Inspector security: depends on.</li>
++<li data-proposed-from="tm-reg-p5" data-proposed-relation="work:relation/depends-on" data-proposed-to="tm-reg-pre-admission">Build and test the Catalog package → Admission of the Project Workspace: depends on.</li>
++<li data-proposed-from="tm-reg-p5" data-proposed-relation="work:relation/depends-on" data-proposed-to="tm-reg-pre-publish">Build and test the Catalog package → Decision to publish the archive: depends on.</li>
++<li data-proposed-from="tm-reg-p6" data-proposed-relation="work:relation/depends-on" data-proposed-to="tm-reg-p5">Stage, verify and deploy → Build and test the Catalog package: depends on.</li>
++<li data-proposed-from="tm-reg-p6" data-proposed-relation="work:relation/depends-on" data-proposed-to="tm-reg-pre-security-review">Stage, verify and deploy → Independent security review: depends on.</li>
++<li data-proposed-from="tm-reg-p6" data-proposed-relation="work:relation/depends-on" data-proposed-to="tm-reg-pre-production">Stage, verify and deploy → Approval of the production activation: depends on.</li>
++</ul>
++
+ <h2>Assignments</h2>
+ <section data-assignment="cc-2026-10-18-project-work-ctm">
+ <h3>Claude Code: Project Work as an Exchangeable CTM Topic Map</h3>
+@@ -180,3 +237,162 @@
+ <p data-field="observed-state">Reported by the executor: a read-only review; no conformance check, no re-import and no comparison was performed. This report is not an acceptance.</p>
+ <p data-field="acceptance">No acceptance by the user is recorded.</p>
+ </section>
++
++<h2>Assignments: Regular HyperDoc Catalog with a Navigable Project Topic Map</h2>
++<section data-assignment="cc-2026-10-28-regular-catalog-scope">
++<h3>Claude Code: Model the scope of the Regular HyperDoc Catalog (Zettel 11359)</h3>
++<p data-field="issued">Given by the user on 2026-10-28 in a Claude Code session (Claude Sonnet 5.5) as Zettel 11359, after the four local commits of the Topic Maps 6162ed68 integration: integrate the regular Catalog, its work packages and plan into the existing project scope, WBS, WBS Dictionary and Implementation Assignments, in two stages, and stop at the Scope Declaration Review.</p>
++<p data-field="goal">Propose the Work Item topic-maps-regular-hyperdoc and the Deliverable tm-regular-catalog with six work packages, six plan steps and their relations, and describe the packages in a draft WBS Dictionary, all as proposals, navigable in the Project Workspace. Prepare the Stage 2 declaration for review, without applying it: it has not been produced (no patch exists; only incomplete, unverified drafts are kept in docs/regular-catalog-scope/stage-2-draft/). Change no Work declaration, status or acceptance, and no Topic Maps or Catalog package.</p>
++<p data-field="work-item" data-ref="topic-maps-regular-hyperdoc">The proposed Work Item above. It is not declared on the Work Breakdown.</p>
++<p data-field="plan-step">No Plan Step is confirmed for this assignment. Its text cannot make one. The assignment delivers no work package: it models the scope.</p>
++<ul data-field="source-authorities">
++<li data-reads="dreyeck/pages/work/Work Breakdown.html">reads the Work Breakdown, authoritative for its Work declarations</li>
++<li data-reads="dreyeck/pages/work/Authoring the CTM Plan Page.html">reads the CTM plan page, authoritative for the vocabulary and relations of a declared WBS and plan</li>
++<li data-reads="dreyeck/pages/work/CTM Plan Page WBS Dictionary.html">reads the WBS Dictionary, authoritative for the form of a dictionary entry</li>
++<li data-reads="dreyeck/pages/project/Project Work Exchange WBS Dictionary.html">reads the existing draft dictionary of project-work-ctm-exchange; not changed</li>
++<li data-reads="docs/project-acceptance-model.md">reads the acceptance model: requirement, report and acceptance stay apart</li>
++<li data-reads="dreyeck/work/project/project-ctm.lisp">reads the emitter and its source registry; not changed</li>
++<li data-changes="dreyeck/pages/project/Implementation Assignments.html">adds the proposals and the assignments of this scope</li>
++<li data-changes="dreyeck/pages/project/Regular Catalog WBS Dictionary.html">adds the draft dictionary of the six proposed work packages; not a source of the project CTM</li>
++<li data-changes="dreyeck/work/project/hyperdoc-project.ctm">regenerated by the emitter from the source pages</li>
++<li data-changes="dreyeck/work/project/hyperdoc-project.ctm.sha256">the digest of the regenerated CTM, kept beside it</li>
++<li data-changes="dreyeck.asd">lists the draft dictionary page and the scope tests</li>
++<li data-changes="dreyeck/tests/project-scope.lisp">adds the tests of the scope, derived from the page text</li>
++<li data-changes="scripts/test-project-workspace-scope.mjs">adds the browser walk of the scope in the Project Workspace</li>
++<li data-changes="docs/regular-catalog-scope/HANDOFF.md">the handoff of the proposal: its state, its known defects and what prevents a fully verified review; Stage 1 proposal material — not declared or accepted</li>
++<li data-changes="docs/regular-catalog-scope/on-88994c1b/SCOPE-DECLARATION-REVIEW.md">the verification of the proposal on HyperDoc bc002546 and the Scope Declaration Review; Stage 1 proposal material — not declared or accepted</li>
++<li data-reads="docs/topic-maps-88994c1b-integration/README.md">reads the committed integration record of Topic Maps 88994c1b in HyperDoc (commit bc002546): its evidence, its commit plan and its open items</li>
++<li data-reads="dreyeck/work/topic-maps-task-1e-review/evidence/task1e-independent-review.md">reads the preserved independent review of Task 1E (GO FOR LOCAL TASK 1E COMMIT); committed in HyperDoc e60d10ba</li>
++</ul>
++<ul data-field="preconditions">
++<li>No Work declaration, status, Acceptance Record or historical evidence is changed; no proposal becomes a declaration.</li>
++<li>Topic Maps, the existing Catalog package and the running staging service are not changed.</li>
++<li>No commit, push, merge, deployment or server configuration without the user's separate authorization.</li>
++<li>The project CTM is regenerated only by the emitter from the source pages, never edited.</li>
++</ul>
++<ul data-field="acceptance-criteria">
++<li>Every proposed ID is unique and every proposed work package has exactly one dictionary entry.</li>
++<li>WBS decomposition, plan dependencies and products are distinct Association types.</li>
++<li>The proposal is read from the source page by the real emitter and reader; no parallel Topic Map is built.</li>
++<li>The scope is navigable in a real HyperDoc browser session, with the source of each relation inspectable.</li>
++<li>The prepared declaration is not applied and is complete: carrier page, declared dictionary, Work Breakdown entry and source registration.</li>
++</ul>
++<ul data-field="evidence">
++<li data-test="dreyeck/tests/project-scope.lisp">tests of the scope derived from the page text</li>
++<li data-test="scripts/test-project-workspace-scope.mjs">browser walk of the scope in the Project Workspace</li>
++</ul>
++<p data-field="observed-state">Reported by the executor: a proposal in the working tree of a separate worktree, not committed. The Stage 2 declaration is not produced: stage-2-declaration.patch is a Stage 2 artifact that does not exist yet and is not a source authority of this assignment; the drafts in docs/regular-catalog-scope/stage-2-draft/ are incomplete and unverified. Zettel 11353 (the existing staging installation) and Zettel 11359 are the user's; neither is an acceptance. This report is not an acceptance.</p>
++<p data-field="acceptance">No acceptance by the user is recorded.</p>
++</section>
++
++<section data-assignment="cc-2026-10-28-topic-maps-6162ed68-revision">
++<h3>Claude Code: Integrate Topic Maps 6162ed68 as the pinned revision</h3>
++<p data-field="issued">Given by the user on 2026-10-28 in a Claude Code session (Claude Sonnet 5.5) as Task 1C Integration, after the independent review of the Task 1C change, and later "Commit the four": bring the reviewed Topic Maps commit into HyperDoc as its pinned runtime snapshot and commit it locally.</p>
++<p data-field="goal">Pin HyperDoc to Topic Maps 6162ed68c94ea4796b8cf2282edd347d9607b08c (b2eecffa and the indexed search for the next Topic merge) as a content-addressed runtime snapshot with a manifest that HyperDoc verifies without .git.</p>
++<p data-field="work-item" data-ref="topic-maps-regular-hyperdoc">The proposed Work Item above. It is not declared on the Work Breakdown.</p>
++<p data-field="delivers" data-ref="tm-reg-wp-1">The proposed work package "1 Integrated Topic Maps Revision" above.</p>
++<p data-field="plan-step">No Plan Step is confirmed for this assignment. Its text cannot make one; the proposed step tm-reg-p1 produces the package.</p>
++<ul data-field="source-authorities">
++<li data-changes="nix/topic-maps-6162ed68.manifest">adds the manifest of Git objects of the snapshot</li>
++<li data-changes="nix/topic-maps-source.nix">pins the archive to the new revision</li>
++<li data-changes="dreyeck/src/catalog-topic-maps.lisp">names the revision the startup policy checks</li>
++<li data-changes="dreyeck/tests/source-snapshot.lisp">verifies the snapshot against the manifest, without .git</li>
++<li data-changes="nix/topic-maps-88994c1b.manifest">later step (Task 1E): adds the manifest of Git objects of the 88994c1b snapshot; the 6162ed68 and b2eecffa manifests stay as history; committed in HyperDoc d9da94d8</li>
++<li data-changes="dreyeck/work/topic-maps-project-example.lisp">later step (Task 1E): names the revision of the 22U reading; committed in HyperDoc d9da94d8. The same commit moves the manifest of the snapshot pin and the revision named in the entries above to 88994c1b</li>
++<li data-reads="dreyeck/work/topic-maps-task-1e-review/evidence/task1e-commit-record.md">later step (Task 1E): reads the commit record of Topic Maps 88994c1b: parent, tree, files and the state of the primary checkout; committed in HyperDoc e60d10ba</li>
++<li data-reads="dreyeck/work/topic-maps-task-1e-review/evidence/snapshot-archive-verification.json">later step (Task 1E): reads the independent verification of the 88994c1b archive against the commit with Git and Nix; committed in HyperDoc e60d10ba</li>
++<li data-reads="dreyeck/work/topic-maps-task-1e-review/evidence/task1e-independent-review.md">later step (Task 1E): reads the preserved independent review of the Task 1E change, verdict GO FOR LOCAL TASK 1E COMMIT; committed in HyperDoc e60d10ba</li>
++</ul>
++<ul data-field="preconditions">
++<li>No push, merge, publication of the archive, NixOS change or deployment; the Topic Maps branch is fast-forwarded locally only.</li>
++<li>The experimental association index of Task 1C stays out; it is a separate task. (Historical: it became the reviewed Task 1E change and was integrated later, see the evidence of the later step.)</li>
++</ul>
++<ul data-field="acceptance-criteria">
++<li>The authoritative Topic Maps line holds a tree equal to the reviewed commit's, with b2eecffa preserved.</li>
++<li>The snapshot verifies against its manifest without .git, and every alteration is refused.</li>
++<li>Every Topic Maps system the Catalog's startup policy checks resolves to that one root.</li>
++<li>Later step (Task 1E): the authoritative line holds a tree equal to the reviewed Task 1E commit's, with 6162ed68 and b2eecffa preserved, and the 88994c1b snapshot verifies against its manifest without .git.</li>
++</ul>
++<ul data-field="evidence">
++<li>HyperDoc commit a55c4a0b7d984cab1f2fd429be26e4ceb0c1b60b (tree 94d21b2e7dcb110b770c47af2a8c9184733398b7), "Pin Topic Maps 6162ed68: snapshot manifest, pins and the earlier review's version-bound contract": local, unpushed, signed; a source change of the package, not an acceptance</li>
++<li>Topic Maps commit 6162ed68c94ea4796b8cf2282edd347d9607b08c (parent b2eecffa): local, unpushed; the branch codex/project-work-slice-22u was fast-forwarded to it</li>
++<li>Independent review of the Task 1C change, 2026-10-28, verdict GO, kept in /Users/rgb/workspace/topic-maps-task-1c-evidence/independent-review-2026-10-28/: it reconstructed the baseline and candidate trees, reran the focused system and regenerated the recorded fixtures with the unchanged baseline source. It reviewed the change, not the integrated HyperDoc revision, and is not an acceptance</li>
++<li>Reported by the executor and not independently checked: the project CTM is read in a 31.1 s median with the change (the baseline did not finish within 120 s); the 120 checks of the focused system pass; the Nix contract check of the integration passes on darwin. Not run on Linux or on the production host</li>
++<li>Later step, Task 1E, 2026-10-28: Topic Maps commit 88994c1b9e1edbf13e665e984a5c9c3b2cdf7575 (tree b0835676837d6a53457a87880d64046035140bb7, parent 6162ed68c94ea4796b8cf2282edd347d9607b08c), "perf(tmdm): index association normalization merge candidates": 33 files (3 modified, 30 added), the indexed search for the next Association merge; local, unpushed; the branch codex/project-work-slice-22u was fast-forwarded to it. Implemented and locally integrated; neither a declaration nor an acceptance</li>
++<li>Later step, Task 1E: independent review of the Task 1E change, 2026-10-28, verdict GO FOR LOCAL TASK 1E COMMIT, kept in /Users/rgb/workspace/topic-maps-task-1e-independent-review/REVIEW.md and preserved in HyperDoc in dreyeck/work/topic-maps-task-1e-review/evidence/task1e-independent-review.md. It reviewed the change, not the integrated HyperDoc revision, and is not an acceptance; it states what it does not establish: Linux, the Stage 2 CTM, peak memory on a 2 GiB host, performance at high arity and the Python Unicode checker mismatch</li>
++<li>Later step, Task 1E: HyperDoc commit d9da94d8b47f2f1b68c567d6c621e64a5202fdc0 (tree 4e9f34124a9a18fc423ac3f1b8f5828c3139f561), "feat(topic-maps): integrate 88994c1b into HyperDoc": local, unpushed; the manifest, the archive pin and the Catalog, 22U and verifier pins; tested as part of one candidate with the two commits after it (e60d10ba, bc002546), not by itself</li>
++<li>Later step, reported by the executor and not independently checked: the 88994c1b archive is reproducible (two create runs byte-identical, 2,384 files, 19 independent checks pass); the verifier, the 22U reading and the CTM review pass on the Git-free snapshot (34, 41 and 58 assertions)</li>
++</ul>
++<p data-field="observed-state">Reported by the executor: committed locally as a55c4a0b on the branch claude/topic-maps-6162ed68-integration after the user authorized the four commits; not pushed. No independent check of the integrated revision has been made, and no Linux build. Later step (Task 1E): the revision was moved to 88994c1b and committed locally as d9da94d8 on the branch claude/topic-maps-88994c1b-integration, not pushed; the packaged Nix Catalog check was not run, no independent check of the integrated HyperDoc revision, no Linux build, the archive is not published. This report is not an acceptance.</p>
++<p data-field="acceptance">No acceptance by the user is recorded.</p>
++</section>
++
++<section data-assignment="cc-2026-10-28-project-workspace-6162ed68">
++<h3>Claude Code: Bind the Project Workspace to Topic Maps 6162ed68</h3>
++<p data-field="issued">Given by the user on 2026-10-28 in a Claude Code session (Claude Sonnet 5.5) as the Complete the HyperDoc 6162ed68 Integration Review, before the commits: show in the actual Project Workspace that it reads the unchanged project CTM with the pinned revision, and do not bypass the Catalog's guard.</p>
++<p data-field="goal">Bind the Project Workspace to the pinned revision, identify a clean Git checkout, a verified Git-free snapshot and an unidentifiable directory apart, and show the unchanged project CTM read with it, in a browser.</p>
++<p data-field="work-item" data-ref="topic-maps-regular-hyperdoc">The proposed Work Item above. It is not declared on the Work Breakdown.</p>
++<p data-field="delivers" data-ref="tm-reg-wp-2">The proposed work package "2 Compatible Project Workspace" above.</p>
++<p data-field="plan-step">No Plan Step is confirmed for this assignment. Its text cannot make one; the proposed step tm-reg-p2 produces the package.</p>
++<ul data-field="source-authorities">
++<li data-changes="dreyeck/work/project/project-workspace.lisp">binds the pin and reports the source identity</li>
++<li data-changes="dreyeck/work/project/project-ctm.lisp">depends on the snapshot verifier</li>
++<li data-changes="dreyeck/src/catalog-topic-maps.lisp">rewords the guard's refusal of the Project Workspace; the guard still refuses it</li>
++<li data-changes="dreyeck/tests/project-ctm.lisp">tests the pin and the identity</li>
++<li data-changes="scripts/run-project-workspace-integration.lisp">runs the Workspace against the Topic Maps ASDF finds in one fresh process</li>
++<li data-reads="dreyeck/work/project/hyperdoc-project.ctm">reads the retained project CTM; no Work page and no CTM is changed</li>
++<li data-reads="docs/topic-maps-88994c1b-integration/README.md">later step (Task 1E): reads the committed integration record of Topic Maps 88994c1b in HyperDoc (commit bc002546): its evidence, its commit plan and its open items</li>
++<li data-reads="docs/regular-catalog-scope/on-88994c1b/SCOPE-DECLARATION-REVIEW.md">later step (Task 1E): reads the verification of the previous Stage 1 CTM on the combined tree; Stage 1 proposal material — not declared or accepted</li>
++</ul>
++<ul data-field="preconditions">
++<li>No Work page and no project CTM is changed; the Catalog's guard is not bypassed.</li>
++<li>The Workspace runs in the trusted review runtime, not in the guarded packaged Catalog.</li>
++</ul>
++<ul data-field="acceptance-criteria">
++<li>With Topic Maps 6162ed68 as a checkout and as the verified snapshot the unchanged project CTM is read without refusal within 90 seconds.</li>
++<li>The signature and the CXTM equal the reference.</li>
++<li>The pin fails for another commit, for another snapshot and for an unidentifiable directory.</li>
++<li>The packaged Catalog's startup guard still refuses the Project Workspace.</li>
++<li>Later step (Task 1E): with Topic Maps 88994c1b as a checkout and as the verified snapshot the original project CTM and the Stage 1 proposal's CTM are read and modelled within the unchanged 90 seconds; the pin fails for another commit, including a clean checkout of 6162ed68.</li>
++</ul>
++<ul data-field="evidence">
++<li>HyperDoc commit df5cf16ebf53944325f737313cceae30a7ea2513 (tree 857211810fdd9d09f127e3f70cb6d2f0969389ff), "Bind the Project Workspace to Topic Maps 6162ed68 and identify a Git-free snapshot": local, unpushed, signed; a source change of the package, not an acceptance</li>
++<li data-test="scripts/test-project-workspace.mjs">Reported by the executor, 2026-10-28T09:14:18Z, tree not recorded as a clean commit: the browser test passed in the trusted review runtime with the object-identity check and the named absence of an acceptance record. It ran on a scratch commit (21c3e3ee) holding the identical tree 857211810fdd9d09f127e3f70cb6d2f0969389ff that df5cf16e has, rehearsed before the commit, not on df5cf16e itself</li>
++<li data-test="scripts/run-project-workspace-integration.lisp">Reported by the executor, on the then-uncommitted integration worktree over the base commit 8e64e7189daf1c5615cbc8bbe40cff3bf2bcd1aa (a modified tree that is not fully reconstructible from that revision): with a clean Git checkout of Topic Maps 6162ed68 the pin was OK and the project CTM was read in 161 s on 2026-10-28 (06:36:17Z), so NOT within 90 s, on a machine with a load average of about 13; with the verified Git-free snapshot it was read in 38.7 s (06:42:12Z), within 90 s; in both the CXTM bytes were equal to the reference and the CTM input was unchanged</li>
++<li>Reported by the executor and not independently checked: a checkout of 5a4a668 and an unidentifiable export were refused as the pin (PIN-NOT-OK); the run against the b2eecffa snapshot reported PIN-NOT-OK and was stopped before its reader finished. The packaged Catalog's guard still refuses the Workspace</li>
++<li>Later step, Task 1E, 2026-10-28: the Workspace's pin was moved to 88994c1b in HyperDoc commit d9da94d8b47f2f1b68c567d6c621e64a5202fdc0 (tree 4e9f34124a9a18fc423ac3f1b8f5828c3139f561), followed by e60d10bad9aaaffb3f241e8022f2658eeed18241 (the review reading, tree 56ac6fbb700100cf28b9f2312049593277ee3a56) and bc0025464131781712e24da5ec05594d91637144 (the integration documentation, tree c36594ef725f6908946a0dc56a0263fd865441c7): local, unpushed; tested as one candidate, not each commit by itself. Implemented and locally integrated; neither a declaration nor an acceptance</li>
++<li>Later step, reported by the executor on the combined tree (bc002546 plus the uncommitted Stage 1 proposal, whose CTM then had SHA-256 fe2955e93239704673a2a38492ea92e57f0d221f14313603dd1dd5f206b340b8, a previous revision of the CTM), Topic Maps a clean Git checkout of 88994c1b, and not independently checked: the Project suite passed, with 345 source checks, 224 read-back checks with the model in 24.2 s against the unchanged 90-second check, 125 acceptance checks on synthetic fixtures and 196 scope checks; a browser walk of the Workspace and the scope passed. With the original CTM the integration script read the Workspace in 11.6 to 21.9 s and the Stage 1 CTM in 19.4 to 32.3 s on a busy machine; a control with the same Stage 1 bytes under 6162ed68 took 82.3 and 85.8 s against 23.7 s under 88994c1b (single observations). The results for the CTM this page now generates are recorded beside it, not here</li>
++<li>Later step, unresolved and preserved: the historical reading Integrating Topic Maps 6162ed68 is bound to 6162ed68 by design and its check pins:catalog-and-22u-reading-and-workspace-and-reading-name-one-commit fails in the current runtime, which is a failure and not a pass; the packaged Nix Catalog check was not run; the Stage 1 results come from a disposable copy and from a combined worktree of uncommitted Stage 1 material; not run on Linux, with the Stage 2 CTM, on the constrained host or at high arity</li>
++</ul>
++<p data-field="observed-state">Reported by the executor: committed locally as df5cf16e, not pushed. The criterion of 90 seconds was met with the snapshot and not met with the Git checkout under load; no run is recorded on an idle machine, on Linux, or with the snapshot as the root of the browser walk. Later step (Task 1E): the pin was moved to 88994c1b and committed locally as d9da94d8, e60d10ba and bc002546, not pushed; the criterion of 90 seconds was met on the combined tree on a previous revision of this proposal's CTM; no independent check of the integrated HyperDoc revision; the packaged Nix Catalog check was not run. This report is not an acceptance.</p>
++<p data-field="acceptance">No acceptance by the user is recorded.</p>
++</section>
++
++<section data-assignment="cc-2026-10-28-project-work-reading-6162ed68">
++<h3>Claude Code: Read the Topic Maps 6162ed68 integration in HyperDoc</h3>
++<p data-field="issued">Given by the user on 2026-10-28 in a Claude Code session (Claude Sonnet 5.5) as Task 1C Integration and the review that followed: make the integration readable in HyperDoc, with its definitions, evidence and project objects, and document its limits.</p>
++<p data-field="goal">A HyperDoc reading in which a human follows the integration to its definitions, evidence and project objects, and a document of its commit boundaries, limits and the proposed staging procedure, without a second project model.</p>
++<p data-field="work-item" data-ref="topic-maps-regular-hyperdoc">The proposed Work Item above. It is not declared on the Work Breakdown.</p>
++<p data-field="delivers" data-ref="tm-reg-wp-3">The proposed work package "3 Inspectable Project Work" above. The reading and the documents make part of it; navigating the scope itself is delivered by the assignment cc-2026-10-28-regular-catalog-scope.</p>
++<p data-field="plan-step">No Plan Step is confirmed for this assignment. Its text cannot make one; the proposed step tm-reg-p3 produces the package.</p>
++<ul data-field="source-authorities">
++<li data-changes="dreyeck/work/topic-maps-integration-review/">adds the reading of the integration, with its tests and its operator start</li>
++<li data-changes="docs/topic-maps-6162ed68-integration/README.md">documents the commit boundaries, the limits and the proposed staging procedure</li>
++</ul>
++<ul data-field="preconditions">
++<li>The reading declares no Work and records no acceptance; its proposed relations stay proposed.</li>
++<li>The reading is a local review, not the packaged staging book: the Catalog's guard refuses the Project Workspace.</li>
++</ul>
++<ul data-field="acceptance-criteria">
++<li>The reading's pages, evidence digests, claims and subjects are checked by its suite.</li>
++<li>The reading is served and navigated to the project objects it names.</li>
++<li>The known unresolved observation EVIDENCE-NAMES-ITS-RECORD of the earlier deployment review is preserved, not weakened.</li>
++</ul>
++<ul data-field="evidence">
++<li>HyperDoc commit c50cf5f7c26504e3ad34f701edcb8b3969b5879c (tree 18906fd61b2fc259f127ee2d8c53c9b37ff4f0f1), "Add the reading of the Topic Maps 6162ed68 integration": local, unpushed, signed; a source change of the reading, not an acceptance</li>
++<li>HyperDoc commit 909bcab342c8107f3b2ed2d052f72307b43a9c7f (tree d4c3560012cd46532d2574241bf66cf3f406f1fd), "Document the Topic Maps 6162ed68 integration, its limits and the proposed staging procedure": local, unpushed, signed; a documentation change, not an acceptance</li>
++<li>Unresolved and preserved: the second procedure of the earlier deployment review fails at EVIDENCE-NAMES-ITS-RECORD; it failed already at 8e64e718 and is not changed here</li>
++</ul>
++<p data-field="observed-state">Reported by the executor: committed locally as c50cf5f7 and 909bcab3, not pushed; the reading served on the loopback address of the review host. The Project Workspace, not this reading, is where the project objects are navigated. This report is not an acceptance.</p>
++<p data-field="acceptance">No acceptance by the user is recorded.</p>
++</section>
+diff --git a/dreyeck/work/project/hyperdoc-project.ctm b/dreyeck/work/project/hyperdoc-project.ctm
+index ef44b538..59739b12 100644
+--- a/dreyeck/work/project/hyperdoc-project.ctm
++++ b/dreyeck/work/project/hyperdoc-project.ctm
+@@ -6,7 +6,7 @@
+ #   dreyeck/pages/work/Work Breakdown.html  a7dc3d53a1a7312e6feba2350bde7251c222b2acd321ef5a109116f5cf616e13
+ #   dreyeck/pages/work/Authoring the CTM Plan Page.html  fced413ad5e893e49973df1fa8fb5ca14dee87695c50100e72ddd12d4d2de75a
+ #   dreyeck/pages/work/CTM Plan Page WBS Dictionary.html  de3f372912e0a257a85990686fdcd354f79481af7aecb1ecc5d1ffb171e9d9b5
+-#   dreyeck/pages/project/Implementation Assignments.html  643bccccf0cffa0aee20423a9ae2c939246fb4c95316c541a358297363ea38f8
++#   dreyeck/pages/project/Implementation Assignments.html  059d90d04472ae5bc0975491106aa896f12989af7bfa17cf1c0d32d192984ce6
+ # Other files read: the test files WBS Dictionary controls name, to derive test marker found:
+ #   dreyeck/tests/fedwiki-page-authoring.lisp  0fcd02078576bde7a0438620797ea30c805900201ac443b8bc20ac8b146671d1
+ #   dreyeck/tests/fedwiki-item-edit-execution.lisp  d215e10c48f94b401248d60e7c8fe95db5c693ea8a489f60b368c7f8102c755d
+@@ -509,7 +509,7 @@ s:role-work-relation-depends-on-target
+     s:hyperbook-id: "dreyeck/work/project" ;
+     s:page-id: "Implementation Assignments" ;
+     s:repository-path: "dreyeck/pages/project/Implementation Assignments.html" ;
+-    s:source-sha256: "643bccccf0cffa0aee20423a9ae2c939246fb4c95316c541a358297363ea38f8" .
++    s:source-sha256: "059d90d04472ae5bc0975491106aa896f12989af7bfa17cf1c0d32d192984ce6" .
+ 
+ <tag:dreyeck.ch,2026:hyperdoc/hyperbook/dreyeck/work/project>
+     isa s:hyperbook ;
+@@ -968,6 +968,96 @@ w:pwc-wp-8
+     - "Read the complete project CTM with the topic-maps reader in practical time" ;
+     s:declaration-text: "Read the complete project CTM with the topic-maps reader in practical time — the reader of topic-maps 963f2a0 did not read the project CTM within 300 s; the second assignment below delivers the correction." .
+ 
++w:topic-maps-regular-hyperdoc
++    isa s:kind-work-item ;
++    - "Regular HyperDoc Catalog with a Navigable Project Topic Map" ;
++    s:declaration-text: "Regular HyperDoc Catalog with a Navigable Project Topic Map — the regular HyperDoc Catalog, built on a reviewed Topic Maps revision, in which the project's work is itself a Topic Map that a reader can navigate and inspect." .
++
++w:tm-regular-catalog
++    isa s:kind-deliverable ;
++    - "Regular HyperDoc Catalog with a Navigable Project Topic Map" ;
++    s:declaration-text: "Regular HyperDoc Catalog with a Navigable Project Topic Map — the defined scope: the integrated Topic Maps revision, the compatible Project Workspace, the inspectable project work, the safe public Inspector, the reproducible package and its verified deployment." .
++
++w:tm-reg-wp-1
++    isa s:kind-work-package ;
++    - "1 Integrated Topic Maps Revision" ;
++    s:declaration-text: "1 Integrated Topic Maps Revision — the reviewed commit 6162ed68, its snapshot, manifest and pin, with the identity that HyperDoc checks." .
++
++w:tm-reg-wp-2
++    isa s:kind-work-package ;
++    - "2 Compatible Project Workspace" ;
++    s:declaration-text: "2 Compatible Project Workspace — the Project Workspace bound to that revision, reading the unchanged project CTM, telling a checkout, a verified snapshot and an unidentifiable directory apart." .
++
++w:tm-reg-wp-3
++    isa s:kind-work-package ;
++    - "3 Inspectable Project Work" ;
++    s:declaration-text: "3 Inspectable Project Work — the project work navigable in the Workspace and the Inspector from a Work Item to its packages, assignments, evidence and source commits." .
++
++w:tm-reg-wp-4
++    isa s:kind-work-package ;
++    - "4 Safe Public Inspector" ;
++    s:declaration-text: "4 Safe Public Inspector — every public view read-only; no view or button runs code, writes or discloses a host path; an independent security review." .
++
++w:tm-reg-wp-5
++    isa s:kind-work-package ;
++    - "5 Reproducible Catalog Package" ;
++    s:declaration-text: "5 Reproducible Catalog Package — the regular Catalog package built and checked for Linux and Darwin with the verified snapshot." .
++
++w:tm-reg-wp-6
++    isa s:kind-work-package ;
++    - "6 Verified Production Deployment" ;
++    s:declaration-text: "6 Verified Production Deployment — the package staged, verified, approved and activated on dreyeck.ch, with a rollback shown." .
++
++w:tm-reg-p1
++    isa s:kind-plan-step ;
++    - "Integrate and verify Topic Maps 6162ed68" ;
++    s:declaration-text: "Integrate and verify Topic Maps 6162ed68 — fast-forward the Topic Maps line, pin the snapshot, verify it without .git and run the Topic Maps suite." .
++
++w:tm-reg-p2
++    isa s:kind-plan-step ;
++    - "Verify the unchanged project CTM" ;
++    s:declaration-text: "Verify the unchanged project CTM — read it with the revision, within the operational limit, and compare the signature and the CXTM." .
++
++w:tm-reg-p3
++    isa s:kind-plan-step ;
++    - "Integrate Project Workspace and Inspector navigation" ;
++    s:declaration-text: "Integrate Project Workspace and Inspector navigation — the project work navigable from the Work Item to its evidence, and the reading of the integration." .
++
++w:tm-reg-p4
++    isa s:kind-plan-step ;
++    - "Verify and enforce public Inspector security" ;
++    s:declaration-text: "Verify and enforce public Inspector security — read-only public views, gated run buttons, an independent review." .
++
++w:tm-reg-p5
++    isa s:kind-plan-step ;
++    - "Build and test the regular Linux and Nix Catalog package" ;
++    s:declaration-text: "Build and test the regular Linux and Nix Catalog package — on an independent builder, with the derivation compared." .
++
++w:tm-reg-p6
++    isa s:kind-plan-step ;
++    - "Stage, verify, obtain production approval and deploy" ;
++    s:declaration-text: "Stage, verify, obtain production approval and deploy — activate the generation, verify identity and boundaries, show the rollback." .
++
++w:tm-reg-pre-admission
++    isa s:kind-precondition ;
++    - "Admission of the Project Workspace to a served runtime" ;
++    s:declaration-text: "Admission of the Project Workspace to a served runtime — the user's decision; the Catalog's startup guard refuses the Workspace until it is made." .
++
++w:tm-reg-pre-security-review
++    isa s:kind-precondition ;
++    - "Independent security review of the public Inspector" ;
++    s:declaration-text: "Independent security review of the public Inspector — a report by a reviewer who is not the executor." .
++
++w:tm-reg-pre-publish
++    isa s:kind-precondition ;
++    - "Decision to publish or transfer the archive" ;
++    s:declaration-text: "Decision to publish or transfer the archive — the user's; a builder must be able to obtain the Topic Maps snapshot." .
++
++w:tm-reg-pre-production
++    isa s:kind-precondition ;
++    - "Approval of the production activation" ;
++    s:declaration-text: "Approval of the production activation — the user's, for the generation on dreyeck.ch, with the operator's record of the server's state." .
++
+ <tag:dreyeck.ch,2026:hyperdoc/statement/dreyeck/work/reading/work-breakdown/interaction/work:relation/informs/operations/1>
+     isa s:authored-statement ;
+     - "interaction informs operations" ;
+@@ -1253,6 +1343,116 @@ w:pwc-wp-8
+     - "project-work-ctm-exchange decomposes-into pwc-wp-8" ;
+     s:statement-number: "1" .
+ 
++<tag:dreyeck.ch,2026:hyperdoc/statement/dreyeck/work/project/implementation-assignments/tm-regular-catalog/work:relation/decomposes-into/tm-reg-wp-1/1>
++    isa s:proposed-statement ;
++    - "tm-regular-catalog decomposes-into tm-reg-wp-1" ;
++    s:statement-number: "1" .
++
++<tag:dreyeck.ch,2026:hyperdoc/statement/dreyeck/work/project/implementation-assignments/tm-regular-catalog/work:relation/decomposes-into/tm-reg-wp-2/1>
++    isa s:proposed-statement ;
++    - "tm-regular-catalog decomposes-into tm-reg-wp-2" ;
++    s:statement-number: "1" .
++
++<tag:dreyeck.ch,2026:hyperdoc/statement/dreyeck/work/project/implementation-assignments/tm-regular-catalog/work:relation/decomposes-into/tm-reg-wp-3/1>
++    isa s:proposed-statement ;
++    - "tm-regular-catalog decomposes-into tm-reg-wp-3" ;
++    s:statement-number: "1" .
++
++<tag:dreyeck.ch,2026:hyperdoc/statement/dreyeck/work/project/implementation-assignments/tm-regular-catalog/work:relation/decomposes-into/tm-reg-wp-4/1>
++    isa s:proposed-statement ;
++    - "tm-regular-catalog decomposes-into tm-reg-wp-4" ;
++    s:statement-number: "1" .
++
++<tag:dreyeck.ch,2026:hyperdoc/statement/dreyeck/work/project/implementation-assignments/tm-regular-catalog/work:relation/decomposes-into/tm-reg-wp-5/1>
++    isa s:proposed-statement ;
++    - "tm-regular-catalog decomposes-into tm-reg-wp-5" ;
++    s:statement-number: "1" .
++
++<tag:dreyeck.ch,2026:hyperdoc/statement/dreyeck/work/project/implementation-assignments/tm-regular-catalog/work:relation/decomposes-into/tm-reg-wp-6/1>
++    isa s:proposed-statement ;
++    - "tm-regular-catalog decomposes-into tm-reg-wp-6" ;
++    s:statement-number: "1" .
++
++<tag:dreyeck.ch,2026:hyperdoc/statement/dreyeck/work/project/implementation-assignments/tm-reg-p1/work:relation/produces/tm-reg-wp-1/1>
++    isa s:proposed-statement ;
++    - "tm-reg-p1 produces tm-reg-wp-1" ;
++    s:statement-number: "1" .
++
++<tag:dreyeck.ch,2026:hyperdoc/statement/dreyeck/work/project/implementation-assignments/tm-reg-p2/work:relation/produces/tm-reg-wp-2/1>
++    isa s:proposed-statement ;
++    - "tm-reg-p2 produces tm-reg-wp-2" ;
++    s:statement-number: "1" .
++
++<tag:dreyeck.ch,2026:hyperdoc/statement/dreyeck/work/project/implementation-assignments/tm-reg-p3/work:relation/produces/tm-reg-wp-3/1>
++    isa s:proposed-statement ;
++    - "tm-reg-p3 produces tm-reg-wp-3" ;
++    s:statement-number: "1" .
++
++<tag:dreyeck.ch,2026:hyperdoc/statement/dreyeck/work/project/implementation-assignments/tm-reg-p4/work:relation/produces/tm-reg-wp-4/1>
++    isa s:proposed-statement ;
++    - "tm-reg-p4 produces tm-reg-wp-4" ;
++    s:statement-number: "1" .
++
++<tag:dreyeck.ch,2026:hyperdoc/statement/dreyeck/work/project/implementation-assignments/tm-reg-p5/work:relation/produces/tm-reg-wp-5/1>
++    isa s:proposed-statement ;
++    - "tm-reg-p5 produces tm-reg-wp-5" ;
++    s:statement-number: "1" .
++
++<tag:dreyeck.ch,2026:hyperdoc/statement/dreyeck/work/project/implementation-assignments/tm-reg-p6/work:relation/produces/tm-reg-wp-6/1>
++    isa s:proposed-statement ;
++    - "tm-reg-p6 produces tm-reg-wp-6" ;
++    s:statement-number: "1" .
++
++<tag:dreyeck.ch,2026:hyperdoc/statement/dreyeck/work/project/implementation-assignments/tm-reg-p2/work:relation/depends-on/tm-reg-p1/1>
++    isa s:proposed-statement ;
++    - "tm-reg-p2 depends-on tm-reg-p1" ;
++    s:statement-number: "1" .
++
++<tag:dreyeck.ch,2026:hyperdoc/statement/dreyeck/work/project/implementation-assignments/tm-reg-p3/work:relation/depends-on/tm-reg-p2/1>
++    isa s:proposed-statement ;
++    - "tm-reg-p3 depends-on tm-reg-p2" ;
++    s:statement-number: "1" .
++
++<tag:dreyeck.ch,2026:hyperdoc/statement/dreyeck/work/project/implementation-assignments/tm-reg-p4/work:relation/depends-on/tm-reg-p3/1>
++    isa s:proposed-statement ;
++    - "tm-reg-p4 depends-on tm-reg-p3" ;
++    s:statement-number: "1" .
++
++<tag:dreyeck.ch,2026:hyperdoc/statement/dreyeck/work/project/implementation-assignments/tm-reg-p5/work:relation/depends-on/tm-reg-p1/1>
++    isa s:proposed-statement ;
++    - "tm-reg-p5 depends-on tm-reg-p1" ;
++    s:statement-number: "1" .
++
++<tag:dreyeck.ch,2026:hyperdoc/statement/dreyeck/work/project/implementation-assignments/tm-reg-p5/work:relation/depends-on/tm-reg-p4/1>
++    isa s:proposed-statement ;
++    - "tm-reg-p5 depends-on tm-reg-p4" ;
++    s:statement-number: "1" .
++
++<tag:dreyeck.ch,2026:hyperdoc/statement/dreyeck/work/project/implementation-assignments/tm-reg-p5/work:relation/depends-on/tm-reg-pre-admission/1>
++    isa s:proposed-statement ;
++    - "tm-reg-p5 depends-on tm-reg-pre-admission" ;
++    s:statement-number: "1" .
++
++<tag:dreyeck.ch,2026:hyperdoc/statement/dreyeck/work/project/implementation-assignments/tm-reg-p5/work:relation/depends-on/tm-reg-pre-publish/1>
++    isa s:proposed-statement ;
++    - "tm-reg-p5 depends-on tm-reg-pre-publish" ;
++    s:statement-number: "1" .
++
++<tag:dreyeck.ch,2026:hyperdoc/statement/dreyeck/work/project/implementation-assignments/tm-reg-p6/work:relation/depends-on/tm-reg-p5/1>
++    isa s:proposed-statement ;
++    - "tm-reg-p6 depends-on tm-reg-p5" ;
++    s:statement-number: "1" .
++
++<tag:dreyeck.ch,2026:hyperdoc/statement/dreyeck/work/project/implementation-assignments/tm-reg-p6/work:relation/depends-on/tm-reg-pre-security-review/1>
++    isa s:proposed-statement ;
++    - "tm-reg-p6 depends-on tm-reg-pre-security-review" ;
++    s:statement-number: "1" .
++
++<tag:dreyeck.ch,2026:hyperdoc/statement/dreyeck/work/project/implementation-assignments/tm-reg-p6/work:relation/depends-on/tm-reg-pre-production/1>
++    isa s:proposed-statement ;
++    - "tm-reg-p6 depends-on tm-reg-pre-production" ;
++    s:statement-number: "1" .
++
+ <tag:dreyeck.ch,2026:hyperdoc/control/ctm-wp-1/site-root-slug-item>
+     isa s:planned-control ;
+     - "site-root-slug-item" ;
+@@ -1516,6 +1716,216 @@ w:pwc-wp-8
+     - "docs/project-ctm-exchange-review.md" ;
+     s:repository-path: "docs/project-ctm-exchange-review.md" .
+ 
++<tag:dreyeck.ch,2026:hyperdoc/assignment/cc-2026-10-28-regular-catalog-scope>
++    isa s:implementation-assignment ;
++    - "Claude Code: Model the scope of the Regular HyperDoc Catalog (Zettel 11359)" ;
++    s:issued: "Given by the user on 2026-10-28 in a Claude Code session (Claude Sonnet 5.5) as Zettel 11359, after the four local commits of the Topic Maps 6162ed68 integration: integrate the regular Catalog, its work packages and plan into the existing project scope, WBS, WBS Dictionary and Implementation Assignments, in two stages, and stop at the Scope Declaration Review." ;
++    s:goal: "Propose the Work Item topic-maps-regular-hyperdoc and the Deliverable tm-regular-catalog with six work packages, six plan steps and their relations, and describe the packages in a draft WBS Dictionary, all as proposals, navigable in the Project Workspace. Prepare the Stage 2 declaration for review, without applying it: it has not been produced (no patch exists; only incomplete, unverified drafts are kept in docs/regular-catalog-scope/stage-2-draft/). Change no Work declaration, status or acceptance, and no Topic Maps or Catalog package." ;
++    s:plan-step-note: "No Plan Step is confirmed for this assignment. Its text cannot make one. The assignment delivers no work package: it models the scope." ;
++    s:observed-state: "Reported by the executor: a proposal in the working tree of a separate worktree, not committed. The Stage 2 declaration is not produced: stage-2-declaration.patch is a Stage 2 artifact that does not exist yet and is not a source authority of this assignment; the drafts in docs/regular-catalog-scope/stage-2-draft/ are incomplete and unverified. Zettel 11353 (the existing staging installation) and Zettel 11359 are the user's; neither is an acceptance. This report is not an acceptance." ;
++    s:acceptance: "No acceptance by the user is recorded." ;
++    s:precondition: "No Work declaration, status, Acceptance Record or historical evidence is changed; no proposal becomes a declaration." ;
++    s:precondition: "Topic Maps, the existing Catalog package and the running staging service are not changed." ;
++    s:precondition: "No commit, push, merge, deployment or server configuration without the user's separate authorization." ;
++    s:precondition: "The project CTM is regenerated only by the emitter from the source pages, never edited." ;
++    s:acceptance-criterion: "Every proposed ID is unique and every proposed work package has exactly one dictionary entry." ;
++    s:acceptance-criterion: "WBS decomposition, plan dependencies and products are distinct Association types." ;
++    s:acceptance-criterion: "The proposal is read from the source page by the real emitter and reader; no parallel Topic Map is built." ;
++    s:acceptance-criterion: "The scope is navigable in a real HyperDoc browser session, with the source of each relation inspectable." ;
++    s:acceptance-criterion: "The prepared declaration is not applied and is complete: carrier page, declared dictionary, Work Breakdown entry and source registration." ;
++    s:source-authority-note: "reads the Work Breakdown, authoritative for its Work declarations" ;
++    s:source-authority-note: "reads the CTM plan page, authoritative for the vocabulary and relations of a declared WBS and plan" ;
++    s:source-authority-note: "reads the WBS Dictionary, authoritative for the form of a dictionary entry" ;
++    s:source-authority-note: "reads the existing draft dictionary of project-work-ctm-exchange; not changed" ;
++    s:source-authority-note: "reads the acceptance model: requirement, report and acceptance stay apart" ;
++    s:source-authority-note: "reads the emitter and its source registry; not changed" ;
++    s:source-authority-note: "adds the proposals and the assignments of this scope" ;
++    s:source-authority-note: "adds the draft dictionary of the six proposed work packages; not a source of the project CTM" ;
++    s:source-authority-note: "regenerated by the emitter from the source pages" ;
++    s:source-authority-note: "the digest of the regenerated CTM, kept beside it" ;
++    s:source-authority-note: "lists the draft dictionary page and the scope tests" ;
++    s:source-authority-note: "adds the tests of the scope, derived from the page text" ;
++    s:source-authority-note: "adds the browser walk of the scope in the Project Workspace" ;
++    s:source-authority-note: "the handoff of the proposal: its state, its known defects and what prevents a fully verified review; Stage 1 proposal material — not declared or accepted" ;
++    s:source-authority-note: "the verification of the proposal on HyperDoc bc002546 and the Scope Declaration Review; Stage 1 proposal material — not declared or accepted" ;
++    s:source-authority-note: "reads the committed integration record of Topic Maps 88994c1b in HyperDoc (commit bc002546): its evidence, its commit plan and its open items" ;
++    s:source-authority-note: "reads the preserved independent review of Task 1E (GO FOR LOCAL TASK 1E COMMIT); committed in HyperDoc e60d10ba" ;
++    s:evidence-note: "tests of the scope derived from the page text" ;
++    s:evidence-note: "browser walk of the scope in the Project Workspace" .
++
++<tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/regular-catalog-wbs-dictionary>
++    isa s:hyperdoc-page ;
++    - "Regular Catalog WBS Dictionary" ;
++    s:hyperbook-id: "dreyeck/work/project" ;
++    s:page-id: "Regular Catalog WBS Dictionary" .
++
++<tag:dreyeck.ch,2026:hyperdoc/file/dreyeck/tests/project-scope.lisp>
++    isa s:repository-file ;
++    - "dreyeck/tests/project-scope.lisp" ;
++    s:repository-path: "dreyeck/tests/project-scope.lisp" .
++
++<tag:dreyeck.ch,2026:hyperdoc/file/scripts/test-project-workspace-scope.mjs>
++    isa s:repository-file ;
++    - "scripts/test-project-workspace-scope.mjs" ;
++    s:repository-path: "scripts/test-project-workspace-scope.mjs" .
++
++<tag:dreyeck.ch,2026:hyperdoc/file/docs/regular-catalog-scope/HANDOFF.md>
++    isa s:repository-file ;
++    - "docs/regular-catalog-scope/HANDOFF.md" ;
++    s:repository-path: "docs/regular-catalog-scope/HANDOFF.md" .
++
++<tag:dreyeck.ch,2026:hyperdoc/file/docs/regular-catalog-scope/on-88994c1b/SCOPE-DECLARATION-REVIEW.md>
++    isa s:repository-file ;
++    - "docs/regular-catalog-scope/on-88994c1b/SCOPE-DECLARATION-REVIEW.md" ;
++    s:repository-path: "docs/regular-catalog-scope/on-88994c1b/SCOPE-DECLARATION-REVIEW.md" .
++
++<tag:dreyeck.ch,2026:hyperdoc/file/docs/topic-maps-88994c1b-integration/README.md>
++    isa s:repository-file ;
++    - "docs/topic-maps-88994c1b-integration/README.md" ;
++    s:repository-path: "docs/topic-maps-88994c1b-integration/README.md" .
++
++<tag:dreyeck.ch,2026:hyperdoc/file/dreyeck/work/topic-maps-task-1e-review/evidence/task1e-independent-review.md>
++    isa s:repository-file ;
++    - "dreyeck/work/topic-maps-task-1e-review/evidence/task1e-independent-review.md" ;
++    s:repository-path: "dreyeck/work/topic-maps-task-1e-review/evidence/task1e-independent-review.md" .
++
++<tag:dreyeck.ch,2026:hyperdoc/assignment/cc-2026-10-28-topic-maps-6162ed68-revision>
++    isa s:implementation-assignment ;
++    - "Claude Code: Integrate Topic Maps 6162ed68 as the pinned revision" ;
++    s:issued: "Given by the user on 2026-10-28 in a Claude Code session (Claude Sonnet 5.5) as Task 1C Integration, after the independent review of the Task 1C change, and later \"Commit the four\": bring the reviewed Topic Maps commit into HyperDoc as its pinned runtime snapshot and commit it locally." ;
++    s:goal: "Pin HyperDoc to Topic Maps 6162ed68c94ea4796b8cf2282edd347d9607b08c (b2eecffa and the indexed search for the next Topic merge) as a content-addressed runtime snapshot with a manifest that HyperDoc verifies without .git." ;
++    s:plan-step-note: "No Plan Step is confirmed for this assignment. Its text cannot make one; the proposed step tm-reg-p1 produces the package." ;
++    s:observed-state: "Reported by the executor: committed locally as a55c4a0b on the branch claude/topic-maps-6162ed68-integration after the user authorized the four commits; not pushed. No independent check of the integrated revision has been made, and no Linux build. Later step (Task 1E): the revision was moved to 88994c1b and committed locally as d9da94d8 on the branch claude/topic-maps-88994c1b-integration, not pushed; the packaged Nix Catalog check was not run, no independent check of the integrated HyperDoc revision, no Linux build, the archive is not published. This report is not an acceptance." ;
++    s:acceptance: "No acceptance by the user is recorded." ;
++    s:precondition: "No push, merge, publication of the archive, NixOS change or deployment; the Topic Maps branch is fast-forwarded locally only." ;
++    s:precondition: "The experimental association index of Task 1C stays out; it is a separate task. (Historical: it became the reviewed Task 1E change and was integrated later, see the evidence of the later step.)" ;
++    s:acceptance-criterion: "The authoritative Topic Maps line holds a tree equal to the reviewed commit's, with b2eecffa preserved." ;
++    s:acceptance-criterion: "The snapshot verifies against its manifest without .git, and every alteration is refused." ;
++    s:acceptance-criterion: "Every Topic Maps system the Catalog's startup policy checks resolves to that one root." ;
++    s:acceptance-criterion: "Later step (Task 1E): the authoritative line holds a tree equal to the reviewed Task 1E commit's, with 6162ed68 and b2eecffa preserved, and the 88994c1b snapshot verifies against its manifest without .git." ;
++    s:source-authority-note: "adds the manifest of Git objects of the snapshot" ;
++    s:source-authority-note: "pins the archive to the new revision" ;
++    s:source-authority-note: "names the revision the startup policy checks" ;
++    s:source-authority-note: "verifies the snapshot against the manifest, without .git" ;
++    s:source-authority-note: "later step (Task 1E): adds the manifest of Git objects of the 88994c1b snapshot; the 6162ed68 and b2eecffa manifests stay as history; committed in HyperDoc d9da94d8" ;
++    s:source-authority-note: "later step (Task 1E): names the revision of the 22U reading; committed in HyperDoc d9da94d8. The same commit moves the manifest of the snapshot pin and the revision named in the entries above to 88994c1b" ;
++    s:source-authority-note: "later step (Task 1E): reads the commit record of Topic Maps 88994c1b: parent, tree, files and the state of the primary checkout; committed in HyperDoc e60d10ba" ;
++    s:source-authority-note: "later step (Task 1E): reads the independent verification of the 88994c1b archive against the commit with Git and Nix; committed in HyperDoc e60d10ba" ;
++    s:source-authority-note: "later step (Task 1E): reads the preserved independent review of the Task 1E change, verdict GO FOR LOCAL TASK 1E COMMIT; committed in HyperDoc e60d10ba" ;
++    s:evidence-note: "HyperDoc commit a55c4a0b7d984cab1f2fd429be26e4ceb0c1b60b (tree 94d21b2e7dcb110b770c47af2a8c9184733398b7), \"Pin Topic Maps 6162ed68: snapshot manifest, pins and the earlier review's version-bound contract\": local, unpushed, signed; a source change of the package, not an acceptance" ;
++    s:evidence-note: "Topic Maps commit 6162ed68c94ea4796b8cf2282edd347d9607b08c (parent b2eecffa): local, unpushed; the branch codex/project-work-slice-22u was fast-forwarded to it" ;
++    s:evidence-note: "Independent review of the Task 1C change, 2026-10-28, verdict GO, kept in /Users/rgb/workspace/topic-maps-task-1c-evidence/independent-review-2026-10-28/: it reconstructed the baseline and candidate trees, reran the focused system and regenerated the recorded fixtures with the unchanged baseline source. It reviewed the change, not the integrated HyperDoc revision, and is not an acceptance" ;
++    s:evidence-note: "Reported by the executor and not independently checked: the project CTM is read in a 31.1 s median with the change (the baseline did not finish within 120 s); the 120 checks of the focused system pass; the Nix contract check of the integration passes on darwin. Not run on Linux or on the production host" ;
++    s:evidence-note: "Later step, Task 1E, 2026-10-28: Topic Maps commit 88994c1b9e1edbf13e665e984a5c9c3b2cdf7575 (tree b0835676837d6a53457a87880d64046035140bb7, parent 6162ed68c94ea4796b8cf2282edd347d9607b08c), \"perf(tmdm): index association normalization merge candidates\": 33 files (3 modified, 30 added), the indexed search for the next Association merge; local, unpushed; the branch codex/project-work-slice-22u was fast-forwarded to it. Implemented and locally integrated; neither a declaration nor an acceptance" ;
++    s:evidence-note: "Later step, Task 1E: independent review of the Task 1E change, 2026-10-28, verdict GO FOR LOCAL TASK 1E COMMIT, kept in /Users/rgb/workspace/topic-maps-task-1e-independent-review/REVIEW.md and preserved in HyperDoc in dreyeck/work/topic-maps-task-1e-review/evidence/task1e-independent-review.md. It reviewed the change, not the integrated HyperDoc revision, and is not an acceptance; it states what it does not establish: Linux, the Stage 2 CTM, peak memory on a 2 GiB host, performance at high arity and the Python Unicode checker mismatch" ;
++    s:evidence-note: "Later step, Task 1E: HyperDoc commit d9da94d8b47f2f1b68c567d6c621e64a5202fdc0 (tree 4e9f34124a9a18fc423ac3f1b8f5828c3139f561), \"feat(topic-maps): integrate 88994c1b into HyperDoc\": local, unpushed; the manifest, the archive pin and the Catalog, 22U and verifier pins; tested as part of one candidate with the two commits after it (e60d10ba, bc002546), not by itself" ;
++    s:evidence-note: "Later step, reported by the executor and not independently checked: the 88994c1b archive is reproducible (two create runs byte-identical, 2,384 files, 19 independent checks pass); the verifier, the 22U reading and the CTM review pass on the Git-free snapshot (34, 41 and 58 assertions)" .
++
++<tag:dreyeck.ch,2026:hyperdoc/file/nix/topic-maps-6162ed68.manifest>
++    isa s:repository-file ;
++    - "nix/topic-maps-6162ed68.manifest" ;
++    s:repository-path: "nix/topic-maps-6162ed68.manifest" .
++
++<tag:dreyeck.ch,2026:hyperdoc/file/nix/topic-maps-source.nix>
++    isa s:repository-file ;
++    - "nix/topic-maps-source.nix" ;
++    s:repository-path: "nix/topic-maps-source.nix" .
++
++<tag:dreyeck.ch,2026:hyperdoc/file/dreyeck/src/catalog-topic-maps.lisp>
++    isa s:repository-file ;
++    - "dreyeck/src/catalog-topic-maps.lisp" ;
++    s:repository-path: "dreyeck/src/catalog-topic-maps.lisp" .
++
++<tag:dreyeck.ch,2026:hyperdoc/file/dreyeck/tests/source-snapshot.lisp>
++    isa s:repository-file ;
++    - "dreyeck/tests/source-snapshot.lisp" ;
++    s:repository-path: "dreyeck/tests/source-snapshot.lisp" .
++
++<tag:dreyeck.ch,2026:hyperdoc/file/nix/topic-maps-88994c1b.manifest>
++    isa s:repository-file ;
++    - "nix/topic-maps-88994c1b.manifest" ;
++    s:repository-path: "nix/topic-maps-88994c1b.manifest" .
++
++<tag:dreyeck.ch,2026:hyperdoc/file/dreyeck/work/topic-maps-project-example.lisp>
++    isa s:repository-file ;
++    - "dreyeck/work/topic-maps-project-example.lisp" ;
++    s:repository-path: "dreyeck/work/topic-maps-project-example.lisp" .
++
++<tag:dreyeck.ch,2026:hyperdoc/file/dreyeck/work/topic-maps-task-1e-review/evidence/task1e-commit-record.md>
++    isa s:repository-file ;
++    - "dreyeck/work/topic-maps-task-1e-review/evidence/task1e-commit-record.md" ;
++    s:repository-path: "dreyeck/work/topic-maps-task-1e-review/evidence/task1e-commit-record.md" .
++
++<tag:dreyeck.ch,2026:hyperdoc/file/dreyeck/work/topic-maps-task-1e-review/evidence/snapshot-archive-verification.json>
++    isa s:repository-file ;
++    - "dreyeck/work/topic-maps-task-1e-review/evidence/snapshot-archive-verification.json" ;
++    s:repository-path: "dreyeck/work/topic-maps-task-1e-review/evidence/snapshot-archive-verification.json" .
++
++<tag:dreyeck.ch,2026:hyperdoc/assignment/cc-2026-10-28-project-workspace-6162ed68>
++    isa s:implementation-assignment ;
++    - "Claude Code: Bind the Project Workspace to Topic Maps 6162ed68" ;
++    s:issued: "Given by the user on 2026-10-28 in a Claude Code session (Claude Sonnet 5.5) as the Complete the HyperDoc 6162ed68 Integration Review, before the commits: show in the actual Project Workspace that it reads the unchanged project CTM with the pinned revision, and do not bypass the Catalog's guard." ;
++    s:goal: "Bind the Project Workspace to the pinned revision, identify a clean Git checkout, a verified Git-free snapshot and an unidentifiable directory apart, and show the unchanged project CTM read with it, in a browser." ;
++    s:plan-step-note: "No Plan Step is confirmed for this assignment. Its text cannot make one; the proposed step tm-reg-p2 produces the package." ;
++    s:observed-state: "Reported by the executor: committed locally as df5cf16e, not pushed. The criterion of 90 seconds was met with the snapshot and not met with the Git checkout under load; no run is recorded on an idle machine, on Linux, or with the snapshot as the root of the browser walk. Later step (Task 1E): the pin was moved to 88994c1b and committed locally as d9da94d8, e60d10ba and bc002546, not pushed; the criterion of 90 seconds was met on the combined tree on a previous revision of this proposal's CTM; no independent check of the integrated HyperDoc revision; the packaged Nix Catalog check was not run. This report is not an acceptance." ;
++    s:acceptance: "No acceptance by the user is recorded." ;
++    s:precondition: "No Work page and no project CTM is changed; the Catalog's guard is not bypassed." ;
++    s:precondition: "The Workspace runs in the trusted review runtime, not in the guarded packaged Catalog." ;
++    s:acceptance-criterion: "With Topic Maps 6162ed68 as a checkout and as the verified snapshot the unchanged project CTM is read without refusal within 90 seconds." ;
++    s:acceptance-criterion: "The signature and the CXTM equal the reference." ;
++    s:acceptance-criterion: "The pin fails for another commit, for another snapshot and for an unidentifiable directory." ;
++    s:acceptance-criterion: "The packaged Catalog's startup guard still refuses the Project Workspace." ;
++    s:acceptance-criterion: "Later step (Task 1E): with Topic Maps 88994c1b as a checkout and as the verified snapshot the original project CTM and the Stage 1 proposal's CTM are read and modelled within the unchanged 90 seconds; the pin fails for another commit, including a clean checkout of 6162ed68." ;
++    s:source-authority-note: "binds the pin and reports the source identity" ;
++    s:source-authority-note: "depends on the snapshot verifier" ;
++    s:source-authority-note: "rewords the guard's refusal of the Project Workspace; the guard still refuses it" ;
++    s:source-authority-note: "tests the pin and the identity" ;
++    s:source-authority-note: "runs the Workspace against the Topic Maps ASDF finds in one fresh process" ;
++    s:source-authority-note: "reads the retained project CTM; no Work page and no CTM is changed" ;
++    s:source-authority-note: "later step (Task 1E): reads the committed integration record of Topic Maps 88994c1b in HyperDoc (commit bc002546): its evidence, its commit plan and its open items" ;
++    s:source-authority-note: "later step (Task 1E): reads the verification of the previous Stage 1 CTM on the combined tree; Stage 1 proposal material — not declared or accepted" ;
++    s:evidence-note: "HyperDoc commit df5cf16ebf53944325f737313cceae30a7ea2513 (tree 857211810fdd9d09f127e3f70cb6d2f0969389ff), \"Bind the Project Workspace to Topic Maps 6162ed68 and identify a Git-free snapshot\": local, unpushed, signed; a source change of the package, not an acceptance" ;
++    s:evidence-note: "Reported by the executor, 2026-10-28T09:14:18Z, tree not recorded as a clean commit: the browser test passed in the trusted review runtime with the object-identity check and the named absence of an acceptance record. It ran on a scratch commit (21c3e3ee) holding the identical tree 857211810fdd9d09f127e3f70cb6d2f0969389ff that df5cf16e has, rehearsed before the commit, not on df5cf16e itself" ;
++    s:evidence-note: "Reported by the executor, on the then-uncommitted integration worktree over the base commit 8e64e7189daf1c5615cbc8bbe40cff3bf2bcd1aa (a modified tree that is not fully reconstructible from that revision): with a clean Git checkout of Topic Maps 6162ed68 the pin was OK and the project CTM was read in 161 s on 2026-10-28 (06:36:17Z), so NOT within 90 s, on a machine with a load average of about 13; with the verified Git-free snapshot it was read in 38.7 s (06:42:12Z), within 90 s; in both the CXTM bytes were equal to the reference and the CTM input was unchanged" ;
++    s:evidence-note: "Reported by the executor and not independently checked: a checkout of 5a4a668 and an unidentifiable export were refused as the pin (PIN-NOT-OK); the run against the b2eecffa snapshot reported PIN-NOT-OK and was stopped before its reader finished. The packaged Catalog's guard still refuses the Workspace" ;
++    s:evidence-note: "Later step, Task 1E, 2026-10-28: the Workspace's pin was moved to 88994c1b in HyperDoc commit d9da94d8b47f2f1b68c567d6c621e64a5202fdc0 (tree 4e9f34124a9a18fc423ac3f1b8f5828c3139f561), followed by e60d10bad9aaaffb3f241e8022f2658eeed18241 (the review reading, tree 56ac6fbb700100cf28b9f2312049593277ee3a56) and bc0025464131781712e24da5ec05594d91637144 (the integration documentation, tree c36594ef725f6908946a0dc56a0263fd865441c7): local, unpushed; tested as one candidate, not each commit by itself. Implemented and locally integrated; neither a declaration nor an acceptance" ;
++    s:evidence-note: "Later step, reported by the executor on the combined tree (bc002546 plus the uncommitted Stage 1 proposal, whose CTM then had SHA-256 fe2955e93239704673a2a38492ea92e57f0d221f14313603dd1dd5f206b340b8, a previous revision of the CTM), Topic Maps a clean Git checkout of 88994c1b, and not independently checked: the Project suite passed, with 345 source checks, 224 read-back checks with the model in 24.2 s against the unchanged 90-second check, 125 acceptance checks on synthetic fixtures and 196 scope checks; a browser walk of the Workspace and the scope passed. With the original CTM the integration script read the Workspace in 11.6 to 21.9 s and the Stage 1 CTM in 19.4 to 32.3 s on a busy machine; a control with the same Stage 1 bytes under 6162ed68 took 82.3 and 85.8 s against 23.7 s under 88994c1b (single observations). The results for the CTM this page now generates are recorded beside it, not here" ;
++    s:evidence-note: "Later step, unresolved and preserved: the historical reading Integrating Topic Maps 6162ed68 is bound to 6162ed68 by design and its check pins:catalog-and-22u-reading-and-workspace-and-reading-name-one-commit fails in the current runtime, which is a failure and not a pass; the packaged Nix Catalog check was not run; the Stage 1 results come from a disposable copy and from a combined worktree of uncommitted Stage 1 material; not run on Linux, with the Stage 2 CTM, on the constrained host or at high arity" .
++
++<tag:dreyeck.ch,2026:hyperdoc/file/scripts/run-project-workspace-integration.lisp>
++    isa s:repository-file ;
++    - "scripts/run-project-workspace-integration.lisp" ;
++    s:repository-path: "scripts/run-project-workspace-integration.lisp" .
++
++<tag:dreyeck.ch,2026:hyperdoc/assignment/cc-2026-10-28-project-work-reading-6162ed68>
++    isa s:implementation-assignment ;
++    - "Claude Code: Read the Topic Maps 6162ed68 integration in HyperDoc" ;
++    s:issued: "Given by the user on 2026-10-28 in a Claude Code session (Claude Sonnet 5.5) as Task 1C Integration and the review that followed: make the integration readable in HyperDoc, with its definitions, evidence and project objects, and document its limits." ;
++    s:goal: "A HyperDoc reading in which a human follows the integration to its definitions, evidence and project objects, and a document of its commit boundaries, limits and the proposed staging procedure, without a second project model." ;
++    s:plan-step-note: "No Plan Step is confirmed for this assignment. Its text cannot make one; the proposed step tm-reg-p3 produces the package." ;
++    s:observed-state: "Reported by the executor: committed locally as c50cf5f7 and 909bcab3, not pushed; the reading served on the loopback address of the review host. The Project Workspace, not this reading, is where the project objects are navigated. This report is not an acceptance." ;
++    s:acceptance: "No acceptance by the user is recorded." ;
++    s:precondition: "The reading declares no Work and records no acceptance; its proposed relations stay proposed." ;
++    s:precondition: "The reading is a local review, not the packaged staging book: the Catalog's guard refuses the Project Workspace." ;
++    s:acceptance-criterion: "The reading's pages, evidence digests, claims and subjects are checked by its suite." ;
++    s:acceptance-criterion: "The reading is served and navigated to the project objects it names." ;
++    s:acceptance-criterion: "The known unresolved observation EVIDENCE-NAMES-ITS-RECORD of the earlier deployment review is preserved, not weakened." ;
++    s:source-authority-note: "adds the reading of the integration, with its tests and its operator start" ;
++    s:source-authority-note: "documents the commit boundaries, the limits and the proposed staging procedure" ;
++    s:evidence-note: "HyperDoc commit c50cf5f7c26504e3ad34f701edcb8b3969b5879c (tree 18906fd61b2fc259f127ee2d8c53c9b37ff4f0f1), \"Add the reading of the Topic Maps 6162ed68 integration\": local, unpushed, signed; a source change of the reading, not an acceptance" ;
++    s:evidence-note: "HyperDoc commit 909bcab342c8107f3b2ed2d052f72307b43a9c7f (tree d4c3560012cd46532d2574241bf66cf3f406f1fd), \"Document the Topic Maps 6162ed68 integration, its limits and the proposed staging procedure\": local, unpushed, signed; a documentation change, not an acceptance" ;
++    s:evidence-note: "Unresolved and preserved: the second procedure of the earlier deployment review fails at EVIDENCE-NAMES-ITS-RECORD; it failed already at 8e64e718 and is not changed here" .
++
++<tag:dreyeck.ch,2026:hyperdoc/file/dreyeck/work/topic-maps-integration-review/>
++    isa s:repository-file ;
++    - "dreyeck/work/topic-maps-integration-review/" ;
++    s:repository-path: "dreyeck/work/topic-maps-integration-review/" .
++
++<tag:dreyeck.ch,2026:hyperdoc/file/docs/topic-maps-6162ed68-integration/README.md>
++    isa s:repository-file ;
++    - "docs/topic-maps-6162ed68-integration/README.md" ;
++    s:repository-path: "docs/topic-maps-6162ed68-integration/README.md" .
++
+ <tag:dreyeck.ch,2026:hyperdoc/gap/work-item-without-breakdown/connections-example>
+     isa s:plan-gap ;
+     - "connections-example has no declared breakdown or plan" ;
+@@ -1591,6 +2001,21 @@ w:pwc-wp-8
+     - "project-work-ctm and project-work-ctm-exchange share only their carrier page" ;
+     s:gap-rule: "A Work Item and a Deliverable name the same carrier page, and no statement relates them. No Relation Contract defines that relation." .
+ 
++<tag:dreyeck.ch,2026:hyperdoc/gap/work-item-deliverable-unlinked/project-work-ctm/tm-regular-catalog>
++    isa s:plan-gap ;
++    - "project-work-ctm and tm-regular-catalog share only their carrier page" ;
++    s:gap-rule: "A Work Item and a Deliverable name the same carrier page, and no statement relates them. No Relation Contract defines that relation." .
++
++<tag:dreyeck.ch,2026:hyperdoc/gap/work-item-deliverable-unlinked/topic-maps-regular-hyperdoc/project-work-ctm-exchange>
++    isa s:plan-gap ;
++    - "topic-maps-regular-hyperdoc and project-work-ctm-exchange share only their carrier page" ;
++    s:gap-rule: "A Work Item and a Deliverable name the same carrier page, and no statement relates them. No Relation Contract defines that relation." .
++
++<tag:dreyeck.ch,2026:hyperdoc/gap/work-item-deliverable-unlinked/topic-maps-regular-hyperdoc/tm-regular-catalog>
++    isa s:plan-gap ;
++    - "topic-maps-regular-hyperdoc and tm-regular-catalog share only their carrier page" ;
++    s:gap-rule: "A Work Item and a Deliverable name the same carrier page, and no statement relates them. No Relation Contract defines that relation." .
++
+ <tag:dreyeck.ch,2026:hyperdoc/gap/assignment-without-plan-step/cc-2026-10-18-project-work-ctm>
+     isa s:plan-gap ;
+     - "cc-2026-10-18-project-work-ctm has no confirmed Plan Step" ;
+@@ -1611,6 +2036,26 @@ w:pwc-wp-8
+     - "cc-2026-10-20-ctm-exchange-review has no confirmed Plan Step" ;
+     s:gap-rule: "The assignment names no confirmed Plan Step. Its own text cannot declare one." .
+ 
++<tag:dreyeck.ch,2026:hyperdoc/gap/assignment-without-plan-step/cc-2026-10-28-regular-catalog-scope>
++    isa s:plan-gap ;
++    - "cc-2026-10-28-regular-catalog-scope has no confirmed Plan Step" ;
++    s:gap-rule: "The assignment names no confirmed Plan Step. Its own text cannot declare one." .
++
++<tag:dreyeck.ch,2026:hyperdoc/gap/assignment-without-plan-step/cc-2026-10-28-topic-maps-6162ed68-revision>
++    isa s:plan-gap ;
++    - "cc-2026-10-28-topic-maps-6162ed68-revision has no confirmed Plan Step" ;
++    s:gap-rule: "The assignment names no confirmed Plan Step. Its own text cannot declare one." .
++
++<tag:dreyeck.ch,2026:hyperdoc/gap/assignment-without-plan-step/cc-2026-10-28-project-workspace-6162ed68>
++    isa s:plan-gap ;
++    - "cc-2026-10-28-project-workspace-6162ed68 has no confirmed Plan Step" ;
++    s:gap-rule: "The assignment names no confirmed Plan Step. Its own text cannot declare one." .
++
++<tag:dreyeck.ch,2026:hyperdoc/gap/assignment-without-plan-step/cc-2026-10-28-project-work-reading-6162ed68>
++    isa s:plan-gap ;
++    - "cc-2026-10-28-project-work-reading-6162ed68 has no confirmed Plan Step" ;
++    s:gap-rule: "The assignment names no confirmed Plan Step. Its own text cannot declare one." .
++
+ <tag:dreyeck.ch,2026:hyperdoc/gap/uncontracted-relation-word/word-models>
+     isa s:plan-gap ;
+     - "models is a relation word without a contract" ;
+@@ -1848,6 +2293,42 @@ s:proposed-on(s:proposal: w:pwc-wp-7, s:source-page: <tag:dreyeck.ch,2026:hyperd
+ s:carried-by(s:carried: w:pwc-wp-7, s:carrier-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/hyperdoc-project-workspace>)
+ s:proposed-on(s:proposal: w:pwc-wp-8, s:source-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/implementation-assignments>)
+ s:carried-by(s:carried: w:pwc-wp-8, s:carrier-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/hyperdoc-project-workspace>)
++s:proposed-on(s:proposal: w:topic-maps-regular-hyperdoc, s:source-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/implementation-assignments>)
++s:carried-by(s:carried: w:topic-maps-regular-hyperdoc, s:carrier-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/hyperdoc-project-workspace>)
++s:proposed-on(s:proposal: w:tm-regular-catalog, s:source-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/implementation-assignments>)
++s:carried-by(s:carried: w:tm-regular-catalog, s:carrier-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/hyperdoc-project-workspace>)
++s:proposed-on(s:proposal: w:tm-reg-wp-1, s:source-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/implementation-assignments>)
++s:carried-by(s:carried: w:tm-reg-wp-1, s:carrier-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/hyperdoc-project-workspace>)
++s:proposed-on(s:proposal: w:tm-reg-wp-2, s:source-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/implementation-assignments>)
++s:carried-by(s:carried: w:tm-reg-wp-2, s:carrier-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/hyperdoc-project-workspace>)
++s:proposed-on(s:proposal: w:tm-reg-wp-3, s:source-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/implementation-assignments>)
++s:carried-by(s:carried: w:tm-reg-wp-3, s:carrier-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/hyperdoc-project-workspace>)
++s:proposed-on(s:proposal: w:tm-reg-wp-4, s:source-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/implementation-assignments>)
++s:carried-by(s:carried: w:tm-reg-wp-4, s:carrier-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/hyperdoc-project-workspace>)
++s:proposed-on(s:proposal: w:tm-reg-wp-5, s:source-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/implementation-assignments>)
++s:carried-by(s:carried: w:tm-reg-wp-5, s:carrier-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/hyperdoc-project-workspace>)
++s:proposed-on(s:proposal: w:tm-reg-wp-6, s:source-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/implementation-assignments>)
++s:carried-by(s:carried: w:tm-reg-wp-6, s:carrier-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/hyperdoc-project-workspace>)
++s:proposed-on(s:proposal: w:tm-reg-p1, s:source-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/implementation-assignments>)
++s:carried-by(s:carried: w:tm-reg-p1, s:carrier-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/hyperdoc-project-workspace>)
++s:proposed-on(s:proposal: w:tm-reg-p2, s:source-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/implementation-assignments>)
++s:carried-by(s:carried: w:tm-reg-p2, s:carrier-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/hyperdoc-project-workspace>)
++s:proposed-on(s:proposal: w:tm-reg-p3, s:source-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/implementation-assignments>)
++s:carried-by(s:carried: w:tm-reg-p3, s:carrier-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/hyperdoc-project-workspace>)
++s:proposed-on(s:proposal: w:tm-reg-p4, s:source-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/implementation-assignments>)
++s:carried-by(s:carried: w:tm-reg-p4, s:carrier-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/hyperdoc-project-workspace>)
++s:proposed-on(s:proposal: w:tm-reg-p5, s:source-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/implementation-assignments>)
++s:carried-by(s:carried: w:tm-reg-p5, s:carrier-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/hyperdoc-project-workspace>)
++s:proposed-on(s:proposal: w:tm-reg-p6, s:source-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/implementation-assignments>)
++s:carried-by(s:carried: w:tm-reg-p6, s:carrier-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/hyperdoc-project-workspace>)
++s:proposed-on(s:proposal: w:tm-reg-pre-admission, s:source-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/implementation-assignments>)
++s:carried-by(s:carried: w:tm-reg-pre-admission, s:carrier-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/hyperdoc-project-workspace>)
++s:proposed-on(s:proposal: w:tm-reg-pre-security-review, s:source-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/implementation-assignments>)
++s:carried-by(s:carried: w:tm-reg-pre-security-review, s:carrier-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/hyperdoc-project-workspace>)
++s:proposed-on(s:proposal: w:tm-reg-pre-publish, s:source-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/implementation-assignments>)
++s:carried-by(s:carried: w:tm-reg-pre-publish, s:carrier-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/hyperdoc-project-workspace>)
++s:proposed-on(s:proposal: w:tm-reg-pre-production, s:source-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/implementation-assignments>)
++s:carried-by(s:carried: w:tm-reg-pre-production, s:carrier-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/hyperdoc-project-workspace>)
+ s:stated-on(s:statement: <tag:dreyeck.ch,2026:hyperdoc/statement/dreyeck/work/reading/work-breakdown/interaction/work:relation/informs/operations/1>, s:source-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/reading/work-breakdown>)
+ <tag:dreyeck.ch,2026:hyperdoc/work/topic/work:relation/informs>(s:role-work-relation-informs-source: w:interaction, s:role-work-relation-informs-target: w:operations) ~ <tag:dreyeck.ch,2026:hyperdoc/statement/dreyeck/work/reading/work-breakdown/interaction/work:relation/informs/operations/1>
+ s:stated-on(s:statement: <tag:dreyeck.ch,2026:hyperdoc/statement/dreyeck/work/reading/work-breakdown/operations/work:relation/informs/connect/1>, s:source-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/reading/work-breakdown>)
+@@ -1962,6 +2443,50 @@ s:proposed-on(s:proposal: <tag:dreyeck.ch,2026:hyperdoc/statement/dreyeck/work/p
+ <tag:dreyeck.ch,2026:hyperdoc/work/topic/work:relation/decomposes-into>(s:role-work-relation-decomposes-into-source: w:project-work-ctm-exchange, s:role-work-relation-decomposes-into-target: w:pwc-wp-7) ~ <tag:dreyeck.ch,2026:hyperdoc/statement/dreyeck/work/project/implementation-assignments/project-work-ctm-exchange/work:relation/decomposes-into/pwc-wp-7/1>
+ s:proposed-on(s:proposal: <tag:dreyeck.ch,2026:hyperdoc/statement/dreyeck/work/project/implementation-assignments/project-work-ctm-exchange/work:relation/decomposes-into/pwc-wp-8/1>, s:source-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/implementation-assignments>)
+ <tag:dreyeck.ch,2026:hyperdoc/work/topic/work:relation/decomposes-into>(s:role-work-relation-decomposes-into-source: w:project-work-ctm-exchange, s:role-work-relation-decomposes-into-target: w:pwc-wp-8) ~ <tag:dreyeck.ch,2026:hyperdoc/statement/dreyeck/work/project/implementation-assignments/project-work-ctm-exchange/work:relation/decomposes-into/pwc-wp-8/1>
++s:proposed-on(s:proposal: <tag:dreyeck.ch,2026:hyperdoc/statement/dreyeck/work/project/implementation-assignments/tm-regular-catalog/work:relation/decomposes-into/tm-reg-wp-1/1>, s:source-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/implementation-assignments>)
++<tag:dreyeck.ch,2026:hyperdoc/work/topic/work:relation/decomposes-into>(s:role-work-relation-decomposes-into-source: w:tm-regular-catalog, s:role-work-relation-decomposes-into-target: w:tm-reg-wp-1) ~ <tag:dreyeck.ch,2026:hyperdoc/statement/dreyeck/work/project/implementation-assignments/tm-regular-catalog/work:relation/decomposes-into/tm-reg-wp-1/1>
++s:proposed-on(s:proposal: <tag:dreyeck.ch,2026:hyperdoc/statement/dreyeck/work/project/implementation-assignments/tm-regular-catalog/work:relation/decomposes-into/tm-reg-wp-2/1>, s:source-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/implementation-assignments>)
++<tag:dreyeck.ch,2026:hyperdoc/work/topic/work:relation/decomposes-into>(s:role-work-relation-decomposes-into-source: w:tm-regular-catalog, s:role-work-relation-decomposes-into-target: w:tm-reg-wp-2) ~ <tag:dreyeck.ch,2026:hyperdoc/statement/dreyeck/work/project/implementation-assignments/tm-regular-catalog/work:relation/decomposes-into/tm-reg-wp-2/1>
++s:proposed-on(s:proposal: <tag:dreyeck.ch,2026:hyperdoc/statement/dreyeck/work/project/implementation-assignments/tm-regular-catalog/work:relation/decomposes-into/tm-reg-wp-3/1>, s:source-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/implementation-assignments>)
++<tag:dreyeck.ch,2026:hyperdoc/work/topic/work:relation/decomposes-into>(s:role-work-relation-decomposes-into-source: w:tm-regular-catalog, s:role-work-relation-decomposes-into-target: w:tm-reg-wp-3) ~ <tag:dreyeck.ch,2026:hyperdoc/statement/dreyeck/work/project/implementation-assignments/tm-regular-catalog/work:relation/decomposes-into/tm-reg-wp-3/1>
++s:proposed-on(s:proposal: <tag:dreyeck.ch,2026:hyperdoc/statement/dreyeck/work/project/implementation-assignments/tm-regular-catalog/work:relation/decomposes-into/tm-reg-wp-4/1>, s:source-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/implementation-assignments>)
++<tag:dreyeck.ch,2026:hyperdoc/work/topic/work:relation/decomposes-into>(s:role-work-relation-decomposes-into-source: w:tm-regular-catalog, s:role-work-relation-decomposes-into-target: w:tm-reg-wp-4) ~ <tag:dreyeck.ch,2026:hyperdoc/statement/dreyeck/work/project/implementation-assignments/tm-regular-catalog/work:relation/decomposes-into/tm-reg-wp-4/1>
++s:proposed-on(s:proposal: <tag:dreyeck.ch,2026:hyperdoc/statement/dreyeck/work/project/implementation-assignments/tm-regular-catalog/work:relation/decomposes-into/tm-reg-wp-5/1>, s:source-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/implementation-assignments>)
++<tag:dreyeck.ch,2026:hyperdoc/work/topic/work:relation/decomposes-into>(s:role-work-relation-decomposes-into-source: w:tm-regular-catalog, s:role-work-relation-decomposes-into-target: w:tm-reg-wp-5) ~ <tag:dreyeck.ch,2026:hyperdoc/statement/dreyeck/work/project/implementation-assignments/tm-regular-catalog/work:relation/decomposes-into/tm-reg-wp-5/1>
++s:proposed-on(s:proposal: <tag:dreyeck.ch,2026:hyperdoc/statement/dreyeck/work/project/implementation-assignments/tm-regular-catalog/work:relation/decomposes-into/tm-reg-wp-6/1>, s:source-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/implementation-assignments>)
++<tag:dreyeck.ch,2026:hyperdoc/work/topic/work:relation/decomposes-into>(s:role-work-relation-decomposes-into-source: w:tm-regular-catalog, s:role-work-relation-decomposes-into-target: w:tm-reg-wp-6) ~ <tag:dreyeck.ch,2026:hyperdoc/statement/dreyeck/work/project/implementation-assignments/tm-regular-catalog/work:relation/decomposes-into/tm-reg-wp-6/1>
++s:proposed-on(s:proposal: <tag:dreyeck.ch,2026:hyperdoc/statement/dreyeck/work/project/implementation-assignments/tm-reg-p1/work:relation/produces/tm-reg-wp-1/1>, s:source-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/implementation-assignments>)
++<tag:dreyeck.ch,2026:hyperdoc/work/topic/work:relation/produces>(s:role-work-relation-produces-source: w:tm-reg-p1, s:role-work-relation-produces-target: w:tm-reg-wp-1) ~ <tag:dreyeck.ch,2026:hyperdoc/statement/dreyeck/work/project/implementation-assignments/tm-reg-p1/work:relation/produces/tm-reg-wp-1/1>
++s:proposed-on(s:proposal: <tag:dreyeck.ch,2026:hyperdoc/statement/dreyeck/work/project/implementation-assignments/tm-reg-p2/work:relation/produces/tm-reg-wp-2/1>, s:source-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/implementation-assignments>)
++<tag:dreyeck.ch,2026:hyperdoc/work/topic/work:relation/produces>(s:role-work-relation-produces-source: w:tm-reg-p2, s:role-work-relation-produces-target: w:tm-reg-wp-2) ~ <tag:dreyeck.ch,2026:hyperdoc/statement/dreyeck/work/project/implementation-assignments/tm-reg-p2/work:relation/produces/tm-reg-wp-2/1>
++s:proposed-on(s:proposal: <tag:dreyeck.ch,2026:hyperdoc/statement/dreyeck/work/project/implementation-assignments/tm-reg-p3/work:relation/produces/tm-reg-wp-3/1>, s:source-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/implementation-assignments>)
++<tag:dreyeck.ch,2026:hyperdoc/work/topic/work:relation/produces>(s:role-work-relation-produces-source: w:tm-reg-p3, s:role-work-relation-produces-target: w:tm-reg-wp-3) ~ <tag:dreyeck.ch,2026:hyperdoc/statement/dreyeck/work/project/implementation-assignments/tm-reg-p3/work:relation/produces/tm-reg-wp-3/1>
++s:proposed-on(s:proposal: <tag:dreyeck.ch,2026:hyperdoc/statement/dreyeck/work/project/implementation-assignments/tm-reg-p4/work:relation/produces/tm-reg-wp-4/1>, s:source-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/implementation-assignments>)
++<tag:dreyeck.ch,2026:hyperdoc/work/topic/work:relation/produces>(s:role-work-relation-produces-source: w:tm-reg-p4, s:role-work-relation-produces-target: w:tm-reg-wp-4) ~ <tag:dreyeck.ch,2026:hyperdoc/statement/dreyeck/work/project/implementation-assignments/tm-reg-p4/work:relation/produces/tm-reg-wp-4/1>
++s:proposed-on(s:proposal: <tag:dreyeck.ch,2026:hyperdoc/statement/dreyeck/work/project/implementation-assignments/tm-reg-p5/work:relation/produces/tm-reg-wp-5/1>, s:source-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/implementation-assignments>)
++<tag:dreyeck.ch,2026:hyperdoc/work/topic/work:relation/produces>(s:role-work-relation-produces-source: w:tm-reg-p5, s:role-work-relation-produces-target: w:tm-reg-wp-5) ~ <tag:dreyeck.ch,2026:hyperdoc/statement/dreyeck/work/project/implementation-assignments/tm-reg-p5/work:relation/produces/tm-reg-wp-5/1>
++s:proposed-on(s:proposal: <tag:dreyeck.ch,2026:hyperdoc/statement/dreyeck/work/project/implementation-assignments/tm-reg-p6/work:relation/produces/tm-reg-wp-6/1>, s:source-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/implementation-assignments>)
++<tag:dreyeck.ch,2026:hyperdoc/work/topic/work:relation/produces>(s:role-work-relation-produces-source: w:tm-reg-p6, s:role-work-relation-produces-target: w:tm-reg-wp-6) ~ <tag:dreyeck.ch,2026:hyperdoc/statement/dreyeck/work/project/implementation-assignments/tm-reg-p6/work:relation/produces/tm-reg-wp-6/1>
++s:proposed-on(s:proposal: <tag:dreyeck.ch,2026:hyperdoc/statement/dreyeck/work/project/implementation-assignments/tm-reg-p2/work:relation/depends-on/tm-reg-p1/1>, s:source-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/implementation-assignments>)
++<tag:dreyeck.ch,2026:hyperdoc/work/topic/work:relation/depends-on>(s:role-work-relation-depends-on-source: w:tm-reg-p2, s:role-work-relation-depends-on-target: w:tm-reg-p1) ~ <tag:dreyeck.ch,2026:hyperdoc/statement/dreyeck/work/project/implementation-assignments/tm-reg-p2/work:relation/depends-on/tm-reg-p1/1>
++s:proposed-on(s:proposal: <tag:dreyeck.ch,2026:hyperdoc/statement/dreyeck/work/project/implementation-assignments/tm-reg-p3/work:relation/depends-on/tm-reg-p2/1>, s:source-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/implementation-assignments>)
++<tag:dreyeck.ch,2026:hyperdoc/work/topic/work:relation/depends-on>(s:role-work-relation-depends-on-source: w:tm-reg-p3, s:role-work-relation-depends-on-target: w:tm-reg-p2) ~ <tag:dreyeck.ch,2026:hyperdoc/statement/dreyeck/work/project/implementation-assignments/tm-reg-p3/work:relation/depends-on/tm-reg-p2/1>
++s:proposed-on(s:proposal: <tag:dreyeck.ch,2026:hyperdoc/statement/dreyeck/work/project/implementation-assignments/tm-reg-p4/work:relation/depends-on/tm-reg-p3/1>, s:source-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/implementation-assignments>)
++<tag:dreyeck.ch,2026:hyperdoc/work/topic/work:relation/depends-on>(s:role-work-relation-depends-on-source: w:tm-reg-p4, s:role-work-relation-depends-on-target: w:tm-reg-p3) ~ <tag:dreyeck.ch,2026:hyperdoc/statement/dreyeck/work/project/implementation-assignments/tm-reg-p4/work:relation/depends-on/tm-reg-p3/1>
++s:proposed-on(s:proposal: <tag:dreyeck.ch,2026:hyperdoc/statement/dreyeck/work/project/implementation-assignments/tm-reg-p5/work:relation/depends-on/tm-reg-p1/1>, s:source-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/implementation-assignments>)
++<tag:dreyeck.ch,2026:hyperdoc/work/topic/work:relation/depends-on>(s:role-work-relation-depends-on-source: w:tm-reg-p5, s:role-work-relation-depends-on-target: w:tm-reg-p1) ~ <tag:dreyeck.ch,2026:hyperdoc/statement/dreyeck/work/project/implementation-assignments/tm-reg-p5/work:relation/depends-on/tm-reg-p1/1>
++s:proposed-on(s:proposal: <tag:dreyeck.ch,2026:hyperdoc/statement/dreyeck/work/project/implementation-assignments/tm-reg-p5/work:relation/depends-on/tm-reg-p4/1>, s:source-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/implementation-assignments>)
++<tag:dreyeck.ch,2026:hyperdoc/work/topic/work:relation/depends-on>(s:role-work-relation-depends-on-source: w:tm-reg-p5, s:role-work-relation-depends-on-target: w:tm-reg-p4) ~ <tag:dreyeck.ch,2026:hyperdoc/statement/dreyeck/work/project/implementation-assignments/tm-reg-p5/work:relation/depends-on/tm-reg-p4/1>
++s:proposed-on(s:proposal: <tag:dreyeck.ch,2026:hyperdoc/statement/dreyeck/work/project/implementation-assignments/tm-reg-p5/work:relation/depends-on/tm-reg-pre-admission/1>, s:source-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/implementation-assignments>)
++<tag:dreyeck.ch,2026:hyperdoc/work/topic/work:relation/depends-on>(s:role-work-relation-depends-on-source: w:tm-reg-p5, s:role-work-relation-depends-on-target: w:tm-reg-pre-admission) ~ <tag:dreyeck.ch,2026:hyperdoc/statement/dreyeck/work/project/implementation-assignments/tm-reg-p5/work:relation/depends-on/tm-reg-pre-admission/1>
++s:proposed-on(s:proposal: <tag:dreyeck.ch,2026:hyperdoc/statement/dreyeck/work/project/implementation-assignments/tm-reg-p5/work:relation/depends-on/tm-reg-pre-publish/1>, s:source-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/implementation-assignments>)
++<tag:dreyeck.ch,2026:hyperdoc/work/topic/work:relation/depends-on>(s:role-work-relation-depends-on-source: w:tm-reg-p5, s:role-work-relation-depends-on-target: w:tm-reg-pre-publish) ~ <tag:dreyeck.ch,2026:hyperdoc/statement/dreyeck/work/project/implementation-assignments/tm-reg-p5/work:relation/depends-on/tm-reg-pre-publish/1>
++s:proposed-on(s:proposal: <tag:dreyeck.ch,2026:hyperdoc/statement/dreyeck/work/project/implementation-assignments/tm-reg-p6/work:relation/depends-on/tm-reg-p5/1>, s:source-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/implementation-assignments>)
++<tag:dreyeck.ch,2026:hyperdoc/work/topic/work:relation/depends-on>(s:role-work-relation-depends-on-source: w:tm-reg-p6, s:role-work-relation-depends-on-target: w:tm-reg-p5) ~ <tag:dreyeck.ch,2026:hyperdoc/statement/dreyeck/work/project/implementation-assignments/tm-reg-p6/work:relation/depends-on/tm-reg-p5/1>
++s:proposed-on(s:proposal: <tag:dreyeck.ch,2026:hyperdoc/statement/dreyeck/work/project/implementation-assignments/tm-reg-p6/work:relation/depends-on/tm-reg-pre-security-review/1>, s:source-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/implementation-assignments>)
++<tag:dreyeck.ch,2026:hyperdoc/work/topic/work:relation/depends-on>(s:role-work-relation-depends-on-source: w:tm-reg-p6, s:role-work-relation-depends-on-target: w:tm-reg-pre-security-review) ~ <tag:dreyeck.ch,2026:hyperdoc/statement/dreyeck/work/project/implementation-assignments/tm-reg-p6/work:relation/depends-on/tm-reg-pre-security-review/1>
++s:proposed-on(s:proposal: <tag:dreyeck.ch,2026:hyperdoc/statement/dreyeck/work/project/implementation-assignments/tm-reg-p6/work:relation/depends-on/tm-reg-pre-production/1>, s:source-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/implementation-assignments>)
++<tag:dreyeck.ch,2026:hyperdoc/work/topic/work:relation/depends-on>(s:role-work-relation-depends-on-source: w:tm-reg-p6, s:role-work-relation-depends-on-target: w:tm-reg-pre-production) ~ <tag:dreyeck.ch,2026:hyperdoc/statement/dreyeck/work/project/implementation-assignments/tm-reg-p6/work:relation/depends-on/tm-reg-pre-production/1>
+ s:defined-in-dictionary(s:work-package: w:ctm-wp-1, s:source-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/reading/ctm-plan-page-wbs-dictionary>)
+ s:planned-control-of(s:work-package: w:ctm-wp-1, s:control: <tag:dreyeck.ch,2026:hyperdoc/control/ctm-wp-1/site-root-slug-item>)
+ s:exercised-by(s:control: <tag:dreyeck.ch,2026:hyperdoc/control/ctm-wp-1/site-root-slug-item>, s:test-file: <tag:dreyeck.ch,2026:hyperdoc/file/dreyeck/tests/fedwiki-page-authoring.lisp>)
+@@ -2030,6 +2555,58 @@ s:reads-source(s:assignment: <tag:dreyeck.ch,2026:hyperdoc/assignment/cc-2026-10
+ s:reads-source(s:assignment: <tag:dreyeck.ch,2026:hyperdoc/assignment/cc-2026-10-20-ctm-exchange-review>, s:source: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/reading/work-breakdown>)
+ s:reads-source(s:assignment: <tag:dreyeck.ch,2026:hyperdoc/assignment/cc-2026-10-20-ctm-exchange-review>, s:source: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/reading/authoring-the-ctm-plan-page>)
+ s:changes-source(s:assignment: <tag:dreyeck.ch,2026:hyperdoc/assignment/cc-2026-10-20-ctm-exchange-review>, s:file: <tag:dreyeck.ch,2026:hyperdoc/file/docs/project-ctm-exchange-review.md>)
++s:declared-on(s:declaration: <tag:dreyeck.ch,2026:hyperdoc/assignment/cc-2026-10-28-regular-catalog-scope>, s:source-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/implementation-assignments>)
++s:assignment-for(s:assignment: <tag:dreyeck.ch,2026:hyperdoc/assignment/cc-2026-10-28-regular-catalog-scope>, s:work-item: w:topic-maps-regular-hyperdoc)
++s:reads-source(s:assignment: <tag:dreyeck.ch,2026:hyperdoc/assignment/cc-2026-10-28-regular-catalog-scope>, s:source: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/reading/work-breakdown>)
++s:reads-source(s:assignment: <tag:dreyeck.ch,2026:hyperdoc/assignment/cc-2026-10-28-regular-catalog-scope>, s:source: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/reading/authoring-the-ctm-plan-page>)
++s:reads-source(s:assignment: <tag:dreyeck.ch,2026:hyperdoc/assignment/cc-2026-10-28-regular-catalog-scope>, s:source: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/reading/ctm-plan-page-wbs-dictionary>)
++s:reads-source(s:assignment: <tag:dreyeck.ch,2026:hyperdoc/assignment/cc-2026-10-28-regular-catalog-scope>, s:source: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/project-work-exchange-wbs-dictionary>)
++s:reads-source(s:assignment: <tag:dreyeck.ch,2026:hyperdoc/assignment/cc-2026-10-28-regular-catalog-scope>, s:source: <tag:dreyeck.ch,2026:hyperdoc/file/docs/project-acceptance-model.md>)
++s:reads-source(s:assignment: <tag:dreyeck.ch,2026:hyperdoc/assignment/cc-2026-10-28-regular-catalog-scope>, s:source: <tag:dreyeck.ch,2026:hyperdoc/file/dreyeck/work/project/project-ctm.lisp>)
++s:changes-source(s:assignment: <tag:dreyeck.ch,2026:hyperdoc/assignment/cc-2026-10-28-regular-catalog-scope>, s:file: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/implementation-assignments>)
++s:contains-page(s:hyperbook-role: <tag:dreyeck.ch,2026:hyperdoc/hyperbook/dreyeck/work/project>, s:page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/regular-catalog-wbs-dictionary>)
++s:changes-source(s:assignment: <tag:dreyeck.ch,2026:hyperdoc/assignment/cc-2026-10-28-regular-catalog-scope>, s:file: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/regular-catalog-wbs-dictionary>)
++s:changes-source(s:assignment: <tag:dreyeck.ch,2026:hyperdoc/assignment/cc-2026-10-28-regular-catalog-scope>, s:file: <tag:dreyeck.ch,2026:hyperdoc/file/dreyeck/work/project/hyperdoc-project.ctm>)
++s:changes-source(s:assignment: <tag:dreyeck.ch,2026:hyperdoc/assignment/cc-2026-10-28-regular-catalog-scope>, s:file: <tag:dreyeck.ch,2026:hyperdoc/file/dreyeck/work/project/hyperdoc-project.ctm.sha256>)
++s:changes-source(s:assignment: <tag:dreyeck.ch,2026:hyperdoc/assignment/cc-2026-10-28-regular-catalog-scope>, s:file: <tag:dreyeck.ch,2026:hyperdoc/file/dreyeck.asd>)
++s:changes-source(s:assignment: <tag:dreyeck.ch,2026:hyperdoc/assignment/cc-2026-10-28-regular-catalog-scope>, s:file: <tag:dreyeck.ch,2026:hyperdoc/file/dreyeck/tests/project-scope.lisp>)
++s:changes-source(s:assignment: <tag:dreyeck.ch,2026:hyperdoc/assignment/cc-2026-10-28-regular-catalog-scope>, s:file: <tag:dreyeck.ch,2026:hyperdoc/file/scripts/test-project-workspace-scope.mjs>)
++s:changes-source(s:assignment: <tag:dreyeck.ch,2026:hyperdoc/assignment/cc-2026-10-28-regular-catalog-scope>, s:file: <tag:dreyeck.ch,2026:hyperdoc/file/docs/regular-catalog-scope/HANDOFF.md>)
++s:changes-source(s:assignment: <tag:dreyeck.ch,2026:hyperdoc/assignment/cc-2026-10-28-regular-catalog-scope>, s:file: <tag:dreyeck.ch,2026:hyperdoc/file/docs/regular-catalog-scope/on-88994c1b/SCOPE-DECLARATION-REVIEW.md>)
++s:reads-source(s:assignment: <tag:dreyeck.ch,2026:hyperdoc/assignment/cc-2026-10-28-regular-catalog-scope>, s:source: <tag:dreyeck.ch,2026:hyperdoc/file/docs/topic-maps-88994c1b-integration/README.md>)
++s:reads-source(s:assignment: <tag:dreyeck.ch,2026:hyperdoc/assignment/cc-2026-10-28-regular-catalog-scope>, s:source: <tag:dreyeck.ch,2026:hyperdoc/file/dreyeck/work/topic-maps-task-1e-review/evidence/task1e-independent-review.md>)
++s:evidenced-by-test(s:assignment: <tag:dreyeck.ch,2026:hyperdoc/assignment/cc-2026-10-28-regular-catalog-scope>, s:test-file: <tag:dreyeck.ch,2026:hyperdoc/file/dreyeck/tests/project-scope.lisp>)
++s:evidenced-by-test(s:assignment: <tag:dreyeck.ch,2026:hyperdoc/assignment/cc-2026-10-28-regular-catalog-scope>, s:test-file: <tag:dreyeck.ch,2026:hyperdoc/file/scripts/test-project-workspace-scope.mjs>)
++s:declared-on(s:declaration: <tag:dreyeck.ch,2026:hyperdoc/assignment/cc-2026-10-28-topic-maps-6162ed68-revision>, s:source-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/implementation-assignments>)
++s:assignment-for(s:assignment: <tag:dreyeck.ch,2026:hyperdoc/assignment/cc-2026-10-28-topic-maps-6162ed68-revision>, s:work-item: w:topic-maps-regular-hyperdoc)
++s:assignment-delivers(s:assignment: <tag:dreyeck.ch,2026:hyperdoc/assignment/cc-2026-10-28-topic-maps-6162ed68-revision>, s:work-package: w:tm-reg-wp-1)
++s:changes-source(s:assignment: <tag:dreyeck.ch,2026:hyperdoc/assignment/cc-2026-10-28-topic-maps-6162ed68-revision>, s:file: <tag:dreyeck.ch,2026:hyperdoc/file/nix/topic-maps-6162ed68.manifest>)
++s:changes-source(s:assignment: <tag:dreyeck.ch,2026:hyperdoc/assignment/cc-2026-10-28-topic-maps-6162ed68-revision>, s:file: <tag:dreyeck.ch,2026:hyperdoc/file/nix/topic-maps-source.nix>)
++s:changes-source(s:assignment: <tag:dreyeck.ch,2026:hyperdoc/assignment/cc-2026-10-28-topic-maps-6162ed68-revision>, s:file: <tag:dreyeck.ch,2026:hyperdoc/file/dreyeck/src/catalog-topic-maps.lisp>)
++s:changes-source(s:assignment: <tag:dreyeck.ch,2026:hyperdoc/assignment/cc-2026-10-28-topic-maps-6162ed68-revision>, s:file: <tag:dreyeck.ch,2026:hyperdoc/file/dreyeck/tests/source-snapshot.lisp>)
++s:changes-source(s:assignment: <tag:dreyeck.ch,2026:hyperdoc/assignment/cc-2026-10-28-topic-maps-6162ed68-revision>, s:file: <tag:dreyeck.ch,2026:hyperdoc/file/nix/topic-maps-88994c1b.manifest>)
++s:changes-source(s:assignment: <tag:dreyeck.ch,2026:hyperdoc/assignment/cc-2026-10-28-topic-maps-6162ed68-revision>, s:file: <tag:dreyeck.ch,2026:hyperdoc/file/dreyeck/work/topic-maps-project-example.lisp>)
++s:reads-source(s:assignment: <tag:dreyeck.ch,2026:hyperdoc/assignment/cc-2026-10-28-topic-maps-6162ed68-revision>, s:source: <tag:dreyeck.ch,2026:hyperdoc/file/dreyeck/work/topic-maps-task-1e-review/evidence/task1e-commit-record.md>)
++s:reads-source(s:assignment: <tag:dreyeck.ch,2026:hyperdoc/assignment/cc-2026-10-28-topic-maps-6162ed68-revision>, s:source: <tag:dreyeck.ch,2026:hyperdoc/file/dreyeck/work/topic-maps-task-1e-review/evidence/snapshot-archive-verification.json>)
++s:reads-source(s:assignment: <tag:dreyeck.ch,2026:hyperdoc/assignment/cc-2026-10-28-topic-maps-6162ed68-revision>, s:source: <tag:dreyeck.ch,2026:hyperdoc/file/dreyeck/work/topic-maps-task-1e-review/evidence/task1e-independent-review.md>)
++s:declared-on(s:declaration: <tag:dreyeck.ch,2026:hyperdoc/assignment/cc-2026-10-28-project-workspace-6162ed68>, s:source-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/implementation-assignments>)
++s:assignment-for(s:assignment: <tag:dreyeck.ch,2026:hyperdoc/assignment/cc-2026-10-28-project-workspace-6162ed68>, s:work-item: w:topic-maps-regular-hyperdoc)
++s:assignment-delivers(s:assignment: <tag:dreyeck.ch,2026:hyperdoc/assignment/cc-2026-10-28-project-workspace-6162ed68>, s:work-package: w:tm-reg-wp-2)
++s:changes-source(s:assignment: <tag:dreyeck.ch,2026:hyperdoc/assignment/cc-2026-10-28-project-workspace-6162ed68>, s:file: <tag:dreyeck.ch,2026:hyperdoc/file/dreyeck/work/project/project-workspace.lisp>)
++s:changes-source(s:assignment: <tag:dreyeck.ch,2026:hyperdoc/assignment/cc-2026-10-28-project-workspace-6162ed68>, s:file: <tag:dreyeck.ch,2026:hyperdoc/file/dreyeck/work/project/project-ctm.lisp>)
++s:changes-source(s:assignment: <tag:dreyeck.ch,2026:hyperdoc/assignment/cc-2026-10-28-project-workspace-6162ed68>, s:file: <tag:dreyeck.ch,2026:hyperdoc/file/dreyeck/src/catalog-topic-maps.lisp>)
++s:changes-source(s:assignment: <tag:dreyeck.ch,2026:hyperdoc/assignment/cc-2026-10-28-project-workspace-6162ed68>, s:file: <tag:dreyeck.ch,2026:hyperdoc/file/dreyeck/tests/project-ctm.lisp>)
++s:changes-source(s:assignment: <tag:dreyeck.ch,2026:hyperdoc/assignment/cc-2026-10-28-project-workspace-6162ed68>, s:file: <tag:dreyeck.ch,2026:hyperdoc/file/scripts/run-project-workspace-integration.lisp>)
++s:reads-source(s:assignment: <tag:dreyeck.ch,2026:hyperdoc/assignment/cc-2026-10-28-project-workspace-6162ed68>, s:source: <tag:dreyeck.ch,2026:hyperdoc/file/dreyeck/work/project/hyperdoc-project.ctm>)
++s:reads-source(s:assignment: <tag:dreyeck.ch,2026:hyperdoc/assignment/cc-2026-10-28-project-workspace-6162ed68>, s:source: <tag:dreyeck.ch,2026:hyperdoc/file/docs/topic-maps-88994c1b-integration/README.md>)
++s:reads-source(s:assignment: <tag:dreyeck.ch,2026:hyperdoc/assignment/cc-2026-10-28-project-workspace-6162ed68>, s:source: <tag:dreyeck.ch,2026:hyperdoc/file/docs/regular-catalog-scope/on-88994c1b/SCOPE-DECLARATION-REVIEW.md>)
++s:evidenced-by-test(s:assignment: <tag:dreyeck.ch,2026:hyperdoc/assignment/cc-2026-10-28-project-workspace-6162ed68>, s:test-file: <tag:dreyeck.ch,2026:hyperdoc/file/scripts/test-project-workspace.mjs>)
++s:evidenced-by-test(s:assignment: <tag:dreyeck.ch,2026:hyperdoc/assignment/cc-2026-10-28-project-workspace-6162ed68>, s:test-file: <tag:dreyeck.ch,2026:hyperdoc/file/scripts/run-project-workspace-integration.lisp>)
++s:declared-on(s:declaration: <tag:dreyeck.ch,2026:hyperdoc/assignment/cc-2026-10-28-project-work-reading-6162ed68>, s:source-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/implementation-assignments>)
++s:assignment-for(s:assignment: <tag:dreyeck.ch,2026:hyperdoc/assignment/cc-2026-10-28-project-work-reading-6162ed68>, s:work-item: w:topic-maps-regular-hyperdoc)
++s:assignment-delivers(s:assignment: <tag:dreyeck.ch,2026:hyperdoc/assignment/cc-2026-10-28-project-work-reading-6162ed68>, s:work-package: w:tm-reg-wp-3)
++s:changes-source(s:assignment: <tag:dreyeck.ch,2026:hyperdoc/assignment/cc-2026-10-28-project-work-reading-6162ed68>, s:file: <tag:dreyeck.ch,2026:hyperdoc/file/dreyeck/work/topic-maps-integration-review/>)
++s:changes-source(s:assignment: <tag:dreyeck.ch,2026:hyperdoc/assignment/cc-2026-10-28-project-work-reading-6162ed68>, s:file: <tag:dreyeck.ch,2026:hyperdoc/file/docs/topic-maps-6162ed68-integration/README.md>)
+ s:gap-concerns(s:gap: <tag:dreyeck.ch,2026:hyperdoc/gap/work-item-without-breakdown/connections-example>, s:subject: w:connections-example)
+ s:gap-concerns(s:gap: <tag:dreyeck.ch,2026:hyperdoc/gap/work-item-without-breakdown/fedwiki-item-authoring>, s:subject: w:fedwiki-item-authoring)
+ s:gap-concerns(s:gap: <tag:dreyeck.ch,2026:hyperdoc/gap/work-item-without-breakdown/production-authoring-authority>, s:subject: w:production-authoring-authority)
+@@ -2047,10 +2624,20 @@ s:gap-concerns(s:gap: <tag:dreyeck.ch,2026:hyperdoc/gap/work-item-without-breakd
+ s:gap-concerns(s:gap: <tag:dreyeck.ch,2026:hyperdoc/gap/work-item-without-breakdown/conversation-coordinates>, s:subject: w:conversation-coordinates)
+ s:gap-concerns(s:gap: <tag:dreyeck.ch,2026:hyperdoc/gap/work-item-deliverable-unlinked/project-work-ctm/project-work-ctm-exchange>, s:subject: w:project-work-ctm)
+ s:gap-concerns(s:gap: <tag:dreyeck.ch,2026:hyperdoc/gap/work-item-deliverable-unlinked/project-work-ctm/project-work-ctm-exchange>, s:subject: w:project-work-ctm-exchange)
++s:gap-concerns(s:gap: <tag:dreyeck.ch,2026:hyperdoc/gap/work-item-deliverable-unlinked/project-work-ctm/tm-regular-catalog>, s:subject: w:project-work-ctm)
++s:gap-concerns(s:gap: <tag:dreyeck.ch,2026:hyperdoc/gap/work-item-deliverable-unlinked/project-work-ctm/tm-regular-catalog>, s:subject: w:tm-regular-catalog)
++s:gap-concerns(s:gap: <tag:dreyeck.ch,2026:hyperdoc/gap/work-item-deliverable-unlinked/topic-maps-regular-hyperdoc/project-work-ctm-exchange>, s:subject: w:topic-maps-regular-hyperdoc)
++s:gap-concerns(s:gap: <tag:dreyeck.ch,2026:hyperdoc/gap/work-item-deliverable-unlinked/topic-maps-regular-hyperdoc/project-work-ctm-exchange>, s:subject: w:project-work-ctm-exchange)
++s:gap-concerns(s:gap: <tag:dreyeck.ch,2026:hyperdoc/gap/work-item-deliverable-unlinked/topic-maps-regular-hyperdoc/tm-regular-catalog>, s:subject: w:topic-maps-regular-hyperdoc)
++s:gap-concerns(s:gap: <tag:dreyeck.ch,2026:hyperdoc/gap/work-item-deliverable-unlinked/topic-maps-regular-hyperdoc/tm-regular-catalog>, s:subject: w:tm-regular-catalog)
+ s:gap-concerns(s:gap: <tag:dreyeck.ch,2026:hyperdoc/gap/assignment-without-plan-step/cc-2026-10-18-project-work-ctm>, s:subject: <tag:dreyeck.ch,2026:hyperdoc/assignment/cc-2026-10-18-project-work-ctm>)
+ s:gap-concerns(s:gap: <tag:dreyeck.ch,2026:hyperdoc/gap/assignment-without-plan-step/cc-2026-10-19-topic-maps-reader-scaling>, s:subject: <tag:dreyeck.ch,2026:hyperdoc/assignment/cc-2026-10-19-topic-maps-reader-scaling>)
+ s:gap-concerns(s:gap: <tag:dreyeck.ch,2026:hyperdoc/gap/assignment-without-plan-step/cc-2026-10-19-acceptance-model-draft>, s:subject: <tag:dreyeck.ch,2026:hyperdoc/assignment/cc-2026-10-19-acceptance-model-draft>)
+ s:gap-concerns(s:gap: <tag:dreyeck.ch,2026:hyperdoc/gap/assignment-without-plan-step/cc-2026-10-20-ctm-exchange-review>, s:subject: <tag:dreyeck.ch,2026:hyperdoc/assignment/cc-2026-10-20-ctm-exchange-review>)
++s:gap-concerns(s:gap: <tag:dreyeck.ch,2026:hyperdoc/gap/assignment-without-plan-step/cc-2026-10-28-regular-catalog-scope>, s:subject: <tag:dreyeck.ch,2026:hyperdoc/assignment/cc-2026-10-28-regular-catalog-scope>)
++s:gap-concerns(s:gap: <tag:dreyeck.ch,2026:hyperdoc/gap/assignment-without-plan-step/cc-2026-10-28-topic-maps-6162ed68-revision>, s:subject: <tag:dreyeck.ch,2026:hyperdoc/assignment/cc-2026-10-28-topic-maps-6162ed68-revision>)
++s:gap-concerns(s:gap: <tag:dreyeck.ch,2026:hyperdoc/gap/assignment-without-plan-step/cc-2026-10-28-project-workspace-6162ed68>, s:subject: <tag:dreyeck.ch,2026:hyperdoc/assignment/cc-2026-10-28-project-workspace-6162ed68>)
++s:gap-concerns(s:gap: <tag:dreyeck.ch,2026:hyperdoc/gap/assignment-without-plan-step/cc-2026-10-28-project-work-reading-6162ed68>, s:subject: <tag:dreyeck.ch,2026:hyperdoc/assignment/cc-2026-10-28-project-work-reading-6162ed68>)
+ s:gap-concerns(s:gap: <tag:dreyeck.ch,2026:hyperdoc/gap/uncontracted-relation-word/word-models>, s:subject: s:relation-word-models)
+ s:gap-concerns(s:gap: <tag:dreyeck.ch,2026:hyperdoc/gap/uncontracted-relation-word/word-observes>, s:subject: s:relation-word-observes)
+ s:gap-concerns(s:gap: <tag:dreyeck.ch,2026:hyperdoc/gap/uncontracted-relation-word/word-uses>, s:subject: s:relation-word-uses)
+diff --git a/dreyeck/work/project/hyperdoc-project.ctm.sha256 b/dreyeck/work/project/hyperdoc-project.ctm.sha256
+index ac0e948d..0cf7a401 100644
+--- a/dreyeck/work/project/hyperdoc-project.ctm.sha256
++++ b/dreyeck/work/project/hyperdoc-project.ctm.sha256
+@@ -1 +1 @@
+-f4f04bb49ce3b762b3e1c0bccf9e177e11785d33db87e8c0d043b04820b540d3  hyperdoc-project.ctm
++346ae79206e291193e4e13a824a4d7c50fabd180a5328621e9ff4894cdd2b0f5  hyperdoc-project.ctm

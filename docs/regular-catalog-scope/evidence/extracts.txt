@@ -1,0 +1,51 @@
+# Evidence extracts (copied from the session scratchpad; full logs remain there while it exists)
+
+## Stage 1 source and scope tests (scope3.log)
+PROJECT-CTM-SOURCE-PASS: 345 checks; no CTM read-back (not semantically validated)
+PROJECT-CTM-SCOPE-PASS: 196 checks; the scope is proposed, not declared; derived from the page text; nothing written
+
+## Concurrent read-time comparison, Git checkout of Topic Maps 6162ed68, same load (ab-old.log / ab-new.log)
+-- old
+CTM-INPUT-SHA256 f4f04bb49ce3b762b3e1c0bccf9e177e11785d33db87e8c0d043b04820b540d3
+PROJECT-WORKSPACE wall=48.716 digest=f4f04bb49ce3b762b3e1c0bccf9e177e11785d33db87e8c0d043b04820b540d3 refusal=NIL
+WITHIN-90-SECONDS YES
+REVISION-FROM-OCTETS wall=48.296 COMPARE (:OCTETS-EQUAL T :CXTM-EQUAL T
+CTM-INPUT-UNCHANGED YES
+$S/env.sh $S/head-copy /Users/rgb/workspace/topic-maps   126.48s user 6.26s system 94% cpu 2:20.42 total
+-- new
+CTM-INPUT-SHA256 203900cbdc099292f43fd253f32c958a3f4a755f16d05ecc5027c8e236fded19
+PROJECT-WORKSPACE wall=113.314 digest=203900cbdc099292f43fd253f32c958a3f4a755f16d05ecc5027c8e236fded19 refusal=NIL
+WITHIN-90-SECONDS NO
+REVISION-FROM-OCTETS wall=110.932 COMPARE (:OCTETS-EQUAL T :CXTM-EQUAL T
+CTM-INPUT-UNCHANGED YES
+$S/env.sh /Users/rgb/workspace/hyperdoc-zettel-11359    243.54s user 7.98s system 93% cpu 4:27.89 total
+
+## Earlier solo read of the Stage 1 CTM (integ-git.log)
+CTM-INPUT-SHA256 203900cbdc099292f43fd253f32c958a3f4a755f16d05ecc5027c8e236fded19
+PROJECT-WORKSPACE wall=107.684 digest=203900cbdc099292f43fd253f32c958a3f4a755f16d05ecc5027c8e236fded19 refusal=NIL
+WITHIN-90-SECONDS NO
+CTM-INPUT-UNCHANGED YES
+
+## Full Project suite, scratch copy diagC1 with the 90 s threshold relaxed in the COPY ONLY (diagC1.log)
+SUITE-START dreyeck/work/project
+PROJECT-CTM-SOURCE-PASS: 345 checks; no CTM read-back (not semantically validated)
+PROJECT-CTM-READBACK-PASS: 224 checks; complete CTM read with topic-maps 6162ed6 in 116.4s with the model
+Unhandled UIOP/RUN-PROGRAM:SUBPROCESS-ERROR in thread #<SB-THREAD:THREAD tid=259 "main thread" RUNNING
+Unhandled UIOP/RUN-PROGRAM:SUBPROCESS-ERROR in thread #<SB-THREAD:THREAD tid=259 "main thread" RUNNING
+                                                         {70003C8103}>:
+  Subprocess #<UIOP/LAUNCH-PROGRAM::PROCESS-INFO {7015A6D063}>
+ with command ("git" "-C"
+               "/private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359/diagC1/"
+               "show" "d089efe8:dreyeck/work/project/hyperdoc-project.ctm")
+
+## Earlier failure of the unrelaxed check (project-suite.log)
+  Check failed: read:within-90-seconds-with-the-model
+0: (SB-DEBUG::DEBUGGER-DISABLED-HOOK #<SIMPLE-ERROR "Check failed: ~A" {700D1D7F83}> #<unused argument> :QUIT T)
+1: (SB-DEBUG::RUN-HOOK *INVOKE-DEBUGGER-HOOK* #<SIMPLE-ERROR "Check failed: ~A" {700D1D7F83}>)
+2: (INVOKE-DEBUGGER #<SIMPLE-ERROR "Check failed: ~A" {700D1D7F83}>)
+3: (ERROR "Check failed: ~A" "read:within-90-seconds-with-the-model")
+
+## Negative control: stale CTM with the new pages (ctrl1-out/catalog.log)
+Unhandled SIMPLE-ERROR in thread #<SB-THREAD:THREAD tid=12559 "CLOG event handler eval-1266:click" RUNNING
+                                    {7005989563}>:
+  Topic "topic-maps-regular-hyperdoc" is absent from workspace.
