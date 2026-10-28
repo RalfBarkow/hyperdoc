@@ -1,0 +1,22 @@
+{
+  "status": "PASS",
+  "topicMaps": "6162ed68c94ea4796b8cf2282edd347d9607b08c",
+  "runtime": "scripts/serve-project-workspace.lisp (trusted review runtime, not the packaged Catalog)",
+  "workBreakdownPageObject": "#<HTML-PAGE {7009D43753}>",
+  "steps": [
+    "Catalog (the trusted review runtime scripts/serve-project-workspace.lisp, not the packaged Catalog) started on loopback over a TEST-COPY site root with topic-maps 6162ed68, a clean Git checkout at the pin by Git's own answers",
+    "Catalog → HyperBook HyperDoc Project Workspace → Text pages → page HyperDoc Project Workspace",
+    "page link → the Project Workspace reading: Work Areas, Work Items, assignments, proposals, gaps",
+    "Roundtrip: pinned reader 6162ed68 (Git checkout); export octets equal; CXTM equal to the sources; every Topic and statement traced",
+    "the Work Breakdown page reached from the reading's Sources table is the object #<HTML-PAGE {7009D43753}>",
+    "control: the page Authoring the CTM Plan Page is another object, #<HTML-PAGE {7008770143}>",
+    "the Work Breakdown page reached from its Workspace Topic is the object #<HTML-PAGE {7009D43753}>",
+    "Workspace along its Associations: Working on HyperDoc → Work Breakdown → Author the CTM Plan Page through HyperDoc → Authoring the CTM Plan Page → One Item of the CTM plan page edited through HyperDoc → Inspectable edit proposal → P2 Prepare the inspectable edit proposal → Item and new content decided",
+    "the work package ctm-wp-2 names its absent acceptance record: \"ctm-wp-2: acceptance criterion without an acceptance record\"",
+    "back along the Associations to the work package; its Point panel opens the declaration in its page source (work-topic-source-occurrence)",
+    "assignment \"Claude Code: Read the complete project CTM in practical time\" with its evidence and no acceptance → its evidence file dreyeck/tests/project-ctm.lisp",
+    "CTM document → download: 161228 octets, SHA-256 f4f04bb49ce3b762b3e1c0bccf9e177e11785d33db87e8c0d043b04820b540d3, equal to the file and its sidecar",
+    "object identity retained across panes and routes: #<HTML-PAGE {7009D43753}>",
+    "nothing written: source pages, CTM file and the site root unchanged"
+  ]
+}

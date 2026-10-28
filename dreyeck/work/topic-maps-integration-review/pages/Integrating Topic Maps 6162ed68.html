@@ -1,0 +1,35 @@
+<html><head><title>Integrating Topic Maps 6162ed68</title></head><body><in-package>topic-maps-integration-review</in-package>
+<h1>Integrating Topic Maps 6162ed68</h1>
+
+<p>HyperDoc's Project Workspace, its Catalog packaging and its Topic Maps readings depend on one independent Topic Maps implementation. This reading follows the step that moves all of them to <code>6162ed68</code>: the independently reviewed change that lets that implementation read the HyperDoc project CTM in practical time. It is a local, uncommitted candidate in HyperDoc; nothing is pushed, published or deployed, and no server was touched.</p>
+<table class="inspector-table">
+<tr><th>Question</th><th>Page</th></tr>
+<tr><td>What is the change that was reviewed?</td><td><a page="The Reviewed Change">The Reviewed Change</a></td></tr>
+<tr><td>What shows that it keeps the meaning, and how independent is that?</td><td><a page="The Independent Evidence">The Independent Evidence</a></td></tr>
+<tr><td>How much faster is it?</td><td><a page="The Performance Difference">The Performance Difference</a></td></tr>
+<tr><td>Which Topic Maps revision does HyperDoc now name, and how is a tree shown to be it?</td><td><a page="The Topic Maps Source Revision">The Topic Maps Source Revision</a></td></tr>
+<tr><td>Does the existing Project Workspace work on it, and can its pin fail?</td><td><a page="Project Workspace Compatibility">Project Workspace Compatibility</a></td></tr>
+<tr><td>How is it split into commits, and does each stand alone?</td><td><a page="The Four Commits">The Four Commits</a></td></tr>
+<tr><td>What did the earlier review's DECLARED-PATHS-AGREE protect, and why did it fail?</td><td><a page="The Earlier Review's Contract">The Earlier Review's Contract</a></td></tr>
+<tr><td>Does the Project Workspace work in a browser, and where does the guard stand?</td><td><a page="The Project Workspace in a Browser">The Project Workspace in a Browser</a></td></tr>
+<tr><td>How does this relate to Zettel 11359 and the proposed Work Packages?</td><td><a page="From Work Item to Implementation">From Work Item to Implementation</a></td></tr>
+<tr><td>What is not done, and what would accept it?</td><td><a page="Remaining Work and Acceptance">Remaining Work and Acceptance</a></td></tr>
+</table>
+<h2>The short answer</h2>
+<ul>
+<li><a expr="(claim &quot;one-bounded-change&quot;)" view="Claim">The change is bounded:</a> one production file, its tests and 25 recorded fixtures; the experimental association index is not in it.</li>
+<li><a expr="(claim &quot;corpus-identical&quot;)" view="Claim">On the unchanged project CTM the result is byte-identical</a> to the earlier reference in both the semantic signature and the CXTM, and <a expr="(claim &quot;within-90-seconds&quot;)" view="Claim">it reads within the 90-second limit</a> (about 30 s; it did not finish in 120 s before).</li>
+<li><a expr="(claim &quot;target-20s-unmet&quot;)" view="Claim">The 20-second aspiration is not met.</a> <a expr="(claim &quot;corpus-never-merges&quot;)" view="Claim">The corpus never merges two Topics,</a> so the merge-choice logic is shown by tests and controls, not by the corpus.</li>
+<li><a expr="(claim &quot;project-suite-passes&quot;)" view="Claim">The Project Workspace suite passes</a> and <a expr="(claim &quot;workspace-on-both-roots&quot;)" view="Claim">works from a Git checkout and from the verified Git-free snapshot;</a> <a expr="(claim &quot;pin-can-fail&quot;)" view="Claim">its pin can fail</a>; <a expr="(claim &quot;guard-remains&quot;)" view="Claim">the Catalog guard still refuses the Workspace.</a></li>
+<li><a expr="(claim &quot;reading-navigated-in-a-browser&quot;)" view="Claim">This reading was served and navigated in a browser.</a> <a expr="(claim &quot;project-workspace-browser&quot;)" view="Claim">The Project Workspace itself passed a fresh-process browser walk</a> in <a expr="(claim &quot;trusted-runtime-not-the-guarded-catalog&quot;)" view="Claim">a trusted review runtime, not the guarded Catalog.</a></li>
+<li><a expr="(claim &quot;declared-paths-bound&quot;)" view="Claim">The earlier review's path contract is now version-bound</a> and <a expr="(claim &quot;boundaries-coherent&quot;)" view="Claim">the four commit boundaries were rehearsed.</a> <a expr="(claim &quot;zettel-navigation-is-proposed&quot;)" view="Claim">The Zettel's navigation is proposed, not declared.</a></li>
+<li><a expr="(claim &quot;nix-contract-darwin&quot;)" view="Claim">The packaged Nix contract passes on x86_64-darwin;</a> <a expr="(claim &quot;linux-nix-unbuilt&quot;)" view="Claim">Linux,</a> <a expr="(claim &quot;browser-from-snapshot-open&quot;)" view="Claim">a browser walk from the snapshot</a> and <a expr="(claim &quot;staging-not-started&quot;)" view="Claim">staging</a> are open.</li>
+</ul>
+<h2>Ways in</h2>
+<ul>
+<li><a expr="(the-workspace)" view="Topicmap">The subjects and their relations</a>: a Topicmap Workspace; at Point, every relation says why it holds and how it is known (observed, derived or open), with its provenance and the recorded runs.</li>
+<li><a expr="(the-workspace)" view="Claims">Every claim</a> and its class; <a expr="(the-workspace)" view="Relations">every relation</a>.</li>
+<li><a expr="(the-workspace)" view="Runs">Three things this reading can run</a>, only on a button.</li>
+</ul>
+<p>Labels: <strong>observed</strong> = a recorded run saw it; <strong>derived</strong> = it follows from source, nothing ran it; <strong>inferred</strong> = expected, still untested; <strong>open</strong> = not done.</p>
+</body></html>

@@ -1,0 +1,56 @@
+DECLARED-PATHS-AGREE of the earlier deployment review: what it protects, why it failed, how it is bound now (2026-10-28)
+
+INTERPRETATION
+The check protects one historical change set: the packaging candidate of topic-maps-deployment-review at the commit where it is complete, 8e64e718 (base 53ee9993).
+At that commit Git changes exactly the 73 declared paths and the 23 tested files have the recorded bytes. It was written against the WORKING TREE, so any later change to
+any path made it fail. The Topic Maps 6162ed68 integration changes seven of the protected files on purpose (listed below) and adds files elsewhere: the failure is a limit of the
+test's scope, not a regression of the candidate or of the integration. A genuine regression would be an UNEXPECTED modification of a protected file; that is still detected.
+Not done: the declared list was not extended, no check was removed, no extra file is accepted. The contract is bound to 8e64e718; seven named successor changes are allowed, each with its reason.
+
+FACTS (computed from Git)
+Declared paths in the earlier review (+candidate-paths+): 73
+Git changed paths 53ee9993..7080162b, less the review's own files: 66; equal to the declaration: False
+Git changed paths 53ee9993..8e64e718, less the review's own files: 73; equal to the declaration: True
+Tested files with a recorded SHA-256: 23; differing from their bytes at 8e64e718: 0
+Declared paths whose working-tree bytes differ from 8e64e718 (protected drift):
+   dreyeck.asd
+   dreyeck/src/catalog-topic-maps.lisp
+   dreyeck/tests/catalog-topic-maps.lisp
+   dreyeck/tests/source-snapshot.lisp
+   dreyeck/work/topic-maps-project-example.lisp
+   nix/topic-maps-source.nix
+   tests/test_catalog_topic_maps_executable.py
+Changed paths since 8e64e718 outside the declaration: 56
+
+RESULTS of asdf:test-system topic-maps-deployment-review (SBCL 2.4.10, fresh caches)
+BEFORE, unmodified checkout 8e64e718 with the b2eecffa snapshot:
+TOPIC-MAPS-DEPLOYMENT-REVIEW-PASS: 332 assertions; 8 pages, 27 subjects, 29 warranted relations, 20 claims.
+  Deployment review check failed: EVIDENCE-NAMES-ITS-RECORD
+0: (SB-DEBUG::DEBUGGER-DISABLED-HOOK #<SIMPLE-ERROR "Deployment review check failed: ~A" {70174DA613}> #<unused argument> :QUIT T)
+1: (SB-DEBUG::RUN-HOOK *INVOKE-DEBUGGER-HOOK* #<SIMPLE-ERROR "Deployment review check failed: ~A" {70174DA613}>)
+2: (INVOKE-DEBUGGER #<SIMPLE-ERROR "Deployment review check failed: ~A" {70174DA613}>)
+3: (ERROR "Deployment review check failed: ~A" :EVIDENCE-NAMES-ITS-RECORD)
+  (its second procedure, the proposals', fails at EVIDENCE-NAMES-ITS-RECORD there too: pre-existing, not touched)
+AFTER the integration, working-tree contract unchanged:
+  Deployment review check failed: DECLARED-PATHS-AGREE
+0: (SB-DEBUG::DEBUGGER-DISABLED-HOOK #<SIMPLE-ERROR "Deployment review check failed: ~A" {70127D8433}> #<unused argument> :QUIT T)
+1: (SB-DEBUG::RUN-HOOK *INVOKE-DEBUGGER-HOOK* #<SIMPLE-ERROR "Deployment review check failed: ~A" {70127D8433}>)
+2: (INVOKE-DEBUGGER #<SIMPLE-ERROR "Deployment review check failed: ~A" {70127D8433}>)
+3: (ERROR "Deployment review check failed: ~A" :DECLARED-PATHS-AGREE)
+AFTER the integration, a second failure the first one concealed:  project-workspace.lisp has no "not in practical time.\")" after its start (an excerpt of the Workspace's pin)
+AFTER, version-bound contract and a historical excerpt of the reviewed pin lines:
+TOPIC-MAPS-DEPLOYMENT-REVIEW-PASS: 344 assertions; 8 pages, 27 subjects, 29 warranted relations, 20 claims.
+  Deployment review check failed: EVIDENCE-NAMES-ITS-RECORD
+0: (SB-DEBUG::DEBUGGER-DISABLED-HOOK #<SIMPLE-ERROR "Deployment review check failed: ~A" {701371AEC3}> #<unused argument> :QUIT T)
+1: (SB-DEBUG::RUN-HOOK *INVOKE-DEBUGGER-HOOK* #<SIMPLE-ERROR "Deployment review check failed: ~A" {701371AEC3}>)
+2: (INVOKE-DEBUGGER #<SIMPLE-ERROR "Deployment review check failed: ~A" {701371AEC3}>)
+3: (ERROR "Deployment review check failed: ~A" :EVIDENCE-NAMES-ITS-RECORD)
+  (the same pre-existing second-procedure failure follows)
+
+POSITIVE CONTROLS in a throwaway image (the repository is not changed):
+MUTANT M0-unmutated: SURVIVED (all checks passed)
+MUTANT M1-an-unlisted-protected-file-is-modified: KILLED by Deployment review check failed: PROTECTED-DRIFT-IS-ONLY-THE-NAMED-SUCCESSOR-CHANGES
+MUTANT M2-a-named-successor-change-is-removed-from-the-allowance: KILLED by Deployment review check failed: PROTECTED-DRIFT-IS-ONLY-THE-NAMED-SUCCESSOR-CHANGES
+MUTANT M3-bound-to-the-first-packaging-commit: KILLED by Deployment review check failed: DECLARED-PATHS-AGREE-AT-THE-REVIEWED-HEAD
+MUTANT M4-a-declared-path-is-dropped: KILLED by Deployment review check failed: DECLARED-PATHS-AGREE-AT-THE-REVIEWED-HEAD
+  and inside the suite: an extra changed path, a missing path, an undeclared path, an altered tested file, an unlisted protected file, and an empty allowance each make the contract fail or report

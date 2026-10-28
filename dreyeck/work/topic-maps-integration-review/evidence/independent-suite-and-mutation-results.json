@@ -1,0 +1,15 @@
+{
+  "suite-baseline": 0,
+  "suite-candidate": 0,
+  "focused-candidate": 0,
+  "focused-experimental": 0,
+  "M0-unmutated": "M0-unmutated | NORMALIZATION-INDEX-PASS: 120 checks; 21 documents, 3 staged imports and 7 rejections equal to the outcomes recorded at b2eecffa. MUTANT-OUTCOME: SURVIVED (all checks passed)",
+  "M1-conflict-ignored": "M1-conflict-ignored | MUTANT-OUTCOME: KILLED by Semantic check failed: scenario:import-reifier-first:cxtm-equals-b2eecffa",
+  "M2-stale-reification-table": "M2-stale-reification-table | MUTANT-OUTCOME: KILLED by Semantic check failed: scenario:import-reifier-first:cxtm-equals-b2eecffa",
+  "M3-no-multi-reifier-fallback": "M3-no-multi-reifier-fallback | MUTANT-OUTCOME: KILLED by Semantic check failed: reifier-mutation:one-topic-reifying-two-items-is-the-recorded-conflict",
+  "M4-no-representative-guard": "M4-no-representative-guard | MUTANT-OUTCOME: KILLED by Semantic check failed: stale-listed:indexed-search-defers-to-it",
+  "M5-ii-si-separate-namespaces": "M5-ii-si-separate-namespaces | MUTANT-OUTCOME: KILLED by Semantic check failed: document:ii-si-cross-identity:cxtm-equals-b2eecffa",
+  "M6-locator-in-identifier-namespace": "M6-locator-in-identifier-namespace | MUTANT-OUTCOME: KILLED by Semantic check failed: document:si-and-sl-stay-apart:cxtm-equals-b2eecffa",
+  "M7-last-sharer-not-first": "M7-last-sharer-not-first | MUTANT-OUTCOME: KILLED by Semantic check failed: selection:indexed-equals-oracle-on-every-map",
+  "M8-ready-not-preferred": "M8-ready-not-preferred | MUTANT-OUTCOME: KILLED by Semantic check failed: scenario:import-reifier-first:cxtm-equals-b2eecffa"
+}

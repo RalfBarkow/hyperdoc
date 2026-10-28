@@ -1,0 +1,25 @@
+{
+  "label": "baseline-timeout",
+  "tm_root": "/private/tmp/task1c-independent-review-96ln4s4u/baseline",
+  "sbcl": "/usr/local/bin/sbcl",
+  "runs": [
+    {
+      "run": 1,
+      "returncode": 124,
+      "process_elapsed": 122.99,
+      "read_wall": null,
+      "read_cpu": null,
+      "read_allocated_bytes": null,
+      "peak_rss_bytes": 128278528,
+      "counts": null,
+      "signature_sha256": null,
+      "cxtm_sha256": null,
+      "signature_equals_5a4a668": false,
+      "cxtm_equals_5a4a668": false
+    }
+  ],
+  "input_sha256_unchanged": true,
+  "read_wall_median": null,
+  "read_wall_min": null,
+  "read_wall_max": null
+}

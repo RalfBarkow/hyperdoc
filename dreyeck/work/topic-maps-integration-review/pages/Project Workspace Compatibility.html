@@ -1,0 +1,24 @@
+<html><head><title>Project Workspace Compatibility</title></head><body><in-package>topic-maps-integration-review</in-package>
+<h1>Project Workspace Compatibility</h1>
+
+<p>The Project Workspace reads the HyperDoc project CTM, traces it to the Work pages, compares revisions by octets and CXTM and projects it into a Topicmap Workspace. It was bound to the sibling lineage 5a4a668; b2eecffa read the CTM correctly but not in practical time. The integration reuses the existing Workspace, Work pages and CTM emitter and changes only what binds it to a revision.</p>
+<h2>What changed in the Workspace</h2>
+<ul>
+<li>The pin: <code>+topic-maps-revision+</code> is now 6162ed68.</li>
+<li><a expr="#'dreyeck/work/project::topic-maps-source-identity" view="Source code">topic-maps-source-identity</a> knows three kinds of root: a Git checkout (as before), a <em>verified</em> /nix/store snapshot (through <a expr="#'dreyeck/source-snapshot:verify-store-snapshot" view="Source code">verify-store-snapshot</a>), and anything else. A directory Git cannot identify used to look clean with an empty commit; it now has no commit, is not clean and is not pinned. <a expr="#'dreyeck/work/project::pinned-state-p" view="Source code">pinned-state-p</a> states the pin: the commit, no change, one root for topic-maps, /tmdm, /ctm and /cxtm.</li>
+<li>The Roundtrip view says which kind of root it has; an obsolete assertion (b2eecffa accepts the template that 5a4a668 refused) became one that checks the new behaviour, and malformed input is still refused with its code.</li>
+</ul>
+<h2>What was run</h2>
+<table class="inspector-table">
+<tr><th>Run</th><th>Result</th></tr>
+<tr><td>Project suite on the integrated Git checkout</td><td><a expr="(claim &quot;project-suite-passes&quot;)" view="Claim">265 + 186 + 125 checks pass</a> · <a expr="(record &quot;phase-b-project-suite.log&quot;)" view="Record">log</a></td></tr>
+<tr><td>Workspace on the original CTM, clean Git checkout</td><td><a expr="(record &quot;phase-b-workspace-git-checkout.log&quot;)" view="Record">35 s alone</a>; signature and CXTM equal; digest unchanged</td></tr>
+<tr><td>The same, Git-free verified snapshot</td><td><a expr="(record &quot;phase-b-workspace-verified-snapshot.log&quot;)" view="Record">39 s</a>; the same CXTM digest 6f957018…</td></tr>
+<tr><td>Under overload</td><td><a expr="(record &quot;phase-b-workspace-git-checkout-under-load.log&quot;)" view="Record">161 s</a>: why timings need an idle machine</td></tr>
+</table>
+<p><a expr="(claim &quot;workspace-on-both-roots&quot;)" view="Claim">The claim:</a> 55 declarations, 57 statements, 4 assignments, 40 derived gaps; 327 Topics and 572 Associations; 148 signs and 286 edges; the trace finds no discrepancy; the eight navigation keys are reached through the Workspace API; the export equals the observed octets. Lisp API navigation only, not a browser flow.</p>
+<h2>The pin can fail</h2>
+<p><a expr="(claim &quot;pin-can-fail&quot;)" view="Claim">Three negatives:</a> the 5a4a668 checkout (<a expr="(record &quot;phase-b-negative-5a4a668.log&quot;)" view="Record">not pinned</a>), the b2eecffa snapshot (<a expr="(record &quot;phase-b-negative-old-b2eecffa-snapshot.log&quot;)" view="Record">does not verify as 6162ed68</a>) and a directory without .git outside the store (<a expr="(record &quot;phase-b-negative-unverifiable.log&quot;)" view="Record">unverifiable</a>).</p>
+<h2>The Catalog guard stays</h2>
+<p>The packaged Catalog refuses <a expr="#'dreyeck/catalog-topic-maps:refuse-project-workspace" view="Source code">dreyeck/work/project</a> and everything depending on it, before it loads or serves anything. Its old reason (another Topic Maps lineage) no longer holds, so its message now says that admission to the served runtime is a separate decision; its behaviour is unchanged and its tests still require the refusal. <a expr="(claim &quot;guard-remains&quot;)" view="Claim">Claim.</a> The button on <a expr="(the-workspace)" view="Runs">the Runs view</a> asks it in this image, which has loaded the Workspace.</p>
+</body></html>

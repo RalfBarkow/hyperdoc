@@ -1,0 +1,18 @@
+<html><head><title>The Earlier Review's Contract</title></head><body><in-package>topic-maps-integration-review</in-package>
+<h1>The Earlier Review's Contract</h1>
+
+<p>The earlier review of the b2eecffa packaging candidate (<a expr="(review-page &quot;Integrating Topic Maps 6162ed68&quot;)" view="Content">this reading's overview</a> is its successor, not its replacement) has a test called <code>DECLARED-PATHS-AGREE</code>. It failed in the integration worktree. This page says what it protected and why, and what was done.</p>
+<h2>What it protects</h2>
+<p>One historical change set: the packaging candidate at the commit where it is complete, <code>8e64e718</code>, against its base <code>53ee9993</code>. At that commit Git changes exactly the 73 declared paths, and the 23 tested files have the bytes recorded when their tests ran; at the first packaging commit <code>7080162b</code> only 66 paths match, because the Linux evidence came later. <a expr="(record &quot;phase-c-declared-paths-agree.txt&quot;)" view="Record">The facts and the results.</a></p>
+<h2>Why it failed: scope, not regression</h2>
+<p>The check compared the <em>working tree</em> with the declaration, so any change made after 8e64e718 made it fail, whatever it was. The integration changes seven of the protected files on purpose and adds files elsewhere. A genuine regression would be a different thing: an unexpected modification of a protected file.</p>
+<h2>What was done, and what was not</h2>
+<ul>
+<li><a expr="#'topic-maps-deployment-review::declared-paths-agree-p" view="Source code">declared-paths-agree-p</a> now compares Git's changes between the base and the reviewed head, not the working tree.</li>
+<li><a expr="#'topic-maps-deployment-review::tested-files-match-at-p" view="Source code">tested-files-match-at-p</a> checks the 23 recorded SHA-256 against the bytes at that head.</li>
+<li><a expr="#'topic-maps-deployment-review::unexpected-drift" view="Source code">unexpected-drift</a> reports a protected file changed since, unless one of seven named successor changes accounts for it, each with its reason.</li>
+<li>Not done: the declared list was not extended, no check was removed, no extra file is accepted. The reviewed pin lines of the Workspace are kept as a historical excerpt, because the file they came from legitimately changed.</li>
+</ul>
+<h2>It can still fail</h2>
+<p><a expr="(claim &quot;declared-paths-bound&quot;)" view="Claim">Positive controls:</a> an extra changed path, a missing path, an undeclared path, an altered tested file, an unlisted modification of a protected file and an empty allowance each make the contract fail or report; four mutants of the contract (an unlisted file drifting, a successor entry removed, the wrong head, a declared path dropped) are each killed. Its second test procedure (the proposals') fails at 8e64e718 too and was not touched.</p>
+</body></html>

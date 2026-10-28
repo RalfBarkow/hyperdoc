@@ -1,0 +1,12 @@
+Topic Maps: a git-archive export of b2eecffa without .git outside /nix/store. IDENTITY_ONLY=1.
+RUN-STARTED 4002159445 SBCL 2.4.10
+ASDF-ORIGIN topic-maps /private/tmp/claude-501/-Users-rgb--claude-spares-spare-WsuU5J/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/task-1c/base-export/
+ASDF-ORIGIN topic-maps/tmdm /private/tmp/claude-501/-Users-rgb--claude-spares-spare-WsuU5J/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/task-1c/base-export/
+ASDF-ORIGIN topic-maps/ctm /private/tmp/claude-501/-Users-rgb--claude-spares-spare-WsuU5J/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/task-1c/base-export/
+ASDF-ORIGIN topic-maps/cxtm /private/tmp/claude-501/-Users-rgb--claude-spares-spare-WsuU5J/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/task-1c/base-export/
+IDENTITY (:DIRECTORY
+          "/private/tmp/claude-501/-Users-rgb--claude-spares-spare-WsuU5J/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/task-1c/base-export/"
+          :KIND :UNVERIFIABLE :COMMIT NIL :CLEAN NIL :ONE-ROOT T :PINNED NIL)
+PIN-NOT-OK
+CTM-INPUT-SHA256 f4f04bb49ce3b762b3e1c0bccf9e177e11785d33db87e8c0d043b04820b540d3
+RUN-STOPPED-AFTER-IDENTITY 4002159479

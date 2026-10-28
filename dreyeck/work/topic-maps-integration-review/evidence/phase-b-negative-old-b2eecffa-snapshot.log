@@ -1,0 +1,12 @@
+Topic Maps: the b2eecffa store snapshot /nix/store/1l6im929…-source, which has a manifest but not for 6162ed68. IDENTITY_ONLY=1: the read of b2eecffa is the slow baseline and is not waited for.
+RUN-STARTED 4002159400 SBCL 2.4.10
+ASDF-ORIGIN topic-maps /nix/store/1l6im929rknvgp3jxx83i01crcf3ahmg-source/
+ASDF-ORIGIN topic-maps/tmdm /nix/store/1l6im929rknvgp3jxx83i01crcf3ahmg-source/
+ASDF-ORIGIN topic-maps/ctm /nix/store/1l6im929rknvgp3jxx83i01crcf3ahmg-source/
+ASDF-ORIGIN topic-maps/cxtm /nix/store/1l6im929rknvgp3jxx83i01crcf3ahmg-source/
+IDENTITY (:DIRECTORY "/nix/store/1l6im929rknvgp3jxx83i01crcf3ahmg-source/"
+          :KIND :UNVERIFIED-NIX-STORE-SNAPSHOT :COMMIT NIL :CLEAN NIL :ONE-ROOT
+          "scripts does not hash to the commit's tree 57107b3248102251c7db1fea644f3f21e9c41027.")
+PIN-NOT-OK
+CTM-INPUT-SHA256 f4f04bb49ce3b762b3e1c0bccf9e177e11785d33db87e8c0d043b04820b540d3
+RUN-STOPPED-AFTER-IDENTITY 4002159443

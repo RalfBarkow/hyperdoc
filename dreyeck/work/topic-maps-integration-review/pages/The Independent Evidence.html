@@ -1,0 +1,24 @@
+<html><head><title>The Independent Evidence</title></head><body><in-package>topic-maps-integration-review</in-package>
+<h1>The Independent Evidence</h1>
+
+<p>A separate reviewer (2026-10-28) reconstructed the baseline, the candidate and the experimental tree from Git objects and patches, ran fresh processes with isolated caches, wrote checks of their own, and recommended GO. This page says what that establishes and what it does not. The review itself: <a expr="(record &quot;independent-review.md&quot;)" view="Record">independent-review.md</a>.</p>
+<table class="inspector-table">
+<tr><th>What</th><th>How it is known</th><th>Where</th></tr>
+<tr><td>The index returns the old search's pair</td><td>derived (argument) and observed (4,000 maps, 800 merge walks, 400 documents)</td><td><a expr="(claim &quot;same-pair&quot;)" view="Claim">claim</a> · <a expr="(claim &quot;tests-agree&quot;)" view="Claim">claim</a></td></tr>
+<tr><td>The tests can fail</td><td>observed: 8 of 8 mutants killed; the stale-table mutant by the invalidation tests alone</td><td><a expr="(claim &quot;mutants-killed&quot;)" view="Claim">claim</a> · <a expr="(record &quot;task1c-mutation-results.txt&quot;)" view="Record">mutants</a></td></tr>
+<tr><td>The expected results do not come from the new code</td><td>observed: fixtures re-recorded from the unchanged b2eecffa are identical</td><td><a expr="(claim &quot;fixtures-from-baseline&quot;)" view="Claim">claim</a></td></tr>
+<tr><td>The existing suite is unchanged</td><td>observed: exit 0, 25 report files byte-identical, one added PASS line</td><td><a expr="(claim &quot;suite-preserved&quot;)" view="Claim">claim</a> · <a expr="(record &quot;phase-a-integration.txt&quot;)" view="Record">repeated on the integrated checkout</a></td></tr>
+<tr><td>Independent semantic checks (77)</td><td>observed: nine identifier-kind combinations, case, first partner, six reifiable kinds, retained handles</td><td><a expr="(record &quot;independent-semantic-checks.log&quot;)" view="Record">log</a></td></tr>
+<tr><td>The corpus result equals the reference</td><td>observed: signature and CXTM byte-identical</td><td><a expr="(claim &quot;corpus-identical&quot;)" view="Claim">claim</a></td></tr>
+<tr><td>Against b2eecffa itself</td><td>observed on two real slices</td><td><a expr="(claim &quot;slices-against-baseline&quot;)" view="Claim">claim</a></td></tr>
+<tr><td>Shadow reproduction</td><td>observed: 18 sampled searches, no mismatch</td><td><a expr="(record &quot;independent-shadow-reproduction.log&quot;)" view="Record">log</a></td></tr>
+</table>
+<h2>What it does not establish</h2>
+<ul>
+<li>The old search is not an independent oracle: it shares <a expr="#'topic-maps.tmdm::equal-topics-p" view="Source code">equal-topics-p</a>, the merge primitives and the serializer with the new one. A defect in those would survive every comparison. The reviewer supplied independent support for the identity rule from the public Topic Maps data model text.</li>
+<li><a expr="(claim &quot;corpus-never-merges&quot;)" view="Claim">The project CTM never merges two Topics.</a> It cannot show the preference path; the staged-import tests, the fixtures and the mutants do.</li>
+<li>The generators use a fixed seed and mostly Names and Associations; eight mutants are eight perturbations.</li>
+<li>Tiny or first-pair-heavy maps are slower with the index (<a page="The Performance Difference">measured</a>). That is a tradeoff, not a changed meaning.</li>
+</ul>
+<p>The commit and the checks around it: <a expr="(record &quot;task1c-commit-record.md&quot;)" view="Record">commit record</a> · <a expr="(record &quot;task1c-evidence-correspondence.txt&quot;)" view="Record">evidence matches the candidate bytes</a>.</p>
+</body></html>

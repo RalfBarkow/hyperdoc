@@ -1,0 +1,17 @@
+<html><head><title>The Reviewed Change</title></head><body><in-package>topic-maps-integration-review</in-package>
+<h1>The Reviewed Change</h1>
+
+<p>Topic Maps merges Topics that share an identifier. After nearly every statement it asks: which two Topics merge next? Until now it answered by comparing every pair; for pairs without a shared identifier, each comparison enumerated every information item to see whether the Topics reify the same one. On the project CTM that cost grew with the square of the Topics times the items.</p>
+<h2>The commit</h2>
+<p><code>6162ed68</code> is one commit on <code>b2eecffa</code>: <a expr="(the-workspace)" view="Topicmap">its subjects</a>; <a expr="(progn (the-workspace) (getf *subjects* :reviewed))" view="Revision">the revision and the branches holding it</a>. <a page="The Topic Maps Source Revision">How it became the primary branch.</a></p>
+<h2>The two functions</h2>
+<p><a expr="#'topic-maps.tmdm::next-topic-merge" view="Source code">next-topic-merge</a> returns the pair; <a expr="#'topic-maps.tmdm::scan-next-topic-merge" view="Source code">scan-next-topic-merge</a> is the old search, moved unchanged, kept as the fallback and as the test oracle. <a expr="#'topic-maps.tmdm::normalize-topic-map" view="Source code">normalize-topic-map</a> now calls only the first. Read the docstrings: they state the argument.</p>
+<ul>
+<li><strong>Candidate selection.</strong> Two live Topics are equal exactly when they share an item or subject identifier (one namespace) or a subject locator, the rule of <a expr="#'topic-maps.tmdm::equal-topics-p" view="Source code">equal-topics-p</a>. The index maps each identifier to its Topics in map order and picks, in order, the first Topic with a later partner and its first partner.</li>
+<li><strong>The nonconflicting-reifier preference.</strong> A staged import can hold equal reifier Topics whose reified Names are not yet equal. Merging them first would signal a reifier conflict that disappears once their owners merge. So the search prefers a pair whose members do not reify different items, and only if none exists returns the plain first pair, whose merge then signals the real conflict. <a expr="(claim &quot;same-pair&quot;)" view="Claim">The claim: the index returns exactly the pair of the old search.</a></li>
+<li><strong>Index lifetime and invalidation.</strong> The reification table and the identifier index are local to one call. After each merge the loop asks again, from the map. Nothing outlives a merge or a change of reifier, so there is no invalidation rule to get wrong.</li>
+<li><strong>Fallback.</strong> If a Topic reifies two items, or a listed Topic is not its own representative, the old search runs, so the condition and the moment it is signalled stay as they were.</li>
+</ul>
+<h2>What it does not touch</h2>
+<p>The Association pair search, the CTM reader, the public API and the retained-handle forwarding are unchanged. The experimental association index is not part of the commit. <a expr="(claim &quot;one-bounded-change&quot;)" view="Claim">Claim and sources.</a></p>
+</body></html>

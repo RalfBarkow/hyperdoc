@@ -1,0 +1,29 @@
+<html><head><title>From Work Item to Implementation</title></head><body><in-package>topic-maps-integration-review</in-package>
+<h1>From Work Item to Implementation</h1>
+
+<p>Zettel 11359 asks that a reader should not have to collect reports and Git hashes by hand: from a Work Item one should reach its Source Change, its Evidence, the Project Workspace that reads it and the Deployment Evidence. It says plainly that this is a wished-for navigation, not a claim that these relations are already declared Topic Map Associations. <a expr="(record &quot;zettel-11359-excerpt.md&quot;)" view="Record">The excerpt.</a></p>
+<h2>The navigation, as this reading offers it</h2>
+<p>Start at <a expr="(subject-object &quot;p-work-item&quot;)" view="Proposed">the proposed Work Item</a> (its view says it is proposed and declared nowhere). Its relations, of class <em>proposed</em> in <a expr="(the-workspace)" view="Topicmap">the Workspace</a>, lead to:</p>
+<table class="inspector-table">
+<tr><th>The Zettel's term</th><th>The real subject it leads to</th></tr>
+<tr><td>Source Change</td><td><a expr="(subject-object &quot;6162ed68&quot;)" view="Revision">Topic Maps 6162ed68</a>, whose definitions are <a expr="#'topic-maps.tmdm::next-topic-merge" view="Source code">next-topic-merge</a> and <a expr="#'topic-maps.tmdm::scan-next-topic-merge" view="Source code">scan-next-topic-merge</a></td></tr>
+<tr><td>Evidence</td><td><a expr="(record &quot;independent-review.md&quot;)" view="Record">the independent review of Task 1C</a> and its <a page="The Independent Evidence">page</a></td></tr>
+<tr><td>Project Workspace: CTM → TMDM → CXTM → Inspector</td><td><a expr="#'dreyeck/work/project::topic-maps-source-identity" view="Source code">topic-maps-source-identity</a>, <a page="Project Workspace Compatibility">the compatibility page</a>, <a page="The Project Workspace in a Browser">the browser walk</a></td></tr>
+<tr><td>Deployment Evidence</td><td><a expr="(record &quot;phase-b-nix-package-check.log&quot;)" view="Record">the Nix contract</a>, <a expr="(progn (the-workspace) (getf *subjects* :manifest))" view="Manifest">the snapshot manifest</a>; systemd and Linux are open</td></tr>
+</table>
+<h2>What this is not</h2>
+<ul>
+<li><a expr="(claim &quot;zettel-navigation-is-proposed&quot;)" view="Claim">It is not a second project model.</a> The objects are the real Lisp definitions, the recorded runs and the commit; the only invented object is the proposed Work Item, marked as such. No Work page, WBS declaration, acceptance record or CTM source was changed.</li>
+<li>It does not turn proposals into Work declarations. The earlier review's proposed Work Packages (<a expr="(subject-object &quot;p-packages&quot;)" view="Content">The Proposed Deployment WBS</a>) are a separate proposal from this Work Item; whether the Zettel's steps A to F become additions to them, or declarations, is not decided here.</li>
+</ul>
+<h2>The Zettel's steps and this candidate</h2>
+<table class="inspector-table">
+<tr><th>Step</th><th>Responsible, per the Zettel</th><th>Here</th></tr>
+<tr><td>A. Integrate Topic Maps</td><td>Claude Code</td><td>done locally (<a page="The Topic Maps Source Revision">The Topic Maps Source Revision</a>)</td></tr>
+<tr><td>B. Check the integration</td><td>Codex, independently</td><td>the independent review of Task 1C is evidence; the integrated checkout was re-tested here, not reviewed independently</td></tr>
+<tr><td>C. Integrate HyperDoc</td><td>Claude Code</td><td>a candidate, not committed (<a page="The Four Commits">The Four Commits</a>)</td></tr>
+<tr><td>D. HyperDoc review</td><td>the owner, with ChatGPT</td><td>this reading</td></tr>
+<tr><td>E. Staging deployment</td><td>prepared by Claude Code, released by the owner</td><td>a proposed procedure only (<a page="Remaining Work and Acceptance">Remaining Work and Acceptance</a>)</td></tr>
+<tr><td>F. Production</td><td>the owner, after Codex's security review</td><td>not touched</td></tr>
+</table>
+</body></html>

@@ -1,0 +1,1 @@
+SHADOW-RESULT read+shadow=27.1s scan-seconds=0.0 calls=7511 with-pair=0 without-pair=7511 shadowed-with-pair=0 shadowed-without-pair=0 preferred-over-first-pair=0 mismatches=0

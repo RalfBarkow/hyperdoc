@@ -1,0 +1,74 @@
+{
+  "label": "candidate",
+  "tm_root": "/private/tmp/task1c-independent-review-96ln4s4u/candidate",
+  "sbcl": "/usr/local/bin/sbcl",
+  "runs": [
+    {
+      "run": 1,
+      "returncode": 0,
+      "process_elapsed": 34.77,
+      "read_wall": 31.413465,
+      "read_cpu": 27.830593,
+      "read_allocated_bytes": 4965852336,
+      "peak_rss_bytes": 102498304,
+      "counts": {
+        "topics": 327,
+        "associations": 572,
+        "names": 323,
+        "occurrences": 509,
+        "roles": 1144,
+        "reified": 57
+      },
+      "signature_sha256": "4e8a07ba210faa368e7339e1666b3e534cbcf3461b277c22186b5afe75c1a02d",
+      "cxtm_sha256": "6f957018d93e7a4f9b8738042797f60a3d6c094134ef85f6ba40d30bfe03d8b9",
+      "signature_equals_5a4a668": true,
+      "cxtm_equals_5a4a668": true
+    },
+    {
+      "run": 2,
+      "returncode": 0,
+      "process_elapsed": 32.17,
+      "read_wall": 28.989826,
+      "read_cpu": 26.963352,
+      "read_allocated_bytes": 4966141248,
+      "peak_rss_bytes": 102473728,
+      "counts": {
+        "topics": 327,
+        "associations": 572,
+        "names": 323,
+        "occurrences": 509,
+        "roles": 1144,
+        "reified": 57
+      },
+      "signature_sha256": "4e8a07ba210faa368e7339e1666b3e534cbcf3461b277c22186b5afe75c1a02d",
+      "cxtm_sha256": "6f957018d93e7a4f9b8738042797f60a3d6c094134ef85f6ba40d30bfe03d8b9",
+      "signature_equals_5a4a668": true,
+      "cxtm_equals_5a4a668": true
+    },
+    {
+      "run": 3,
+      "returncode": 0,
+      "process_elapsed": 30.68,
+      "read_wall": 27.665466,
+      "read_cpu": 26.37819,
+      "read_allocated_bytes": 4965849968,
+      "peak_rss_bytes": 102506496,
+      "counts": {
+        "topics": 327,
+        "associations": 572,
+        "names": 323,
+        "occurrences": 509,
+        "roles": 1144,
+        "reified": 57
+      },
+      "signature_sha256": "4e8a07ba210faa368e7339e1666b3e534cbcf3461b277c22186b5afe75c1a02d",
+      "cxtm_sha256": "6f957018d93e7a4f9b8738042797f60a3d6c094134ef85f6ba40d30bfe03d8b9",
+      "signature_equals_5a4a668": true,
+      "cxtm_equals_5a4a668": true
+    }
+  ],
+  "input_sha256_unchanged": true,
+  "read_wall_median": 28.989826,
+  "read_wall_min": 27.665466,
+  "read_wall_max": 31.413465
+}

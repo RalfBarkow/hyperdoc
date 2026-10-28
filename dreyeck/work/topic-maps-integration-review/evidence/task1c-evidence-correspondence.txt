@@ -1,0 +1,31 @@
+Evidence correspondence check, 2026-10-27 23:57:08
+== 1. candidate worktree vs manifest (shasum -c)
+  29 OK
+== 2. saved diffs vs current git diff
+candidate-full.diff identical
+candidate-source.diff identical
+candidate-tests.diff identical
+== 3. files-at-review vs worktree
+(no DIFFERS line = identical, 29 files)
+== 4. HEAD / base / other checkouts
+b2eecffa05de4fce41c10ae1ada9ae11a0c6e7dc
+topic-maps main checkout dirty entries: 0
+HyperDoc dirty entries: 0
+input CTM sha256: f4f04bb49ce3b762b3e1c0bccf9e177e11785d33db87e8c0d043b04820b540d3
+== 5. last-modified times of candidate files vs the evidence that depends on them (original scratch timestamps)
+23:07:01  src/tmdm/merging.lisp
+23:05:13  topic-maps.asd
+23:08:09  tests/normalization-index.lisp
+23:06:27  tests/fixtures/normalization-index/rejections.sexp
+23:10:16  scripts/fresh-sbcl.lisp
+23:09:08  c1/run.log
+23:09:55  profile-after-1.log
+23:11:26  mutation-results.txt
+23:17:43  prefix/cand-slice-R8/run.log
+23:14:56  bench/candidate-topic-index/summary.json
+23:22:20  suite-candidate-fresh-reports.log
+23:35:42  ws/workspace-candidate.log
+23:33:52  shadow-full-corpus.log
+All probe/benchmark/mutation/shadow/workspace evidence (which depends on src/tmdm/merging.lisp and the tests) is later than 23:08:09, the last edit of merging.lisp / the test file / fixtures / asd. scripts/fresh-sbcl.lisp (23:10:16) only affects the full-suite logs, which were produced afterwards (suite-candidate-fresh-reports.log).
+== 6. new suite re-run on current worktree
+NORMALIZATION-INDEX-PASS: 120 checks; 21 documents, 3 staged imports and 7 rejections equal to the outcomes recorded at b2eecffa.

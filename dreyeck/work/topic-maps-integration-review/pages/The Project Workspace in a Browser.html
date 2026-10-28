@@ -1,0 +1,22 @@
+<html><head><title>The Project Workspace in a Browser</title></head><body><in-package>topic-maps-integration-review</in-package>
+<h1>The Project Workspace in a Browser</h1>
+
+<p>The Lisp-level checks of the Project Workspace pass; this page is about the browser. <a expr="(claim &quot;project-workspace-browser&quot;)" view="Claim">The claim,</a> <a expr="(record &quot;phase-c-project-workspace-browser.log&quot;)" view="Record">the log</a> and <a expr="(record &quot;phase-c-project-workspace-browser.json&quot;)" view="Record">the result</a>.</p>
+<h2>What ran</h2>
+<p><code>scripts/test-project-workspace.mjs</code> (<a expr="(file-line &quot;scripts/test-project-workspace.mjs&quot;)" view="File">the file</a>), in a fresh process with headless Chrome, over the original project CTM (SHA-256 f4f04bb4…b540d3) and Topic Maps 6162ed68 as a clean Git checkout. It takes its expectation from the Workspace's own pin, read from its source, and checks the checkout without the Lisp that serves the Catalog: Git's HEAD, a clean tree, and a committed manifest naming the commit. Earlier it asserted 5a4a668; that expectation changed only where the new identity was verified independently.</p>
+<ol>
+<li>Catalog → HyperBook <em>HyperDoc Project Workspace</em> → its page → the Project Workspace reading (Work Areas, Work Items, assignments, proposals, gaps).</li>
+<li>Roundtrip: the reader is the pinned checkout; the export equals the observed octets; the CXTM equals the sources'; every Topic and statement traces to its declaration.</li>
+<li>A declared Work Item, along Associations of the native Workspace: Working on HyperDoc → Work Breakdown → <em>Author the CTM Plan Page through HyperDoc</em> → its carrier page → the Item edited through HyperDoc → a Deliverable → a work package (WBS) → its plan step → a precondition.</li>
+<li>Its source page, and the declaration in the page source (a work-topic-source-occurrence).</li>
+<li>An Implementation Assignment and its evidence file <code>dreyeck/tests/project-ctm.lisp</code>.</li>
+<li><strong>Absent evidence is named:</strong> the work package <code>ctm-wp-2</code> shows <em>acceptance criterion without an acceptance record</em>; the reading says that no acceptance is recorded; the assignment says that no acceptance by the user is recorded.</li>
+<li><strong>Object identity retained:</strong> the Work Breakdown page is the same Lisp object (the same printed address under each pane's Print tab) whether reached from its Topic in the Workspace or from the reading's Sources table; another page is another object (the control).</li>
+<li>The CTM document and its download: 161,228 octets, equal to the file and its sidecar digest.</li>
+<li><strong>Nothing written:</strong> the four source pages and the CTM keep their digests; the site root stays empty; Git shows the Work pages and the CTM unchanged.</li>
+</ol>
+<h2>A trusted review runtime, not the guarded Catalog</h2>
+<p><a expr="(claim &quot;trusted-runtime-not-the-guarded-catalog&quot;)" view="Claim">The walk ran in</a> <code>scripts/serve-project-workspace.lisp</code> (<a expr="(file-line &quot;scripts/serve-project-workspace.lisp&quot;)" view="File">the file</a>): a fresh Catalog on loopback over an empty test-copy site root that loads the Project Workspace by choice. The <em>packaged</em> executable is a different thing: its startup guard <a expr="#'dreyeck/catalog-topic-maps:refuse-project-workspace" view="Source code">refuse-project-workspace</a> reads the system the Catalog is asked to load and refuses <code>dreyeck/work/project</code> and anything that depends on it, before listening. That is unchanged: only its message now says that admission is a separate decision, because the Workspace is no longer bound to another lineage. Neither the guard nor the executable was bypassed or weakened to run the browser test; the Nix contract that includes the executable's refusal passes (<a expr="(record &quot;phase-b-nix-package-check.log&quot;)" view="Record">record</a>).</p>
+<h2>What remains</h2>
+<p><a expr="(claim &quot;browser-from-snapshot-open&quot;)" view="Claim">The browser walk was not run with the Git-free snapshot</a> as the Topic Maps root; the Lisp-level runs were (<a page="Project Workspace Compatibility">Project Workspace Compatibility</a>). Serving the Workspace from the packaged staging service is not possible without the admission decision (<a page="Remaining Work and Acceptance">Remaining Work and Acceptance</a>).</p>
+</body></html>

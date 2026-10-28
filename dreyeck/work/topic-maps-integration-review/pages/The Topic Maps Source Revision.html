@@ -1,0 +1,14 @@
+<html><head><title>The Topic Maps Source Revision</title></head><body><in-package>topic-maps-integration-review</in-package>
+<h1>The Topic Maps Source Revision</h1>
+
+<h2>The line of development</h2>
+<p>The authoritative line is the primary checkout's branch <code>codex/project-work-slice-22u</code>, tracking <code>gitweb/codex/project-work-slice-22u</code>. It stood at <code>b2eecffa</code>; the reviewed commit is its direct child, so the integration was a fast-forward (<a expr="(the-workspace)" view="Topicmap">6162ed68 descends from b2eecffa</a>: a Git answer, asked when the subjects were projected). The tree equals the reviewed commit's tree; b2eecffa remains a commit object and its manifest stays in the repository. <a expr="(claim &quot;fast-forward&quot;)" view="Claim">Claim and record.</a> It is local: the gitweb remote still names b2eecffa.</p>
+<p>5a4a668, the Project Workspace's former pin, is a sibling on 963f2a0 and not an ancestor of either; its recovery evidence is unchanged.</p>
+<h2>What HyperDoc names now</h2>
+<p>One commit, <code>6162ed68</code>, in four places: the Catalog (<code>+topic-maps-commit+</code>), the 22U reading (<code>+source-revision+</code>), the CTM review (through the 22U reading), and the Project Workspace (<code>+topic-maps-revision+</code>). One Topic Maps per image, so they move together.</p>
+<h2>The Git-free snapshot</h2>
+<p>A Nix source has no <code>.git</code>. HyperDoc therefore carries a manifest: <a expr="(progn (the-workspace) (getf *subjects* :manifest))" view="Manifest">the manifest of 6162ed68</a> holds the raw commit object and the root tree listing, and <a expr="#'dreyeck/source-snapshot:verify-store-snapshot" view="Source code">verify-store-snapshot</a> hashes every shipped file as Git does and checks the chain from the commit to the files. <a expr="(claim &quot;snapshot-of-6162ed68&quot;)" view="Claim">The archive for 6162ed68</a> equals the commit's tree minus <code>reports/</code> (2.47 GB, named by its tree id, not shipped): 19 independent Git and Nix checks, reproducible byte for byte. NAR hash <code>sha256-t3E4HX4JxGPGNDnCMRg8GGIg7zhtquBbCU7CLU4TU2M=</code>, store path <code>/nix/store/wii905xa…-source</code>. The mechanism is unchanged; the b2eecffa manifest stays beside it.</p>
+<p><a expr="(claim &quot;pins-retargeted&quot;)" view="Claim">The verifier, the 22U reading and the CTM review pass on it</a> (34, 41 and 58 assertions).</p>
+<h2>What this image loaded</h2>
+<p><a expr="(the-topic-maps-source)" view="Source">The Topic Maps source of this image</a> says where ASDF found it; its button asks the pin check (verifying a snapshot, or asking Git about a checkout).</p>
+</body></html>

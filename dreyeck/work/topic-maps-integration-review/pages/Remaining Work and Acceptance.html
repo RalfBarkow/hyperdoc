@@ -1,0 +1,25 @@
+<html><head><title>Remaining Work and Acceptance</title></head><body><in-package>topic-maps-integration-review</in-package>
+<h1>Remaining Work and Acceptance</h1>
+
+<p>What was done is local and uncommitted; what is open is listed with what would accept it. Nothing here is an acceptance: acceptance is a record you make, and the tests passing is evidence for it, not the record.</p>
+<table class="inspector-table">
+<tr><th>Open</th><th>Accepted when</th><th>Needs approval</th></tr>
+<tr><td><a expr="(claim &quot;linux-nix-unbuilt&quot;)" view="Claim">x86_64-linux build of the package for the new pins</a> (darwin: <a expr="(claim &quot;nix-contract-darwin&quot;)" view="Claim">passes</a>)</td><td>checks.catalog-topic-maps passes on x86_64-linux with the snapshot, and hyperdoc-catalog is shown unchanged apart from HyperDoc's own source path (not re-compared in this step)</td><td>an independent builder; publishing the archive at the URL in nix/topic-maps-source.nix, or adding it to the builder's store</td></tr>
+<tr><td><a expr="(claim &quot;browser-from-snapshot-open&quot;)" view="Claim">Browser walk with the Git-free snapshot as the Topic Maps root</a> (from a checkout: <a expr="(claim &quot;project-workspace-browser&quot;)" view="Claim">passes</a>)</td><td>scripts/test-project-workspace.mjs passes with the snapshot as TOPIC_MAPS_ROOT, the snapshot identified by the verifier</td><td>none (loopback only)</td></tr>
+<tr><td><a expr="(claim &quot;staging-not-started&quot;)" view="Claim">Staging on the private service (port 18780)</a></td><td>the operator procedure in docs/topic-maps-6162ed68-integration passes: cold start, memory within the host's limits, the catalog answers, rollback shown</td><td>yes: push of dreyeck.ch or a transferred package, and any server change</td></tr>
+<tr><td>Serving this reading through the packaged staging executable</td><td>not possible today, by design: this reading loads the Project Workspace, which the executable's startup guard refuses. It is served locally on loopback (serve.sh). Either the Workspace is admitted, or a variant of the reading without it is made</td><td>a decision</td></tr>
+<tr><td>Admission of the Project Workspace to the served runtime</td><td>a separate, tested policy that changes the guard knowingly; the 90-second read measured on the server's hardware</td><td>yes</td></tr>
+<tr><td>The 20-second aspiration (Association search)</td><td>a separate task with its own obligations (Task 1E); not part of this integration</td><td>a decision</td></tr>
+</table>
+<h2>Commit boundaries proposed</h2>
+<p>Detailed, with files, dependencies and tests, on <a page="The Four Commits">The Four Commits</a>.</p>
+<ol>
+<li>Topic Maps pins and the 6162ed68 snapshot: the manifest, <code>nix/topic-maps-source.nix</code>, the Lisp pins, <code>dreyeck.asd</code>, the verifier test's counts.</li>
+<li>Project Workspace: pin, snapshot-aware identity, tests, the integration script, the reworded guard message and its two tests.</li>
+<li>This reading.</li>
+<li>The documentation page with the staging procedure.</li>
+</ol>
+<p>Each is separable; none is committed. The Task 1C evidence the commit rests on: <a expr="(record &quot;task1c-commit-record.md&quot;)" view="Record">commit record</a>, <a expr="(record &quot;independent-review.md&quot;)" view="Record">independent review</a>.</p>
+<h2>What stays unverified</h2>
+<p>Linux and the production host; hyperdoc-catalog (production) not re-compared; a browser flow; a controlled benchmark on an idle machine; the XTM integration suites; and the guard's scope (it is a startup check for ASDF, not a sandbox). See each claim's own limit on <a expr="(the-workspace)" view="Claims">the claims table</a>.</p>
+</body></html>

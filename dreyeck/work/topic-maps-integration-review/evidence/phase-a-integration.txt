@@ -1,0 +1,25 @@
+Phase A: integrate the reviewed Task 1C commit into the primary Topic Maps checkout (2026-10-28)
+repository /Users/rgb/workspace/topic-maps, branch codex/project-work-slice-22u, remote gitweb (not pushed)
+HEAD before: b2eecffa05de4fce41c10ae1ada9ae11a0c6e7dc
+git merge --ff-only 6162ed68c94ea4796b8cf2282edd347d9607b08c: fast-forward
+HEAD after:  6162ed68c94ea4796b8cf2282edd347d9607b08c
+parent of HEAD: b2eecffa05de4fce41c10ae1ada9ae11a0c6e7dc
+tree HEAD: a4e787b08ff74447c9d55d442969b42560faaa8e  tree 6162ed68: a4e787b08ff74447c9d55d442969b42560faaa8e  (identical)
+git diff 6162ed68 HEAD:        0 lines
+working tree entries after:        0
+gitweb/codex/project-work-slice-22u still at: b2eecffa05de4fce41c10ae1ada9ae11a0c6e7dc
+b2eecffa still a commit object: commit; branches containing it:        2
+---- full suite in the integrated checkout, fresh FASL cache, with report files (scripts/fresh-sbcl.lisp), exit 0
+EMPTY2-PASS: 13 checks; one actual original contract
+CTM-INTEGER-ORIGINAL ctm/in/occurrence-ctm-integer.ctm: PASS; 356 byte-exact CXTM bytes
+CTM-INTEGER-PASS: 112 checks; one original plus 31 positive and 26 negative controls
+TRIPLE-ORIGINAL ctm/in/occurrence-string-triple.ctm: PASS; 367 byte-exact CXTM bytes
+TRIPLE-ORIGINAL ctm/in/occurrence-string-triple2.ctm: PASS; 370 byte-exact CXTM bytes
+TRIPLE-ORIGINAL ctm/in/unicode-escape-u4-triple-string.ctm: PASS; 331 byte-exact CXTM bytes
+TRIPLE-ORIGINAL ctm/in/unicode-escape-u6-triple-string.ctm: PASS; 331 byte-exact CXTM bytes
+TRIPLE-PASS: 226 checks; four originals plus 77 positive and 31 negative controls
+ENCODING-ORIGINAL ctm/in/encoding-8859-5.ctm: PASS; 337 byte-exact CXTM bytes
+ENCODING-PASS: 722 checks; 256 byte mappings, one original, 74 positive and 33 negative controls
+NORMALIZATION-INDEX-PASS: 120 checks; 21 documents, 3 staged imports and 7 rejections equal to the outcomes recorded at b2eecffa.
+PROJECT-WORK-PASS: 27 checks
+report files identical to the b2eecffa baseline reports: 25 of 25 (cmp)

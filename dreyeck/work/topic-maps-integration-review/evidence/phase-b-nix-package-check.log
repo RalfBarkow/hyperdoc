@@ -1,0 +1,45 @@
+nix build --no-link --print-out-paths -L .#checks.x86_64-darwin.catalog-topic-maps  (worktree hyperdoc-topic-maps-6162ed68, dirty tree; Determinate Nix 3.11.2 / Nix 2.31.1)
+The Topic Maps source was the local store path /nix/store/wii905xa1b2v6rhyqx230gpy3xq40y8l-source, added with 'nix store add --mode nar --name source' from the verified archive; the fetchzip of nix/topic-maps-source.nix was not contacted (its URL is unpublished).
+NOTE: the build also fetched public inputs (curl, openssl and others from cache.nixos.org; the d2 0.9.0 release archive from GitHub) because this store no longer held them. Nothing was uploaded.
+copied-from-cache paths: 19
+building '/nix/store/vfpjyifl6f3xkd09y7nm383wlpdn21br-d2-v0.9.0-macos-amd64.tar.gz.drv'...
+building '/nix/store/0f8jziflr00yfh5ki0sq69v8fk2hgir9-d2-tala-0.9.0.drv'...
+building '/nix/store/wf5dxrgrq7pjsgacly125gw5d66in84h-hyperdoc-catalog-topic-maps.drv'...
+building '/nix/store/jkk4a0rwpbrbymdpdlckiw7ydwdksdqk-catalog-topic-maps-contract.drv'...
+/nix/store/wzj8ls4hvi6n8v7f2la619dmj6p5z2sy-catalog-topic-maps-contract
+exit=0
+---- result directory /nix/store/wzj8ls4hvi6n8v7f2la619dmj6p5z2sy-catalog-topic-maps-contract
+---- lisp.log (outcome lines)
+RUN-STARTED 4002159815 SBCL 2.4.10
+ASDF-ORIGIN topic-maps /nix/store/wii905xa1b2v6rhyqx230gpy3xq40y8l-source/
+ASDF-ORIGIN topic-maps/tmdm /nix/store/wii905xa1b2v6rhyqx230gpy3xq40y8l-source/
+ASDF-ORIGIN topic-maps/ctm /nix/store/wii905xa1b2v6rhyqx230gpy3xq40y8l-source/
+ASDF-ORIGIN topic-maps/cxtm /nix/store/wii905xa1b2v6rhyqx230gpy3xq40y8l-source/
+ASDF-ORIGIN topic-maps/project-work-example /nix/store/wii905xa1b2v6rhyqx230gpy3xq40y8l-source/
+ASDF-ORIGIN dreyeck /nix/store/gihfp01gza04g9bd1i9ah8ggx9gfcajc-source/
+ASDF-ORIGIN dreyeck/catalog-application /nix/store/gihfp01gza04g9bd1i9ah8ggx9gfcajc-source/
+ASDF-ORIGIN ironclad /nix/store/qll8psdvm67r4dncbbpqqdrd5ibsq1n5-sbcl-ironclad-v0.61/
+ASDF-ORIGIN babel /nix/store/f5rvmqvnj9zjbbmgxpvdhla23wcp1d9k-sbcl-babel-20241012-git/
+ASDF-ORIGIN cl-base64 /nix/store/fahsc8csvwaxr2xgwcw735kgw9mqcrrm-sbcl-cl-base64-20201016-git/
+ASDF-ORIGIN cl-who /nix/store/7kwvfxhgrx9d2nnainzdflxrd76c1aj3-sbcl-cl-who-20241012-git/
+ASDF-ORIGIN html-inspector-views /nix/store/w26nr9dxpfsyzbviphnaaydmcww2h3y6-source/
+FASL-CACHE /nix/var/nix/builds/nix-build-catalog-topic-maps-contract.drv-77258-2564018959/cache/common-lisp/sbcl-2.4.10-macosx-x64/nix/store/gihfp01gza04g9bd1i9ah8ggx9gfcajc-source/
+CATALOG-TOPIC-MAPS-PASS: 29 assertions; Topic Maps 6162ed68 from the verified store snapshot, loopback only, Project Workspace refused at startup.
+SOURCE-SNAPSHOT-PASS: 34 assertions; /nix/store/wii905xa1b2v6rhyqx230gpy3xq40y8l-source/ verified as Topic Maps 6162ed68 without .git; every alteration refused.
+TOPIC-MAPS-22U-INSPECTOR-PASS: 41 assertions; project and disposition reached through native Role/Association references.
+TOPIC-MAPS-CTM-REVIEW-PASS: 58 assertions; scheme-plus refuted by the reader's own condition, its control read, proposed claims unexecuted.
+RUN-FINISHED 4002159872
+CATALOG-TOPIC-MAPS-PACKAGE-PASS
+---- asdf-methods.log
+ASDF-METHOD-PRESERVATION-PASS: 183 assertions; ASDF 3.3.1 methods unchanged by identity, behaviour equal before and after, a control collision is seen.
+---- topic-maps-asd (every topic-maps.asd in the registry)
+/nix/store/wii905xa1b2v6rhyqx230gpy3xq40y8l-source/topic-maps.asd
+---- executable.log
+test_loopback_staging_http_and_shutdown (__main__.CatalogTopicMapsExecutableTests.test_loopback_staging_http_and_shutdown) ... ok
+test_project_workspace_refused (__main__.CatalogTopicMapsExecutableTests.test_project_workspace_refused) ... ok
+test_public_hosts_refused_before_loading (__main__.CatalogTopicMapsExecutableTests.test_public_hosts_refused_before_loading) ... ok
+
+----------------------------------------------------------------------
+Ran 3 tests in 62.309s
+
+OK

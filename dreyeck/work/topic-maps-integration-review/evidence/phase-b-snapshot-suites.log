@@ -1,0 +1,10 @@
+ASDF-ORIGIN topic-maps /nix/store/wii905xa1b2v6rhyqx230gpy3xq40y8l-source/
+SUITE-START dreyeck/source-snapshot
+SOURCE-SNAPSHOT-PASS: 34 assertions; /nix/store/wii905xa1b2v6rhyqx230gpy3xq40y8l-source/ verified as Topic Maps 6162ed68 without .git; every alteration refused.
+SUITE-DONE dreyeck/source-snapshot
+SUITE-START dreyeck/work/topic-maps-project-example
+TOPIC-MAPS-22U-INSPECTOR-PASS: 41 assertions; project and disposition reached through native Role/Association references.
+SUITE-DONE dreyeck/work/topic-maps-project-example
+SUITE-START dreyeck/work/topic-maps-ctm-review
+TOPIC-MAPS-CTM-REVIEW-PASS: 58 assertions; scheme-plus refuted by the reader's own condition, its control read, proposed claims unexecuted.
+SUITE-DONE dreyeck/work/topic-maps-ctm-review

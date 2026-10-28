@@ -1,0 +1,6 @@
+ASDF-ORIGIN topic-maps /Users/rgb/workspace/topic-maps/
+SUITE-START dreyeck/work/project
+PROJECT-CTM-SOURCE-PASS: 265 checks; no CTM read-back (not semantically validated)
+PROJECT-CTM-READBACK-PASS: 186 checks; complete CTM read with topic-maps 6162ed6 in 39.0s with the model
+PROJECT-CTM-ACCEPTANCE-PASS: 125 checks; no acceptance recorded in the project CTM; revisions, evidence entries, supersession, withdrawal and conflict shown on synthetic fixtures
+SUITE-DONE dreyeck/work/project

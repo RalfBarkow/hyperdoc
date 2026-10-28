@@ -1,0 +1,12 @@
+The reading served and navigated in a browser (the Claude desktop app's in-app browser), 2026-10-28 08:16 CET.
+Server: dreyeck/work/topic-maps-integration-review/serve.sh 18778, loopback only, under sandbox-exec; HyperDoc from the integration worktree,
+Topic Maps from the Git-free snapshot /nix/store/wii905xa1b2v6rhyqx230gpy3xq40y8l-source (6162ed68). Catalog at http://127.0.0.1:18778/.
+This was an interactive check by the reviewer-of-this-step, not a scripted browser test. What was seen and done:
+OBSERVED the Catalog lists the HyperBook "Integrating Topic Maps 6162ed68" among 27 books.
+OBSERVED opening it shows the Main page with the Text pages, Code pages, Files, Packages and URL tabs, the question table and the short answer.
+OBSERVED clicking the claim "The change is bounded" opens a Claim pane with its evidence records and sources.
+OBSERVED clicking the source topic-maps.tmdm::next-topic-merge opens a function pane; its Source code tab shows the function's source with its docstring.
+OBSERVED the Runs view of the Workspace lists three buttons and, before any press, "Results so far" is empty: rendering ran nothing.
+OBSERVED pressing "Ask whether the Project Workspace is refused" shows: "dreyeck/work/project is the Project Workspace, which this runtime does not admit: it was bound to Topic Maps 5a4a668 and is now bound to 6162ed68 ... it is not loaded here." and that dreyeck/work/project is loaded in this image.
+OBSERVED the Topicmap view of the Workspace renders its 22 subjects (17 SVG elements counted in the page) with Point at "Topic Maps 6162ed68" and the table "Why these relations hold" with each relation's known-as class, provenance and evidence.
+NOT DONE no browser flow through the HyperDoc Project Workspace itself (its own pages), no mobile viewport, no run of the "Read the project CTM now" button in the browser (the function is tested separately), no cross-browser check.

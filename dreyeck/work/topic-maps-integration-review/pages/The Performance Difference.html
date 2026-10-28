@@ -1,0 +1,15 @@
+<html><head><title>The Performance Difference</title></head><body><in-package>topic-maps-integration-review</in-package>
+<h1>The Performance Difference</h1>
+
+<p><a expr="(the-performance)" view="Performance">The performance table</a> reads the recorded benchmark files when you open it; nothing is measured now. In short:</p>
+<ul>
+<li>The unchanged b2eecffa did not finish reading the project CTM in 120 s.</li>
+<li>6162ed68 reads it in about 29 s (independent, SBCL 2.6.4), 33 s (packaged SBCL 2.4.10) and 34 s (this step's benchmark of the integrated checkout). <a expr="(claim &quot;within-90-seconds&quot;)" view="Claim">Below the 90-second limit.</a></li>
+<li>On two corpus slices b2eecffa can finish (111 s and 152 s), 6162ed68 takes half a second, with byte-identical output.</li>
+<li>The sibling lineage 5a4a668 reads it in 7.6 s, because it also indexes the Association search. <a expr="(claim &quot;target-20s-unmet&quot;)" view="Claim">The 20-second aspiration is therefore not met by this change alone.</a> The row marked EXPERIMENTAL shows an association index on top (about 9 s); it is not Task 1C and not in this integration.</li>
+</ul>
+<h2>Where the time goes now</h2>
+<p>The reviewer's profile: the Association pair search is about 73 % of the read; the new topic search about 6 %; before, the topic comparison was 98 %. <a expr="(record &quot;independent-review.md&quot;)" view="Record">The review, section 5.</a></p>
+<h2>Timings depend on the machine</h2>
+<p>All numbers are from one Intel Mac. They move with its load: one Project Workspace run on this revision took <a expr="(record &quot;phase-b-workspace-git-checkout-under-load.log&quot;)" view="Record">161 s on an overloaded machine</a> and <a expr="(record &quot;phase-b-workspace-git-checkout.log&quot;)" view="Record">35 s when repeated alone</a>. A check against the 90-second limit belongs on an idle machine, and a Linux or production-sized host has not been measured.</p>
+</body></html>

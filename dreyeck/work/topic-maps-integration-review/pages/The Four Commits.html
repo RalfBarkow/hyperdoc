@@ -1,0 +1,18 @@
+<html><head><title>The Four Commits</title></head><body><in-package>topic-maps-integration-review</in-package>
+<h1>The Four Commits</h1>
+
+<p>The candidate is split into four commits, each explainable on its own and each leaving the tree consistent when applied after the ones it depends on. None is made. Each boundary is an object with its files, its purpose, its dependencies, its tests, the Lisp definitions it touches and the identity (Git blob id, SHA-256) of every file as the working tree holds it now: <a expr="(boundary &quot;1&quot;)" view="Boundary">boundary 1</a> · <a expr="(boundary &quot;2&quot;)" view="Boundary">boundary 2</a> · <a expr="(boundary &quot;3&quot;)" view="Boundary">boundary 3</a> · <a expr="(boundary &quot;4&quot;)" view="Boundary">boundary 4</a>. They are also four subjects of <a expr="(the-workspace)" view="Topicmap">the Workspace</a>, linked by <em>depends on</em>.</p>
+<table class="inspector-table">
+<tr><th>#</th><th>Subject line</th><th>Depends on</th><th>Needs to stand alone</th></tr>
+<tr><td>1</td><td>Pin Topic Maps 6162ed68: snapshot manifest, pins and the earlier review's version-bound contract</td><td>nothing: it applies to 8e64e718</td><td>the snapshot verifier, the 22U reading and the CTM review pass on the new snapshot; the earlier review's main suite passes; the Nix contract passes. The Workspace is still pinned to 5a4a668 and the guard's old message is still true.</td></tr>
+<tr><td>2</td><td>Bind the Project Workspace to Topic Maps 6162ed68 and identify a Git-free snapshot</td><td>1</td><td>the Project suite, the integration script on a checkout and on the snapshot, the browser test, the Nix contract with the guard's new wording.</td></tr>
+<tr><td>3</td><td>Add the reading of the Topic Maps 6162ed68 integration</td><td>1, 2</td><td>its own suite; it loads the Project Workspace and the earlier review.</td></tr>
+<tr><td>4</td><td>Document the integration, its limits and the proposed staging procedure</td><td>1, 2, 3</td><td>prose only.</td></tr>
+</table>
+<h2>Two files are split by hunk</h2>
+<p><code>dreyeck.asd</code> (boundary 1: the manifest; boundary 2: the Workspace's dependency on the verifier) and <code>dreyeck/src/catalog-topic-maps.lisp</code> (boundary 1: the pin; boundary 2: the refusal's wording). Stage each with <code>git add -p</code>; the reading's tests check that every other path belongs to exactly one boundary and that together they are exactly the paths the working tree changes.</p>
+<h2>Rehearsed, not committed</h2>
+<p><a expr="(claim &quot;boundaries-coherent&quot;)" view="Claim">Boundaries 1 and 2 were committed in a scratch clone</a> (a different repository, so this worktree is unchanged) and tested at each commit; the record names the tree of each: <a expr="(record &quot;phase-d-boundary-rehearsal.txt&quot;)" view="Record">the rehearsal</a>. Boundaries 3 and 4 are this reading and the documentation. <a expr="(claim &quot;declared-paths-bound&quot;)" view="Claim">Why boundary 1 carries the earlier review's contract:</a> without it, committing the pins alone would break that review.</p>
+<h2>What does not belong to any commit</h2>
+<p>The Task 1C evidence and the snapshot archive are outside the repository (<code>/Users/rgb/workspace/topic-maps-task-1c-evidence/</code>); the archive is reproducible from Topic Maps. Linux and the staging service are later acceptance, not conditions of these local commits (<a page="Remaining Work and Acceptance">Remaining Work and Acceptance</a>).</p>
+</body></html>

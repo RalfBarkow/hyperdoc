@@ -1,0 +1,19 @@
+INDEPENDENT-SPEC-CHECKS: 77 passed
+MICRO search topics=2 same=NIL fn=SCAN-NEXT-TOPIC-MERGE reps=100000 seconds=0.042022 allocated=11168432
+MICRO search topics=2 same=NIL fn=NEXT-TOPIC-MERGE reps=100000 seconds=0.142423 allocated=123062736
+MICRO search topics=2 same=T fn=SCAN-NEXT-TOPIC-MERGE reps=100000 seconds=0.097336 allocated=28787008
+MICRO search topics=2 same=T fn=NEXT-TOPIC-MERGE reps=100000 seconds=0.168031 allocated=126304640
+MICRO search topics=8 same=NIL fn=SCAN-NEXT-TOPIC-MERGE reps=10000 seconds=0.243924 allocated=111979088
+MICRO search topics=8 same=NIL fn=NEXT-TOPIC-MERGE reps=10000 seconds=0.049620 allocated=26024128
+MICRO search topics=8 same=T fn=SCAN-NEXT-TOPIC-MERGE reps=10000 seconds=0.018976 allocated=8613520
+MICRO search topics=8 same=T fn=NEXT-TOPIC-MERGE reps=10000 seconds=0.040737 allocated=22220320
+MICRO search topics=32 same=NIL fn=SCAN-NEXT-TOPIC-MERGE reps=2000 seconds=1.903713 allocated=1539573056
+MICRO search topics=32 same=NIL fn=NEXT-TOPIC-MERGE reps=2000 seconds=0.041654 allocated=21098928
+MICRO search topics=32 same=T fn=SCAN-NEXT-TOPIC-MERGE reps=2000 seconds=0.011732 allocated=6321072
+MICRO search topics=32 same=T fn=NEXT-TOPIC-MERGE reps=2000 seconds=0.026578 allocated=13823152
+MICRO normalize-all-duplicate topics=16 oracle=T reps=200 seconds=0.019261 allocated=8613936
+MICRO normalize-all-duplicate topics=16 oracle=NIL reps=200 seconds=0.029720 allocated=13813120
+MICRO normalize-all-duplicate topics=64 oracle=T reps=30 seconds=0.033121 allocated=17686144
+MICRO normalize-all-duplicate topics=64 oracle=NIL reps=30 seconds=0.052209 allocated=26923664
+MICRO normalize-all-duplicate topics=256 oracle=T reps=3 seconds=0.046205 allocated=27085904
+MICRO normalize-all-duplicate topics=256 oracle=NIL reps=3 seconds=0.076670 allocated=42277520

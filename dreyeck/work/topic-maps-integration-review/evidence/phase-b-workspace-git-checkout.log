@@ -1,0 +1,31 @@
+Quiet machine, run alone. SBCL 2.4.10 (packaged). Topic Maps: the integrated primary checkout /Users/rgb/workspace/topic-maps (clean, 6162ed68).
+RUN-STARTED 4002159492 SBCL 2.4.10
+ASDF-ORIGIN topic-maps /Users/rgb/workspace/topic-maps/
+ASDF-ORIGIN topic-maps/tmdm /Users/rgb/workspace/topic-maps/
+ASDF-ORIGIN topic-maps/ctm /Users/rgb/workspace/topic-maps/
+ASDF-ORIGIN topic-maps/cxtm /Users/rgb/workspace/topic-maps/
+IDENTITY (:DIRECTORY "/Users/rgb/workspace/topic-maps/" :KIND :GIT-CHECKOUT
+          :COMMIT "6162ed68c94ea4796b8cf2282edd347d9607b08c" :CLEAN T :ONE-ROOT
+PIN-OK
+CTM-INPUT-SHA256 f4f04bb49ce3b762b3e1c0bccf9e177e11785d33db87e8c0d043b04820b540d3
+PROJECT-WORKSPACE wall=35.400 digest=f4f04bb49ce3b762b3e1c0bccf9e177e11785d33db87e8c0d043b04820b540d3 refusal=NIL
+WITHIN-90-SECONDS YES
+MODEL declarations=55 statements=57 assignments=4 gaps=40
+MAP topics=327 associations=572
+TRACE-DISCREPANCIES NIL
+CXTM-BYTES 392172 SHA256 6f957018d93e7a4f9b8738042797f60a3d6c094134ef85f6ba40d30bfe03d8b9
+PROJECTION topics=148 edges=286 wall=0.046
+NAVIGATION eight keys reached, history ("ctm-plan-p2" "ctm-wp-2"
+                                        "ctm-page-edit"
+                                        "page/dreyeck/work/reading/authoring-the-ctm-plan-page"
+                                        "ctm-plan-page-authoring"
+                                        "page/dreyeck/work/reading/work-breakdown"
+                                        "hyperbook/dreyeck/work/reading")
+REVISION-FROM-OCTETS wall=35.112 COMPARE (:OCTETS-EQUAL T :CXTM-EQUAL T
+                                          :ONLY-FIRST-TOPICS NIL
+                                          :ONLY-SECOND-TOPICS NIL
+                                          :ONLY-FIRST-ASSOCIATIONS NIL
+                                          :ONLY-SECOND-ASSOCIATIONS NIL)
+CTM-INPUT-UNCHANGED YES
+RUN-FINISHED 4002159592 PROJECT-WORKSPACE-INTEGRATION-PASS
+           483373056  maximum resident set size

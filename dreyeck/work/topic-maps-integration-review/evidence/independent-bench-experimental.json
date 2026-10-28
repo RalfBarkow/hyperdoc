@@ -1,0 +1,32 @@
+{
+  "label": "experimental",
+  "tm_root": "/private/tmp/task1c-independent-review-96ln4s4u/experimental",
+  "sbcl": "/usr/local/bin/sbcl",
+  "runs": [
+    {
+      "run": 1,
+      "returncode": 0,
+      "process_elapsed": 12.33,
+      "read_wall": 8.906576,
+      "read_cpu": 8.236508,
+      "read_allocated_bytes": 5649769520,
+      "peak_rss_bytes": 107597824,
+      "counts": {
+        "topics": 327,
+        "associations": 572,
+        "names": 323,
+        "occurrences": 509,
+        "roles": 1144,
+        "reified": 57
+      },
+      "signature_sha256": "4e8a07ba210faa368e7339e1666b3e534cbcf3461b277c22186b5afe75c1a02d",
+      "cxtm_sha256": "6f957018d93e7a4f9b8738042797f60a3d6c094134ef85f6ba40d30bfe03d8b9",
+      "signature_equals_5a4a668": true,
+      "cxtm_equals_5a4a668": true
+    }
+  ],
+  "input_sha256_unchanged": true,
+  "read_wall_median": 8.906576,
+  "read_wall_min": 8.906576,
+  "read_wall_max": 8.906576
+}
