@@ -489,6 +489,22 @@ comparisons on five mutations of TEXT, each of which they must detect."
          (model (p:reading-model reading)) (document (p:reading-document reading)) (map (p:revision-map document))
          (text (p:model-text model)) (index (p::%index map)))
     (check "pin:loaded-reader-is-the-pinned-clean-revision" (getf identity :pinned))
+    (check "pin:identity-names-its-kind" (member (getf identity :kind) '(:git-checkout :verified-nix-store-snapshot)))
+    (check "pin:every-topic-maps-system-comes-from-the-one-root" (getf identity :one-root))
+    (check "pin:the-commit-is-the-pinned-one" (equal (getf identity :commit) p::+topic-maps-revision+))
+    ;; The pin can fail: a changed tree, another commit, an unidentified commit and two roots are each not the pin.
+    (check "pin:negative:pinned-and-clean-and-one-root-is-pinned" (p::pinned-state-p p::+topic-maps-revision+ "" t))
+    (check "pin:negative:a-changed-working-tree-is-not-pinned" (not (p::pinned-state-p p::+topic-maps-revision+ " M src/tmdm/merging.lisp" t)))
+    (check "pin:negative:another-commit-is-not-pinned" (not (p::pinned-state-p "5a4a66850403cdfe2755c6c88083a8e31af89628" "" t)))
+    (check "pin:negative:b2eecffa-is-not-pinned" (not (p::pinned-state-p "b2eecffa05de4fce41c10ae1ada9ae11a0c6e7dc" "" t)))
+    (check "pin:negative:an-empty-commit-is-not-pinned" (not (p::pinned-state-p "" "" t)))
+    (check "pin:negative:two-roots-are-not-pinned" (not (p::pinned-state-p p::+topic-maps-revision+ "" nil)))
+    ;; A directory Git cannot identify and that is no /nix/store snapshot is never reported clean or pinned, and has no commit.
+    (uiop:with-temporary-file (:pathname marker :type "txt" :keep nil)
+      (let ((identity (p::topic-maps-source-identity (uiop:pathname-directory-pathname marker))))
+        (check "pin:negative:unverifiable-directory-has-no-commit-and-is-not-clean-or-pinned"
+               (and (eq :unverifiable (getf identity :kind)) (null (getf identity :commit))
+                    (null (getf identity :clean)) (null (getf identity :pinned))))))
     (check "read:complete-ctm-read-without-refusal" (and map (null (p:revision-refusal document))))
     (check "read:within-90-seconds-with-the-model" (< seconds 90))
     ;; Topics: every subject the text writes is one Topic with that subject identifier; nothing else but TMDM's own.
@@ -556,9 +572,14 @@ comparisons on five mutations of TEXT, each of which they must detect."
         (check "import:unchanged-copy-equal-octets-and-cxtm" (and (getf c :octets-equal) (getf c :cxtm-equal)))))
     (let* ((template (p:ctm-revision-from-octets (sb-ext:string-to-octets "def t() end" :external-format :utf-8) :label "template"))
            (latin (p:ctm-revision-from-octets (coerce #(97 32 45 32 34 233 34 32 46) '(vector (unsigned-byte 8))) :label "latin-1")))
-      (check "refuse:template-unsupported" (eq :unsupported-keyword (first (p:revision-refusal template))))
+      ;; Topic Maps 5a4a668 refused `def t() end` as unsupported (:unsupported-keyword); b2eecffa and its descendants support
+      ;; templates, so this runtime reads it as a map without Topics. Malformed input is still refused, with a code.
+      (check "accept:template-definition-reads-as-an-empty-map" (and (p:revision-map template) (null (p:revision-refusal template))
+                                                                      (null (topic-maps.tmdm:topic-map-topics (p:revision-map template)))))
       (check "refuse:not-utf-8" (eq :not-utf-8 (first (p:revision-refusal latin))))
-      (check "refuse:no-topic-map-from-a-refusal" (and (null (p:revision-map template)) (null (p:revision-map latin)))))
+      (let ((malformed (p:ctm-revision-from-octets (sb-ext:string-to-octets "a(r: b" :external-format :utf-8) :label "malformed")))
+        (check "refuse:malformed-input-with-its-code" (eq :missing-association-close (first (p:revision-refusal malformed))))
+        (check "refuse:no-topic-map-from-a-refusal" (and (null (p:revision-map malformed)) (null (p:revision-map latin))))))
     ;; The native Workspace: from the project to a precondition, and from the assignment to its evidence; back along History.
     (let ((ws (p:reading-workspace reading)))
       (flet ((walk (path)

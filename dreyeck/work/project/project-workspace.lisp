@@ -9,17 +9,49 @@
 
 ;;; The reader this reading depends on
 
-(defparameter +topic-maps-revision+ "5a4a66850403cdfe2755c6c88083a8e31af89628"
-  "The topic-maps commit this system is tested with: 963f2a0 plus the indexed merge search (branch
-claude/ctm-reader-normalization-scaling). The unchanged 963f2a0 reads the project CTM correctly but not in practical time.")
-(defun topic-maps-source-identity ()
-  "What the loaded topic-maps reader is: the Git commit and state of the checkout ASDF loaded topic-maps/ctm from, observed now."
-  (let ((directory (namestring (asdf:system-source-directory "topic-maps/ctm"))))
+(defparameter +topic-maps-revision+ "6162ed68c94ea4796b8cf2282edd347d9607b08c"
+  "The topic-maps commit this system is tested with: b2eecffa (Slice 22U) plus the indexed Topic merge search of Task 1C
+(branch codex/project-work-slice-22u). The unchanged b2eecffa reads the project CTM correctly but not in practical time.
+Before the integration of 2026-10-28 this was 5a4a668, a sibling lineage (963f2a0 plus an indexed search); its recovery
+evidence stays in topic-maps-5a4a668-recovery.txt.")
+
+(defparameter +one-root-systems+ '("topic-maps" "topic-maps/tmdm" "topic-maps/ctm" "topic-maps/cxtm")
+  "The Topic Maps systems the Project Workspace loads; they must all come from the one checked root.")
+
+(defun pinned-state-p (commit changes one-root)
+  "Whether a checkout is the pin: the pinned commit, no change in its working tree, one root for every Topic Maps system."
+  (and one-root (equal commit +topic-maps-revision+) (zerop (length changes))))
+
+(defun topic-maps-source-identity (&optional (root (asdf:system-source-directory "topic-maps/ctm")))
+  "What the loaded topic-maps reader is, observed now, as a plist: :DIRECTORY; :KIND, one of :GIT-CHECKOUT,
+:VERIFIED-NIX-STORE-SNAPSHOT (a /nix/store tree without .git whose files hash, as Git hashes them, to the pinned commit:
+dreyeck/source-snapshot), :UNVERIFIED-NIX-STORE-SNAPSHOT (a store tree that does not) or :UNVERIFIABLE (anything else);
+:COMMIT, the Git commit of a checkout, or the verified pinned commit of a snapshot, else NIL; :CLEAN; :ONE-ROOT, whether
+topic-maps, /tmdm, /ctm and /cxtm all come from ROOT; :PINNED; and :REASON where a snapshot was refused. A directory that Git
+cannot identify is never reported clean and never pinned."
+  (let* ((directory (namestring root))
+         (one-root (every (lambda (name)
+                            (let ((other (ignore-errors (asdf:system-source-directory name))))
+                              (and other (equal (truename root) (truename other)))))
+                          +one-root-systems+)))
     (flet ((git (&rest arguments)
              (string-trim '(#\Newline) (uiop:run-program (list* "git" "-C" directory arguments) :output :string :ignore-error-status t))))
-      (let ((commit (git "rev-parse" "HEAD")) (changes (git "status" "--porcelain")))
-        (list :directory directory :commit commit :clean (zerop (length changes))
-              :pinned (and (equal commit +topic-maps-revision+) (zerop (length changes))))))))
+      (ecase (snap:source-kind root)
+        (:git-checkout
+         (let ((commit (git "rev-parse" "HEAD")) (changes (git "status" "--porcelain")))
+           (list :directory directory :kind :git-checkout :commit (and (plusp (length commit)) commit)
+                 :clean (and (plusp (length commit)) (zerop (length changes))) :one-root one-root
+                 :pinned (pinned-state-p commit changes one-root))))
+        (:nix-store-snapshot
+         (handler-case
+             (let ((verification (snap:verify-store-snapshot root +topic-maps-revision+)))
+               (list :directory directory :kind :verified-nix-store-snapshot :commit +topic-maps-revision+ :clean t :one-root one-root
+                     :pinned (and one-root t) :checks (snap:verification-checks verification)))
+           (snap:snapshot-refused (condition)
+             (list :directory directory :kind :unverified-nix-store-snapshot :commit nil :clean nil :one-root one-root :pinned nil
+                   :reason (snap:snapshot-refused-reason condition)))))
+        (:unverifiable
+         (list :directory directory :kind :unverifiable :commit nil :clean nil :one-root one-root :pinned nil))))))
 
 ;;; Revisions
 
@@ -474,8 +506,13 @@ would read, or a synthetic fixture. Its document is that materialization read on
       (v:html
         (:h2 "Roundtrip and traceability")
         (let ((identity (topic-maps-source-identity)))
-          (v:html (:p "Reader: topic-maps at " (:code (v:esc (getf identity :directory))) ", commit " (:code (v:esc (getf identity :commit)))
-                      (v:esc (format nil " — ~:[working tree has changes~;clean~]; ~:[NOT the pinned ~A~;the pinned revision~*~]."
+          (v:html (:p "Reader: topic-maps at " (:code (v:esc (getf identity :directory))) ", "
+                      (ecase (getf identity :kind)
+                        (:git-checkout (v:html "Git checkout, commit " (:code (v:esc (or (getf identity :commit) "unknown")))))
+                        (:verified-nix-store-snapshot (v:html "/nix/store snapshot without .git, verified against commit " (:code (v:esc (getf identity :commit)))))
+                        (:unverified-nix-store-snapshot (v:html "/nix/store snapshot that does not verify: " (v:esc (getf identity :reason))))
+                        (:unverifiable (v:html "a directory that Git cannot identify and that is no verified snapshot")))
+                      (v:esc (format nil " — ~:[not clean or not identified~;clean~]; ~:[NOT the pinned ~A~;the pinned revision~*~]."
                                      (getf identity :clean) (getf identity :pinned) +topic-maps-revision+)))))
         (:table :class "inspector-table"
           (:tr (:th "Check") (:th "Compares") (:th "Result"))

@@ -64,7 +64,7 @@ class CatalogTopicMapsExecutableTests(unittest.TestCase):
         result = self.run_executable(str(port), HYPERDOC_CATALOG_SYSTEM="dreyeck/work/project")
         self.assertNotEqual(0, result.returncode)
         self.assertIn("Topic Maps snapshot verified without .git", result.stdout)
-        self.assertIn("is bound to Topic Maps 5a4a668", result.stderr)
+        self.assertIn("which this runtime does not admit", result.stderr)
         with socket.socket() as probe:
             self.assertNotEqual(0, probe.connect_ex(("127.0.0.1", port)))
 

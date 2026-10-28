@@ -10,13 +10,20 @@ import path from 'node:path'
 import net from 'node:net'
 import crypto from 'node:crypto'
 import assert from 'node:assert/strict'
-import {spawn} from 'node:child_process'
+import {spawn,execFileSync} from 'node:child_process'
 import {pathToFileURL} from 'node:url'
 const [lisp,pw,chrome,output,topicMaps]=process.argv.slice(2)
 if(!topicMaps)throw Error('LISP_WRAPPER PLAYWRIGHT_DIRECTORY CHROME OUTPUT TOPIC_MAPS_ROOT required')
 fs.mkdirSync(output,{recursive:true})
 const repo=path.resolve(path.dirname(new URL(import.meta.url).pathname),'..')
 const sha=f=>crypto.createHash('sha256').update(fs.readFileSync(f)).digest('hex')
+// The Topic Maps revision this test expects is the Project Workspace's own pin, read from its source, and it is checked here without
+// the Lisp that serves the Catalog: Git's own answers for the checkout the Catalog was started on (its HEAD, a clean working tree) and
+// the committed manifest that names the same commit. 5a4a668 was the pin until the Topic Maps 6162ed68 integration.
+const pin=fs.readFileSync(path.join(repo,'dreyeck/work/project/project-workspace.lisp'),'utf8').match(/\(defparameter \+topic-maps-revision\+ "([0-9a-f]{40})"/)[1]
+const git=(...args)=>execFileSync('git',['-C',topicMaps,...args],{encoding:'utf8'}).trim()
+assert.equal(git('rev-parse','HEAD'),pin,'the Topic Maps checkout is at the pin');assert.equal(git('status','--porcelain'),'','the Topic Maps checkout is clean')
+assert(fs.readFileSync(path.join(repo,`nix/topic-maps-${pin.slice(0,8)}.manifest`),'utf8').includes(`:commit "${pin}"`),'a committed manifest names the pin')
 const ctmFile=path.join(repo,'dreyeck/work/project/hyperdoc-project.ctm')
 const sources=['dreyeck/pages/work/Work Breakdown.html','dreyeck/pages/work/Authoring the CTM Plan Page.html',
  'dreyeck/pages/work/CTM Plan Page WBS Dictionary.html','dreyeck/pages/project/Implementation Assignments.html'].map(f=>path.join(repo,f))
@@ -37,18 +44,28 @@ const child=spawn(lisp,['--load',path.join(repo,'scripts/serve-project-workspace
 const text=()=>fs.readFileSync(log,'utf8')
 const {chromium}=await import(pathToFileURL(path.join(pw,'index.mjs')))
 const browser=await chromium.launch({headless:true,executablePath:chrome})
-const steps=[];let siteRoot=null
+const steps=[];let siteRoot=null;const identity={}
 try{
  for(let n=0;!/PROJECT-WORKSPACE-CATALOG: /.test(text());n++){if(child.exitCode!==null||n>9000)throw Error(text().slice(-3000));await new Promise(r=>setTimeout(r,100))}
  siteRoot=text().match(/SITE-ROOT: (\S+)/)[1];assert(siteRoot.includes('TEST-COPY')&&!siteRoot.includes('/.wiki'),siteRoot)
- assert.equal(text().match(/TOPIC-MAPS: (\S+)/)[1],'5a4a66850403cdfe2755c6c88083a8e31af89628')
- steps.push('Catalog started on loopback over a TEST-COPY site root with topic-maps 5a4a668')
+ assert.equal(text().match(/TOPIC-MAPS: (\S+)/)[1],pin)
+ steps.push(`Catalog (the trusted review runtime scripts/serve-project-workspace.lisp, not the packaged Catalog) started on loopback over a TEST-COPY site root with topic-maps ${pin.slice(0,8)}, a clean Git checkout at the pin by Git's own answers`)
  const context=await browser.newContext({serviceWorkers:'block'})
  await context.route('**/*',r=>new URL(r.request().url()).origin===`http://127.0.0.1:${port}`?r.continue():r.abort())
  const page=await context.newPage();page.setDefaultTimeout(180000);installBoundClicks(page)
  const errors=[];page.on('pageerror',e=>errors.push(e.message))
  const panes=()=>page.locator('.inspector-pane')
  const last=()=>panes().last()
+ // A pane for an object shows its printed representation, with the address of the Lisp object, under its Print tab: the same address in two
+ // panes is the same object, not a copy of it.
+ const printedObject=async index=>{const pane=panes().nth(index);await pane.locator('.inspector-title').first().waitFor()
+  // The pane first renders its default view; its tabs take effect once that view has settled (two reads, 100 ms apart, agree).
+  let settled=await pane.innerText();for(let n=0;n<50;n++){await new Promise(r=>setTimeout(r,100));const now=await pane.innerText();if(now===settled&&now.length>100)break;settled=now}
+  await pane.getByRole('button',{name:'Print',exact:true}).first().click()
+  let printed=null
+  for(let n=0;n<100&&!printed;n++){printed=(await pane.innerText()).match(/#<[A-Z-]+ \{[0-9A-F]+\}>/g);if(!printed)await new Promise(r=>setTimeout(r,100))}
+  assert(printed,'a printed object; the pane shows: '+JSON.stringify((await pane.innerText()).slice(0,400)));return printed[printed.length-1]}
+ let routeOne=null
  const titleOf=async pane=>(await pane.locator('.inspector-title').first().innerText()).replace(/\s+/g,' ')
  await page.goto(`http://127.0.0.1:${port}`)
  await page.getByText('HyperDoc Project Workspace',{exact:true}).and(page.locator(':visible')).first().click()
@@ -71,27 +88,50 @@ try{
  await project.getByRole('heading',{name:'Roundtrip and traceability',exact:true}).waitFor()
  const roundtrip=await project.innerText()
  assert(/the pinned revision/.test(roundtrip),'the pinned reader');assert(!/NOT the pinned/.test(roundtrip))
+ assert(roundtrip.includes('Git checkout, commit '+pin),'the Roundtrip view names the checkout and the commit')
  assert(/Export of the unchanged import\s*octets\s*yes/.test(roundtrip),'byte-identical export')
  assert(/The file and the sources mean the same\s*CXTM\s*yes/.test(roundtrip),'CXTM equal')
  assert(/Every Topic and statement traced to its declaration\s*TMDM against the source pages\s*yes/.test(roundtrip),'trace')
- steps.push('Roundtrip: pinned reader 5a4a668; export octets equal; CXTM equal to the sources; every Topic and statement traced')
+ steps.push('Roundtrip: pinned reader '+pin.slice(0,8)+' (Git checkout); export octets equal; CXTM equal to the sources; every Topic and statement traced')
  await project.getByRole('button',{name:'Project',exact:true}).first().click()
  await project.getByRole('heading',{name:'HyperDoc Project Workspace',exact:true}).waitFor()
+ // Route 2 to the Work Breakdown page object: the Sources table of the reading that read it.
+ const beforeRoute2=await panes().count()
+ await project.locator('tr:has-text("dreyeck/pages/work/Work Breakdown.html") .inspector-inspect').first().click()
+ const routeTwoObject=await printedObject(beforeRoute2)
+ steps.push(`the Work Breakdown page reached from the reading's Sources table is the object ${routeTwoObject}`)
+ identity.routeTwoObject=routeTwoObject
+ // The comparison can fail: another source page, reached the same way, is another object.
+ await project.locator('tr:has-text("dreyeck/pages/work/Authoring the CTM Plan Page.html") .inspector-inspect').first().click()
+ const otherObject=await printedObject(pagePanes+1) // a link of the project pane opens its pane just to the right of it, replacing the earlier one
+ assert.notEqual(otherObject,routeTwoObject,'another page is another object')
+ steps.push(`control: the page Authoring the CTM Plan Page is another object, ${otherObject}`)
+ assert((await project.innerText()).includes('No acceptance is recorded'),'the reading states that no acceptance is recorded')
  // The native Workspace, along its Associations.
  await project.getByText('Open the Project Workspace (native Topicmap, Point and History)',{exact:true}).first().click()
- const ws=last();await ws.locator('.dreyeck-topicmap-point-sign[data-topic-id="hyperbook/dreyeck/work/reading"]').first().waitFor({state:'attached'})
+ const ws=panes().nth((await panes().count())-1);await ws.locator('.dreyeck-topicmap-point-sign[data-topic-id="hyperbook/dreyeck/work/reading"]').first().waitFor({state:'attached'})
  for(const {key,label} of path_){
-  await last().locator('tr.dreyeck-topicmap-workspace-association button.inspector-action').filter({hasText:label}).first().click()
-  await last().locator(`.dreyeck-topicmap-point-sign[data-topic-id="${key}"]`).first().waitFor({state:'attached'})
+  await ws.locator('tr.dreyeck-topicmap-workspace-association button.inspector-action').filter({hasText:label}).first().click()
+  await ws.locator(`.dreyeck-topicmap-point-sign[data-topic-id="${key}"]`).first().waitFor({state:'attached'})
+  if(key===path_[0].key){
+   // Route 1 to the Work Breakdown page object: the Point panel of its Topic names it as the Topic's source page.
+   const wsPane=ws,before=await panes().count()
+   await wsPane.locator('tr:has-text("Source page") .inspector-inspect').first().click()
+   routeOne=await printedObject(before)
+  }
  }
+ steps.push(`the Work Breakdown page reached from its Workspace Topic is the object ${routeOne}`)
  steps.push('Workspace along its Associations: Working on HyperDoc → '+path_.map(p=>p.label).join(' → '))
  // Back to the work package: its Point panel names the declaration in its page source and the represented TMDM Topic.
- await last().locator('tr.dreyeck-topicmap-workspace-association button.inspector-action').filter({hasText:path_[5].label}).first().click()
- await last().locator('.dreyeck-topicmap-point-sign[data-topic-id="ctm-plan-p2"]').first().waitFor({state:'attached'})
- await last().locator('tr.dreyeck-topicmap-workspace-association button.inspector-action').filter({hasText:path_[4].label}).first().click()
- await last().locator('.dreyeck-topicmap-point-sign[data-topic-id="ctm-wp-2"]').first().waitFor({state:'attached'})
- const point=await last().innerText();assert(/Declared on/.test(point));assert(/wbs-acceptance-criterion|WBS acceptance criterion/.test(point))
- await last().getByText('the declaration in the page source',{exact:true}).first().click()
+ await ws.locator('tr.dreyeck-topicmap-workspace-association button.inspector-action').filter({hasText:path_[5].label}).first().click()
+ await ws.locator('.dreyeck-topicmap-point-sign[data-topic-id="ctm-plan-p2"]').first().waitFor({state:'attached'})
+ await ws.locator('tr.dreyeck-topicmap-workspace-association button.inspector-action').filter({hasText:path_[4].label}).first().click()
+ await ws.locator('.dreyeck-topicmap-point-sign[data-topic-id="ctm-wp-2"]').first().waitFor({state:'attached'})
+ const point=await ws.innerText();assert(/Declared on/.test(point));assert(/wbs-acceptance-criterion|WBS acceptance criterion/.test(point))
+ // Absent evidence is named, not left out: the work package has an acceptance criterion and no acceptance record.
+ assert(point.includes('ctm-wp-2: acceptance criterion without an acceptance record'),'the Point panel names the absent acceptance record')
+ steps.push('the work package ctm-wp-2 names its absent acceptance record: "ctm-wp-2: acceptance criterion without an acceptance record"')
+ await ws.getByText('the declaration in the page source',{exact:true}).first().click()
  const occurrence=last();await occurrence.locator('.inspector-title').first().waitFor();await page.waitForTimeout(400)
  assert(/WORK-TOPIC-SOURCE-OCCURRENCE/i.test(await titleOf(occurrence)),await titleOf(occurrence))
  steps.push('back along the Associations to the work package; its Point panel opens the declaration in its page source (work-topic-source-occurrence)')
@@ -113,12 +153,14 @@ try{
  assert((await doc.innerText()).includes(sha(ctmFile)),'the document view shows the digest')
  assert.equal(fs.readFileSync(ctmFile+'.sha256','utf8').slice(0,64),sha(ctmFile),'the sidecar digest is the file')
  steps.push('CTM document → download: '+downloaded.length+' octets, SHA-256 '+sha(ctmFile)+', equal to the file and its sidecar')
+ assert.equal(identity.routeTwoObject,routeOne,'the same page object from both routes')
+ steps.push('object identity retained across panes and routes: '+routeOne)
  assert.deepEqual(errors,[])
  for(const [f,digest] of Object.entries(before))assert.equal(sha(f),digest,f+' unchanged')
  assert.deepEqual(fs.readdirSync(path.join(siteRoot,'pages')),[],'the test-copy site root stays empty')
  steps.push('nothing written: source pages, CTM file and the site root unchanged')
  await context.close()
- fs.writeFileSync(path.join(output,'result.json'),JSON.stringify({status:'PASS',steps},null,2))
+ fs.writeFileSync(path.join(output,'result.json'),JSON.stringify({status:'PASS',topicMaps:pin,runtime:'scripts/serve-project-workspace.lisp (trusted review runtime, not the packaged Catalog)',workBreakdownPageObject:routeOne,steps},null,2))
  console.log('PROJECT-WORKSPACE-BROWSER-PASS:\n  '+steps.join('\n  '))
 }catch(e){
  const pages=browser.contexts().flatMap(c=>c.pages());if(pages.length){fs.writeFileSync(path.join(output,'failure.txt'),await pages[0].locator('body').innerText());await pages[0].screenshot({path:path.join(output,'failure.png'),fullPage:true})}

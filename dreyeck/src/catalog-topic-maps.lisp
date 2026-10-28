@@ -2,7 +2,8 @@
 ;;;;
 ;;;; A separate executable for loopback staging; hyperdoc-catalog and its startup are unchanged and never see topic-maps.
 ;;;; Before serving it verifies the snapshot and that every Topic Maps system comes from it, and it refuses the Project
-;;;; Workspace, whose reader is pinned to another Topic Maps lineage (5a4a668), so that it is never loaded against this one.
+;;;; Workspace. Until 2026-10-28 its reader was pinned to another Topic Maps lineage (5a4a668); it is now bound to the packaged commit,
+;;;; but admitting it to this runtime is a separate, tested decision, so the refusal stays.
 ;;;; The refusal is a check of this application's own startup: the Catalog loads exactly one system by choice, the one
 ;;;; HYPERDOC_CATALOG_SYSTEM names, and MAIN looks at that system's definition, and at its dependencies' definitions, before
 ;;;; the Catalog starts. It adds no method to ASDF and replaces none: ASDF's own methods stay ASDF's.
@@ -39,14 +40,14 @@
   "Systems bound to another Topic Maps revision than the snapshot, with their subsystems.")
 (define-condition project-workspace-refused (error)
   ((system :initarg :system :reader refused-system))
-  (:report (lambda (c s) (format s "~A is bound to Topic Maps 5a4a668, not to the packaged ~A; it is not loaded here."
+  (:report (lambda (c s) (format s "~A is the Project Workspace, which this runtime does not admit: it was bound to Topic Maps 5a4a668 and is now bound to ~A, the packaged commit, but its admission is a separate decision (docs/topic-maps-6162ed68-integration); it is not loaded here."
                                  (refused-system c) (subseq +topic-maps-commit+ 0 8)))))
 (defparameter +loader-systems+ '("dreyeck/page-attached-hyperdoc")
   "The system whose function loads, after startup, a system named by a wiki page's attached ASD. The activation button of a
 local FedWiki page reaches it through dreyeck/fedwiki-hyperdoc, and that button is a plain v:thunk, which dreyeck/authority-policy
 does not gate. dreyeck/fedwiki-hyperdoc and the activation button's system depend on it, so refusing it refuses them as well.")
 (define-condition page-attached-loader-refused (project-workspace-refused) ()
-  (:report (lambda (c s) (format s "~A would let a wiki page name a system to load after startup, which could introduce the Project Workspace (bound to Topic Maps 5a4a668, not to the packaged ~A); it is not loaded here."
+  (:report (lambda (c s) (format s "~A would let a wiki page name a system to load after startup, which could introduce the Project Workspace, which this runtime does not admit (bound to ~A, the packaged commit; admission is a separate decision); it is not loaded here."
                                  (refused-system c) (subseq +topic-maps-commit+ 0 8)))))
 (defun %under-p (name roots)
   (some (lambda (root) (or (string= name root) (uiop:string-prefix-p (concatenate 'string root "/") name))) roots))

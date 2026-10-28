@@ -63,7 +63,7 @@
              (refusal (let ((*standard-output* output)) (handler-case (progn (c:verify-startup "dreyeck/work/project") nil) (c:project-workspace-refused (c) c)))))
         (check :startup-refuses-the-project-workspace (typep refusal 'c:project-workspace-refused))
         (check :startup-verified-origins-first (search "Topic Maps snapshot verified without .git" (get-output-stream-string output)))
-        (check :startup-refusal-says-why (search "is bound to Topic Maps 5a4a668" (princ-to-string refusal))))
+        (check :startup-refusal-says-why (search "which this runtime does not admit" (princ-to-string refusal))))
       (check :startup-permits-the-default-catalog (typep (let ((*standard-output* (make-broadcast-stream))) (c:verify-startup "dreyeck/catalog")) 'snap:snapshot-verification))
       (check :startup-permits-the-optional-readings
              (every (lambda (name) (let ((*standard-output* (make-broadcast-stream))) (c:verify-startup name)))

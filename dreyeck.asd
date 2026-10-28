@@ -3353,7 +3353,7 @@
   :version "0.0.1"
   :depends-on ("dreyeck/work/reading" "dreyeck/topicmap" "dreyeck/inspector/topicmap" "dreyeck/inspector/tmdm"
                "topic-maps/ctm" "topic-maps/cxtm" "html-inspector-views" "html-inspector-views/reactive" "lwcells"
-               "plump" "ironclad" "cl-base64")
+               "dreyeck/source-snapshot" "plump" "ironclad" "cl-base64")
   :components ((:module "dreyeck/work/project"
                 :serial t
                 :components ((:file "project-ctm") (:file "project-workspace") (:static-file "hyperdoc-project.ctm")

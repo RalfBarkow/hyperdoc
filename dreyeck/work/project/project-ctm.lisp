@@ -8,6 +8,7 @@
                     (#:ctm #:topic-maps.ctm)
                     (#:cxtm #:topic-maps.cxtm)
                     (#:native #:dreyeck/inspector/topicmap)
+                    (#:snap #:dreyeck/source-snapshot)
                     (#:v #:html-inspector-views))
   (:export #:+base+ #:+document-iri+ #:+project-ctm-file+
            #:read-project-sources #:project-sources #:sources-items #:source-path #:source-sha256 #:source-page
