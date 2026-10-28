@@ -1,0 +1,17 @@
+<html><head><title>Task 1C and Task 1E</title></head><body><in-package>topic-maps-task-1e-review</in-package>
+<h1>Task 1C and Task 1E</h1>
+<p>Both are changes to how Topic Maps chooses the next pair to merge while normalizing a map. Neither changes what is merged or the order of merging.</p>
+<table class="inspector-table">
+<tr><th></th><th>Task 1C, <code>6162ed68</code></th><th>Task 1E, <code>88994c1b</code></th></tr>
+<tr><th>Parent</th><td><code>b2eecffa</code></td><td><code>6162ed68</code> (a direct child; integrated by a fast-forward)</td></tr>
+<tr><th>Change</th><td>Index the search for the next <em>Topic</em> merge.</td><td>Index the search for the next <em>Association</em> merge: <code>next-association-merge</code>, with the unchanged pairwise <code>scan-next-association-merge</code> as fallback.</td></tr>
+<tr><th>Reviewed</th><td>Independently, 2026-10-28: GO.</td><td>Independently, 2026-10-28: <a expr="(record &quot;task1e-independent-review.md&quot;)" view="Record">GO FOR LOCAL TASK 1E COMMIT</a>.</td></tr>
+<tr><th>Commit record</th><td>See the earlier reading <em>Integrating Topic Maps 6162ed68</em>.</td><td><a expr="(record &quot;task1e-commit-record.md&quot;)" view="Record">The commit record</a>: 33 files (3 modified, 30 added), tree <code>b0835676…</code>.</td></tr>
+</table>
+<h2>The code</h2>
+<p>Source of Task 1E, from the loaded Topic Maps (open in the Inspector): <a expr="#'topic-maps.tmdm::next-association-merge" view="Source code">next-association-merge</a> (the indexed search), <a expr="#'topic-maps.tmdm::scan-next-association-merge" view="Source code">scan-next-association-merge</a> (the unchanged pairwise search, the fallback and the oracle) and <a expr="#'topic-maps.tmdm::normalize-associations" view="Source code">normalize-associations</a>, which now asks the first. The earlier Topic search of Task 1C is read in the reading <em>Integrating Topic Maps 6162ed68</em>, a separate book bound to 6162ed68 (not part of this one).</p>
+<h2>What the review of Task 1E found</h2>
+<p>The semantic checks agree with <code>6162ed68</code> and the reviewer's mutants are killed; the review also states what it does not establish: cumulative allocation rises by about 14 to 15 percent (churn, not peak memory), nothing was measured at high Role or Scope arity, and the fast path is not an unconditional speed-up for every graph shape. The review's verdict covers a local commit of those exact bytes; it does not certify deployment, a HyperDoc re-pin, Linux, Stage 2 or a 2 GiB host.</p>
+<h2>A verified correction or a candidate?</h2>
+<p>The change is reviewed and integrated locally. That it makes the Project Workspace read faster is shown on the next pages by measurement on this machine; it is not shown on Linux or on the production host.</p>
+</body></html>

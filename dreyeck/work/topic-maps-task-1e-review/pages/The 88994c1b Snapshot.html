@@ -1,0 +1,11 @@
+<html><head><title>The 88994c1b Snapshot</title></head><body><in-package>topic-maps-task-1e-review</in-package>
+<h1>The 88994c1b Snapshot</h1>
+<p>The packaged runtime does not carry the multi-gigabyte Topic Maps repository. It carries the commit's tree without <code>reports/</code>, made by <code>scripts/topic-maps-snapshot.py</code> and verifiable without <code>.git</code> through the manifest <code>nix/topic-maps-88994c1b.manifest</code> (raw commit object, root tree listing, excluded entries). The previous manifests stay as history.</p>
+<ul>
+<li>2,384 files (every file of the commit except <code>reports/</code>; the 6162ed68 snapshot had 2,354, and Task 1E added 30). Archive 1,062,834 octets.</li>
+<li>Two independent <code>create</code> runs produced byte-identical archive and manifest. <a expr="(record &quot;snapshot-archive-and-manifest.sha256&quot;)" view="Record">The digests.</a></li>
+<li><a expr="(record &quot;snapshot-archive-verification.json&quot;)" view="Record">The independent verification</a> (Git and Nix, not the Lisp verifier): 19 checks, no failure. The Nix hash of the unpacked tree equals the one in <code>nix/topic-maps-source.nix</code>.</li>
+<li><a expr="(record &quot;snapshot-suites.log&quot;)" view="Record">The Lisp verifier, the 22U reading and the CTM review on the added snapshot</a>: 34, 41 and 58 assertions pass, with the expected source kind stated by the caller. The same suites were 34, 41 and 58 at 6162ed68.</li>
+<li>The archive was added to the <em>local</em> Nix store from the local archive. It is not published at the URL in <code>nix/topic-maps-source.nix</code>; that URL is the intended release location.</li>
+</ul>
+</body></html>

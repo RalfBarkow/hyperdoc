@@ -1,0 +1,30 @@
+Suites and same-bytes controls, 2026-10-28, x86_64-darwin, Nix SBCL 2.4.10, fresh process each, run one after another.
+Load averages are those printed when each run started; this machine was shared and busy (9 to 60).
+
+## Snapshot suites (Topic Maps root: verified /nix/store snapshot of 88994c1b)
+ASDF-ORIGIN topic-maps /nix/store/kna6395gl32f2hl4n3ha4776zm9r0sgb-source/
+SOURCE-SNAPSHOT-PASS: 34 assertions; /nix/store/kna6395gl32f2hl4n3ha4776zm9r0sgb-source/ verified as Topic Maps 88994c1b without .git; every alteration refused.
+TOPIC-MAPS-22U-INSPECTOR-PASS: 41 assertions; project and disposition reached through native Role/Association references.
+TOPIC-MAPS-CTM-REVIEW-PASS: 58 assertions; scheme-plus refuted by the reader's own condition, its control read, proposed claims unexecuted.
+
+## Project suite, re-pinned tree, ORIGINAL CTM (Topic Maps: clean Git checkout at 88994c1b)
+PROJECT-CTM-SOURCE-PASS: 265 checks; no CTM read-back (not semantically validated)
+PROJECT-CTM-READBACK-PASS: 186 checks; complete CTM read with topic-maps 88994c1 in 10.9s with the model
+PROJECT-CTM-ACCEPTANCE-PASS: 125 checks; no acceptance recorded in the project CTM; revisions, evidence entries, supersession, withdrawal and conflict shown on synthetic fixtures
+
+## Project suite, disposable copy holding the Stage 1 tree + re-pin (threshold at project-ctm.lisp:509 unchanged: (< seconds 90))
+PROJECT-CTM-SOURCE-PASS: 345 checks; no CTM read-back (not semantically validated)
+PROJECT-CTM-READBACK-PASS: 224 checks; complete CTM read with topic-maps 88994c1 in 19.4s with the model
+PROJECT-CTM-ACCEPTANCE-PASS: 125 checks; no acceptance recorded in the project CTM; revisions, evidence entries, supersession, withdrawal and conflict shown on synthetic fixtures
+PROJECT-CTM-SCOPE-PASS: 196 checks; the scope is proposed, not declared; derived from the page text; nothing written
+
+## Catalog suite (dreyeck/catalog-topic-maps/tests) from a development tree: NOT A RESULT
+ASDF-ORIGIN topic-maps /nix/store/kna6395gl32f2hl4n3ha4776zm9r0sgb-source/
+  Topic Maps Catalog check failed: HYPERDOC-FROM-A-STORE-SOURCE
+The test requires HyperDoc to load from a /nix/store source (HYPERDOC-FROM-A-STORE-SOURCE): it belongs to the packaged Nix check, which was not run.
+
+## Same-bytes control: Stage 1 CTM (fe2955e9...), integration script, read-and-model of the Workspace, sequential
+- Topic Maps 6162ed68, clean Git checkout (control): PIN-NOT-OK PROJECT-WORKSPACE wall=82.326 digest=fe2 user=177.49s peakRSS=465506304
+- Topic Maps 88994c1b, clean Git checkout: PIN-OK PROJECT-WORKSPACE wall=23.733 digest=fe2 user=71.32s peakRSS=510537728
+- earlier control, load above 60: 85.8 s (6162ed68; d2). Earlier 88994c1b runs on the same bytes: 20.9 s, 23.8 s (Git checkout), 32.3 s (snapshot), 19.4 s (project-suite read-back).
+- The script's 90-second line reads YES for the 6162ed68 control here (82.3 s); the project suite's own read-back on 6162ed68 reported 116.4 s (threshold relaxed in a scratch copy) and failed the unrelaxed check earlier. The two measurements are not the same code path; the ratio, not the line, is the comparison.
