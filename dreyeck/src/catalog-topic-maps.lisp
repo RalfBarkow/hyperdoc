@@ -19,7 +19,7 @@
            #:refused-system-p #:loader-system-p))
 (in-package #:dreyeck/catalog-topic-maps)
 
-(defparameter +topic-maps-commit+ "b2eecffa05de4fce41c10ae1ada9ae11a0c6e7dc"
+(defparameter +topic-maps-commit+ "6162ed68c94ea4796b8cf2282edd347d9607b08c"
   "The commit of the packaged snapshot; the 22U reading and the CTM review pin the same one.")
 (defparameter +topic-maps-systems+ '("topic-maps" "topic-maps/tmdm" "topic-maps/ctm" "topic-maps/cxtm" "topic-maps/project-work-example"))
 

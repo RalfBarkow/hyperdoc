@@ -190,17 +190,61 @@ first that exists is read; the other stays as the historical record of what the 
 (defun file-named (path)
   (or (find path (candidate-files (the-candidate)) :key #'file-path :test #'string=) (error "~A is not a candidate file." path)))
 
-(defun git-changed-paths ()
-  "The paths the working tree changes against the base, committed or not, intent-to-add included; then the untracked ones."
-  (values (sort (remove-if #'review-reading-path-p (git-lines "diff" "--name-only" +base-commit+)) #'string<)
+(defparameter +reviewed-head+ "8e64e7189daf1c5615cbc8bbe40cff3bf2bcd1aa"
+  "The commit at which the candidate is complete: between the base and it Git changes exactly the declared paths, and every tested file
+has the bytes the tests ran on. The contract below is bound to this commit, not to the working tree. Later work cannot change what
+this reading reviewed, and cannot pass as it: a protected file changed since then is reported, and unless a named successor changed
+it (+SUCCESSOR-CHANGES+) the contract fails.")
+
+(defparameter +successor-changes+
+  '(("dreyeck.asd" . "Topic Maps 6162ed68 integration: the 6162ed68 manifest as a static file and the Project Workspace's dependency on the verifier")
+    ("nix/topic-maps-source.nix" . "Topic Maps 6162ed68 integration: the pinned archive is now 6162ed68's")
+    ("dreyeck/src/catalog-topic-maps.lisp" . "Topic Maps 6162ed68 integration: the packaged commit, and the guard's message")
+    ("dreyeck/work/topic-maps-project-example.lisp" . "Topic Maps 6162ed68 integration: the pinned revision")
+    ("dreyeck/tests/source-snapshot.lisp" . "Topic Maps 6162ed68 integration: the commit and the file count of the snapshot")
+    ("dreyeck/tests/catalog-topic-maps.lisp" . "Topic Maps 6162ed68 integration: the guard's new wording")
+    ("tests/test_catalog_topic_maps_executable.py" . "Topic Maps 6162ed68 integration: the guard's new wording"))
+  "The protected paths changed after +REVIEWED-HEAD+ by a named successor, each with its reason. A protected path changed for any other
+reason is unexpected drift. The list is not a way to accept arbitrary files: it names paths of the declaration only, and each entry
+is a decision of a later, documented change (docs/topic-maps-6162ed68-integration).")
+
+(defun git-changed-paths (&optional (revision +reviewed-head+))
+  "The paths Git changes between the base and REVISION, less this reading's own files; then, from the working tree, the untracked ones."
+  (values (sort (remove-if #'review-reading-path-p (git-lines "diff" "--name-only" +base-commit+ revision)) #'string<)
           (sort (git-lines "ls-files" "--others" "--exclude-standard") #'string<)))
 (defun review-reading-paths () (remove-if-not #'review-reading-path-p (nth-value 1 (git-changed-paths))))
-(defun declared-paths-agree-p ()
-  "Whether the paths Git sees changed against the base, committed or intent-to-add, are exactly the declared candidate; :UNKNOWN
-without Git. Untracked files are outside the candidate by construction: its new files are intent-to-add."
+(defun declared-paths-agree-p (&key (revision +reviewed-head+) (changed nil changed-p) (declared (mapcar #'first +candidate-paths+)))
+  "Whether the paths Git changes between the base and REVISION (the reviewed head) are exactly the declared candidate; :UNKNOWN
+without Git. CHANGED and DECLARED stand in for Git's answer and the declaration, so that a test can show an extra, or a missing,
+path is detected."
   (if (git-available-p)
-      (equal (git-changed-paths) (sort (mapcar #'first +candidate-paths+) #'string<))
+      (equal (sort (copy-list (if changed-p changed (git-changed-paths revision))) #'string<) (sort (copy-list declared) #'string<))
       :unknown))
+
+(defun blob-sha256-at (revision path)
+  "The SHA-256 of PATH's bytes at REVISION, from Git's object, or NIL."
+  (multiple-value-bind (out err code)
+      (uiop:run-program (list "git" "-C" (sb-ext:native-namestring (hyperdoc-root)) "cat-file" "blob" (format nil "~A:~A" revision path))
+                        :output :string :external-format :latin-1 :ignore-error-status t :error-output nil)
+    (declare (ignore err))
+    (and out (eql code 0) (sha256-hex (map '(vector (unsigned-byte 8)) #'char-code out)))))
+(defun tested-files-match-at-p (&key (revision +reviewed-head+) (blob-sha256 #'blob-sha256-at))
+  "Whether every program and test file of the candidate has, at REVISION, the SHA-256 recorded when the tests ran. BLOB-SHA256 stands
+in for Git's answer so that a test can show an altered file is detected."
+  (every (lambda (entry) (equal (cdr entry) (funcall blob-sha256 revision (car entry)))) (tested-digests)))
+(defun protected-paths-drift (&optional (revision +reviewed-head+))
+  "The declared paths whose bytes in the working tree are not those of REVISION (or that are missing from either)."
+  (let ((table (cached-git (list :tree revision) (lambda () (tree-blobs revision)))))
+    (sort (loop for (path) in +candidate-paths+
+                for pathname = (root-path path)
+                for now = (and (probe-file pathname) (snap:git-object-id "blob" (octets-of pathname)))
+                unless (equal now (gethash path table)) collect path)
+          #'string<)))
+(defun unexpected-drift (&key (drift (protected-paths-drift)) (allowed (mapcar #'car +successor-changes+)))
+  "The drifted protected paths no named successor accounts for."
+  (set-difference drift allowed :test #'string=))
+(defun reviewed-head-reachable-p ()
+  (multiple-value-bind (out err code) (git-values "merge-base" "--is-ancestor" +reviewed-head+ "HEAD") (declare (ignore out err)) (eql code 0)))
 
 ;;; Excerpts: a definition as it stands in a file now
 
@@ -273,9 +317,11 @@ without Git. Untracked files are outside the candidate by construction: its new 
                                  "(asdf:defsystem \"topic-maps/ctm\"" "(:file \"src/ctm/resources\")))")
              (hyperdoc-excerpt "main:host" "scripts/catalog-topic-maps-main.lisp: loopback before loading"
                                "scripts/catalog-topic-maps-main.lisp" ";; Loopback only" "(uiop:quit 2))))")
-             (hyperdoc-excerpt "workspace:pin" "dreyeck/work/project/project-workspace.lisp: the Project Workspace's pin"
-                               "dreyeck/work/project/project-workspace.lisp" "(defparameter +topic-maps-revision+"
-                               "not in practical time.\")")
+             ;; Historical: the reviewed candidate bound the Workspace to 5a4a668. Since the Topic Maps 6162ed68 integration the file binds it
+             ;; to 6162ed68 (docs/topic-maps-6162ed68-integration); this reading keeps the lines it reviewed, extracted from commit 8e64e718.
+             (historical-excerpt "workspace:pin" "The Project Workspace's pin as the reviewed candidate held it (commit 8e64e718; historical)"
+                                 "project-workspace-pin-at-8e64e718.lisp" "(defparameter +topic-maps-revision+"
+                                 "not in practical time.\")")
              (historical-excerpt "startup:guard-methods" "The first guard's two ASDF methods, as the candidate's file held them (historical)"
                                  "catalog-topic-maps-before-correction.lisp" "(defvar *guard* nil)"
                                  "(error 'project-workspace-refused :system (asdf:component-name (asdf:component-system component)))))")
@@ -312,8 +358,12 @@ without Git. Untracked files are outside the candidate by construction: its new 
                             +base-commit+ (or (git-line "rev-parse" "HEAD") "not available without .git") c:+topic-maps-commit+)))
          (:p (:strong (v:esc (case (declared-paths-agree-p)
                                 (:unknown (format nil "This source has no .git, so Git cannot say which paths differ from the base. The declaration names ~D paths." (length +candidate-paths+)))
-                                ((nil) (format nil "Git disagrees with the declaration: the paths that differ from the base are not these ~D." (length +candidate-paths+)))
-                                (t (format nil "Git agrees with the declaration: these ~D paths, and no others, differ from the base." (length +candidate-paths+)))))))
+                                ((nil) (format nil "Git disagrees with the declaration: the paths that differ from the base at the reviewed head ~A are not these ~D." (subseq +reviewed-head+ 0 8) (length +candidate-paths+)))
+                                (t (format nil "Git agrees with the declaration at the reviewed head ~A: these ~D paths, and no others, differ from the base." (subseq +reviewed-head+ 0 8) (length +candidate-paths+)))))))
+         (when (git-available-p)
+           (let ((drift (protected-paths-drift)))
+             (v:html (:p (v:esc (format nil "Protected files whose working-tree bytes are no longer the reviewed head's: ~D~@[ (~{~A~^, ~})~]. Each is accounted for by a named successor change (Topic Maps 6162ed68 integration) unless it is listed here as unexpected: ~:[none~;~:*~{~A~^, ~}~]."
+                                              (length drift) drift (unexpected-drift :drift drift)))))))
          (:p (v:esc "Observed when this view is shown: each file's SHA-256 now, whether HEAD holds those bytes, and, for program and test files, whether they are the bytes the tests ran on."))
          (:table :class "inspector-table"
           (:tr (:th "File") (:th "Responsibility") (:th "State now") (:th "As tested"))

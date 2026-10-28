@@ -9,7 +9,7 @@
   :depends-on ("topic-maps-deployment-review" "sb-introspect")
   :components ((:file "collision")
                (:static-file "probe-asdf-method-collision.lisp")
-               (:module "evidence" :components ((:static-file "baseline.sexp") (:static-file "with-guard.sexp")
+               (:module "evidence" :components ((:static-file "project-workspace-pin-at-8e64e718.lisp") (:static-file "baseline.sexp") (:static-file "with-guard.sexp")
                                        (:static-file "catalog-topic-maps-before-correction.lisp"))))
   :in-order-to ((asdf:test-op (asdf:test-op "topic-maps-deployment-review-asdf-collision/tests"))))
 

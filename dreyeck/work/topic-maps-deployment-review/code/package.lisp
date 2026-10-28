@@ -8,7 +8,7 @@
                     (#:ap #:dreyeck/authority-policy) (#:ex #:dreyeck/work/topic-maps-project-example))
   (:export #:+book-id+ #:+base-commit+ #:+candidate-paths+ #:review-page
            #:candidate #:the-candidate #:candidate-files #:candidate-file #:file-named #:file-path #:file-kind
-           #:file-sha256-now #:file-tested-sha256 #:file-state #:file-matches-tested-p #:declared-paths-agree-p
+           #:file-sha256-now #:file-tested-sha256 #:file-state #:file-matches-tested-p #:declared-paths-agree-p #:+reviewed-head+
            #:review-reading-paths
            #:source-excerpt #:excerpt #:excerpt-key #:excerpt-text #:excerpts
            #:recorded-evidence #:evidence #:evidence-file #:evidence-kind #:evidence-outcomes #:all-evidence

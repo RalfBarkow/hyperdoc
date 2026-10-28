@@ -52,9 +52,34 @@
     (flet ((topic-object (id) (tm:topicmap-topic-object-of (tm:topicmap-projection-topic-by-id projection id))))
       ;; The candidate: Git agrees with the declaration, every tested file is as tested, and nothing is called committed
       ;; that HEAD does not hold.
-      (check :declared-paths-agree (if (r::git-available-p) (eq t (r:declared-paths-agree-p)) (eq :unknown (r:declared-paths-agree-p))))
-      (check :tested-files-as-tested
-             (every #'r:file-matches-tested-p (remove-if-not #'r:file-tested-sha256 (r:candidate-files (r:the-candidate)))))
+      ;; The historical contract is bound to the commit at which the candidate is complete, not to the working tree: Git changes exactly
+      ;; the declared paths there, every tested file has the bytes the tests ran on, and later work may change protected files only
+      ;; where a named successor did. Each clause has a control that shows an unexpected change is still detected.
+      (let ((git (r::git-available-p)))
+        (check :reviewed-head-is-an-ancestor-of-head (if git (r::reviewed-head-reachable-p) t))
+        (check :declared-paths-agree-at-the-reviewed-head (if git (eq t (r:declared-paths-agree-p)) (eq :unknown (r:declared-paths-agree-p))))
+        (check :tested-files-as-tested-at-the-reviewed-head (if git (r::tested-files-match-at-p) t))
+        (check :protected-drift-is-only-the-named-successor-changes (if git (null (r::unexpected-drift)) t))
+        (when git
+          (let ((real (r::git-changed-paths)) (declared (mapcar #'first r::+candidate-paths+)))
+            (check :negative-an-extra-changed-path-is-detected (null (r:declared-paths-agree-p :changed (cons "scripts/unexpected.lisp" real))))
+            (check :negative-a-missing-changed-path-is-detected (null (r:declared-paths-agree-p :changed (rest real))))
+            (check :negative-an-undeclared-path-is-detected (null (r:declared-paths-agree-p :declared (cons "scripts/unexpected.lisp" declared))))
+            (check :control-the-unaltered-answers-agree (eq t (r:declared-paths-agree-p :changed real :declared declared))))
+          (check :negative-an-altered-tested-file-is-detected
+                 (null (r::tested-files-match-at-p :blob-sha256 (lambda (revision path)
+                                                                 (if (string= path "dreyeck.asd") (make-string 64 :initial-element #\0) (r::blob-sha256-at revision path))))))
+          (check :control-the-unaltered-tested-files-match-through-the-same-function
+                 (r::tested-files-match-at-p :blob-sha256 #'r::blob-sha256-at))
+          (check :negative-an-unlisted-protected-file-changed-is-unexpected-drift
+                 (equal '("dreyeck/src/source-snapshot.lisp") (r::unexpected-drift :drift (cons "dreyeck/src/source-snapshot.lisp" (r::protected-paths-drift)))))
+          (check :negative-with-no-allowance-every-integration-change-is-reported
+                 (and (r::protected-paths-drift) (equal (r::protected-paths-drift) (sort (copy-list (r::unexpected-drift :allowed nil)) #'string<))))
+          (check :every-named-successor-change-is-a-declared-path
+                 (every (lambda (entry) (member (car entry) r::+candidate-paths+ :key #'first :test #'string=)) r::+successor-changes+))))
+      (check :tested-digests-are-still-recorded-for-the-working-tree-view
+             (every (lambda (f) (or (r:file-matches-tested-p f) (member (r:file-path f) (mapcar #'car r::+successor-changes+) :test #'string=)))
+                    (remove-if-not #'r:file-tested-sha256 (r:candidate-files (r:the-candidate)))))
       (check :every-tested-digest-is-a-candidate-file (= (length (r::tested-digests)) (count-if #'r:file-tested-sha256 (r:candidate-files (r:the-candidate)))))
       (check :states-are-what-git-says
              (every (lambda (f) (member (r:file-state f) (cond ((not (r::git-available-p)) '(:no-git))

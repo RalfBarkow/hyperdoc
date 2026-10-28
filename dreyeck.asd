@@ -3421,7 +3421,8 @@
   :description "Verify a /nix/store snapshot of a pinned Git commit without .git, from a manifest committed in HyperDoc"
   :depends-on ("ironclad" "sb-posix" "html-inspector-views" "uiop")
   :components ((:file "dreyeck/src/source-snapshot")
-               (:static-file "topic-maps-b2eecffa.manifest" :pathname "nix/topic-maps-b2eecffa.manifest"))
+               (:static-file "topic-maps-b2eecffa.manifest" :pathname "nix/topic-maps-b2eecffa.manifest") ; history: the previous pin
+               (:static-file "topic-maps-6162ed68.manifest" :pathname "nix/topic-maps-6162ed68.manifest"))
   :in-order-to ((test-op (test-op "dreyeck/source-snapshot/tests"))))
 
 (defsystem "dreyeck/source-snapshot/tests"
