@@ -1,0 +1,458 @@
+diff --git a/dreyeck.asd b/dreyeck.asd
+index 71cb0d0c..ce3dda28 100644
+--- a/dreyeck.asd
++++ b/dreyeck.asd
+@@ -3363,7 +3363,9 @@
+                 :components ((:static-file "HyperDoc Project Workspace.html") (:static-file "Implementation Assignments.html")
+                              ;; Drafts: pages of the HyperBook, not sources of the project CTM until the user decides.
+                              (:static-file "Project Work Exchange WBS Dictionary.html") (:static-file "Acceptance Records.html")
+-                             (:static-file "Regular Catalog WBS Dictionary.html"))))
++                             (:static-file "Regular Catalog WBS Dictionary.html")
++                             ;; A presentation page, not a source: the carrier the proposals of Zettel 11359 name.
++                             (:static-file "Regular HyperDoc Catalog Scope Proposal.html"))))
+   :in-order-to ((test-op (test-op "dreyeck/work/project/tests"))))
+ 
+ (defsystem "dreyeck/work/project/tests"
+diff --git a/dreyeck/pages/project/HyperDoc Project Workspace.html b/dreyeck/pages/project/HyperDoc Project Workspace.html
+index 68d17f69..95e660cf 100644
+--- a/dreyeck/pages/project/HyperDoc Project Workspace.html	
++++ b/dreyeck/pages/project/HyperDoc Project Workspace.html	
+@@ -1,6 +1,7 @@
+ <h1>HyperDoc Project Workspace</h1>
+ <p>HyperDoc's declared project work as one Topic Map. The Work declarations of the <a page="Work Breakdown" hyperbook="dreyeck/work/reading">Work Breakdown</a>, the WBS, plan steps and preconditions of <a page="Authoring the CTM Plan Page" hyperbook="dreyeck/work/reading">Authoring the CTM Plan Page</a>, the entries of the <a page="CTM Plan Page WBS Dictionary" hyperbook="dreyeck/work/reading">CTM Plan Page WBS Dictionary</a> and the assignments and proposals of <a page="Implementation Assignments">Implementation Assignments</a> are written as a CTM document, read back with the topic-maps reader, and drawn with the native Topicmap renderer.</p>
+ <p><a expr="(dreyeck/work/project:project-workspace)" view="Project">Open the HyperDoc Project Workspace</a>: the project and its Work Areas, the Work Items, the assignments, the proposals and the gaps, each a way into the Workspace. In the Workspace, the Point panel names where the Topic at Point is declared, links that declaration in its page source, and lists its Associations. Following an Association moves the Point; History keeps where it was.</p>
++<p>The proposed scope of Zettel 11359 is presented on <a page="Regular HyperDoc Catalog Scope Proposal">Regular HyperDoc Catalog Scope Proposal</a>: its Work Item, Deliverable, work packages, plan steps and preconditions, linked to where they are proposed. That page is not a source and declares nothing.</p>
+ <p><a expr="(dreyeck/work/project:project-ctm-document)" view="CTM document">The project CTM document</a>: its octets, their SHA-256, what the topic-maps reader made of them, and the download of exactly those octets.</p>
+ 
+ <h2>Authority</h2>
+diff --git a/dreyeck/pages/project/Implementation Assignments.html b/dreyeck/pages/project/Implementation Assignments.html
+index 7711f1df..367e000d 100644
+--- a/dreyeck/pages/project/Implementation Assignments.html	
++++ b/dreyeck/pages/project/Implementation Assignments.html	
+@@ -28,19 +28,19 @@
+ </ul>
+ 
+ <h2>Proposed Work: Regular HyperDoc Catalog with a Navigable Project Topic Map</h2>
+-<p>The Work Item, the Deliverable, the work packages and the plan of Zettel 11359. None of them is declared, and none has a work status. The work packages are described by the draft <code>Regular Catalog WBS Dictionary</code>, which declares nothing either. This scope is distinct from <code>tmd-deployment</code>, the separate staging Catalog, and from <code>project-work-ctm-exchange</code>, the exchangeable project CTM; it repeats no deliverable of either.</p>
++<p>The Work Item, the Deliverable, the work packages and the plan of Zettel 11359. None of them is declared, and none has a work status. The work packages are described by the draft <code>Regular Catalog WBS Dictionary</code>, which declares nothing either. This scope is distinct from <code>tmd-deployment</code>, the separate staging Catalog, and from <code>project-work-ctm-exchange</code>, the exchangeable project CTM; it repeats no deliverable of either. The links of these proposals name the page <a page="Regular HyperDoc Catalog Scope Proposal">Regular HyperDoc Catalog Scope Proposal</a> as their carrier: it presents the scope and links to it and declares nothing, while the proposals are written, and stay authoritative, on this page.</p>
+ <p>Completeness: the six elements together are the whole defined scope. A Topic Maps revision whose identity can be checked (1), a Project Workspace that reads the unchanged project CTM with it (2), project work a reader can navigate and inspect in that Workspace (3), a public Inspector that is safe to expose (4), the regular Catalog package built reproducibly (5) and its verified deployment (6). What the scope needs and does not deliver are preconditions of the plan below: the user's admission of the Project Workspace to a served runtime, an independent security review, the decision to publish the archive and the approval of the production activation. Project management is not an element: this scope proposal and the integration review deliver no package.</p>
+ <p>Overlap: 1 and 5 meet at the snapshot: 1 makes the revision and its manifest verifiable, 5 builds the package that serves it. 2 and 3 both concern the Project Workspace: 2 that it reads the unchanged project CTM with the revision and refuses what it cannot identify, 3 what the project work shows and how it is navigated, including the reading of the integration. 4 and 6 meet at exposure: 4 makes the views safe, 6 activates them. Package 5 builds the same regular Catalog on which the separate staging package of <code>tmd-deployment</code> was modelled; it neither changes that package nor its running service.</p>
+ <p>Gap: no Relation Contract relates a Work Item to a Deliverable, so none is proposed; the Deliverable <code>tm-regular-catalog</code> decomposes into the six packages and is related to its Work Item only by this text (see pwc-wp-3).</p>
+ <ul>
+-<li><a page="HyperDoc Project Workspace" hyperbook="dreyeck/work/project" data-proposed-topic="topic-maps-regular-hyperdoc" data-kind="work item">Regular HyperDoc Catalog with a Navigable Project Topic Map</a> — the regular HyperDoc Catalog, built on a reviewed Topic Maps revision, in which the project's work is itself a Topic Map that a reader can navigate and inspect.</li>
+-<li><a page="HyperDoc Project Workspace" hyperbook="dreyeck/work/project" data-proposed-topic="tm-regular-catalog" data-kind="deliverable">Regular HyperDoc Catalog with a Navigable Project Topic Map</a> — the defined scope: the integrated Topic Maps revision, the compatible Project Workspace, the inspectable project work, the safe public Inspector, the reproducible package and its verified deployment.</li>
+-<li><a page="HyperDoc Project Workspace" hyperbook="dreyeck/work/project" data-proposed-topic="tm-reg-wp-1" data-kind="work package">1 Integrated Topic Maps Revision</a> — the reviewed commit 6162ed68, its snapshot, manifest and pin, with the identity that HyperDoc checks.</li>
+-<li><a page="HyperDoc Project Workspace" hyperbook="dreyeck/work/project" data-proposed-topic="tm-reg-wp-2" data-kind="work package">2 Compatible Project Workspace</a> — the Project Workspace bound to that revision, reading the unchanged project CTM, telling a checkout, a verified snapshot and an unidentifiable directory apart.</li>
+-<li><a page="HyperDoc Project Workspace" hyperbook="dreyeck/work/project" data-proposed-topic="tm-reg-wp-3" data-kind="work package">3 Inspectable Project Work</a> — the project work navigable in the Workspace and the Inspector from a Work Item to its packages, assignments, evidence and source commits.</li>
+-<li><a page="HyperDoc Project Workspace" hyperbook="dreyeck/work/project" data-proposed-topic="tm-reg-wp-4" data-kind="work package">4 Safe Public Inspector</a> — every public view read-only; no view or button runs code, writes or discloses a host path; an independent security review.</li>
+-<li><a page="HyperDoc Project Workspace" hyperbook="dreyeck/work/project" data-proposed-topic="tm-reg-wp-5" data-kind="work package">5 Reproducible Catalog Package</a> — the regular Catalog package built and checked for Linux and Darwin with the verified snapshot.</li>
+-<li><a page="HyperDoc Project Workspace" hyperbook="dreyeck/work/project" data-proposed-topic="tm-reg-wp-6" data-kind="work package">6 Verified Production Deployment</a> — the package staged, verified, approved and activated on dreyeck.ch, with a rollback shown.</li>
++<li><a page="Regular HyperDoc Catalog Scope Proposal" hyperbook="dreyeck/work/project" data-proposed-topic="topic-maps-regular-hyperdoc" data-kind="work item">Regular HyperDoc Catalog with a Navigable Project Topic Map</a> — the regular HyperDoc Catalog, built on a reviewed Topic Maps revision, in which the project's work is itself a Topic Map that a reader can navigate and inspect.</li>
++<li><a page="Regular HyperDoc Catalog Scope Proposal" hyperbook="dreyeck/work/project" data-proposed-topic="tm-regular-catalog" data-kind="deliverable">Regular HyperDoc Catalog with a Navigable Project Topic Map</a> — the defined scope: the integrated Topic Maps revision, the compatible Project Workspace, the inspectable project work, the safe public Inspector, the reproducible package and its verified deployment.</li>
++<li><a page="Regular HyperDoc Catalog Scope Proposal" hyperbook="dreyeck/work/project" data-proposed-topic="tm-reg-wp-1" data-kind="work package">1 Integrated Topic Maps Revision</a> — the reviewed Topic Maps revision 88994c1b (Task 1C, commit 6162ed68, and Task 1E), its snapshot, manifest and pin, with the identity that HyperDoc checks.</li>
++<li><a page="Regular HyperDoc Catalog Scope Proposal" hyperbook="dreyeck/work/project" data-proposed-topic="tm-reg-wp-2" data-kind="work package">2 Compatible Project Workspace</a> — the Project Workspace bound to that revision, reading the unchanged project CTM, telling a checkout, a verified snapshot and an unidentifiable directory apart.</li>
++<li><a page="Regular HyperDoc Catalog Scope Proposal" hyperbook="dreyeck/work/project" data-proposed-topic="tm-reg-wp-3" data-kind="work package">3 Inspectable Project Work</a> — the project work navigable in the Workspace and the Inspector from a Work Item to its packages, assignments, evidence and source commits.</li>
++<li><a page="Regular HyperDoc Catalog Scope Proposal" hyperbook="dreyeck/work/project" data-proposed-topic="tm-reg-wp-4" data-kind="work package">4 Safe Public Inspector</a> — every public view read-only; no view or button runs code, writes or discloses a host path; an independent security review.</li>
++<li><a page="Regular HyperDoc Catalog Scope Proposal" hyperbook="dreyeck/work/project" data-proposed-topic="tm-reg-wp-5" data-kind="work package">5 Reproducible Catalog Package</a> — the regular Catalog package built and checked for Linux and Darwin with the verified snapshot.</li>
++<li><a page="Regular HyperDoc Catalog Scope Proposal" hyperbook="dreyeck/work/project" data-proposed-topic="tm-reg-wp-6" data-kind="work package">6 Verified Production Deployment</a> — the package staged, verified, approved and activated on dreyeck.ch, with a rollback shown.</li>
+ </ul>
+ <ul>
+ <li data-proposed-from="tm-regular-catalog" data-proposed-relation="work:relation/decomposes-into" data-proposed-to="tm-reg-wp-1">Regular Catalog → 1 Integrated Topic Maps Revision: decomposes into.</li>
+@@ -54,16 +54,16 @@
+ <h3>Proposed plan: Regular HyperDoc Catalog</h3>
+ <p>Plan steps, each for one work package, and the preconditions the steps wait on. A plan step is work to do, not a deliverable; a precondition is something the scope needs and does not deliver. No plan step or precondition grants authority. The four preconditions are an addition to the six steps of Zettel 11359 and are put to the user for review.</p>
+ <ul>
+-<li><a page="HyperDoc Project Workspace" hyperbook="dreyeck/work/project" data-proposed-topic="tm-reg-p1" data-kind="plan step">Integrate and verify Topic Maps 6162ed68</a> — fast-forward the Topic Maps line, pin the snapshot, verify it without .git and run the Topic Maps suite.</li>
+-<li><a page="HyperDoc Project Workspace" hyperbook="dreyeck/work/project" data-proposed-topic="tm-reg-p2" data-kind="plan step">Verify the unchanged project CTM</a> — read it with the revision, within the operational limit, and compare the signature and the CXTM.</li>
+-<li><a page="HyperDoc Project Workspace" hyperbook="dreyeck/work/project" data-proposed-topic="tm-reg-p3" data-kind="plan step">Integrate Project Workspace and Inspector navigation</a> — the project work navigable from the Work Item to its evidence, and the reading of the integration.</li>
+-<li><a page="HyperDoc Project Workspace" hyperbook="dreyeck/work/project" data-proposed-topic="tm-reg-p4" data-kind="plan step">Verify and enforce public Inspector security</a> — read-only public views, gated run buttons, an independent review.</li>
+-<li><a page="HyperDoc Project Workspace" hyperbook="dreyeck/work/project" data-proposed-topic="tm-reg-p5" data-kind="plan step">Build and test the regular Linux and Nix Catalog package</a> — on an independent builder, with the derivation compared.</li>
+-<li><a page="HyperDoc Project Workspace" hyperbook="dreyeck/work/project" data-proposed-topic="tm-reg-p6" data-kind="plan step">Stage, verify, obtain production approval and deploy</a> — activate the generation, verify identity and boundaries, show the rollback.</li>
+-<li><a page="HyperDoc Project Workspace" hyperbook="dreyeck/work/project" data-proposed-topic="tm-reg-pre-admission" data-kind="precondition">Admission of the Project Workspace to a served runtime</a> — the user's decision; the Catalog's startup guard refuses the Workspace until it is made.</li>
+-<li><a page="HyperDoc Project Workspace" hyperbook="dreyeck/work/project" data-proposed-topic="tm-reg-pre-security-review" data-kind="precondition">Independent security review of the public Inspector</a> — a report by a reviewer who is not the executor.</li>
+-<li><a page="HyperDoc Project Workspace" hyperbook="dreyeck/work/project" data-proposed-topic="tm-reg-pre-publish" data-kind="precondition">Decision to publish or transfer the archive</a> — the user's; a builder must be able to obtain the Topic Maps snapshot.</li>
+-<li><a page="HyperDoc Project Workspace" hyperbook="dreyeck/work/project" data-proposed-topic="tm-reg-pre-production" data-kind="precondition">Approval of the production activation</a> — the user's, for the generation on dreyeck.ch, with the operator's record of the server's state.</li>
++<li><a page="Regular HyperDoc Catalog Scope Proposal" hyperbook="dreyeck/work/project" data-proposed-topic="tm-reg-p1" data-kind="plan step">Integrate and verify Topic Maps 88994c1b</a> — fast-forward the Topic Maps line, pin the snapshot, verify it without .git and run the Topic Maps suite.</li>
++<li><a page="Regular HyperDoc Catalog Scope Proposal" hyperbook="dreyeck/work/project" data-proposed-topic="tm-reg-p2" data-kind="plan step">Verify the unchanged project CTM</a> — read it with the revision, within the operational limit, and compare the signature and the CXTM.</li>
++<li><a page="Regular HyperDoc Catalog Scope Proposal" hyperbook="dreyeck/work/project" data-proposed-topic="tm-reg-p3" data-kind="plan step">Integrate Project Workspace and Inspector navigation</a> — the project work navigable from the Work Item to its evidence, and the reading of the integration.</li>
++<li><a page="Regular HyperDoc Catalog Scope Proposal" hyperbook="dreyeck/work/project" data-proposed-topic="tm-reg-p4" data-kind="plan step">Verify and enforce public Inspector security</a> — read-only public views, gated run buttons, an independent review.</li>
++<li><a page="Regular HyperDoc Catalog Scope Proposal" hyperbook="dreyeck/work/project" data-proposed-topic="tm-reg-p5" data-kind="plan step">Build and test the regular Linux and Nix Catalog package</a> — on an independent builder, with the derivation compared.</li>
++<li><a page="Regular HyperDoc Catalog Scope Proposal" hyperbook="dreyeck/work/project" data-proposed-topic="tm-reg-p6" data-kind="plan step">Stage, verify, obtain production approval and deploy</a> — activate the generation, verify identity and boundaries, show the rollback.</li>
++<li><a page="Regular HyperDoc Catalog Scope Proposal" hyperbook="dreyeck/work/project" data-proposed-topic="tm-reg-pre-admission" data-kind="precondition">Admission of the Project Workspace to a served runtime</a> — the user's decision; the Catalog's startup guard refuses the Workspace until it is made.</li>
++<li><a page="Regular HyperDoc Catalog Scope Proposal" hyperbook="dreyeck/work/project" data-proposed-topic="tm-reg-pre-security-review" data-kind="precondition">Independent security review of the public Inspector</a> — a report by a reviewer who is not the executor.</li>
++<li><a page="Regular HyperDoc Catalog Scope Proposal" hyperbook="dreyeck/work/project" data-proposed-topic="tm-reg-pre-publish" data-kind="precondition">Decision to publish or transfer the archive</a> — the user's; a builder must be able to obtain the Topic Maps snapshot.</li>
++<li><a page="Regular HyperDoc Catalog Scope Proposal" hyperbook="dreyeck/work/project" data-proposed-topic="tm-reg-pre-production" data-kind="precondition">Approval of the production activation</a> — the user's, for the generation on dreyeck.ch, with the operator's record of the server's state.</li>
+ </ul>
+ <ul>
+ <li data-proposed-from="tm-reg-p1" data-proposed-relation="work:relation/produces" data-proposed-to="tm-reg-wp-1">Integrate and verify Topic Maps → 1 Integrated Topic Maps Revision: produces.</li>
+diff --git a/dreyeck/tests/project-scope.lisp b/dreyeck/tests/project-scope.lisp
+index 1260609f..3eb81f74 100644
+--- a/dreyeck/tests/project-scope.lisp
++++ b/dreyeck/tests/project-scope.lisp
+@@ -315,6 +315,90 @@
+     (check "acceptance:no-acceptance-record-is-in-the-repository"
+            (let ((acceptance (p:model-acceptance (p:build-project-model)))) (or (null acceptance) (null (p:acceptance-records acceptance)))))))
+ 
++;; The carrier is the page a proposal's link names (its `page` attribute): a logical, presentation carrier. The source authority stays the page the
++;; proposal is written on. The carrier page of the scope presents and links; it declares nothing.
++(defparameter +scope-carrier-title+ "Regular HyperDoc Catalog Scope Proposal")
++(defparameter +workspace-carrier-title+ "HyperDoc Project Workspace")
++(defparameter +scope-carrier-iri-part+ "page/dreyeck/work/project/regular-hyperdoc-catalog-scope-proposal")
++
++(defun scope-carrier-tests ()
++  (let* ((text (%assignments-text))
++         (anchors (%with "a" "data-proposed-topic" text))
++         (scope (remove-if-not (lambda (n) (%scope-id-p (plump:attribute n "data-proposed-topic"))) anchors))
++         (others (remove-if (lambda (n) (%scope-id-p (plump:attribute n "data-proposed-topic"))) anchors))
++         (page-text (%project-page +scope-carrier-title+))
++         (page-root (%dom page-text))
++         (retained (p:materialize-project-ctm)))
++    (check "carrier:the-scope-has-proposals" scope)
++    (check "carrier:every-proposal-of-the-scope-names-the-carrier-page"
++           (every (lambda (n) (equal +scope-carrier-title+ (plump:attribute n "page"))) scope))
++    (check "carrier:negative:no-proposal-of-the-scope-names-the-workspace-page"
++           (notany (lambda (n) (equal +workspace-carrier-title+ (plump:attribute n "page"))) scope))
++    (check "carrier:the-unrelated-proposals-keep-the-workspace-page"
++           (and others (every (lambda (n) (equal +workspace-carrier-title+ (plump:attribute n "page"))) others)))
++    (check "carrier:negative:no-unrelated-proposal-names-the-scope-carrier"
++           (notany (lambda (n) (equal +scope-carrier-title+ (plump:attribute n "page"))) others))
++    (check "carrier:the-carrier-is-in-the-project-hyperbook"
++           (every (lambda (n) (equal "dreyeck/work/project" (plump:attribute n "hyperbook"))) scope))
++    ;; The carrier page presents exactly the proposals that name it, with their labels, and declares nothing.
++    (let ((listed (loop for code in (plump:get-elements-by-tag-name page-root "code") collect (plump:text code)))
++          (ids (mapcar (lambda (n) (plump:attribute n "data-proposed-topic")) scope)))
++      (check "carrier-page:lists-exactly-the-proposals-that-name-it"
++             (and (null (set-difference ids listed :test #'equal)) (null (%duplicates ids))
++                  (null (set-difference (remove-if-not #'%scope-id-p listed) ids :test #'equal))))
++      (check "carrier-page:states-each-label-as-the-proposal-does"
++             (every (lambda (n) (search (plump:text n) (plump:text page-root))) scope)))
++    (check "carrier-page:declares-nothing-no-data-attribute-at-all"
++           (let ((found nil))
++             (plump:traverse page-root
++                             (lambda (node)
++                               (when (loop for key being the hash-keys of (plump:attributes node)
++                                           thereis (eql 0 (search "data-" (string-downcase key))))
++                                 (setf found t)))
++                             :test #'plump:element-p)
++             (not found)))
++    (check "carrier-page:says-it-is-no-source-declares-nothing-and-owns-nothing"
++           (and (search "not a source of the project CTM" page-text) (search "declares nothing" page-text) (search "owns none" page-text)))
++    (check "carrier-page:says-nothing-is-declared-accepted-or-approved" (search "Nothing here has been declared, accepted or approved" page-text))
++    (check "carrier-page:links-the-source-the-dictionary-and-the-workspace"
++           (every (lambda (title) (find title (%with "a" "page" page-text) :key (lambda (n) (plump:attribute n "page")) :test #'equal))
++                  '("Implementation Assignments" "Regular Catalog WBS Dictionary" "HyperDoc Project Workspace")))
++    (check "carrier-page:opens-the-workspace-reading"
++           (search "(dreyeck/work/project:project-workspace)" page-text))
++    (check "carrier-page:is-registered-as-a-static-file-of-the-project-hyperbook"
++           (search (format nil "(:static-file ~S)" (format nil "~A.html" +scope-carrier-title+))
++                   (uiop:read-file-string (asdf:system-relative-pathname "dreyeck" "dreyeck.asd"))))
++    (check "carrier-page:the-project-workspace-page-links-to-it"
++           (find +scope-carrier-title+ (%with "a" "page" (%project-page "HyperDoc Project Workspace"))
++                 :key (lambda (n) (plump:attribute n "page")) :test #'equal))
++    (check "carrier-page:the-assignments-page-links-to-it-in-prose"
++           (find +scope-carrier-title+ (remove-if (lambda (n) (plump:attribute n "data-proposed-topic")) (%with "a" "page" text))
++                 :key (lambda (n) (plump:attribute n "page")) :test #'equal))
++    ;; What the model says: a carrier and nothing else.
++    (check "carrier-model:not-a-source-of-the-project-ctm"
++           (notany (lambda (item) (search "Scope Proposal" (p:source-path item))) (p:sources-items (p:read-project-sources))))
++    (check "carrier-model:the-page-is-named-only-by-carried-by-and-the-hyperbook-containing-it"
++           (let ((lines (remove-if-not (lambda (l) (search +scope-carrier-iri-part+ l)) (%association-lines retained))))
++             (and lines
++                  (every (lambda (l) (or (eql 0 (search "s:carried-by(" l)) (eql 0 (search "s:contains-page(" l)))) lines)
++                  (= 1 (count-if (lambda (l) (eql 0 (search "s:contains-page(" l))) lines)))))
++    (check "carrier-model:negative:the-page-is-never-declared-proposed-or-stated-on"
++           (notany (lambda (l) (and (search +scope-carrier-iri-part+ l)
++                                    (or (eql 0 (search "s:declared-on(" l)) (eql 0 (search "s:proposed-on(" l)) (eql 0 (search "s:stated-on(" l)))))
++                   (%association-lines retained)))
++    (check "carrier-model:exactly-the-proposals-of-the-scope-are-carried-by-it"
++           (= (length scope) (count-if (lambda (l) (and (eql 0 (search "s:carried-by(" l)) (search +scope-carrier-iri-part+ l))) (%association-lines retained))))
++    (check "carrier-model:the-proposals-stay-proposed-on-the-assignments-page"
++           (every (lambda (n) (search (format nil "s:proposed-on(s:proposal: w:~A," (plump:attribute n "data-proposed-topic")) retained)) scope))
++    ;; The gaps: the artefacts of the shared carrier are gone, the legitimate missing link remains.
++    (check "carrier-gaps:the-missing-work-item-deliverable-link-remains"
++           (search (format nil "gap/work-item-deliverable-unlinked/~A/~A>" +scope-work-item+ +scope-deliverable+) retained))
++    (check "carrier-gaps:negative:no-artefact-from-sharing-the-workspace-carrier"
++           (and (not (search (format nil "gap/work-item-deliverable-unlinked/project-work-ctm/~A>" +scope-deliverable+) retained))
++                (not (search (format nil "gap/work-item-deliverable-unlinked/~A/project-work-ctm-exchange>" +scope-work-item+) retained))))
++    (check "carrier-gaps:the-earlier-pair-on-the-workspace-carrier-remains"
++           (search "gap/work-item-deliverable-unlinked/project-work-ctm/project-work-ctm-exchange>" retained))))
++
+ (defun run-scope-tests ()
+   "The proposed scope of Zettel 11359. Source pages and the retained CTM are compared before and after; nothing is written."
+   (let ((*checks* 0) (before (%source-digests)) (ctm-before (%sha (p:project-ctm-pathname))))
+@@ -324,6 +408,7 @@
+     (scope-dictionary-tests)
+     (scope-model-tests)
+     (scope-assignment-tests)
++    (scope-carrier-tests)
+     (scope-preservation-tests)
+     (scope-acceptance-tests)
+     (check "preserved:source-pages-unchanged" (equal before (%source-digests)))
+diff --git a/dreyeck/work/project/hyperdoc-project.ctm b/dreyeck/work/project/hyperdoc-project.ctm
+index 59739b12..b289fca6 100644
+--- a/dreyeck/work/project/hyperdoc-project.ctm
++++ b/dreyeck/work/project/hyperdoc-project.ctm
+@@ -6,7 +6,7 @@
+ #   dreyeck/pages/work/Work Breakdown.html  a7dc3d53a1a7312e6feba2350bde7251c222b2acd321ef5a109116f5cf616e13
+ #   dreyeck/pages/work/Authoring the CTM Plan Page.html  fced413ad5e893e49973df1fa8fb5ca14dee87695c50100e72ddd12d4d2de75a
+ #   dreyeck/pages/work/CTM Plan Page WBS Dictionary.html  de3f372912e0a257a85990686fdcd354f79481af7aecb1ecc5d1ffb171e9d9b5
+-#   dreyeck/pages/project/Implementation Assignments.html  059d90d04472ae5bc0975491106aa896f12989af7bfa17cf1c0d32d192984ce6
++#   dreyeck/pages/project/Implementation Assignments.html  e205b90a4c4fe887ec248ce1859aa3c893e9822feabc76f1413860ced13e1288
+ # Other files read: the test files WBS Dictionary controls name, to derive test marker found:
+ #   dreyeck/tests/fedwiki-page-authoring.lisp  0fcd02078576bde7a0438620797ea30c805900201ac443b8bc20ac8b146671d1
+ #   dreyeck/tests/fedwiki-item-edit-execution.lisp  d215e10c48f94b401248d60e7c8fe95db5c693ea8a489f60b368c7f8102c755d
+@@ -509,7 +509,7 @@ s:role-work-relation-depends-on-target
+     s:hyperbook-id: "dreyeck/work/project" ;
+     s:page-id: "Implementation Assignments" ;
+     s:repository-path: "dreyeck/pages/project/Implementation Assignments.html" ;
+-    s:source-sha256: "059d90d04472ae5bc0975491106aa896f12989af7bfa17cf1c0d32d192984ce6" .
++    s:source-sha256: "e205b90a4c4fe887ec248ce1859aa3c893e9822feabc76f1413860ced13e1288" .
+ 
+ <tag:dreyeck.ch,2026:hyperdoc/hyperbook/dreyeck/work/project>
+     isa s:hyperbook ;
+@@ -973,6 +973,12 @@ w:topic-maps-regular-hyperdoc
+     - "Regular HyperDoc Catalog with a Navigable Project Topic Map" ;
+     s:declaration-text: "Regular HyperDoc Catalog with a Navigable Project Topic Map — the regular HyperDoc Catalog, built on a reviewed Topic Maps revision, in which the project's work is itself a Topic Map that a reader can navigate and inspect." .
+ 
++<tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/regular-hyperdoc-catalog-scope-proposal>
++    isa s:hyperdoc-page ;
++    - "Regular HyperDoc Catalog Scope Proposal" ;
++    s:hyperbook-id: "dreyeck/work/project" ;
++    s:page-id: "Regular HyperDoc Catalog Scope Proposal" .
++
+ w:tm-regular-catalog
+     isa s:kind-deliverable ;
+     - "Regular HyperDoc Catalog with a Navigable Project Topic Map" ;
+@@ -981,7 +987,7 @@ w:tm-regular-catalog
+ w:tm-reg-wp-1
+     isa s:kind-work-package ;
+     - "1 Integrated Topic Maps Revision" ;
+-    s:declaration-text: "1 Integrated Topic Maps Revision — the reviewed commit 6162ed68, its snapshot, manifest and pin, with the identity that HyperDoc checks." .
++    s:declaration-text: "1 Integrated Topic Maps Revision — the reviewed Topic Maps revision 88994c1b (Task 1C, commit 6162ed68, and Task 1E), its snapshot, manifest and pin, with the identity that HyperDoc checks." .
+ 
+ w:tm-reg-wp-2
+     isa s:kind-work-package ;
+@@ -1010,8 +1016,8 @@ w:tm-reg-wp-6
+ 
+ w:tm-reg-p1
+     isa s:kind-plan-step ;
+-    - "Integrate and verify Topic Maps 6162ed68" ;
+-    s:declaration-text: "Integrate and verify Topic Maps 6162ed68 — fast-forward the Topic Maps line, pin the snapshot, verify it without .git and run the Topic Maps suite." .
++    - "Integrate and verify Topic Maps 88994c1b" ;
++    s:declaration-text: "Integrate and verify Topic Maps 88994c1b — fast-forward the Topic Maps line, pin the snapshot, verify it without .git and run the Topic Maps suite." .
+ 
+ w:tm-reg-p2
+     isa s:kind-plan-step ;
+@@ -2001,16 +2007,6 @@ w:tm-reg-pre-production
+     - "project-work-ctm and project-work-ctm-exchange share only their carrier page" ;
+     s:gap-rule: "A Work Item and a Deliverable name the same carrier page, and no statement relates them. No Relation Contract defines that relation." .
+ 
+-<tag:dreyeck.ch,2026:hyperdoc/gap/work-item-deliverable-unlinked/project-work-ctm/tm-regular-catalog>
+-    isa s:plan-gap ;
+-    - "project-work-ctm and tm-regular-catalog share only their carrier page" ;
+-    s:gap-rule: "A Work Item and a Deliverable name the same carrier page, and no statement relates them. No Relation Contract defines that relation." .
+-
+-<tag:dreyeck.ch,2026:hyperdoc/gap/work-item-deliverable-unlinked/topic-maps-regular-hyperdoc/project-work-ctm-exchange>
+-    isa s:plan-gap ;
+-    - "topic-maps-regular-hyperdoc and project-work-ctm-exchange share only their carrier page" ;
+-    s:gap-rule: "A Work Item and a Deliverable name the same carrier page, and no statement relates them. No Relation Contract defines that relation." .
+-
+ <tag:dreyeck.ch,2026:hyperdoc/gap/work-item-deliverable-unlinked/topic-maps-regular-hyperdoc/tm-regular-catalog>
+     isa s:plan-gap ;
+     - "topic-maps-regular-hyperdoc and tm-regular-catalog share only their carrier page" ;
+@@ -2294,41 +2290,42 @@ s:carried-by(s:carried: w:pwc-wp-7, s:carrier-page: <tag:dreyeck.ch,2026:hyperdo
+ s:proposed-on(s:proposal: w:pwc-wp-8, s:source-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/implementation-assignments>)
+ s:carried-by(s:carried: w:pwc-wp-8, s:carrier-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/hyperdoc-project-workspace>)
+ s:proposed-on(s:proposal: w:topic-maps-regular-hyperdoc, s:source-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/implementation-assignments>)
+-s:carried-by(s:carried: w:topic-maps-regular-hyperdoc, s:carrier-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/hyperdoc-project-workspace>)
++s:contains-page(s:hyperbook-role: <tag:dreyeck.ch,2026:hyperdoc/hyperbook/dreyeck/work/project>, s:page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/regular-hyperdoc-catalog-scope-proposal>)
++s:carried-by(s:carried: w:topic-maps-regular-hyperdoc, s:carrier-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/regular-hyperdoc-catalog-scope-proposal>)
+ s:proposed-on(s:proposal: w:tm-regular-catalog, s:source-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/implementation-assignments>)
+-s:carried-by(s:carried: w:tm-regular-catalog, s:carrier-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/hyperdoc-project-workspace>)
++s:carried-by(s:carried: w:tm-regular-catalog, s:carrier-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/regular-hyperdoc-catalog-scope-proposal>)
+ s:proposed-on(s:proposal: w:tm-reg-wp-1, s:source-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/implementation-assignments>)
+-s:carried-by(s:carried: w:tm-reg-wp-1, s:carrier-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/hyperdoc-project-workspace>)
++s:carried-by(s:carried: w:tm-reg-wp-1, s:carrier-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/regular-hyperdoc-catalog-scope-proposal>)
+ s:proposed-on(s:proposal: w:tm-reg-wp-2, s:source-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/implementation-assignments>)
+-s:carried-by(s:carried: w:tm-reg-wp-2, s:carrier-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/hyperdoc-project-workspace>)
++s:carried-by(s:carried: w:tm-reg-wp-2, s:carrier-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/regular-hyperdoc-catalog-scope-proposal>)
+ s:proposed-on(s:proposal: w:tm-reg-wp-3, s:source-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/implementation-assignments>)
+-s:carried-by(s:carried: w:tm-reg-wp-3, s:carrier-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/hyperdoc-project-workspace>)
++s:carried-by(s:carried: w:tm-reg-wp-3, s:carrier-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/regular-hyperdoc-catalog-scope-proposal>)
+ s:proposed-on(s:proposal: w:tm-reg-wp-4, s:source-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/implementation-assignments>)
+-s:carried-by(s:carried: w:tm-reg-wp-4, s:carrier-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/hyperdoc-project-workspace>)
++s:carried-by(s:carried: w:tm-reg-wp-4, s:carrier-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/regular-hyperdoc-catalog-scope-proposal>)
+ s:proposed-on(s:proposal: w:tm-reg-wp-5, s:source-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/implementation-assignments>)
+-s:carried-by(s:carried: w:tm-reg-wp-5, s:carrier-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/hyperdoc-project-workspace>)
++s:carried-by(s:carried: w:tm-reg-wp-5, s:carrier-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/regular-hyperdoc-catalog-scope-proposal>)
+ s:proposed-on(s:proposal: w:tm-reg-wp-6, s:source-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/implementation-assignments>)
+-s:carried-by(s:carried: w:tm-reg-wp-6, s:carrier-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/hyperdoc-project-workspace>)
++s:carried-by(s:carried: w:tm-reg-wp-6, s:carrier-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/regular-hyperdoc-catalog-scope-proposal>)
+ s:proposed-on(s:proposal: w:tm-reg-p1, s:source-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/implementation-assignments>)
+-s:carried-by(s:carried: w:tm-reg-p1, s:carrier-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/hyperdoc-project-workspace>)
++s:carried-by(s:carried: w:tm-reg-p1, s:carrier-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/regular-hyperdoc-catalog-scope-proposal>)
+ s:proposed-on(s:proposal: w:tm-reg-p2, s:source-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/implementation-assignments>)
+-s:carried-by(s:carried: w:tm-reg-p2, s:carrier-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/hyperdoc-project-workspace>)
++s:carried-by(s:carried: w:tm-reg-p2, s:carrier-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/regular-hyperdoc-catalog-scope-proposal>)
+ s:proposed-on(s:proposal: w:tm-reg-p3, s:source-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/implementation-assignments>)
+-s:carried-by(s:carried: w:tm-reg-p3, s:carrier-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/hyperdoc-project-workspace>)
++s:carried-by(s:carried: w:tm-reg-p3, s:carrier-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/regular-hyperdoc-catalog-scope-proposal>)
+ s:proposed-on(s:proposal: w:tm-reg-p4, s:source-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/implementation-assignments>)
+-s:carried-by(s:carried: w:tm-reg-p4, s:carrier-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/hyperdoc-project-workspace>)
++s:carried-by(s:carried: w:tm-reg-p4, s:carrier-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/regular-hyperdoc-catalog-scope-proposal>)
+ s:proposed-on(s:proposal: w:tm-reg-p5, s:source-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/implementation-assignments>)
+-s:carried-by(s:carried: w:tm-reg-p5, s:carrier-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/hyperdoc-project-workspace>)
++s:carried-by(s:carried: w:tm-reg-p5, s:carrier-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/regular-hyperdoc-catalog-scope-proposal>)
+ s:proposed-on(s:proposal: w:tm-reg-p6, s:source-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/implementation-assignments>)
+-s:carried-by(s:carried: w:tm-reg-p6, s:carrier-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/hyperdoc-project-workspace>)
++s:carried-by(s:carried: w:tm-reg-p6, s:carrier-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/regular-hyperdoc-catalog-scope-proposal>)
+ s:proposed-on(s:proposal: w:tm-reg-pre-admission, s:source-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/implementation-assignments>)
+-s:carried-by(s:carried: w:tm-reg-pre-admission, s:carrier-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/hyperdoc-project-workspace>)
++s:carried-by(s:carried: w:tm-reg-pre-admission, s:carrier-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/regular-hyperdoc-catalog-scope-proposal>)
+ s:proposed-on(s:proposal: w:tm-reg-pre-security-review, s:source-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/implementation-assignments>)
+-s:carried-by(s:carried: w:tm-reg-pre-security-review, s:carrier-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/hyperdoc-project-workspace>)
++s:carried-by(s:carried: w:tm-reg-pre-security-review, s:carrier-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/regular-hyperdoc-catalog-scope-proposal>)
+ s:proposed-on(s:proposal: w:tm-reg-pre-publish, s:source-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/implementation-assignments>)
+-s:carried-by(s:carried: w:tm-reg-pre-publish, s:carrier-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/hyperdoc-project-workspace>)
++s:carried-by(s:carried: w:tm-reg-pre-publish, s:carrier-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/regular-hyperdoc-catalog-scope-proposal>)
+ s:proposed-on(s:proposal: w:tm-reg-pre-production, s:source-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/implementation-assignments>)
+-s:carried-by(s:carried: w:tm-reg-pre-production, s:carrier-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/hyperdoc-project-workspace>)
++s:carried-by(s:carried: w:tm-reg-pre-production, s:carrier-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/regular-hyperdoc-catalog-scope-proposal>)
+ s:stated-on(s:statement: <tag:dreyeck.ch,2026:hyperdoc/statement/dreyeck/work/reading/work-breakdown/interaction/work:relation/informs/operations/1>, s:source-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/reading/work-breakdown>)
+ <tag:dreyeck.ch,2026:hyperdoc/work/topic/work:relation/informs>(s:role-work-relation-informs-source: w:interaction, s:role-work-relation-informs-target: w:operations) ~ <tag:dreyeck.ch,2026:hyperdoc/statement/dreyeck/work/reading/work-breakdown/interaction/work:relation/informs/operations/1>
+ s:stated-on(s:statement: <tag:dreyeck.ch,2026:hyperdoc/statement/dreyeck/work/reading/work-breakdown/operations/work:relation/informs/connect/1>, s:source-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/reading/work-breakdown>)
+@@ -2624,10 +2621,6 @@ s:gap-concerns(s:gap: <tag:dreyeck.ch,2026:hyperdoc/gap/work-item-without-breakd
+ s:gap-concerns(s:gap: <tag:dreyeck.ch,2026:hyperdoc/gap/work-item-without-breakdown/conversation-coordinates>, s:subject: w:conversation-coordinates)
+ s:gap-concerns(s:gap: <tag:dreyeck.ch,2026:hyperdoc/gap/work-item-deliverable-unlinked/project-work-ctm/project-work-ctm-exchange>, s:subject: w:project-work-ctm)
+ s:gap-concerns(s:gap: <tag:dreyeck.ch,2026:hyperdoc/gap/work-item-deliverable-unlinked/project-work-ctm/project-work-ctm-exchange>, s:subject: w:project-work-ctm-exchange)
+-s:gap-concerns(s:gap: <tag:dreyeck.ch,2026:hyperdoc/gap/work-item-deliverable-unlinked/project-work-ctm/tm-regular-catalog>, s:subject: w:project-work-ctm)
+-s:gap-concerns(s:gap: <tag:dreyeck.ch,2026:hyperdoc/gap/work-item-deliverable-unlinked/project-work-ctm/tm-regular-catalog>, s:subject: w:tm-regular-catalog)
+-s:gap-concerns(s:gap: <tag:dreyeck.ch,2026:hyperdoc/gap/work-item-deliverable-unlinked/topic-maps-regular-hyperdoc/project-work-ctm-exchange>, s:subject: w:topic-maps-regular-hyperdoc)
+-s:gap-concerns(s:gap: <tag:dreyeck.ch,2026:hyperdoc/gap/work-item-deliverable-unlinked/topic-maps-regular-hyperdoc/project-work-ctm-exchange>, s:subject: w:project-work-ctm-exchange)
+ s:gap-concerns(s:gap: <tag:dreyeck.ch,2026:hyperdoc/gap/work-item-deliverable-unlinked/topic-maps-regular-hyperdoc/tm-regular-catalog>, s:subject: w:topic-maps-regular-hyperdoc)
+ s:gap-concerns(s:gap: <tag:dreyeck.ch,2026:hyperdoc/gap/work-item-deliverable-unlinked/topic-maps-regular-hyperdoc/tm-regular-catalog>, s:subject: w:tm-regular-catalog)
+ s:gap-concerns(s:gap: <tag:dreyeck.ch,2026:hyperdoc/gap/assignment-without-plan-step/cc-2026-10-18-project-work-ctm>, s:subject: <tag:dreyeck.ch,2026:hyperdoc/assignment/cc-2026-10-18-project-work-ctm>)
+diff --git a/dreyeck/work/project/hyperdoc-project.ctm.sha256 b/dreyeck/work/project/hyperdoc-project.ctm.sha256
+index 0cf7a401..5cc9a6e3 100644
+--- a/dreyeck/work/project/hyperdoc-project.ctm.sha256
++++ b/dreyeck/work/project/hyperdoc-project.ctm.sha256
+@@ -1 +1 @@
+-346ae79206e291193e4e13a824a4d7c50fabd180a5328621e9ff4894cdd2b0f5  hyperdoc-project.ctm
++6a54569f9ddbf01ae00e33715d605c0e8ade54b3b6c6d81305d3e68ae519a8b5  hyperdoc-project.ctm
+diff --git a/scripts/test-project-workspace-scope.mjs b/scripts/test-project-workspace-scope.mjs
+index 68b51e28..56a1c0b3 100644
+--- a/scripts/test-project-workspace-scope.mjs
++++ b/scripts/test-project-workspace-scope.mjs
+@@ -24,15 +24,22 @@ assert.equal(git('rev-parse','HEAD'),pin,'the Topic Maps checkout is at the pin'
+ const ctmFile=path.join(repo,'dreyeck/work/project/hyperdoc-project.ctm')
+ const assignmentsFile=path.join(repo,'dreyeck/pages/project/Implementation Assignments.html')
+ const watched=[ctmFile,ctmFile+'.sha256',assignmentsFile,path.join(repo,'dreyeck/pages/project/Regular Catalog WBS Dictionary.html'),
++ path.join(repo,'dreyeck/pages/project/Regular HyperDoc Catalog Scope Proposal.html'),path.join(repo,'dreyeck/pages/project/HyperDoc Project Workspace.html'),
+  ...['Work Breakdown','Authoring the CTM Plan Page','CTM Plan Page WBS Dictionary'].map(t=>path.join(repo,'dreyeck/pages/work',t+'.html'))]
+ const before=Object.fromEntries(watched.map(f=>[f,sha(f)]))
+ 
+ // What the page proposes, read from its text
+ const source=fs.readFileSync(assignmentsFile,'utf8')
+ const inScope=id=>id==='topic-maps-regular-hyperdoc'||id==='tm-regular-catalog'||id.startsWith('tm-reg-')
+-const proposals=[...source.matchAll(/<a [^>]*data-proposed-topic="([^"]+)" data-kind="([^"]+)"[^>]*>([^<]*)<\/a>/g)]
+- .map(m=>({id:m[1],kind:m[2],label:m[3]})).filter(p=>inScope(p.id))
++// Each proposal's carrier is the page its link names (the `page` attribute): a logical, presentation carrier. The page it is proposed on is another thing.
++const allProposals=[...source.matchAll(/<a ((?:[^>]*? )?)data-proposed-topic="([^"]+)" data-kind="([^"]+)"[^>]*>([^<]*)<\/a>/g)]
++ .map(m=>({id:m[2],kind:m[3],label:m[4],carrier:(m[1].match(/page="([^"]*)"/)||[])[1],carrierBook:(m[1].match(/hyperbook="([^"]*)"/)||[])[1]||'dreyeck/work/reading'}))
++const proposals=allProposals.filter(p=>inScope(p.id)),unrelated=allProposals.filter(p=>!inScope(p.id))
+ const byId=Object.fromEntries(proposals.map(p=>[p.id,p]))
++const slug=t=>t.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'')
++const carrierIri=p=>`page/${p.carrierBook}/${slug(p.carrier)}`
++assert(proposals.every(p=>p.carrier&&p.carrier===proposals[0].carrier),'the proposals of the scope name one carrier page')
++assert(unrelated.length>0&&unrelated.every(p=>p.carrier&&p.carrier!==proposals[0].carrier),'the unrelated proposals are carried elsewhere')
+ const statements=[...source.matchAll(/<li data-proposed-from="([^"]+)" data-proposed-relation="([^"]+)" data-proposed-to="([^"]+)"/g)]
+  .map(m=>({from:m[1],relation:m[2],to:m[3]})).filter(s=>inScope(s.from)||inScope(s.to))
+ const words={'work:relation/decomposes-into':'decomposes into','work:relation/produces':'produces','work:relation/depends-on':'depends on'}
+@@ -49,7 +56,7 @@ const workItem=proposals.find(p=>p.kind==='work item'),deliverable=proposals.fin
+ const packages=proposals.filter(p=>p.kind==='work package'),steps=proposals.filter(p=>p.kind==='plan step'),preconditions=proposals.filter(p=>p.kind==='precondition')
+ // The rows the native Workspace shows for a proposal: the page it is proposed on, its carrier, its statements, and the assignments that concern it
+ const expectedRows=id=>{
+- const rows=[{word:'proposed on',arrow:'←',label:'Implementation Assignments'},{word:'carried by',arrow:'→',label:'HyperDoc Project Workspace'}]
++ const rows=[{word:'proposed on',arrow:'←',label:'Implementation Assignments'},{word:'carried by',arrow:'→',label:byId[id].carrier}]
+  for(const s of statements){if(s.from===id)rows.push({word:words[s.relation],arrow:'→',label:byId[s.to].label});if(s.to===id)rows.push({word:words[s.relation],arrow:'←',label:byId[s.from].label})}
+  for(const a of scopeAssignments){if(a.delivers===id)rows.push({word:'assignment delivers',arrow:'←',label:a.title})
+   if(a.workItem===id)rows.push({word:'assignment for',arrow:'←',label:a.title})}
+@@ -71,7 +78,7 @@ try{
+  steps_.push(`Catalog (the trusted review runtime scripts/serve-project-workspace.lisp, not the packaged Catalog) started on loopback over a TEST-COPY site root with topic-maps ${pin.slice(0,8)}`)
+  const context=await browser.newContext({serviceWorkers:'block'})
+  await context.route('**/*',r=>new URL(r.request().url()).origin===`http://127.0.0.1:${port}`?r.continue():r.abort())
+- const page=await context.newPage();page.setDefaultTimeout(600000);installBoundClicks(page)
++ const page=await context.newPage();page.setDefaultTimeout(Number(process.env.WALK_TIMEOUT_MS||600000));installBoundClicks(page)
+  const errors=[];page.on('pageerror',e=>errors.push(e.message))
+  const panes=()=>page.locator('.inspector-pane'),last=()=>panes().last()
+  await page.goto(`http://127.0.0.1:${port}`)
+@@ -80,6 +87,10 @@ try{
+  await page.locator('tr.inspector-inspect:visible').filter({hasText:'HyperDoc Project Workspace'}).last().click()
+  await last().getByRole('heading',{name:'HyperDoc Project Workspace',exact:true}).waitFor()
+  const pagePanes=await panes().count()
++ // The Project Workspace page links explicitly to the carrier page of the scope
++ const workspacePagePane=panes().nth(pagePanes-1),carrierTitle=proposals[0].carrier
++ const carrierLink=workspacePagePane.locator('.hyperbook-reference').filter({hasText:new RegExp('^\\s*'+escape(carrierTitle)+'\\s*$')}).first()
++ await carrierLink.waitFor()
+  await last().locator('.hyperbook-reference[title="(dreyeck/work/project:project-workspace)"] .inspector-inspect').first().click()
+  const project=panes().nth(pagePanes)
+  await project.getByRole('heading',{name:'HyperDoc Project Workspace',exact:true}).waitFor()
+@@ -99,6 +110,11 @@ try{
+   await atPoint(ws,id)
+   const rows=await rowsOf(ws),expected=expectedRows(id)
+   for(const e of expected)assert(rows.some(r=>new RegExp(`^${escape(e.word)} ${escape(e.arrow)} ${escape(e.label)}$`).test(r)),`${id}: no row "${e.word} ${e.arrow} ${e.label}" among ${JSON.stringify(rows)}`)
++  // The actual carrier, once, and no other: a wrong carrier is not shown (negative check)
++  const carriers=rows.filter(r=>/^carried by /.test(r))
++  assert.deepEqual(carriers,[`carried by → ${byId[id].carrier}`],`${id}: exactly its own carrier ${JSON.stringify(carriers)}`)
++  const wrong=byId[id].carrier===unrelated[0].carrier?proposals[0].carrier:unrelated[0].carrier
++  assert(!rows.includes(`carried by → ${wrong}`),`${id}: not carried by ${wrong}`)
+   const relations=rows.filter(r=>/^(decomposes into|produces|depends on) /.test(r))
+   assert.equal(relations.length,expected.filter(e=>/^(decomposes into|produces|depends on)$/.test(e.word)).length,`${id}: exactly the proposed relations ${JSON.stringify(relations)}`)
+   assert(!rows.some(r=>/^proposed in dictionary/.test(r)),`${id}: the draft dictionary is not a source, so no row states it`)
+@@ -111,7 +127,28 @@ try{
+  let ws=await open(workItem.label),rows
+  await checkProposal(ws,workItem.id)
+  assert(projectText.includes(`${workItem.id} and ${deliverable.id} share only their carrier page`),'the Work Item and the Deliverable are not related, and the Workspace says so')
+- steps_.push(`Project → Work Item ${workItem.id}: proposed on the page, carried by the Workspace page, assignments for it; no Association to the Deliverable, and the Project Workspace names the gap`)
++ steps_.push(`Project → Work Item ${workItem.id}: proposed on the page, carried by ${workItem.carrier}, assignments for it; no Association to the Deliverable, and the Project Workspace names the gap`)
++ // Workspace → the dedicated carrier page → a proposal, and back: the page Topic is joined by "carried by" to exactly the proposals that name it
++ await go(ws,workItem.carrier);await atPoint(ws,carrierIri(workItem))
++ rows=await rowsOf(ws)
++ assert.deepEqual(rows.filter(r=>/^carried by /.test(r)).sort(),proposals.map(p=>`carried by ← ${p.label}`).sort(),'the carrier page leads back to exactly the proposals that name it')
++ for(const u of unrelated)assert(!rows.includes(`carried by ← ${u.label}`),`the carrier page of the scope is not the carrier of ${u.id}`)
++ assert(!rows.some(r=>/^(declared on|proposed on|stated on)/.test(r)),'the carrier page is no source: no declared/proposed/stated on row')
++ steps_.push(`Work Item → its carrier page ${workItem.carrier} (a Topic of the project CTM): carried by ← exactly the ${proposals.length} proposals that name it, none of the ${unrelated.length} unrelated proposals, and no "declared on / proposed on / stated on" row (it declares nothing)`)
++ await go(ws,packages[0].label);await checkProposal(ws,packages[0].id)
++ await go(ws,packages[0].carrier);await atPoint(ws,carrierIri(packages[0]))
++ steps_.push(`carrier page → proposal ${packages[0].id} → back to the carrier page: navigation in both directions`)
++ // The unrelated proposals keep the Workspace page: a historical route, and a negative check against the wrong carrier
++ const other=unrelated[0]
++ ws=await open(other.label);await atPoint(ws,other.id)
++ rows=await rowsOf(ws)
++ assert(rows.includes(`carried by → ${other.carrier}`)&&!rows.includes(`carried by → ${proposals[0].carrier}`),`${other.id} stays carried by ${other.carrier}`)
++ await go(ws,other.carrier);await atPoint(ws,carrierIri(other))
++ rows=await rowsOf(ws)
++ for(const u of unrelated)assert(rows.includes(`carried by ← ${u.label}`),`${u.id} leads back from its carrier`)
++ for(const p of proposals)assert(!rows.includes(`carried by ← ${p.label}`),`${p.id} is not carried by ${other.carrier}`)
++ steps_.push(`unrelated proposal ${other.id}: carried by ${other.carrier} (not the scope's carrier); that page leads back to its ${unrelated.length} proposals and to none of the scope's ${proposals.length}`)
++ ws=await open(workItem.label)
+  // The Deliverable decomposes into the work packages (the second button of the same label)
+  await project.getByRole('button',{name:deliverable.label,exact:true}).nth(1).click();await page.waitForTimeout(500);ws=last()
+  await checkProposal(ws,deliverable.id)
+@@ -175,6 +212,16 @@ try{
+  assert(/Every Topic and statement traced to its declaration\s*TMDM against the source pages\s*yes/.test(roundtrip),'trace')
+  steps_.push('Roundtrip with the scope in the CTM: export octets equal; CXTM equal to the sources; every Topic and statement traced')
+ 
++ // The carrier page itself, opened from the Project Workspace page (last: opening it replaces the Workspace reading pane to its right): it presents every proposal of the scope and declares nothing
++ await carrierLink.locator('.inspector-inspect').first().click()
++ const carrierPane=last()
++ await carrierPane.getByRole('heading',{name:carrierTitle,exact:true}).waitFor()
++ const carrierText=normalize(await carrierPane.innerText())
++ for(const p of proposals)assert(carrierText.includes(p.id)&&carrierText.includes(p.label),`the carrier page presents ${p.id}`)
++ assert(carrierText.includes('declares nothing')&&carrierText.includes('Nothing here has been declared, accepted or approved'),'the carrier page says it declares nothing')
++ assert(carrierText.includes('Implementation Assignments'),'the carrier page names the source of the proposals')
++ steps_.push(`Project Workspace page → link → the carrier page ${carrierTitle}: it presents the ${proposals.length} proposals of the scope, names Implementation Assignments as their source and says it declares nothing`)
++
+  assert.deepEqual(errors,[])
+  for(const [f,digest] of Object.entries(before))assert.equal(sha(f),digest,f+' unchanged')
+  assert.deepEqual(fs.readdirSync(path.join(siteRoot,'pages')),[],'the test-copy site root stays empty')

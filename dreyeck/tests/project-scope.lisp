@@ -315,6 +315,90 @@
     (check "acceptance:no-acceptance-record-is-in-the-repository"
            (let ((acceptance (p:model-acceptance (p:build-project-model)))) (or (null acceptance) (null (p:acceptance-records acceptance)))))))
 
+;; The carrier is the page a proposal's link names (its `page` attribute): a logical, presentation carrier. The source authority stays the page the
+;; proposal is written on. The carrier page of the scope presents and links; it declares nothing.
+(defparameter +scope-carrier-title+ "Regular HyperDoc Catalog Scope Proposal")
+(defparameter +workspace-carrier-title+ "HyperDoc Project Workspace")
+(defparameter +scope-carrier-iri-part+ "page/dreyeck/work/project/regular-hyperdoc-catalog-scope-proposal")
+
+(defun scope-carrier-tests ()
+  (let* ((text (%assignments-text))
+         (anchors (%with "a" "data-proposed-topic" text))
+         (scope (remove-if-not (lambda (n) (%scope-id-p (plump:attribute n "data-proposed-topic"))) anchors))
+         (others (remove-if (lambda (n) (%scope-id-p (plump:attribute n "data-proposed-topic"))) anchors))
+         (page-text (%project-page +scope-carrier-title+))
+         (page-root (%dom page-text))
+         (retained (p:materialize-project-ctm)))
+    (check "carrier:the-scope-has-proposals" scope)
+    (check "carrier:every-proposal-of-the-scope-names-the-carrier-page"
+           (every (lambda (n) (equal +scope-carrier-title+ (plump:attribute n "page"))) scope))
+    (check "carrier:negative:no-proposal-of-the-scope-names-the-workspace-page"
+           (notany (lambda (n) (equal +workspace-carrier-title+ (plump:attribute n "page"))) scope))
+    (check "carrier:the-unrelated-proposals-keep-the-workspace-page"
+           (and others (every (lambda (n) (equal +workspace-carrier-title+ (plump:attribute n "page"))) others)))
+    (check "carrier:negative:no-unrelated-proposal-names-the-scope-carrier"
+           (notany (lambda (n) (equal +scope-carrier-title+ (plump:attribute n "page"))) others))
+    (check "carrier:the-carrier-is-in-the-project-hyperbook"
+           (every (lambda (n) (equal "dreyeck/work/project" (plump:attribute n "hyperbook"))) scope))
+    ;; The carrier page presents exactly the proposals that name it, with their labels, and declares nothing.
+    (let ((listed (loop for code in (plump:get-elements-by-tag-name page-root "code") collect (plump:text code)))
+          (ids (mapcar (lambda (n) (plump:attribute n "data-proposed-topic")) scope)))
+      (check "carrier-page:lists-exactly-the-proposals-that-name-it"
+             (and (null (set-difference ids listed :test #'equal)) (null (%duplicates ids))
+                  (null (set-difference (remove-if-not #'%scope-id-p listed) ids :test #'equal))))
+      (check "carrier-page:states-each-label-as-the-proposal-does"
+             (every (lambda (n) (search (plump:text n) (plump:text page-root))) scope)))
+    (check "carrier-page:declares-nothing-no-data-attribute-at-all"
+           (let ((found nil))
+             (plump:traverse page-root
+                             (lambda (node)
+                               (when (loop for key being the hash-keys of (plump:attributes node)
+                                           thereis (eql 0 (search "data-" (string-downcase key))))
+                                 (setf found t)))
+                             :test #'plump:element-p)
+             (not found)))
+    (check "carrier-page:says-it-is-no-source-declares-nothing-and-owns-nothing"
+           (and (search "not a source of the project CTM" page-text) (search "declares nothing" page-text) (search "owns none" page-text)))
+    (check "carrier-page:says-nothing-is-declared-accepted-or-approved" (search "Nothing here has been declared, accepted or approved" page-text))
+    (check "carrier-page:links-the-source-the-dictionary-and-the-workspace"
+           (every (lambda (title) (find title (%with "a" "page" page-text) :key (lambda (n) (plump:attribute n "page")) :test #'equal))
+                  '("Implementation Assignments" "Regular Catalog WBS Dictionary" "HyperDoc Project Workspace")))
+    (check "carrier-page:opens-the-workspace-reading"
+           (search "(dreyeck/work/project:project-workspace)" page-text))
+    (check "carrier-page:is-registered-as-a-static-file-of-the-project-hyperbook"
+           (search (format nil "(:static-file ~S)" (format nil "~A.html" +scope-carrier-title+))
+                   (uiop:read-file-string (asdf:system-relative-pathname "dreyeck" "dreyeck.asd"))))
+    (check "carrier-page:the-project-workspace-page-links-to-it"
+           (find +scope-carrier-title+ (%with "a" "page" (%project-page "HyperDoc Project Workspace"))
+                 :key (lambda (n) (plump:attribute n "page")) :test #'equal))
+    (check "carrier-page:the-assignments-page-links-to-it-in-prose"
+           (find +scope-carrier-title+ (remove-if (lambda (n) (plump:attribute n "data-proposed-topic")) (%with "a" "page" text))
+                 :key (lambda (n) (plump:attribute n "page")) :test #'equal))
+    ;; What the model says: a carrier and nothing else.
+    (check "carrier-model:not-a-source-of-the-project-ctm"
+           (notany (lambda (item) (search "Scope Proposal" (p:source-path item))) (p:sources-items (p:read-project-sources))))
+    (check "carrier-model:the-page-is-named-only-by-carried-by-and-the-hyperbook-containing-it"
+           (let ((lines (remove-if-not (lambda (l) (search +scope-carrier-iri-part+ l)) (%association-lines retained))))
+             (and lines
+                  (every (lambda (l) (or (eql 0 (search "s:carried-by(" l)) (eql 0 (search "s:contains-page(" l)))) lines)
+                  (= 1 (count-if (lambda (l) (eql 0 (search "s:contains-page(" l))) lines)))))
+    (check "carrier-model:negative:the-page-is-never-declared-proposed-or-stated-on"
+           (notany (lambda (l) (and (search +scope-carrier-iri-part+ l)
+                                    (or (eql 0 (search "s:declared-on(" l)) (eql 0 (search "s:proposed-on(" l)) (eql 0 (search "s:stated-on(" l)))))
+                   (%association-lines retained)))
+    (check "carrier-model:exactly-the-proposals-of-the-scope-are-carried-by-it"
+           (= (length scope) (count-if (lambda (l) (and (eql 0 (search "s:carried-by(" l)) (search +scope-carrier-iri-part+ l))) (%association-lines retained))))
+    (check "carrier-model:the-proposals-stay-proposed-on-the-assignments-page"
+           (every (lambda (n) (search (format nil "s:proposed-on(s:proposal: w:~A," (plump:attribute n "data-proposed-topic")) retained)) scope))
+    ;; The gaps: the artefacts of the shared carrier are gone, the legitimate missing link remains.
+    (check "carrier-gaps:the-missing-work-item-deliverable-link-remains"
+           (search (format nil "gap/work-item-deliverable-unlinked/~A/~A>" +scope-work-item+ +scope-deliverable+) retained))
+    (check "carrier-gaps:negative:no-artefact-from-sharing-the-workspace-carrier"
+           (and (not (search (format nil "gap/work-item-deliverable-unlinked/project-work-ctm/~A>" +scope-deliverable+) retained))
+                (not (search (format nil "gap/work-item-deliverable-unlinked/~A/project-work-ctm-exchange>" +scope-work-item+) retained))))
+    (check "carrier-gaps:the-earlier-pair-on-the-workspace-carrier-remains"
+           (search "gap/work-item-deliverable-unlinked/project-work-ctm/project-work-ctm-exchange>" retained))))
+
 (defun run-scope-tests ()
   "The proposed scope of Zettel 11359. Source pages and the retained CTM are compared before and after; nothing is written."
   (let ((*checks* 0) (before (%source-digests)) (ctm-before (%sha (p:project-ctm-pathname))))
@@ -324,6 +408,7 @@
     (scope-dictionary-tests)
     (scope-model-tests)
     (scope-assignment-tests)
+    (scope-carrier-tests)
     (scope-preservation-tests)
     (scope-acceptance-tests)
     (check "preserved:source-pages-unchanged" (equal before (%source-digests)))

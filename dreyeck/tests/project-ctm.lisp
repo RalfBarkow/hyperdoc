@@ -429,16 +429,24 @@ page names, delivers nothing, and changes no status or acceptance of pwc-wp-4 an
     (assert (p:revision-map revision) () "~A was refused: ~S" label (p:revision-refusal revision))
     (p:revision-map revision)))
 
+(declaim (ftype function apply-transition %applicable-transition))
 (defun oracle-tests (map text)
   "The read-back MAP of the CTM TEXT against the source pages, the committed revision and the exchange review's invariants; then the same
 comparisons on five mutations of TEXT, each of which they must detect."
-  (let* ((items (p:sources-items (p:read-project-sources))) (committed (%read-ctm (%committed-ctm) "committed HEAD")))
+  (let* ((items (p:sources-items (p:read-project-sources))) (committed-text (%committed-ctm)) (committed (%read-ctm committed-text "committed HEAD")))
     (let ((d (oracle-differences map items)))
       (check "oracle:every-stated-association-in-the-topic-map-once-per-statement" (null (getf d :missing)))
       (check "oracle:no-association-the-sources-do-not-state" (null (getf d :unexpected)))
       (check "oracle:every-named-topic-present" (null (getf d :missing-topics)))
       (check "oracle:no-named-topic-the-sources-do-not-name" (null (getf d :unexpected-topics))))
-    (let ((d (preservation-differences committed map items)))
+    (let* ((d (preservation-differences committed map items))
+           ;; A named, exact transition (dreyeck/tests/project-transition-*.lisp) excuses only what it names, and only for the one
+           ;; revision pair it names; otherwise the differences stay as they are and the checks below are unchanged.
+           (transition (%applicable-transition committed-text text)))
+      (when transition
+        (multiple-value-bind (remaining problems) (apply-transition transition committed map d)
+          (check (format nil "transition:~A:what-it-names-is-exactly-as-specified" (getf transition :id)) (null problems))
+          (setf d remaining)))
       (check "preserved:no-topic-of-the-committed-revision-lost" (null (getf d :lost-topics)))
       (check "preserved:no-association-or-reification-lost-that-the-sources-still-state" (null (getf d :lost-associations)))
       (check "preserved:every-derived-addition-involves-a-new-topic" (null (getf d :unattributed-additions)))

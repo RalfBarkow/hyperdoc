@@ -24,15 +24,22 @@ assert.equal(git('rev-parse','HEAD'),pin,'the Topic Maps checkout is at the pin'
 const ctmFile=path.join(repo,'dreyeck/work/project/hyperdoc-project.ctm')
 const assignmentsFile=path.join(repo,'dreyeck/pages/project/Implementation Assignments.html')
 const watched=[ctmFile,ctmFile+'.sha256',assignmentsFile,path.join(repo,'dreyeck/pages/project/Regular Catalog WBS Dictionary.html'),
+ path.join(repo,'dreyeck/pages/project/Regular HyperDoc Catalog Scope Proposal.html'),path.join(repo,'dreyeck/pages/project/HyperDoc Project Workspace.html'),
  ...['Work Breakdown','Authoring the CTM Plan Page','CTM Plan Page WBS Dictionary'].map(t=>path.join(repo,'dreyeck/pages/work',t+'.html'))]
 const before=Object.fromEntries(watched.map(f=>[f,sha(f)]))
 
 // What the page proposes, read from its text
 const source=fs.readFileSync(assignmentsFile,'utf8')
 const inScope=id=>id==='topic-maps-regular-hyperdoc'||id==='tm-regular-catalog'||id.startsWith('tm-reg-')
-const proposals=[...source.matchAll(/<a [^>]*data-proposed-topic="([^"]+)" data-kind="([^"]+)"[^>]*>([^<]*)<\/a>/g)]
- .map(m=>({id:m[1],kind:m[2],label:m[3]})).filter(p=>inScope(p.id))
+// Each proposal's carrier is the page its link names (the `page` attribute): a logical, presentation carrier. The page it is proposed on is another thing.
+const allProposals=[...source.matchAll(/<a ((?:[^>]*? )?)data-proposed-topic="([^"]+)" data-kind="([^"]+)"[^>]*>([^<]*)<\/a>/g)]
+ .map(m=>({id:m[2],kind:m[3],label:m[4],carrier:(m[1].match(/page="([^"]*)"/)||[])[1],carrierBook:(m[1].match(/hyperbook="([^"]*)"/)||[])[1]||'dreyeck/work/reading'}))
+const proposals=allProposals.filter(p=>inScope(p.id)),unrelated=allProposals.filter(p=>!inScope(p.id))
 const byId=Object.fromEntries(proposals.map(p=>[p.id,p]))
+const slug=t=>t.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'')
+const carrierIri=p=>`page/${p.carrierBook}/${slug(p.carrier)}`
+assert(proposals.every(p=>p.carrier&&p.carrier===proposals[0].carrier),'the proposals of the scope name one carrier page')
+assert(unrelated.length>0&&unrelated.every(p=>p.carrier&&p.carrier!==proposals[0].carrier),'the unrelated proposals are carried elsewhere')
 const statements=[...source.matchAll(/<li data-proposed-from="([^"]+)" data-proposed-relation="([^"]+)" data-proposed-to="([^"]+)"/g)]
  .map(m=>({from:m[1],relation:m[2],to:m[3]})).filter(s=>inScope(s.from)||inScope(s.to))
 const words={'work:relation/decomposes-into':'decomposes into','work:relation/produces':'produces','work:relation/depends-on':'depends on'}
@@ -49,7 +56,7 @@ const workItem=proposals.find(p=>p.kind==='work item'),deliverable=proposals.fin
 const packages=proposals.filter(p=>p.kind==='work package'),steps=proposals.filter(p=>p.kind==='plan step'),preconditions=proposals.filter(p=>p.kind==='precondition')
 // The rows the native Workspace shows for a proposal: the page it is proposed on, its carrier, its statements, and the assignments that concern it
 const expectedRows=id=>{
- const rows=[{word:'proposed on',arrow:'←',label:'Implementation Assignments'},{word:'carried by',arrow:'→',label:'HyperDoc Project Workspace'}]
+ const rows=[{word:'proposed on',arrow:'←',label:'Implementation Assignments'},{word:'carried by',arrow:'→',label:byId[id].carrier}]
  for(const s of statements){if(s.from===id)rows.push({word:words[s.relation],arrow:'→',label:byId[s.to].label});if(s.to===id)rows.push({word:words[s.relation],arrow:'←',label:byId[s.from].label})}
  for(const a of scopeAssignments){if(a.delivers===id)rows.push({word:'assignment delivers',arrow:'←',label:a.title})
   if(a.workItem===id)rows.push({word:'assignment for',arrow:'←',label:a.title})}
@@ -71,7 +78,7 @@ try{
  steps_.push(`Catalog (the trusted review runtime scripts/serve-project-workspace.lisp, not the packaged Catalog) started on loopback over a TEST-COPY site root with topic-maps ${pin.slice(0,8)}`)
  const context=await browser.newContext({serviceWorkers:'block'})
  await context.route('**/*',r=>new URL(r.request().url()).origin===`http://127.0.0.1:${port}`?r.continue():r.abort())
- const page=await context.newPage();page.setDefaultTimeout(600000);installBoundClicks(page)
+ const page=await context.newPage();page.setDefaultTimeout(Number(process.env.WALK_TIMEOUT_MS||600000));installBoundClicks(page)
  const errors=[];page.on('pageerror',e=>errors.push(e.message))
  const panes=()=>page.locator('.inspector-pane'),last=()=>panes().last()
  await page.goto(`http://127.0.0.1:${port}`)
@@ -80,6 +87,10 @@ try{
  await page.locator('tr.inspector-inspect:visible').filter({hasText:'HyperDoc Project Workspace'}).last().click()
  await last().getByRole('heading',{name:'HyperDoc Project Workspace',exact:true}).waitFor()
  const pagePanes=await panes().count()
+ // The Project Workspace page links explicitly to the carrier page of the scope
+ const workspacePagePane=panes().nth(pagePanes-1),carrierTitle=proposals[0].carrier
+ const carrierLink=workspacePagePane.locator('.hyperbook-reference').filter({hasText:new RegExp('^\\s*'+escape(carrierTitle)+'\\s*$')}).first()
+ await carrierLink.waitFor()
  await last().locator('.hyperbook-reference[title="(dreyeck/work/project:project-workspace)"] .inspector-inspect').first().click()
  const project=panes().nth(pagePanes)
  await project.getByRole('heading',{name:'HyperDoc Project Workspace',exact:true}).waitFor()
@@ -99,6 +110,11 @@ try{
   await atPoint(ws,id)
   const rows=await rowsOf(ws),expected=expectedRows(id)
   for(const e of expected)assert(rows.some(r=>new RegExp(`^${escape(e.word)} ${escape(e.arrow)} ${escape(e.label)}$`).test(r)),`${id}: no row "${e.word} ${e.arrow} ${e.label}" among ${JSON.stringify(rows)}`)
+  // The actual carrier, once, and no other: a wrong carrier is not shown (negative check)
+  const carriers=rows.filter(r=>/^carried by /.test(r))
+  assert.deepEqual(carriers,[`carried by → ${byId[id].carrier}`],`${id}: exactly its own carrier ${JSON.stringify(carriers)}`)
+  const wrong=byId[id].carrier===unrelated[0].carrier?proposals[0].carrier:unrelated[0].carrier
+  assert(!rows.includes(`carried by → ${wrong}`),`${id}: not carried by ${wrong}`)
   const relations=rows.filter(r=>/^(decomposes into|produces|depends on) /.test(r))
   assert.equal(relations.length,expected.filter(e=>/^(decomposes into|produces|depends on)$/.test(e.word)).length,`${id}: exactly the proposed relations ${JSON.stringify(relations)}`)
   assert(!rows.some(r=>/^proposed in dictionary/.test(r)),`${id}: the draft dictionary is not a source, so no row states it`)
@@ -111,7 +127,28 @@ try{
  let ws=await open(workItem.label),rows
  await checkProposal(ws,workItem.id)
  assert(projectText.includes(`${workItem.id} and ${deliverable.id} share only their carrier page`),'the Work Item and the Deliverable are not related, and the Workspace says so')
- steps_.push(`Project → Work Item ${workItem.id}: proposed on the page, carried by the Workspace page, assignments for it; no Association to the Deliverable, and the Project Workspace names the gap`)
+ steps_.push(`Project → Work Item ${workItem.id}: proposed on the page, carried by ${workItem.carrier}, assignments for it; no Association to the Deliverable, and the Project Workspace names the gap`)
+ // Workspace → the dedicated carrier page → a proposal, and back: the page Topic is joined by "carried by" to exactly the proposals that name it
+ await go(ws,workItem.carrier);await atPoint(ws,carrierIri(workItem))
+ rows=await rowsOf(ws)
+ assert.deepEqual(rows.filter(r=>/^carried by /.test(r)).sort(),proposals.map(p=>`carried by ← ${p.label}`).sort(),'the carrier page leads back to exactly the proposals that name it')
+ for(const u of unrelated)assert(!rows.includes(`carried by ← ${u.label}`),`the carrier page of the scope is not the carrier of ${u.id}`)
+ assert(!rows.some(r=>/^(declared on|proposed on|stated on)/.test(r)),'the carrier page is no source: no declared/proposed/stated on row')
+ steps_.push(`Work Item → its carrier page ${workItem.carrier} (a Topic of the project CTM): carried by ← exactly the ${proposals.length} proposals that name it, none of the ${unrelated.length} unrelated proposals, and no "declared on / proposed on / stated on" row (it declares nothing)`)
+ await go(ws,packages[0].label);await checkProposal(ws,packages[0].id)
+ await go(ws,packages[0].carrier);await atPoint(ws,carrierIri(packages[0]))
+ steps_.push(`carrier page → proposal ${packages[0].id} → back to the carrier page: navigation in both directions`)
+ // The unrelated proposals keep the Workspace page: a historical route, and a negative check against the wrong carrier
+ const other=unrelated[0]
+ ws=await open(other.label);await atPoint(ws,other.id)
+ rows=await rowsOf(ws)
+ assert(rows.includes(`carried by → ${other.carrier}`)&&!rows.includes(`carried by → ${proposals[0].carrier}`),`${other.id} stays carried by ${other.carrier}`)
+ await go(ws,other.carrier);await atPoint(ws,carrierIri(other))
+ rows=await rowsOf(ws)
+ for(const u of unrelated)assert(rows.includes(`carried by ← ${u.label}`),`${u.id} leads back from its carrier`)
+ for(const p of proposals)assert(!rows.includes(`carried by ← ${p.label}`),`${p.id} is not carried by ${other.carrier}`)
+ steps_.push(`unrelated proposal ${other.id}: carried by ${other.carrier} (not the scope's carrier); that page leads back to its ${unrelated.length} proposals and to none of the scope's ${proposals.length}`)
+ ws=await open(workItem.label)
  // The Deliverable decomposes into the work packages (the second button of the same label)
  await project.getByRole('button',{name:deliverable.label,exact:true}).nth(1).click();await page.waitForTimeout(500);ws=last()
  await checkProposal(ws,deliverable.id)
@@ -174,6 +211,16 @@ try{
  assert(/The file and the sources mean the same\s*CXTM\s*yes/.test(roundtrip),'CXTM equal')
  assert(/Every Topic and statement traced to its declaration\s*TMDM against the source pages\s*yes/.test(roundtrip),'trace')
  steps_.push('Roundtrip with the scope in the CTM: export octets equal; CXTM equal to the sources; every Topic and statement traced')
+
+ // The carrier page itself, opened from the Project Workspace page (last: opening it replaces the Workspace reading pane to its right): it presents every proposal of the scope and declares nothing
+ await carrierLink.locator('.inspector-inspect').first().click()
+ const carrierPane=last()
+ await carrierPane.getByRole('heading',{name:carrierTitle,exact:true}).waitFor()
+ const carrierText=normalize(await carrierPane.innerText())
+ for(const p of proposals)assert(carrierText.includes(p.id)&&carrierText.includes(p.label),`the carrier page presents ${p.id}`)
+ assert(carrierText.includes('declares nothing')&&carrierText.includes('Nothing here has been declared, accepted or approved'),'the carrier page says it declares nothing')
+ assert(carrierText.includes('Implementation Assignments'),'the carrier page names the source of the proposals')
+ steps_.push(`Project Workspace page → link → the carrier page ${carrierTitle}: it presents the ${proposals.length} proposals of the scope, names Implementation Assignments as their source and says it declares nothing`)
 
  assert.deepEqual(errors,[])
  for(const [f,digest] of Object.entries(before))assert.equal(sha(f),digest,f+' unchanged')

@@ -1,0 +1,19 @@
+PROJECT-WORKSPACE-SCOPE-BROWSER-PASS:
+  Catalog (the trusted review runtime scripts/serve-project-workspace.lisp, not the packaged Catalog) started on loopback over a TEST-COPY site root with topic-maps 88994c1b
+  Catalog → HyperBook HyperDoc Project Workspace → Text pages → page → the Project Workspace reading
+  the Proposals section lists the 18 proposals of the scope with their kinds, "Not declared: proposed on the page Implementation Assignments, without status", and the 4 assignments of the scope
+  Project → Work Item topic-maps-regular-hyperdoc: proposed on the page, carried by Regular HyperDoc Catalog Scope Proposal, assignments for it; no Association to the Deliverable, and the Project Workspace names the gap
+  Work Item → its carrier page Regular HyperDoc Catalog Scope Proposal (a Topic of the project CTM): carried by ← exactly the 18 proposals that name it, none of the 10 unrelated proposals, and no "declared on / proposed on / stated on" row (it declares nothing)
+  carrier page → proposal tm-reg-wp-1 → back to the carrier page: navigation in both directions
+  unrelated proposal project-work-ctm: carried by HyperDoc Project Workspace (not the scope's carrier); that page leads back to its 10 proposals and to none of the scope's 18
+  Project → Deliverable tm-regular-catalog: decomposes into 6 work packages
+  Deliverable → tm-reg-wp-1: proposed on the page, decomposed from the Deliverable, produced by its plan step, delivered by an assignment
+  plan steps along depends-on: tm-reg-p1 → tm-reg-p2 → tm-reg-p3 → tm-reg-p4 → tm-reg-p5 → tm-reg-p6, each with exactly the relations the page proposes
+  tm-reg-p6 → precondition tm-reg-pre-security-review: depends on ← tm-reg-p6; no work package depends on it
+  proposed on → the page Implementation Assignments as a Topic of the project CTM
+  assignment cc-2026-10-28-project-workspace-6162ed68: delivers tm-reg-wp-2, for topic-maps-regular-hyperdoc, names 2 tests, reports the commit df5cf16e, d9da94d8 as an evidence note, no identified evidence entry, no acceptance
+  evidenced by test → the file Topic scripts/test-project-workspace.mjs
+  every assignment of the scope states: No acceptance by the user is recorded.
+  Roundtrip with the scope in the CTM: export octets equal; CXTM equal to the sources; every Topic and statement traced
+  Project Workspace page → link → the carrier page Regular HyperDoc Catalog Scope Proposal: it presents the 18 proposals of the scope, names Implementation Assignments as their source and says it declares nothing
+  nothing written: source pages, the draft dictionary, the CTM file and the site root unchanged

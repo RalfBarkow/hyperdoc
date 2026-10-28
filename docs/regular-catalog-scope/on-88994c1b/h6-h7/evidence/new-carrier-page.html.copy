@@ -1,0 +1,43 @@
+<h1>Regular HyperDoc Catalog Scope Proposal</h1>
+<p><strong>Presentation page.</strong> This page presents the proposed scope of Zettel 11359 and links to where it is written. It is not a source of the project CTM, it declares nothing, it holds no status and no acceptance, and it owns none of what it lists. The Work Item, the Deliverable, the work packages, the plan steps and the preconditions below are <em>proposals</em>: they are written, and stay authoritative, on <a page="Implementation Assignments">Implementation Assignments</a> (in the project CTM they are <em>proposed on</em> that page). The links of those proposals name this page as their <em>carrier</em> (<em>carried by</em>): the page a reader reaches by following a proposal's name. Carrier and source are two different things; neither is a Work relation.</p>
+<p>Nothing here has been declared, accepted or approved. Whether and where a declaration would be carried is not decided on this page.</p>
+
+<h2>Where to read it</h2>
+<ul>
+<li><a page="Implementation Assignments">Implementation Assignments</a>: the proposals, their statements (<em>decomposes into</em>, <em>produces</em>, <em>depends on</em>) and the assignments of the scope.</li>
+<li><a page="Regular Catalog WBS Dictionary">Regular Catalog WBS Dictionary</a>: the draft entries of the six proposed work packages; a draft, not a source.</li>
+<li><a page="HyperDoc Project Workspace">HyperDoc Project Workspace</a>, the page that describes the Workspace, and <a expr="(dreyeck/work/project:project-workspace)" view="Project">Open the HyperDoc Project Workspace</a>: its Proposals section lists every proposal below, each a way into the Workspace; the Point panel of a proposal shows its rows <em>proposed on</em> (Implementation Assignments) and <em>carried by</em> (this page), and from this page's Topic the proposals that name it lead back.</li>
+</ul>
+<p>The Work Item and the Deliverable share only this carrier page: no Relation Contract relates a Work Item to a Deliverable, and the Workspace names that gap. This page does not close it.</p>
+
+<h2>Work Item and Deliverable</h2>
+<ul>
+<li><code>topic-maps-regular-hyperdoc</code> — Regular HyperDoc Catalog with a Navigable Project Topic Map</li>
+<li><code>tm-regular-catalog</code> — Regular HyperDoc Catalog with a Navigable Project Topic Map</li>
+</ul>
+
+<h2>Work packages (WBS)</h2>
+<p>The Deliverable decomposes into these six packages; each is described by an entry of the draft dictionary.</p>
+<ul>
+<li><code>tm-reg-wp-1</code> — 1 Integrated Topic Maps Revision</li>
+<li><code>tm-reg-wp-2</code> — 2 Compatible Project Workspace</li>
+<li><code>tm-reg-wp-3</code> — 3 Inspectable Project Work</li>
+<li><code>tm-reg-wp-4</code> — 4 Safe Public Inspector</li>
+<li><code>tm-reg-wp-5</code> — 5 Reproducible Catalog Package</li>
+<li><code>tm-reg-wp-6</code> — 6 Verified Production Deployment</li>
+</ul>
+
+<h2>Plan steps and preconditions</h2>
+<p>Each plan step produces one package; the steps and the preconditions they depend on are written, with their order, on Implementation Assignments only.</p>
+<ul>
+<li><code>tm-reg-p1</code> — Integrate and verify Topic Maps 88994c1b</li>
+<li><code>tm-reg-p2</code> — Verify the unchanged project CTM</li>
+<li><code>tm-reg-p3</code> — Integrate Project Workspace and Inspector navigation</li>
+<li><code>tm-reg-p4</code> — Verify and enforce public Inspector security</li>
+<li><code>tm-reg-p5</code> — Build and test the regular Linux and Nix Catalog package</li>
+<li><code>tm-reg-p6</code> — Stage, verify, obtain production approval and deploy</li>
+<li><code>tm-reg-pre-admission</code> — Admission of the Project Workspace to a served runtime</li>
+<li><code>tm-reg-pre-security-review</code> — Independent security review of the public Inspector</li>
+<li><code>tm-reg-pre-publish</code> — Decision to publish or transfer the archive</li>
+<li><code>tm-reg-pre-production</code> — Approval of the production activation</li>
+</ul>

@@ -1,0 +1,114 @@
+9c9
+< #   dreyeck/pages/project/Implementation Assignments.html  059d90d04472ae5bc0975491106aa896f12989af7bfa17cf1c0d32d192984ce6
+---
+> #   dreyeck/pages/project/Implementation Assignments.html  e205b90a4c4fe887ec248ce1859aa3c893e9822feabc76f1413860ced13e1288
+512c512
+<     s:source-sha256: "059d90d04472ae5bc0975491106aa896f12989af7bfa17cf1c0d32d192984ce6" .
+---
+>     s:source-sha256: "e205b90a4c4fe887ec248ce1859aa3c893e9822feabc76f1413860ced13e1288" .
+975a976,981
+> <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/regular-hyperdoc-catalog-scope-proposal>
+>     isa s:hyperdoc-page ;
+>     - "Regular HyperDoc Catalog Scope Proposal" ;
+>     s:hyperbook-id: "dreyeck/work/project" ;
+>     s:page-id: "Regular HyperDoc Catalog Scope Proposal" .
+> 
+984c990
+<     s:declaration-text: "1 Integrated Topic Maps Revision — the reviewed commit 6162ed68, its snapshot, manifest and pin, with the identity that HyperDoc checks." .
+---
+>     s:declaration-text: "1 Integrated Topic Maps Revision — the reviewed Topic Maps revision 88994c1b (Task 1C, commit 6162ed68, and Task 1E), its snapshot, manifest and pin, with the identity that HyperDoc checks." .
+1013,1014c1019,1020
+<     - "Integrate and verify Topic Maps 6162ed68" ;
+<     s:declaration-text: "Integrate and verify Topic Maps 6162ed68 — fast-forward the Topic Maps line, pin the snapshot, verify it without .git and run the Topic Maps suite." .
+---
+>     - "Integrate and verify Topic Maps 88994c1b" ;
+>     s:declaration-text: "Integrate and verify Topic Maps 88994c1b — fast-forward the Topic Maps line, pin the snapshot, verify it without .git and run the Topic Maps suite." .
+2004,2013d2009
+< <tag:dreyeck.ch,2026:hyperdoc/gap/work-item-deliverable-unlinked/project-work-ctm/tm-regular-catalog>
+<     isa s:plan-gap ;
+<     - "project-work-ctm and tm-regular-catalog share only their carrier page" ;
+<     s:gap-rule: "A Work Item and a Deliverable name the same carrier page, and no statement relates them. No Relation Contract defines that relation." .
+< 
+< <tag:dreyeck.ch,2026:hyperdoc/gap/work-item-deliverable-unlinked/topic-maps-regular-hyperdoc/project-work-ctm-exchange>
+<     isa s:plan-gap ;
+<     - "topic-maps-regular-hyperdoc and project-work-ctm-exchange share only their carrier page" ;
+<     s:gap-rule: "A Work Item and a Deliverable name the same carrier page, and no statement relates them. No Relation Contract defines that relation." .
+< 
+2297c2293,2294
+< s:carried-by(s:carried: w:topic-maps-regular-hyperdoc, s:carrier-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/hyperdoc-project-workspace>)
+---
+> s:contains-page(s:hyperbook-role: <tag:dreyeck.ch,2026:hyperdoc/hyperbook/dreyeck/work/project>, s:page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/regular-hyperdoc-catalog-scope-proposal>)
+> s:carried-by(s:carried: w:topic-maps-regular-hyperdoc, s:carrier-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/regular-hyperdoc-catalog-scope-proposal>)
+2299c2296
+< s:carried-by(s:carried: w:tm-regular-catalog, s:carrier-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/hyperdoc-project-workspace>)
+---
+> s:carried-by(s:carried: w:tm-regular-catalog, s:carrier-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/regular-hyperdoc-catalog-scope-proposal>)
+2301c2298
+< s:carried-by(s:carried: w:tm-reg-wp-1, s:carrier-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/hyperdoc-project-workspace>)
+---
+> s:carried-by(s:carried: w:tm-reg-wp-1, s:carrier-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/regular-hyperdoc-catalog-scope-proposal>)
+2303c2300
+< s:carried-by(s:carried: w:tm-reg-wp-2, s:carrier-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/hyperdoc-project-workspace>)
+---
+> s:carried-by(s:carried: w:tm-reg-wp-2, s:carrier-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/regular-hyperdoc-catalog-scope-proposal>)
+2305c2302
+< s:carried-by(s:carried: w:tm-reg-wp-3, s:carrier-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/hyperdoc-project-workspace>)
+---
+> s:carried-by(s:carried: w:tm-reg-wp-3, s:carrier-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/regular-hyperdoc-catalog-scope-proposal>)
+2307c2304
+< s:carried-by(s:carried: w:tm-reg-wp-4, s:carrier-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/hyperdoc-project-workspace>)
+---
+> s:carried-by(s:carried: w:tm-reg-wp-4, s:carrier-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/regular-hyperdoc-catalog-scope-proposal>)
+2309c2306
+< s:carried-by(s:carried: w:tm-reg-wp-5, s:carrier-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/hyperdoc-project-workspace>)
+---
+> s:carried-by(s:carried: w:tm-reg-wp-5, s:carrier-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/regular-hyperdoc-catalog-scope-proposal>)
+2311c2308
+< s:carried-by(s:carried: w:tm-reg-wp-6, s:carrier-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/hyperdoc-project-workspace>)
+---
+> s:carried-by(s:carried: w:tm-reg-wp-6, s:carrier-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/regular-hyperdoc-catalog-scope-proposal>)
+2313c2310
+< s:carried-by(s:carried: w:tm-reg-p1, s:carrier-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/hyperdoc-project-workspace>)
+---
+> s:carried-by(s:carried: w:tm-reg-p1, s:carrier-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/regular-hyperdoc-catalog-scope-proposal>)
+2315c2312
+< s:carried-by(s:carried: w:tm-reg-p2, s:carrier-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/hyperdoc-project-workspace>)
+---
+> s:carried-by(s:carried: w:tm-reg-p2, s:carrier-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/regular-hyperdoc-catalog-scope-proposal>)
+2317c2314
+< s:carried-by(s:carried: w:tm-reg-p3, s:carrier-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/hyperdoc-project-workspace>)
+---
+> s:carried-by(s:carried: w:tm-reg-p3, s:carrier-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/regular-hyperdoc-catalog-scope-proposal>)
+2319c2316
+< s:carried-by(s:carried: w:tm-reg-p4, s:carrier-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/hyperdoc-project-workspace>)
+---
+> s:carried-by(s:carried: w:tm-reg-p4, s:carrier-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/regular-hyperdoc-catalog-scope-proposal>)
+2321c2318
+< s:carried-by(s:carried: w:tm-reg-p5, s:carrier-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/hyperdoc-project-workspace>)
+---
+> s:carried-by(s:carried: w:tm-reg-p5, s:carrier-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/regular-hyperdoc-catalog-scope-proposal>)
+2323c2320
+< s:carried-by(s:carried: w:tm-reg-p6, s:carrier-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/hyperdoc-project-workspace>)
+---
+> s:carried-by(s:carried: w:tm-reg-p6, s:carrier-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/regular-hyperdoc-catalog-scope-proposal>)
+2325c2322
+< s:carried-by(s:carried: w:tm-reg-pre-admission, s:carrier-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/hyperdoc-project-workspace>)
+---
+> s:carried-by(s:carried: w:tm-reg-pre-admission, s:carrier-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/regular-hyperdoc-catalog-scope-proposal>)
+2327c2324
+< s:carried-by(s:carried: w:tm-reg-pre-security-review, s:carrier-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/hyperdoc-project-workspace>)
+---
+> s:carried-by(s:carried: w:tm-reg-pre-security-review, s:carrier-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/regular-hyperdoc-catalog-scope-proposal>)
+2329c2326
+< s:carried-by(s:carried: w:tm-reg-pre-publish, s:carrier-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/hyperdoc-project-workspace>)
+---
+> s:carried-by(s:carried: w:tm-reg-pre-publish, s:carrier-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/regular-hyperdoc-catalog-scope-proposal>)
+2331c2328
+< s:carried-by(s:carried: w:tm-reg-pre-production, s:carrier-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/hyperdoc-project-workspace>)
+---
+> s:carried-by(s:carried: w:tm-reg-pre-production, s:carrier-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/regular-hyperdoc-catalog-scope-proposal>)
+2627,2630d2623
+< s:gap-concerns(s:gap: <tag:dreyeck.ch,2026:hyperdoc/gap/work-item-deliverable-unlinked/project-work-ctm/tm-regular-catalog>, s:subject: w:project-work-ctm)
+< s:gap-concerns(s:gap: <tag:dreyeck.ch,2026:hyperdoc/gap/work-item-deliverable-unlinked/project-work-ctm/tm-regular-catalog>, s:subject: w:tm-regular-catalog)
+< s:gap-concerns(s:gap: <tag:dreyeck.ch,2026:hyperdoc/gap/work-item-deliverable-unlinked/topic-maps-regular-hyperdoc/project-work-ctm-exchange>, s:subject: w:topic-maps-regular-hyperdoc)
+< s:gap-concerns(s:gap: <tag:dreyeck.ch,2026:hyperdoc/gap/work-item-deliverable-unlinked/topic-maps-regular-hyperdoc/project-work-ctm-exchange>, s:subject: w:project-work-ctm-exchange)
