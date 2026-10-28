@@ -1,0 +1,10 @@
+start d1 1793204874 load averages: 28.93 13.27 12.74
+end d1 exit=1
+start d2 1793204940 load averages: 60.20 30.80 19.72
+end d2 exit=0
+all-done
+start e1-control-6162ed68 load averages: 17.44 25.31 19.99
+end e1-control-6162ed68 exit=0
+start e2-new-88994c1b load averages: 29.51 22.71 19.68
+end e2-new-88994c1b exit=0
+all-done

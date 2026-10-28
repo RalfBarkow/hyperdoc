@@ -1,0 +1,7 @@
+start c1-worktree-catalog 1793203876 load load averages: 13.16 14.07 16.72
+end c1-worktree-catalog exit=1 1793203914
+start c2-worktree-project 1793203914 load load averages: 9.98 13.19 16.29
+end c2-worktree-project exit=0 1793204284
+start c3-stage1copy-project 1793204284 load load averages: 10.87 11.14 14.09
+end c3-stage1copy-project exit=0 1793204859
+all-done

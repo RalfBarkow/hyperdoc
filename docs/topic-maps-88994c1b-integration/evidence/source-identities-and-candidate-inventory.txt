@@ -1,0 +1,55 @@
+# Source identities and candidate inventory, 2026-10-28
+
+HyperDoc worktree: /Users/rgb/workspace/hyperdoc-topic-maps-88994c1b branch claude/topic-maps-88994c1b-integration HEAD 909bcab342c8107f3b2ed2d052f72307b43a9c7f
+Topic Maps: /Users/rgb/workspace/topic-maps branch codex/project-work-slice-22u HEAD 88994c1b9e1edbf13e665e984a5c9c3b2cdf7575 tree b0835676837d6a53457a87880d64046035140bb7 status lines        0
+Snapshot archive sha256 6fe74dc31e5291b03d440cfbeaf41c38d021225f36ce7fb96afcbcd632006cdd (1,062,834 octets); manifest sha256 f3bc7890ef5b7cfa4b85126d64d3660765ed3a2ef1f1dc30316ff5610dfc2b89; NAR hash sha256-5h3t+4tb0J49Zt9bWtu3ZCX46OjDVmZOWlfy/pu7h40=; store path /nix/store/kna6395gl32f2hl4n3ha4776zm9r0sgb-source
+Original project CTM sha256 f4f04bb49ce3b762b3e1c0bccf9e177e11785d33db87e8c0d043b04820b540d3 (this tree, unchanged)
+Stage 1 CTM sha256 fe2955e93239704673a2a38492ea92e57f0d221f14313603dd1dd5f206b340b8 (read-only from /Users/rgb/workspace/hyperdoc-zettel-11359; not part of this candidate)
+Zettel 11359 worktree: status entries        9, tracked diff sha256 c56f987e8017430d1de8356602799fdaa2f6c382c5e27f02c4790bb7c354f2e0 (unchanged since the start of this work)
+SBCL: SBCL 2.4.10
+
+## Changed tracked files (git diff --stat)
+ dreyeck.asd                                  |  3 ++-
+ dreyeck/src/catalog-topic-maps.lisp          |  2 +-
+ dreyeck/tests/source-snapshot.lisp           |  6 +++---
+ dreyeck/work/project/project-workspace.lisp  |  5 +++--
+ dreyeck/work/topic-maps-project-example.lisp |  2 +-
+ nix/topic-maps-source.nix                    | 12 ++++++------
+ 6 files changed, 16 insertions(+), 14 deletions(-)
+
+## SHA-256 of every candidate file at the time of the final 105-check run (files unchanged since 18:05:49; run 3 ended 18:07:00)
+edd4bf82085c0fb6befe415a59a08a0d35b419e9f08470ccaa16fa5f88007135  dreyeck.asd
+70ad70a0c6c2ccf71bab415a2d91824877c0fb5c8d2ec5484f384b0d71b1f9c4  dreyeck/src/catalog-topic-maps.lisp
+6b5efecb5d9aaeeb7a0b5659b953a4a18d7cc3af3d955d3540ffd1386611a31a  dreyeck/tests/source-snapshot.lisp
+aac51495705f51bea0cc5a7d5cedd6fd4fcd56dab674c135be7ba1477f8fff9e  dreyeck/work/project/project-workspace.lisp
+7e0ebba6a2ac4c3d490845079954daf3d73a7177e2acd9eac944eaf38863eeaa  dreyeck/work/topic-maps-project-example.lisp
+ad9581afc75e4145d8930a1ae8aed6a2e4a6c9faa20e16497b48ddc619676944  nix/topic-maps-source.nix
+694fb746ca131c1ad8c0980a63d366a6b2b44d880ca6031b91acee7d87a4ea25  dreyeck/work/topic-maps-task-1e-review/code/package.lisp
+0d2e0abcc52fed14ad6caba01700838e71651ba14258273deab7702fa569a9d5  dreyeck/work/topic-maps-task-1e-review/code/review.lisp
+ca5d3822ec4f93140ba91ab988b89bfe5a9f3703ff11aa56b859e3d78a9c9d0d  dreyeck/work/topic-maps-task-1e-review/evidence/SHA256SUMS
+1185779c8553b5cc6054fa37eeb4bdc004b1ca50fe0f45cfe473a3d3619d2fce  dreyeck/work/topic-maps-task-1e-review/evidence/control-stage1-ctm-at-6162ed68.log
+ee6c30f1b2c84c4845dbd3facd87ff8f491e68442aae593444aff48352892efd  dreyeck/work/topic-maps-task-1e-review/evidence/control-stage1-ctm-at-88994c1b.log
+f4e1c7fd979088e909d50d44bc0d44e0b3faad94fb3746d33dc68ede174efbc5  dreyeck/work/topic-maps-task-1e-review/evidence/negative-6162ed68-checkout-not-pinned.log
+f90549ea7c521cd69b9e72559e2235dc8d9d401747a1c23749ebf7bd2452f348  dreyeck/work/topic-maps-task-1e-review/evidence/snapshot-archive-and-manifest.sha256
+cef1d1d573e96f621b7b7ceaa0011e952a069f0c65924ca2d9e66056a436e981  dreyeck/work/topic-maps-task-1e-review/evidence/snapshot-archive-verification.json
+b1337b4440acea50f2774663ddfc08fcdf088b4f8e0e7bd3fb04db0443c1010a  dreyeck/work/topic-maps-task-1e-review/evidence/snapshot-suites.log
+66b49341450748c416f051a70e7e6ae2864d02c0dbe760a3d91eea4e663b5056  dreyeck/work/topic-maps-task-1e-review/evidence/stage1-ctm-timings-at-6162ed68.txt
+8a99d16e6d8b3aad832d88a4487919bbecd35f2559d461f1c3c7a3295b0b978f  dreyeck/work/topic-maps-task-1e-review/evidence/suites-and-controls.txt
+e85bcef5fbed82212689c590c58fd82e01b9bf23748db8adda4bf73272bd38f0  dreyeck/work/topic-maps-task-1e-review/evidence/task1e-commit-record.md
+c3970caad49c029adedb00eda49b8407c048712f55f47016b3e07d293716181b  dreyeck/work/topic-maps-task-1e-review/evidence/task1e-independent-review.md
+7fe5a023036ee4b70050906f98b7a78f98ea7331ee97f9d241558da81a4c519f  dreyeck/work/topic-maps-task-1e-review/evidence/workspace-original-ctm-git-checkout.log
+926726500553ee68e086cf766e3594c9f307fc869dfa73c84a9d69665f915f3f  dreyeck/work/topic-maps-task-1e-review/evidence/workspace-original-ctm-verified-snapshot.log
+c211e5309e9a06ac7b18f12d11d06f01df5e569a5a722f362850cf1c882616fb  dreyeck/work/topic-maps-task-1e-review/evidence/workspace-stage1-ctm-git-checkout-run1.log
+05d757447fa955bc6c90efc74ec59d6d66047203df0dea9afc7ad0e132d11277  dreyeck/work/topic-maps-task-1e-review/evidence/workspace-stage1-ctm-git-checkout-run2.log
+db4fbea6eb72e9f0327f41cc25fef2248cd82bee2f04ef5bdede88cafab3a496  dreyeck/work/topic-maps-task-1e-review/evidence/workspace-stage1-ctm-verified-snapshot.log
+c0783fa237e45d390837f074625963ff2f8a583f875614921d1298b876fa95e4  dreyeck/work/topic-maps-task-1e-review/pages/Project Workspace on 88994c1b.html
+f2217b09b3d04ff7056160a5ce33855c9645ebe517d4e9defaf79993fe8b6ec5  dreyeck/work/topic-maps-task-1e-review/pages/Re-pinning Topic Maps to 88994c1b.html
+b6b3fc5043fd54318bb745578bf4ace8c9618d55d6c8d53e94ed5f6538f2bd89  dreyeck/work/topic-maps-task-1e-review/pages/Remaining Requirements.html
+bba48e58c1959fdac8de6a05637568a8ce9d8518ad0e36e1b49d8559a7d193df  dreyeck/work/topic-maps-task-1e-review/pages/Task 1C and Task 1E.html
+1998fb6bab56a9a4ba7b0232c41cfe82f59bcb7649ce271e9b8297c42f84bc06  dreyeck/work/topic-maps-task-1e-review/pages/The 88994c1b Snapshot.html
+273cf2c591d6e016a3c26f5822c57265491a3ac2b37205754d9e7786c4189432  dreyeck/work/topic-maps-task-1e-review/pages/The Stage 1 CTM and the Proposed Work Packages.html
+c205ac35ec2575ef2e88871545d63b4016251254ed947d4f384c2652b2ebf41a  dreyeck/work/topic-maps-task-1e-review/serve.lisp
+e779027dca112c3b20617998065866666e28ee8d3f89e4f6cb00c2e4cac76025  dreyeck/work/topic-maps-task-1e-review/serve.sh
+8c8c74be7c760dae17cf14e0db1122a29271f148b112b5c98c4fdba94a2e65d1  dreyeck/work/topic-maps-task-1e-review/tests/review.lisp
+53c0b412461366ad1bf25da561794894e280ed0a1975a3434a45c436484b8d6d  dreyeck/work/topic-maps-task-1e-review/topic-maps-task-1e-review.asd
+f3bc7890ef5b7cfa4b85126d64d3660765ed3a2ef1f1dc30316ff5610dfc2b89  nix/topic-maps-88994c1b.manifest
