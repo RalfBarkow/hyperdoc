@@ -1,0 +1,6 @@
+HTTP-PASS: fixed snapshot, manifest, SHA-256 and source-page identities
+HTTP-REJECT-PASS: missing - Resource unavailable
+HTTP-REJECT-PASS: bad-digest - Incorrect digest sidecar
+HTTP-REJECT-PASS: unexpected-content - Unexpected revision, identity or trusted digest
+Focused runner exit: 0
+HTTP-BOOTSTRAP-PASS: 3 negative cases rejected before native reading; 1 verified native read-back
