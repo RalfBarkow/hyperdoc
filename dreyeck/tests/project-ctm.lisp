@@ -408,9 +408,13 @@ page names, delivers nothing, and changes no status or acceptance of pwc-wp-4 an
             (problem "no changes source to ~A" path))))
       (when (with-assignment "assignment-delivers") (problem "the assignment delivers ~A" (with-assignment "assignment-delivers")))
       (dolist (type '("acceptance-decision" "withdrawal" "acceptance-record" "withdrawal-record"))
-        (when (or (find-if (lambda (sig) (search (%o-schema type) sig)) signatures)
-                  (find (%o-schema type) (topic-maps.tmdm:topic-map-topics map) :key #'%si1 :test #'string=))
-          (problem "the project CTM has ~A" type)))
+        ;; Identified evidence now needs the existing schema. Schema Topics are
+        ;; definitions, not decisions: reject actual decision relations/instances.
+        (when (or (find (%o-schema type) (topic-maps.tmdm:topic-map-associations map)
+                        :key (lambda (a) (%si1 (topic-maps.tmdm:association-type a))) :test #'equal)
+                  (some (lambda (tp) (member (%o-schema type) (mapcar #'%si1 (p::%types map tp)) :test #'equal))
+                        (topic-maps.tmdm:topic-map-topics map)))
+          (problem "the project CTM has a decision relation or instance of ~A" type)))
       (dolist (wp '("pwc-wp-4" "pwc-wp-7"))
         (let ((now (find (%o-work wp) (topic-maps.tmdm:topic-map-topics map) :key #'%si1 :test #'string=))
               (then (find (%o-work wp) (topic-maps.tmdm:topic-map-topics committed) :key #'%si1 :test #'string=))
@@ -490,6 +494,99 @@ comparisons on five mutations of TEXT, each of which they must detect."
                     (push (%expand (subseq line 0 (position #\( line))) associations)))
              (when (eql 0 (search "    isa " line)) (incf isa)))
     (values subjects associations isa)))
+
+(defun codex-report-tests (reading)
+  "One attributed Cloud investigation, using the ordinary evidence and Workspace paths."
+  (let* ((id "codex-2026-10-29-template-identity-substitution")
+         (key (format nil "assignment/~A" id))
+         (model (p:reading-model reading))
+         (map (p:revision-map (p:reading-document reading)))
+         (index (p::%index map))
+         (assignment (find id (p:model-assignments model) :key #'p::assignment-id :test #'equal))
+         (owner (gethash (p::%iri "assignment" id) index))
+         (ws (p:reading-workspace reading))
+         (evidence-ids '("original-source" "corpus-expectation" "reader-behavior" "expanded-control"
+                         "grammar-reading" "substitution-reading" "unresolved-question"
+                         "unresolved-contracts" "execution-boundary" "decision-note")))
+    (check "codex-report:assignment-is-a-native-topic" (and assignment owner))
+    (check "codex-report:goal-keeps-repository-branch-and-baseline"
+           (let ((goal (first (p::%occurrences owner (p:schema-iri "goal")))))
+             (every (lambda (s) (search s goal))
+                    '("github.com/RalfBarkow/topic-maps" "codex/ctm-template-identity-substitution"
+                      "88994c1b9e1edbf13e665e984a5c9c3b2cdf7575"))))
+    (check "codex-report:no-invented-work-or-deliverable-relation" (null (p::assignment-refs assignment)))
+    (check "codex-report:no-acceptance-record" (null (p:model-acceptance model)))
+    (check "codex-report:source-page-is-a-native-association-player"
+           (let* ((source (gethash (p:page-iri "dreyeck/work/project" "Implementation Assignments") index))
+                  (a (p::%of-role map owner "declared-on" "declaration")))
+             (and a (eq source (p::%player a (p:schema-iri "source-page"))))))
+    (check "codex-report:source-page-is-reachable"
+           (member "page/dreyeck/work/project/implementation-assignments" (%neighbours ws key) :test #'equal))
+    (dolist (entry-id evidence-ids)
+      (let* ((entry-key (format nil "evidence/~A/~A" id entry-id))
+             (entry (gethash (concatenate 'string p:+base+ entry-key) index))
+             (stated (and entry (topic-maps.tmdm:topic-reified entry)))
+             (view (find "Topicmap" (v:all-views ws) :key #'v:view-title :test #'equal)))
+        (check (format nil "codex-report:~A:attributed-native-evidence" entry-id)
+               (and stated (eq owner (topic-maps.tmdm:occurrence-parent stated))
+                    (eq entry (topic-maps.tmdm:item-reifier stated))
+                    (eq (gethash (p:schema-iri "evidence-note") index) (topic-maps.tmdm:occurrence-type stated))
+                    (eql 0 (search "Operator report" (topic-maps.tmdm:occurrence-value stated)))
+                    (member (gethash (p:schema-iri "evidence-entry") index) (p::%types map entry) :test #'eq)))
+        ;; Reification edges present the native occurrence; they are not invented TMDM Associations.
+        (check (format nil "codex-report:~A:assignment-to-evidence" entry-id)
+               (member entry-key (%neighbours ws key) :test #'equal))
+        (check (format nil "codex-report:~A:evidence-to-assignment" entry-id)
+               (member key (%neighbours ws entry-key) :test #'equal))
+        (let* ((html (v:view-html view)) (refs (mapcar #'cdr (v:view-references view))))
+          (check (format nil "codex-report:~A:inspector-native-object-and-report" entry-id)
+                 (and (member entry refs :test #'eq) (search "Reported by the executor" html)
+                      (search "Operator report" html))))))
+    (flet ((text (entry-id)
+             (topic-maps.tmdm:occurrence-value
+              (topic-maps.tmdm:topic-reified (gethash (p::%iri "evidence" id entry-id) index)))))
+      (check "codex-report:source-and-expectation-are-distinct"
+             (and (search "topic $iri." (text "original-source"))
+                  (search "#topic" (text "corpus-expectation"))))
+      (check "codex-report:observation-is-not-a-new-run"
+             (and (search "character 34, line 3, column 15" (text "reader-behavior"))
+                  (search "no fresh Lisp test was executed" (text "execution-boundary"))
+                  (search "not a PASS" (text "expanded-control"))))
+      (check "codex-report:competing-readings-and-unresolved-question-stay-distinct"
+             (and (search "without an explicit variable alternative" (text "grammar-reading"))
+                  (search "competing reading" (text "substitution-reading"))
+                  (search "remain unverified" (text "unresolved-question"))))
+      (check "codex-report:three-contracts-remain-unresolved"
+             (every (lambda (s) (search s (text "unresolved-contracts")))
+                    '("NOT-RUN" "ctm/in/template-subject-identifier2.ctm"
+                      "ctm/invalid/template-item-identifier3.ctm" "ctm/invalid/template-subject-locator3.ctm")))
+      (check "codex-report:decision-note-has-no-invented-immutable-identity"
+             (and (search "uncommitted" (text "decision-note"))
+                  (search "no document hash, publication URL or commit identity is asserted" (text "decision-note")))))
+    (dolist (entry (remove-if-not (lambda (e) (eq assignment (p::entry-assignment e))) (p:model-evidence-entries model)))
+      (check (format nil "codex-report:~A:no-fictional-execution-report" (p:entry-key entry))
+             (not (p::entry-execution-p entry))))
+    ;; Remove only this authored section in memory: all prior Work declarations,
+    ;; statements and unrelated assignment fields/relations must remain the same.
+    (let* ((page (p::source-text (%item (p::model-sources model) :assignments)))
+           (start (search (format nil "<section data-assignment=~S>" id) page))
+           (end (and start (search "</section>" page :start2 start)))
+           (old (p:build-project-model
+                 (p:read-project-sources :texts `((:assignments . ,(concatenate 'string (subseq page 0 start)
+                                                                               (subseq page (+ end 10)))))))))
+      (flet ((declarations (m)
+               (mapcar (lambda (d) (list (p:declaration-id d) (p:declaration-kind d) (p:declaration-status d)
+                                        (p::declaration-text d) (p:declaration-page-iri d))) (p:model-declarations m)))
+             (statements (m)
+               (mapcar (lambda (s) (list (p:statement-iri s) (p:statement-from s) (p:statement-relation s)
+                                        (p:statement-to s) (p:statement-page-iri s))) (p:model-statements m)))
+             (assignments (m)
+               (loop for a in (p:model-assignments m) unless (equal id (p::assignment-id a))
+                     collect (list (p::assignment-id a) (p::assignment-title a) (p::assignment-fields a)
+                                   (p::assignment-refs a) (p::assignment-lists a)))))
+        (check "codex-report:preserves-declared-work" (equal (declarations old) (declarations model)))
+        (check "codex-report:preserves-work-relationships" (equal (statements old) (statements model)))
+        (check "codex-report:preserves-unrelated-assignment-statements" (equal (assignments old) (assignments model)))))))
 
 (defun readback-tests ()
   (let* ((identity (p::topic-maps-source-identity)) (start (get-internal-real-time))
@@ -629,6 +726,7 @@ comparisons on five mutations of TEXT, each of which they must detect."
       (dolist (a (p:model-assignments model))
         (check (format nil "inspector:project-view-offers-~A" (p::assignment-id a)) (search (p::assignment-title a) overview)))
       (check "inspector:project-view-offers-the-ctm-document" (search "The project CTM document" overview)))
+    (codex-report-tests reading)
     (check "nothing-written:no-page-authoring-writer-loaded" (null (find-package "DREYECK/FEDWIKI-PAGE-AUTHORING")))
     seconds))
 
@@ -772,15 +870,25 @@ RECORDS and RECORDS-TEXT are NIL). The records page always has the same title, s
                                                       (format nil "~A:dreyeck/work/project/hyperdoc-project.ctm" commit))
                                                 :output :string)))
          (baseline (funcall git +baseline-commit+)) (head (funcall git "HEAD")))
-    (check "productive:no-acceptance-record-or-vocabulary"
-           (and (null (p:model-acceptance (p:reading-model reading))) (not (search "acceptance-decision" text)) (not (search "Acceptance record" text))
-                (not (search "retained-wbs-acceptance-criterion" text)) (not (search "supersedes" text))))
-    (check "productive:no-evidence-entry-or-criterion-revision"
-           (and (null (p:model-evidence-entries (p:reading-model reading)))
-                (not (search (p::%namespace "evidence") text)) (not (search (p::%namespace "criterion") text))
-                (notany #'topic-maps.tmdm:item-reifier (loop for tp in (topic-maps.tmdm:topic-map-topics map) append (topic-maps.tmdm:topic-occurrences tp)))))
+    (check "productive:no-acceptance-record-or-decision"
+           (and (null (p:model-acceptance (p:reading-model reading)))
+                (every (lambda (type) (null (p::%of-type map (p:schema-iri type))))
+                       '("acceptance-decision" "withdrawal" "supersedes"))
+                (notany (lambda (tp) (intersection '("Acceptance record" "Withdrawal record" "WBS criterion")
+                                                 (%type-names map tp) :test #'equal))
+                        (topic-maps.tmdm:topic-map-topics map))))
+    (check "productive:evidence-reifiers-are-exactly-the-authored-entries-no-criterion-revision"
+           (let ((expected (mapcar (lambda (e) (gethash (p:entry-iri e) index))
+                                   (p:model-evidence-entries (p:reading-model reading))))
+                 (actual (loop for tp in (topic-maps.tmdm:topic-map-topics map)
+                               append (loop for o in (topic-maps.tmdm:topic-occurrences tp)
+                                            when (topic-maps.tmdm:item-reifier o) collect (topic-maps.tmdm:item-reifier o)))))
+             (and expected (not (search (p::%namespace "criterion") text))
+                  (null (set-exclusive-or expected actual :test #'eq)))))
     (check "productive:existing-evidence-entries-are-not-retrofitted"
-           (null (%with "li" "data-evidence" (%project-page "Implementation Assignments"))))
+           (every (lambda (e) (equal "codex-2026-10-29-template-identity-substitution"
+                                     (p::assignment-id (p::entry-assignment e))))
+                  (p:model-evidence-entries (p:reading-model reading))))
     (check "productive:pwc-wp-8-is-a-proposal-without-status-or-acceptance"
            (let ((wp (gethash (p:topic-iri "pwc-wp-8") index)))
              (and wp (null (%occ wp "work status")) (%plays map "proposed on" "proposal" wp) (null (%plays map "declared on" "declaration" wp)))))
@@ -790,7 +898,8 @@ RECORDS and RECORDS-TEXT are NIL). The records page always has the same title, s
     (check "productive:no-draft-dictionary-requirements"
            (let ((wp (gethash (p:topic-iri "pwc-wp-8") index)))
              (and (null (%occ wp "WBS acceptance criterion")) (null (%occ wp "WBS evidence")) (null (%occ wp "WBS scope"))
-                  (not (search "proposed-in-dictionary" text)) (not (search (p:schema-iri "wbs-criterion") text)) (not (search "s:wbs-criterion" text)))))
+                  (null (%plays map "proposed in dictionary" "work package" wp))
+                  (not (search (p::%namespace "criterion") text)))))
     ;; Each declared Work Topic's status is the data-status its Work page authors, read here from the HTML; it is a status, not acceptance.
     (check "productive:work-status-stays-a-status"
            (every (lambda (item)
