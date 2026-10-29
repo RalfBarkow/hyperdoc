@@ -1,0 +1,6 @@
+# Deployment blockers, 2026-10-29, on the Darwin packaged executables (no push, no deployment)
+abort.py <package>/bin/hyperdoc-catalog <fixture>:  warm server; a client sends GET / and closes the socket at once, 40 times.
+  candidate a9155676 (Darwin package l1kd7nch…):  "/ close DEAD exit=1"; 63 BROKEN-PIPE lines
+  base 0c388f95 (package 9f44pgsx…, the code the server runs now):  "/ close DEAD exit=1"; 41 BROKEN-PIPE lines
+hist.lisp (served, click path, 35 reviewed Workspace controls, 2000 rounds):
+  work-workspace is NOT a singleton (two calls are not EQ); history 0 -> 70000 after 70000 clicks on one Workspace object
