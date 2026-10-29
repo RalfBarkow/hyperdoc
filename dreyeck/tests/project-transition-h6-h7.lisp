@@ -54,7 +54,7 @@
 (defun %decl-line (text)
   (format nil "occurrence ~A ~S ^^http://www.w3.org/2001/XMLSchema#string" (%o-schema "declaration-text") text))
 
-(defparameter +preservation-transitions+ '(%transition-h6-h7)
+(defparameter +preservation-transitions+ '(%transition-h6-h7 %transition-graph-a)
   "Functions returning the transition specifications the preservation guard knows. Each applies to exactly one revision pair.")
 
 ;;; Applicability: the revision compared with and the CTM tested are exactly the named ones

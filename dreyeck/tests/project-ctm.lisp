@@ -429,7 +429,7 @@ page names, delivers nothing, and changes no status or acceptance of pwc-wp-4 an
     (assert (p:revision-map revision) () "~A was refused: ~S" label (p:revision-refusal revision))
     (p:revision-map revision)))
 
-(declaim (ftype function apply-transition %applicable-transition))
+(declaim (ftype function apply-transition-by-spec %applicable-transition))
 (defun oracle-tests (map text)
   "The read-back MAP of the CTM TEXT against the source pages, the committed revision and the exchange review's invariants; then the same
 comparisons on five mutations of TEXT, each of which they must detect."
@@ -444,7 +444,7 @@ comparisons on five mutations of TEXT, each of which they must detect."
            ;; revision pair it names; otherwise the differences stay as they are and the checks below are unchanged.
            (transition (%applicable-transition committed-text text)))
       (when transition
-        (multiple-value-bind (remaining problems) (apply-transition transition committed map d)
+        (multiple-value-bind (remaining problems) (apply-transition-by-spec transition committed map d)
           (check (format nil "transition:~A:what-it-names-is-exactly-as-specified" (getf transition :id)) (null problems))
           (setf d remaining)))
       (check "preserved:no-topic-of-the-committed-revision-lost" (null (getf d :lost-topics)))

@@ -1,0 +1,369 @@
+diff --git a/dreyeck.asd b/dreyeck.asd
+index b2777052..dc2782be 100644
+--- a/dreyeck.asd
++++ b/dreyeck.asd
+@@ -3374,6 +3374,7 @@
+   :components ((:file "dreyeck/tests/project-ctm")
+                (:file "dreyeck/tests/project-scope")
+                (:file "dreyeck/tests/project-transition-h6-h7")
++               (:file "dreyeck/tests/project-transition-graph-a")
+                (:module "dreyeck/tests/fixtures/project-acceptance"
+                 :components ((:static-file "README.txt") (:static-file "synthetic-work.html") (:static-file "synthetic-assignments-addition.html")
+                              (:static-file "synthetic-dictionary-c1.html") (:static-file "synthetic-dictionary-c2.html")
+@@ -3385,7 +3386,8 @@
+              (declare (ignore op component))
+              (uiop:symbol-call :dreyeck/work/project/tests :run-tests)
+              (uiop:symbol-call :dreyeck/work/project/tests :run-scope-tests)
+-             (uiop:symbol-call :dreyeck/work/project/tests :run-transition-tests)))
++             (uiop:symbol-call :dreyeck/work/project/tests :run-transition-tests)
++             (uiop:symbol-call :dreyeck/work/project/tests :run-transition-graph-a-tests)))
+ 
+ 
+ ;; Optional local Slice 22U reading. The independent checkout is not vendored.
+diff --git a/dreyeck/pages/project/Implementation Assignments.html b/dreyeck/pages/project/Implementation Assignments.html
+index 367e000d..a1f25e32 100644
+--- a/dreyeck/pages/project/Implementation Assignments.html	
++++ b/dreyeck/pages/project/Implementation Assignments.html	
+@@ -29,7 +29,7 @@
+ 
+ <h2>Proposed Work: Regular HyperDoc Catalog with a Navigable Project Topic Map</h2>
+ <p>The Work Item, the Deliverable, the work packages and the plan of Zettel 11359. None of them is declared, and none has a work status. The work packages are described by the draft <code>Regular Catalog WBS Dictionary</code>, which declares nothing either. This scope is distinct from <code>tmd-deployment</code>, the separate staging Catalog, and from <code>project-work-ctm-exchange</code>, the exchangeable project CTM; it repeats no deliverable of either. The links of these proposals name the page <a page="Regular HyperDoc Catalog Scope Proposal">Regular HyperDoc Catalog Scope Proposal</a> as their carrier: it presents the scope and links to it and declares nothing, while the proposals are written, and stay authoritative, on this page.</p>
+-<p>Completeness: the six elements together are the whole defined scope. A Topic Maps revision whose identity can be checked (1), a Project Workspace that reads the unchanged project CTM with it (2), project work a reader can navigate and inspect in that Workspace (3), a public Inspector that is safe to expose (4), the regular Catalog package built reproducibly (5) and its verified deployment (6). What the scope needs and does not deliver are preconditions of the plan below: the user's admission of the Project Workspace to a served runtime, an independent security review, the decision to publish the archive and the approval of the production activation. Project management is not an element: this scope proposal and the integration review deliver no package.</p>
++<p>Completeness: the six elements together are the whole defined scope. A Topic Maps revision whose identity can be checked (1), a Project Workspace that reads the unchanged project CTM with it (2), project work a reader can navigate and inspect in that Workspace (3), a public Inspector that is safe to expose (4), the regular Catalog package built reproducibly (5) and its verified deployment (6). What the scope needs and does not deliver are preconditions of the plan below: an independent security review, the decision to publish the archive and the approval of the production activation. The Project Workspace is read, inspected and tested locally and is not admitted to the served regular Catalog within this scope: the Catalog's startup guard refuses it and stays; admitting it would be a separate decision of the user. Project management is not an element: this scope proposal and the integration review deliver no package.</p>
+ <p>Overlap: 1 and 5 meet at the snapshot: 1 makes the revision and its manifest verifiable, 5 builds the package that serves it. 2 and 3 both concern the Project Workspace: 2 that it reads the unchanged project CTM with the revision and refuses what it cannot identify, 3 what the project work shows and how it is navigated, including the reading of the integration. 4 and 6 meet at exposure: 4 makes the views safe, 6 activates them. Package 5 builds the same regular Catalog on which the separate staging package of <code>tmd-deployment</code> was modelled; it neither changes that package nor its running service.</p>
+ <p>Gap: no Relation Contract relates a Work Item to a Deliverable, so none is proposed; the Deliverable <code>tm-regular-catalog</code> decomposes into the six packages and is related to its Work Item only by this text (see pwc-wp-3).</p>
+ <ul>
+@@ -60,7 +60,6 @@
+ <li><a page="Regular HyperDoc Catalog Scope Proposal" hyperbook="dreyeck/work/project" data-proposed-topic="tm-reg-p4" data-kind="plan step">Verify and enforce public Inspector security</a> — read-only public views, gated run buttons, an independent review.</li>
+ <li><a page="Regular HyperDoc Catalog Scope Proposal" hyperbook="dreyeck/work/project" data-proposed-topic="tm-reg-p5" data-kind="plan step">Build and test the regular Linux and Nix Catalog package</a> — on an independent builder, with the derivation compared.</li>
+ <li><a page="Regular HyperDoc Catalog Scope Proposal" hyperbook="dreyeck/work/project" data-proposed-topic="tm-reg-p6" data-kind="plan step">Stage, verify, obtain production approval and deploy</a> — activate the generation, verify identity and boundaries, show the rollback.</li>
+-<li><a page="Regular HyperDoc Catalog Scope Proposal" hyperbook="dreyeck/work/project" data-proposed-topic="tm-reg-pre-admission" data-kind="precondition">Admission of the Project Workspace to a served runtime</a> — the user's decision; the Catalog's startup guard refuses the Workspace until it is made.</li>
+ <li><a page="Regular HyperDoc Catalog Scope Proposal" hyperbook="dreyeck/work/project" data-proposed-topic="tm-reg-pre-security-review" data-kind="precondition">Independent security review of the public Inspector</a> — a report by a reviewer who is not the executor.</li>
+ <li><a page="Regular HyperDoc Catalog Scope Proposal" hyperbook="dreyeck/work/project" data-proposed-topic="tm-reg-pre-publish" data-kind="precondition">Decision to publish or transfer the archive</a> — the user's; a builder must be able to obtain the Topic Maps snapshot.</li>
+ <li><a page="Regular HyperDoc Catalog Scope Proposal" hyperbook="dreyeck/work/project" data-proposed-topic="tm-reg-pre-production" data-kind="precondition">Approval of the production activation</a> — the user's, for the generation on dreyeck.ch, with the operator's record of the server's state.</li>
+@@ -74,10 +73,8 @@
+ <li data-proposed-from="tm-reg-p6" data-proposed-relation="work:relation/produces" data-proposed-to="tm-reg-wp-6">Stage, verify and deploy → 6 Verified Production Deployment: produces.</li>
+ <li data-proposed-from="tm-reg-p2" data-proposed-relation="work:relation/depends-on" data-proposed-to="tm-reg-p1">Verify the unchanged project CTM → Integrate and verify Topic Maps: depends on.</li>
+ <li data-proposed-from="tm-reg-p3" data-proposed-relation="work:relation/depends-on" data-proposed-to="tm-reg-p2">Integrate Workspace and Inspector navigation → Verify the unchanged project CTM: depends on.</li>
+-<li data-proposed-from="tm-reg-p4" data-proposed-relation="work:relation/depends-on" data-proposed-to="tm-reg-p3">Verify and enforce Inspector security → Integrate Workspace and Inspector navigation: depends on.</li>
+ <li data-proposed-from="tm-reg-p5" data-proposed-relation="work:relation/depends-on" data-proposed-to="tm-reg-p1">Build and test the Catalog package → Integrate and verify Topic Maps: depends on.</li>
+ <li data-proposed-from="tm-reg-p5" data-proposed-relation="work:relation/depends-on" data-proposed-to="tm-reg-p4">Build and test the Catalog package → Verify and enforce Inspector security: depends on.</li>
+-<li data-proposed-from="tm-reg-p5" data-proposed-relation="work:relation/depends-on" data-proposed-to="tm-reg-pre-admission">Build and test the Catalog package → Admission of the Project Workspace: depends on.</li>
+ <li data-proposed-from="tm-reg-p5" data-proposed-relation="work:relation/depends-on" data-proposed-to="tm-reg-pre-publish">Build and test the Catalog package → Decision to publish the archive: depends on.</li>
+ <li data-proposed-from="tm-reg-p6" data-proposed-relation="work:relation/depends-on" data-proposed-to="tm-reg-p5">Stage, verify and deploy → Build and test the Catalog package: depends on.</li>
+ <li data-proposed-from="tm-reg-p6" data-proposed-relation="work:relation/depends-on" data-proposed-to="tm-reg-pre-security-review">Stage, verify and deploy → Independent security review: depends on.</li>
+diff --git a/dreyeck/pages/project/Regular Catalog WBS Dictionary.html b/dreyeck/pages/project/Regular Catalog WBS Dictionary.html
+index 08fa220e..2b390076 100644
+--- a/dreyeck/pages/project/Regular Catalog WBS Dictionary.html	
++++ b/dreyeck/pages/project/Regular Catalog WBS Dictionary.html	
+@@ -35,7 +35,7 @@
+ 
+ <section data-wbs-entry="tm-reg-wp-3">
+ <h2>tm-reg-wp-3 Inspectable Project Work</h2>
+-<p data-field="scope">The project work reachable in the Project Workspace and the Inspector as real Topics and Associations of the project CTM: from a Work Item through its WBS to its work packages, their plan steps and dependencies, the assignments that deliver them and the evidence they report, down to the source commits and recorded runs; and the HyperDoc reading in which a human follows the integration to its definitions, evidence and project objects. Excluded: any Acceptance Record; any change of a Work status; a second project model; the public safety of the views (package 4); the package (5).</p>
++<p data-field="scope">The project work reachable in the Project Workspace and the Inspector as real Topics and Associations of the project CTM: from a Work Item through its WBS to its work packages, their plan steps and dependencies, the assignments that deliver them and the evidence they report, down to the source commits and recorded runs; and the HyperDoc reading in which a human follows the integration to its definitions, evidence and project objects. Excluded: any Acceptance Record; any change of a Work status; a second project model; the public safety of served views (package 4: the Workspace is not served in this scope, so it has no public view); the package (5).</p>
+ <p data-field="acceptance">In a browser session over the project CTM derived from its source pages a reader can navigate from the Work Item to its Deliverable, its work packages, their plan steps and dependencies, the assignments and their evidence entries and source commits, each a Topic or Association of the CTM; reported results, independently checked results and acceptance remain distinct; the CTM is derived deterministically from its source pages and passes the roundtrip and CXTM comparisons; no proposal appears as a declaration.</p>
+ <p data-field="authority">The user decides whether the package is accepted and whether proposals become declarations. Declaring is the user's; this page and the proposals declare nothing.</p>
+ <p data-field="effect">Changes only what the registered source pages and the emitter derive; adds the draft dictionary and, after the user's decision, the declaration pages. No wiki file is written.</p>
+@@ -49,22 +49,22 @@
+ 
+ <section data-wbs-entry="tm-reg-wp-4">
+ <h2>tm-reg-wp-4 Safe Public Inspector</h2>
+-<p data-field="scope">What a public reader of the regular Catalog can do in the Inspector: every view of the Topic Maps readings and the Project Workspace is read-only on a public request; no view or button runs code, writes, loads a system, reads a secret or discloses a path of the host; the plain run buttons of the 22U reading, the CTM review and the readings are gated by the authority policy or absent from the public instance. Excluded: building the package (5); deploying it (6); the private staging Catalog reached through SSH; the content of the project work (3).</p>
++<p data-field="scope">What a public reader of the regular Catalog can do in the Inspector: every served view of the Topic Maps readings is read-only on a public request; the Project Workspace is not served in this scope (the Catalog's startup guard refuses it, a control of package 2), so it has no public view; no view or button runs code, writes, loads a system, reads a secret or discloses a path of the host; the plain run buttons of the 22U reading, the CTM review and the readings are gated by the authority policy or absent from the public instance. Excluded: building the package (5); deploying it (6); the private staging Catalog reached through SSH; the content of the project work (3).</p>
+ <p data-field="acceptance">For each class of public route and view a recorded test shows that it is read-only; the plain run buttons are gated or absent on a public request; no request reaches the ASDF loader of a page-attached system; an independent security review of the public Inspector has been made and leaves no unresolved high finding.</p>
+ <p data-field="authority">The user decides whether the package is accepted. An independent security review precedes the production decision; neither the executor's tests nor the review accept the package.</p>
+ <p data-field="effect">Changes the authority policy and the public routes of the Catalog application and the reading systems' run buttons, and adds their tests. No server is touched.</p>
+ <p data-field="evidence">A record of the public routes and views and what each may do; the tests that exercise each with a public request; the independent security review's report.</p>
+ <ul data-field="controls">
+ <li data-control="tm-reg-authority-policy" data-coverage="existing" data-test="dreyeck/tests/authority-policy.lisp" data-marker="AUTHORITY-POLICY-PASS">The authority policy: an unreviewed operation is not run in a served Catalog.</li>
+-<li data-control="tm-reg-public-readonly" data-coverage="planned">A public request to every Topic Maps and Project Workspace view changes, loads and runs nothing.</li>
++<li data-control="tm-reg-public-readonly" data-coverage="planned">A public request to every served Topic Maps view changes, loads and runs nothing; a request for the Project Workspace is refused at startup, not served.</li>
+ <li data-control="tm-reg-security-review" data-coverage="planned">The independent security review of the public Inspector.</li>
+ </ul>
+ </section>
+ 
+ <section data-wbs-entry="tm-reg-wp-5">
+ <h2>tm-reg-wp-5 Reproducible Catalog Package</h2>
+-<p data-field="scope">The regular HyperDoc Catalog package, the one the production service runs, built reproducibly for x86_64-linux and x86_64-darwin with the verified Topic Maps snapshot and, if the user admits it, the Project Workspace and its source pages and CTM; its flake check; and the comparison of its derivation with the previous production package. Excluded: any change to the separate staging package or its service; deploying (6); the decision to admit the Workspace; publishing the archive, which the user decides.</p>
+-<p data-field="acceptance">The package builds on an independent x86_64-linux builder from the committed tree; its check passes in the build sandbox with an empty home; every topic-maps.asd in its registry is the snapshot's; the Topic Maps snapshot and the project CTM it carries verify against their manifests; the derivation differs from the previous production package only as the declared changes require.</p>
++<p data-field="scope">The regular HyperDoc Catalog package, the one the production service runs, built reproducibly for x86_64-linux and x86_64-darwin with the verified Topic Maps snapshot, without the Project Workspace, which the Catalog's startup guard refuses and this scope does not admit; its flake check; and the comparison of its derivation with the previous production package. Excluded: any change to the separate staging package or its service; deploying (6); admitting the Workspace to a served runtime (a separate decision of the user, not part of this scope); publishing the archive, which the user decides.</p>
++<p data-field="acceptance">The package builds on an independent x86_64-linux builder from the committed tree; its check passes in the build sandbox with an empty home; every topic-maps.asd in its registry is the snapshot's; the Topic Maps snapshot it carries verifies against its manifest; the derivation differs from the previous production package only as the declared changes require.</p>
+ <p data-field="authority">The user decides whether the package is accepted, whether the archive is published or transferred and which builder is used. Building on the production server is not part of this package.</p>
+ <p data-field="effect">Changes the Nix declarations of the regular Catalog and its checks. No server is touched.</p>
+ <p data-field="evidence">The build log and the check output of the Linux builder; the derivation comparison with its positive control; the origins of every Topic Maps system in the build.</p>
+diff --git a/dreyeck/pages/project/Regular HyperDoc Catalog Scope Proposal.html b/dreyeck/pages/project/Regular HyperDoc Catalog Scope Proposal.html
+index 25ba54ec..8848d5e8 100644
+--- a/dreyeck/pages/project/Regular HyperDoc Catalog Scope Proposal.html	
++++ b/dreyeck/pages/project/Regular HyperDoc Catalog Scope Proposal.html	
+@@ -36,7 +36,6 @@
+ <li><code>tm-reg-p4</code> — Verify and enforce public Inspector security</li>
+ <li><code>tm-reg-p5</code> — Build and test the regular Linux and Nix Catalog package</li>
+ <li><code>tm-reg-p6</code> — Stage, verify, obtain production approval and deploy</li>
+-<li><code>tm-reg-pre-admission</code> — Admission of the Project Workspace to a served runtime</li>
+ <li><code>tm-reg-pre-security-review</code> — Independent security review of the public Inspector</li>
+ <li><code>tm-reg-pre-publish</code> — Decision to publish or transfer the archive</li>
+ <li><code>tm-reg-pre-production</code> — Approval of the production activation</li>
+diff --git a/dreyeck/tests/project-ctm.lisp b/dreyeck/tests/project-ctm.lisp
+index 315e296f..dfd40537 100644
+--- a/dreyeck/tests/project-ctm.lisp
++++ b/dreyeck/tests/project-ctm.lisp
+@@ -429,7 +429,7 @@ page names, delivers nothing, and changes no status or acceptance of pwc-wp-4 an
+     (assert (p:revision-map revision) () "~A was refused: ~S" label (p:revision-refusal revision))
+     (p:revision-map revision)))
+ 
+-(declaim (ftype function apply-transition %applicable-transition))
++(declaim (ftype function apply-transition-by-spec %applicable-transition))
+ (defun oracle-tests (map text)
+   "The read-back MAP of the CTM TEXT against the source pages, the committed revision and the exchange review's invariants; then the same
+ comparisons on five mutations of TEXT, each of which they must detect."
+@@ -444,7 +444,7 @@ comparisons on five mutations of TEXT, each of which they must detect."
+            ;; revision pair it names; otherwise the differences stay as they are and the checks below are unchanged.
+            (transition (%applicable-transition committed-text text)))
+       (when transition
+-        (multiple-value-bind (remaining problems) (apply-transition transition committed map d)
++        (multiple-value-bind (remaining problems) (apply-transition-by-spec transition committed map d)
+           (check (format nil "transition:~A:what-it-names-is-exactly-as-specified" (getf transition :id)) (null problems))
+           (setf d remaining)))
+       (check "preserved:no-topic-of-the-committed-revision-lost" (null (getf d :lost-topics)))
+diff --git a/dreyeck/tests/project-transition-graph-a.lisp b/dreyeck/tests/project-transition-graph-a.lisp
+new file mode 100644
+index 00000000..f87f92df
+--- /dev/null
++++ b/dreyeck/tests/project-transition-graph-a.lisp
+@@ -0,0 +1,201 @@
++;;;; A named, exact transition of the committed project CTM: Zettel 11359, Graph A (H4/H5)
++(in-package #:dreyeck/work/project/tests)
++
++;; Decision H5b: the Project Workspace is not admitted to the served regular Catalog within this scope. Graph A therefore
++;;  - removes the dependency of p4 on p3 (p4 concerns the served Catalog application; with no served Workspace it needs nothing from p3),
++;;  - removes the dependency of p5 on the precondition "admission of the Project Workspace to a served runtime" and retires that
++;;    precondition (a decision outside the scope, not a condition the scope can wait for),
++;;  - keeps p5 -> p4 (package content), p5 -> p1, and the other six dependencies, among them the Security Review gate of p6.
++;; Like the transition of H6/H7 (project-transition-h6-h7.lisp), this one is exact and revision-scoped: it names its baseline commit and
++;; the project CTM of that commit, and the one result CTM it admits; it excuses only what it names after verifying all of it, in both
++;; directions; it states the complete Topic and Association delta, not only what the unchanged guard happens to report (the guard
++;; reports 3 Topics and only the 3 derived Associations; the other 6 removed Associations are accounted for there by the changed source
++;; page, which is why this specification lists all 9). Everything else stays under the unchanged guard.
++
++(defun %transition-graph-a ()
++  (list :kind :graph-a :id "graph-a-e766ee42"
++        :baseline-commit "e766ee42956dcc940961af3fb3d2f60219e63835"
++        :baseline-ctm-sha256 "6a54569f9ddbf01ae00e33715d605c0e8ade54b3b6c6d81305d3e68ae519a8b5"
++        :result-ctm-sha256 "e7c4478cf1cab9e3555efbb359b19818f68ab4a0c51ed8850dd1519e545edd52"
++        :source-page '("dreyeck/work/project" . "Implementation Assignments")
++        :carrier-page '("dreyeck/work/project" . "Regular HyperDoc Catalog Scope Proposal")
++        :removed-statements '(("tm-reg-p4" "tm-reg-p3") ("tm-reg-p5" "tm-reg-pre-admission"))
++        :removed-precondition "tm-reg-pre-admission"
++        :kept-dependencies '(("tm-reg-p2" "tm-reg-p1") ("tm-reg-p3" "tm-reg-p2") ("tm-reg-p5" "tm-reg-p1") ("tm-reg-p5" "tm-reg-p4")
++                             ("tm-reg-p5" "tm-reg-pre-publish") ("tm-reg-p6" "tm-reg-p5")
++                             ("tm-reg-p6" "tm-reg-pre-security-review") ("tm-reg-p6" "tm-reg-pre-production"))
++        :topic-counts '(395 392)
++        :association-counts '(779 770)
++        :counts '(:declarations 72 :statements 77 :assignments 8 :gaps 45)))
++
++(defun apply-transition-by-spec (spec old new differences)
++  "Dispatch on the kind of SPEC; a specification without a kind is the one of H6/H7."
++  (ecase (or (getf spec :kind) :h6-h7)
++    (:h6-h7 (apply-transition spec old new differences))
++    (:graph-a (apply-transition-graph-a spec old new differences))))
++
++(defun %dep-statement-si (from to)
++  (%o "statement" "dreyeck/work/project/implementation-assignments" from "work:relation/depends-on" to "1"))
++(defun %graph-a-associations (spec)
++  "The nine Associations that go with the two removed statements and the retired precondition, as signatures of the baseline."
++  (let* ((source (%o-page (car (getf spec :source-page)) (cdr (getf spec :source-page))))
++         (carrier (%o-page (car (getf spec :carrier-page)) (cdr (getf spec :carrier-page))))
++         (pre (getf spec :removed-precondition)) (result nil))
++    (push (%kind-signature pre "kind-precondition") result)
++    (push (%o-signature (%o-schema "proposed-on") `((,(%o-schema "proposal") . ,(%o-work pre)) (,(%o-schema "source-page") . ,source))) result)
++    (push (%carried-by-signature pre carrier) result)
++    (dolist (edge (getf spec :removed-statements))
++      (let ((si (%dep-statement-si (first edge) (second edge))))
++        (push (%o-signature +type-instance+ `((,(concatenate 'string +psi+ "instance") . ,si) (,(concatenate 'string +psi+ "type") . ,(%o-schema "proposed-statement")))) result)
++        (push (%o-signature (%o-schema "proposed-on") `((,(%o-schema "proposal") . ,si) (,(%o-schema "source-page") . ,source))) result)
++        (push (%o-signature (%o-work "work:relation/depends-on")
++                            `((,(%o-schema "role-work-relation-depends-on-source") . ,(%o-work (first edge)))
++                              (,(%o-schema "role-work-relation-depends-on-target") . ,(%o-work (second edge))))
++                            si)
++              result)))
++    (nreverse result)))
++(defun %depends-edges (signatures)
++  "The (from to) pairs of the scope's depends-on Associations in SIGNATURES."
++  (let ((head (format nil "~A(" (%o-work "work:relation/depends-on"))) (src (format nil "~A: ~A" (%o-schema "role-work-relation-depends-on-source") (%o "work/topic/")))
++        (tgt (format nil "~A: ~A" (%o-schema "role-work-relation-depends-on-target") (%o "work/topic/"))) (edges nil))
++    (dolist (s signatures (nreverse edges))
++      (when (eql 0 (search head s))
++        (let* ((a (search src s)) (b (search tgt s)))
++          (when (and a b)
++            (let ((from (subseq s (+ a (length src)) (search ", " s :start2 a))) (to (subseq s (+ b (length tgt)) (or (position #\) s :start b) (length s)))))
++              (when (and (eql 0 (search "tm-reg-" from)) (or (eql 0 (search "tm-reg-" to)))) (push (list from to) edges)))))))))
++
++(defun apply-transition-graph-a (spec old new differences)
++  "(values RESIDUAL PROBLEMS) as apply-transition: the guard's DIFFERENCES without exactly the 3 Topics and 3 derived Associations named,
++and the problems found in the complete delta (3 Topics, 9 Associations, nothing added) and in what must stay."
++  (let ((problems nil) (residual (copy-list differences))
++        (old-sigs (%signatures old)) (new-sigs (%signatures new))
++        (statements (mapcar (lambda (e) (%dep-statement-si (first e) (second e))) (getf spec :removed-statements)))
++        (pre-si (%o-work (getf spec :removed-precondition))))
++    (labels ((problem (kind &rest detail) (push (cons kind detail) problems))
++             (drop (key items &key multiset)
++               (setf (getf residual key)
++                     (if multiset (%multiset-minus (getf residual key) items)
++                         (remove-if (lambda (x) (member x items :test #'string=)) (getf residual key))))))
++      ;; Identity in the baseline: two proposed depends-on statements and a proposed precondition, as named
++      (dolist (edge (getf spec :removed-statements))
++        (let* ((si (%dep-statement-si (first edge) (second edge))) (o (%topic-by-si old si)))
++          (cond ((null o) (problem :expected-removal-absent si))
++                (t (unless (member (format nil "name ~A depends-on ~A" (first edge) (second edge)) (%topic-content o) :test #'string=)
++                     (problem :removed-statement-has-another-text si))
++                   (when (%topic-by-si new si) (problem :removed-statement-still-in-the-result si))))))
++      (let ((p (%topic-by-si old pre-si)))
++        (cond ((null p) (problem :expected-removal-absent pre-si))
++              (t (unless (member (%kind-signature (getf spec :removed-precondition) "kind-precondition") old-sigs :test #'string=)
++                   (problem :retired-topic-is-no-precondition pre-si))
++                 (when (%topic-by-si new pre-si) (problem :retired-precondition-still-in-the-result pre-si)))))
++      ;; The complete delta: exactly these Topics and exactly these nine Associations are gone, and nothing is new
++      (let ((expected (%graph-a-associations spec)) (gone (%multiset-minus old-sigs new-sigs)) (added (%multiset-minus new-sigs old-sigs)))
++        (when (or (%multiset-minus gone expected) (%multiset-minus expected gone))
++          (problem :association-delta-differs (list :unexpected-loss (%multiset-minus gone expected) :expected-loss-missing (%multiset-minus expected gone))))
++        (when added (problem :association-added added))
++        (unless (every (lambda (sig) (member sig old-sigs :test #'string=)) expected) (problem :expected-association-absent-in-the-baseline))
++        (when (some (lambda (s) (or (search pre-si s) (some (lambda (st) (search st s)) statements))) new-sigs)
++          (problem :a-retired-item-is-still-referenced))
++        (let* ((old-topics (mapcar #'%si1 (topic-maps.tmdm:topic-map-topics old))) (new-topics (mapcar #'%si1 (topic-maps.tmdm:topic-map-topics new)))
++               (lost (remove-if (lambda (si) (member si new-topics :test #'string=)) old-topics))
++               (fresh (remove-if (lambda (si) (member si old-topics :test #'string=)) new-topics)))
++          (unless (equal (sort (copy-list lost) #'string<) (sort (cons pre-si (copy-list statements)) #'string<)) (problem :topic-delta-differs lost))
++          (when fresh (problem :topic-added fresh))
++          (unless (equal (list (length old-topics) (length new-topics)) (getf spec :topic-counts)) (problem :topic-counts-differ (list (length old-topics) (length new-topics)))))
++        (unless (equal (list (length old-sigs) (length new-sigs)) (getf spec :association-counts)) (problem :association-counts-differ (list (length old-sigs) (length new-sigs))))
++        ;; What the guard sees of it: exactly the 3 Topics and the 3 derived Associations, taken from the residual only if present
++        (let ((derived (remove-if-not (lambda (s) (member s (getf differences :lost-associations) :test #'string=)) expected)))
++          (unless (member pre-si (getf differences :lost-topics) :test #'string=) (problem :expected-removal-absent pre-si))
++          (dolist (st statements) (unless (member st (getf differences :lost-topics) :test #'string=) (problem :expected-removal-absent st)))
++          (drop :lost-topics (cons pre-si statements))
++          (drop :lost-associations derived :multiset t)))
++      ;; What must stay: the eight other dependencies, exactly, among them p5->p4, p5->p1 and the Security Review gate of p6
++      (let ((edges (%depends-edges new-sigs)) (kept (getf spec :kept-dependencies)))
++        (when (or (set-difference edges kept :test #'equal) (set-difference kept edges :test #'equal))
++          (problem :dependencies-differ edges))
++        (unless (member '("tm-reg-p5" "tm-reg-p4") edges :test #'equal) (problem :retained-edge-missing "tm-reg-p5" "tm-reg-p4"))
++        (unless (member '("tm-reg-p5" "tm-reg-p1") edges :test #'equal) (problem :retained-edge-missing "tm-reg-p5" "tm-reg-p1"))
++        (unless (member '("tm-reg-p6" "tm-reg-pre-security-review") edges :test #'equal) (problem :review-gate-missing)))
++      (let ((counts (%model-counts new)))
++        (unless (equal counts (getf spec :counts)) (problem :model-counts-differ counts)))
++      (values residual (nreverse problems)))))
++
++;;; Controls
++
++(defun run-transition-graph-a-tests ()
++  "Graph A, with controls. It runs only while the working project CTM is the transition's result; otherwise it says NOT-RUN, which is not a pass."
++  (let* ((spec (%transition-graph-a)) (*checks* 0)
++         (working (uiop:read-file-string (p:project-ctm-pathname) :external-format :utf-8)))
++    (unless (equal (getf spec :result-ctm-sha256) (%sha-of-text working))
++      (format t "~&PROJECT-CTM-TRANSITION-GRAPH-A-NOT-RUN: the working project CTM is not the result of ~A (SHA-256 ~A); this is not a pass~%"
++              (getf spec :id) (getf spec :result-ctm-sha256))
++      (return-from run-transition-graph-a-tests 0))
++    (let* ((items (p:sources-items (p:read-project-sources)))
++           (old-text (%git-ctm-at (getf spec :baseline-commit)))
++           (old (%read-ctm old-text "baseline")) (new (%read-ctm working "result"))
++           (differences (preservation-differences old new items)))
++      (check "graph-a:the-specification-agrees-with-its-commit" (equal (getf spec :baseline-ctm-sha256) (%sha-of-text old-text)))
++      (check "graph-a:applies-to-the-named-baseline-and-the-named-result" (eq t (transition-applicable-p spec old-text working)))
++      (check "graph-a:the-unchanged-guard-reports-exactly-three-topics"
++             (equal (sort (copy-list (getf differences :lost-topics)) #'string<)
++                    (sort (cons (%o-work (getf spec :removed-precondition)) (mapcar (lambda (e) (%dep-statement-si (first e) (second e))) (getf spec :removed-statements))) #'string<)))
++      (check "graph-a:the-unchanged-guard-reports-only-the-three-derived-associations" (= 3 (length (getf differences :lost-associations))))
++      (check "graph-a:the-unchanged-guard-reports-no-changed-topic-and-no-unattributed-addition"
++             (and (null (getf differences :changed-topics)) (null (getf differences :unattributed-additions))))
++      (check "graph-a:the-complete-delta-is-nine-associations-and-nothing-added"
++             (and (= 9 (length (%multiset-minus (%signatures old) (%signatures new)))) (null (%multiset-minus (%signatures new) (%signatures old)))))
++      (multiple-value-bind (residual problems) (apply-transition-graph-a spec old new differences)
++        (check "graph-a:positive:no-problem-in-what-the-specification-names" (null problems))
++        (check "graph-a:positive:nothing-remains-for-the-unchanged-guard" (%empty-residual-p residual)))
++      (check "graph-a:positive:the-result-has-the-size-the-specification-says" (equal (getf spec :counts) (%model-counts new)))
++      (check "graph-a:positive:the-model-of-the-sources-agrees-with-the-counts"
++             (let ((model (p:build-project-model)))
++               (equal (list :declarations (length (p:model-declarations model)) :statements (length (p:model-statements model))
++                            :assignments (length (p:model-assignments model)) :gaps (length (p:model-gaps model)))
++                      (getf spec :counts))))
++      (check "graph-a:positive:the-eight-other-dependencies-remain-exactly"
++             (null (set-difference (getf spec :kept-dependencies) (%depends-edges (%signatures new)) :test #'equal)))
++      (check "graph-a:positive:the-security-review-gate-of-p6-remains"
++             (member '("tm-reg-p6" "tm-reg-pre-security-review") (%depends-edges (%signatures new)) :test #'equal))
++      (check "graph-a:positive:the-legitimate-work-item-deliverable-gap-remains"
++             (%topic-by-si new (%gap-si "work-item-deliverable-unlinked" '("topic-maps-regular-hyperdoc" "tm-regular-catalog"))))
++      ;; Negative controls: mutate the result text; apply the transition directly; each must fail for its own reason
++      (flet ((evaluate (text &optional (baseline old))
++               (let* ((mutant (%read-ctm text "mutant")) (d (preservation-differences baseline mutant items)))
++                 (multiple-value-list (apply-transition-graph-a spec baseline mutant d))))
++             (kinds (problems) (mapcar #'car problems))
++             (drop-statement (text from to)
++               (%drop-topic-and-associations text (%dep-statement-si from to))))
++        ;; N1 an additional, unrelated Topic disappears
++        (let* ((h6 (%transition-h6-h7)) (iri (%first-gap-iri-not-in working h6)) (r (evaluate (%drop-topic-and-associations working iri))))
++          (check "graph-a:negative:an-unrelated-topic-disappears" (and iri (member iri (getf (first r) :lost-topics) :test #'string=)))
++          (check "graph-a:negative:that-stays-with-the-unchanged-guard" (not (%empty-residual-p (first r)))))
++        ;; N2 an unrelated Association disappears
++        (let ((r (evaluate (%drop-first-line-starting working "s:reads-source("))))
++          (check "graph-a:negative:an-unrelated-association-disappears" (getf (first r) :lost-associations))
++          (check "graph-a:negative:it-is-reported-as-an-unexpected-loss" (member :association-delta-differs (kinds (second r)))))
++        ;; N3 a required removal is absent: the baseline stands in for a result that removed nothing
++        (let ((r (multiple-value-list (apply-transition-graph-a spec old old (preservation-differences old old items)))))
++          (check "graph-a:negative:a-required-removal-is-absent" (member :expected-removal-absent (kinds (second r)))))
++        ;; N4 a further dependency is removed: p5 -> p4
++        (let ((r (evaluate (drop-statement working "tm-reg-p5" "tm-reg-p4"))))
++          (check "graph-a:negative:a-further-dependency-is-removed" (member :association-delta-differs (kinds (second r))))
++          (check "graph-a:negative:the-removed-dependency-is-lost-to-the-guard" (member (%dep-statement-si "tm-reg-p5" "tm-reg-p4") (getf (first r) :lost-topics) :test #'string=))
++          (check "graph-a:negative:the-retained-edge-is-reported-missing" (member :retained-edge-missing (kinds (second r)))))
++        ;; N5 the Security Review gate of p6 is removed
++        (let ((r (evaluate (drop-statement working "tm-reg-p6" "tm-reg-pre-security-review"))))
++          (check "graph-a:negative:the-security-review-gate-is-removed" (member :review-gate-missing (kinds (second r)))))
++        ;; N6 p5 -> p1 is removed
++        (let ((r (evaluate (drop-statement working "tm-reg-p5" "tm-reg-p1"))))
++          (check "graph-a:negative:p5-to-p1-is-removed" (member :retained-edge-missing (kinds (second r))))))
++      ;; Second line: another result CTM, or an unrelated revision compared with, is not covered at all
++      (check "graph-a:negative:another-result-ctm-is-not-covered"
++             (eq :result-ctm-differs (transition-applicable-p spec old-text (concatenate 'string working (string #\Newline) "# another CTM"))))
++      (check "graph-a:negative:the-h6-h7-baseline-is-not-this-baseline"
++             (eq :baseline-ctm-differs (transition-applicable-p spec (%git-ctm-at (getf (%transition-h6-h7) :baseline-commit)) working)))
++      (check "graph-a:negative:an-unrelated-source-revision-is-not-covered"
++             (eq :baseline-ctm-differs (transition-applicable-p spec (%git-ctm-at +baseline-commit+) working)))
++      (format t "~&PROJECT-CTM-TRANSITION-GRAPH-A-PASS: ~D checks; the transition ~A is exact: baseline ~A, result CTM ~A, 3 Topics and 9 Associations, nothing else excused~%"
++              *checks* (getf spec :id) (subseq (getf spec :baseline-commit) 0 8) (subseq (getf spec :result-ctm-sha256) 0 8))
++      *checks*)))
+diff --git a/dreyeck/tests/project-transition-h6-h7.lisp b/dreyeck/tests/project-transition-h6-h7.lisp
+index 43b39f82..5919084c 100644
+--- a/dreyeck/tests/project-transition-h6-h7.lisp
++++ b/dreyeck/tests/project-transition-h6-h7.lisp
+@@ -54,7 +54,7 @@
+ (defun %decl-line (text)
+   (format nil "occurrence ~A ~S ^^http://www.w3.org/2001/XMLSchema#string" (%o-schema "declaration-text") text))
+ 
+-(defparameter +preservation-transitions+ '(%transition-h6-h7)
++(defparameter +preservation-transitions+ '(%transition-h6-h7 %transition-graph-a)
+   "Functions returning the transition specifications the preservation guard knows. Each applies to exactly one revision pair.")
+ 
+ ;;; Applicability: the revision compared with and the CTM tested are exactly the named ones
+diff --git a/scripts/test-project-workspace-scope.mjs b/scripts/test-project-workspace-scope.mjs
+index 56a1c0b3..4d3f07c8 100644
+--- a/scripts/test-project-workspace-scope.mjs
++++ b/scripts/test-project-workspace-scope.mjs
+@@ -168,11 +168,12 @@ try{
+  }
+  assert(visited.length>1,'the plan steps follow one another')
+  steps_.push('plan steps along depends-on: '+visited.join(' → ')+', each with exactly the relations the page proposes')
+- // A precondition the last step waits for
+- const waits=statements.find(s=>s.relation==='work:relation/depends-on'&&s.from===current&&byId[s.to].kind==='precondition')
+- assert(waits,'the last step waits for a precondition')
++ // A precondition a plan step waits for: the first step the page says waits for one (the chain of steps need not end at it)
++ const waits=statements.find(s=>s.relation==='work:relation/depends-on'&&byId[s.from].kind==='plan step'&&byId[s.to].kind==='precondition')
++ assert(waits,'a step waits for a precondition')
++ if(waits.from!==current){ws=await open(byId[waits.from].label);await checkProposal(ws,waits.from)}
+  await go(ws,byId[waits.to].label);await checkProposal(ws,waits.to)
+- steps_.push(`${current} → precondition ${waits.to}: depends on ← ${current}; no work package depends on it`)
++ steps_.push(`${waits.from} → precondition ${waits.to}: depends on ← ${waits.from}; no work package depends on it`)
+  // From a work package to the page it is proposed on: a Topic of the project CTM
+  await go(ws,'Implementation Assignments');await atPoint(ws,'page/dreyeck/work/project/implementation-assignments')
+  steps_.push('proposed on → the page Implementation Assignments as a Topic of the project CTM')

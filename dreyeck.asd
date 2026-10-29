@@ -3374,6 +3374,7 @@
   :components ((:file "dreyeck/tests/project-ctm")
                (:file "dreyeck/tests/project-scope")
                (:file "dreyeck/tests/project-transition-h6-h7")
+               (:file "dreyeck/tests/project-transition-graph-a")
                (:module "dreyeck/tests/fixtures/project-acceptance"
                 :components ((:static-file "README.txt") (:static-file "synthetic-work.html") (:static-file "synthetic-assignments-addition.html")
                              (:static-file "synthetic-dictionary-c1.html") (:static-file "synthetic-dictionary-c2.html")
@@ -3385,7 +3386,8 @@
              (declare (ignore op component))
              (uiop:symbol-call :dreyeck/work/project/tests :run-tests)
              (uiop:symbol-call :dreyeck/work/project/tests :run-scope-tests)
-             (uiop:symbol-call :dreyeck/work/project/tests :run-transition-tests)))
+             (uiop:symbol-call :dreyeck/work/project/tests :run-transition-tests)
+             (uiop:symbol-call :dreyeck/work/project/tests :run-transition-graph-a-tests)))
 
 
 ;; Optional local Slice 22U reading. The independent checkout is not vendored.

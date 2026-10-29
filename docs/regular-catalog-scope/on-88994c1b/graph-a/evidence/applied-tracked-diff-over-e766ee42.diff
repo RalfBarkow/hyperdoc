@@ -1,0 +1,256 @@
+diff --git a/dreyeck.asd b/dreyeck.asd
+index b2777052..dc2782be 100644
+--- a/dreyeck.asd
++++ b/dreyeck.asd
+@@ -3374,6 +3374,7 @@
+   :components ((:file "dreyeck/tests/project-ctm")
+                (:file "dreyeck/tests/project-scope")
+                (:file "dreyeck/tests/project-transition-h6-h7")
++               (:file "dreyeck/tests/project-transition-graph-a")
+                (:module "dreyeck/tests/fixtures/project-acceptance"
+                 :components ((:static-file "README.txt") (:static-file "synthetic-work.html") (:static-file "synthetic-assignments-addition.html")
+                              (:static-file "synthetic-dictionary-c1.html") (:static-file "synthetic-dictionary-c2.html")
+@@ -3385,7 +3386,8 @@
+              (declare (ignore op component))
+              (uiop:symbol-call :dreyeck/work/project/tests :run-tests)
+              (uiop:symbol-call :dreyeck/work/project/tests :run-scope-tests)
+-             (uiop:symbol-call :dreyeck/work/project/tests :run-transition-tests)))
++             (uiop:symbol-call :dreyeck/work/project/tests :run-transition-tests)
++             (uiop:symbol-call :dreyeck/work/project/tests :run-transition-graph-a-tests)))
+ 
+ 
+ ;; Optional local Slice 22U reading. The independent checkout is not vendored.
+diff --git a/dreyeck/pages/project/Implementation Assignments.html b/dreyeck/pages/project/Implementation Assignments.html
+index 367e000d..a1f25e32 100644
+--- a/dreyeck/pages/project/Implementation Assignments.html	
++++ b/dreyeck/pages/project/Implementation Assignments.html	
+@@ -29,7 +29,7 @@
+ 
+ <h2>Proposed Work: Regular HyperDoc Catalog with a Navigable Project Topic Map</h2>
+ <p>The Work Item, the Deliverable, the work packages and the plan of Zettel 11359. None of them is declared, and none has a work status. The work packages are described by the draft <code>Regular Catalog WBS Dictionary</code>, which declares nothing either. This scope is distinct from <code>tmd-deployment</code>, the separate staging Catalog, and from <code>project-work-ctm-exchange</code>, the exchangeable project CTM; it repeats no deliverable of either. The links of these proposals name the page <a page="Regular HyperDoc Catalog Scope Proposal">Regular HyperDoc Catalog Scope Proposal</a> as their carrier: it presents the scope and links to it and declares nothing, while the proposals are written, and stay authoritative, on this page.</p>
+-<p>Completeness: the six elements together are the whole defined scope. A Topic Maps revision whose identity can be checked (1), a Project Workspace that reads the unchanged project CTM with it (2), project work a reader can navigate and inspect in that Workspace (3), a public Inspector that is safe to expose (4), the regular Catalog package built reproducibly (5) and its verified deployment (6). What the scope needs and does not deliver are preconditions of the plan below: the user's admission of the Project Workspace to a served runtime, an independent security review, the decision to publish the archive and the approval of the production activation. Project management is not an element: this scope proposal and the integration review deliver no package.</p>
++<p>Completeness: the six elements together are the whole defined scope. A Topic Maps revision whose identity can be checked (1), a Project Workspace that reads the unchanged project CTM with it (2), project work a reader can navigate and inspect in that Workspace (3), a public Inspector that is safe to expose (4), the regular Catalog package built reproducibly (5) and its verified deployment (6). What the scope needs and does not deliver are preconditions of the plan below: an independent security review, the decision to publish the archive and the approval of the production activation. The Project Workspace is read, inspected and tested locally and is not admitted to the served regular Catalog within this scope: the Catalog's startup guard refuses it and stays; admitting it would be a separate decision of the user. Project management is not an element: this scope proposal and the integration review deliver no package.</p>
+ <p>Overlap: 1 and 5 meet at the snapshot: 1 makes the revision and its manifest verifiable, 5 builds the package that serves it. 2 and 3 both concern the Project Workspace: 2 that it reads the unchanged project CTM with the revision and refuses what it cannot identify, 3 what the project work shows and how it is navigated, including the reading of the integration. 4 and 6 meet at exposure: 4 makes the views safe, 6 activates them. Package 5 builds the same regular Catalog on which the separate staging package of <code>tmd-deployment</code> was modelled; it neither changes that package nor its running service.</p>
+ <p>Gap: no Relation Contract relates a Work Item to a Deliverable, so none is proposed; the Deliverable <code>tm-regular-catalog</code> decomposes into the six packages and is related to its Work Item only by this text (see pwc-wp-3).</p>
+ <ul>
+@@ -60,7 +60,6 @@
+ <li><a page="Regular HyperDoc Catalog Scope Proposal" hyperbook="dreyeck/work/project" data-proposed-topic="tm-reg-p4" data-kind="plan step">Verify and enforce public Inspector security</a> — read-only public views, gated run buttons, an independent review.</li>
+ <li><a page="Regular HyperDoc Catalog Scope Proposal" hyperbook="dreyeck/work/project" data-proposed-topic="tm-reg-p5" data-kind="plan step">Build and test the regular Linux and Nix Catalog package</a> — on an independent builder, with the derivation compared.</li>
+ <li><a page="Regular HyperDoc Catalog Scope Proposal" hyperbook="dreyeck/work/project" data-proposed-topic="tm-reg-p6" data-kind="plan step">Stage, verify, obtain production approval and deploy</a> — activate the generation, verify identity and boundaries, show the rollback.</li>
+-<li><a page="Regular HyperDoc Catalog Scope Proposal" hyperbook="dreyeck/work/project" data-proposed-topic="tm-reg-pre-admission" data-kind="precondition">Admission of the Project Workspace to a served runtime</a> — the user's decision; the Catalog's startup guard refuses the Workspace until it is made.</li>
+ <li><a page="Regular HyperDoc Catalog Scope Proposal" hyperbook="dreyeck/work/project" data-proposed-topic="tm-reg-pre-security-review" data-kind="precondition">Independent security review of the public Inspector</a> — a report by a reviewer who is not the executor.</li>
+ <li><a page="Regular HyperDoc Catalog Scope Proposal" hyperbook="dreyeck/work/project" data-proposed-topic="tm-reg-pre-publish" data-kind="precondition">Decision to publish or transfer the archive</a> — the user's; a builder must be able to obtain the Topic Maps snapshot.</li>
+ <li><a page="Regular HyperDoc Catalog Scope Proposal" hyperbook="dreyeck/work/project" data-proposed-topic="tm-reg-pre-production" data-kind="precondition">Approval of the production activation</a> — the user's, for the generation on dreyeck.ch, with the operator's record of the server's state.</li>
+@@ -74,10 +73,8 @@
+ <li data-proposed-from="tm-reg-p6" data-proposed-relation="work:relation/produces" data-proposed-to="tm-reg-wp-6">Stage, verify and deploy → 6 Verified Production Deployment: produces.</li>
+ <li data-proposed-from="tm-reg-p2" data-proposed-relation="work:relation/depends-on" data-proposed-to="tm-reg-p1">Verify the unchanged project CTM → Integrate and verify Topic Maps: depends on.</li>
+ <li data-proposed-from="tm-reg-p3" data-proposed-relation="work:relation/depends-on" data-proposed-to="tm-reg-p2">Integrate Workspace and Inspector navigation → Verify the unchanged project CTM: depends on.</li>
+-<li data-proposed-from="tm-reg-p4" data-proposed-relation="work:relation/depends-on" data-proposed-to="tm-reg-p3">Verify and enforce Inspector security → Integrate Workspace and Inspector navigation: depends on.</li>
+ <li data-proposed-from="tm-reg-p5" data-proposed-relation="work:relation/depends-on" data-proposed-to="tm-reg-p1">Build and test the Catalog package → Integrate and verify Topic Maps: depends on.</li>
+ <li data-proposed-from="tm-reg-p5" data-proposed-relation="work:relation/depends-on" data-proposed-to="tm-reg-p4">Build and test the Catalog package → Verify and enforce Inspector security: depends on.</li>
+-<li data-proposed-from="tm-reg-p5" data-proposed-relation="work:relation/depends-on" data-proposed-to="tm-reg-pre-admission">Build and test the Catalog package → Admission of the Project Workspace: depends on.</li>
+ <li data-proposed-from="tm-reg-p5" data-proposed-relation="work:relation/depends-on" data-proposed-to="tm-reg-pre-publish">Build and test the Catalog package → Decision to publish the archive: depends on.</li>
+ <li data-proposed-from="tm-reg-p6" data-proposed-relation="work:relation/depends-on" data-proposed-to="tm-reg-p5">Stage, verify and deploy → Build and test the Catalog package: depends on.</li>
+ <li data-proposed-from="tm-reg-p6" data-proposed-relation="work:relation/depends-on" data-proposed-to="tm-reg-pre-security-review">Stage, verify and deploy → Independent security review: depends on.</li>
+diff --git a/dreyeck/pages/project/Regular Catalog WBS Dictionary.html b/dreyeck/pages/project/Regular Catalog WBS Dictionary.html
+index 08fa220e..2b390076 100644
+--- a/dreyeck/pages/project/Regular Catalog WBS Dictionary.html	
++++ b/dreyeck/pages/project/Regular Catalog WBS Dictionary.html	
+@@ -35,7 +35,7 @@
+ 
+ <section data-wbs-entry="tm-reg-wp-3">
+ <h2>tm-reg-wp-3 Inspectable Project Work</h2>
+-<p data-field="scope">The project work reachable in the Project Workspace and the Inspector as real Topics and Associations of the project CTM: from a Work Item through its WBS to its work packages, their plan steps and dependencies, the assignments that deliver them and the evidence they report, down to the source commits and recorded runs; and the HyperDoc reading in which a human follows the integration to its definitions, evidence and project objects. Excluded: any Acceptance Record; any change of a Work status; a second project model; the public safety of the views (package 4); the package (5).</p>
++<p data-field="scope">The project work reachable in the Project Workspace and the Inspector as real Topics and Associations of the project CTM: from a Work Item through its WBS to its work packages, their plan steps and dependencies, the assignments that deliver them and the evidence they report, down to the source commits and recorded runs; and the HyperDoc reading in which a human follows the integration to its definitions, evidence and project objects. Excluded: any Acceptance Record; any change of a Work status; a second project model; the public safety of served views (package 4: the Workspace is not served in this scope, so it has no public view); the package (5).</p>
+ <p data-field="acceptance">In a browser session over the project CTM derived from its source pages a reader can navigate from the Work Item to its Deliverable, its work packages, their plan steps and dependencies, the assignments and their evidence entries and source commits, each a Topic or Association of the CTM; reported results, independently checked results and acceptance remain distinct; the CTM is derived deterministically from its source pages and passes the roundtrip and CXTM comparisons; no proposal appears as a declaration.</p>
+ <p data-field="authority">The user decides whether the package is accepted and whether proposals become declarations. Declaring is the user's; this page and the proposals declare nothing.</p>
+ <p data-field="effect">Changes only what the registered source pages and the emitter derive; adds the draft dictionary and, after the user's decision, the declaration pages. No wiki file is written.</p>
+@@ -49,22 +49,22 @@
+ 
+ <section data-wbs-entry="tm-reg-wp-4">
+ <h2>tm-reg-wp-4 Safe Public Inspector</h2>
+-<p data-field="scope">What a public reader of the regular Catalog can do in the Inspector: every view of the Topic Maps readings and the Project Workspace is read-only on a public request; no view or button runs code, writes, loads a system, reads a secret or discloses a path of the host; the plain run buttons of the 22U reading, the CTM review and the readings are gated by the authority policy or absent from the public instance. Excluded: building the package (5); deploying it (6); the private staging Catalog reached through SSH; the content of the project work (3).</p>
++<p data-field="scope">What a public reader of the regular Catalog can do in the Inspector: every served view of the Topic Maps readings is read-only on a public request; the Project Workspace is not served in this scope (the Catalog's startup guard refuses it, a control of package 2), so it has no public view; no view or button runs code, writes, loads a system, reads a secret or discloses a path of the host; the plain run buttons of the 22U reading, the CTM review and the readings are gated by the authority policy or absent from the public instance. Excluded: building the package (5); deploying it (6); the private staging Catalog reached through SSH; the content of the project work (3).</p>
+ <p data-field="acceptance">For each class of public route and view a recorded test shows that it is read-only; the plain run buttons are gated or absent on a public request; no request reaches the ASDF loader of a page-attached system; an independent security review of the public Inspector has been made and leaves no unresolved high finding.</p>
+ <p data-field="authority">The user decides whether the package is accepted. An independent security review precedes the production decision; neither the executor's tests nor the review accept the package.</p>
+ <p data-field="effect">Changes the authority policy and the public routes of the Catalog application and the reading systems' run buttons, and adds their tests. No server is touched.</p>
+ <p data-field="evidence">A record of the public routes and views and what each may do; the tests that exercise each with a public request; the independent security review's report.</p>
+ <ul data-field="controls">
+ <li data-control="tm-reg-authority-policy" data-coverage="existing" data-test="dreyeck/tests/authority-policy.lisp" data-marker="AUTHORITY-POLICY-PASS">The authority policy: an unreviewed operation is not run in a served Catalog.</li>
+-<li data-control="tm-reg-public-readonly" data-coverage="planned">A public request to every Topic Maps and Project Workspace view changes, loads and runs nothing.</li>
++<li data-control="tm-reg-public-readonly" data-coverage="planned">A public request to every served Topic Maps view changes, loads and runs nothing; a request for the Project Workspace is refused at startup, not served.</li>
+ <li data-control="tm-reg-security-review" data-coverage="planned">The independent security review of the public Inspector.</li>
+ </ul>
+ </section>
+ 
+ <section data-wbs-entry="tm-reg-wp-5">
+ <h2>tm-reg-wp-5 Reproducible Catalog Package</h2>
+-<p data-field="scope">The regular HyperDoc Catalog package, the one the production service runs, built reproducibly for x86_64-linux and x86_64-darwin with the verified Topic Maps snapshot and, if the user admits it, the Project Workspace and its source pages and CTM; its flake check; and the comparison of its derivation with the previous production package. Excluded: any change to the separate staging package or its service; deploying (6); the decision to admit the Workspace; publishing the archive, which the user decides.</p>
+-<p data-field="acceptance">The package builds on an independent x86_64-linux builder from the committed tree; its check passes in the build sandbox with an empty home; every topic-maps.asd in its registry is the snapshot's; the Topic Maps snapshot and the project CTM it carries verify against their manifests; the derivation differs from the previous production package only as the declared changes require.</p>
++<p data-field="scope">The regular HyperDoc Catalog package, the one the production service runs, built reproducibly for x86_64-linux and x86_64-darwin with the verified Topic Maps snapshot, without the Project Workspace, which the Catalog's startup guard refuses and this scope does not admit; its flake check; and the comparison of its derivation with the previous production package. Excluded: any change to the separate staging package or its service; deploying (6); admitting the Workspace to a served runtime (a separate decision of the user, not part of this scope); publishing the archive, which the user decides.</p>
++<p data-field="acceptance">The package builds on an independent x86_64-linux builder from the committed tree; its check passes in the build sandbox with an empty home; every topic-maps.asd in its registry is the snapshot's; the Topic Maps snapshot it carries verifies against its manifest; the derivation differs from the previous production package only as the declared changes require.</p>
+ <p data-field="authority">The user decides whether the package is accepted, whether the archive is published or transferred and which builder is used. Building on the production server is not part of this package.</p>
+ <p data-field="effect">Changes the Nix declarations of the regular Catalog and its checks. No server is touched.</p>
+ <p data-field="evidence">The build log and the check output of the Linux builder; the derivation comparison with its positive control; the origins of every Topic Maps system in the build.</p>
+diff --git a/dreyeck/pages/project/Regular HyperDoc Catalog Scope Proposal.html b/dreyeck/pages/project/Regular HyperDoc Catalog Scope Proposal.html
+index 25ba54ec..8848d5e8 100644
+--- a/dreyeck/pages/project/Regular HyperDoc Catalog Scope Proposal.html	
++++ b/dreyeck/pages/project/Regular HyperDoc Catalog Scope Proposal.html	
+@@ -36,7 +36,6 @@
+ <li><code>tm-reg-p4</code> — Verify and enforce public Inspector security</li>
+ <li><code>tm-reg-p5</code> — Build and test the regular Linux and Nix Catalog package</li>
+ <li><code>tm-reg-p6</code> — Stage, verify, obtain production approval and deploy</li>
+-<li><code>tm-reg-pre-admission</code> — Admission of the Project Workspace to a served runtime</li>
+ <li><code>tm-reg-pre-security-review</code> — Independent security review of the public Inspector</li>
+ <li><code>tm-reg-pre-publish</code> — Decision to publish or transfer the archive</li>
+ <li><code>tm-reg-pre-production</code> — Approval of the production activation</li>
+diff --git a/dreyeck/tests/project-ctm.lisp b/dreyeck/tests/project-ctm.lisp
+index 315e296f..dfd40537 100644
+--- a/dreyeck/tests/project-ctm.lisp
++++ b/dreyeck/tests/project-ctm.lisp
+@@ -429,7 +429,7 @@ page names, delivers nothing, and changes no status or acceptance of pwc-wp-4 an
+     (assert (p:revision-map revision) () "~A was refused: ~S" label (p:revision-refusal revision))
+     (p:revision-map revision)))
+ 
+-(declaim (ftype function apply-transition %applicable-transition))
++(declaim (ftype function apply-transition-by-spec %applicable-transition))
+ (defun oracle-tests (map text)
+   "The read-back MAP of the CTM TEXT against the source pages, the committed revision and the exchange review's invariants; then the same
+ comparisons on five mutations of TEXT, each of which they must detect."
+@@ -444,7 +444,7 @@ comparisons on five mutations of TEXT, each of which they must detect."
+            ;; revision pair it names; otherwise the differences stay as they are and the checks below are unchanged.
+            (transition (%applicable-transition committed-text text)))
+       (when transition
+-        (multiple-value-bind (remaining problems) (apply-transition transition committed map d)
++        (multiple-value-bind (remaining problems) (apply-transition-by-spec transition committed map d)
+           (check (format nil "transition:~A:what-it-names-is-exactly-as-specified" (getf transition :id)) (null problems))
+           (setf d remaining)))
+       (check "preserved:no-topic-of-the-committed-revision-lost" (null (getf d :lost-topics)))
+diff --git a/dreyeck/tests/project-transition-h6-h7.lisp b/dreyeck/tests/project-transition-h6-h7.lisp
+index 43b39f82..5919084c 100644
+--- a/dreyeck/tests/project-transition-h6-h7.lisp
++++ b/dreyeck/tests/project-transition-h6-h7.lisp
+@@ -54,7 +54,7 @@
+ (defun %decl-line (text)
+   (format nil "occurrence ~A ~S ^^http://www.w3.org/2001/XMLSchema#string" (%o-schema "declaration-text") text))
+ 
+-(defparameter +preservation-transitions+ '(%transition-h6-h7)
++(defparameter +preservation-transitions+ '(%transition-h6-h7 %transition-graph-a)
+   "Functions returning the transition specifications the preservation guard knows. Each applies to exactly one revision pair.")
+ 
+ ;;; Applicability: the revision compared with and the CTM tested are exactly the named ones
+diff --git a/dreyeck/work/project/hyperdoc-project.ctm b/dreyeck/work/project/hyperdoc-project.ctm
+index b289fca6..027ba3e8 100644
+--- a/dreyeck/work/project/hyperdoc-project.ctm
++++ b/dreyeck/work/project/hyperdoc-project.ctm
+@@ -6,7 +6,7 @@
+ #   dreyeck/pages/work/Work Breakdown.html  a7dc3d53a1a7312e6feba2350bde7251c222b2acd321ef5a109116f5cf616e13
+ #   dreyeck/pages/work/Authoring the CTM Plan Page.html  fced413ad5e893e49973df1fa8fb5ca14dee87695c50100e72ddd12d4d2de75a
+ #   dreyeck/pages/work/CTM Plan Page WBS Dictionary.html  de3f372912e0a257a85990686fdcd354f79481af7aecb1ecc5d1ffb171e9d9b5
+-#   dreyeck/pages/project/Implementation Assignments.html  e205b90a4c4fe887ec248ce1859aa3c893e9822feabc76f1413860ced13e1288
++#   dreyeck/pages/project/Implementation Assignments.html  51c656f125d09abf010d860a54a78972c9c00fc0f700ca876e2965209fecc58d
+ # Other files read: the test files WBS Dictionary controls name, to derive test marker found:
+ #   dreyeck/tests/fedwiki-page-authoring.lisp  0fcd02078576bde7a0438620797ea30c805900201ac443b8bc20ac8b146671d1
+ #   dreyeck/tests/fedwiki-item-edit-execution.lisp  d215e10c48f94b401248d60e7c8fe95db5c693ea8a489f60b368c7f8102c755d
+@@ -509,7 +509,7 @@ s:role-work-relation-depends-on-target
+     s:hyperbook-id: "dreyeck/work/project" ;
+     s:page-id: "Implementation Assignments" ;
+     s:repository-path: "dreyeck/pages/project/Implementation Assignments.html" ;
+-    s:source-sha256: "e205b90a4c4fe887ec248ce1859aa3c893e9822feabc76f1413860ced13e1288" .
++    s:source-sha256: "51c656f125d09abf010d860a54a78972c9c00fc0f700ca876e2965209fecc58d" .
+ 
+ <tag:dreyeck.ch,2026:hyperdoc/hyperbook/dreyeck/work/project>
+     isa s:hyperbook ;
+@@ -1044,11 +1044,6 @@ w:tm-reg-p6
+     - "Stage, verify, obtain production approval and deploy" ;
+     s:declaration-text: "Stage, verify, obtain production approval and deploy — activate the generation, verify identity and boundaries, show the rollback." .
+ 
+-w:tm-reg-pre-admission
+-    isa s:kind-precondition ;
+-    - "Admission of the Project Workspace to a served runtime" ;
+-    s:declaration-text: "Admission of the Project Workspace to a served runtime — the user's decision; the Catalog's startup guard refuses the Workspace until it is made." .
+-
+ w:tm-reg-pre-security-review
+     isa s:kind-precondition ;
+     - "Independent security review of the public Inspector" ;
+@@ -1419,11 +1414,6 @@ w:tm-reg-pre-production
+     - "tm-reg-p3 depends-on tm-reg-p2" ;
+     s:statement-number: "1" .
+ 
+-<tag:dreyeck.ch,2026:hyperdoc/statement/dreyeck/work/project/implementation-assignments/tm-reg-p4/work:relation/depends-on/tm-reg-p3/1>
+-    isa s:proposed-statement ;
+-    - "tm-reg-p4 depends-on tm-reg-p3" ;
+-    s:statement-number: "1" .
+-
+ <tag:dreyeck.ch,2026:hyperdoc/statement/dreyeck/work/project/implementation-assignments/tm-reg-p5/work:relation/depends-on/tm-reg-p1/1>
+     isa s:proposed-statement ;
+     - "tm-reg-p5 depends-on tm-reg-p1" ;
+@@ -1434,11 +1424,6 @@ w:tm-reg-pre-production
+     - "tm-reg-p5 depends-on tm-reg-p4" ;
+     s:statement-number: "1" .
+ 
+-<tag:dreyeck.ch,2026:hyperdoc/statement/dreyeck/work/project/implementation-assignments/tm-reg-p5/work:relation/depends-on/tm-reg-pre-admission/1>
+-    isa s:proposed-statement ;
+-    - "tm-reg-p5 depends-on tm-reg-pre-admission" ;
+-    s:statement-number: "1" .
+-
+ <tag:dreyeck.ch,2026:hyperdoc/statement/dreyeck/work/project/implementation-assignments/tm-reg-p5/work:relation/depends-on/tm-reg-pre-publish/1>
+     isa s:proposed-statement ;
+     - "tm-reg-p5 depends-on tm-reg-pre-publish" ;
+@@ -2318,8 +2303,6 @@ s:proposed-on(s:proposal: w:tm-reg-p5, s:source-page: <tag:dreyeck.ch,2026:hyper
+ s:carried-by(s:carried: w:tm-reg-p5, s:carrier-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/regular-hyperdoc-catalog-scope-proposal>)
+ s:proposed-on(s:proposal: w:tm-reg-p6, s:source-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/implementation-assignments>)
+ s:carried-by(s:carried: w:tm-reg-p6, s:carrier-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/regular-hyperdoc-catalog-scope-proposal>)
+-s:proposed-on(s:proposal: w:tm-reg-pre-admission, s:source-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/implementation-assignments>)
+-s:carried-by(s:carried: w:tm-reg-pre-admission, s:carrier-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/regular-hyperdoc-catalog-scope-proposal>)
+ s:proposed-on(s:proposal: w:tm-reg-pre-security-review, s:source-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/implementation-assignments>)
+ s:carried-by(s:carried: w:tm-reg-pre-security-review, s:carrier-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/regular-hyperdoc-catalog-scope-proposal>)
+ s:proposed-on(s:proposal: w:tm-reg-pre-publish, s:source-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/implementation-assignments>)
+@@ -2468,14 +2451,10 @@ s:proposed-on(s:proposal: <tag:dreyeck.ch,2026:hyperdoc/statement/dreyeck/work/p
+ <tag:dreyeck.ch,2026:hyperdoc/work/topic/work:relation/depends-on>(s:role-work-relation-depends-on-source: w:tm-reg-p2, s:role-work-relation-depends-on-target: w:tm-reg-p1) ~ <tag:dreyeck.ch,2026:hyperdoc/statement/dreyeck/work/project/implementation-assignments/tm-reg-p2/work:relation/depends-on/tm-reg-p1/1>
+ s:proposed-on(s:proposal: <tag:dreyeck.ch,2026:hyperdoc/statement/dreyeck/work/project/implementation-assignments/tm-reg-p3/work:relation/depends-on/tm-reg-p2/1>, s:source-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/implementation-assignments>)
+ <tag:dreyeck.ch,2026:hyperdoc/work/topic/work:relation/depends-on>(s:role-work-relation-depends-on-source: w:tm-reg-p3, s:role-work-relation-depends-on-target: w:tm-reg-p2) ~ <tag:dreyeck.ch,2026:hyperdoc/statement/dreyeck/work/project/implementation-assignments/tm-reg-p3/work:relation/depends-on/tm-reg-p2/1>
+-s:proposed-on(s:proposal: <tag:dreyeck.ch,2026:hyperdoc/statement/dreyeck/work/project/implementation-assignments/tm-reg-p4/work:relation/depends-on/tm-reg-p3/1>, s:source-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/implementation-assignments>)
+-<tag:dreyeck.ch,2026:hyperdoc/work/topic/work:relation/depends-on>(s:role-work-relation-depends-on-source: w:tm-reg-p4, s:role-work-relation-depends-on-target: w:tm-reg-p3) ~ <tag:dreyeck.ch,2026:hyperdoc/statement/dreyeck/work/project/implementation-assignments/tm-reg-p4/work:relation/depends-on/tm-reg-p3/1>
+ s:proposed-on(s:proposal: <tag:dreyeck.ch,2026:hyperdoc/statement/dreyeck/work/project/implementation-assignments/tm-reg-p5/work:relation/depends-on/tm-reg-p1/1>, s:source-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/implementation-assignments>)
+ <tag:dreyeck.ch,2026:hyperdoc/work/topic/work:relation/depends-on>(s:role-work-relation-depends-on-source: w:tm-reg-p5, s:role-work-relation-depends-on-target: w:tm-reg-p1) ~ <tag:dreyeck.ch,2026:hyperdoc/statement/dreyeck/work/project/implementation-assignments/tm-reg-p5/work:relation/depends-on/tm-reg-p1/1>
+ s:proposed-on(s:proposal: <tag:dreyeck.ch,2026:hyperdoc/statement/dreyeck/work/project/implementation-assignments/tm-reg-p5/work:relation/depends-on/tm-reg-p4/1>, s:source-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/implementation-assignments>)
+ <tag:dreyeck.ch,2026:hyperdoc/work/topic/work:relation/depends-on>(s:role-work-relation-depends-on-source: w:tm-reg-p5, s:role-work-relation-depends-on-target: w:tm-reg-p4) ~ <tag:dreyeck.ch,2026:hyperdoc/statement/dreyeck/work/project/implementation-assignments/tm-reg-p5/work:relation/depends-on/tm-reg-p4/1>
+-s:proposed-on(s:proposal: <tag:dreyeck.ch,2026:hyperdoc/statement/dreyeck/work/project/implementation-assignments/tm-reg-p5/work:relation/depends-on/tm-reg-pre-admission/1>, s:source-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/implementation-assignments>)
+-<tag:dreyeck.ch,2026:hyperdoc/work/topic/work:relation/depends-on>(s:role-work-relation-depends-on-source: w:tm-reg-p5, s:role-work-relation-depends-on-target: w:tm-reg-pre-admission) ~ <tag:dreyeck.ch,2026:hyperdoc/statement/dreyeck/work/project/implementation-assignments/tm-reg-p5/work:relation/depends-on/tm-reg-pre-admission/1>
+ s:proposed-on(s:proposal: <tag:dreyeck.ch,2026:hyperdoc/statement/dreyeck/work/project/implementation-assignments/tm-reg-p5/work:relation/depends-on/tm-reg-pre-publish/1>, s:source-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/implementation-assignments>)
+ <tag:dreyeck.ch,2026:hyperdoc/work/topic/work:relation/depends-on>(s:role-work-relation-depends-on-source: w:tm-reg-p5, s:role-work-relation-depends-on-target: w:tm-reg-pre-publish) ~ <tag:dreyeck.ch,2026:hyperdoc/statement/dreyeck/work/project/implementation-assignments/tm-reg-p5/work:relation/depends-on/tm-reg-pre-publish/1>
+ s:proposed-on(s:proposal: <tag:dreyeck.ch,2026:hyperdoc/statement/dreyeck/work/project/implementation-assignments/tm-reg-p6/work:relation/depends-on/tm-reg-p5/1>, s:source-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/implementation-assignments>)
+diff --git a/dreyeck/work/project/hyperdoc-project.ctm.sha256 b/dreyeck/work/project/hyperdoc-project.ctm.sha256
+index 5cc9a6e3..7a55f393 100644
+--- a/dreyeck/work/project/hyperdoc-project.ctm.sha256
++++ b/dreyeck/work/project/hyperdoc-project.ctm.sha256
+@@ -1 +1 @@
+-6a54569f9ddbf01ae00e33715d605c0e8ade54b3b6c6d81305d3e68ae519a8b5  hyperdoc-project.ctm
++e7c4478cf1cab9e3555efbb359b19818f68ab4a0c51ed8850dd1519e545edd52  hyperdoc-project.ctm
+diff --git a/scripts/test-project-workspace-scope.mjs b/scripts/test-project-workspace-scope.mjs
+index 56a1c0b3..e4349493 100644
+--- a/scripts/test-project-workspace-scope.mjs
++++ b/scripts/test-project-workspace-scope.mjs
+@@ -168,11 +168,17 @@ try{
+  }
+  assert(visited.length>1,'the plan steps follow one another')
+  steps_.push('plan steps along depends-on: '+visited.join(' → ')+', each with exactly the relations the page proposes')
+- // A precondition the last step waits for
+- const waits=statements.find(s=>s.relation==='work:relation/depends-on'&&s.from===current&&byId[s.to].kind==='precondition')
+- assert(waits,'the last step waits for a precondition')
++ // A precondition a plan step waits for: the first step the page says waits for one (the chain of steps need not end at it)
++ const waits=statements.find(s=>s.relation==='work:relation/depends-on'&&byId[s.from].kind==='plan step'&&byId[s.to].kind==='precondition')
++ assert(waits,'a step waits for a precondition')
++ if(waits.from!==current){ws=await open(byId[waits.from].label);await checkProposal(ws,waits.from)}
+  await go(ws,byId[waits.to].label);await checkProposal(ws,waits.to)
+- steps_.push(`${current} → precondition ${waits.to}: depends on ← ${current}; no work package depends on it`)
++ steps_.push(`${waits.from} → precondition ${waits.to}: depends on ← ${waits.from}; no work package depends on it`)
++ // Every plan step is reached directly in the Workspace, not only asserted: the ones the chain above did not visit (here p4 and p6) are opened and compared with the page
++ const reached=new Set([...visited,waits.from])
++ for(const s of steps){if(!reached.has(s.id)){ws=await open(s.label);await checkProposal(ws,s.id);reached.add(s.id)}}
++ assert.equal(reached.size,steps.length,'every plan step was reached in the Workspace')
++ steps_.push(`every plan step opened in the Workspace and compared with the page, directly: ${steps.map(s=>s.id).join(', ')}`)
+  // From a work package to the page it is proposed on: a Topic of the project CTM
+  await go(ws,'Implementation Assignments');await atPoint(ws,'page/dreyeck/work/project/implementation-assignments')
+  steps_.push('proposed on → the page Implementation Assignments as a Topic of the project CTM')

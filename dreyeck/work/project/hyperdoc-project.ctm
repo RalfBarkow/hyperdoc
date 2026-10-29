@@ -6,7 +6,7 @@
 #   dreyeck/pages/work/Work Breakdown.html  a7dc3d53a1a7312e6feba2350bde7251c222b2acd321ef5a109116f5cf616e13
 #   dreyeck/pages/work/Authoring the CTM Plan Page.html  fced413ad5e893e49973df1fa8fb5ca14dee87695c50100e72ddd12d4d2de75a
 #   dreyeck/pages/work/CTM Plan Page WBS Dictionary.html  de3f372912e0a257a85990686fdcd354f79481af7aecb1ecc5d1ffb171e9d9b5
-#   dreyeck/pages/project/Implementation Assignments.html  e205b90a4c4fe887ec248ce1859aa3c893e9822feabc76f1413860ced13e1288
+#   dreyeck/pages/project/Implementation Assignments.html  51c656f125d09abf010d860a54a78972c9c00fc0f700ca876e2965209fecc58d
 # Other files read: the test files WBS Dictionary controls name, to derive test marker found:
 #   dreyeck/tests/fedwiki-page-authoring.lisp  0fcd02078576bde7a0438620797ea30c805900201ac443b8bc20ac8b146671d1
 #   dreyeck/tests/fedwiki-item-edit-execution.lisp  d215e10c48f94b401248d60e7c8fe95db5c693ea8a489f60b368c7f8102c755d
@@ -509,7 +509,7 @@ s:role-work-relation-depends-on-target
     s:hyperbook-id: "dreyeck/work/project" ;
     s:page-id: "Implementation Assignments" ;
     s:repository-path: "dreyeck/pages/project/Implementation Assignments.html" ;
-    s:source-sha256: "e205b90a4c4fe887ec248ce1859aa3c893e9822feabc76f1413860ced13e1288" .
+    s:source-sha256: "51c656f125d09abf010d860a54a78972c9c00fc0f700ca876e2965209fecc58d" .
 
 <tag:dreyeck.ch,2026:hyperdoc/hyperbook/dreyeck/work/project>
     isa s:hyperbook ;
@@ -1044,11 +1044,6 @@ w:tm-reg-p6
     - "Stage, verify, obtain production approval and deploy" ;
     s:declaration-text: "Stage, verify, obtain production approval and deploy — activate the generation, verify identity and boundaries, show the rollback." .
 
-w:tm-reg-pre-admission
-    isa s:kind-precondition ;
-    - "Admission of the Project Workspace to a served runtime" ;
-    s:declaration-text: "Admission of the Project Workspace to a served runtime — the user's decision; the Catalog's startup guard refuses the Workspace until it is made." .
-
 w:tm-reg-pre-security-review
     isa s:kind-precondition ;
     - "Independent security review of the public Inspector" ;
@@ -1419,11 +1414,6 @@ w:tm-reg-pre-production
     - "tm-reg-p3 depends-on tm-reg-p2" ;
     s:statement-number: "1" .
 
-<tag:dreyeck.ch,2026:hyperdoc/statement/dreyeck/work/project/implementation-assignments/tm-reg-p4/work:relation/depends-on/tm-reg-p3/1>
-    isa s:proposed-statement ;
-    - "tm-reg-p4 depends-on tm-reg-p3" ;
-    s:statement-number: "1" .
-
 <tag:dreyeck.ch,2026:hyperdoc/statement/dreyeck/work/project/implementation-assignments/tm-reg-p5/work:relation/depends-on/tm-reg-p1/1>
     isa s:proposed-statement ;
     - "tm-reg-p5 depends-on tm-reg-p1" ;
@@ -1432,11 +1422,6 @@ w:tm-reg-pre-production
 <tag:dreyeck.ch,2026:hyperdoc/statement/dreyeck/work/project/implementation-assignments/tm-reg-p5/work:relation/depends-on/tm-reg-p4/1>
     isa s:proposed-statement ;
     - "tm-reg-p5 depends-on tm-reg-p4" ;
-    s:statement-number: "1" .
-
-<tag:dreyeck.ch,2026:hyperdoc/statement/dreyeck/work/project/implementation-assignments/tm-reg-p5/work:relation/depends-on/tm-reg-pre-admission/1>
-    isa s:proposed-statement ;
-    - "tm-reg-p5 depends-on tm-reg-pre-admission" ;
     s:statement-number: "1" .
 
 <tag:dreyeck.ch,2026:hyperdoc/statement/dreyeck/work/project/implementation-assignments/tm-reg-p5/work:relation/depends-on/tm-reg-pre-publish/1>
@@ -2318,8 +2303,6 @@ s:proposed-on(s:proposal: w:tm-reg-p5, s:source-page: <tag:dreyeck.ch,2026:hyper
 s:carried-by(s:carried: w:tm-reg-p5, s:carrier-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/regular-hyperdoc-catalog-scope-proposal>)
 s:proposed-on(s:proposal: w:tm-reg-p6, s:source-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/implementation-assignments>)
 s:carried-by(s:carried: w:tm-reg-p6, s:carrier-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/regular-hyperdoc-catalog-scope-proposal>)
-s:proposed-on(s:proposal: w:tm-reg-pre-admission, s:source-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/implementation-assignments>)
-s:carried-by(s:carried: w:tm-reg-pre-admission, s:carrier-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/regular-hyperdoc-catalog-scope-proposal>)
 s:proposed-on(s:proposal: w:tm-reg-pre-security-review, s:source-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/implementation-assignments>)
 s:carried-by(s:carried: w:tm-reg-pre-security-review, s:carrier-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/regular-hyperdoc-catalog-scope-proposal>)
 s:proposed-on(s:proposal: w:tm-reg-pre-publish, s:source-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/implementation-assignments>)
@@ -2468,14 +2451,10 @@ s:proposed-on(s:proposal: <tag:dreyeck.ch,2026:hyperdoc/statement/dreyeck/work/p
 <tag:dreyeck.ch,2026:hyperdoc/work/topic/work:relation/depends-on>(s:role-work-relation-depends-on-source: w:tm-reg-p2, s:role-work-relation-depends-on-target: w:tm-reg-p1) ~ <tag:dreyeck.ch,2026:hyperdoc/statement/dreyeck/work/project/implementation-assignments/tm-reg-p2/work:relation/depends-on/tm-reg-p1/1>
 s:proposed-on(s:proposal: <tag:dreyeck.ch,2026:hyperdoc/statement/dreyeck/work/project/implementation-assignments/tm-reg-p3/work:relation/depends-on/tm-reg-p2/1>, s:source-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/implementation-assignments>)
 <tag:dreyeck.ch,2026:hyperdoc/work/topic/work:relation/depends-on>(s:role-work-relation-depends-on-source: w:tm-reg-p3, s:role-work-relation-depends-on-target: w:tm-reg-p2) ~ <tag:dreyeck.ch,2026:hyperdoc/statement/dreyeck/work/project/implementation-assignments/tm-reg-p3/work:relation/depends-on/tm-reg-p2/1>
-s:proposed-on(s:proposal: <tag:dreyeck.ch,2026:hyperdoc/statement/dreyeck/work/project/implementation-assignments/tm-reg-p4/work:relation/depends-on/tm-reg-p3/1>, s:source-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/implementation-assignments>)
-<tag:dreyeck.ch,2026:hyperdoc/work/topic/work:relation/depends-on>(s:role-work-relation-depends-on-source: w:tm-reg-p4, s:role-work-relation-depends-on-target: w:tm-reg-p3) ~ <tag:dreyeck.ch,2026:hyperdoc/statement/dreyeck/work/project/implementation-assignments/tm-reg-p4/work:relation/depends-on/tm-reg-p3/1>
 s:proposed-on(s:proposal: <tag:dreyeck.ch,2026:hyperdoc/statement/dreyeck/work/project/implementation-assignments/tm-reg-p5/work:relation/depends-on/tm-reg-p1/1>, s:source-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/implementation-assignments>)
 <tag:dreyeck.ch,2026:hyperdoc/work/topic/work:relation/depends-on>(s:role-work-relation-depends-on-source: w:tm-reg-p5, s:role-work-relation-depends-on-target: w:tm-reg-p1) ~ <tag:dreyeck.ch,2026:hyperdoc/statement/dreyeck/work/project/implementation-assignments/tm-reg-p5/work:relation/depends-on/tm-reg-p1/1>
 s:proposed-on(s:proposal: <tag:dreyeck.ch,2026:hyperdoc/statement/dreyeck/work/project/implementation-assignments/tm-reg-p5/work:relation/depends-on/tm-reg-p4/1>, s:source-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/implementation-assignments>)
 <tag:dreyeck.ch,2026:hyperdoc/work/topic/work:relation/depends-on>(s:role-work-relation-depends-on-source: w:tm-reg-p5, s:role-work-relation-depends-on-target: w:tm-reg-p4) ~ <tag:dreyeck.ch,2026:hyperdoc/statement/dreyeck/work/project/implementation-assignments/tm-reg-p5/work:relation/depends-on/tm-reg-p4/1>
-s:proposed-on(s:proposal: <tag:dreyeck.ch,2026:hyperdoc/statement/dreyeck/work/project/implementation-assignments/tm-reg-p5/work:relation/depends-on/tm-reg-pre-admission/1>, s:source-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/implementation-assignments>)
-<tag:dreyeck.ch,2026:hyperdoc/work/topic/work:relation/depends-on>(s:role-work-relation-depends-on-source: w:tm-reg-p5, s:role-work-relation-depends-on-target: w:tm-reg-pre-admission) ~ <tag:dreyeck.ch,2026:hyperdoc/statement/dreyeck/work/project/implementation-assignments/tm-reg-p5/work:relation/depends-on/tm-reg-pre-admission/1>
 s:proposed-on(s:proposal: <tag:dreyeck.ch,2026:hyperdoc/statement/dreyeck/work/project/implementation-assignments/tm-reg-p5/work:relation/depends-on/tm-reg-pre-publish/1>, s:source-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/implementation-assignments>)
 <tag:dreyeck.ch,2026:hyperdoc/work/topic/work:relation/depends-on>(s:role-work-relation-depends-on-source: w:tm-reg-p5, s:role-work-relation-depends-on-target: w:tm-reg-pre-publish) ~ <tag:dreyeck.ch,2026:hyperdoc/statement/dreyeck/work/project/implementation-assignments/tm-reg-p5/work:relation/depends-on/tm-reg-pre-publish/1>
 s:proposed-on(s:proposal: <tag:dreyeck.ch,2026:hyperdoc/statement/dreyeck/work/project/implementation-assignments/tm-reg-p6/work:relation/depends-on/tm-reg-p5/1>, s:source-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/implementation-assignments>)

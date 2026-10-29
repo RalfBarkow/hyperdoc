@@ -1,0 +1,3 @@
+6d9ddda78acde7c9882901a08ce0b30ba46dd0cbc9c2ab5ddb301b3596ebe6e7  graph-a-source.patch
+a8a9a4a066a0f33a3ff9c6c97ecee75633da571459e2ea721a1ae5e53ab4d707  graph-a-generated-ctm.diff
+1ac086e85c35835881626c32ecdf29fa2064a23880a1fa68ad6e7f59566417a9  project-transition-graph-a.lisp.draft

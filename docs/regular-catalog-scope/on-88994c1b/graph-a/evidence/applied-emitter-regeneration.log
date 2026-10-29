@@ -1,0 +1,1175 @@
+WARNING: System definition file #P"/nix/store/7kwvfxhgrx9d2nnainzdflxrd76c1aj3-sbcl-cl-who-20241012-git/cl-who.asd" contains definition for system "cl-who-test". Please only define "cl-who" and secondary systems with a name starting with "cl-who/" (e.g. "cl-who/test") in that file.
+WARNING: System definition file #P"/nix/store/37a33q8xchz47wpd24wf67lalz080hl5-sbcl-parse-float-20200218-git/parse-float.asd" contains definition for system "parse-float-tests". Please only define "parse-float" and secondary systems with a name starting with "parse-float/" (e.g. "parse-float/test") in that file.
+WARNING: System definition file #P"/nix/store/8nfp68p140k76rh833nfcv500k8ippr4-sbcl-cl-template-20130615-git/cl-template.asd" contains definition for system "cl-template-tests". Please only define "cl-template" and secondary systems with a name starting with "cl-template/" (e.g. "cl-template/test") in that file.
+; compiling file "/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/dreyeck/src/topicmap-package.lisp" (written 28 OCT 2026 06:29:48 PM):
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/dreyeck/src/topicmap-package-tmpGHU3ALSV.fasl
+; compilation finished in 0:00:00.004
+; compiling file "/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/dreyeck/src/topicmap.lisp" (written 28 OCT 2026 06:29:48 PM):
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/dreyeck/src/topicmap-tmpAAURSO1.fasl
+; compilation finished in 0:00:00.102
+; compiling file "/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/dreyeck/src/topicmap-curation-package.lisp" (written 28 OCT 2026 06:29:48 PM):
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/dreyeck/src/topicmap-curation-package-tmp5GEXGEG5.fasl
+; compilation finished in 0:00:00.002
+; compiling file "/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/dreyeck/src/topicmap-curation.lisp" (written 28 OCT 2026 06:29:48 PM):
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/dreyeck/src/topicmap-curation-tmpAR3FSGEY.fasl
+; compilation finished in 0:00:00.038
+; compiling file "/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/hyperbook/package.lisp" (written 28 OCT 2026 06:29:49 PM):
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/hyperbook/package-tmpJAIDFZTC.fasl
+; compilation finished in 0:00:00.002
+; compiling file "/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/hyperbook/hyperbooks.lisp" (written 28 OCT 2026 06:29:49 PM):
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/hyperbook/hyperbooks-tmp8V3J6PE9.fasl
+; compilation finished in 0:00:00.024
+; compiling file "/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/hyperbook/catalog.lisp" (written 28 OCT 2026 06:29:49 PM):
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/hyperbook/catalog-tmp9V47YWQF.fasl
+; compilation finished in 0:00:00.031
+; compiling file "/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/hyperbook/html-books.lisp" (written 28 OCT 2026 06:29:49 PM):
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/hyperbook/html-books-tmp9BN22RMA.fasl
+; compilation finished in 0:00:00.003
+; compiling file "/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/hyperbook/html-rendering-support.lisp" (written 28 OCT 2026 06:29:49 PM):
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/hyperbook/html-rendering-support-tmp1CXFJSK9.fasl
+; compilation finished in 0:00:00.009
+; compiling file "/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/hyperdoc/package.lisp" (written 28 OCT 2026 06:29:49 PM):
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/hyperdoc/package-tmpX4BRKI0R.fasl
+; compilation finished in 0:00:00.003
+; compiling file "/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/hyperdoc/core.lisp" (written 28 OCT 2026 06:29:49 PM):
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/hyperdoc/core-tmpQ371UGST.fasl
+; compilation finished in 0:00:00.081
+; compiling file "/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/hyperdoc/links-in-code.lisp" (written 28 OCT 2026 06:29:49 PM):
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/hyperdoc/links-in-code-tmp2OWI3Q7U.fasl
+; compilation finished in 0:00:00.007
+; compiling file "/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/hyperdoc/defining.lisp" (written 28 OCT 2026 06:29:49 PM):
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/hyperdoc/defining-tmp9KKTJMYV.fasl
+; compilation finished in 0:00:00.004
+; compiling file "/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/hyperdoc/examples.lisp" (written 28 OCT 2026 06:29:49 PM):
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/hyperdoc/examples-tmpJU0JWO19.fasl
+; compilation finished in 0:00:00.020
+; compiling file "/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/hyperdoc/tools.lisp" (written 28 OCT 2026 06:29:49 PM):
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/hyperdoc/tools-tmpZX2WN8N4.fasl
+; compilation finished in 0:00:00.023
+; compiling file "/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/hyperdoc/hyperdoc.lisp" (written 28 OCT 2026 06:29:49 PM):
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/hyperdoc/hyperdoc-tmpOU81XRV0.fasl
+; compilation finished in 0:00:00.003
+;;; Computing Hangul syllable names
+; compiling file "/nix/store/w26nr9dxpfsyzbviphnaaydmcww2h3y6-source/package.lisp" (written 01 JAN 1970 01:00:01 AM):
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/nix/store/w26nr9dxpfsyzbviphnaaydmcww2h3y6-source/package-tmpY2ML9CFA.fasl
+; compilation finished in 0:00:00.004
+; compiling file "/nix/store/w26nr9dxpfsyzbviphnaaydmcww2h3y6-source/thunks.lisp" (written 01 JAN 1970 01:00:01 AM):
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/nix/store/w26nr9dxpfsyzbviphnaaydmcww2h3y6-source/thunks-tmpX2JYJDQE.fasl
+; compilation finished in 0:00:00.010
+; compiling file "/nix/store/w26nr9dxpfsyzbviphnaaydmcww2h3y6-source/html.lisp" (written 01 JAN 1970 01:00:01 AM):
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/nix/store/w26nr9dxpfsyzbviphnaaydmcww2h3y6-source/html-tmpOPCILR65.fasl
+; compilation finished in 0:00:00.161
+; compiling file "/nix/store/w26nr9dxpfsyzbviphnaaydmcww2h3y6-source/title-bar.lisp" (written 01 JAN 1970 01:00:01 AM):
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/nix/store/w26nr9dxpfsyzbviphnaaydmcww2h3y6-source/title-bar-tmpRV9F8A9A.fasl
+; compilation finished in 0:00:00.072
+; compiling file "/nix/store/w26nr9dxpfsyzbviphnaaydmcww2h3y6-source/views.lisp" (written 01 JAN 1970 01:00:01 AM):
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/nix/store/w26nr9dxpfsyzbviphnaaydmcww2h3y6-source/views-tmpK2ZAJT4I.fasl
+; compilation finished in 0:00:00.120
+; compiling file "/nix/store/w26nr9dxpfsyzbviphnaaydmcww2h3y6-source/view-support.lisp" (written 01 JAN 1970 01:00:01 AM):
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/nix/store/w26nr9dxpfsyzbviphnaaydmcww2h3y6-source/view-support-tmpUX5S4ADN.fasl
+; compilation finished in 0:00:00.496
+; compiling file "/nix/store/w26nr9dxpfsyzbviphnaaydmcww2h3y6-source/gui-class.lisp" (written 01 JAN 1970 01:00:01 AM):
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/nix/store/w26nr9dxpfsyzbviphnaaydmcww2h3y6-source/gui-class-tmp10401X32.fasl
+; compilation finished in 0:00:00.032
+STYLE-WARNING:
+   The new FTYPE proclamation for FSET::VECTOR-SET-BINARY-SEARCH-LO
+     (FUNCTION (SIMPLE-VECTOR T) FIXNUM)
+   does not match the derived return type
+     (FUNCTION (SIMPLE-VECTOR T)
+      (VALUES (INTEGER -4611686018427387904 4611686018427387904) &OPTIONAL))
+STYLE-WARNING:
+   The new FTYPE proclamation for FSET::WB-BAG-TREE-TOTAL-COUNT
+     (FUNCTION (FSET::WB-BAG-TREE) INTEGER)
+   does not match the derived return type
+     (FUNCTION ((OR LIST FSET::WB-BAG-TREE-NODE)) *)
+STYLE-WARNING:
+   The new FTYPE proclamation for FSET::HASH-VALUE-FIXNUM
+     (FUNCTION (T) FIXNUM)
+   does not match the derived return type
+     (FUNCTION (T) (VALUES INTEGER &OPTIONAL))
+STYLE-WARNING:
+   The new FTYPE proclamation for FSET::CH-SET-NODE-ENTRY-MASK
+     (FUNCTION (T) FIXNUM)
+   does not match the derived return type
+     (FUNCTION (SIMPLE-VECTOR) (VALUES T &OPTIONAL))
+STYLE-WARNING:
+   The new FTYPE proclamation for FSET::CH-SET-NODE-SUBNODE-MASK
+     (FUNCTION (T) FIXNUM)
+   does not match the derived return type
+     (FUNCTION (SIMPLE-VECTOR) (VALUES T &OPTIONAL))
+STYLE-WARNING:
+   The new FTYPE proclamation for FSET::CH-SET-NODE-SIZE
+     (FUNCTION (T) FIXNUM)
+   does not match the derived return type
+     (FUNCTION (SIMPLE-VECTOR) (VALUES T &OPTIONAL))
+STYLE-WARNING:
+   The new FTYPE proclamation for FSET::CH-SET-NODE-HASH-VALUE
+     (FUNCTION (T) FIXNUM)
+   does not match the derived return type
+     (FUNCTION (SIMPLE-VECTOR) (VALUES T &OPTIONAL))
+STYLE-WARNING:
+   The new FTYPE proclamation for FSET::CH-MAP-NODE-ENTRY-MASK
+     (FUNCTION (T) FIXNUM)
+   does not match the derived return type
+     (FUNCTION (SIMPLE-VECTOR) (VALUES T &OPTIONAL))
+STYLE-WARNING:
+   The new FTYPE proclamation for FSET::CH-MAP-NODE-SUBNODE-MASK
+     (FUNCTION (T) FIXNUM)
+   does not match the derived return type
+     (FUNCTION (SIMPLE-VECTOR) (VALUES T &OPTIONAL))
+STYLE-WARNING:
+   The new FTYPE proclamation for FSET::CH-MAP-NODE-SIZE
+     (FUNCTION (T) FIXNUM)
+   does not match the derived return type
+     (FUNCTION (SIMPLE-VECTOR) (VALUES T &OPTIONAL))
+STYLE-WARNING:
+   The new FTYPE proclamation for FSET::CH-MAP-NODE-HASH-VALUE
+     (FUNCTION (T) FIXNUM)
+   does not match the derived return type
+     (FUNCTION (SIMPLE-VECTOR) (VALUES T &OPTIONAL))
+STYLE-WARNING:
+   Generic function FSET:ITERATOR clobbers an earlier FTYPE proclamation
+   (FUNCTION (T &KEY &ALLOW-OTHER-KEYS) (VALUES FUNCTION &REST T)) for the same
+   name with (FUNCTION (T &KEY &ALLOW-OTHER-KEYS) *).
+STYLE-WARNING:
+   The new FTYPE proclamation for SWANK/BACKEND:GETPID
+     (FUNCTION NIL (VALUES (SIGNED-BYTE 32) &OPTIONAL))
+   does not match the derived return type
+     (FUNCTION NIL *)
+WARNING:
+   redefining EMACS-INSPECT (#<SB-PCL:SYSTEM-CLASS COMMON-LISP:T>) in DEFMETHOD
+; compiling file "/nix/store/w26nr9dxpfsyzbviphnaaydmcww2h3y6-source/package-standard.lisp" (written 01 JAN 1970 01:00:01 AM):
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/nix/store/w26nr9dxpfsyzbviphnaaydmcww2h3y6-source/package-standard-tmpZ7CBRM0G.fasl
+; compilation finished in 0:00:00.004
+; compiling file "/nix/store/w26nr9dxpfsyzbviphnaaydmcww2h3y6-source/svg.lisp" (written 01 JAN 1970 01:00:01 AM):
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/nix/store/w26nr9dxpfsyzbviphnaaydmcww2h3y6-source/svg-tmp9OZEQ0G2.fasl
+; compilation finished in 0:00:00.004
+; compiling file "/nix/store/w26nr9dxpfsyzbviphnaaydmcww2h3y6-source/basic.lisp" (written 01 JAN 1970 01:00:01 AM):
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/nix/store/w26nr9dxpfsyzbviphnaaydmcww2h3y6-source/basic-tmpB2JTL1W9.fasl
+; compilation finished in 0:00:00.189
+WARNING:
+   redefining 👀PRINT-STRING (#<SB-PCL:SYSTEM-CLASS COMMON-LISP:T>) in DEFMETHOD
+; compiling file "/nix/store/w26nr9dxpfsyzbviphnaaydmcww2h3y6-source/pathnames.lisp" (written 01 JAN 1970 01:00:01 AM):
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/nix/store/w26nr9dxpfsyzbviphnaaydmcww2h3y6-source/pathnames-tmpP3BI68WQ.fasl
+; compilation finished in 0:00:00.156
+; compiling file "/nix/store/w26nr9dxpfsyzbviphnaaydmcww2h3y6-source/numbers.lisp" (written 01 JAN 1970 01:00:01 AM):
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/nix/store/w26nr9dxpfsyzbviphnaaydmcww2h3y6-source/numbers-tmpQDARA81Z.fasl
+; compilation finished in 0:00:00.056
+; compiling file "/nix/store/w26nr9dxpfsyzbviphnaaydmcww2h3y6-source/characters.lisp" (written 01 JAN 1970 01:00:01 AM):
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/nix/store/w26nr9dxpfsyzbviphnaaydmcww2h3y6-source/characters-tmpYEMMM7SE.fasl
+; compilation finished in 0:00:00.005
+; compiling file "/nix/store/w26nr9dxpfsyzbviphnaaydmcww2h3y6-source/strings.lisp" (written 01 JAN 1970 01:00:01 AM):
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/nix/store/w26nr9dxpfsyzbviphnaaydmcww2h3y6-source/strings-tmp73HU0RPK.fasl
+; compilation finished in 0:00:00.027
+; compiling file "/nix/store/w26nr9dxpfsyzbviphnaaydmcww2h3y6-source/symbols.lisp" (written 01 JAN 1970 01:00:01 AM):
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/nix/store/w26nr9dxpfsyzbviphnaaydmcww2h3y6-source/symbols-tmpIO5N7K88.fasl
+; compilation finished in 0:00:00.089
+; compiling file "/nix/store/w26nr9dxpfsyzbviphnaaydmcww2h3y6-source/lists.lisp" (written 01 JAN 1970 01:00:01 AM):
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/nix/store/w26nr9dxpfsyzbviphnaaydmcww2h3y6-source/lists-tmpCM21U60Z.fasl
+; compilation finished in 0:00:00.019
+; compiling file "/nix/store/w26nr9dxpfsyzbviphnaaydmcww2h3y6-source/arrays.lisp" (written 01 JAN 1970 01:00:01 AM):
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/nix/store/w26nr9dxpfsyzbviphnaaydmcww2h3y6-source/arrays-tmp9DT7SEFG.fasl
+; compilation finished in 0:00:00.032
+; compiling file "/nix/store/w26nr9dxpfsyzbviphnaaydmcww2h3y6-source/hash-tables.lisp" (written 01 JAN 1970 01:00:01 AM):
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/nix/store/w26nr9dxpfsyzbviphnaaydmcww2h3y6-source/hash-tables-tmp8065ESJT.fasl
+; compilation finished in 0:00:00.099
+; compiling file "/nix/store/w26nr9dxpfsyzbviphnaaydmcww2h3y6-source/swank.lisp" (written 01 JAN 1970 01:00:01 AM):
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/nix/store/w26nr9dxpfsyzbviphnaaydmcww2h3y6-source/swank-tmp7S8Z6FGF.fasl
+; compilation finished in 0:00:00.080
+; compiling file "/nix/store/w26nr9dxpfsyzbviphnaaydmcww2h3y6-source/functions.lisp" (written 01 JAN 1970 01:00:01 AM):
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/nix/store/w26nr9dxpfsyzbviphnaaydmcww2h3y6-source/functions-tmpSIT3QPKP.fasl
+; compilation finished in 0:00:00.149
+; compiling file "/nix/store/w26nr9dxpfsyzbviphnaaydmcww2h3y6-source/classes.lisp" (written 01 JAN 1970 01:00:01 AM):
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/nix/store/w26nr9dxpfsyzbviphnaaydmcww2h3y6-source/classes-tmpE0PA0714.fasl
+; compilation finished in 0:00:00.092
+; compiling file "/nix/store/w26nr9dxpfsyzbviphnaaydmcww2h3y6-source/packages.lisp" (written 01 JAN 1970 01:00:01 AM):
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/nix/store/w26nr9dxpfsyzbviphnaaydmcww2h3y6-source/packages-tmpJRWHHVG0.fasl
+; compilation finished in 0:00:00.191
+; compiling file "/nix/store/w26nr9dxpfsyzbviphnaaydmcww2h3y6-source/image.lisp" (written 01 JAN 1970 01:00:01 AM):
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/nix/store/w26nr9dxpfsyzbviphnaaydmcww2h3y6-source/image-tmp4WZVROCX.fasl
+; compilation finished in 0:00:00.209
+; compiling file "/nix/store/w26nr9dxpfsyzbviphnaaydmcww2h3y6-source/systems.lisp" (written 01 JAN 1970 01:00:01 AM):
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/nix/store/w26nr9dxpfsyzbviphnaaydmcww2h3y6-source/systems-tmpA0I3UKX8.fasl
+; compilation finished in 0:00:00.244
+; compiling file "/nix/store/w26nr9dxpfsyzbviphnaaydmcww2h3y6-source/conditions.lisp" (written 01 JAN 1970 01:00:01 AM):
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/nix/store/w26nr9dxpfsyzbviphnaaydmcww2h3y6-source/conditions-tmp267Y2N80.fasl
+; compilation finished in 0:00:00.084
+; compiling file "/nix/store/w26nr9dxpfsyzbviphnaaydmcww2h3y6-source/views-on-views.lisp" (written 01 JAN 1970 01:00:01 AM):
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/nix/store/w26nr9dxpfsyzbviphnaaydmcww2h3y6-source/views-on-views-tmpOUPE5FSJ.fasl
+; compilation finished in 0:00:00.418
+; compiling file "/nix/store/w26nr9dxpfsyzbviphnaaydmcww2h3y6-source/s-graphviz.lisp" (written 01 JAN 1970 01:00:01 AM):
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/nix/store/w26nr9dxpfsyzbviphnaaydmcww2h3y6-source/s-graphviz-tmpIGHCU6ZA.fasl
+; compilation finished in 0:00:00.005
+; compiling file "/nix/store/w26nr9dxpfsyzbviphnaaydmcww2h3y6-source/fset.lisp" (written 01 JAN 1970 01:00:01 AM):
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/nix/store/w26nr9dxpfsyzbviphnaaydmcww2h3y6-source/fset-tmpBO0TUGLK.fasl
+; compilation finished in 0:00:00.106
+; compiling file "/nix/store/w26nr9dxpfsyzbviphnaaydmcww2h3y6-source/web-pages.lisp" (written 01 JAN 1970 01:00:01 AM):
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/nix/store/w26nr9dxpfsyzbviphnaaydmcww2h3y6-source/web-pages-tmpIIXPIQNW.fasl
+; compilation finished in 0:00:00.061
+; compiling file "/nix/store/w26nr9dxpfsyzbviphnaaydmcww2h3y6-source/hyperspec.lisp" (written 01 JAN 1970 01:00:01 AM):
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/nix/store/w26nr9dxpfsyzbviphnaaydmcww2h3y6-source/hyperspec-tmpOHM494YR.fasl
+; compilation finished in 0:00:00.139
+; compiling file "/nix/store/w26nr9dxpfsyzbviphnaaydmcww2h3y6-source/lisp-parser.lisp" (written 01 JAN 1970 01:00:01 AM):
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/nix/store/w26nr9dxpfsyzbviphnaaydmcww2h3y6-source/lisp-parser-tmpOVFB07XF.fasl
+; compilation finished in 0:00:00.191
+; compiling file "/nix/store/w26nr9dxpfsyzbviphnaaydmcww2h3y6-source/lisp-code.lisp" (written 01 JAN 1970 01:00:01 AM):
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/nix/store/w26nr9dxpfsyzbviphnaaydmcww2h3y6-source/lisp-code-tmpG6VFGMYP.fasl
+; compilation finished in 0:00:00.519
+; compiling file "/nix/store/w26nr9dxpfsyzbviphnaaydmcww2h3y6-source/playgrounds.lisp" (written 01 JAN 1970 01:00:01 AM):
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/nix/store/w26nr9dxpfsyzbviphnaaydmcww2h3y6-source/playgrounds-tmp4QIPRMOF.fasl
+; compilation finished in 0:00:00.124
+; compiling file "/nix/store/w26nr9dxpfsyzbviphnaaydmcww2h3y6-source/json.lisp" (written 01 JAN 1970 01:00:01 AM):
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/nix/store/w26nr9dxpfsyzbviphnaaydmcww2h3y6-source/json-tmpGW0QV22K.fasl
+; compilation finished in 0:00:00.068
+WARNING:
+   The new FTYPE proclamation for CLSS:MATCH-SELECTOR
+     (FUNCTION (LIST (OR PLUMP-DOM:NODE VECTOR LIST) KEYWORD)
+      (VALUES (AND (VECTOR PLUMP-DOM:NODE) (NOT SIMPLE-ARRAY))))
+   does not match the old FTYPE proclamation
+     (FUNCTION (LIST (OR LIST PLUMP-DOM:NODE VECTOR) &OPTIONAL KEYWORD)
+      (VALUES (AND (VECTOR PLUMP-DOM:NODE) (NOT SIMPLE-ARRAY)) &REST T))
+; compiling file "/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/hyperbook-explorer/package.lisp" (written 28 OCT 2026 06:29:49 PM):
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/hyperbook-explorer/package-tmp2K9J0HSR.fasl
+; compilation finished in 0:00:00.002
+; compiling file "/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/hyperbook-explorer/links.lisp" (written 28 OCT 2026 06:29:49 PM):
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/hyperbook-explorer/links-tmpP44I4E0Y.fasl
+; compilation finished in 0:00:00.054
+; compiling file "/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/hyperbook-explorer/link-views.lisp" (written 28 OCT 2026 06:29:49 PM):
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/hyperbook-explorer/link-views-tmp63LQ7EX6.fasl
+; compilation finished in 0:00:00.191
+; compiling file "/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/hyperbook-explorer/link-redirection.lisp" (written 28 OCT 2026 06:29:49 PM):
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/hyperbook-explorer/link-redirection-tmp86F1A8FB.fasl
+; compilation finished in 0:00:00.005
+; compiling file "/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/hyperbook-explorer/explorer.lisp" (written 28 OCT 2026 06:29:49 PM):
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/hyperbook-explorer/explorer-tmpH7D4HL98.fasl
+; compilation finished in 0:00:00.053
+; compiling file "/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/hyperbook-explorer/catalog.lisp" (written 28 OCT 2026 06:29:49 PM):
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/hyperbook-explorer/catalog-tmpCDM7YXYI.fasl
+; compilation finished in 0:00:00.012
+; compiling file "/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/hyperbook-explorer/rendering.lisp" (written 28 OCT 2026 06:29:49 PM):
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/hyperbook-explorer/rendering-tmpLM57P5P.fasl
+; compilation finished in 0:00:00.127
+; compiling file "/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/hyperbook-explorer/html-books.lisp" (written 28 OCT 2026 06:29:49 PM):
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/hyperbook-explorer/html-books-tmpZE69DN33.fasl
+; compilation finished in 0:00:00.058
+; compiling file "/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/hyperbook-explorer/hyperbook-the-book.lisp" (written 28 OCT 2026 06:29:49 PM):
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/hyperbook-explorer/hyperbook-the-book-tmpG8099TO3.fasl
+; compilation finished in 0:00:00.002
+; compiling file "/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/hyperbook-explorer/asdf-systems.lisp" (written 28 OCT 2026 06:29:49 PM):
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/hyperbook-explorer/asdf-systems-tmpTASQCYAW.fasl
+; compilation finished in 0:00:00.040
+; compiling file "/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/hyperbook-explorer/lisp-functions.lisp" (written 28 OCT 2026 06:29:49 PM):
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/hyperbook-explorer/lisp-functions-tmp35U57IV6.fasl
+; compilation finished in 0:00:00.081
+; compiling file "/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/hyperbook-explorer/lisp-classes.lisp" (written 28 OCT 2026 06:29:49 PM):
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/hyperbook-explorer/lisp-classes-tmpTZOONXRW.fasl
+; compilation finished in 0:00:00.066
+WARNING: redefining CL-ISAAC:RAND32 in DEFUN
+WARNING: redefining CL-ISAAC:RAND64 in DEFUN
+WARNING:
+   bare references to struct types are deprecated. Please use (:POINTER
+                                                               (:STRUCT
+                                                                SQLITE3)) or (:STRUCT
+                                                                              SQLITE3) instead.
+WARNING:
+   bare references to struct types are deprecated. Please use (:POINTER
+                                                               (:STRUCT
+                                                                SQLITE3-STMT)) or (:STRUCT
+                                                                                   SQLITE3-STMT) instead.
+WARNING: redefining DEFTYPE type to be a class: DBI.ERROR:<DBI-ERROR>
+WARNING: redefining DEFTYPE type to be a class: DBI.ERROR:<DBI-WARNING>
+WARNING: redefining DEFTYPE type to be a class: DBI.ERROR:<DBI-INTERFACE-ERROR>
+WARNING:
+   redefining DEFTYPE type to be a class: DBI.ERROR:<DBI-UNIMPLEMENTED-ERROR>
+WARNING: redefining DEFTYPE type to be a class: DBI.ERROR:<DBI-DATABASE-ERROR>
+WARNING: redefining DEFTYPE type to be a class: DBI.ERROR:<DBI-DATA-ERROR>
+WARNING:
+   redefining DEFTYPE type to be a class: DBI.ERROR:<DBI-OPERATIONAL-ERROR>
+WARNING: redefining DEFTYPE type to be a class: DBI.ERROR:<DBI-INTEGRITY-ERROR>
+WARNING: redefining DEFTYPE type to be a class: DBI.ERROR:<DBI-INTERNAL-ERROR>
+WARNING:
+   redefining DEFTYPE type to be a class: DBI.ERROR:<DBI-PROGRAMMING-ERROR>
+WARNING:
+   redefining DEFTYPE type to be a class: DBI.ERROR:<DBI-NOTSUPPORTED-ERROR>
+WARNING:
+   redefining DEFTYPE type to be a class: DBI.ERROR:<DBI-ALREADY-COMMITED-ERROR>
+WARNING:
+   redefining DEFTYPE type to be a class: DBI.ERROR:<DBI-ALREADY-ROLLED-BACK-ERROR>
+WARNING: redefining DEFTYPE type to be a class: DBI.DRIVER:<DBI-DRIVER>
+WARNING: redefining DEFTYPE type to be a class: DBI.DRIVER:<DBI-CONNECTION>
+WARNING: redefining DEFTYPE type to be a class: DBI.DRIVER:<DBI-QUERY>
+WARNING: redefining IRONCLAD:BLOCK-LENGTH in DEFGENERIC
+WARNING: redefining CLOG:PARENT in DEFGENERIC
+WARNING: redefining CLOG::CONNECTION-ID in DEFGENERIC
+WARNING: redefining CLOG:HTML-ID in DEFGENERIC
+WARNING: redefining CLOG:WINDOW in DEFGENERIC
+WARNING: redefining CLOG:HTML-DOCUMENT in DEFGENERIC
+WARNING: redefining CLOG:LOCATION in DEFGENERIC
+WARNING: redefining CLOG:NAVIGATOR in DEFGENERIC
+WARNING: redefining CLOG:DOCUMENT-ELEMENT in DEFGENERIC
+WARNING: redefining CLOG:HEAD-ELEMENT in DEFGENERIC
+WARNING: redefining CLOG:DISABLEDP in DEFGENERIC
+WARNING: redefining (COMMON-LISP:SETF CLOG:DISABLEDP) in DEFGENERIC
+WARNING: redefining CLOG:VALUE in DEFGENERIC
+WARNING: redefining (COMMON-LISP:SETF CLOG:VALUE) in DEFGENERIC
+WARNING: redefining CLOG:MINIMUM in DEFGENERIC
+WARNING: redefining (COMMON-LISP:SETF CLOG:MINIMUM) in DEFGENERIC
+WARNING: redefining CLOG:MAXIMUM in DEFGENERIC
+WARNING: redefining (COMMON-LISP:SETF CLOG:MAXIMUM) in DEFGENERIC
+WARNING: redefining CLOG:URL-SRC in DEFGENERIC
+WARNING: redefining (COMMON-LISP:SETF CLOG:URL-SRC) in DEFGENERIC
+WARNING: redefining CLOG:ALT-TEXT in DEFGENERIC
+WARNING: redefining (COMMON-LISP:SETF CLOG:ALT-TEXT) in DEFGENERIC
+WARNING: redefining CLOG:CENTER-PANEL in DEFGENERIC
+WARNING: redefining CLOG:TOP-PANEL in DEFGENERIC
+WARNING: redefining CLOG:LEFT-PANEL in DEFGENERIC
+WARNING: redefining CLOG:BOTTOM-PANEL in DEFGENERIC
+WARNING: redefining CLOG:PANEL-BOX in DEFGENERIC
+WARNING: redefining CLOG:TREE-ROOT in DEFGENERIC
+WARNING: redefining CLOG:INDENT-LEVEL in DEFGENERIC
+WARNING: redefining CLOG:TOGGLE-STATE in DEFGENERIC
+WARNING: redefining CLOG:TREE-ITEM in DEFGENERIC
+WARNING: redefining CLOG:DATABASE-CONNECTION in DEFGENERIC
+; compiling file "/nix/store/ibq9zs9js02ln87vjmcl6xdafvpxzffx-source/package.lisp" (written 01 JAN 1970 01:00:01 AM):
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/nix/store/ibq9zs9js02ln87vjmcl6xdafvpxzffx-source/package-tmpBF3HHBTQ.fasl
+; compilation finished in 0:00:00.002
+; compiling file "/nix/store/ibq9zs9js02ln87vjmcl6xdafvpxzffx-source/plump-inspector-views.lisp" (written 01 JAN 1970 01:00:01 AM):
+
+; file: /nix/store/ibq9zs9js02ln87vjmcl6xdafvpxzffx-source/plump-inspector-views.lisp
+; in: DEFVIEW 👀TEXT
+;     (ERROR (PLUMP-INSPECTOR-VIEWS::C) NIL)
+; 
+; caught STYLE-WARNING:
+;   The variable C is defined but never used.
+
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/nix/store/ibq9zs9js02ln87vjmcl6xdafvpxzffx-source/plump-inspector-views-tmpGYUNPZCY.fasl
+; compilation finished in 0:00:00.063
+WARNING:
+   Lisp compilation had style-warnings while
+   compiling #<CL-SOURCE-FILE "plump-inspector-views" "plump-inspector-views">
+; compiling file "/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/hyperbook-wikipedia/package.lisp" (written 28 OCT 2026 06:29:49 PM):
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/hyperbook-wikipedia/package-tmpD68Q8WCA.fasl
+; compilation finished in 0:00:00.002
+; compiling file "/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/hyperbook-wikipedia/wikipedia-editions.lisp" (written 28 OCT 2026 06:29:49 PM):
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/hyperbook-wikipedia/wikipedia-editions-tmp7MK9KM9C.fasl
+; compilation finished in 0:00:00.003
+; compiling file "/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/hyperbook-wikipedia/wikipedia.lisp" (written 28 OCT 2026 06:29:49 PM):
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/hyperbook-wikipedia/wikipedia-tmpJJ71X849.fasl
+; compilation finished in 0:00:00.105
+WARNING: redefining CLOG:READ-ONLY-P in DEFGENERIC
+WARNING: redefining (COMMON-LISP:SETF CLOG:READ-ONLY-P) in DEFGENERIC
+; compiling file "/nix/store/w15dbn9gy780n3p9k5b69dr3rrr5lczr-source/named-closure.lisp" (written 01 JAN 1970 01:00:01 AM):
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/nix/store/w15dbn9gy780n3p9k5b69dr3rrr5lczr-source/named-closure-tmp1VUK6SR2.fasl
+; compilation finished in 0:00:00.057
+; compiling file "/nix/store/p62cd9zn5gnrd34wgbjjnqragxwx6dhh-source/lwcells.lisp" (written 01 JAN 1970 01:00:01 AM):
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/nix/store/p62cd9zn5gnrd34wgbjjnqragxwx6dhh-source/lwcells-tmpR2FIHSUG.fasl
+; compilation finished in 0:00:00.225
+; compiling file "/nix/store/w26nr9dxpfsyzbviphnaaydmcww2h3y6-source/package-reactive.lisp" (written 01 JAN 1970 01:00:01 AM):
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/nix/store/w26nr9dxpfsyzbviphnaaydmcww2h3y6-source/package-reactive-tmp8PYELRKX.fasl
+; compilation finished in 0:00:00.001
+; compiling file "/nix/store/w26nr9dxpfsyzbviphnaaydmcww2h3y6-source/reactive.lisp" (written 01 JAN 1970 01:00:01 AM):
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/nix/store/w26nr9dxpfsyzbviphnaaydmcww2h3y6-source/reactive-tmpEHTOKYT0.fasl
+; compilation finished in 0:00:00.480
+; compiling file "/nix/store/w26nr9dxpfsyzbviphnaaydmcww2h3y6-source/cell-views.lisp" (written 01 JAN 1970 01:00:01 AM):
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/nix/store/w26nr9dxpfsyzbviphnaaydmcww2h3y6-source/cell-views-tmpS6U1VHI9.fasl
+; compilation finished in 0:00:00.142
+; compiling file "/nix/store/7l95gid3niz995qqpkgclj6355k50phf-source/package.lisp" (written 01 JAN 1970 01:00:01 AM):
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/nix/store/7l95gid3niz995qqpkgclj6355k50phf-source/package-tmpVTFK6ZJW.fasl
+; compilation finished in 0:00:00.002
+; compiling file "/nix/store/7l95gid3niz995qqpkgclj6355k50phf-source/utilities.lisp" (written 01 JAN 1970 01:00:01 AM):
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/nix/store/7l95gid3niz995qqpkgclj6355k50phf-source/utilities-tmp75WVSJEW.fasl
+; compilation finished in 0:00:00.005
+; compiling file "/nix/store/7l95gid3niz995qqpkgclj6355k50phf-source/svg-buttons.lisp" (written 01 JAN 1970 01:00:01 AM):
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/nix/store/7l95gid3niz995qqpkgclj6355k50phf-source/svg-buttons-tmpBU5UM3S4.fasl
+; compilation finished in 0:00:00.004
+; compiling file "/nix/store/7l95gid3niz995qqpkgclj6355k50phf-source/inspector.lisp" (written 01 JAN 1970 01:00:01 AM):
+
+; file: /nix/store/7l95gid3niz995qqpkgclj6355k50phf-source/inspector.lisp
+; in: DEFUN EVAL-THUNK-WITH-ACTIVE-BUTTON
+;     (DEFUN CLOG-MOLDABLE-INSPECTOR::EVAL-THUNK-WITH-ACTIVE-BUTTON
+;            (CLOG-MOLDABLE-INSPECTOR::PANE-CLOG-OBJ CLOG-MOLDABLE-INSPECTOR::OBJ
+;             CLOG-MOLDABLE-INSPECTOR::TARGET)
+;       (CLOG:REMOVE-CLASS CLOG-MOLDABLE-INSPECTOR::OBJ "inspector-action")
+;       (CLOG:ADD-CLASS CLOG-MOLDABLE-INSPECTOR::OBJ "inspector-action-active")
+;       (LET ((CLOG-MOLDABLE-INSPECTOR::RESULT
+;              (HTML-INSPECTOR-VIEWS:EVAL-THUNK CLOG-MOLDABLE-INSPECTOR::TARGET)))
+;         (CLOG:REMOVE-CLASS CLOG-MOLDABLE-INSPECTOR::OBJ
+;                            "inspector-action-active")
+;         (CLOG:ADD-CLASS CLOG-MOLDABLE-INSPECTOR::OBJ "inspector-action")
+;         CLOG-MOLDABLE-INSPECTOR::RESULT))
+; --> SB-IMPL::%DEFUN SB-IMPL::%DEFUN SB-INT:NAMED-LAMBDA 
+; ==>
+;   #'(SB-INT:NAMED-LAMBDA CLOG-MOLDABLE-INSPECTOR::EVAL-THUNK-WITH-ACTIVE-BUTTON
+;         (CLOG-MOLDABLE-INSPECTOR::PANE-CLOG-OBJ CLOG-MOLDABLE-INSPECTOR::OBJ
+;          CLOG-MOLDABLE-INSPECTOR::TARGET)
+;       (DECLARE (SB-C::TOP-LEVEL-FORM))
+;       (BLOCK CLOG-MOLDABLE-INSPECTOR::EVAL-THUNK-WITH-ACTIVE-BUTTON
+;         (CLOG:REMOVE-CLASS CLOG-MOLDABLE-INSPECTOR::OBJ "inspector-action")
+;         (CLOG:ADD-CLASS CLOG-MOLDABLE-INSPECTOR::OBJ "inspector-action-active")
+;         (LET ((CLOG-MOLDABLE-INSPECTOR::RESULT #))
+;           (CLOG:REMOVE-CLASS CLOG-MOLDABLE-INSPECTOR::OBJ
+;                              "inspector-action-active")
+;           (CLOG:ADD-CLASS CLOG-MOLDABLE-INSPECTOR::OBJ "inspector-action")
+;           CLOG-MOLDABLE-INSPECTOR::RESULT)))
+; 
+; caught STYLE-WARNING:
+;   The variable PANE-CLOG-OBJ is defined but never used.
+
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/nix/store/7l95gid3niz995qqpkgclj6355k50phf-source/inspector-tmpOBHVA3CD.fasl
+; compilation finished in 0:00:00.193
+WARNING:
+   Lisp compilation had style-warnings while
+   compiling #<CL-SOURCE-FILE "clog-moldable-inspector" "inspector">
+; compiling file "/nix/store/7l95gid3niz995qqpkgclj6355k50phf-source/views.lisp" (written 01 JAN 1970 01:00:01 AM):
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/nix/store/7l95gid3niz995qqpkgclj6355k50phf-source/views-tmpJ6ELVFLF.fasl
+; compilation finished in 0:00:00.130
+; compiling file "/nix/store/7l95gid3niz995qqpkgclj6355k50phf-source/playground.lisp" (written 01 JAN 1970 01:00:01 AM):
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/nix/store/7l95gid3niz995qqpkgclj6355k50phf-source/playground-tmpULDB0RG.fasl
+; compilation finished in 0:00:00.024
+WARNING:
+   redefining HV:👀PLAYGROUND (#<SB-PCL:SYSTEM-CLASS COMMON-LISP:T>) in DEFMETHOD
+; compiling file "/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/inspector-hyperdoc/package.lisp" (written 28 OCT 2026 06:29:49 PM):
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/inspector-hyperdoc/package-tmpUTZ0UUTE.fasl
+; compilation finished in 0:00:00.003
+; compiling file "/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/inspector-hyperdoc/hyperdoc.lisp" (written 28 OCT 2026 06:29:49 PM):
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/inspector-hyperdoc/hyperdoc-tmpOOSRA8PZ.fasl
+; compilation finished in 0:00:00.002
+; compiling file "/nix/store/9zkvhs70z8w06kximfrw3zm099qa87vj-source/package.lisp" (written 01 JAN 1970 01:00:01 AM):
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/nix/store/9zkvhs70z8w06kximfrw3zm099qa87vj-source/package-tmpDMIL0RVK.fasl
+; compilation finished in 0:00:00.003
+; compiling file "/nix/store/9zkvhs70z8w06kximfrw3zm099qa87vj-source/conditions.lisp" (written 01 JAN 1970 01:00:01 AM):
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/nix/store/9zkvhs70z8w06kximfrw3zm099qa87vj-source/conditions-tmp8MR9IMIO.fasl
+; compilation finished in 0:00:00.045
+; compiling file "/nix/store/9zkvhs70z8w06kximfrw3zm099qa87vj-source/njson.lisp" (written 01 JAN 1970 01:00:01 AM):
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/nix/store/9zkvhs70z8w06kximfrw3zm099qa87vj-source/njson-tmpJQDKAVAY.fasl
+; compilation finished in 0:00:00.036
+; compiling file "/nix/store/9zkvhs70z8w06kximfrw3zm099qa87vj-source/functions.lisp" (written 01 JAN 1970 01:00:01 AM):
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/nix/store/9zkvhs70z8w06kximfrw3zm099qa87vj-source/functions-tmp3I8CEEQY.fasl
+; compilation finished in 0:00:00.174
+; compiling file "/nix/store/9zkvhs70z8w06kximfrw3zm099qa87vj-source/macros.lisp" (written 01 JAN 1970 01:00:01 AM):
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/nix/store/9zkvhs70z8w06kximfrw3zm099qa87vj-source/macros-tmpA3RHFLWZ.fasl
+; compilation finished in 0:00:00.143
+; compiling file "/nix/store/9zkvhs70z8w06kximfrw3zm099qa87vj-source/aliases.lisp" (written 01 JAN 1970 01:00:01 AM):
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/nix/store/9zkvhs70z8w06kximfrw3zm099qa87vj-source/aliases-tmpYZIB7VXO.fasl
+; compilation finished in 0:00:00.010
+; compiling file "/nix/store/9zkvhs70z8w06kximfrw3zm099qa87vj-source/backend/jzon.lisp" (written 01 JAN 1970 01:00:01 AM):
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/nix/store/9zkvhs70z8w06kximfrw3zm099qa87vj-source/backend/jzon-tmpR8PK79V8.fasl
+; compilation finished in 0:00:00.034
+WARNING:
+   redefining ENCODE-TO-STRING (#<SB-PCL:SYSTEM-CLASS COMMON-LISP:T>) in DEFMETHOD
+; compiling file "/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/hyperdoc-explorer/package.lisp" (written 28 OCT 2026 06:29:49 PM):
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/hyperdoc-explorer/package-tmpN1ZVB1HZ.fasl
+; compilation finished in 0:00:00.001
+; compiling file "/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/hyperdoc-explorer/links.lisp" (written 28 OCT 2026 06:29:49 PM):
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/hyperdoc-explorer/links-tmpZGRRPISB.fasl
+; compilation finished in 0:00:00.032
+; compiling file "/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/hyperdoc-explorer/explorer.lisp" (written 28 OCT 2026 06:29:49 PM):
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/hyperdoc-explorer/explorer-tmpFNKDE5XP.fasl
+; compilation finished in 0:00:00.146
+; compiling file "/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/hyperdoc-explorer/packages.lisp" (written 28 OCT 2026 06:29:49 PM):
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/hyperdoc-explorer/packages-tmpRJTU435C.fasl
+; compilation finished in 0:00:00.021
+; compiling file "/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/hyperdoc-explorer/parse-expr.lisp" (written 28 OCT 2026 06:29:49 PM):
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/hyperdoc-explorer/parse-expr-tmpI9WG87JK.fasl
+; compilation finished in 0:00:00.008
+; compiling file "/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/hyperdoc-explorer/html-pages.lisp" (written 28 OCT 2026 06:29:49 PM):
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/hyperdoc-explorer/html-pages-tmpYDE6I9E6.fasl
+; compilation finished in 0:00:00.110
+; compiling file "/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/hyperdoc-explorer/markdown-pages.lisp" (written 28 OCT 2026 06:29:49 PM):
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/hyperdoc-explorer/markdown-pages-tmp319UV2V8.fasl
+; compilation finished in 0:00:00.008
+; compiling file "/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/hyperdoc-explorer/code-pages.lisp" (written 28 OCT 2026 06:29:49 PM):
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/hyperdoc-explorer/code-pages-tmpLYQINFYS.fasl
+; compilation finished in 0:00:00.045
+; compiling file "/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/hyperdoc-explorer/links-in-code.lisp" (written 28 OCT 2026 06:29:49 PM):
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/hyperdoc-explorer/links-in-code-tmpGA31XWNO.fasl
+; compilation finished in 0:00:00.020
+; compiling file "/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/hyperdoc-explorer/tools.lisp" (written 28 OCT 2026 06:29:49 PM):
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/hyperdoc-explorer/tools-tmp5HT23M6C.fasl
+; compilation finished in 0:00:00.082
+; compiling file "/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/hyperdoc-explorer/codemeta.lisp" (written 28 OCT 2026 06:29:49 PM):
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/hyperdoc-explorer/codemeta-tmpA60KLDKY.fasl
+; compilation finished in 0:00:00.049
+; compiling file "/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/hyperdoc-explorer/examples.lisp" (written 28 OCT 2026 06:29:49 PM):
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/hyperdoc-explorer/examples-tmpD801X3GJ.fasl
+; compilation finished in 0:00:00.008
+; compiling file "/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/hyperdoc-explorer/hyperdoc.lisp" (written 28 OCT 2026 06:29:49 PM):
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/hyperdoc-explorer/hyperdoc-tmpGOW1GC70.fasl
+; compilation finished in 0:00:00.002
+; compiling file "/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/dreyeck/src/hyperdoc-curation-package.lisp" (written 28 OCT 2026 06:29:48 PM):
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/dreyeck/src/hyperdoc-curation-package-tmpPQ1X28TL.fasl
+; compilation finished in 0:00:00.001
+; compiling file "/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/dreyeck/src/hyperdoc-curation.lisp" (written 28 OCT 2026 06:29:48 PM):
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/dreyeck/src/hyperdoc-curation-tmpE92ECU7O.fasl
+; compilation finished in 0:00:00.203
+; compiling file "/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/dreyeck/src/workflow-model.lisp" (written 28 OCT 2026 06:29:48 PM):
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/dreyeck/src/workflow-model-tmp8S0II570.fasl
+; compilation finished in 0:00:00.065
+; compiling file "/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/dreyeck/src/asdf-source-package.lisp" (written 28 OCT 2026 06:29:48 PM):
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/dreyeck/src/asdf-source-package-tmpJE88A12F.fasl
+; compilation finished in 0:00:00.001
+; compiling file "/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/dreyeck/src/asdf-source.lisp" (written 28 OCT 2026 06:29:48 PM):
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/dreyeck/src/asdf-source-tmpA5FNLPLT.fasl
+; compilation finished in 0:00:00.099
+; compiling file "/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/dreyeck/src/git-package.lisp" (written 28 OCT 2026 06:29:48 PM):
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/dreyeck/src/git-package-tmpHKCV9TP8.fasl
+; compilation finished in 0:00:00.003
+; compiling file "/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/dreyeck/src/git-repository-checkout.lisp" (written 28 OCT 2026 06:29:48 PM):
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/dreyeck/src/git-repository-checkout-tmpZ18MA7XE.fasl
+; compilation finished in 0:00:00.014
+; compiling file "/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/dreyeck/src/git-commit-inspection.lisp" (written 28 OCT 2026 06:29:48 PM):
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/dreyeck/src/git-commit-inspection-tmp6LQJ9T0C.fasl
+; compilation finished in 0:00:00.066
+; compiling file "/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/dreyeck/src/git-local-availability.lisp" (written 28 OCT 2026 06:29:48 PM):
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/dreyeck/src/git-local-availability-tmpTX7OA81T.fasl
+; compilation finished in 0:00:00.024
+; compiling file "/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/dreyeck/src/git-revision-reference.lisp" (written 28 OCT 2026 06:29:48 PM):
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/dreyeck/src/git-revision-reference-tmpWOTC3PB7.fasl
+; compilation finished in 0:00:00.026
+; compiling file "/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/dreyeck/src/git-source-slice.lisp" (written 28 OCT 2026 06:29:48 PM):
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/dreyeck/src/git-source-slice-tmpHQE95SAC.fasl
+; compilation finished in 0:00:00.019
+; compiling file "/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/dreyeck/src/git-repository-topicmap.lisp" (written 28 OCT 2026 06:29:48 PM):
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/dreyeck/src/git-repository-topicmap-tmpO87FP9NR.fasl
+; compilation finished in 0:00:00.014
+; compiling file "/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/dreyeck/src/git-asdf-references.lisp" (written 28 OCT 2026 06:29:48 PM):
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/dreyeck/src/git-asdf-references-tmpP6A3E92I.fasl
+; compilation finished in 0:00:00.039
+; compiling file "/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/dreyeck/src/git-asdf-reference-topicmap.lisp" (written 28 OCT 2026 06:29:48 PM):
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/dreyeck/src/git-asdf-reference-topicmap-tmpUSHT8RIL.fasl
+; compilation finished in 0:00:00.077
+; compiling file "/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/dreyeck/src/upstream-intake-package.lisp" (written 28 OCT 2026 06:29:48 PM):
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/dreyeck/src/upstream-intake-package-tmp7YCPD44Y.fasl
+; compilation finished in 0:00:00.002
+; compiling file "/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/dreyeck/src/upstream-intake.lisp" (written 28 OCT 2026 06:29:48 PM):
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/dreyeck/src/upstream-intake-tmpQXR7SNXD.fasl
+; compilation finished in 0:00:00.293
+; compiling file "/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/dreyeck/src/hyperdoc-pages.lisp" (written 28 OCT 2026 06:29:48 PM):
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/dreyeck/src/hyperdoc-pages-tmp6FLI1OC3.fasl
+; compilation finished in 0:00:00.015
+; compiling file "/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/dreyeck/src/upstream-intake-hyperdoc.lisp" (written 28 OCT 2026 06:29:48 PM):
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/dreyeck/src/upstream-intake-hyperdoc-tmpWBK8JTS9.fasl
+; compilation finished in 0:00:00.020
+; compiling file "/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/dreyeck/src/upstream-page-loading-history.lisp" (written 28 OCT 2026 06:29:48 PM):
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/dreyeck/src/upstream-page-loading-history-tmpUVEUD2ZN.fasl
+; compilation finished in 0:00:00.223
+; compiling file "/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/hyperbook-fedwiki/package.lisp" (written 28 OCT 2026 06:29:49 PM):
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/hyperbook-fedwiki/package-tmpOWNJOEU.fasl
+; compilation finished in 0:00:00.005
+; compiling file "/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/hyperbook-fedwiki/utilities.lisp" (written 28 OCT 2026 06:29:49 PM):
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/hyperbook-fedwiki/utilities-tmpVT5BMTA5.fasl
+; compilation finished in 0:00:00.007
+; compiling file "/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/hyperbook-fedwiki/pages.lisp" (written 28 OCT 2026 06:29:49 PM):
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/hyperbook-fedwiki/pages-tmpN3CFVWZF.fasl
+; compilation finished in 0:00:00.206
+; compiling file "/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/hyperbook-fedwiki/fedwiki.lisp" (written 28 OCT 2026 06:29:49 PM):
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/hyperbook-fedwiki/fedwiki-tmpNK27C0R1.fasl
+; compilation finished in 0:00:00.119
+; compiling file "/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/hyperbook-fedwiki/story-items.lisp" (written 28 OCT 2026 06:29:49 PM):
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/hyperbook-fedwiki/story-items-tmp3BPE71HR.fasl
+; compilation finished in 0:00:00.331
+; compiling file "/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/hyperbook-fedwiki/wiki-links.lisp" (written 28 OCT 2026 06:29:49 PM):
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/hyperbook-fedwiki/wiki-links-tmp758YUXMV.fasl
+; compilation finished in 0:00:00.117
+; compiling file "/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/hyperbook-fedwiki/plugins.lisp" (written 28 OCT 2026 06:29:49 PM):
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/hyperbook-fedwiki/plugins-tmpGMQXK1HK.fasl
+; compilation finished in 0:00:00.023
+; compiling file "/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/hyperbook-fedwiki/views.lisp" (written 28 OCT 2026 06:29:49 PM):
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/hyperbook-fedwiki/views-tmp49Q238TW.fasl
+; compilation finished in 0:00:00.057
+; compiling file "/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/dreyeck/src/authority-policy.lisp" (written 28 OCT 2026 06:29:48 PM):
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/dreyeck/src/authority-policy-tmpMXPMJ5KG.fasl
+; compilation finished in 0:00:00.246
+WARNING:
+   redefining HVS::👀OPERATIONS (#<SB-PCL:SYSTEM-CLASS COMMON-LISP:T>) in DEFMETHOD
+WARNING:
+   redefining HVS:RENDER-TOPLEVEL-CST :AROUND (#<SB-MOP:EQL-SPECIALIZER HYPERDOC:DEFEXAMPLE>
+                                               #<SB-PCL:SYSTEM-CLASS COMMON-LISP:T>
+                                               #<SB-PCL:SYSTEM-CLASS COMMON-LISP:T>
+                                               #<SB-PCL:SYSTEM-CLASS COMMON-LISP:T>) in DEFMETHOD
+; compiling file "/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/dreyeck/src/topicmap-tala.lisp" (written 28 OCT 2026 06:29:48 PM):
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/dreyeck/src/topicmap-tala-tmpB69313KI.fasl
+; compilation finished in 0:00:00.126
+; compiling file "/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/dreyeck/src/state-machine-package.lisp" (written 28 OCT 2026 06:29:48 PM):
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/dreyeck/src/state-machine-package-tmp9ZT99EEA.fasl
+; compilation finished in 0:00:00.001
+; compiling file "/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/dreyeck/src/state-machine.lisp" (written 28 OCT 2026 06:29:48 PM):
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/dreyeck/src/state-machine-tmpW045U8V2.fasl
+; compilation finished in 0:00:00.100
+; compiling file "/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/dreyeck/src/gesture-binding-witness.lisp" (written 28 OCT 2026 06:29:48 PM):
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/dreyeck/src/gesture-binding-witness-tmp6XOIRI3N.fasl
+; compilation finished in 0:00:00.138
+; compiling file "/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/dreyeck/src/gesture-clog-transport.lisp" (written 28 OCT 2026 06:29:48 PM):
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/dreyeck/src/gesture-clog-transport-tmp9ZHTLHSG.fasl
+; compilation finished in 0:00:00.114
+; compiling file "/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/dreyeck/src/gesture-clog-binder.lisp" (written 28 OCT 2026 06:29:48 PM):
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/dreyeck/src/gesture-clog-binder-tmpRW73Q691.fasl
+; compilation finished in 0:00:00.077
+; compiling file "/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/dreyeck/src/topicmap-inspector-package.lisp" (written 28 OCT 2026 06:29:48 PM):
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/dreyeck/src/topicmap-inspector-package-tmp4TM0ME1F.fasl
+; compilation finished in 0:00:00.001
+; compiling file "/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/dreyeck/src/topicmap-gesture.lisp" (written 28 OCT 2026 06:29:48 PM):
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/dreyeck/src/topicmap-gesture-tmpU2IL9N4.fasl
+; compilation finished in 0:00:00.119
+; compiling file "/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/dreyeck/src/topicmap-inspector.lisp" (written 28 OCT 2026 06:29:48 PM):
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/dreyeck/src/topicmap-inspector-tmpOPW41KDL.fasl
+; compilation finished in 0:00:00.231
+; compiling file "/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/dreyeck/src/topicmap-tala-inspector.lisp" (written 28 OCT 2026 06:29:48 PM):
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/dreyeck/src/topicmap-tala-inspector-tmpIPVWLON2.fasl
+; compilation finished in 0:00:00.483
+; compiling file "/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/dreyeck/src/git-inspector-package.lisp" (written 28 OCT 2026 06:29:48 PM):
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/dreyeck/src/git-inspector-package-tmpO0LCOIDS.fasl
+; compilation finished in 0:00:00.002
+; compiling file "/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/dreyeck/src/git-commit-inspection-views.lisp" (written 28 OCT 2026 06:29:48 PM):
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/dreyeck/src/git-commit-inspection-views-tmpP264WQ6O.fasl
+; compilation finished in 0:00:00.478
+; compiling file "/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/dreyeck/src/git-asdf-reference-views.lisp" (written 28 OCT 2026 06:29:48 PM):
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/dreyeck/src/git-asdf-reference-views-tmpESC43OCR.fasl
+; compilation finished in 0:00:00.224
+; compiling file "/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/dreyeck/src/git-revision-reference-views.lisp" (written 28 OCT 2026 06:29:48 PM):
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/dreyeck/src/git-revision-reference-views-tmpWCAM54ZJ.fasl
+; compilation finished in 0:00:00.126
+; compiling file "/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/dreyeck/nested-actions/action-tree.lisp" (written 28 OCT 2026 06:29:47 PM):
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/dreyeck/nested-actions/action-tree-tmpVTMW561L.fasl
+; compilation finished in 0:00:00.071
+; compiling file "/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/dreyeck/nested-actions/probes.lisp" (written 28 OCT 2026 06:29:47 PM):
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/dreyeck/nested-actions/probes-tmpUNNGT9CF.fasl
+; compilation finished in 0:00:00.005
+; compiling file "/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/dreyeck/nested-actions/message-path.lisp" (written 28 OCT 2026 06:29:47 PM):
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/dreyeck/nested-actions/message-path-tmp4L3W83SU.fasl
+; compilation finished in 0:00:00.124
+; compiling file "/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/dreyeck/nested-actions/source-revisions.lisp" (written 28 OCT 2026 06:29:47 PM):
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/dreyeck/nested-actions/source-revisions-tmpGE7QNNEE.fasl
+; compilation finished in 0:00:00.016
+; compiling file "/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/dreyeck/nested-actions/input-path.lisp" (written 28 OCT 2026 06:29:47 PM):
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/dreyeck/nested-actions/input-path-tmp9B0UZGT4.fasl
+; compilation finished in 0:00:00.051
+; compiling file "/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/dreyeck/nested-actions/solo-history.lisp" (written 28 OCT 2026 06:29:47 PM):
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/dreyeck/nested-actions/solo-history-tmpAJ5U325P.fasl
+; compilation finished in 0:00:00.046
+; compiling file "/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/dreyeck/nested-actions/reading.lisp" (written 28 OCT 2026 06:29:47 PM):
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/dreyeck/nested-actions/reading-tmpAOF1CYAS.fasl
+; compilation finished in 0:00:00.033
+; compiling file "/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/dreyeck/mech-intake/catalog.lisp" (written 28 OCT 2026 06:29:47 PM):
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/dreyeck/mech-intake/catalog-tmpIXCQTSHA.fasl
+; compilation finished in 0:00:00.158
+; compiling file "/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/dreyeck/mech-intake/execution.lisp" (written 28 OCT 2026 06:29:47 PM):
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/dreyeck/mech-intake/execution-tmp5E6VIEMS.fasl
+; compilation finished in 0:00:00.052
+; compiling file "/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/dreyeck/mech-intake/acceptance.lisp" (written 28 OCT 2026 06:29:47 PM):
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/dreyeck/mech-intake/acceptance-tmpI0PODGVV.fasl
+; compilation finished in 0:00:00.008
+; compiling file "/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/dreyeck/mech-intake/reading.lisp" (written 28 OCT 2026 06:29:47 PM):
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/dreyeck/mech-intake/reading-tmp1Z95I17K.fasl
+; compilation finished in 0:00:00.035
+; compiling file "/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/dreyeck/fedwiki-config/configuration.lisp" (written 28 OCT 2026 06:29:47 PM):
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/dreyeck/fedwiki-config/configuration-tmpCFVK1AC1.fasl
+; compilation finished in 0:00:00.202
+; compiling file "/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/dreyeck/fedwiki-config/composition.lisp" (written 28 OCT 2026 06:29:47 PM):
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/dreyeck/fedwiki-config/composition-tmpHHRR8E8N.fasl
+; compilation finished in 0:00:00.045
+; compiling file "/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/dreyeck/fedwiki-config/fork.lisp" (written 28 OCT 2026 06:29:47 PM):
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/dreyeck/fedwiki-config/fork-tmpWWJ02E3I.fasl
+; compilation finished in 0:00:00.056
+; compiling file "/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/dreyeck/fedwiki-config/workspace.lisp" (written 28 OCT 2026 06:29:47 PM):
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/dreyeck/fedwiki-config/workspace-tmpONTOHUJ2.fasl
+; compilation finished in 0:00:00.037
+; compiling file "/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/dreyeck/src/lisp-image-package.lisp" (written 28 OCT 2026 06:29:48 PM):
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/dreyeck/src/lisp-image-package-tmpQT9APWMH.fasl
+; compilation finished in 0:00:00.004
+; compiling file "/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/dreyeck/src/lisp-image-inventory.lisp" (written 28 OCT 2026 06:29:48 PM):
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/dreyeck/src/lisp-image-inventory-tmp6LYQXY0L.fasl
+; compilation finished in 0:00:00.042
+; compiling file "/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/dreyeck/src/lisp-image-definition-sources.lisp" (written 28 OCT 2026 06:29:48 PM):
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/dreyeck/src/lisp-image-definition-sources-tmpNKVDR0J1.fasl
+; compilation finished in 0:00:00.008
+; compiling file "/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/dreyeck/src/lisp-image-observations.lisp" (written 28 OCT 2026 06:29:48 PM):
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/dreyeck/src/lisp-image-observations-tmp6F83SDCV.fasl
+; compilation finished in 0:00:00.039
+; compiling file "/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/dreyeck/src/lisp-image-views.lisp" (written 28 OCT 2026 06:29:48 PM):
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/dreyeck/src/lisp-image-views-tmpEJNPPMJY.fasl
+; compilation finished in 0:00:00.017
+; compiling file "/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/dreyeck/src/lisp-image-hyperdoc.lisp" (written 28 OCT 2026 06:29:48 PM):
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/dreyeck/src/lisp-image-hyperdoc-tmp31RWPSX2.fasl
+; compilation finished in 0:00:00.003
+; compiling file "/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/dreyeck/src/lisp-image-topicmap.lisp" (written 28 OCT 2026 06:29:48 PM):
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/dreyeck/src/lisp-image-topicmap-tmp1HKLMSTH.fasl
+; compilation finished in 0:00:00.021
+; compiling file "/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/dreyeck/src/topicmap-tala-reading.lisp" (written 28 OCT 2026 06:29:48 PM):
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/dreyeck/src/topicmap-tala-reading-tmpEWG5XJ53.fasl
+; compilation finished in 0:00:00.041
+; compiling file "/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/dreyeck/src/topicmap-tala-authored.lisp" (written 28 OCT 2026 06:29:48 PM):
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/dreyeck/src/topicmap-tala-authored-tmpXHL60MUV.fasl
+; compilation finished in 0:00:00.044
+; compiling file "/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/dreyeck/src/topicmap-tala-dispatch-reading.lisp" (written 28 OCT 2026 06:29:48 PM):
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/dreyeck/src/topicmap-tala-dispatch-reading-tmpB7NPDQCW.fasl
+; compilation finished in 0:00:00.006
+; compiling file "/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/dreyeck/src/topicmap-tala-reference-reading.lisp" (written 28 OCT 2026 06:29:48 PM):
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/dreyeck/src/topicmap-tala-reference-reading-tmpGZ70QILE.fasl
+; compilation finished in 0:00:00.011
+; compiling file "/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/dreyeck/src/gesture-operation-request.lisp" (written 28 OCT 2026 06:29:48 PM):
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/dreyeck/src/gesture-operation-request-tmpKYD38Q95.fasl
+; compilation finished in 0:00:00.124
+; compiling file "/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/dreyeck/work/reading.lisp" (written 28 OCT 2026 06:29:48 PM):
+
+; file: /Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/dreyeck/work/reading.lisp
+; in: DEFUN %FEDWIKI-STORY
+;     'NIL
+; 
+; note: deleting unreachable code
+
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/dreyeck/work/reading-tmpV4YQ0HKA.fasl
+; compilation finished in 0:00:00.675
+; compiling file "/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/dreyeck/work/operation-requests.lisp" (written 28 OCT 2026 06:29:48 PM):
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/dreyeck/work/operation-requests-tmpJXWE1HN2.fasl
+; compilation finished in 0:00:00.022
+; compiling file "/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/dreyeck/work/deployment-reading.lisp" (written 28 OCT 2026 06:29:48 PM):
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/dreyeck/work/deployment-reading-tmpMNC5LX5B.fasl
+; compilation finished in 0:00:00.016
+; compiling file "/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/dreyeck/work/authoring-architecture.lisp" (written 28 OCT 2026 06:29:48 PM):
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/dreyeck/work/authoring-architecture-tmp4RNSVVC1.fasl
+; compilation finished in 0:00:00.096
+; compiling file "/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/dreyeck/work/addresses.lisp" (written 28 OCT 2026 06:29:48 PM):
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/dreyeck/work/addresses-tmpN626KU7B.fasl
+; compilation finished in 0:00:00.352
+; compiling file "/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/dreyeck/work/trails-rendered-reading.lisp" (written 28 OCT 2026 06:29:49 PM):
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/dreyeck/work/trails-rendered-reading-tmpOO0K1B0C.fasl
+; compilation finished in 0:00:00.041
+; compiling file "/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/dreyeck/work/trails-rendered-federated-context.lisp" (written 28 OCT 2026 06:29:49 PM):
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/dreyeck/work/trails-rendered-federated-context-tmpVFL7JAFK.fasl
+; compilation finished in 0:00:01.066
+; compiling file "/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/dreyeck/work/trails-rendered-following.lisp" (written 28 OCT 2026 06:29:49 PM):
+
+; file: /Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/dreyeck/work/trails-rendered-following.lisp
+; in: DEFUN TRAIL-LEARNING-PROJECTION
+;     (DREYECK/WORK/TRAILS-RENDERED-READING::CONTEXT
+;      (DREYECK/WORK/TRAILS-RENDERED-READING::FOLLOWING-CONTEXT
+;       DREYECK/WORK/TRAILS-RENDERED-READING::FOLLOWING))
+; 
+; caught STYLE-WARNING:
+;   The variable CONTEXT is defined but never used.
+
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/dreyeck/work/trails-rendered-following-tmpU45RTF.fasl
+; compilation finished in 0:00:00.312
+WARNING:
+   Lisp compilation had style-warnings while compiling
+   #<CL-SOURCE-FILE "dreyeck/work/reading" "dreyeck/work" "trails-rendered-following">
+; compiling file "/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/dreyeck/work/how-trails-sources.lisp" (written 28 OCT 2026 06:29:48 PM):
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/dreyeck/work/how-trails-sources-tmpZTS6G7ND.fasl
+; compilation finished in 0:00:00.662
+; compiling file "/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/dreyeck/work/javascript-definitions.lisp" (written 28 OCT 2026 06:29:48 PM):
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/dreyeck/work/javascript-definitions-tmp5TNBATEG.fasl
+; compilation finished in 0:00:00.207
+; compiling file "/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/dreyeck/work/reading-mech-hubs.lisp" (written 28 OCT 2026 06:29:48 PM):
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/dreyeck/work/reading-mech-hubs-tmpJL6JXW7Z.fasl
+; compilation finished in 0:00:00.058
+; compiling file "/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/dreyeck/work/inspecting-hub-selection.lisp" (written 28 OCT 2026 06:29:48 PM):
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/dreyeck/work/inspecting-hub-selection-tmp5PQ00DH7.fasl
+; compilation finished in 0:00:00.352
+; compiling file "/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/dreyeck/work/investigating-ward-hub-selection.lisp" (written 28 OCT 2026 06:29:48 PM):
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/dreyeck/work/investigating-ward-hub-selection-tmp5R1KP4O2.fasl
+; compilation finished in 0:00:00.209
+; compiling file "/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/dreyeck/work/collaborative-planning-reading.lisp" (written 28 OCT 2026 06:29:48 PM):
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/dreyeck/work/collaborative-planning-reading-tmpXQDKKJYI.fasl
+; compilation finished in 0:00:00.496
+; compiling file "/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/dreyeck/work/ctm-plan-page-authoring.lisp" (written 28 OCT 2026 06:29:48 PM):
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/dreyeck/work/ctm-plan-page-authoring-tmpGJ3P31TF.fasl
+; compilation finished in 0:00:00.624
+; compiling file "/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/dreyeck/work/conversation-coordinates-reading.lisp" (written 28 OCT 2026 06:29:48 PM):
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/dreyeck/work/conversation-coordinates-reading-tmpT2P2LFJI.fasl
+; compilation finished in 0:00:00.536
+; compiling file "/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/dreyeck/work/item-edit-view-diagnosis.lisp" (written 28 OCT 2026 06:29:48 PM):
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/dreyeck/work/item-edit-view-diagnosis-tmpKOV75BS9.fasl
+; compilation finished in 0:00:00.877
+; compiling file "/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/dreyeck/work/trails-rendered-browser-check.lisp" (written 28 OCT 2026 06:29:48 PM):
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/dreyeck/work/trails-rendered-browser-check-tmpP07HWIXP.fasl
+; compilation finished in 0:00:00.095
+; compiling file "/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/dreyeck/work/shift-click.lisp" (written 28 OCT 2026 06:29:48 PM):
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/dreyeck/work/shift-click-tmpURW0SA3C.fasl
+; compilation finished in 0:00:00.052
+; compiling file "/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/dreyeck/work/deployment-inspection.lisp" (written 28 OCT 2026 06:29:48 PM):
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/dreyeck/work/deployment-inspection-tmp627QKRZN.fasl
+; compilation finished in 0:00:00.406
+; compiling file "/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/dreyeck/work/source-text-view.lisp" (written 28 OCT 2026 06:29:48 PM):
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/dreyeck/work/source-text-view-tmpK8OFNZFV.fasl
+; compilation finished in 0:00:00.005
+; compiling file "/Users/rgb/workspace/topic-maps/src/tmdm/package.lisp" (written 18 OCT 2026 12:43:22 PM):
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/Users/rgb/workspace/topic-maps/src/tmdm/package-tmpRMCY5COB.fasl
+; compilation finished in 0:00:00.003
+; compiling file "/Users/rgb/workspace/topic-maps/src/tmdm/integers.lisp" (written 16 OCT 2026 07:06:07 AM):
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/Users/rgb/workspace/topic-maps/src/tmdm/integers-tmp9TN1FOJ6.fasl
+; compilation finished in 0:00:00.017
+; compiling file "/Users/rgb/workspace/topic-maps/src/tmdm/decimals.lisp" (written 16 OCT 2026 08:18:19 AM):
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/Users/rgb/workspace/topic-maps/src/tmdm/decimals-tmpEID7NJG3.fasl
+; compilation finished in 0:00:00.021
+; compiling file "/Users/rgb/workspace/topic-maps/src/tmdm/dates.lisp" (written 16 OCT 2026 12:57:36 PM):
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/Users/rgb/workspace/topic-maps/src/tmdm/dates-tmp8CJLVG9R.fasl
+; compilation finished in 0:00:00.069
+; compiling file "/Users/rgb/workspace/topic-maps/src/tmdm/datetimes.lisp" (written 17 OCT 2026 07:39:44 AM):
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/Users/rgb/workspace/topic-maps/src/tmdm/datetimes-tmpZCJK45JG.fasl
+; compilation finished in 0:00:00.127
+; compiling file "/Users/rgb/workspace/topic-maps/src/tmdm/items.lisp" (written 18 OCT 2026 06:51:54 AM):
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/Users/rgb/workspace/topic-maps/src/tmdm/items-tmpQC4TENAZ.fasl
+; compilation finished in 0:00:00.201
+; compiling file "/Users/rgb/workspace/topic-maps/src/tmdm/core-subjects.lisp" (written 18 OCT 2026 09:07:18 AM):
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/Users/rgb/workspace/topic-maps/src/tmdm/core-subjects-tmp4HJFFDY3.fasl
+; compilation finished in 0:00:00.016
+; compiling file "/Users/rgb/workspace/topic-maps/src/tmdm/item-identifiers.lisp" (written 18 OCT 2026 06:55:56 AM):
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/Users/rgb/workspace/topic-maps/src/tmdm/item-identifiers-tmp78H81ZL.fasl
+; compilation finished in 0:00:00.046
+; compiling file "/Users/rgb/workspace/topic-maps/src/tmdm/reification.lisp" (written 18 OCT 2026 12:43:22 PM):
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/Users/rgb/workspace/topic-maps/src/tmdm/reification-tmp86K6JU7V.fasl
+; compilation finished in 0:00:00.059
+; compiling file "/Users/rgb/workspace/topic-maps/src/tmdm/merging.lisp" (written 28 OCT 2026 07:09:53 AM):
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/Users/rgb/workspace/topic-maps/src/tmdm/merging-tmp2L6X9BVQ.fasl
+; compilation finished in 0:00:00.127
+; compiling file "/Users/rgb/workspace/topic-maps/src/tmdm/occurrences.lisp" (written 18 OCT 2026 06:52:49 AM):
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/Users/rgb/workspace/topic-maps/src/tmdm/occurrences-tmpES5DCUFN.fasl
+; compilation finished in 0:00:00.033
+; compiling file "/Users/rgb/workspace/topic-maps/src/tmdm/variants.lisp" (written 18 OCT 2026 06:52:49 AM):
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/Users/rgb/workspace/topic-maps/src/tmdm/variants-tmpDVKOEP6R.fasl
+; compilation finished in 0:00:00.043
+; compiling file "/Users/rgb/workspace/topic-maps/src/tmdm/associations.lisp" (written 28 OCT 2026 04:48:52 PM):
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/Users/rgb/workspace/topic-maps/src/tmdm/associations-tmp4TWTKS75.fasl
+; compilation finished in 0:00:00.037
+; compiling file "/Users/rgb/workspace/topic-maps/src/tmdm/import.lisp" (written 18 OCT 2026 12:43:24 PM):
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/Users/rgb/workspace/topic-maps/src/tmdm/import-tmpXSOQ2I78.fasl
+; compilation finished in 0:00:00.022
+; compiling file "/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/dreyeck/src/evaluation-record-package.lisp" (written 28 OCT 2026 06:29:48 PM):
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/dreyeck/src/evaluation-record-package-tmpUA03GLW1.fasl
+; compilation finished in 0:00:00.001
+; compiling file "/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/dreyeck/src/evaluation-record.lisp" (written 28 OCT 2026 06:29:48 PM):
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/dreyeck/src/evaluation-record-tmpO0OW34V4.fasl
+; compilation finished in 0:00:00.005
+; compiling file "/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/dreyeck/src/tmdm-model-navigation.lisp" (written 28 OCT 2026 06:29:48 PM):
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/dreyeck/src/tmdm-model-navigation-tmpU8KQLETJ.fasl
+; compilation finished in 0:00:00.224
+; compiling file "/Users/rgb/workspace/topic-maps/src/ctm/package.lisp" (written 18 OCT 2026 11:06:05 PM):
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/Users/rgb/workspace/topic-maps/src/ctm/package-tmpLBWGBOTB.fasl
+; compilation finished in 0:00:00.003
+; compiling file "/Users/rgb/workspace/topic-maps/src/ctm/conditions.lisp" (written 18 OCT 2026 11:06:05 PM):
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/Users/rgb/workspace/topic-maps/src/ctm/conditions-tmpRX2XGI9U.fasl
+; compilation finished in 0:00:00.021
+; compiling file "/Users/rgb/workspace/topic-maps/src/ctm/unicode.lisp" (written 19 OCT 2026 09:22:48 AM):
+
+; file: /Users/rgb/workspace/topic-maps/src/ctm/unicode.lisp
+; in: DEFUN SCALAR-CHARACTER
+;     (TOPIC-MAPS.CTM::PROBLEM 'TOPIC-MAPS.CTM:CTM-UNSUPPORTED
+;                              :CHARACTER-REPERTOIRE POSITION
+;                              "The Common Lisp implementation cannot represent this Unicode character.")
+; 
+; note: deleting unreachable code
+
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/Users/rgb/workspace/topic-maps/src/ctm/unicode-tmpT2A3PQL9.fasl
+; compilation finished in 0:00:00.062
+; compiling file "/Users/rgb/workspace/topic-maps/src/ctm/iri.lisp" (written 18 OCT 2026 02:50:41 PM):
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/Users/rgb/workspace/topic-maps/src/ctm/iri-tmpOVHYA3BO.fasl
+; compilation finished in 0:00:00.070
+; compiling file "/Users/rgb/workspace/topic-maps/src/ctm/lexer.lisp" (written 19 OCT 2026 08:42:53 AM):
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/Users/rgb/workspace/topic-maps/src/ctm/lexer-tmpLT3TYWCE.fasl
+; compilation finished in 0:00:00.136
+; compiling file "/Users/rgb/workspace/topic-maps/src/ctm/reader.lisp" (written 19 OCT 2026 09:18:04 AM):
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/Users/rgb/workspace/topic-maps/src/ctm/reader-tmp3YF2HENI.fasl
+; compilation finished in 0:00:00.331
+; compiling file "/Users/rgb/workspace/topic-maps/src/ctm/templates.lisp" (written 19 OCT 2026 08:25:49 AM):
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/Users/rgb/workspace/topic-maps/src/ctm/templates-tmp9EEV8FN4.fasl
+; compilation finished in 0:00:00.112
+; compiling file "/Users/rgb/workspace/topic-maps/src/ctm/resources.lisp" (written 19 OCT 2026 07:23:54 AM):
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/Users/rgb/workspace/topic-maps/src/ctm/resources-tmpDK25NJJO.fasl
+; compilation finished in 0:00:00.043
+; compiling file "/Users/rgb/workspace/topic-maps/src/cxtm/package.lisp" (written 14 OCT 2026 05:49:40 PM):
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/Users/rgb/workspace/topic-maps/src/cxtm/package-tmpNMZ5RT9R.fasl
+; compilation finished in 0:00:00.009
+; compiling file "/Users/rgb/workspace/topic-maps/src/cxtm/nfc-data.lisp" (written 14 OCT 2026 05:59:26 PM):
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/Users/rgb/workspace/topic-maps/src/cxtm/nfc-data-tmp8K51P1O1.fasl
+; compilation finished in 0:00:00.198
+; compiling file "/Users/rgb/workspace/topic-maps/src/cxtm/unicode.lisp" (written 14 OCT 2026 05:59:27 PM):
+
+; file: /Users/rgb/workspace/topic-maps/src/cxtm/unicode.lisp
+; in: DEFUN NFC
+;     (TOPIC-MAPS.CXTM::FAIL :UNSUPPORTED-CHARACTER
+;                            "Lisp character repertoire is insufficient." T)
+; 
+; note: deleting unreachable code
+
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/Users/rgb/workspace/topic-maps/src/cxtm/unicode-tmpXAVJ8WEV.fasl
+; compilation finished in 0:00:00.030
+; compiling file "/Users/rgb/workspace/topic-maps/src/cxtm/canonicalizer.lisp" (written 18 OCT 2026 09:07:18 AM):
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/Users/rgb/workspace/topic-maps/src/cxtm/canonicalizer-tmpOZHFIU2N.fasl
+; compilation finished in 0:00:00.178
+; compiling file "/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/dreyeck/src/source-snapshot.lisp" (written 28 OCT 2026 06:29:48 PM):
+
+; file: /Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/dreyeck/src/source-snapshot.lisp
+; in: DEFUN %LISTING
+;     (SB-POSIX:DIRENT-NAME DREYECK/SOURCE-SNAPSHOT::ENTRY)
+; --> BLOCK CAST SB-ALIEN-INTERNALS:%CAST 
+; ==>
+;   1
+; 
+; note: doing SAP to pointer coercion (cost 20)
+
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/dreyeck/src/source-snapshot-tmpJD9SCIW3.fasl
+; compilation finished in 0:00:00.258
+; compiling file "/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/dreyeck/work/project/project-ctm.lisp" (written 28 OCT 2026 06:29:48 PM):
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/dreyeck/work/project/project-ctm-tmpICVK4HSI.fasl
+; compilation finished in 0:00:00.473
+; compiling file "/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/dreyeck/work/project/project-workspace.lisp" (written 28 OCT 2026 06:29:48 PM):
+
+; wrote /private/tmp/claude-501/-Users-rgb-workspace-hyperdoc-dreyeck-ch/722e64a5-5b1f-4cad-85d9-50bda1748710/scratchpad/s11359b/cache.iiGb6t/common-lisp/sbcl-2.4.10-macosx-x64/Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/dreyeck/work/project/project-workspace-tmpA5CK3QHN.fasl
+; compilation finished in 0:00:00.876
+
+; file: /Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/dreyeck/work/project/project-workspace.lisp
+; in:
+;      HTML-INSPECTOR-VIEWS:DEFVIEW DREYECK/WORK/PROJECT::PROJECT-ROUNDTRIP
+;     (:P
+;      "Equal octets, equal CXTM, the same Lisp object and the same Workspace sign are four different things; each row says which it compares.")
+; 
+; caught STYLE-WARNING:
+;   undefined function: :P
+; 
+; compilation unit finished
+;   Undefined function:
+;     :P
+;   caught 4 STYLE-WARNING conditions
+;   printed 4 notes
+ROOT /Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/
+WROTE /Users/rgb/workspace/hyperdoc-zettel-11359-on-88994c1b/dreyeck/work/project/hyperdoc-project.ctm e7c4478cf1cab9e3555efbb359b19818f68ab4a0c51ed8850dd1519e545edd52
+       38.82 real        30.00 user         4.66 sys
+           485478400  maximum resident set size
+                   0  average shared memory size
+                   0  average unshared data size
+                   0  average unshared stack size
+              366589  page reclaims
+               19822  page faults
+                   0  swaps
+                   0  block input operations
+                   0  block output operations
+                   0  messages sent
+                   0  messages received
+                 152  signals received
+                4302  voluntary context switches
+              130151  involuntary context switches
+         84887533992  instructions retired
+         89641616353  cycles elapsed
+           503431168  peak memory footprint

@@ -1,0 +1,9 @@
+ dreyeck.asd                                        |   4 +-
+ .../pages/project/Implementation Assignments.html  |   5 +-
+ .../project/Regular Catalog WBS Dictionary.html    |  10 +-
+ .../Regular HyperDoc Catalog Scope Proposal.html   |   1 -
+ dreyeck/tests/project-ctm.lisp                     |   4 +-
+ dreyeck/tests/project-transition-graph-a.lisp      | 201 +++++++++++++++++++++
+ dreyeck/tests/project-transition-h6-h7.lisp        |   2 +-
+ scripts/test-project-workspace-scope.mjs           |   9 +-
+ 8 files changed, 218 insertions(+), 18 deletions(-)

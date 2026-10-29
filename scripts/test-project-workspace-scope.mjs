@@ -168,11 +168,17 @@ try{
  }
  assert(visited.length>1,'the plan steps follow one another')
  steps_.push('plan steps along depends-on: '+visited.join(' → ')+', each with exactly the relations the page proposes')
- // A precondition the last step waits for
- const waits=statements.find(s=>s.relation==='work:relation/depends-on'&&s.from===current&&byId[s.to].kind==='precondition')
- assert(waits,'the last step waits for a precondition')
+ // A precondition a plan step waits for: the first step the page says waits for one (the chain of steps need not end at it)
+ const waits=statements.find(s=>s.relation==='work:relation/depends-on'&&byId[s.from].kind==='plan step'&&byId[s.to].kind==='precondition')
+ assert(waits,'a step waits for a precondition')
+ if(waits.from!==current){ws=await open(byId[waits.from].label);await checkProposal(ws,waits.from)}
  await go(ws,byId[waits.to].label);await checkProposal(ws,waits.to)
- steps_.push(`${current} → precondition ${waits.to}: depends on ← ${current}; no work package depends on it`)
+ steps_.push(`${waits.from} → precondition ${waits.to}: depends on ← ${waits.from}; no work package depends on it`)
+ // Every plan step is reached directly in the Workspace, not only asserted: the ones the chain above did not visit (here p4 and p6) are opened and compared with the page
+ const reached=new Set([...visited,waits.from])
+ for(const s of steps){if(!reached.has(s.id)){ws=await open(s.label);await checkProposal(ws,s.id);reached.add(s.id)}}
+ assert.equal(reached.size,steps.length,'every plan step was reached in the Workspace')
+ steps_.push(`every plan step opened in the Workspace and compared with the page, directly: ${steps.map(s=>s.id).join(', ')}`)
  // From a work package to the page it is proposed on: a Topic of the project CTM
  await go(ws,'Implementation Assignments');await atPoint(ws,'page/dreyeck/work/project/implementation-assignments')
  steps_.push('proposed on → the page Implementation Assignments as a Topic of the project CTM')
