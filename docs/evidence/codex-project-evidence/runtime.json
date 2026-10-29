@@ -1,0 +1,41 @@
+{
+  "checked_at": "2026-10-29T21:06:40.276509+01:00",
+  "review_commit": "0d7610900fc49d8e553683ef351f462728d780e3",
+  "runtime": "SBCL 2.4.10",
+  "runtime_method": "Matching Nix glibc loader and core invoked directly; search paths relocated in external launcher only.",
+  "topic_maps_revision": "88994c1b9e1edbf13e665e984a5c9c3b2cdf7575",
+  "topic_maps_source": "/workspace/scratch/codex-evidence-verification/topic-maps-88994c1b",
+  "dependency_sources": {
+    "clog": "/nix/store/7l95gid3niz995qqpkgclj6355k50phf-source",
+    "html": "/nix/store/w26nr9dxpfsyzbviphnaaydmcww2h3y6-source",
+    "lwcells": "/nix/store/p62cd9zn5gnrd34wgbjjnqragxwx6dhh-source",
+    "named": "/nix/store/w15dbn9gy780n3p9k5b69dr3rrr5lczr-source",
+    "njson": "/nix/store/9zkvhs70z8w06kximfrw3zm099qa87vj-source",
+    "plump": "/nix/store/ibq9zs9js02ln87vjmcl6xdafvpxzffx-source"
+  },
+  "network": {
+    "policy": "restricted, enforced, observations current",
+    "http_source": "http://beta.quicklisp.org/archive/fast-websocket/2024-10-12/fast-websocket-20241012-git.tgz",
+    "https_source": "https://beta.quicklisp.org/archive/fast-websocket/2024-10-12/fast-websocket-20241012-git.tgz",
+    "http_status": 200,
+    "https_proxy_connect_status": 200,
+    "https_status": 200,
+    "download_sha256": "b958d597d4eeb2e8be94f4be867751ea7a00042b3c70f0a612211fc7044eda87"
+  },
+  "tested_files": {
+    "dreyeck/pages/project/Implementation Assignments.html": "0d755af7b32bd02c30d41573afc9956767c8027e0e7fb79f20affa294cc1e463",
+    "dreyeck/tests/project-ctm.lisp": "af5065edf76b03f7803d1b5280193346da1eeda36ef6ea934b41dd7b52f62ab8",
+    "scripts/test-codex-project-evidence.lisp": "2c8ec51a9134ce886784e1b6f7cc5092693e035355b1981c6a355db7b2df364c"
+  },
+  "results": {
+    "process_exit": 0,
+    "source_checks": 339,
+    "readback_navigation_checks": 290,
+    "read_and_model_seconds": 10.6,
+    "acceptance_fixture_checks": 125,
+    "total_assertions": 754,
+    "retained_ctm_written_only_after_checks": true,
+    "ctm_sha256": "8b4142421f5bfa1cc089e7ac53b43ebc6975e597cdedea5a49f6fc226dcc2e1d",
+    "log_sha256": "d8434804bc350f1ae902d19e5d5bca61f79ae68f1d5634cec95a689cc1debdfc"
+  }
+}

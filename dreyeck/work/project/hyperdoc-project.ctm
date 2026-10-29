@@ -6,7 +6,7 @@
 #   dreyeck/pages/work/Work Breakdown.html  a7dc3d53a1a7312e6feba2350bde7251c222b2acd321ef5a109116f5cf616e13
 #   dreyeck/pages/work/Authoring the CTM Plan Page.html  fced413ad5e893e49973df1fa8fb5ca14dee87695c50100e72ddd12d4d2de75a
 #   dreyeck/pages/work/CTM Plan Page WBS Dictionary.html  de3f372912e0a257a85990686fdcd354f79481af7aecb1ecc5d1ffb171e9d9b5
-#   dreyeck/pages/project/Implementation Assignments.html  51c656f125d09abf010d860a54a78972c9c00fc0f700ca876e2965209fecc58d
+#   dreyeck/pages/project/Implementation Assignments.html  0d755af7b32bd02c30d41573afc9956767c8027e0e7fb79f20affa294cc1e463
 # Other files read: the test files WBS Dictionary controls name, to derive test marker found:
 #   dreyeck/tests/fedwiki-page-authoring.lisp  0fcd02078576bde7a0438620797ea30c805900201ac443b8bc20ac8b146671d1
 #   dreyeck/tests/fedwiki-item-edit-execution.lisp  d215e10c48f94b401248d60e7c8fe95db5c693ea8a489f60b368c7f8102c755d
@@ -251,6 +251,122 @@ s:source-authority-note
 s:evidence-note
     - "evidence" ;
     s:description: "One authored entry of the assignment's evidence, as written. Evidence is not an acceptance." .
+
+s:acceptance-record
+    - "Acceptance record" ;
+    s:description: "A judgment, accepted or rejected, on one declared work package against an explicitly named revision of its WBS Dictionary acceptance criterion, by a declared authority, at a time, on named evidence entries. Stated only by an Acceptance Records page and never changed; a correction supersedes it. A test result or an executor report is not one." .
+
+s:withdrawal-record
+    - "Withdrawal record" ;
+    s:description: "A corrective record of an Acceptance Records page: it withdraws the earlier records of its work package that it supersedes and judges nothing. It names no criterion and considers no evidence, so it asserts no criterion satisfaction." .
+
+s:authority
+    - "Authority" ;
+    s:description: "Whoever an Acceptance Records page declares may decide on acceptance: declared, not authenticated. Not the executor of an assignment." .
+
+s:wbs-criterion
+    - "WBS criterion" ;
+    s:description: "One revision of a WBS Dictionary acceptance criterion, identified by the SHA-256 of its text; it reifies the occurrence that states that text, current or retained. Not the occurrence type acceptance criterion of an assignment." .
+
+s:evidence-entry
+    - "Evidence entry" ;
+    s:description: "One entry of an assignment's evidence with an authored ID, as the executor wrote it; it reifies that evidence occurrence. A report, not an acceptance." .
+
+s:test-execution-report
+    - "Test execution report" ;
+    s:description: "An evidence entry that reports one run of a test: its repository, tested revision, tree state, observation and time, as the executor reports them. It states that the run was reported, not that it happened; the test file is a program, not this report." .
+
+s:acceptance-decision
+    - "acceptance decision" ;
+    s:description: "The record judges the work package against the applied criterion revision; the authority decides." .
+
+s:withdrawal
+    - "withdrawal" ;
+    s:description: "The withdrawal record concerns the work package; the authority withdraws." .
+
+s:considers-evidence
+    - "considers evidence" ;
+    s:description: "The record names this evidence entry as evidence it considered. Considering evidence is not the evidence deciding." .
+
+s:supersedes
+    - "supersedes" ;
+    s:description: "The superseding record replaces the superseded one, which stays as it was. Which record is in force follows from this Association alone, never from a time." .
+
+s:reports-execution-of
+    - "reports execution of" ;
+    s:description: "The execution report names this test file of this repository as the program it ran. The file is not the report." .
+
+s:proposed-in-dictionary
+    - "proposed in dictionary" ;
+    s:description: "A draft WBS Dictionary states requirements for the proposed work package. Nothing is declared." .
+
+s:acceptance-record-role
+    - "acceptance record" .
+
+s:withdrawal-record-role
+    - "withdrawal record" .
+
+s:applied-criterion
+    - "applied criterion" .
+
+s:deciding-authority
+    - "deciding authority" .
+
+s:considered-evidence
+    - "considered evidence" .
+
+s:superseding-record
+    - "superseding record" .
+
+s:superseded-record
+    - "superseded record" .
+
+s:execution-report
+    - "execution report" .
+
+s:decision
+    - "decision" ;
+    s:description: "accepted or rejected, as the record states it." .
+
+s:decided-at
+    - "decided at" ;
+    s:description: "When the record was decided, as it states it (xsd:dateTime, UTC). Information only: it decides no precedence." .
+
+s:retained-wbs-acceptance-criterion
+    - "retained WBS acceptance criterion" ;
+    s:description: "An acceptance criterion the WBS Dictionary entry stated before and keeps, so that a record that applied it stays readable. Not the current criterion; it records no acceptance." .
+
+s:source-repository
+    - "source repository" ;
+    s:description: "The repository of the tested tree, as the report names it." .
+
+s:test-path
+    - "test path" ;
+    s:description: "The path of the test in its repository." .
+
+s:tested-revision
+    - "tested revision" ;
+    s:description: "The commit the tested tree was at, as the report states it." .
+
+s:tree-state
+    - "tree state" ;
+    s:description: "clean, or modified against the tested revision, as the report states it." .
+
+s:content-reference
+    - "content reference" ;
+    s:description: "An immutable reference to the content of a modified tree, as the report states it." .
+
+s:observation
+    - "observation" ;
+    s:description: "The output the executor reports having observed, as written." .
+
+s:observed-at
+    - "observed at" ;
+    s:description: "When the executor observed it, as the report states it (xsd:dateTime, UTC)." .
+
+s:reconstruction
+    - "reconstruction" ;
+    s:description: "Derived from tree state and content reference: whether the tested tree can be rebuilt from what the report records." .
 
 s:kind-area
     - "area" ;
@@ -509,7 +625,7 @@ s:role-work-relation-depends-on-target
     s:hyperbook-id: "dreyeck/work/project" ;
     s:page-id: "Implementation Assignments" ;
     s:repository-path: "dreyeck/pages/project/Implementation Assignments.html" ;
-    s:source-sha256: "51c656f125d09abf010d860a54a78972c9c00fc0f700ca876e2965209fecc58d" .
+    s:source-sha256: "0d755af7b32bd02c30d41573afc9956767c8027e0e7fb79f20affa294cc1e463" .
 
 <tag:dreyeck.ch,2026:hyperdoc/hyperbook/dreyeck/work/project>
     isa s:hyperbook ;
@@ -1512,6 +1628,71 @@ w:tm-reg-pre-production
     s:repository-path: "dreyeck/tests/fedwiki-item-edit-execution.lisp" ;
     s:source-sha256: "d215e10c48f94b401248d60e7c8fe95db5c693ea8a489f60b368c7f8102c755d" .
 
+<tag:dreyeck.ch,2026:hyperdoc/assignment/codex-2026-10-29-template-identity-substitution>
+    isa s:implementation-assignment ;
+    - "Codex Cloud: CTM Template Identity Substitution — unresolved grammar question" ;
+    s:issued: "Operator-supplied account of a completed Codex Cloud investigation, integrated on 2026-10-29. The statements below report the earlier executor's findings; this entry does not independently reproduce that investigation." ;
+    s:goal: "Resolve the smallest justified subset of the open Template identity-substitution contracts in github.com/RalfBarkow/topic-maps, starting with ctm/in/template-subject-identifier2.ctm. Reported baseline: 88994c1b9e1edbf13e665e984a5c9c3b2cdf7575; task branch: codex/ctm-template-identity-substitution." ;
+    s:plan-step-note: "No Plan Step or plan-status change is declared by this report." ;
+    s:observed-state: "Reported by the previous executor, as supplied by the operator: stopped at a normative-evidence boundary without a speculative reader extension. The investigation is complete as a report; the grammar question and the three named contracts remain unresolved. Integration into this Project Workspace creates neither a Work-status change nor acceptance." ;
+    s:acceptance: "No acceptance by the user is recorded." ;
+    s:precondition: "Distinguish the original corpus expectation, the executor's report, normative interpretation and an acceptance decision. No one of them establishes the others." ;
+    s:precondition: "The prior decision note is uncommitted and has no reported immutable document identity. Its availability in a local checkout does not supply a publication, commit or independently verified provenance." ;
+    s:source-authority-note: "This HyperDoc page is authoritative for this attributed assignment report, not for CTM normative legality or acceptance." ;
+    s:source-authority-note: "The operator-supplied prior Codex account is the source of the reported investigation below. Its statements are not newly observed reader results." ;
+    s:source-authority-note: "Reported Topic Maps sources at baseline 88994c1b9e1edbf13e665e984a5c9c3b2cdf7575: docs/reading-ctm-templates.md, docs/slice-18-validation.md, src/ctm/reader.lisp, src/ctm/templates.lisp, tests/ctm-templates.lisp and the original CTM corpus inputs and canonical expectations. These paths belong to github.com/RalfBarkow/topic-maps, not this HyperDoc repository." ;
+    s:source-authority-note: "Normative target: ISO/IEC 13250-6:2010, especially sections 3.3.6, 3.9 and 3.14–3.15 and their EBNF. Reported public reference: https://www.isotopicmaps.org/ctm/ctm.html. The authoritative published-edition clauses were not fully verified." ;
+    s:evidence-note: "Operator report — original source: github.com/RalfBarkow/topic-maps, vendor/cxtm/ctm/in/template-subject-identifier2.ctm, baseline 88994c1b9e1edbf13e665e984a5c9c3b2cdf7575. The Template body contains topic $iri.; invocation: template(<http://psi.example.org/fake>)." ~ <tag:dreyeck.ch,2026:hyperdoc/evidence/codex-2026-10-29-template-identity-substitution/original-source> ;
+    s:evidence-note: "Operator report — original corpus expectation: vendor/cxtm/ctm/baseline/template-subject-identifier2.ctm.cxtm expects one Topic with subject identifier http://psi.example.org/fake and document-local item identifier #topic. This expectation is not itself a normative grammar provision." ~ <tag:dreyeck.ch,2026:hyperdoc/evidence/codex-2026-10-29-template-identity-substitution/corpus-expectation> ;
+    s:evidence-note: "Operator report — retained reader evidence: INVALID-TEMPLATE-BODY / template-identity-tail, character 34, line 3, column 15, before invocation and argument qualification; no original Map or CXTM result was returned. This integration did not observe that reader execution." ~ <tag:dreyeck.ch,2026:hyperdoc/evidence/codex-2026-10-29-template-identity-substitution/reader-behavior> ;
+    s:evidence-note: "Operator report — a literal-expanded control, topic <http://psi.example.org/fake>., matches the 204-byte expected baseline. This does not establish that the original Template syntax is legal and is not a PASS of its original contract." ~ <tag:dreyeck.ch,2026:hyperdoc/evidence/codex-2026-10-29-template-identity-substitution/expanded-control> ;
+    s:evidence-note: "Operator report — grammar-constrained reading: section 3.9 productions [50]–[52] lead to section 3.3.6 [17], subject-identifier to iri-ref, without an explicit variable alternative. Under the retained HTML reading, contextual substitution does not license that additional Tail position." ~ <tag:dreyeck.ch,2026:hyperdoc/evidence/codex-2026-10-29-template-identity-substitution/grammar-reading> ;
+    s:evidence-note: "Operator report — competing reading: sections 3.14–3.15 might license substituting a bare IRI argument into this Tail identity position before contextual validation. The corpus model is compatible with that reading, but no authoritative published-edition provision or correction establishing it was verified." ~ <tag:dreyeck.ch,2026:hyperdoc/evidence/codex-2026-10-29-template-identity-substitution/substitution-reading> ;
+    s:evidence-note: "Operator report — unresolved normative question: does the published ISO/IEC 13250-6:2010 grammar and substitution rule admit an unmarked variable as an additional Subject Identifier in a Topic Tail? The needed published-edition clauses remain unverified; no normative resolution or acceptance is recorded." ~ <tag:dreyeck.ch,2026:hyperdoc/evidence/codex-2026-10-29-template-identity-substitution/unresolved-question> ;
+    s:evidence-note: "Operator report — three original contracts remain NOT-RUN: ctm/in/template-subject-identifier2.ctm, ctm/invalid/template-item-identifier3.ctm and ctm/invalid/template-subject-locator3.ctm. The negative cases are rejected at body checking before their intended wrong-argument checks; those rejections are not qualified negative-contract PASS results." ~ <tag:dreyeck.ch,2026:hyperdoc/evidence/codex-2026-10-29-template-identity-substitution/unresolved-contracts> ;
+    s:evidence-note: "Operator report — no reader implementation, corpus or test was changed; no fresh Lisp test was executed; no commit or push was made by that investigation. This evidence entry is not a test-execution report." ~ <tag:dreyeck.ch,2026:hyperdoc/evidence/codex-2026-10-29-template-identity-substitution/execution-boundary> ;
+    s:evidence-note: "Operator report — prior output: docs/ctm-template-identity-substitution-review.md on task branch codex/ctm-template-identity-substitution in Topic Maps, uncommitted. During this integration a local uncommitted note is present at that path; no document hash, publication URL or commit identity is asserted, and its contents are not an independent validation of the earlier findings." ~ <tag:dreyeck.ch,2026:hyperdoc/evidence/codex-2026-10-29-template-identity-substitution/decision-note> .
+
+<tag:dreyeck.ch,2026:hyperdoc/evidence/codex-2026-10-29-template-identity-substitution/original-source>
+    isa s:evidence-entry ;
+    - "codex-2026-10-29-template-identity-substitution/original-source" .
+
+<tag:dreyeck.ch,2026:hyperdoc/evidence/codex-2026-10-29-template-identity-substitution/corpus-expectation>
+    isa s:evidence-entry ;
+    - "codex-2026-10-29-template-identity-substitution/corpus-expectation" .
+
+<tag:dreyeck.ch,2026:hyperdoc/evidence/codex-2026-10-29-template-identity-substitution/reader-behavior>
+    isa s:evidence-entry ;
+    - "codex-2026-10-29-template-identity-substitution/reader-behavior" .
+
+<tag:dreyeck.ch,2026:hyperdoc/evidence/codex-2026-10-29-template-identity-substitution/expanded-control>
+    isa s:evidence-entry ;
+    - "codex-2026-10-29-template-identity-substitution/expanded-control" .
+
+<tag:dreyeck.ch,2026:hyperdoc/evidence/codex-2026-10-29-template-identity-substitution/grammar-reading>
+    isa s:evidence-entry ;
+    - "codex-2026-10-29-template-identity-substitution/grammar-reading" .
+
+<tag:dreyeck.ch,2026:hyperdoc/evidence/codex-2026-10-29-template-identity-substitution/substitution-reading>
+    isa s:evidence-entry ;
+    - "codex-2026-10-29-template-identity-substitution/substitution-reading" .
+
+<tag:dreyeck.ch,2026:hyperdoc/evidence/codex-2026-10-29-template-identity-substitution/unresolved-question>
+    isa s:evidence-entry ;
+    - "codex-2026-10-29-template-identity-substitution/unresolved-question" .
+
+<tag:dreyeck.ch,2026:hyperdoc/evidence/codex-2026-10-29-template-identity-substitution/unresolved-contracts>
+    isa s:evidence-entry ;
+    - "codex-2026-10-29-template-identity-substitution/unresolved-contracts" .
+
+<tag:dreyeck.ch,2026:hyperdoc/evidence/codex-2026-10-29-template-identity-substitution/execution-boundary>
+    isa s:evidence-entry ;
+    - "codex-2026-10-29-template-identity-substitution/execution-boundary" .
+
+<tag:dreyeck.ch,2026:hyperdoc/evidence/codex-2026-10-29-template-identity-substitution/decision-note>
+    isa s:evidence-entry ;
+    - "codex-2026-10-29-template-identity-substitution/decision-note" .
+
 <tag:dreyeck.ch,2026:hyperdoc/assignment/cc-2026-10-18-project-work-ctm>
     isa s:implementation-assignment ;
     - "Claude Code: Project Work as an Exchangeable CTM Topic Map" ;
@@ -1996,6 +2177,11 @@ w:tm-reg-pre-production
     isa s:plan-gap ;
     - "topic-maps-regular-hyperdoc and tm-regular-catalog share only their carrier page" ;
     s:gap-rule: "A Work Item and a Deliverable name the same carrier page, and no statement relates them. No Relation Contract defines that relation." .
+
+<tag:dreyeck.ch,2026:hyperdoc/gap/assignment-without-plan-step/codex-2026-10-29-template-identity-substitution>
+    isa s:plan-gap ;
+    - "codex-2026-10-29-template-identity-substitution has no confirmed Plan Step" ;
+    s:gap-rule: "The assignment names no confirmed Plan Step. Its own text cannot declare one." .
 
 <tag:dreyeck.ch,2026:hyperdoc/gap/assignment-without-plan-step/cc-2026-10-18-project-work-ctm>
     isa s:plan-gap ;
@@ -2482,6 +2668,8 @@ s:exercised-by(s:control: <tag:dreyeck.ch,2026:hyperdoc/control/ctm-wp-4/other-i
 s:planned-control-of(s:work-package: w:ctm-wp-4, s:control: <tag:dreyeck.ch,2026:hyperdoc/control/ctm-wp-4/fresh-reconstruction>)
 s:exercised-by(s:control: <tag:dreyeck.ch,2026:hyperdoc/control/ctm-wp-4/fresh-reconstruction>, s:test-file: <tag:dreyeck.ch,2026:hyperdoc/file/dreyeck/tests/fedwiki-item-edit-execution.lisp>)
 s:defined-in-dictionary(s:work-package: w:ctm-wp-5, s:source-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/reading/ctm-plan-page-wbs-dictionary>)
+s:declared-on(s:declaration: <tag:dreyeck.ch,2026:hyperdoc/assignment/codex-2026-10-29-template-identity-substitution>, s:source-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/implementation-assignments>)
+s:reads-source(s:assignment: <tag:dreyeck.ch,2026:hyperdoc/assignment/codex-2026-10-29-template-identity-substitution>, s:source: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/implementation-assignments>)
 s:declared-on(s:declaration: <tag:dreyeck.ch,2026:hyperdoc/assignment/cc-2026-10-18-project-work-ctm>, s:source-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/implementation-assignments>)
 s:assignment-for(s:assignment: <tag:dreyeck.ch,2026:hyperdoc/assignment/cc-2026-10-18-project-work-ctm>, s:work-item: w:project-work-ctm)
 s:assignment-delivers(s:assignment: <tag:dreyeck.ch,2026:hyperdoc/assignment/cc-2026-10-18-project-work-ctm>, s:work-package: w:pwc-wp-1)
@@ -2602,6 +2790,7 @@ s:gap-concerns(s:gap: <tag:dreyeck.ch,2026:hyperdoc/gap/work-item-deliverable-un
 s:gap-concerns(s:gap: <tag:dreyeck.ch,2026:hyperdoc/gap/work-item-deliverable-unlinked/project-work-ctm/project-work-ctm-exchange>, s:subject: w:project-work-ctm-exchange)
 s:gap-concerns(s:gap: <tag:dreyeck.ch,2026:hyperdoc/gap/work-item-deliverable-unlinked/topic-maps-regular-hyperdoc/tm-regular-catalog>, s:subject: w:topic-maps-regular-hyperdoc)
 s:gap-concerns(s:gap: <tag:dreyeck.ch,2026:hyperdoc/gap/work-item-deliverable-unlinked/topic-maps-regular-hyperdoc/tm-regular-catalog>, s:subject: w:tm-regular-catalog)
+s:gap-concerns(s:gap: <tag:dreyeck.ch,2026:hyperdoc/gap/assignment-without-plan-step/codex-2026-10-29-template-identity-substitution>, s:subject: <tag:dreyeck.ch,2026:hyperdoc/assignment/codex-2026-10-29-template-identity-substitution>)
 s:gap-concerns(s:gap: <tag:dreyeck.ch,2026:hyperdoc/gap/assignment-without-plan-step/cc-2026-10-18-project-work-ctm>, s:subject: <tag:dreyeck.ch,2026:hyperdoc/assignment/cc-2026-10-18-project-work-ctm>)
 s:gap-concerns(s:gap: <tag:dreyeck.ch,2026:hyperdoc/gap/assignment-without-plan-step/cc-2026-10-19-topic-maps-reader-scaling>, s:subject: <tag:dreyeck.ch,2026:hyperdoc/assignment/cc-2026-10-19-topic-maps-reader-scaling>)
 s:gap-concerns(s:gap: <tag:dreyeck.ch,2026:hyperdoc/gap/assignment-without-plan-step/cc-2026-10-19-acceptance-model-draft>, s:subject: <tag:dreyeck.ch,2026:hyperdoc/assignment/cc-2026-10-19-acceptance-model-draft>)

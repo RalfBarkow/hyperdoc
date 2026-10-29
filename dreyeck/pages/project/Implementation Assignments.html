@@ -82,6 +82,39 @@
 </ul>
 
 <h2>Assignments</h2>
+<section data-assignment="codex-2026-10-29-template-identity-substitution">
+<h3>Codex Cloud: CTM Template Identity Substitution — unresolved grammar question</h3>
+<p data-field="issued">Operator-supplied account of a completed Codex Cloud investigation, integrated on 2026-10-29. The statements below report the earlier executor's findings; this entry does not independently reproduce that investigation.</p>
+<p data-field="goal">Resolve the smallest justified subset of the open Template identity-substitution contracts in github.com/RalfBarkow/topic-maps, starting with ctm/in/template-subject-identifier2.ctm. Reported baseline: 88994c1b9e1edbf13e665e984a5c9c3b2cdf7575; task branch: codex/ctm-template-identity-substitution.</p>
+<p data-field="work-item">No relation to an existing declared Work Item is supplied by this account. No Work declaration or assignment-for relation is made.</p>
+<p data-field="delivers">No relation to an existing Deliverable is supplied by this account. No assignment-delivers relation or proposal promotion is made.</p>
+<p data-field="plan-step">No Plan Step or plan-status change is declared by this report.</p>
+<ul data-field="source-authorities">
+<li data-reads="dreyeck/pages/project/Implementation Assignments.html">This HyperDoc page is authoritative for this attributed assignment report, not for CTM normative legality or acceptance.</li>
+<li>The operator-supplied prior Codex account is the source of the reported investigation below. Its statements are not newly observed reader results.</li>
+<li>Reported Topic Maps sources at baseline 88994c1b9e1edbf13e665e984a5c9c3b2cdf7575: docs/reading-ctm-templates.md, docs/slice-18-validation.md, src/ctm/reader.lisp, src/ctm/templates.lisp, tests/ctm-templates.lisp and the original CTM corpus inputs and canonical expectations. These paths belong to github.com/RalfBarkow/topic-maps, not this HyperDoc repository.</li>
+<li>Normative target: ISO/IEC 13250-6:2010, especially sections 3.3.6, 3.9 and 3.14–3.15 and their EBNF. Reported public reference: https://www.isotopicmaps.org/ctm/ctm.html. The authoritative published-edition clauses were not fully verified.</li>
+</ul>
+<ul data-field="preconditions">
+<li>Distinguish the original corpus expectation, the executor's report, normative interpretation and an acceptance decision. No one of them establishes the others.</li>
+<li>The prior decision note is uncommitted and has no reported immutable document identity. Its availability in a local checkout does not supply a publication, commit or independently verified provenance.</li>
+</ul>
+<ul data-field="evidence">
+<li data-evidence="original-source">Operator report — original source: github.com/RalfBarkow/topic-maps, vendor/cxtm/ctm/in/template-subject-identifier2.ctm, baseline 88994c1b9e1edbf13e665e984a5c9c3b2cdf7575. The Template body contains topic $iri.; invocation: template(&lt;http://psi.example.org/fake&gt;).</li>
+<li data-evidence="corpus-expectation">Operator report — original corpus expectation: vendor/cxtm/ctm/baseline/template-subject-identifier2.ctm.cxtm expects one Topic with subject identifier http://psi.example.org/fake and document-local item identifier #topic. This expectation is not itself a normative grammar provision.</li>
+<li data-evidence="reader-behavior">Operator report — retained reader evidence: INVALID-TEMPLATE-BODY / template-identity-tail, character 34, line 3, column 15, before invocation and argument qualification; no original Map or CXTM result was returned. This integration did not observe that reader execution.</li>
+<li data-evidence="expanded-control">Operator report — a literal-expanded control, topic &lt;http://psi.example.org/fake&gt;., matches the 204-byte expected baseline. This does not establish that the original Template syntax is legal and is not a PASS of its original contract.</li>
+<li data-evidence="grammar-reading">Operator report — grammar-constrained reading: section 3.9 productions [50]–[52] lead to section 3.3.6 [17], subject-identifier to iri-ref, without an explicit variable alternative. Under the retained HTML reading, contextual substitution does not license that additional Tail position.</li>
+<li data-evidence="substitution-reading">Operator report — competing reading: sections 3.14–3.15 might license substituting a bare IRI argument into this Tail identity position before contextual validation. The corpus model is compatible with that reading, but no authoritative published-edition provision or correction establishing it was verified.</li>
+<li data-evidence="unresolved-question">Operator report — unresolved normative question: does the published ISO/IEC 13250-6:2010 grammar and substitution rule admit an unmarked variable as an additional Subject Identifier in a Topic Tail? The needed published-edition clauses remain unverified; no normative resolution or acceptance is recorded.</li>
+<li data-evidence="unresolved-contracts">Operator report — three original contracts remain NOT-RUN: ctm/in/template-subject-identifier2.ctm, ctm/invalid/template-item-identifier3.ctm and ctm/invalid/template-subject-locator3.ctm. The negative cases are rejected at body checking before their intended wrong-argument checks; those rejections are not qualified negative-contract PASS results.</li>
+<li data-evidence="execution-boundary">Operator report — no reader implementation, corpus or test was changed; no fresh Lisp test was executed; no commit or push was made by that investigation. This evidence entry is not a test-execution report.</li>
+<li data-evidence="decision-note">Operator report — prior output: docs/ctm-template-identity-substitution-review.md on task branch codex/ctm-template-identity-substitution in Topic Maps, uncommitted. During this integration a local uncommitted note is present at that path; no document hash, publication URL or commit identity is asserted, and its contents are not an independent validation of the earlier findings.</li>
+</ul>
+<p data-field="observed-state">Reported by the previous executor, as supplied by the operator: stopped at a normative-evidence boundary without a speculative reader extension. The investigation is complete as a report; the grammar question and the three named contracts remain unresolved. Integration into this Project Workspace creates neither a Work-status change nor acceptance.</p>
+<p data-field="acceptance">No acceptance by the user is recorded.</p>
+</section>
+
 <section data-assignment="cc-2026-10-18-project-work-ctm">
 <h3>Claude Code: Project Work as an Exchangeable CTM Topic Map</h3>
 <p data-field="issued">Given by the user on 2026-10-18 in a Claude Code session (Claude Opus 5.5, high effort), after an architecture review of CTM roundtrips in HyperDoc.</p>
