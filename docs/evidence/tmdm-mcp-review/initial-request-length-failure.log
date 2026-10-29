@@ -1,0 +1,12 @@
+MCP-CHECK missing-bearer-401 PASS
+MCP-CHECK wrong-bearer-401 PASS
+MCP-CHECK wrong-origin-403 PASS
+MCP-CHECK get-405 PASS
+Traceback (most recent call last):
+  File "/workspace/hyperdoc/scripts/test-tmdm-mcp-review.py", line 204, in <module>
+    main()
+  File "/workspace/hyperdoc/scripts/test-tmdm-mcp-review.py", line 117, in main
+    check("missing-session-400", call()[0] == 400)
+  File "/workspace/hyperdoc/scripts/test-tmdm-mcp-review.py", line 59, in check
+    raise AssertionError(label)
+AssertionError: missing-session-400

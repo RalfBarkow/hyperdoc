@@ -1,0 +1,12 @@
+{
+  "checks": 60,
+  "status": "PASS",
+  "sourceRevision": "0484a4b76128c3ed302a6a8d6e0343bfe03cece5",
+  "sha256": "8b4142421f5bfa1cc089e7ac53b43ebc6975e597cdedea5a49f6fc226dcc2e1d",
+  "topicMapsRevision": "88994c1b9e1edbf13e665e984a5c9c3b2cdf7575",
+  "documentIRI": "tag:dreyeck.ch,2026:hyperdoc/project.ctm",
+  "transport": "loopback-only",
+  "nativeReadback": "PASS",
+  "sameBaseCXTM": "PASS",
+  "publicMCP": "CONNECT 403; not reached"
+}
