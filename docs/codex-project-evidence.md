@@ -28,7 +28,7 @@ The previous decision note is present locally as an uncommitted Topic Maps
 file. Its existence does not establish immutable provenance; no hash,
 publication URL or commit for that note is invented here.
 
-## Focused verification prepared
+## Focused verification
 
 From the repository root in the pinned Lisp runtime, with the dependency ASDF
 registry, this HyperDoc checkout and the verified Topic Maps snapshot selected:
@@ -38,12 +38,14 @@ sbcl --noinform --no-sysinit --no-userinit --non-interactive \
   --load scripts/test-codex-project-evidence.lisp
 ```
 
-Use the immutable snapshot rather than changing or cleaning the separate Topic
-Maps checkout: the earlier user's uncommitted note remains there. The runner
-calls the existing WRITE-PROJECT-CTM, which records source paths and SHA-256
-identities in the CTM header and writes the derived file's digest beside it.
-It then invokes the existing focused source/read-back/acceptance test entrypoint;
-the new case checks execute inside the read-back test's existing reading.
+The actual run used a disposable clean Git checkout at the exact Topic Maps
+pin; the separate user checkout and its uncommitted note were untouched. The
+runner calls the existing WRITE-PROJECT-CTM on a temporary materialization,
+then invokes the focused source/read-back/acceptance test entrypoint. Only
+after all checks pass does it regenerate the retained CTM and digest, requiring
+the retained octets to equal the tested temporary materialization. Source paths
+and SHA-256 identities are recorded in the CTM header. The new case checks
+execute inside the read-back test's existing reading.
 
 The case checks require native assignment/evidence Topics, reified occurrence
 values and parent/reifier identity, source-page Association Roles, navigation
@@ -61,25 +63,66 @@ acceptance-schema definitions are distinguished from decision instances and
 relations: identified evidence needs that schema but creates no acceptance.
 These are explicit source-model changes, not adjustments of expected totals.
 
-## Current execution boundary
+## Executed results and launcher diagnosis
 
-Preparation is not acceptance or a completed roundtrip. At this stage the
-pinned SBCL dependency build failed because beta.quicklisp.org and
-tarballs.nixos.org returned HTTP 403. The two required destinations were saved
-additively in the environment draft; saving does not apply or publish them.
-The runtime build must succeed before running the command above.
+Verified on 2026-10-29 using SBCL 2.4.10. The updated network policy was current
+and enforced; the exact formerly blocked Fast WebSocket source returned HTTP
+200 over both HTTP and HTTPS. The GitHub API also became accessible. These are
+current observations, not an inference from saved allowlist entries.
 
-No focused Lisp test, native read-back, Inspector navigation or CTM regeneration
-has been executed for this change yet. The retained CTM and its digest still
-describe the previous authoritative pages until the existing writer runs.
-No local task commit is permitted before those checks pass.
+Nix-portable had cached its namespace-based runtime. It could not launch the
+Lisp shell in this container (`setting up a private mount namespace: Operation
+not permitted`); the supported proot alternative also failed before executing
+a command. The already-built SBCL runs directly through its matching glibc
+loader with an explicit core and relocated ASDF/library search paths. Library
+relocation is passed to the loader only, not exported to child Git commands.
+SQLite's matching zlib directory is included. This environment configuration
+changes no production code, source pin or identity assertion.
 
-Keep these claims separate when recording the eventual results:
+The runner itself also contained an unsupported UIOP API:
+WITH-TEMPORARY-DIRECTORY. It now uses WITH-TEMPORARY-FILE to reserve a unique
+name, creates an owned staging directory, and removes it with UNWIND-PROTECT.
+No assertion, expected result or timeout was relaxed.
 
-1. CTM regenerated from authored pages is source materialization.
-2. CTM read into native TMDM is deserialization.
-3. Export of retained CTM octets is unchanged-source export.
+| Completed focused suite | Result |
+| --- | --- |
+| Source/emitter | 339 assertions passed |
+| Native read-back, CXTM and Inspector/Workspace navigation | 290 assertions passed |
+| Acceptance fixtures and preservation | 125 assertions passed |
+| Overall runner | exit 0, CODEX-PROJECT-EVIDENCE-PASS |
+
+Read-and-model time was 10.6 seconds, within the unchanged 90-second assertion.
+The 754 assertions include the ten attributed native evidence objects, their
+occurrence reifications and parent identity, source Association Roles,
+assignment/evidence navigation, unresolved contracts, no Acceptance Record,
+and preservation of unrelated authored Work and assignment statements.
+
+After successful verification, the retained CTM and digest were regenerated.
+CTM SHA-256: `8b4142421f5bfa1cc089e7ac53b43ebc6975e597cdedea5a49f6fc226dcc2e1d`.
+The source identity recorded for Implementation Assignments is
+`0d755af7b32bd02c30d41573afc9956767c8027e0e7fb79f20affa294cc1e463`.
+
+[Complete successful output](evidence/codex-project-evidence/focused.log),
+[runtime, source roots and tested-file hashes](evidence/codex-project-evidence/runtime.json),
+and [the exact external launcher used](evidence/codex-project-evidence/launcher.py)
+retain the evidence. The launcher records this restored environment's paths;
+it is not a general installation script. Earlier failed attempts were setup
+diagnostics, not successful test runs.
+
+The demonstrated roundtrip properties remain distinct:
+
+1. Deterministic CTM regeneration from the authored pages.
+2. Deserialization into native TMDM and CXTM equivalence under the same Document
+   IRI/base locator, `tag:dreyeck.ch,2026:hyperdoc/project.ctm`.
+3. Unchanged-original-octet export, verified separately from semantics.
 4. Serialization of a modified TMDM Map into CTM is not implemented or claimed.
+
+Inspector views and native Workspace navigation were exercised in Lisp; this
+run does not claim a graphical browser acceptance test. No full CTM/XTM corpus,
+Topic Maps performance suite, production Catalog or deployment was exercised.
+Dependency load warnings remain in the complete log. The prior investigation's
+normative question and three NOT-RUN contracts remain unresolved; these focused
+integration tests do not reclassify them or grant acceptance.
 
 No previous reader observation is promoted to an independently reproduced
 fact or a normative decision by any of these integration checks.

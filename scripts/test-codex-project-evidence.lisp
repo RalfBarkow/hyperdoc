@@ -4,8 +4,12 @@
 ;;;; Verifies a temporary materialization before replacing the retained CTM/digest.
 (require :asdf)
 (asdf:load-system "dreyeck/work/project/tests")
-(uiop:with-temporary-directory (:pathname staged)
-  (let ((ctm (merge-pathnames "hyperdoc-project.ctm" staged))
+(uiop:with-temporary-file (:pathname marker)
+  (let ((staged (uiop:ensure-directory-pathname
+                 (concatenate 'string (namestring marker) "-ctm/"))))
+    (ensure-directories-exist staged)
+    (unwind-protect
+      (let ((ctm (merge-pathnames "hyperdoc-project.ctm" staged))
         (digest-file (merge-pathnames "hyperdoc-project.ctm.sha256" staged))
         (verified-octets nil))
     (progv (list (find-symbol "+PROJECT-CTM-FILE+" :dreyeck/work/project)
@@ -23,5 +27,6 @@
     (multiple-value-bind (pathname digest)
         (uiop:symbol-call :dreyeck/work/project :write-project-ctm)
       (assert (equalp verified-octets (uiop:symbol-call :dreyeck/work/project :%octets pathname)))
-      (format t "~&PROJECT-CTM-MATERIALIZED ~A SHA256 ~A~%" pathname digest))))
+      (format t "~&PROJECT-CTM-MATERIALIZED ~A SHA256 ~A~%" pathname digest)))
+      (uiop:delete-directory-tree staged :validate t :if-does-not-exist :ignore))))
 (format t "~&CODEX-PROJECT-EVIDENCE-PASS~%")
