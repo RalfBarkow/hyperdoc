@@ -3363,6 +3363,7 @@
                              (:static-file "topic-maps-5a4a668-recovery.txt")))
                (:module "dreyeck/pages/project"
                 :components ((:static-file "HyperDoc Project Workspace.html") (:static-file "Implementation Assignments.html")
+                             (:static-file "Topic Maps Standards Inventory and TMCL Design.html")
                              ;; Drafts: pages of the HyperBook, not sources of the project CTM until the user decides.
                              (:static-file "Project Work Exchange WBS Dictionary.html") (:static-file "Acceptance Records.html")
                              (:static-file "Regular Catalog WBS Dictionary.html")
