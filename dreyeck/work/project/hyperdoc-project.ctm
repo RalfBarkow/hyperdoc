@@ -6,7 +6,7 @@
 #   dreyeck/pages/work/Work Breakdown.html  a7dc3d53a1a7312e6feba2350bde7251c222b2acd321ef5a109116f5cf616e13
 #   dreyeck/pages/work/Authoring the CTM Plan Page.html  fced413ad5e893e49973df1fa8fb5ca14dee87695c50100e72ddd12d4d2de75a
 #   dreyeck/pages/work/CTM Plan Page WBS Dictionary.html  de3f372912e0a257a85990686fdcd354f79481af7aecb1ecc5d1ffb171e9d9b5
-#   dreyeck/pages/project/Implementation Assignments.html  51c656f125d09abf010d860a54a78972c9c00fc0f700ca876e2965209fecc58d
+#   dreyeck/pages/project/Implementation Assignments.html  48530a5174d3713443af5b98d09080431ac32c128a84441374a00631a32e1445
 # Other files read: the test files WBS Dictionary controls name, to derive test marker found:
 #   dreyeck/tests/fedwiki-page-authoring.lisp  0fcd02078576bde7a0438620797ea30c805900201ac443b8bc20ac8b146671d1
 #   dreyeck/tests/fedwiki-item-edit-execution.lisp  d215e10c48f94b401248d60e7c8fe95db5c693ea8a489f60b368c7f8102c755d
@@ -509,7 +509,7 @@ s:role-work-relation-depends-on-target
     s:hyperbook-id: "dreyeck/work/project" ;
     s:page-id: "Implementation Assignments" ;
     s:repository-path: "dreyeck/pages/project/Implementation Assignments.html" ;
-    s:source-sha256: "51c656f125d09abf010d860a54a78972c9c00fc0f700ca876e2965209fecc58d" .
+    s:source-sha256: "48530a5174d3713443af5b98d09080431ac32c128a84441374a00631a32e1445" .
 
 <tag:dreyeck.ch,2026:hyperdoc/hyperbook/dreyeck/work/project>
     isa s:hyperbook ;
@@ -1059,6 +1059,162 @@ w:tm-reg-pre-production
     - "Approval of the production activation" ;
     s:declaration-text: "Approval of the production activation — the user's, for the generation on dreyeck.ch, with the operator's record of the server's state." .
 
+w:iso-tm-review
+    isa s:kind-work-item ;
+    - "Investigate Topic Maps implementation and schema requirements" ;
+    s:declaration-text: "Investigate Topic Maps implementation and schema requirements — Investigation only; no implementation authorization, completion status or acceptance decision." .
+
+<tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/topic-maps-standards-inventory-and-tmcl-design>
+    isa s:hyperdoc-page ;
+    - "Topic Maps Standards Inventory and TMCL Design" ;
+    s:hyperbook-id: "dreyeck/work/project" ;
+    s:page-id: "Topic Maps Standards Inventory and TMCL Design" .
+
+w:iso-tm-design
+    isa s:kind-deliverable ;
+    - "Source-grounded inventory and first TMCL schema design" ;
+    s:declaration-text: "Source-grounded inventory and first TMCL schema design — Proposed result: an attributed inventory, unresolved normative requirements and an application schema design; not a validator." .
+
+w:iso-tm-wp-inventory
+    isa s:kind-work-package ;
+    - "Inventory editions, implementations and retained evidence" ;
+    s:declaration-text: "Inventory editions, implementations and retained evidence — Proposed scope only. Missing: declared Work/Dictionary authority and approved acceptance criteria." .
+
+w:iso-tm-wp-schema
+    isa s:kind-work-package ;
+    - "Design Assignment and Evidence constraints" ;
+    s:declaration-text: "Design Assignment and Evidence constraints — Proposed scope only. Missing: published TMCL requirements, approved domain/cardinality policy and validator authorization." .
+
+w:iso-tm-plan-inventory
+    isa s:kind-plan-step ;
+    - "Read sources and separate editions and evidence" ;
+    s:declaration-text: "Read sources and separate editions and evidence — Proposed ordering only; no schedule or plan-status declaration." .
+
+w:iso-tm-plan-schema
+    isa s:kind-plan-step ;
+    - "Compare application constraints with verified TMCL provisions" ;
+    s:declaration-text: "Compare application constraints with verified TMCL provisions — Proposed ordering only; unresolved normative mappings must remain unresolved." .
+
+w:iso-tm-primary-text
+    isa s:kind-precondition ;
+    - "Obtain published TMCL provisions and applicable corrections" ;
+    s:declaration-text: "Obtain published TMCL provisions and applicable corrections — Missing primary material; no acquisition, authority or completion is asserted." .
+
+w:iso13250-2-2006
+    isa s:kind-concept ;
+    - "ISO/IEC 13250-2:2006 — TMDM" ;
+    s:declaration-text: "ISO/IEC 13250-2:2006 — TMDM — Source: topic-maps.asd system topic-maps/tmdm and src/tmdm/; historical native invariants/import tests; no whole-standard conformance acceptance." .
+
+w:iso13250-3-2007
+    isa s:kind-concept ;
+    - "ISO/IEC 13250-3:2007 — XTM 2.0" ;
+    s:declaration-text: "ISO/IEC 13250-3:2007 — XTM 2.0 — Source: topic-maps.asd topic-maps/xtm; src/xtm/reader.lisp accepts version 2.0. Retained 22U corpus status 121 PASS, 0 FAIL, 3 NOT-RUN; not a new execution." .
+
+w:iso13250-3-2013
+    isa s:kind-concept ;
+    - "ISO/IEC 13250-3:2013 — later XTM edition" ;
+    s:declaration-text: "ISO/IEC 13250-3:2013 — later XTM edition — 2013-edition support and primary normative text are not established by the pinned 2007-profile reader/evidence." .
+
+w:iso13250-4-2009
+    isa s:kind-concept ;
+    - "ISO/IEC 13250-4:2009 — CXTM" ;
+    s:declaration-text: "ISO/IEC 13250-4:2009 — CXTM — Source: topic-maps/cxtm, src/cxtm/canonicalizer.lisp, tests/cxtm.lisp. Final-edition and date/time Q-CXTM requirements remain unresolved." .
+
+w:iso13250-5-2015
+    isa s:kind-concept ;
+    - "ISO/IEC 13250-5:2015 — Reference Model" ;
+    s:declaration-text: "ISO/IEC 13250-5:2015 — Reference Model — No separately registered Reference Model implementation is established by the enumerated ASDF/source distribution; TMDM is not substituted for TMRM." .
+
+w:iso13250-6-2010
+    isa s:kind-concept ;
+    - "ISO/IEC 13250-6:2010 — CTM" ;
+    s:declaration-text: "ISO/IEC 13250-6:2010 — CTM — Source: topic-maps/ctm, src/ctm/reader.lisp and templates.lisp, tests/ctm-templates.lisp. Historical 22U originals: 262 PASS, 4 FAIL, 7 NOT-RUN; draft/final questions remain." .
+
+w:iso19756-2011
+    isa s:kind-concept ;
+    - "ISO/IEC 19756:2011 — TMCL" ;
+    s:declaration-text: "ISO/IEC 19756:2011 — TMCL — Published requirements, constraint PSIs, validation rules and authoring templates are UNRESOLVED here. No validator or runnable TMCL schema is supplied." .
+
+w:tm-system-tmdm
+    isa s:kind-concept ;
+    - "Common Lisp system topic-maps/tmdm" ;
+    s:declaration-text: "Common Lisp system topic-maps/tmdm — Pin 88994c1b9e1edbf13e665e984a5c9c3b2cdf7575: topic-maps.asd registers native information items, identity, merging and content import." .
+
+w:tm-system-ctm
+    isa s:kind-concept ;
+    - "Common Lisp system topic-maps/ctm" ;
+    s:declaration-text: "Common Lisp system topic-maps/ctm — Same pin: topic-maps.asd registers lexer, reader, templates, resources, IRI and encoding code; not a general writer." .
+
+w:tm-system-cxtm
+    isa s:kind-concept ;
+    - "Common Lisp system topic-maps/cxtm" ;
+    s:declaration-text: "Common Lisp system topic-maps/cxtm — Same pin: topic-maps.asd registers canonicalizer, Unicode/NFC support; canonical output is not CTM serialization." .
+
+w:tm-system-xtm
+    isa s:kind-concept ;
+    - "Common Lisp systems topic-maps/xtm and topic-maps/xml" ;
+    s:declaration-text: "Common Lisp systems topic-maps/xtm and topic-maps/xml — Same pin: topic-maps.asd registers XTM 2.0 and the qualified XML path, including anyType; not 2013-edition qualification." .
+
+w:tm-source-tmdm
+    isa s:kind-concept ;
+    - "Source artifact: TMDM content import" ;
+    s:declaration-text: "Source artifact: TMDM content import — github.com/RalfBarkow/topic-maps at 88994c1b: src/tmdm/import.lisp, import-map-content. Content copying/normalization preserves source objects, excludes root Map metadata and returns canonical target handles." .
+
+w:tm-source-ctm
+    isa s:kind-concept ;
+    - "Source artifact: CTM reader and templates" ;
+    s:declaration-text: "Source artifact: CTM reader and templates — Same repository/pin: src/ctm/reader.lisp and src/ctm/templates.lisp. Their implementation grammar and policy are distinct from original corpus expectations." .
+
+w:tm-source-cxtm
+    isa s:kind-concept ;
+    - "Source artifact: CXTM canonicalizer" ;
+    s:declaration-text: "Source artifact: CXTM canonicalizer — Same repository/pin: src/cxtm/canonicalizer.lisp. Compare explicit document/base IRIs, not labels or memory addresses." .
+
+w:tm-source-xtm
+    isa s:kind-concept ;
+    - "Source artifact: XTM reader" ;
+    s:declaration-text: "Source artifact: XTM reader — Same repository/pin: src/xtm/reader.lisp; validate-source explicitly requires version 2.0." .
+
+w:tm-tests-tmdm
+    isa s:kind-concept ;
+    - "Test artifact: native identity and import" ;
+    s:declaration-text: "Test artifact: native identity and import — Same repository/pin: tests/item-identifiers.lisp, tests/reification.lisp and tests/map-import.lisp; a test source is not an execution report." .
+
+w:tm-tests-ctm
+    isa s:kind-concept ;
+    - "Test artifact: CTM Template contracts" ;
+    s:declaration-text: "Test artifact: CTM Template contracts — Same repository/pin: tests/ctm-templates.lisp and vendor/cxtm/ctm/in/template-subject-identifier2.ctm; original corpus and norm are separate authorities." .
+
+w:tm-tests-cxtm
+    isa s:kind-concept ;
+    - "Test artifact: CXTM comparisons" ;
+    s:declaration-text: "Test artifact: CXTM comparisons — Same repository/pin: tests/cxtm.lisp; original canonical expectations are not modified by this inventory." .
+
+w:tm-tests-xtm
+    isa s:kind-concept ;
+    - "Test artifact: XTM and CTM/XTM equivalence" ;
+    s:declaration-text: "Test artifact: XTM and CTM/XTM equivalence — Same repository/pin: tests/xtm-anytype.lisp and tests/ctm-xtm-anytype-equivalence.lisp; parsing/equivalence does not validate TMCL." .
+
+w:tm-run-22u
+    isa s:kind-concept ;
+    - "Retained execution evidence: Slice 22U" ;
+    s:declaration-text: "Retained execution evidence: Slice 22U — Same repository/pin: reports/slice-22u/after/execution.json records SBCL 2.5.4 on 2026-10-25, base b9517b977fca2105422892a14b4cf9fe9790bbba; 12100 core checks, 4327 XTM checks, 146 XML checks and 728 equivalence checks. Historical attribution, not a run at 88994c1b or by this task." .
+
+w:tm-question-editions
+    isa s:kind-concept ;
+    - "Normative question: published editions and corrections" ;
+    s:declaration-text: "Normative question: published editions and corrections — Same repository/pin: docs/slice-22c-normative-decisions.md, Q-CTM/Q-CXTM/Q-ERRATA. Existing findings are not promoted to freshly verified normative clauses." .
+
+w:tm-question-tmcl
+    isa s:kind-concept ;
+    - "Normative question: TMCL mapping remains UNRESOLVED" ;
+    s:declaration-text: "Normative question: TMCL mapping remains UNRESOLVED — The public reference request failed at proxy CONNECT with 403. No published TMCL PSI, constraint rule or CTM template signature has been verified in this task." .
+
+w:tm-question-authority
+    isa s:kind-concept ;
+    - "Application question: schema domain and authority" ;
+    s:declaration-text: "Application question: schema domain and authority — HyperDoc docs/project-acceptance-model.md and docs/project-ctm-exchange-review.md: decide required Goal policy, schema authority, external-map domain and Lisp/TMCL boundary before implementation." .
+
 <tag:dreyeck.ch,2026:hyperdoc/statement/dreyeck/work/reading/work-breakdown/interaction/work:relation/informs/operations/1>
     isa s:authored-statement ;
     - "interaction informs operations" ;
@@ -1442,6 +1598,36 @@ w:tm-reg-pre-production
 <tag:dreyeck.ch,2026:hyperdoc/statement/dreyeck/work/project/implementation-assignments/tm-reg-p6/work:relation/depends-on/tm-reg-pre-production/1>
     isa s:proposed-statement ;
     - "tm-reg-p6 depends-on tm-reg-pre-production" ;
+    s:statement-number: "1" .
+
+<tag:dreyeck.ch,2026:hyperdoc/statement/dreyeck/work/project/implementation-assignments/iso-tm-design/work:relation/decomposes-into/iso-tm-wp-inventory/1>
+    isa s:proposed-statement ;
+    - "iso-tm-design decomposes-into iso-tm-wp-inventory" ;
+    s:statement-number: "1" .
+
+<tag:dreyeck.ch,2026:hyperdoc/statement/dreyeck/work/project/implementation-assignments/iso-tm-design/work:relation/decomposes-into/iso-tm-wp-schema/1>
+    isa s:proposed-statement ;
+    - "iso-tm-design decomposes-into iso-tm-wp-schema" ;
+    s:statement-number: "1" .
+
+<tag:dreyeck.ch,2026:hyperdoc/statement/dreyeck/work/project/implementation-assignments/iso-tm-plan-inventory/work:relation/produces/iso-tm-wp-inventory/1>
+    isa s:proposed-statement ;
+    - "iso-tm-plan-inventory produces iso-tm-wp-inventory" ;
+    s:statement-number: "1" .
+
+<tag:dreyeck.ch,2026:hyperdoc/statement/dreyeck/work/project/implementation-assignments/iso-tm-plan-schema/work:relation/produces/iso-tm-wp-schema/1>
+    isa s:proposed-statement ;
+    - "iso-tm-plan-schema produces iso-tm-wp-schema" ;
+    s:statement-number: "1" .
+
+<tag:dreyeck.ch,2026:hyperdoc/statement/dreyeck/work/project/implementation-assignments/iso-tm-plan-schema/work:relation/depends-on/iso-tm-plan-inventory/1>
+    isa s:proposed-statement ;
+    - "iso-tm-plan-schema depends-on iso-tm-plan-inventory" ;
+    s:statement-number: "1" .
+
+<tag:dreyeck.ch,2026:hyperdoc/statement/dreyeck/work/project/implementation-assignments/iso-tm-plan-schema/work:relation/depends-on/iso-tm-primary-text/1>
+    isa s:proposed-statement ;
+    - "iso-tm-plan-schema depends-on iso-tm-primary-text" ;
     s:statement-number: "1" .
 
 <tag:dreyeck.ch,2026:hyperdoc/control/ctm-wp-1/site-root-slug-item>
@@ -1997,6 +2183,11 @@ w:tm-reg-pre-production
     - "topic-maps-regular-hyperdoc and tm-regular-catalog share only their carrier page" ;
     s:gap-rule: "A Work Item and a Deliverable name the same carrier page, and no statement relates them. No Relation Contract defines that relation." .
 
+<tag:dreyeck.ch,2026:hyperdoc/gap/work-item-deliverable-unlinked/iso-tm-review/iso-tm-design>
+    isa s:plan-gap ;
+    - "iso-tm-review and iso-tm-design share only their carrier page" ;
+    s:gap-rule: "A Work Item and a Deliverable name the same carrier page, and no statement relates them. No Relation Contract defines that relation." .
+
 <tag:dreyeck.ch,2026:hyperdoc/gap/assignment-without-plan-step/cc-2026-10-18-project-work-ctm>
     isa s:plan-gap ;
     - "cc-2026-10-18-project-work-ctm has no confirmed Plan Step" ;
@@ -2309,6 +2500,67 @@ s:proposed-on(s:proposal: w:tm-reg-pre-publish, s:source-page: <tag:dreyeck.ch,2
 s:carried-by(s:carried: w:tm-reg-pre-publish, s:carrier-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/regular-hyperdoc-catalog-scope-proposal>)
 s:proposed-on(s:proposal: w:tm-reg-pre-production, s:source-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/implementation-assignments>)
 s:carried-by(s:carried: w:tm-reg-pre-production, s:carrier-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/regular-hyperdoc-catalog-scope-proposal>)
+s:proposed-on(s:proposal: w:iso-tm-review, s:source-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/implementation-assignments>)
+s:contains-page(s:hyperbook-role: <tag:dreyeck.ch,2026:hyperdoc/hyperbook/dreyeck/work/project>, s:page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/topic-maps-standards-inventory-and-tmcl-design>)
+s:carried-by(s:carried: w:iso-tm-review, s:carrier-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/topic-maps-standards-inventory-and-tmcl-design>)
+s:proposed-on(s:proposal: w:iso-tm-design, s:source-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/implementation-assignments>)
+s:carried-by(s:carried: w:iso-tm-design, s:carrier-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/topic-maps-standards-inventory-and-tmcl-design>)
+s:proposed-on(s:proposal: w:iso-tm-wp-inventory, s:source-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/implementation-assignments>)
+s:carried-by(s:carried: w:iso-tm-wp-inventory, s:carrier-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/topic-maps-standards-inventory-and-tmcl-design>)
+s:proposed-on(s:proposal: w:iso-tm-wp-schema, s:source-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/implementation-assignments>)
+s:carried-by(s:carried: w:iso-tm-wp-schema, s:carrier-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/topic-maps-standards-inventory-and-tmcl-design>)
+s:proposed-on(s:proposal: w:iso-tm-plan-inventory, s:source-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/implementation-assignments>)
+s:carried-by(s:carried: w:iso-tm-plan-inventory, s:carrier-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/topic-maps-standards-inventory-and-tmcl-design>)
+s:proposed-on(s:proposal: w:iso-tm-plan-schema, s:source-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/implementation-assignments>)
+s:carried-by(s:carried: w:iso-tm-plan-schema, s:carrier-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/topic-maps-standards-inventory-and-tmcl-design>)
+s:proposed-on(s:proposal: w:iso-tm-primary-text, s:source-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/implementation-assignments>)
+s:carried-by(s:carried: w:iso-tm-primary-text, s:carrier-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/topic-maps-standards-inventory-and-tmcl-design>)
+s:proposed-on(s:proposal: w:iso13250-2-2006, s:source-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/implementation-assignments>)
+s:carried-by(s:carried: w:iso13250-2-2006, s:carrier-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/topic-maps-standards-inventory-and-tmcl-design>)
+s:proposed-on(s:proposal: w:iso13250-3-2007, s:source-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/implementation-assignments>)
+s:carried-by(s:carried: w:iso13250-3-2007, s:carrier-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/topic-maps-standards-inventory-and-tmcl-design>)
+s:proposed-on(s:proposal: w:iso13250-3-2013, s:source-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/implementation-assignments>)
+s:carried-by(s:carried: w:iso13250-3-2013, s:carrier-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/topic-maps-standards-inventory-and-tmcl-design>)
+s:proposed-on(s:proposal: w:iso13250-4-2009, s:source-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/implementation-assignments>)
+s:carried-by(s:carried: w:iso13250-4-2009, s:carrier-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/topic-maps-standards-inventory-and-tmcl-design>)
+s:proposed-on(s:proposal: w:iso13250-5-2015, s:source-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/implementation-assignments>)
+s:carried-by(s:carried: w:iso13250-5-2015, s:carrier-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/topic-maps-standards-inventory-and-tmcl-design>)
+s:proposed-on(s:proposal: w:iso13250-6-2010, s:source-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/implementation-assignments>)
+s:carried-by(s:carried: w:iso13250-6-2010, s:carrier-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/topic-maps-standards-inventory-and-tmcl-design>)
+s:proposed-on(s:proposal: w:iso19756-2011, s:source-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/implementation-assignments>)
+s:carried-by(s:carried: w:iso19756-2011, s:carrier-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/topic-maps-standards-inventory-and-tmcl-design>)
+s:proposed-on(s:proposal: w:tm-system-tmdm, s:source-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/implementation-assignments>)
+s:carried-by(s:carried: w:tm-system-tmdm, s:carrier-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/topic-maps-standards-inventory-and-tmcl-design>)
+s:proposed-on(s:proposal: w:tm-system-ctm, s:source-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/implementation-assignments>)
+s:carried-by(s:carried: w:tm-system-ctm, s:carrier-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/topic-maps-standards-inventory-and-tmcl-design>)
+s:proposed-on(s:proposal: w:tm-system-cxtm, s:source-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/implementation-assignments>)
+s:carried-by(s:carried: w:tm-system-cxtm, s:carrier-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/topic-maps-standards-inventory-and-tmcl-design>)
+s:proposed-on(s:proposal: w:tm-system-xtm, s:source-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/implementation-assignments>)
+s:carried-by(s:carried: w:tm-system-xtm, s:carrier-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/topic-maps-standards-inventory-and-tmcl-design>)
+s:proposed-on(s:proposal: w:tm-source-tmdm, s:source-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/implementation-assignments>)
+s:carried-by(s:carried: w:tm-source-tmdm, s:carrier-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/topic-maps-standards-inventory-and-tmcl-design>)
+s:proposed-on(s:proposal: w:tm-source-ctm, s:source-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/implementation-assignments>)
+s:carried-by(s:carried: w:tm-source-ctm, s:carrier-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/topic-maps-standards-inventory-and-tmcl-design>)
+s:proposed-on(s:proposal: w:tm-source-cxtm, s:source-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/implementation-assignments>)
+s:carried-by(s:carried: w:tm-source-cxtm, s:carrier-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/topic-maps-standards-inventory-and-tmcl-design>)
+s:proposed-on(s:proposal: w:tm-source-xtm, s:source-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/implementation-assignments>)
+s:carried-by(s:carried: w:tm-source-xtm, s:carrier-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/topic-maps-standards-inventory-and-tmcl-design>)
+s:proposed-on(s:proposal: w:tm-tests-tmdm, s:source-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/implementation-assignments>)
+s:carried-by(s:carried: w:tm-tests-tmdm, s:carrier-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/topic-maps-standards-inventory-and-tmcl-design>)
+s:proposed-on(s:proposal: w:tm-tests-ctm, s:source-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/implementation-assignments>)
+s:carried-by(s:carried: w:tm-tests-ctm, s:carrier-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/topic-maps-standards-inventory-and-tmcl-design>)
+s:proposed-on(s:proposal: w:tm-tests-cxtm, s:source-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/implementation-assignments>)
+s:carried-by(s:carried: w:tm-tests-cxtm, s:carrier-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/topic-maps-standards-inventory-and-tmcl-design>)
+s:proposed-on(s:proposal: w:tm-tests-xtm, s:source-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/implementation-assignments>)
+s:carried-by(s:carried: w:tm-tests-xtm, s:carrier-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/topic-maps-standards-inventory-and-tmcl-design>)
+s:proposed-on(s:proposal: w:tm-run-22u, s:source-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/implementation-assignments>)
+s:carried-by(s:carried: w:tm-run-22u, s:carrier-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/topic-maps-standards-inventory-and-tmcl-design>)
+s:proposed-on(s:proposal: w:tm-question-editions, s:source-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/implementation-assignments>)
+s:carried-by(s:carried: w:tm-question-editions, s:carrier-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/topic-maps-standards-inventory-and-tmcl-design>)
+s:proposed-on(s:proposal: w:tm-question-tmcl, s:source-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/implementation-assignments>)
+s:carried-by(s:carried: w:tm-question-tmcl, s:carrier-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/topic-maps-standards-inventory-and-tmcl-design>)
+s:proposed-on(s:proposal: w:tm-question-authority, s:source-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/implementation-assignments>)
+s:carried-by(s:carried: w:tm-question-authority, s:carrier-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/topic-maps-standards-inventory-and-tmcl-design>)
 s:stated-on(s:statement: <tag:dreyeck.ch,2026:hyperdoc/statement/dreyeck/work/reading/work-breakdown/interaction/work:relation/informs/operations/1>, s:source-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/reading/work-breakdown>)
 <tag:dreyeck.ch,2026:hyperdoc/work/topic/work:relation/informs>(s:role-work-relation-informs-source: w:interaction, s:role-work-relation-informs-target: w:operations) ~ <tag:dreyeck.ch,2026:hyperdoc/statement/dreyeck/work/reading/work-breakdown/interaction/work:relation/informs/operations/1>
 s:stated-on(s:statement: <tag:dreyeck.ch,2026:hyperdoc/statement/dreyeck/work/reading/work-breakdown/operations/work:relation/informs/connect/1>, s:source-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/reading/work-breakdown>)
@@ -2463,6 +2715,18 @@ s:proposed-on(s:proposal: <tag:dreyeck.ch,2026:hyperdoc/statement/dreyeck/work/p
 <tag:dreyeck.ch,2026:hyperdoc/work/topic/work:relation/depends-on>(s:role-work-relation-depends-on-source: w:tm-reg-p6, s:role-work-relation-depends-on-target: w:tm-reg-pre-security-review) ~ <tag:dreyeck.ch,2026:hyperdoc/statement/dreyeck/work/project/implementation-assignments/tm-reg-p6/work:relation/depends-on/tm-reg-pre-security-review/1>
 s:proposed-on(s:proposal: <tag:dreyeck.ch,2026:hyperdoc/statement/dreyeck/work/project/implementation-assignments/tm-reg-p6/work:relation/depends-on/tm-reg-pre-production/1>, s:source-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/implementation-assignments>)
 <tag:dreyeck.ch,2026:hyperdoc/work/topic/work:relation/depends-on>(s:role-work-relation-depends-on-source: w:tm-reg-p6, s:role-work-relation-depends-on-target: w:tm-reg-pre-production) ~ <tag:dreyeck.ch,2026:hyperdoc/statement/dreyeck/work/project/implementation-assignments/tm-reg-p6/work:relation/depends-on/tm-reg-pre-production/1>
+s:proposed-on(s:proposal: <tag:dreyeck.ch,2026:hyperdoc/statement/dreyeck/work/project/implementation-assignments/iso-tm-design/work:relation/decomposes-into/iso-tm-wp-inventory/1>, s:source-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/implementation-assignments>)
+<tag:dreyeck.ch,2026:hyperdoc/work/topic/work:relation/decomposes-into>(s:role-work-relation-decomposes-into-source: w:iso-tm-design, s:role-work-relation-decomposes-into-target: w:iso-tm-wp-inventory) ~ <tag:dreyeck.ch,2026:hyperdoc/statement/dreyeck/work/project/implementation-assignments/iso-tm-design/work:relation/decomposes-into/iso-tm-wp-inventory/1>
+s:proposed-on(s:proposal: <tag:dreyeck.ch,2026:hyperdoc/statement/dreyeck/work/project/implementation-assignments/iso-tm-design/work:relation/decomposes-into/iso-tm-wp-schema/1>, s:source-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/implementation-assignments>)
+<tag:dreyeck.ch,2026:hyperdoc/work/topic/work:relation/decomposes-into>(s:role-work-relation-decomposes-into-source: w:iso-tm-design, s:role-work-relation-decomposes-into-target: w:iso-tm-wp-schema) ~ <tag:dreyeck.ch,2026:hyperdoc/statement/dreyeck/work/project/implementation-assignments/iso-tm-design/work:relation/decomposes-into/iso-tm-wp-schema/1>
+s:proposed-on(s:proposal: <tag:dreyeck.ch,2026:hyperdoc/statement/dreyeck/work/project/implementation-assignments/iso-tm-plan-inventory/work:relation/produces/iso-tm-wp-inventory/1>, s:source-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/implementation-assignments>)
+<tag:dreyeck.ch,2026:hyperdoc/work/topic/work:relation/produces>(s:role-work-relation-produces-source: w:iso-tm-plan-inventory, s:role-work-relation-produces-target: w:iso-tm-wp-inventory) ~ <tag:dreyeck.ch,2026:hyperdoc/statement/dreyeck/work/project/implementation-assignments/iso-tm-plan-inventory/work:relation/produces/iso-tm-wp-inventory/1>
+s:proposed-on(s:proposal: <tag:dreyeck.ch,2026:hyperdoc/statement/dreyeck/work/project/implementation-assignments/iso-tm-plan-schema/work:relation/produces/iso-tm-wp-schema/1>, s:source-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/implementation-assignments>)
+<tag:dreyeck.ch,2026:hyperdoc/work/topic/work:relation/produces>(s:role-work-relation-produces-source: w:iso-tm-plan-schema, s:role-work-relation-produces-target: w:iso-tm-wp-schema) ~ <tag:dreyeck.ch,2026:hyperdoc/statement/dreyeck/work/project/implementation-assignments/iso-tm-plan-schema/work:relation/produces/iso-tm-wp-schema/1>
+s:proposed-on(s:proposal: <tag:dreyeck.ch,2026:hyperdoc/statement/dreyeck/work/project/implementation-assignments/iso-tm-plan-schema/work:relation/depends-on/iso-tm-plan-inventory/1>, s:source-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/implementation-assignments>)
+<tag:dreyeck.ch,2026:hyperdoc/work/topic/work:relation/depends-on>(s:role-work-relation-depends-on-source: w:iso-tm-plan-schema, s:role-work-relation-depends-on-target: w:iso-tm-plan-inventory) ~ <tag:dreyeck.ch,2026:hyperdoc/statement/dreyeck/work/project/implementation-assignments/iso-tm-plan-schema/work:relation/depends-on/iso-tm-plan-inventory/1>
+s:proposed-on(s:proposal: <tag:dreyeck.ch,2026:hyperdoc/statement/dreyeck/work/project/implementation-assignments/iso-tm-plan-schema/work:relation/depends-on/iso-tm-primary-text/1>, s:source-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/project/implementation-assignments>)
+<tag:dreyeck.ch,2026:hyperdoc/work/topic/work:relation/depends-on>(s:role-work-relation-depends-on-source: w:iso-tm-plan-schema, s:role-work-relation-depends-on-target: w:iso-tm-primary-text) ~ <tag:dreyeck.ch,2026:hyperdoc/statement/dreyeck/work/project/implementation-assignments/iso-tm-plan-schema/work:relation/depends-on/iso-tm-primary-text/1>
 s:defined-in-dictionary(s:work-package: w:ctm-wp-1, s:source-page: <tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/reading/ctm-plan-page-wbs-dictionary>)
 s:planned-control-of(s:work-package: w:ctm-wp-1, s:control: <tag:dreyeck.ch,2026:hyperdoc/control/ctm-wp-1/site-root-slug-item>)
 s:exercised-by(s:control: <tag:dreyeck.ch,2026:hyperdoc/control/ctm-wp-1/site-root-slug-item>, s:test-file: <tag:dreyeck.ch,2026:hyperdoc/file/dreyeck/tests/fedwiki-page-authoring.lisp>)
@@ -2602,6 +2866,8 @@ s:gap-concerns(s:gap: <tag:dreyeck.ch,2026:hyperdoc/gap/work-item-deliverable-un
 s:gap-concerns(s:gap: <tag:dreyeck.ch,2026:hyperdoc/gap/work-item-deliverable-unlinked/project-work-ctm/project-work-ctm-exchange>, s:subject: w:project-work-ctm-exchange)
 s:gap-concerns(s:gap: <tag:dreyeck.ch,2026:hyperdoc/gap/work-item-deliverable-unlinked/topic-maps-regular-hyperdoc/tm-regular-catalog>, s:subject: w:topic-maps-regular-hyperdoc)
 s:gap-concerns(s:gap: <tag:dreyeck.ch,2026:hyperdoc/gap/work-item-deliverable-unlinked/topic-maps-regular-hyperdoc/tm-regular-catalog>, s:subject: w:tm-regular-catalog)
+s:gap-concerns(s:gap: <tag:dreyeck.ch,2026:hyperdoc/gap/work-item-deliverable-unlinked/iso-tm-review/iso-tm-design>, s:subject: w:iso-tm-review)
+s:gap-concerns(s:gap: <tag:dreyeck.ch,2026:hyperdoc/gap/work-item-deliverable-unlinked/iso-tm-review/iso-tm-design>, s:subject: w:iso-tm-design)
 s:gap-concerns(s:gap: <tag:dreyeck.ch,2026:hyperdoc/gap/assignment-without-plan-step/cc-2026-10-18-project-work-ctm>, s:subject: <tag:dreyeck.ch,2026:hyperdoc/assignment/cc-2026-10-18-project-work-ctm>)
 s:gap-concerns(s:gap: <tag:dreyeck.ch,2026:hyperdoc/gap/assignment-without-plan-step/cc-2026-10-19-topic-maps-reader-scaling>, s:subject: <tag:dreyeck.ch,2026:hyperdoc/assignment/cc-2026-10-19-topic-maps-reader-scaling>)
 s:gap-concerns(s:gap: <tag:dreyeck.ch,2026:hyperdoc/gap/assignment-without-plan-step/cc-2026-10-19-acceptance-model-draft>, s:subject: <tag:dreyeck.ch,2026:hyperdoc/assignment/cc-2026-10-19-acceptance-model-draft>)
