@@ -4,6 +4,13 @@
   (:export #:start-catalog #:main))
 (in-package #:dreyeck/catalog-application)
 
+;;; A client that goes away while the server writes to it is not an error of the server. CLOG runs Clack with :DEBUG on and Hunchentoot's
+;;; *CATCH-ERRORS-P* off inside a request, so such a condition reaches HUNCHENTOOT:MAYBE-INVOKE-DEBUGGER; the executable runs with the debugger
+;;; disabled, where invoking it ends the whole process (SBCL's BROKEN-PIPE on a closed socket, found 2026-10-29 with one aborted request).
+;;; Declining here, and only for stream errors, lets Hunchentoot's own outer handler end that one request; every other condition is unchanged.
+(defmethod hunchentoot:maybe-invoke-debugger :around ((condition stream-error))
+  nil)
+
 (defun %port (value)
   (let ((port (if (and (stringp value) (plusp (length value))
                        (every (lambda (c) (find c "0123456789")) value))

@@ -3276,7 +3276,7 @@
 
 (defsystem "dreyeck/catalog-application"
   :description "Catalog application startup and executable lifecycle"
-  :depends-on ("dreyeck/local-fedwiki-view" "clack-handler-hunchentoot" "uiop")
+  :depends-on ("dreyeck/local-fedwiki-view" "clack-handler-hunchentoot" "hunchentoot" "uiop")
   :components ((:file "dreyeck/src/catalog-application"))
   :in-order-to ((test-op (test-op "dreyeck/catalog-application/tests"))))
 

@@ -195,6 +195,47 @@ class CatalogExecutableTests(unittest.TestCase):
                 output = self.serve_once(port, environment, remove)
                 self.assertIn(f"HyperBook Catalog listening on {expected}:{port}", output)
 
+    def test_aborted_clients_do_not_end_the_process(self):
+        """A client that sends a request and goes away at once must not terminate the Catalog (it did: an unhandled BROKEN-PIPE in a
+        Hunchentoot worker ended the whole process, whose debugger is disabled). Several ways of leaving, repeated, then the server still answers."""
+        import struct
+        port = self.free_port()
+        env = {**self.env}
+        with tempfile.TemporaryFile(mode="w+b") as log:
+            process = subprocess.Popen([EXECUTABLE, str(port)], cwd=self.root, env=env, stdout=log, stderr=log)
+            try:
+                deadline = time.monotonic() + 600
+                opener = urllib.request.build_opener(urllib.request.ProxyHandler({}))
+                while True:
+                    self.assertIsNone(process.poll(), "the Catalog exited while starting")
+                    try:
+                        with opener.open(f"http://127.0.0.1:{port}/", timeout=30) as response:
+                            self.assertEqual(200, response.status)
+                        break
+                    except (OSError, urllib.error.URLError):
+                        self.assertLess(time.monotonic(), deadline)
+                        time.sleep(0.2)
+                for path in ("/", "/js/boot.js", "/view/reading-java-source-as-data"):
+                    for mode in ("close", "reset", "read-one-byte"):
+                        for _ in range(40):
+                            connection = socket.create_connection(("127.0.0.1", port))
+                            connection.sendall(f"GET {path} HTTP/1.1\r\nHost: x\r\n\r\n".encode())
+                            if mode == "reset":
+                                connection.setsockopt(socket.SOL_SOCKET, socket.SO_LINGER, struct.pack("ii", 1, 0))
+                            if mode == "read-one-byte":
+                                connection.recv(1)
+                            connection.close()
+                        time.sleep(0.5)
+                        self.assertIsNone(process.poll(), f"the Catalog ended after aborted GET {path} ({mode})")
+                with opener.open(f"http://127.0.0.1:{port}/", timeout=30) as response:
+                    self.assertEqual(200, response.status)
+                process.send_signal(signal.SIGTERM)
+                self.assertEqual(0, process.wait(timeout=15))
+            finally:
+                if process.poll() is None:
+                    process.kill()
+                    process.wait(timeout=10)
+
 
 if __name__ == "__main__":
     unittest.main()
