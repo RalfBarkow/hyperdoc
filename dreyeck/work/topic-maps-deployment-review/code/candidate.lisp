@@ -197,10 +197,12 @@ this reading reviewed, and cannot pass as it: a protected file changed since the
 it (+SUCCESSOR-CHANGES+) the contract fails.")
 
 (defparameter +successor-changes+
-  '(("dreyeck.asd" . "Topic Maps 6162ed68 integration: the 6162ed68 manifest as a static file and the Project Workspace's dependency on the verifier")
-    ("nix/topic-maps-source.nix" . "Topic Maps 6162ed68 integration: the pinned archive is now 6162ed68's")
+  '(("dreyeck.asd" . "Topic Maps 6162ed68 integration: the 6162ed68 manifest as a static file and the Project Workspace's dependency on the verifier; one production Catalog (docs/one-catalog): the readings depend on the authority policy, and the guard's tests include the served views")
+    ("nix/topic-maps-source.nix" . "Topic Maps 6162ed68 integration: the pinned archive is now 6162ed68's; one production Catalog (docs/one-catalog): the 88994c1b archive is in the repository and unpacked by a fixed-output derivation")
+    ("flake.nix" . "One production Catalog (docs/one-catalog): hyperdoc-catalog carries the snapshot and the verified startup; this variant stays only as the record this reading reviews")
+    ("dreyeck/work/topic-maps-ctm-review.lisp" . "One production Catalog (docs/one-catalog): the run button goes through the authority policy, so a served Catalog does not offer it")
     ("dreyeck/src/catalog-topic-maps.lisp" . "Topic Maps 6162ed68 integration: the packaged commit, and the guard's message")
-    ("dreyeck/work/topic-maps-project-example.lisp" . "Topic Maps 6162ed68 integration: the pinned revision")
+    ("dreyeck/work/topic-maps-project-example.lisp" . "Topic Maps 6162ed68 integration: the pinned revision; one production Catalog (docs/one-catalog): the run buttons go through the authority policy")
     ("dreyeck/tests/source-snapshot.lisp" . "Topic Maps 6162ed68 integration: the commit and the file count of the snapshot")
     ("dreyeck/tests/catalog-topic-maps.lisp" . "Topic Maps 6162ed68 integration: the guard's new wording")
     ("tests/test_catalog_topic_maps_executable.py" . "Topic Maps 6162ed68 integration: the guard's new wording"))

@@ -1,0 +1,22 @@
+# Controls reachable by navigation from the six public objects (and the two refused systems' definitions), served, 300 objects, depth 2.
+# Tree: working tree of this candidate (tests: dreyeck/tests/topic-maps-public-views.lisp, check-reachable-controls). Darwin, tala shell, snapshot kna6395g…
+WALK seconds=85 objects=300 views=1951 truncated=T errors=6 clog=322 controls=9467
+TARGET DREYECK/AUTHORITY-POLICY:OPERATION-THUNK x893 thunk-class=T
+TARGET COMPILED-FUNCTION x3011 thunk-class=NIL
+TARGET FUNCTION x557 thunk-class=NIL
+TARGET HTML-INSPECTOR-VIEWS/STANDARD:VAR-DEFINITION x429 thunk-class=NIL
+TARGET HTML-INSPECTOR-VIEWS/STANDARD::SYMBOL-REFS x197 thunk-class=NIL
+TARGET STANDARD-GENERIC-FUNCTION x3154 thunk-class=NIL
+TARGET STANDARD-CLASS x1024 thunk-class=NIL
+TARGET STRUCTURE-CLASS x25 thunk-class=NIL
+TARGET SB-PCL::CONDITION-CLASS x75 thunk-class=NIL
+TARGET HV:THUNK x18 thunk-class=T
+TARGET DREYECK/INSPECTOR/TOPICMAP::TOPIC-ACTION-REFERENCE x84 thunk-class=T
+NONOP-THUNK (HV:THUNK
+NONOP-THUNK (DREYECK/INSPECTOR/TOPICMAP::TOPIC-ACTION-REFERENCE
+NONOP-THUNK (HV:THUNK
+CLOGVIEWS ("Source" "Text" "<span style=\"color: #666;\">Playground</span>")
+ERRORS ((HYPERDOC::CODE-PAGE . SB-PCL::NO-APPLICABLE-METHOD-ERROR))
+
+# distinct operation-thunk methods (all contract 'slot reader', status :contracted):
+     138

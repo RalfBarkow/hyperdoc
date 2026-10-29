@@ -125,13 +125,18 @@
             inherit system;
           };
         in {
+          # The one production Catalog, with the pinned Topic Maps snapshot (nix/catalog.nix).
           hyperdoc-catalog = pkgs.callPackage ./nix/catalog.nix {
             runtime = runtimeFor system;
             source = pkgs.lib.cleanSource self.outPath;
+            topicMaps = self.packages.${system}.topic-maps-source;
             d2-tala = self.packages.${system}.d2-tala;
+            revision = self.rev or self.dirtyRev or "";
           };
-          # Separate from hyperdoc-catalog: the Catalog with the pinned Topic Maps snapshot, loopback only.
           topic-maps-source = pkgs.callPackage ./nix/topic-maps-source.nix { };
+          # Separate from hyperdoc-catalog: the Catalog with the pinned Topic Maps snapshot, loopback only.
+          # Retired from production by hyperdoc-catalog itself (docs/one-catalog); kept only because the deployment review
+          # reading quotes it, and to be removed with that reading.
           hyperdoc-catalog-topic-maps = pkgs.callPackage ./nix/catalog-topic-maps.nix {
             runtime = runtimeFor system;
             source = pkgs.lib.cleanSource self.outPath;
@@ -161,6 +166,8 @@
             catalog = self.packages.${system}.hyperdoc-catalog;
             runtime = runtimeFor system;
             source = pkgs.lib.cleanSource self.outPath;
+            topicMaps = self.packages.${system}.topic-maps-source;
+            revision = self.rev or self.dirtyRev or "";
           };
         catalog-topic-maps = let pkgs = import nixpkgs { inherit system; }; in
           pkgs.callPackage ./nix/catalog-topic-maps-check.nix {

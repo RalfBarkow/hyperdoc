@@ -366,8 +366,8 @@ Imported Work/CTM/Planning relations retain their own existing contracts."
              (v:html (:li (ref message nil "Message coordinates") " — "
                           (v:esc (gethash "timestamp" (message-record message)))))))
       (:p "Cursor: " (ref (selected-message session) nil "Message coordinates"))
-      (:p (v:action-button "Previous selected message" (v:thunk (select-message session (1- (session-cursor session)))))
-          " " (v:action-button "Next selected message" (v:thunk (select-message session (1+ (session-cursor session))))))
+      (:p (v:action-button "Previous selected message" (dreyeck/authority-policy:reviewed-thunk "conversation/select-message" (select-message session (1- (session-cursor session)))))
+          " " (v:action-button "Next selected message" (dreyeck/authority-policy:reviewed-thunk "conversation/select-message" (select-message session (1+ (session-cursor session))))))
       (session-links session))))
 (v:defview message-coordinates (message conversation-message)
   (v:html-view :title "Message coordinates" :priority -1

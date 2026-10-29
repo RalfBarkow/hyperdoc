@@ -1,0 +1,31 @@
+# Reviewed controls (dreyeck/authority-policy): identity, effect, audit
+conversation/select-message
+    effect: sets the bounded message cursor of one conversation session, and nothing else
+    audit:  dreyeck/work/conversation-coordinates-reading.lisp SELECT-MESSAGE
+gesture/request-through-binding
+    effect: finds or makes the in-image request object for one operation on one definition; writes no file and runs no operation
+    audit:  dreyeck/src/gesture-operation-request.lisp ENSURE-OPERATION-REQUEST
+tala/guarded-action
+    effect: delegates to the original action, which keeps its own contract; only turns a failure into an inspectable condition
+    audit:  dreyeck/src/topicmap-tala-reading.lisp
+topicmap/workspace-go-to
+    effect: moves the Point of a Topicmap Workspace to a Topic of it (pushing the old Point on its history)
+    audit:  dreyeck/src/topicmap.lisp TOPICMAP-WORKSPACE-GO-TO
+trails/follow-context-object
+    effect: resolves the wiki page or the federated subject a context sign stands for, and returns it; it may read the sites that context's own data names
+    audit:  dreyeck/work/trails-rendered-federated-context.lisp FOLLOW-CONTEXT-OBJECT
+trails/native-context-page
+    effect: resolves the wiki page a context link names, and returns it
+    audit:  dreyeck/work/trails-rendered-federated-context.lisp NATIVE-CONTEXT-PAGE
+trails/select-context-event
+    effect: sets the bounded event cursor of one federated context
+    audit:  dreyeck/work/trails-rendered-federated-context.lisp SELECT-CONTEXT-EVENT
+trails/set-context-mode
+    effect: sets the display mode (state or delta) of one federated context
+    audit:  dreyeck/work/trails-rendered-federated-context.lisp, the mode buttons
+
+# Reviewed classes (instances are controls; subclasses included)
+DREYECK/INSPECTOR/TOPICMAP::TOPIC-ACTION-REFERENCE
+    effect: A topic sign of a Topicmap Workspace: moves the Workspace Point to that topic (and, on a Trails context sign, updates its presentation). Runs no code of the page.
+DREYECK/INSPECTOR/TOPICMAP::ASSOCIATION-ACTION-REFERENCE
+    effect: The hit line of a native Role edge: its function does nothing; it carries the Association for the gesture bound to it.

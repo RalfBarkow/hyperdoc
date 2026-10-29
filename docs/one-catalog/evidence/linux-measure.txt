@@ -1,0 +1,6 @@
+# Cold start of the packaged hyperdoc-catalog on x86_64-linux (Docker Desktop Linux VM, container nixos/nix:2.31.1, 8 cpus), fresh HOME and compilation cache.
+# Package /nix/store/hipx6im7sd2k0glmgc8xcf62s1iri7s4-hyperdoc-catalog (tree e1a52604…, earlier than the final tree; only tests and docs differ in the final one).
+RESULT default  system=dreyeck/catalog                         seconds_to_listening=80 peak_rss_kB=442356 steady_rss_kB=421116 http=200 shutdown_exit=0
+RESULT readings system=dreyeck/work/topic-maps-ctm-review      seconds_to_listening=68 peak_rss_kB=444840 steady_rss_kB=396132 http=200 shutdown_exit=0
+# Production, for comparison (hyperdoc.service after the Graph A switch): MemoryCurrent 530-658 MB while in use; the previous process peaked at 378 MB over 14 h.
+# The service runs SBCL with --dynamic-space-size 3000 and no MemoryMax; the host has 3.8 GB.

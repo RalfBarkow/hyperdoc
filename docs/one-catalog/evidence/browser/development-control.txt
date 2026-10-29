@@ -1,0 +1,27 @@
+Control: the same script against a development server (start-catalog :development t), where the run buttons ARE offered.
+It must fail, and it does:
+
+success: False
+AssertionError [ERR_ASSERTION]: claim scheme-plus: "Run the experiment" is not shown as not offered; the pane reads: review-claimReview claim scheme-plus (executable)
+Claim
+Slots
+Print
+Operations
+Playground
+Claim scheme-plus
+
+Executable experiment: runs only when its button is pressed.
+
+1. Claim
+
+Every iri-undelimited of production [7] is accepted as an IRI reference and denotes the same IRI as its delimited form; in particular a scheme containing +.
+
+2. Normative basis
+
+ISO/IEC 13250-6:2010 (public HTML), §3.3.3 Creating IRIs from strings — https://www.isotopicmaps.org/ctm/ctm.html#sec-creating-iris, retrieved 2026-10-26.
+
+[6] schema-name: [a-zA-Z]+ [a-zA-Z0-9+-.]*
+
+[7] iri-undelimited: schema-name '://' ([
+    at noRunControl (file:///Users/rgb/workspace/hyperdoc-one-catalog/scripts/test-catalog-topic-maps-served-browser.mjs:54:4)
+    at async file:///Users/rgb/workspace/hyperdoc-one-catalog/scripts/test-catalog-topic-maps-served-browser.mjs:69:2

@@ -1,0 +1,5 @@
+# Mutants of the security checks (dreyeck/tests/topic-maps-public-views.lisp), each run in the image and each killed.
+A  +accepted-state-controls+ emptied            -> CHECK-REACHABLE-CONTROLS fails: "Controls reachable when served that are neither inert nor gated nor accepted: ((HV:THUNK …"
+B  RUN-BUTTON redefined as upstream's button      -> CHECK-AN-EXTRA-BUTTON-IS-FOUND fails: "expected exactly the plain probe button, found ((PROBE-OBJECT "Probe" …"
+C  RUN-BUTTON redefined as upstream's button      -> CHECK-VIEW fails: "22U reading page: a plain thunk is reachable when served"  (earlier run, same file)
+D  an extra button made with hv:eval-button       -> found by the walk (the probe); not accepted (CHECK-AN-EXTRA-BUTTON-IS-FOUND)

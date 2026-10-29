@@ -1,0 +1,8 @@
+# Mutants of the run-time boundary and its checks (dreyeck/tests/authority-policy.lisp, dreyeck/tests/topic-maps-public-views.lisp), each run in the image, each killed.
+M1  contain-controls redefined as a no-op                       -> CHECK-CONTROL-BOUNDARY fails: a plain eval control is not a REFUSED-THUNK
+M2  control-permitted-p redefined as always true                -> CHECK-CONTROL-BOUNDARY fails: the same assertion
+M3  the :after method on view-references removed                -> CHECK-CONTROL-BOUNDARY fails: the references are read without the HTML having been read first
+M4  a registered identity with no call site                     -> CHECK-REVIEWED-CONTROLS-MATCH-THEIR-SITES fails: "registered but used nowhere"
+A   the walk's list of reviewed kinds emptied (revision 1)      -> CHECK-REACHABLE-CONTROLS fails
+B   run-button redefined as upstream's button (revision 1)      -> found by the probe; with the boundary the control is refused instead (CHECK-AN-EXTRA-BUTTON-IS-REFUSED)
+Control: unmutated, CHECK-CONTROL-BOUNDARY passes.

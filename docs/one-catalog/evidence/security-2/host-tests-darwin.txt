@@ -1,0 +1,8 @@
+test_host_defaults_to_loopback_and_an_explicit_host_is_kept (__main__.CatalogExecutableTests.test_host_defaults_to_loopback_and_an_explicit_host_is_kept)
+Unset or empty: loopback. Named by the service: as named. The Catalog is not made loopback-only; it is made loopback by default. ... ok
+
+----------------------------------------------------------------------
+Ran 1 test in 71.692s
+
+OK
+python3 tests/test_catalog_executable.py $PKG/bin/hyperdoc-catalog -k  -v  56.97s user 12.65s system 95% cpu 1:12.85 total

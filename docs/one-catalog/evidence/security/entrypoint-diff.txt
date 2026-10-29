@@ -1,0 +1,51 @@
+# hyperdoc-catalog (production) vs hyperdoc-catalog-topic-maps (the old loopback-only staging executable)
+
+## nix/catalog-topic-maps.nix vs nix/catalog.nix
+1,2c1,3
+< # hyperdoc-catalog-topic-maps: the Catalog with the pinned Topic Maps snapshot in its ASDF registry, for loopback staging.
+< # A separate executable: nix/catalog.nix and the hyperdoc-catalog it builds are unchanged and never see topic-maps.
+---
+> # hyperdoc-catalog: the one production Catalog. It carries the verified Topic Maps snapshot in its ASDF registry and its
+> # startup (dreyeck/catalog-topic-maps) verifies that snapshot and refuses the Project Workspace before anything is served;
+> # which Topic Maps readings are loaded is a choice of the service (HYPERDOC_CATALOG_SYSTEM), not of the package.
+5c6
+<   name = "hyperdoc-catalog-topic-maps";
+---
+>   name = "hyperdoc-catalog";
+8c9
+<     # Explicit store sources, as in hyperdoc-catalog, and the verified Topic Maps snapshot.
+---
+>     # Explicit store sources, independent of shellHook, cwd and personal ASDF config.
+14c15
+<       --script ${source}/scripts/catalog-topic-maps-main.lisp "$@"
+---
+>       --script ${source}/scripts/catalog-main.lisp "$@"
+17,18c18,19
+<     description = "Dreyeck HyperBook Catalog with the pinned Topic Maps snapshot, loopback only";
+<     mainProgram = "hyperdoc-catalog-topic-maps";
+---
+>     description = "Dreyeck HyperBook Catalog with local FedWiki views and the pinned Topic Maps snapshot";
+>     mainProgram = "hyperdoc-catalog";
+
+## scripts/catalog-topic-maps-main.lisp vs scripts/catalog-main.lisp
+1c1,2
+< ;;; Executable adapter of hyperdoc-catalog-topic-maps, as scripts/catalog-main.lisp is of hyperdoc-catalog.
+---
+> ;;; Executable adapter: ASDF owns loading, the application owns startup/lifetime. The startup is the Catalog's own MAIN
+> ;;; behind dreyeck/catalog-topic-maps: the Topic Maps snapshot is verified and the Project Workspace refused before it runs.
+3,10c4,6
+< ;; Loopback only, decided before anything is loaded: the optional Topic Maps readings have run buttons that the
+< ;; served Catalog's authority policy does not gate. An unset host becomes 127.0.0.1; any other host is refused.
+< (let ((host (uiop:getenv "HYPERDOC_CATALOG_HOST")))
+<   (cond ((member host '(nil "") :test #'equal) (setf (uiop:getenv "HYPERDOC_CATALOG_HOST") "127.0.0.1"))
+<         ((not (member host '("127.0.0.1" "::1") :test #'equal))
+<          (format *error-output* "~&hyperdoc-catalog-topic-maps serves loopback only (127.0.0.1 or ::1), not ~A.~%" host)
+<          (uiop:quit 2))))
+< ;; The same registry rule as scripts/catalog-main.lisp: only the supplied trees, no inherited configuration.
+---
+> ;; Nix's SBCL wrapper separates registry prefixes with an empty entry, which
+> ;; ASDF otherwise treats as inheritance of personal source-registry files.
+> ;; Resolve only the supplied dependency/application trees for this executable.
+
+## the two share the same MAIN: dreyeck/catalog-topic-maps:main (verify the snapshot, refuse the Project Workspace and the page-attached loader, then dreyeck/catalog-application:main)
+## HYPERDOC_CATALOG_HOST unset: staging forces 127.0.0.1; production keeps dreyeck/catalog-application's default 0.0.0.0 (the service sets 127.0.0.1).

@@ -47,7 +47,9 @@
            #:register-operation-contract #:find-operation-contract #:method-contract
            #:invocation-decision #:method-invocation-decision #:policy-enforced-p
            #:operation-thunk #:invocation-refused #:invocation-refused-reason
-           #:example-thunk #:example-invocation-decision #:find-example-contract
+           #:example-thunk #:example-invocation-decision #:find-example-contract #:run-button
+           #:reviewed-thunk #:register-reviewed-control #:reviewed-control-identities #:refused-thunk #:refused-thunk-original
+           #:control-permitted-p #:contain-controls
            #:allowed-disclosure-roots #:pathname-disclosure-permitted-p
            #:+containment-adapters+ #:containment-adapter-drift))
 
@@ -382,6 +384,126 @@ decision is taken again when it is evaluated, not only when it was shown."))
 (defmethod hv:title-bar-action-buttons :around ((object lwcells::lazy-cell))
   (%withhold-actions (call-next-method)))
 
+;;;; Run buttons of the readings
+;;
+;; A reading's plain run button is an HV:EVAL-BUTTON over a V:THUNK: a click runs whatever its form says, in the served image.
+;; Unlike an operation or an example it has no contract, so nothing here can decide it. A served runtime therefore does not offer
+;; it: the thunk is neither made reachable nor evaluable, and the page says why. Everywhere else (an interactive image, a
+;; development server) the button is upstream's, unchanged.
+
+(defun run-button (label thunk &optional hover-label)
+  "HV:EVAL-BUTTON of LABEL for THUNK where the policy is not enforced; where it is, a marker, and THUNK is never registered."
+  (if (policy-enforced-p)
+      (hv:html (:span :class "run-not-offered"
+                      :title (cl-who:escape-string "Not run here: this button would run code in the served image on a click, and it has no operation contract.")
+                      "▷ " (cl-who:esc label) " (not run in a served Catalog)"))
+      (hv:eval-button label thunk hover-label)))
+
+;;;; The runtime boundary for Inspector controls
+;;
+;; The Inspector evaluates, when it is clicked, the thunk a view registered under an EVAL- or ACTION- id (HV:EVAL-BUTTON, HV:ACTION-BUTTON,
+;; the title bar's actions), through HV:EVAL-THUNK, which for a plain thunk calls its function. A served Catalog was therefore as safe as
+;; every view that ever made a control. RUN-BUTTON helps only where a reading chooses it.
+;;
+;; Here the decision is taken once, where every control passes: after a view's HTML and references are computed and before the Inspector
+;; reads them, each control of a served runtime that is not one of the following has its thunk replaced by a REFUSED-THUNK, which never calls
+;; the original:
+;;  - a target that is not a thunk (HV:EVAL-THUNK returns it, and a pane opens for it);
+;;  - an OPERATION-THUNK or an EXAMPLE-THUNK, which decide again when clicked;
+;;  - a REVIEWED-THUNK, made by a call site that names a control registered below;
+;;  - an instance of a class registered in +REVIEWED-CONTROL-CLASSES+.
+;; A new button made directly by HV:EVAL-BUTTON or HV:ACTION-BUTTON on a plain thunk is none of these, so it is refused when served without anyone having
+;; to remember to use RUN-BUTTON. Where the policy is not enforced (an interactive image, a development server) nothing is replaced.
+;; Upstream is not modified: the two methods below are this layer's, on the HTML view, at the point the layer already relies on
+;; (the view's HTML and references are computed by a :before method, see +CONTAINMENT-ADAPTERS+).
+
+(defvar *reviewed-controls* (make-hash-table :test #'equal)
+  "Identity -> (:effect … :audit …) of each control a call site may make with REVIEWED-THUNK.")
+
+(defun register-reviewed-control (identity &key effect audit)
+  (setf (gethash identity *reviewed-controls*) (list :effect effect :audit audit))
+  identity)
+
+(defun reviewed-control-identities () (sort (loop for key being the hash-keys of *reviewed-controls* collect key) #'string<))
+
+(defclass reviewed-thunk (hv:thunk)
+  ((identity :initarg :identity :reader reviewed-thunk-identity))
+  (:documentation "A control a call site made on purpose: the identity names a registered, reviewed control. It runs its function."))
+
+(defmethod initialize-instance :after ((thunk reviewed-thunk) &key identity &allow-other-keys)
+  (unless (gethash identity *reviewed-controls*)
+    (error "~S is not a reviewed control: register it in dreyeck/authority-policy first." identity)))
+
+(defmacro reviewed-thunk (identity &body body)
+  "A thunk for a reviewed control IDENTITY."
+  `(make-instance 'reviewed-thunk :identity ,identity :fn (lambda () ,@body)))
+
+(defparameter +reviewed-control-classes+
+  '(("DREYECK/INSPECTOR/TOPICMAP::TOPIC-ACTION-REFERENCE"
+     "A topic sign of a Topicmap Workspace: moves the Workspace Point to that topic (and, on a Trails context sign, updates its presentation). Runs no code of the page.")
+    ("DREYECK/INSPECTOR/TOPICMAP::ASSOCIATION-ACTION-REFERENCE"
+     "The hit line of a native Role edge: its function does nothing; it carries the Association for the gesture bound to it."))
+  "(class name, effect) of the classes whose instances are reviewed controls. Resolved by name, so this layer needs not load them.")
+
+(defun %reviewed-control-class-p (target)
+  (loop for (name) in +reviewed-control-classes+
+        for symbol = (let ((colon (position #\: name)))
+                       (and colon (let ((package (find-package (subseq name 0 colon))))
+                                    (and package (find-symbol (string-left-trim ":" (subseq name colon)) package)))))
+        thereis (and symbol (find-class symbol nil) (typep target (find-class symbol)))))
+
+(defclass refused-thunk (hv:thunk)
+  ((original :initarg :original :reader refused-thunk-original))
+  (:documentation "What a served runtime puts where a view registered a control nobody reviewed. It never calls the original."))
+
+(defmethod hv:eval-thunk ((thunk refused-thunk))
+  (make-condition 'invocation-refused :method nil :target (refused-thunk-original thunk)
+                  :reason "a control no one reviewed (a plain thunk made directly by a view) is not run by a served Catalog"))
+
+(defun %control-id-p (id) (or (uiop:string-prefix-p "eval-" id) (uiop:string-prefix-p "action-" id)))
+
+(defun control-permitted-p (target)
+  "Whether a served runtime lets TARGET, registered as a control, be evaluated when clicked."
+  (or (not (typep target 'hv:thunk))
+      (typep target '(or operation-thunk example-thunk reviewed-thunk refused-thunk))
+      (%reviewed-control-class-p target)))
+
+(defun contain-controls (view)
+  "Replace, in a served runtime, every control of VIEW that CONTROL-PERMITTED-P does not permit by a REFUSED-THUNK, in place."
+  (when (and (policy-enforced-p) (slot-boundp view 'hv::references))
+    (loop for reference in (slot-value view 'hv::references)
+          when (and (consp reference) (stringp (car reference)) (%control-id-p (car reference)) (not (control-permitted-p (cdr reference))))
+            do (setf (cdr reference) (make-instance 'refused-thunk :original (cdr reference)))))
+  view)
+
+(defmethod hv:view-html :after ((view hv:html-view)) (contain-controls view))
+(defmethod hv:view-references :after ((view hv:html-view)) (contain-controls view))
+
+(register-reviewed-control "conversation/select-message"
+  :effect "sets the bounded message cursor of one conversation session, and nothing else"
+  :audit "dreyeck/work/conversation-coordinates-reading.lisp SELECT-MESSAGE")
+(register-reviewed-control "topicmap/workspace-go-to"
+  :effect "moves the Point of a Topicmap Workspace to a Topic of it (pushing the old Point on its history)"
+  :audit "dreyeck/src/topicmap.lisp TOPICMAP-WORKSPACE-GO-TO")
+(register-reviewed-control "trails/select-context-event"
+  :effect "sets the bounded event cursor of one federated context"
+  :audit "dreyeck/work/trails-rendered-federated-context.lisp SELECT-CONTEXT-EVENT")
+(register-reviewed-control "trails/set-context-mode"
+  :effect "sets the display mode (state or delta) of one federated context"
+  :audit "dreyeck/work/trails-rendered-federated-context.lisp, the mode buttons")
+(register-reviewed-control "trails/follow-context-object"
+  :effect "resolves the wiki page or the federated subject a context sign stands for, and returns it; it may read the sites that context's own data names"
+  :audit "dreyeck/work/trails-rendered-federated-context.lisp FOLLOW-CONTEXT-OBJECT")
+(register-reviewed-control "trails/native-context-page"
+  :effect "resolves the wiki page a context link names, and returns it"
+  :audit "dreyeck/work/trails-rendered-federated-context.lisp NATIVE-CONTEXT-PAGE")
+(register-reviewed-control "gesture/request-through-binding"
+  :effect "finds or makes the in-image request object for one operation on one definition; writes no file and runs no operation"
+  :audit "dreyeck/src/gesture-operation-request.lisp ENSURE-OPERATION-REQUEST")
+(register-reviewed-control "tala/guarded-action"
+  :effect "delegates to the original action, which keeps its own contract; only turns a failure into an inspectable condition"
+  :audit "dreyeck/src/topicmap-tala-reading.lisp")
+
 ;;;; Running an example
 ;;
 ;; Replaces upstream's RENDER-TOPLEVEL-CST :AROUND for DEFEXAMPLE (see
@@ -476,7 +598,13 @@ actions, and the two examples reviewed to run.")
     (:point "HTML-INSPECTOR-VIEWS/STANDARD:RENDER-TOPLEVEL-CST :AROUND for DEFEXAMPLE, replaced"
      :system "hyperdoc/explorer" :file "hyperdoc-explorer/examples.lisp"
      :form "(defmethod html-inspector-views/standard:render-toplevel-cst :around"
-     :sha256 "741549c2b7ecf0637fbc6325bb8a274b2e00bce2efd73590a2660988a9048a43"))
+     :sha256 "741549c2b7ecf0637fbc6325bb8a274b2e00bce2efd73590a2660988a9048a43")
+    (:point "a view's references are computed by a :before method, as its HTML is (CONTAIN-CONTROLS relies on it)"
+     :system "html-inspector-views" :file "views.lisp" :form "(defmethod view-references :before ((view html-view))"
+     :sha256 "c74271d2e1779279d1043e0f5770ee4263257dbb70708c0d04dc8fac534147e4")
+    (:point "a control is registered by pushing (id . thunk) on the view accumulator's references (CONTAIN-CONTROLS replaces the cdr)"
+     :system "html-inspector-views" :file "html.lisp" :form "(defun html-id"
+     :sha256 "b94e3dceb3079a54c14f6a067f092efcfd6606f1df2d028d0b273d962c772aab"))
   "Each upstream point this layer replaces or relies on, with the digest of the
 source form as reviewed: html-inspector-views 386df893, clog-moldable-inspector
 b369f0a4, the revisions dreyeck's flake pins.")

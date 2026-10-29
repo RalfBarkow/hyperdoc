@@ -1,0 +1,30 @@
+{
+ "kind": "packaged-served-Catalog-read-only-Topic-Maps-views",
+ "startedAtUTC": "2026-10-29T11:05:47.440Z",
+ "finishedAtUTC": "2026-10-29T11:06:47.377Z",
+ "mode": "--executable",
+ "origin": "http://127.0.0.1:52135",
+ "success": true,
+ "failure": null,
+ "steps": [
+  "Catalog → Topic Maps CTM Review (22U) → Text pages → Reviewing the CTM Reader",
+  "page → Claim scheme-plus: eight parts, \"Not executed in this image.\", and the experiment shown as not offered; no button",
+  "Claim → the loaded definition next-token (a function object): read-only navigation continues",
+  "Claim → src/ctm/lexer.lisp at the pinned commit, read from the verified /nix/store snapshot",
+  "Catalog → Topic Maps Project Example (22U) → Reading Slice 22U → view Topic Maps 22U: both buttons shown as not offered",
+  "Catalog → Working on HyperDoc → Work Breakdown → views Topic Maps 22U (not offered) and TMDM model",
+  "TMDM model → Work topic ctm-plan-page-authoring → view TMDM model: both examples shown as not offered; their definitions stay readable",
+  "the served TMDM model view has no direct link to the shared Workspace",
+  "Work topic → Conversation sources → Conversation Session → Chronology: Next selected message moves the cursor (Message #2 → Message #8) and Previous moves it back, by real clicks when served"
+ ],
+ "errors": [],
+ "externalRequests": [],
+ "clickReadiness": {
+  "waited": 21,
+  "unbound": 0,
+  "maxWaitMs": 0,
+  "settledReads": 9,
+  "unsettled": 0
+ },
+ "shutdownExit": 0
+}

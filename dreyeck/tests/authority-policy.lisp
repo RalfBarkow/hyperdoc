@@ -5,7 +5,7 @@
   (:use #:cl)
   (:local-nicknames (#:ap #:dreyeck/authority-policy)
                     (#:hv #:html-inspector-views))
-  (:export #:run-tests #:probe-effect #:*probe-calls*))
+  (:export #:run-tests #:run-gate-tests #:probe-effect #:*probe-calls*))
 
 (in-package #:dreyeck/authority-policy/tests)
 
@@ -223,6 +223,118 @@ and a run obtained otherwise is refused; without the served policy it runs."
     (assert (eql 42 (hv:eval-thunk run))))
   t)
 
+(defun check-run-buttons ()
+  "A reading's run button is upstream's where the policy is not enforced; served, it is a marker, and its thunk is never
+registered, so no click can reach it."
+  (let ((thunk (make-instance 'hv:thunk :fn (lambda () :ran))))
+    (flet ((rendered ()
+             (let ((view (hv:html-view :title "Run" (hv:html (:p (ap:run-button "Run it" thunk "Run DEFEXAMPLE"))))))
+               (list (hv:view-html view) (mapcar #'cdr (hv:view-references view))))))
+      (destructuring-bind (html references) (developing #'rendered)
+        (assert (search "inspector-action" html))
+        (assert (member thunk references)))
+      (destructuring-bind (html references) (served #'rendered)
+        (assert (search "Run it" html))
+        (assert (search "not run in a served Catalog" html))
+        (assert (not (search "inspector-action" html)))
+        (assert (not (member thunk references))))))
+  t)
+
+;;; The runtime boundary: a control no one reviewed is refused when served, whoever made it and however it got into the view.
+
+(defvar *ran* nil "Set by the probe controls, so that a refused control can be shown not to have run.")
+(defclass boundary-probe () ())
+(hv:defview boundary-probe-view (object boundary-probe)
+  (hv:html-view :title "Boundary probe" :priority 1
+    (hv:html (:p (hv:eval-button "Plain eval" (hv:thunk (setf *ran* :eval)))
+                 (hv:action-button "Plain action" (hv:thunk (setf *ran* :action)))
+                 (hv:eval-button "Reviewed" (ap:reviewed-thunk "conversation/select-message" (setf *ran* :reviewed)))
+                 (hv:eval-button "Not a thunk" #'identity)))))
+
+(defmacro with-clog-stubs (&body body)
+  "The Inspector's click path marks the button with CLOG classes; here there is no browser, so those calls do nothing."
+  `(progn (sb-int:encapsulate 'clog:remove-class 'authority-test (lambda (f &rest args) (declare (ignore f args)) nil))
+          (sb-int:encapsulate 'clog:add-class 'authority-test (lambda (f &rest args) (declare (ignore f args)) nil))
+          (unwind-protect (progn ,@body)
+            (sb-int:unencapsulate 'clog:remove-class 'authority-test)
+            (sb-int:unencapsulate 'clog:add-class 'authority-test))))
+
+(defun click (reference)
+  "What a click on the control REFERENCE (id . thunk) does: the Inspector's own click path."
+  (with-clog-stubs (clog-moldable-inspector::eval-thunk-with-active-button nil nil (cdr reference))))
+
+(defun probe-view () (find "Boundary probe" (hv:all-views (make-instance 'boundary-probe)) :key #'hv:view-title :test #'string=))
+(defun controls-by-label (view)
+  "The references of VIEW in the order the probe made them: plain eval, plain action, reviewed, not a thunk."
+  (let ((references (remove-if-not (lambda (reference) (or (uiop:string-prefix-p "eval-" (car reference)) (uiop:string-prefix-p "action-" (car reference))))
+                                   (hv:view-references view))))
+    (assert (= 4 (length references)))
+    (destructuring-bind (plain-eval plain-action reviewed non-thunk)
+        (sort (copy-list references) #'< :key (lambda (reference) (parse-integer (car reference) :start (1+ (position #\- (car reference))))))
+      (list :plain-eval plain-eval :plain-action plain-action :reviewed reviewed :non-thunk non-thunk))))
+
+(defun check-control-boundary ()
+  "CREATION: a plain thunk registered by HV:EVAL-BUTTON or HV:ACTION-BUTTON is replaced when served and untouched when developing; a reviewed
+thunk, and a target that is not a thunk, are kept. INVOCATION: through the Inspector's click path a replaced control returns a refusal and
+its function never runs, a reviewed control runs, and a control registered after the view was computed is replaced when the references are next read."
+  ;; creation, served
+  (served
+   (lambda ()
+     (let ((c (controls-by-label (probe-view))))
+       (setf *ran* nil)
+       (assert (typep (cdr (getf c :plain-eval)) 'ap:refused-thunk))
+       (assert (typep (cdr (getf c :plain-action)) 'ap:refused-thunk))
+       (assert (eq (class-of (ap:refused-thunk-original (cdr (getf c :plain-eval)))) (find-class 'hv:thunk)))
+       (assert (typep (cdr (getf c :reviewed)) 'ap:reviewed-thunk))
+       (assert (eq #'identity (cdr (getf c :non-thunk))))
+       (assert (null *ran*) () "creating the controls ran one")
+       ;; invocation
+       (assert (typep (click (getf c :plain-eval)) 'ap:invocation-refused))
+       (assert (typep (click (getf c :plain-action)) 'ap:invocation-refused))
+       (assert (null *ran*) () "a refused control ran")
+       (assert (eq :reviewed (click (getf c :reviewed))))
+       (assert (eq :reviewed *ran*))
+       (assert (eq #'identity (click (getf c :non-thunk)))))))
+  ;; a control added to the references after the view was computed
+  (served
+   (lambda ()
+     (let ((view (probe-view)))
+       (hv:view-html view)
+       (setf *ran* nil)
+       (push (cons "eval-99999" (hv:thunk (setf *ran* :late))) (slot-value view 'hv::references))
+       (let ((late (assoc "eval-99999" (hv:view-references view) :test #'string=)))
+         (assert (typep (cdr late) 'ap:refused-thunk))
+         (assert (typep (click late) 'ap:invocation-refused))
+         (assert (null *ran*))))))
+  ;; developing: nothing is replaced and the plain control runs (the original behaviour)
+  (developing
+   (lambda ()
+     (let ((c (controls-by-label (probe-view))))
+       (setf *ran* nil)
+       (assert (eq (class-of (cdr (getf c :plain-eval))) (find-class 'hv:thunk)))
+       (assert (eq :eval (click (getf c :plain-eval))))
+       (assert (eq :eval *ran*)))))
+  ;; a reviewed control must be registered
+  (assert (handler-case (progn (ap:reviewed-thunk "no/such/control" 1) nil) (error () t)))
+  t)
+
+(defun check-reviewed-controls-match-their-sites ()
+  "The registered identities are exactly those the sources use: no call site names an unregistered control (it would fail on creation),
+and no registration is dead. Test sources are not scanned."
+  (let ((used '()) (root (asdf:system-source-directory "dreyeck")))
+    (dolist (file (append (directory (merge-pathnames "dreyeck/src/*.lisp" root)) (directory (merge-pathnames "dreyeck/work/**/*.lisp" root))))
+      (unless (search "/tests/" (namestring file))
+        (let* ((text (uiop:read-file-string file)) (needle "reviewed-thunk \"") (at (search needle text)))
+          (loop while at
+                do (let* ((start (+ at (length needle))) (end (position #\" text :start start)))
+                     (unless (uiop:string-prefix-p "dreyeck/authority-policy" (subseq text (max 0 (- at 40)) at))
+                       (pushnew (subseq text start end) used :test #'string=))
+                     (setf at (search needle text :start2 end)))))))
+    (let ((registered (ap:reviewed-control-identities)))
+      (assert (null (set-difference used registered :test #'string=)) () "used but not registered: ~S" (set-difference used registered :test #'string=))
+      (assert (null (set-difference registered used :test #'string=)) () "registered but used nowhere: ~S" (set-difference registered used :test #'string=))))
+  t)
+
 (defun check-contracts ()
   "The Work operations are fully contracted and still not invocable in a Catalog:
 the authoring capability is absent. The audited upstream candidates are
@@ -267,23 +379,34 @@ registered as unresolved or unsafe."
     (assert (= 1 (length (ap:containment-adapter-drift tampered)))))
   t)
 
-(defun run-tests ()
+(defun run-gate-tests ()
+  "The checks that need nothing of the machine they run on. RUN-TESTS adds the three that do: CHECK-FEDWIKI-ACTIONS-WITHHELD reads a
+~/.wiki/dreyeck.ch, CHECK-RELOAD-WITHHELD needs a HyperDoc the user can write (not a /nix/store source built by another user), and
+CHECK-ADAPTERS-AS-REVIEWED compares the adapted upstream points and classes with what was reviewed."
   (check-operations-stay-inspectable)
   (check-uncontracted-invocation-refused)
   (check-pathnames-stay-inside-the-root)
-  (check-fedwiki-actions-withheld)
   (check-wikipedia-open-is-navigation)
   (check-clipboard-withheld)
-  (check-reload-withheld)
   (check-lazy-cell-withheld)
   (check-examples-gated)
+  (check-run-buttons)
+  (check-control-boundary)
+  (check-reviewed-controls-match-their-sites)
   (check-contracts)
   (check-served-catalog-boundary)
+  t)
+
+(defun run-tests ()
+  (run-gate-tests)
+  (check-fedwiki-actions-withheld)
+  (check-reload-withheld)
   (check-adapters-as-reviewed)
   (format t "~&AUTHORITY-POLICY-PASS: served, Operations stays and shows contract status; an unreviewed ~
 new method is listed, gets no Evaluate and is refused if invoked anyway; a contracted reader-like ~
 method runs; pathnames outside the repository show nothing; FedWiki's inherited actions, the server-side ~
 clipboard, Reload and a lazy cell's Evaluate are withheld; Wikipedia's Open in browser is the same link served and ~
-developing, and nothing opens on the server; an example runs only with a contract; ~
+developing, and nothing opens on the server; an example runs only with a contract; a reading's plain run button is not offered, and its thunk not registered; ~
+a control no one reviewed is replaced when served, however made, and refuses when clicked, while a reviewed one runs; ~
 the Work operations are contracted but need the authoring capability; adapted upstream points are as reviewed.~%")
   t)

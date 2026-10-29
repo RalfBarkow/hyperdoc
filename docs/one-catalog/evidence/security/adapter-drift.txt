@@ -1,0 +1,11 @@
+# dreyeck/authority-policy:containment-adapter-drift
+base 0c388f95, Darwin (tala shell):
+((:POINT "new title-bar actions on DREYECK/WORK/TRAILS-RENDERED-READING::CONTEXT-FEDWIKI-PAGE"))
+
+candidate, Darwin: same single entry (loaded with dreyeck/authority-policy/tests; DRIFT-A in drift.sh run):
+((:POINT "new title-bar actions on DREYECK/WORK/TRAILS-RENDERED-READING::CONTEXT-FEDWIKI-PAGE"))
+
+candidate, x86_64-linux (packaged runtime, builder container):
+((:POINT "new title-bar actions on DREYECK/WORK/TRAILS-RENDERED-READING::CONTEXT-FEDWIKI-PAGE"))
+
+No entry has :expected/:found: the digests of all five adapted upstream points (including eval-thunk-with-active-button, the Inspector's single click path) are as reviewed.

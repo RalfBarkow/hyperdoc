@@ -488,7 +488,7 @@ readable values stay on the element's data- attributes."
                                  (views:action-button
                                   (dreyeck/topicmap:topicmap-topic-label-of
                                    other-topic)
-                                  (views:thunk
+                                  (dreyeck/authority-policy:reviewed-thunk "topicmap/workspace-go-to"
                                     (dreyeck/topicmap:topicmap-workspace-go-to
                                      workspace other-id))
                                   (format nil "Go to ~A"

@@ -143,9 +143,9 @@ No TMDM object is copied or used as an alternative navigation graph."
       (v:html (:h2 "Read the project's native Topic Map")
         (:p "Explicit execution only. Source lookup uses the registered ASDF system; no load runs while a view is rendered.")
         (:p (v:object-ref (hyperdoc:page "Reading Slice 22U" :hyperbook "dreyeck/work/topic-maps-project-example") :display "Reading path"))
-        (:p (v:eval-button "Read a fresh 22U Map" (v:thunk (inspect-project-example)) "Run DEFEXAMPLE"))
+        (:p (dreyeck/authority-policy:run-button "Read a fresh 22U Map" (v:thunk (inspect-project-example)) "Run DEFEXAMPLE"))
         (:p (v:object-ref #'inspect-project-example :display "Example definition" :select "Source code"))
-        (:p (v:eval-button "Exercise on a separate fresh Map" (v:thunk (exercise-project-example)) "Run isolated exercise"))
+        (:p (dreyeck/authority-policy:run-button "Exercise on a separate fresh Map" (v:thunk (exercise-project-example)) "Run isolated exercise"))
         (:p (v:object-ref #'exercise-project-example :display "Exercise definition" :select "Source code"))))))
 
 (hyperdoc:defhyperdoc *project-example-reading*

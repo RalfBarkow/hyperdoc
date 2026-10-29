@@ -73,7 +73,7 @@
   ;; the same native EVAL transport that follows a context sign.
   (html-inspector-views:html
     (:span :class "hyperbook-reference inspector-inspect"
-           :id (html-inspector-views:eval-id (html-inspector-views:thunk (native-context-page page)))
+           :id (html-inspector-views:eval-id (dreyeck/authority-policy:reviewed-thunk "trails/native-context-page" (native-context-page page)))
            (html-inspector-views:esc (context-page-label page)))))
 
 (defun select-context-event (context index)
@@ -348,7 +348,7 @@ navigation operation; projection and Subject rendering never call it."
     (ecase projection-kind
       (:temporal
        (html-inspector-views:action-id
-        (html-inspector-views:thunk
+        (dreyeck/authority-policy:reviewed-thunk "trails/select-context-event"
           (select-context-event (event-context object)
                                 (position (event-record object) (context-events context) :test #'eq)))))
       (:context
@@ -816,7 +816,7 @@ existing Workspace owns Point; this reference owns no Point state."))
       (html-inspector-views:html
         (:p "Workspace Point: " (html-inspector-views:esc (dreyeck/topicmap:topicmap-topic-label-of topic)))
         (:p (html-inspector-views:eval-button "Follow"
-              (html-inspector-views:thunk
+              (dreyeck/authority-policy:reviewed-thunk "trails/follow-context-object"
                 (follow-context-object (dreyeck/topicmap:topicmap-workspace-current-object workspace))))
             " · " (html-inspector-views:object-ref object :display "Inspect represented object")
             " · " (html-inspector-views:object-ref topic :display "Inspect Topicmap sign"))
@@ -894,10 +894,10 @@ existing Workspace owns Point; this reference owns no Point state."))
       (html-inspector-views:html
         (:style "[data-projection]{overflow:auto;max-height:26rem;border:1px solid #ddd}[data-projection='temporal']{max-height:18rem}[data-projection='context'] [data-delta='changed'] path,[data-projection='context'] [data-delta='changed'] rect{stroke:#b45309!important;stroke-width:3px!important}[data-projection='context'] [data-delta='removed']{opacity:.45}[data-projection] [data-selected='true'] rect{stroke:#2563eb!important;stroke-width:4px!important}")
         (:p "How did this federated context change during October 1?")
-        (:p (html-inspector-views:action-button "Previous event" (html-inspector-views:thunk
+        (:p (html-inspector-views:action-button "Previous event" (dreyeck/authority-policy:reviewed-thunk "trails/select-context-event"
                                                                  (select-context-event context (1- (context-cursor context)))))
             " " (html-inspector-views:esc (gethash "at" event)) " "
-            (html-inspector-views:action-button "Next event" (html-inspector-views:thunk
+            (html-inspector-views:action-button "Next event" (dreyeck/authority-policy:reviewed-thunk "trails/select-context-event"
                                                              (select-context-event context (1+ (context-cursor context)))))
             " · " (html-inspector-views:esc (format nil "Event ~D of ~D" (1+ (context-cursor context))
                                                     (length (context-events context)))))
@@ -912,7 +912,7 @@ existing Workspace owns Point; this reference owns no Point state."))
         (:p (dolist (mode '(:state :delta))
               (let ((choice mode))
                 (html-inspector-views:action-button (string-capitalize (symbol-name choice))
-                  (html-inspector-views:thunk (setf (context-mode context) choice) t))
+                  (dreyeck/authority-policy:reviewed-thunk "trails/set-context-mode" (setf (context-mode context) choice) t))
                 (html-inspector-views:str " ")))
             " · " (html-inspector-views:esc (symbol-name (context-mode context)))
             " · " (html-inspector-views:object-ref (context-current-state context) :display "Inspect current State")

@@ -1,0 +1,28 @@
+# The HTML views of the six public objects in the BASE tree (0c388f95) and in this candidate (revision 2); ids, addresses, paths and transclusion counters normalised.
+
+## developing: 46 views base, 46 candidate; identical 46; different 0
+
+## served: 46 views base, 46 candidate; identical 42; different 4
+  DIFFERENT 22U-reading-page.Topic_Maps_22U.served.html
+      -<button id='eval-N' class='inspector-action' title='Run DEFEXAMPLE'>Read a fresh 22U Map</button>
+      +<span class='run-not-offered' title='Not run here: this button would run code in the served image on a click, and it has no operation contract.'>▷ Read a fresh 22U Map (
+      -<button id='eval-N' class='inspector-action' title='Run isolated exercise'>Exercise on a separate fresh Map</button>
+      +<span class='run-not-offered' title='Not run here: this button would run code in the served image on a click, and it has no operation contract.'>▷ Exercise on a separate
+  DIFFERENT Work-Breakdown.Topic_Maps_22U.served.html
+      -<button id='eval-N' class='inspector-action' title='Run DEFEXAMPLE'>Read a fresh 22U Map</button>
+      +<span class='run-not-offered' title='Not run here: this button would run code in the served image on a click, and it has no operation contract.'>▷ Read a fresh 22U Map (
+      -<button id='eval-N' class='inspector-action' title='Run isolated exercise'>Exercise on a separate fresh Map</button>
+      +<span class='run-not-offered' title='Not run here: this button would run code in the served image on a click, and it has no operation contract.'>▷ Exercise on a separate
+  DIFFERENT claim-scheme-plus.Claim.served.html
+      -<button id='eval-N' class='inspector-action' title='Run DEFEXAMPLE'>Run the experiment</button>
+      +<span class='run-not-offered' title='Not run here: this button would run code in the served image on a click, and it has no operation contract.'>▷ Run the experiment (no
+  DIFFERENT work-topic.TMDM_model.served.html
+      -<button id='eval-N' class='inspector-action' title='Run DEFEXAMPLE'>Read default-type example</button> / <span class='inspector-inspect'>
+      +<span class='run-not-offered' title='Not run here: this button would run code in the served image on a click, and it has no operation contract.'>▷ Read default-type exam
+      -<button id='eval-N' class='inspector-action' title='Run DEFEXAMPLE'>Read explicit-type example</button> / <span class='inspector-inspect'>
+      +<span class='run-not-offered' title='Not run here: this button would run code in the served image on a click, and it has no operation contract.'>▷ Read explicit-type exa
+      -<p>
+      -<span class='inspector-inspect'>
+      -<span id='inspect-N'>Existing Work Workspace</span>
+      -</span>
+      -</p>

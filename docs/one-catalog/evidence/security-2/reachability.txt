@@ -1,0 +1,14 @@
+# Reachability of request-through-binding and the Trails context actions from the six public objects (served, Darwin tala shell, working tree)
+REACH code page: HYPERDOC::CODE-PAGE
+REACH code-page view "Source" has 353 controls, classes (SB-PCL::CONDITION-CLASS
+REACH code-page view "Operations" has 9 controls, classes (AP:REVIEWED-THUNK)
+REACH code-page view "<span style=\"color: #666;\">Operations</span>" has 5 controls, classes (AP:OPERATION-THUNK)
+REACH gesture Operations view present: T; reviewed control: "gesture/request-through-binding"
+REACH clicked it: DREYECK/GESTURE/OPERATION-REQUEST:OPERATION-REQUEST
+REACH request object: 547 controls; kinds ((:INERT . 516) (:SLOT-READER . 31)
+ (:REVIEWED . 0)
+ (:REVIEWED-CLASS . 0) (:REFUSED . 0)
+ (:UNKNOWN . 0))
+While evaluating the form starting at line 55, column 0
+
+REACH trails/context object within depth 3 and 500 objects: NIL

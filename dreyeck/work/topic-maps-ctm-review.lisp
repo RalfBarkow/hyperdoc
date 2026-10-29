@@ -300,7 +300,7 @@ Refuses a proposed claim, and a Topic Maps source that is neither the pinned cle
               (run (v:html (:p (v:object-ref run :display (format nil "Latest run in this image: ~(~A~)" (run-evaluation run)) :select "Execution"))))
               (t (v:html (:p "Not executed in this image."))))
         (when (eq :executable (claim-status claim))
-          (v:html (:p (v:eval-button "Run the experiment" (v:thunk (run-scheme-plus-experiment)) "Run DEFEXAMPLE"))
+          (v:html (:p (dreyeck/authority-policy:run-button "Run the experiment" (v:thunk (run-scheme-plus-experiment)) "Run DEFEXAMPLE"))
                   (:p (v:object-ref #'run-scheme-plus-experiment :display "Example definition" :select "Source code"))))
         (:h3 "7. Evaluation")
         (:p (v:esc (if run (format nil "~(~A~) — observed in this image: ~A" (run-evaluation run) (run-reason run)) "Open: no execution in this image.")))

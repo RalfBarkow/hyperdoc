@@ -1,0 +1,34 @@
+--- /etc/nixos/hyperdoc-service.nix	2026-10-10 21:00:10.495235551 +0200
++++ /home/rgb/stage-onecatalog/cfg/hyperdoc-service.nix	2026-10-29 12:04:25.132679978 +0100
++      HYPERDOC_CATALOG_SYSTEM = "dreyeck/work/topic-maps-ctm-review";
+== free disk
+/dev/sda1        19G   16G  2.4G  87% /
+== pure eval (override hyperdoc input by the candidate tree)
+/nix/store/nwmpq8zvahvxa34bp8zmgh1kv8dif2pf-nixos-system-dreyeck-26.05.20261021.da6dc0e.drv
+== pure build
+building '/nix/store/5hvbwra8s592vm13rxnlqbi7hyc6hxzb-hyperdoc-catalog.drv'...
+building '/nix/store/x8js1hm0rcgzflnivz6ivc6i17y4z52h-unit-hyperdoc.service.drv'...
+building '/nix/store/ckhi3089cfiymvvvl24djvlamv0ghpda-system-units.drv'...
+building '/nix/store/n4d9mzbha2pbzkx8vkfk4cz8brjr0raf-etc.drv'...
+building '/nix/store/0k21d3alpwzvcppna4yylqmjbrqhb23f-activate.drv'...
+building '/nix/store/nwmpq8zvahvxa34bp8zmgh1kv8dif2pf-nixos-system-dreyeck-26.05.20261021.da6dc0e.drv'...
+/nix/store/9ivdb5k31v7hw574czqb7kb23gnp009b-nixos-system-dreyeck-26.05.20261021.da6dc0e
+== free disk after
+/dev/sda1        19G   16G  2.4G  87% /
+
+== reviewed difference to the running generation (7rvm05b4…, generation 755): nix store diff-closures, diff -rq of etc/, diff of the unit
+current: /nix/store/7rvm05b4h4rgwbjqhx4j3jlvrkf6jn22-nixos-system-dreyeck-26.05.20261021.da6dc0e
+source: 7.0 MiB
+Files /run/current-system/etc/systemd/system/hyperdoc.service and /nix/store/9ivdb5k31v7hw574czqb7kb23gnp009b-
+Files /run/current-system/etc/systemd/system/multi-user.target.wants/hyperdoc.service and /nix/store/9ivdb5k31
+8a9
+> Environment="HYPERDOC_CATALOG_SYSTEM=dreyeck/work/topic-maps-ctm-review"
+13c14
+< ExecStart=/nix/store/b6mzg8dzkqdx9gpbzlj9q0bmxx5sh4l3-hyperdoc-catalog/bin/hyperdoc-catalog 8080
+---
+> ExecStart=/nix/store/z6qak1d7p0gnmwmfr2291fs1hs41n2hr-hyperdoc-catalog/bin/hyperdoc-catalog 8080
+same kernel
+same initrd
+same sw
+active
+/dev/sda1        19G   16G  2.5G  87% /

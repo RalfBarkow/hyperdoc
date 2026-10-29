@@ -1,0 +1,19 @@
+# authority-policy gate checks run one by one, Darwin tala shell (empty HOME) and x86_64-linux (container, as root, store source, empty HOME)
+## Darwin
+HERMETIC CHECK-OPERATIONS-STAY-INSPECTABLE PASS
+HERMETIC CHECK-UNCONTRACTED-INVOCATION-REFUSED PASS
+HERMETIC CHECK-PATHNAMES-STAY-INSIDE-THE-ROOT PASS
+HERMETIC CHECK-FEDWIKI-ACTIONS-WITHHELD FAIL Failed to find the TRUENAME of /tmp/nix-shell.EcVHHz/tmp.jjVZuRNRs6/.wiki/dreyeck.ch/:  No such file
+HERMETIC CHECK-WIKIPEDIA-OPEN-IS-NAVIGATION PASS
+HERMETIC CHECK-CLIPBOARD-WITHHELD PASS
+HERMETIC CHECK-RELOAD-WITHHELD PASS
+HERMETIC CHECK-LAZY-CELL-WITHHELD PASS
+HERMETIC CHECK-EXAMPLES-GATED PASS
+HERMETIC CHECK-RUN-BUTTONS PASS
+HERMETIC CHECK-CONTROL-BOUNDARY PASS
+HERMETIC CHECK-REVIEWED-CONTROLS-MATCH-THEIR-SITES PASS
+HERMETIC CHECK-CONTRACTS PASS
+HERMETIC CHECK-SERVED-CATALOG-BOUNDARY PASS
+## x86_64-linux (container as root, store source, empty HOME), before CHECK-RELOAD-WITHHELD was moved out of the gate set:
+HERMETIC CHECK-FEDWIKI-ACTIONS-WITHHELD FAIL (needs ~/.wiki/dreyeck.ch); every other check PASS
+## inside the Nix sandbox (user nixbld, store source): the 12 checks of RUN-GATE-TESTS pass on both platforms (public-views.log); CHECK-RELOAD-WITHHELD fails there (no HyperDoc the build user can write), so it is outside the gate set.

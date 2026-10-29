@@ -196,7 +196,7 @@ It is not a missing renderer: D2 is reported by TALA-DEPENDENCY-STATUS."
                   (when (typep (cdr reference) 'views:thunk)
                     (let ((original (cdr reference)))
                       (setf (cdr reference)
-                            (views:thunk
+                            (dreyeck/authority-policy:reviewed-thunk "tala/guarded-action"
                               (handler-case
                                   (let ((current (tala:tala-dependency-status)))
                                     (if (eq :available (getf current :status))

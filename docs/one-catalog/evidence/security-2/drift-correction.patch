@@ -1,0 +1,15 @@
+--- a/dreyeck/src/authority-policy.lisp
++++ b/dreyeck/src/authority-policy.lisp
+@@ -627,7 +627,11 @@
+ 
+ (defparameter +known-title-bar-classes+
+   '("LAZY-CELL" "PATHNAME" "STRING" "DIST" "RELEASE" "SYSTEM" "HYPERDOC" "TEXT-PAGE" "FEDWIKI"
+-    "FEDWIKI-PAGE" "REMOTE-FEDWIKI-PAGE" "WIKIPEDIA-PAGE" "PLAYGROUND-PAGE" "LOCAL-FEDWIKI-PAGE")
++    "FEDWIKI-PAGE" "REMOTE-FEDWIKI-PAGE" "WIKIPEDIA-PAGE" "PLAYGROUND-PAGE" "LOCAL-FEDWIKI-PAGE"
++    ;; Reviewed on 2026-10-29: a subclass of FEDWIKI-PAGE (dreyeck/work/trails-rendered-federated-context.lisp), so the :around method on
++    ;; FEDWIKI-PAGE withholds its actions when served. dreyeck/tests/topic-maps-public-views.lisp (CHECK-TITLE-BAR-ACTIONS-WITHHELD) asserts
++    ;; both facts for it and for every other class with a primary method.
++    "CONTEXT-FEDWIKI-PAGE")
+   "The classes with a primary title-bar method when this layer was reviewed.")
+ 
+ (defun %form-text (text start)

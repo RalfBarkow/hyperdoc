@@ -1,0 +1,8 @@
+# What each run of this revision was made on (git write-tree of the working tree, uncommitted; the committed tree will differ by docs/one-catalog and any later edit)
+Linux Nix check + package (container, sandbox off): tree 7e16e77ed31cc308805b4394c1cd893a92be15a7   exit 0   package /nix/store/f7p7fyda5zs1h3q8qc8h66x5wsv87r6d-hyperdoc-catalog
+Darwin Nix check (sandboxed): same tree 7e16e77e…   exit 0
+Linux browser walk (relay): that package, 9 steps
+Darwin browser walk: package /nix/store/l1kd7nch2wkq8b5c4va4a6x69m8jqa1c-hyperdoc-catalog (tree 1f60ff42390cc8d372e1edf83bfbeffc655b113d, which adds only docs and one script line), 9 steps
+Pure NixOS build on the server: tree 1f60ff42…, toplevel /nix/store/9ivdb5k31v7hw574czqb7kb23gnp009b-nixos-system-dreyeck-26.05.20261021.da6dc0e
+Earlier trees (before the security review): 18712a54ddd80a1ceb4b0b8fcaf6a83704905677; revision 1 of the review: 98de1747…
+Server disk free: 2.5G before, 2.4-2.5G after (unrooted store paths from the pure builds; nothing was garbage-collected)

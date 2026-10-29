@@ -257,7 +257,8 @@
   T
   :DEPENDS-ON
   (#:DREYECK/TOPICMAP #:HYPERDOC/INSPECTOR #:HTML-INSPECTOR-VIEWS
-   #:TRIVIAL-PACKAGE-LOCAL-NICKNAMES "clog-moldable-inspector" "dreyeck/gesture/clog")
+   #:TRIVIAL-PACKAGE-LOCAL-NICKNAMES "clog-moldable-inspector" "dreyeck/gesture/clog"
+   "dreyeck/authority-policy")
   :COMPONENTS
   ((:FILE "topicmap-inspector-package") (:FILE "topicmap-gesture")
    (:FILE "topicmap-inspector")))
@@ -2098,7 +2099,7 @@
   ("alexandria" "concrete-syntax-tree" "html-inspector-views"
    "html-inspector-views/standard" "hyperdoc" "hyperdoc/explorer"
    "dreyeck/workflow" "dreyeck/gesture-binding-witness"
-   "dreyeck/gesture/clog" "clog-moldable-inspector")
+   "dreyeck/gesture/clog" "clog-moldable-inspector" "dreyeck/authority-policy")
   :COMPONENTS
   ((:FILE "dreyeck/src/gesture-operation-request")))
 
@@ -2946,6 +2947,7 @@
                                 "Executable reading companion for the experimental TALA layout boundary"
                                 :license "BSD" :serial t :depends-on
                                 ("dreyeck/hyperdoc"
+                                 "dreyeck/authority-policy"
                                  "dreyeck/inspector/topicmap/tala"
                                  "dreyeck/lisp-image/topicmap"
                                  "hyperdoc/explorer")
@@ -3334,7 +3336,7 @@
 (asdf:defsystem "dreyeck/work/tmdm-reading"
   :description "Local CTM/TMDM readings using existing Work and evaluation records"
   :depends-on ("dreyeck/inspector/tmdm" "dreyeck/work/reading" "dreyeck/evaluation-record"
-               "topic-maps" "topic-maps/ctm" "topic-maps/cxtm" "ironclad" "babel")
+               "topic-maps" "topic-maps/ctm" "topic-maps/cxtm" "ironclad" "babel" "dreyeck/authority-policy")
   :components ((:file "dreyeck/work/tmdm-model-reading")))
 
 (asdf:defsystem "dreyeck/work/tmdm-reading/tests"
@@ -3393,7 +3395,7 @@
 ;; Optional local Slice 22U reading. The independent checkout is not vendored.
 (defsystem "dreyeck/work/topic-maps-project-example"
   :description "Execute and inspect the pinned Topic Maps 22U project example as native TMDM objects"
-  :depends-on ("topic-maps/project-work-example" "dreyeck/inspector/tmdm" "dreyeck/work/tmdm-reading" "dreyeck/source-snapshot")
+  :depends-on ("topic-maps/project-work-example" "dreyeck/inspector/tmdm" "dreyeck/work/tmdm-reading" "dreyeck/source-snapshot" "dreyeck/authority-policy")
   :serial t
   :components ((:file "dreyeck/work/topic-maps-project-example")
                (:module "dreyeck/pages/topic-maps-project-example"
@@ -3411,7 +3413,7 @@
 (defsystem "dreyeck/work/topic-maps-ctm-review"
   :description "Read, execute on request and inspect one falsifiable claim about the pinned Topic Maps 22U CTM reader"
   :depends-on ("dreyeck/work/topic-maps-project-example" "topic-maps/ctm" "topic-maps/cxtm" "dreyeck/inspector/tmdm"
-               "dreyeck/evaluation-record" "dreyeck/git" "dreyeck/source-snapshot" "ironclad")
+               "dreyeck/evaluation-record" "dreyeck/git" "dreyeck/source-snapshot" "ironclad" "dreyeck/authority-policy")
   :serial t
   :components ((:file "dreyeck/work/topic-maps-ctm-review")
                (:module "dreyeck/pages/topic-maps-ctm-review"
@@ -3455,3 +3457,17 @@
   :perform (test-op (operation component)
              (declare (ignore operation component))
              (uiop:symbol-call :dreyeck/catalog-topic-maps/tests :run-tests)))
+
+;; The Topic Maps views a served Catalog offers (docs/one-catalog): each rendered served and developing, none with a run button served.
+(defsystem "dreyeck/topic-maps-public-views"
+  :description "The Topic Maps readings a served Catalog loads, with the run buttons the authority policy withholds"
+  :depends-on ("dreyeck/work/topic-maps-ctm-review" "dreyeck/authority-policy")
+  :in-order-to ((test-op (test-op "dreyeck/topic-maps-public-views/tests"))))
+
+(defsystem "dreyeck/topic-maps-public-views/tests"
+  :depends-on ("dreyeck/topic-maps-public-views" "dreyeck/work/tmdm-reading" "dreyeck/work/reading" "hyperbook/server"
+               "dreyeck/catalog-topic-maps" "dreyeck/topicmap" "dreyeck/inspector/topicmap" "dreyeck/authority-policy/tests" "sb-introspect")
+  :components ((:file "dreyeck/tests/topic-maps-public-views"))
+  :perform (test-op (operation component)
+             (declare (ignore operation component))
+             (uiop:symbol-call :dreyeck/topic-maps-public-views/tests :run-tests)))

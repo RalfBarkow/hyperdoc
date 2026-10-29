@@ -1,0 +1,4 @@
+# CONTEXT-FEDWIKI-PAGE: the patch above applied to a scratch copy of the candidate, then asdf:test-system "dreyeck/authority-policy" (the whole suite, including the drift check):
+DRIFT-CORRECTED-SUITE-PASS
+
+# the equivalence it rests on, asserted by CHECK-TITLE-BAR-ACTIONS-WITHHELD in dreyeck/tests/topic-maps-public-views.lisp: CONTEXT-FEDWIKI-PAGE is a subclass of HYPERBOOK/FEDWIKI::FEDWIKI-PAGE and a withholding :around of the authority layer is applicable to it.

@@ -1,0 +1,380 @@
+RUN-STARTED 4002247100 SBCL 2.4.10
+ASDF-ORIGIN topic-maps /nix/store/kna6395gl32f2hl4n3ha4776zm9r0sgb-source/
+ASDF-ORIGIN topic-maps/tmdm /nix/store/kna6395gl32f2hl4n3ha4776zm9r0sgb-source/
+ASDF-ORIGIN topic-maps/ctm /nix/store/kna6395gl32f2hl4n3ha4776zm9r0sgb-source/
+ASDF-ORIGIN topic-maps/cxtm /nix/store/kna6395gl32f2hl4n3ha4776zm9r0sgb-source/
+ASDF-ORIGIN topic-maps/project-work-example /nix/store/kna6395gl32f2hl4n3ha4776zm9r0sgb-source/
+ASDF-ORIGIN dreyeck /nix/store/zizzvr9d6ddq1c2qigl6m9bp4d7vw804-source/
+ASDF-ORIGIN dreyeck/catalog-application /nix/store/zizzvr9d6ddq1c2qigl6m9bp4d7vw804-source/
+ASDF-ORIGIN ironclad /nix/store/xg4ccdsa3hwwj76aac8h4xkm0lw4q4js-sbcl-ironclad-v0.61/
+ASDF-ORIGIN babel /nix/store/3r3iy84a6x4zz1xsxplib1qqs0h6pcvw-sbcl-babel-20241012-git/
+ASDF-ORIGIN cl-base64 /nix/store/cg75a7113yk16jyfn72q7fh2grxfyvsb-sbcl-cl-base64-20201016-git/
+WARNING: System definition file #P"/nix/store/fdrq5ji4dvm7jj0wzfvxcyr0rwiq2c24-sbcl-cl-who-20241012-git/cl-who.asd" contains definition for system "cl-who-test". Please only define "cl-who" and secondary systems with a name starting with "cl-who/" (e.g. "cl-who/test") in that file.
+ASDF-ORIGIN cl-who /nix/store/fdrq5ji4dvm7jj0wzfvxcyr0rwiq2c24-sbcl-cl-who-20241012-git/
+ASDF-ORIGIN html-inspector-views /nix/store/w26nr9dxpfsyzbviphnaaydmcww2h3y6-source/
+FASL-CACHE /nix/var/nix/builds/nix-build-catalog-startup-contract.drv-7365-1151044734/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/zizzvr9d6ddq1c2qigl6m9bp4d7vw804-source/
+WARNING: System definition file #P"/nix/store/rn29yxasws4x3wvcf6d0738zxbcrvmin-sbcl-parse-float-20200218-git/parse-float.asd" contains definition for system "parse-float-tests". Please only define "parse-float" and secondary systems with a name starting with "parse-float/" (e.g. "parse-float/test") in that file.
+WARNING: System definition file #P"/nix/store/bzssaly51znz21jychrjrjg22cbimv2h-sbcl-cl-template-20130615-git/cl-template.asd" contains definition for system "cl-template-tests". Please only define "cl-template" and secondary systems with a name starting with "cl-template/" (e.g. "cl-template/test") in that file.
+;;; Computing Hangul syllable namesSTYLE-WARNING:
+   The new FTYPE proclamation for FSET::VECTOR-SET-BINARY-SEARCH-LO
+     (FUNCTION (SIMPLE-VECTOR T) FIXNUM)
+   does not match the derived return type
+     (FUNCTION (SIMPLE-VECTOR T)
+      (VALUES (INTEGER -4611686018427387904 4611686018427387904) &OPTIONAL))
+STYLE-WARNING:
+   The new FTYPE proclamation for FSET::WB-BAG-TREE-TOTAL-COUNT
+     (FUNCTION (FSET::WB-BAG-TREE) INTEGER)
+   does not match the derived return type
+     (FUNCTION ((OR LIST FSET::WB-BAG-TREE-NODE)) *)
+STYLE-WARNING:
+   The new FTYPE proclamation for FSET::HASH-VALUE-FIXNUM
+     (FUNCTION (T) FIXNUM)
+   does not match the derived return type
+     (FUNCTION (T) (VALUES INTEGER &OPTIONAL))
+STYLE-WARNING:
+   The new FTYPE proclamation for FSET::CH-SET-NODE-ENTRY-MASK
+     (FUNCTION (T) FIXNUM)
+   does not match the derived return type
+     (FUNCTION (SIMPLE-VECTOR) (VALUES T &OPTIONAL))
+STYLE-WARNING:
+   The new FTYPE proclamation for FSET::CH-SET-NODE-SUBNODE-MASK
+     (FUNCTION (T) FIXNUM)
+   does not match the derived return type
+     (FUNCTION (SIMPLE-VECTOR) (VALUES T &OPTIONAL))
+STYLE-WARNING:
+   The new FTYPE proclamation for FSET::CH-SET-NODE-SIZE
+     (FUNCTION (T) FIXNUM)
+   does not match the derived return type
+     (FUNCTION (SIMPLE-VECTOR) (VALUES T &OPTIONAL))
+STYLE-WARNING:
+   The new FTYPE proclamation for FSET::CH-SET-NODE-HASH-VALUE
+     (FUNCTION (T) FIXNUM)
+   does not match the derived return type
+     (FUNCTION (SIMPLE-VECTOR) (VALUES T &OPTIONAL))
+STYLE-WARNING:
+   The new FTYPE proclamation for FSET::CH-MAP-NODE-ENTRY-MASK
+     (FUNCTION (T) FIXNUM)
+   does not match the derived return type
+     (FUNCTION (SIMPLE-VECTOR) (VALUES T &OPTIONAL))
+STYLE-WARNING:
+   The new FTYPE proclamation for FSET::CH-MAP-NODE-SUBNODE-MASK
+     (FUNCTION (T) FIXNUM)
+   does not match the derived return type
+     (FUNCTION (SIMPLE-VECTOR) (VALUES T &OPTIONAL))
+STYLE-WARNING:
+   The new FTYPE proclamation for FSET::CH-MAP-NODE-SIZE
+     (FUNCTION (T) FIXNUM)
+   does not match the derived return type
+     (FUNCTION (SIMPLE-VECTOR) (VALUES T &OPTIONAL))
+STYLE-WARNING:
+   The new FTYPE proclamation for FSET::CH-MAP-NODE-HASH-VALUE
+     (FUNCTION (T) FIXNUM)
+   does not match the derived return type
+     (FUNCTION (SIMPLE-VECTOR) (VALUES T &OPTIONAL))
+STYLE-WARNING:
+   Generic function FSET:ITERATOR clobbers an earlier FTYPE proclamation
+   (FUNCTION (T &KEY &ALLOW-OTHER-KEYS) (VALUES FUNCTION &REST T)) for the same
+   name with (FUNCTION (T &KEY &ALLOW-OTHER-KEYS) *).
+STYLE-WARNING:
+   The new FTYPE proclamation for SWANK/BACKEND:GETPID
+     (FUNCTION NIL (VALUES (SIGNED-BYTE 32) &OPTIONAL))
+   does not match the derived return type
+     (FUNCTION NIL *)
+WARNING:
+   redefining EMACS-INSPECT (#<SB-PCL:SYSTEM-CLASS COMMON-LISP:T>) in DEFMETHOD
+WARNING:
+   redefining 👀PRINT-STRING (#<SB-PCL:SYSTEM-CLASS COMMON-LISP:T>) in DEFMETHOD
+WARNING:
+   The new FTYPE proclamation for CLSS:MATCH-SELECTOR
+     (FUNCTION (LIST (OR PLUMP-DOM:NODE VECTOR LIST) KEYWORD)
+      (VALUES (AND (VECTOR PLUMP-DOM:NODE) (NOT SIMPLE-ARRAY))))
+   does not match the old FTYPE proclamation
+     (FUNCTION (LIST (OR LIST PLUMP-DOM:NODE VECTOR) &OPTIONAL KEYWORD)
+      (VALUES (AND (VECTOR PLUMP-DOM:NODE) (NOT SIMPLE-ARRAY)) &REST T))
+WARNING: redefining CL-ISAAC:RAND32 in DEFUN
+WARNING: redefining CL-ISAAC:RAND64 in DEFUN
+WARNING:
+   bare references to struct types are deprecated. Please use (:POINTER
+                                                               (:STRUCT
+                                                                SQLITE3)) or (:STRUCT
+                                                                              SQLITE3) instead.
+WARNING:
+   bare references to struct types are deprecated. Please use (:POINTER
+                                                               (:STRUCT
+                                                                SQLITE3-STMT)) or (:STRUCT
+                                                                                   SQLITE3-STMT) instead.
+WARNING: redefining DEFTYPE type to be a class: DBI.ERROR:<DBI-ERROR>
+WARNING: redefining DEFTYPE type to be a class: DBI.ERROR:<DBI-WARNING>
+WARNING: redefining DEFTYPE type to be a class: DBI.ERROR:<DBI-INTERFACE-ERROR>
+WARNING:
+   redefining DEFTYPE type to be a class: DBI.ERROR:<DBI-UNIMPLEMENTED-ERROR>
+WARNING: redefining DEFTYPE type to be a class: DBI.ERROR:<DBI-DATABASE-ERROR>
+WARNING: redefining DEFTYPE type to be a class: DBI.ERROR:<DBI-DATA-ERROR>
+WARNING:
+   redefining DEFTYPE type to be a class: DBI.ERROR:<DBI-OPERATIONAL-ERROR>
+WARNING: redefining DEFTYPE type to be a class: DBI.ERROR:<DBI-INTEGRITY-ERROR>
+WARNING: redefining DEFTYPE type to be a class: DBI.ERROR:<DBI-INTERNAL-ERROR>
+WARNING:
+   redefining DEFTYPE type to be a class: DBI.ERROR:<DBI-PROGRAMMING-ERROR>
+WARNING:
+   redefining DEFTYPE type to be a class: DBI.ERROR:<DBI-NOTSUPPORTED-ERROR>
+WARNING:
+   redefining DEFTYPE type to be a class: DBI.ERROR:<DBI-ALREADY-COMMITED-ERROR>
+WARNING:
+   redefining DEFTYPE type to be a class: DBI.ERROR:<DBI-ALREADY-ROLLED-BACK-ERROR>
+WARNING: redefining DEFTYPE type to be a class: DBI.DRIVER:<DBI-DRIVER>
+WARNING: redefining DEFTYPE type to be a class: DBI.DRIVER:<DBI-CONNECTION>
+WARNING: redefining DEFTYPE type to be a class: DBI.DRIVER:<DBI-QUERY>
+WARNING: redefining IRONCLAD:BLOCK-LENGTH in DEFGENERIC
+WARNING: redefining CLOG:PARENT in DEFGENERIC
+WARNING: redefining CLOG::CONNECTION-ID in DEFGENERIC
+WARNING: redefining CLOG:HTML-ID in DEFGENERIC
+WARNING: redefining CLOG:WINDOW in DEFGENERIC
+WARNING: redefining CLOG:HTML-DOCUMENT in DEFGENERIC
+WARNING: redefining CLOG:LOCATION in DEFGENERIC
+WARNING: redefining CLOG:NAVIGATOR in DEFGENERIC
+WARNING: redefining CLOG:DOCUMENT-ELEMENT in DEFGENERIC
+WARNING: redefining CLOG:HEAD-ELEMENT in DEFGENERIC
+WARNING: redefining CLOG:DISABLEDP in DEFGENERIC
+WARNING: redefining (COMMON-LISP:SETF CLOG:DISABLEDP) in DEFGENERIC
+WARNING: redefining CLOG:VALUE in DEFGENERIC
+WARNING: redefining (COMMON-LISP:SETF CLOG:VALUE) in DEFGENERIC
+WARNING: redefining CLOG:MINIMUM in DEFGENERIC
+WARNING: redefining (COMMON-LISP:SETF CLOG:MINIMUM) in DEFGENERIC
+WARNING: redefining CLOG:MAXIMUM in DEFGENERIC
+WARNING: redefining (COMMON-LISP:SETF CLOG:MAXIMUM) in DEFGENERIC
+WARNING: redefining CLOG:URL-SRC in DEFGENERIC
+WARNING: redefining (COMMON-LISP:SETF CLOG:URL-SRC) in DEFGENERIC
+WARNING: redefining CLOG:ALT-TEXT in DEFGENERIC
+WARNING: redefining (COMMON-LISP:SETF CLOG:ALT-TEXT) in DEFGENERIC
+WARNING: redefining CLOG:CENTER-PANEL in DEFGENERIC
+WARNING: redefining CLOG:TOP-PANEL in DEFGENERIC
+WARNING: redefining CLOG:LEFT-PANEL in DEFGENERIC
+WARNING: redefining CLOG:BOTTOM-PANEL in DEFGENERIC
+WARNING: redefining CLOG:PANEL-BOX in DEFGENERIC
+WARNING: redefining CLOG:TREE-ROOT in DEFGENERIC
+WARNING: redefining CLOG:INDENT-LEVEL in DEFGENERIC
+WARNING: redefining CLOG:TOGGLE-STATE in DEFGENERIC
+WARNING: redefining CLOG:TREE-ITEM in DEFGENERIC
+WARNING: redefining CLOG:DATABASE-CONNECTION in DEFGENERIC
+WARNING: redefining CLOG:READ-ONLY-P in DEFGENERIC
+WARNING: redefining (COMMON-LISP:SETF CLOG:READ-ONLY-P) in DEFGENERIC
+WARNING:
+   redefining HV:👀PLAYGROUND (#<SB-PCL:SYSTEM-CLASS COMMON-LISP:T>) in DEFMETHOD
+WARNING:
+   redefining ENCODE-TO-STRING (#<SB-PCL:SYSTEM-CLASS COMMON-LISP:T>) in DEFMETHOD
+WARNING:
+   redefining HVS::👀OPERATIONS (#<SB-PCL:SYSTEM-CLASS COMMON-LISP:T>) in DEFMETHOD
+WARNING:
+   redefining HVS:RENDER-TOPLEVEL-CST :AROUND (#<SB-MOP:EQL-SPECIALIZER HYPERDOC:DEFEXAMPLE>
+                                               #<SB-PCL:SYSTEM-CLASS COMMON-LISP:T>
+                                               #<SB-PCL:SYSTEM-CLASS COMMON-LISP:T>
+                                               #<SB-PCL:SYSTEM-CLASS COMMON-LISP:T>) in DEFMETHOD
+WARNING:
+   redefining HTML-INSPECTOR-VIEWS:TITLE-BAR-ACTION-BUTTONS (#<STANDARD-CLASS HYPERBOOK/WIKIPEDIA::WIKIPEDIA-PAGE>) in DEFMETHOD
+
+; compiling file "/nix/store/zizzvr9d6ddq1c2qigl6m9bp4d7vw804-source/dreyeck/src/source-snapshot.lisp" (written 01 JAN 1970 12:00:01 AM):
+
+; file: /nix/store/zizzvr9d6ddq1c2qigl6m9bp4d7vw804-source/dreyeck/src/source-snapshot.lisp
+; in: DEFUN %LISTING
+;     (SB-POSIX:DIRENT-NAME DREYECK/SOURCE-SNAPSHOT::ENTRY)
+; --> BLOCK CAST SB-ALIEN-INTERNALS:%CAST 
+; ==>
+;   1
+; 
+; note: doing SAP to pointer coercion (cost 20)
+
+
+; wrote /nix/var/nix/builds/nix-build-catalog-startup-contract.drv-7365-1151044734/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/zizzvr9d6ddq1c2qigl6m9bp4d7vw804-source/dreyeck/src/source-snapshot-tmpAAURSO1.fasl
+; compilation finished in 0:00:01.143
+; compiling file "/nix/store/zizzvr9d6ddq1c2qigl6m9bp4d7vw804-source/dreyeck/src/catalog-topic-maps.lisp" (written 01 JAN 1970 12:00:01 AM):
+
+; wrote /nix/var/nix/builds/nix-build-catalog-startup-contract.drv-7365-1151044734/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/zizzvr9d6ddq1c2qigl6m9bp4d7vw804-source/dreyeck/src/catalog-topic-maps-tmp5GEXGEG5.fasl
+; compilation finished in 0:00:00.079
+; compiling file "/nix/store/kna6395gl32f2hl4n3ha4776zm9r0sgb-source/src/tmdm/package.lisp" (written 01 JAN 1970 12:00:01 AM):
+
+; wrote /nix/var/nix/builds/nix-build-catalog-startup-contract.drv-7365-1151044734/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/kna6395gl32f2hl4n3ha4776zm9r0sgb-source/src/tmdm/package-tmpAR3FSGEY.fasl
+; compilation finished in 0:00:00.007
+; compiling file "/nix/store/kna6395gl32f2hl4n3ha4776zm9r0sgb-source/src/tmdm/integers.lisp" (written 01 JAN 1970 12:00:01 AM):
+
+; wrote /nix/var/nix/builds/nix-build-catalog-startup-contract.drv-7365-1151044734/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/kna6395gl32f2hl4n3ha4776zm9r0sgb-source/src/tmdm/integers-tmpJAIDFZTC.fasl
+; compilation finished in 0:00:00.056
+; compiling file "/nix/store/kna6395gl32f2hl4n3ha4776zm9r0sgb-source/src/tmdm/decimals.lisp" (written 01 JAN 1970 12:00:01 AM):
+
+; wrote /nix/var/nix/builds/nix-build-catalog-startup-contract.drv-7365-1151044734/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/kna6395gl32f2hl4n3ha4776zm9r0sgb-source/src/tmdm/decimals-tmp8V3J6PE9.fasl
+; compilation finished in 0:00:00.075
+; compiling file "/nix/store/kna6395gl32f2hl4n3ha4776zm9r0sgb-source/src/tmdm/dates.lisp" (written 01 JAN 1970 12:00:01 AM):
+
+; wrote /nix/var/nix/builds/nix-build-catalog-startup-contract.drv-7365-1151044734/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/kna6395gl32f2hl4n3ha4776zm9r0sgb-source/src/tmdm/dates-tmp9V47YWQF.fasl
+; compilation finished in 0:00:00.152
+; compiling file "/nix/store/kna6395gl32f2hl4n3ha4776zm9r0sgb-source/src/tmdm/datetimes.lisp" (written 01 JAN 1970 12:00:01 AM):
+
+; wrote /nix/var/nix/builds/nix-build-catalog-startup-contract.drv-7365-1151044734/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/kna6395gl32f2hl4n3ha4776zm9r0sgb-source/src/tmdm/datetimes-tmp9BN22RMA.fasl
+; compilation finished in 0:00:00.244
+; compiling file "/nix/store/kna6395gl32f2hl4n3ha4776zm9r0sgb-source/src/tmdm/items.lisp" (written 01 JAN 1970 12:00:01 AM):
+
+; wrote /nix/var/nix/builds/nix-build-catalog-startup-contract.drv-7365-1151044734/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/kna6395gl32f2hl4n3ha4776zm9r0sgb-source/src/tmdm/items-tmp1CXFJSK9.fasl
+; compilation finished in 0:00:00.647
+; compiling file "/nix/store/kna6395gl32f2hl4n3ha4776zm9r0sgb-source/src/tmdm/core-subjects.lisp" (written 01 JAN 1970 12:00:01 AM):
+
+; wrote /nix/var/nix/builds/nix-build-catalog-startup-contract.drv-7365-1151044734/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/kna6395gl32f2hl4n3ha4776zm9r0sgb-source/src/tmdm/core-subjects-tmpX4BRKI0R.fasl
+; compilation finished in 0:00:00.034
+; compiling file "/nix/store/kna6395gl32f2hl4n3ha4776zm9r0sgb-source/src/tmdm/item-identifiers.lisp" (written 01 JAN 1970 12:00:01 AM):
+
+; wrote /nix/var/nix/builds/nix-build-catalog-startup-contract.drv-7365-1151044734/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/kna6395gl32f2hl4n3ha4776zm9r0sgb-source/src/tmdm/item-identifiers-tmpQ371UGST.fasl
+; compilation finished in 0:00:00.071
+; compiling file "/nix/store/kna6395gl32f2hl4n3ha4776zm9r0sgb-source/src/tmdm/reification.lisp" (written 01 JAN 1970 12:00:01 AM):
+
+; wrote /nix/var/nix/builds/nix-build-catalog-startup-contract.drv-7365-1151044734/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/kna6395gl32f2hl4n3ha4776zm9r0sgb-source/src/tmdm/reification-tmp2OWI3Q7U.fasl
+; compilation finished in 0:00:00.090
+; compiling file "/nix/store/kna6395gl32f2hl4n3ha4776zm9r0sgb-source/src/tmdm/merging.lisp" (written 01 JAN 1970 12:00:01 AM):
+
+; wrote /nix/var/nix/builds/nix-build-catalog-startup-contract.drv-7365-1151044734/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/kna6395gl32f2hl4n3ha4776zm9r0sgb-source/src/tmdm/merging-tmp9KKTJMYV.fasl
+; compilation finished in 0:00:00.165
+; compiling file "/nix/store/kna6395gl32f2hl4n3ha4776zm9r0sgb-source/src/tmdm/occurrences.lisp" (written 01 JAN 1970 12:00:01 AM):
+
+; wrote /nix/var/nix/builds/nix-build-catalog-startup-contract.drv-7365-1151044734/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/kna6395gl32f2hl4n3ha4776zm9r0sgb-source/src/tmdm/occurrences-tmpJU0JWO19.fasl
+; compilation finished in 0:00:00.076
+; compiling file "/nix/store/kna6395gl32f2hl4n3ha4776zm9r0sgb-source/src/tmdm/variants.lisp" (written 01 JAN 1970 12:00:01 AM):
+
+; wrote /nix/var/nix/builds/nix-build-catalog-startup-contract.drv-7365-1151044734/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/kna6395gl32f2hl4n3ha4776zm9r0sgb-source/src/tmdm/variants-tmpZX2WN8N4.fasl
+; compilation finished in 0:00:00.082
+; compiling file "/nix/store/kna6395gl32f2hl4n3ha4776zm9r0sgb-source/src/tmdm/associations.lisp" (written 01 JAN 1970 12:00:01 AM):
+
+; wrote /nix/var/nix/builds/nix-build-catalog-startup-contract.drv-7365-1151044734/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/kna6395gl32f2hl4n3ha4776zm9r0sgb-source/src/tmdm/associations-tmpOU81XRV0.fasl
+; compilation finished in 0:00:00.054
+; compiling file "/nix/store/kna6395gl32f2hl4n3ha4776zm9r0sgb-source/src/tmdm/import.lisp" (written 01 JAN 1970 12:00:01 AM):
+
+; wrote /nix/var/nix/builds/nix-build-catalog-startup-contract.drv-7365-1151044734/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/kna6395gl32f2hl4n3ha4776zm9r0sgb-source/src/tmdm/import-tmpY2ML9CFA.fasl
+; compilation finished in 0:00:00.036
+; compiling file "/nix/store/kna6395gl32f2hl4n3ha4776zm9r0sgb-source/src/ctm/package.lisp" (written 01 JAN 1970 12:00:01 AM):
+
+; wrote /nix/var/nix/builds/nix-build-catalog-startup-contract.drv-7365-1151044734/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/kna6395gl32f2hl4n3ha4776zm9r0sgb-source/src/ctm/package-tmpX2JYJDQE.fasl
+; compilation finished in 0:00:00.002
+; compiling file "/nix/store/kna6395gl32f2hl4n3ha4776zm9r0sgb-source/src/ctm/conditions.lisp" (written 01 JAN 1970 12:00:01 AM):
+
+; wrote /nix/var/nix/builds/nix-build-catalog-startup-contract.drv-7365-1151044734/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/kna6395gl32f2hl4n3ha4776zm9r0sgb-source/src/ctm/conditions-tmpOPCILR65.fasl
+; compilation finished in 0:00:00.030
+; compiling file "/nix/store/kna6395gl32f2hl4n3ha4776zm9r0sgb-source/src/ctm/unicode.lisp" (written 01 JAN 1970 12:00:01 AM):
+
+; file: /nix/store/kna6395gl32f2hl4n3ha4776zm9r0sgb-source/src/ctm/unicode.lisp
+; in: DEFUN SCALAR-CHARACTER
+;     (TOPIC-MAPS.CTM::PROBLEM 'TOPIC-MAPS.CTM:CTM-UNSUPPORTED
+;                              :CHARACTER-REPERTOIRE POSITION
+;                              "The Common Lisp implementation cannot represent this Unicode character.")
+; 
+; note: deleting unreachable code
+
+
+; wrote /nix/var/nix/builds/nix-build-catalog-startup-contract.drv-7365-1151044734/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/kna6395gl32f2hl4n3ha4776zm9r0sgb-source/src/ctm/unicode-tmpRV9F8A9A.fasl
+; compilation finished in 0:00:00.103
+; compiling file "/nix/store/kna6395gl32f2hl4n3ha4776zm9r0sgb-source/src/ctm/iri.lisp" (written 01 JAN 1970 12:00:01 AM):
+
+; wrote /nix/var/nix/builds/nix-build-catalog-startup-contract.drv-7365-1151044734/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/kna6395gl32f2hl4n3ha4776zm9r0sgb-source/src/ctm/iri-tmpK2ZAJT4I.fasl
+; compilation finished in 0:00:00.122
+; compiling file "/nix/store/kna6395gl32f2hl4n3ha4776zm9r0sgb-source/src/ctm/lexer.lisp" (written 01 JAN 1970 12:00:01 AM):
+
+; wrote /nix/var/nix/builds/nix-build-catalog-startup-contract.drv-7365-1151044734/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/kna6395gl32f2hl4n3ha4776zm9r0sgb-source/src/ctm/lexer-tmpUX5S4ADN.fasl
+; compilation finished in 0:00:00.251
+; compiling file "/nix/store/kna6395gl32f2hl4n3ha4776zm9r0sgb-source/src/ctm/reader.lisp" (written 01 JAN 1970 12:00:01 AM):
+
+; wrote /nix/var/nix/builds/nix-build-catalog-startup-contract.drv-7365-1151044734/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/kna6395gl32f2hl4n3ha4776zm9r0sgb-source/src/ctm/reader-tmp10401X32.fasl
+; compilation finished in 0:00:00.693
+; compiling file "/nix/store/kna6395gl32f2hl4n3ha4776zm9r0sgb-source/src/ctm/templates.lisp" (written 01 JAN 1970 12:00:01 AM):
+
+; wrote /nix/var/nix/builds/nix-build-catalog-startup-contract.drv-7365-1151044734/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/kna6395gl32f2hl4n3ha4776zm9r0sgb-source/src/ctm/templates-tmpZ7CBRM0G.fasl
+; compilation finished in 0:00:00.163
+; compiling file "/nix/store/kna6395gl32f2hl4n3ha4776zm9r0sgb-source/src/ctm/resources.lisp" (written 01 JAN 1970 12:00:01 AM):
+
+; wrote /nix/var/nix/builds/nix-build-catalog-startup-contract.drv-7365-1151044734/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/kna6395gl32f2hl4n3ha4776zm9r0sgb-source/src/ctm/resources-tmp9OZEQ0G2.fasl
+; compilation finished in 0:00:00.070
+; compiling file "/nix/store/kna6395gl32f2hl4n3ha4776zm9r0sgb-source/src/cxtm/package.lisp" (written 01 JAN 1970 12:00:01 AM):
+
+; wrote /nix/var/nix/builds/nix-build-catalog-startup-contract.drv-7365-1151044734/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/kna6395gl32f2hl4n3ha4776zm9r0sgb-source/src/cxtm/package-tmpB2JTL1W9.fasl
+; compilation finished in 0:00:00.077
+; compiling file "/nix/store/kna6395gl32f2hl4n3ha4776zm9r0sgb-source/src/cxtm/nfc-data.lisp" (written 01 JAN 1970 12:00:01 AM):
+
+; wrote /nix/var/nix/builds/nix-build-catalog-startup-contract.drv-7365-1151044734/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/kna6395gl32f2hl4n3ha4776zm9r0sgb-source/src/cxtm/nfc-data-tmpP3BI68WQ.fasl
+; compilation finished in 0:00:00.611
+; compiling file "/nix/store/kna6395gl32f2hl4n3ha4776zm9r0sgb-source/src/cxtm/unicode.lisp" (written 01 JAN 1970 12:00:01 AM):
+
+; file: /nix/store/kna6395gl32f2hl4n3ha4776zm9r0sgb-source/src/cxtm/unicode.lisp
+; in: DEFUN NFC
+;     (TOPIC-MAPS.CXTM::FAIL :UNSUPPORTED-CHARACTER
+;                            "Lisp character repertoire is insufficient." T)
+; 
+; note: deleting unreachable code
+
+
+; wrote /nix/var/nix/builds/nix-build-catalog-startup-contract.drv-7365-1151044734/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/kna6395gl32f2hl4n3ha4776zm9r0sgb-source/src/cxtm/unicode-tmpQDARA81Z.fasl
+; compilation finished in 0:00:00.051
+; compiling file "/nix/store/kna6395gl32f2hl4n3ha4776zm9r0sgb-source/src/cxtm/canonicalizer.lisp" (written 01 JAN 1970 12:00:01 AM):
+
+; wrote /nix/var/nix/builds/nix-build-catalog-startup-contract.drv-7365-1151044734/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/kna6395gl32f2hl4n3ha4776zm9r0sgb-source/src/cxtm/canonicalizer-tmpYEMMM7SE.fasl
+; compilation finished in 0:00:00.243
+; compiling file "/nix/store/kna6395gl32f2hl4n3ha4776zm9r0sgb-source/examples/project-work.lisp" (written 01 JAN 1970 12:00:01 AM):
+
+; wrote /nix/var/nix/builds/nix-build-catalog-startup-contract.drv-7365-1151044734/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/kna6395gl32f2hl4n3ha4776zm9r0sgb-source/examples/project-work-tmp73HU0RPK.fasl
+; compilation finished in 0:00:00.077
+; compiling file "/nix/store/zizzvr9d6ddq1c2qigl6m9bp4d7vw804-source/dreyeck/src/tmdm-model-navigation.lisp" (written 01 JAN 1970 12:00:01 AM):
+
+; wrote /nix/var/nix/builds/nix-build-catalog-startup-contract.drv-7365-1151044734/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/zizzvr9d6ddq1c2qigl6m9bp4d7vw804-source/dreyeck/src/tmdm-model-navigation-tmpIO5N7K88.fasl
+; compilation finished in 0:00:00.636
+; compiling file "/nix/store/kna6395gl32f2hl4n3ha4776zm9r0sgb-source/src/package.lisp" (written 01 JAN 1970 12:00:01 AM):
+
+; wrote /nix/var/nix/builds/nix-build-catalog-startup-contract.drv-7365-1151044734/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/kna6395gl32f2hl4n3ha4776zm9r0sgb-source/src/package-tmpCM21U60Z.fasl
+; compilation finished in 0:00:00.003
+; compiling file "/nix/store/kna6395gl32f2hl4n3ha4776zm9r0sgb-source/src/filesystem.lisp" (written 01 JAN 1970 12:00:01 AM):
+
+; wrote /nix/var/nix/builds/nix-build-catalog-startup-contract.drv-7365-1151044734/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/kna6395gl32f2hl4n3ha4776zm9r0sgb-source/src/filesystem-tmp9DT7SEFG.fasl
+; compilation finished in 0:00:00.040
+; compiling file "/nix/store/kna6395gl32f2hl4n3ha4776zm9r0sgb-source/src/corpus.lisp" (written 01 JAN 1970 12:00:01 AM):
+
+; wrote /nix/var/nix/builds/nix-build-catalog-startup-contract.drv-7365-1151044734/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/kna6395gl32f2hl4n3ha4776zm9r0sgb-source/src/corpus-tmp8065ESJT.fasl
+; compilation finished in 0:00:00.215
+; compiling file "/nix/store/kna6395gl32f2hl4n3ha4776zm9r0sgb-source/src/report.lisp" (written 01 JAN 1970 12:00:01 AM):
+
+; wrote /nix/var/nix/builds/nix-build-catalog-startup-contract.drv-7365-1151044734/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/kna6395gl32f2hl4n3ha4776zm9r0sgb-source/src/report-tmp7S8Z6FGF.fasl
+; compilation finished in 0:00:00.088
+; compiling file "/nix/store/zizzvr9d6ddq1c2qigl6m9bp4d7vw804-source/dreyeck/work/tmdm-model-reading.lisp" (written 01 JAN 1970 12:00:01 AM):
+
+; wrote /nix/var/nix/builds/nix-build-catalog-startup-contract.drv-7365-1151044734/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/zizzvr9d6ddq1c2qigl6m9bp4d7vw804-source/dreyeck/work/tmdm-model-reading-tmpSIT3QPKP.fasl
+; compilation finished in 0:00:00.286
+; compiling file "/nix/store/zizzvr9d6ddq1c2qigl6m9bp4d7vw804-source/dreyeck/work/topic-maps-project-example.lisp" (written 01 JAN 1970 12:00:01 AM):
+
+; wrote /nix/var/nix/builds/nix-build-catalog-startup-contract.drv-7365-1151044734/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/zizzvr9d6ddq1c2qigl6m9bp4d7vw804-source/dreyeck/work/topic-maps-project-example-tmpE0PA0714.fasl
+; compilation finished in 0:00:00.409
+; compiling file "/nix/store/zizzvr9d6ddq1c2qigl6m9bp4d7vw804-source/dreyeck/tests/catalog-topic-maps.lisp" (written 01 JAN 1970 12:00:01 AM):
+
+; wrote /nix/var/nix/builds/nix-build-catalog-startup-contract.drv-7365-1151044734/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/zizzvr9d6ddq1c2qigl6m9bp4d7vw804-source/dreyeck/tests/catalog-topic-maps-tmpJRWHHVG0.fasl
+; compilation finished in 0:00:00.268
+WARNING:
+   Deprecated recursive use of (ASDF/OPERATE:OPERATE 'ASDF/LISP-ACTION:LOAD-OP
+   '("dreyeck/work/topic-maps-ctm-review")) while visiting
+   (ASDF/LISP-ACTION:TEST-OP "dreyeck/catalog-topic-maps/tests") - please use
+   proper dependencies instead
+; compiling file "/nix/store/zizzvr9d6ddq1c2qigl6m9bp4d7vw804-source/dreyeck/work/topic-maps-ctm-review.lisp" (written 01 JAN 1970 12:00:01 AM):
+
+; wrote /nix/var/nix/builds/nix-build-catalog-startup-contract.drv-7365-1151044734/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/zizzvr9d6ddq1c2qigl6m9bp4d7vw804-source/dreyeck/work/topic-maps-ctm-review-tmp4WZVROCX.fasl
+; compilation finished in 0:00:00.548
+CATALOG-TOPIC-MAPS-PASS: 29 assertions; Topic Maps 88994c1b from the verified store snapshot, loopback only, Project Workspace refused at startup.
+; 
+; compilation unit finished
+;   printed 3 notes
+; compiling file "/nix/store/zizzvr9d6ddq1c2qigl6m9bp4d7vw804-source/dreyeck/tests/source-snapshot.lisp" (written 01 JAN 1970 12:00:01 AM):
+
+; wrote /nix/var/nix/builds/nix-build-catalog-startup-contract.drv-7365-1151044734/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/zizzvr9d6ddq1c2qigl6m9bp4d7vw804-source/dreyeck/tests/source-snapshot-tmpA0I3UKX8.fasl
+; compilation finished in 0:00:00.159
+SOURCE-SNAPSHOT-PASS: 34 assertions; /nix/store/kna6395gl32f2hl4n3ha4776zm9r0sgb-source/ verified as Topic Maps 88994c1b without .git; every alteration refused.
+; compiling file "/nix/store/zizzvr9d6ddq1c2qigl6m9bp4d7vw804-source/dreyeck/tests/topic-maps-project-example.lisp" (written 01 JAN 1970 12:00:01 AM):
+
+; wrote /nix/var/nix/builds/nix-build-catalog-startup-contract.drv-7365-1151044734/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/zizzvr9d6ddq1c2qigl6m9bp4d7vw804-source/dreyeck/tests/topic-maps-project-example-tmp8PYELRKX.fasl
+; compilation finished in 0:00:00.064
+TOPIC-MAPS-22U-INSPECTOR-PASS: 41 assertions; project and disposition reached through native Role/Association references.
+; compiling file "/nix/store/zizzvr9d6ddq1c2qigl6m9bp4d7vw804-source/dreyeck/tests/topic-maps-ctm-review.lisp" (written 01 JAN 1970 12:00:01 AM):
+
+; wrote /nix/var/nix/builds/nix-build-catalog-startup-contract.drv-7365-1151044734/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/zizzvr9d6ddq1c2qigl6m9bp4d7vw804-source/dreyeck/tests/topic-maps-ctm-review-tmpEHTOKYT0.fasl
+; compilation finished in 0:00:00.178
+TOPIC-MAPS-CTM-REVIEW-PASS: 58 assertions; scheme-plus refuted by the reader's own condition, its control read, proposed claims unexecuted.
+RUN-FINISHED 4002247138
+CATALOG-TOPIC-MAPS-PACKAGE-PASS

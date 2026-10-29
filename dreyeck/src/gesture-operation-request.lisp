@@ -259,7 +259,7 @@ the subject, which the surface was given by its view, says on what."
                 ;; and a press on the strip never reach each other.
                 (:tr (:td (views:eval-button
                            title
-                           (views:thunk (request-through-binding binding occurrence))))
+                           (dreyeck/authority-policy:reviewed-thunk "gesture/request-through-binding" (request-through-binding binding occurrence))))
                      (:td (views:transclusion (gesture-target-view occurrence))))))))))))
 
 (defun %render-occurrence-request (request)

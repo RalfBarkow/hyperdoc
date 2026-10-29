@@ -1,0 +1,113 @@
+# Executable-control creation sites in the files of every loaded dreyeck/hyperbook/hyperdoc/topic-maps system (patterns: eval-button action-button action-id eval-id thunk set-on-*click)
+# A: default Catalog of the base 0c388f95 (203 files)  B: default Catalog of this candidate (203 files)  C: candidate with the three Topic Maps readings loaded (239 files)
+
+## B vs A (line numbers removed)
+26a27
+> SITE dreyeck/src/authority-policy.lisp (hv:eval-button label thunk hover-label)))
+
+## C vs B
+47a48,52
+> SITE dreyeck/work/tmdm-model-reading.lisp (:p (dreyeck/authority-policy:run-button "Read default-type example" (v:thunk (default-name-example)) "Run DEFEXAMPLE")
+> SITE dreyeck/work/tmdm-model-reading.lisp (:p (dreyeck/authority-policy:run-button "Read explicit-type example" (v:thunk (explicit-name-example)) "Run DEFEXAMPLE")
+> SITE dreyeck/work/topic-maps-ctm-review.lisp (v:html (:p (dreyeck/authority-policy:run-button "Run the experiment" (v:thunk (run-scheme-plus-experiment)) "Run DEFEXAMPLE"))
+> SITE dreyeck/work/topic-maps-project-example.lisp (:p (dreyeck/authority-policy:run-button "Exercise on a separate fresh Map" (v:thunk (exercise-project-example)) "Run isolated exercise"))
+> SITE dreyeck/work/topic-maps-project-example.lisp (:p (dreyeck/authority-policy:run-button "Read a fresh 22U Map" (v:thunk (inspect-project-example)) "Run DEFEXAMPLE"))
+
+## C in full (file:line text)
+dreyeck/src/topicmap-gesture.lisp:23 (defclass topic-action-reference (views:thunk)
+dreyeck/src/topicmap-gesture.lisp:31 (defclass association-action-reference (views:thunk)
+dreyeck/src/topicmap-inspector.lisp:124 (views:action-id (make-instance 'association-action-reference :association association :fn (lambda () nil))))
+dreyeck/src/topicmap-inspector.lisp:236 (let ((action-id (topicmap-workspace-topic-action-id projection topic)))
+dreyeck/src/topicmap-inspector.lisp:237 (when action-id
+dreyeck/src/topicmap-inspector.lisp:242 (topicmap-html-escape action-id)
+dreyeck/src/topicmap-inspector.lisp:488 (views:action-button
+dreyeck/src/topicmap-inspector.lisp:491 (views:thunk
+dreyeck/src/authority-policy.lisp:178 (defclass operation-thunk (hv:thunk)
+dreyeck/src/authority-policy.lisp:224 (hv:eval-button hvs::*icon-eval*
+dreyeck/src/authority-policy.lisp:278 "VIEW, the upstream action-button view, with its buttons never computed."
+dreyeck/src/authority-policy.lisp:284 `(defmethod hv:title-bar-action-buttons :around ((object ,class))
+dreyeck/src/authority-policy.lisp:376 (defmethod hv:title-bar-action-buttons :around ((object hyperdoc::hyperdoc))
+dreyeck/src/authority-policy.lisp:379 (defmethod hv:title-bar-action-buttons :around ((object hyperdoc::text-page))
+dreyeck/src/authority-policy.lisp:382 (defmethod hv:title-bar-action-buttons :around ((object lwcells::lazy-cell))
+dreyeck/src/authority-policy.lisp:398 (hv:eval-button label thunk hover-label)))
+dreyeck/src/authority-policy.lisp:423 (defclass example-thunk (hv:thunk)
+dreyeck/src/authority-policy.lisp:437 (hv:eval-button "►" (make-instance 'example-thunk :fn (lambda () (funcall (symbol-function name)))
+dreyeck/src/authority-policy.lisp:485 (:point "an action-button view is computed lazily from its thunk"
+dreyeck/src/authority-policy.lisp:486 :system "html-inspector-views" :file "title-bar.lisp" :form "(defmethod title-bar-action-buttons :around ((object t))"
+dreyeck/src/authority-policy.lisp:556 (loop for method in (c2mop:generic-function-methods #'hv:title-bar-action-buttons)
+dreyeck/src/wikipedia-title-bar.lisp:32 (defmethod html-inspector-views:title-bar-action-buttons
+dreyeck/authority/reading.lisp:59 (source-form "html-inspector-views" "html.lisp" "(defun eval-button")
+dreyeck/authority/reading.lisp:60 :eval-reference (source-form "html-inspector-views" "html.lisp" "(defun eval-id")
+dreyeck/authority/navigation.lisp:21 "(defmethod views:title-bar-action-buttons ((page wikipedia-page))")
+dreyeck/authority/navigation.lisp:23 "(defgeneric title-bar-action-buttons")
+dreyeck/authority/navigation.lisp:24 (:action-button "html-inspector-views" "html.lisp" "(defun action-button")
+dreyeck/authority/navigation.lisp:31 "(defmethod html-inspector-views:title-bar-action-buttons")
+dreyeck/authority/navigation.lisp:47 "(defmethod views:title-bar-action-buttons ((wiki fedwiki))")
+dreyeck/authority/navigation.lisp:49 "(defmethod views:title-bar-action-buttons ((page fedwiki-page))")
+dreyeck/authority/navigation.lisp:51 "(defmethod views:title-bar-action-buttons ((page remote-fedwiki-page))")))
+dreyeck/authority/navigation.lisp:103 (let* ((view (hv:title-bar-action-buttons page))
+dreyeck/authority/navigation.lisp:112 :method (find-method #'hv:title-bar-action-buttons '()
+dreyeck/authority/navigation.lisp:143 (topic "action-button" "ACTION-BUTTON" #'hv:action-button 30 190)
+dreyeck/authority/navigation.lisp:144 (topic "thunk" "THUNK" (find-class 'hv:thunk) 30 350)
+dreyeck/authority/navigation.lisp:149 (find-method #'hv:title-bar-action-buttons '()
+dreyeck/authority/navigation.lisp:171 ("upstream-button" "upstream-method" "action-button" :constructs :source-observed
+dreyeck/authority/navigation.lisp:173 ("button-thunk" "action-button" "thunk" :refers-to :source-observed
+dreyeck/src/gesture-operation-request.lisp:260 (:tr (:td (views:eval-button
+dreyeck/src/gesture-operation-request.lisp:262 (views:thunk (request-through-binding binding occurrence))))
+dreyeck/src/historical-claims-views.lisp:477 (:p (html-inspector-views:eval-button
+dreyeck/src/historical-claims-views.lisp:479 (html-inspector-views:thunk (reconstruct-engine-workspace))
+dreyeck/src/topicmap-tala-reading.lisp:196 (when (typep (cdr reference) 'views:thunk)
+dreyeck/src/topicmap-tala-reading.lisp:199 (views:thunk
+dreyeck/work/trails-rendered-federated-context.lisp:76 :id (html-inspector-views:eval-id (html-inspector-views:thunk (native-context-page page)))
+dreyeck/work/trails-rendered-federated-context.lisp:233 :thunk (html-inspector-views:thunk (historical-wiki-link-target page title))))
+dreyeck/work/trails-rendered-federated-context.lisp:350 (html-inspector-views:action-id
+dreyeck/work/trails-rendered-federated-context.lisp:351 (html-inspector-views:thunk
+dreyeck/work/trails-rendered-federated-context.lisp:358 #'html-inspector-views:eval-id #'html-inspector-views:action-id)
+dreyeck/work/trails-rendered-federated-context.lisp:818 (:p (html-inspector-views:eval-button "Follow"
+dreyeck/work/trails-rendered-federated-context.lisp:819 (html-inspector-views:thunk
+dreyeck/work/trails-rendered-federated-context.lisp:835 (:td (html-inspector-views:action-button (dreyeck/topicmap:topicmap-topic-label-of other)
+dreyeck/work/trails-rendered-federated-context.lisp:897 (:p (html-inspector-views:action-button "Previous event" (html-inspector-views:thunk
+dreyeck/work/trails-rendered-federated-context.lisp:900 (html-inspector-views:action-button "Next event" (html-inspector-views:thunk
+dreyeck/work/trails-rendered-federated-context.lisp:914 (html-inspector-views:action-button (string-capitalize (symbol-name choice))
+dreyeck/work/trails-rendered-federated-context.lisp:915 (html-inspector-views:thunk (setf (context-mode context) choice) t))
+dreyeck/work/trails-rendered-federated-context.lisp:1054 (defmethod html-inspector-views:title-bar-action-buttons ((page context-fedwiki-page))
+dreyeck/work/conversation-coordinates-reading.lisp:369 (:p (v:action-button "Previous selected message" (v:thunk (select-message session (1- (session-cursor session)))))
+dreyeck/work/conversation-coordinates-reading.lisp:370 " " (v:action-button "Next selected message" (v:thunk (select-message session (1+ (session-cursor session))))))
+dreyeck/clog-tutorial/observations.lisp:156 (defmethod clog:set-on-click :around ((heading clog:clog-element) callback
+dreyeck/work/tmdm-model-reading.lisp:215 (:p (dreyeck/authority-policy:run-button "Read default-type example" (v:thunk (default-name-example)) "Run DEFEXAMPLE")
+dreyeck/work/tmdm-model-reading.lisp:217 (:p (dreyeck/authority-policy:run-button "Read explicit-type example" (v:thunk (explicit-name-example)) "Run DEFEXAMPLE")
+dreyeck/work/topic-maps-project-example.lisp:146 (:p (dreyeck/authority-policy:run-button "Read a fresh 22U Map" (v:thunk (inspect-project-example)) "Run DEFEXAMPLE"))
+dreyeck/work/topic-maps-project-example.lisp:148 (:p (dreyeck/authority-policy:run-button "Exercise on a separate fresh Map" (v:thunk (exercise-project-example)) "Run isolated exercise"))
+dreyeck/work/topic-maps-ctm-review.lisp:303 (v:html (:p (dreyeck/authority-policy:run-button "Run the experiment" (v:thunk (run-scheme-plus-experiment)) "Run DEFEXAMPLE"))
+hyperdoc-explorer/links.lisp:26 :thunk (views:thunk (let ((*package* package))
+hyperdoc-explorer/explorer.lisp:78 (defmethod views:title-bar-action-buttons ((hdoc hyperdoc))
+hyperdoc-explorer/explorer.lisp:80 (views:action-button "Reload"
+hyperdoc-explorer/explorer.lisp:81 (views:thunk (reload-text-pages hdoc)
+hyperdoc-explorer/explorer.lisp:143 (defmethod views:title-bar-action-buttons ((page text-page))
+hyperdoc-explorer/explorer.lisp:145 (views:action-button "Reload"
+hyperdoc-explorer/explorer.lisp:146 (views:thunk
+hyperdoc-explorer/tools.lisp:87 (defmethod views:title-bar-action-buttons ((pg playground-page))
+hyperdoc-explorer/tools.lisp:88 (views:action-button "Reset"
+hyperdoc-explorer/tools.lisp:89 (views:thunk (views/standard:store-playground-content
+hyperdoc-explorer/examples.lisp:13 (views:eval-button "►"
+hyperdoc-explorer/examples.lisp:14 (views:thunk
+hyperbook-explorer/links.lisp:66 :thunk (views:thunk
+hyperbook-explorer/links.lisp:94 :thunk (views:thunk
+hyperbook-explorer/asdf-systems.lisp:46 views:thunk
+hyperbook-wikipedia/wikipedia.lisp:278 (defmethod views:title-bar-action-buttons ((page wikipedia-page))
+hyperbook-wikipedia/wikipedia.lisp:279 (views:action-button "Open in browser"
+hyperbook-wikipedia/wikipedia.lisp:280 (views:thunk (clog:open-browser :url (page-url page))
+hyperbook-fedwiki/pages.lisp:285 (defmethod views:title-bar-action-buttons ((page fedwiki-page))
+hyperbook-fedwiki/pages.lisp:286 (views:action-button html-inspector-views/standard:*icon-open-external*
+hyperbook-fedwiki/pages.lisp:289 (views:action-button "Reload"
+hyperbook-fedwiki/pages.lisp:290 (views:thunk (reload-page page)
+hyperbook-fedwiki/pages.lisp:292 (views:thunk
+hyperbook-fedwiki/pages.lisp:298 (defmethod views:title-bar-action-buttons ((page remote-fedwiki-page))
+hyperbook-fedwiki/pages.lisp:299 (views:action-button html-inspector-views/standard:*icon-open-external*
+hyperbook-fedwiki/pages.lisp:300 (views:thunk
+hyperbook-fedwiki/wiki-links.lisp:20 :thunk (views:thunk
+hyperbook-fedwiki/views.lisp:23 (views:thunk
+hyperbook-fedwiki/views.lisp:35 (defmethod views:title-bar-action-buttons ((wiki fedwiki))
+hyperbook-fedwiki/views.lisp:36 (views:action-button html-inspector-views/standard:*icon-open-external*
+hyperbook-fedwiki/views.lisp:37 (views:thunk
+hyperbook-fedwiki/views.lisp:90 (views:thunk

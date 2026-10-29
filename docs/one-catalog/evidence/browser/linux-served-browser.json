@@ -1,0 +1,29 @@
+{
+ "kind": "packaged-served-Catalog-read-only-Topic-Maps-views",
+ "startedAtUTC": "2026-10-29T07:28:30.447Z",
+ "finishedAtUTC": "2026-10-29T07:28:48.482Z",
+ "mode": "--origin",
+ "origin": "http://127.0.0.1:18811",
+ "success": true,
+ "failure": null,
+ "steps": [
+  "Catalog → Topic Maps CTM Review (22U) → Text pages → Reviewing the CTM Reader",
+  "page → Claim scheme-plus: eight parts, \"Not executed in this image.\", and the experiment shown as not offered; no button",
+  "Claim → the loaded definition next-token (a function object): read-only navigation continues",
+  "Claim → src/ctm/lexer.lisp at the pinned commit, read from the verified /nix/store snapshot",
+  "Catalog → Topic Maps Project Example (22U) → Reading Slice 22U → view Topic Maps 22U: both buttons shown as not offered",
+  "Catalog → Working on HyperDoc → Work Breakdown → views Topic Maps 22U (not offered) and TMDM model",
+  "TMDM model → Work topic ctm-plan-page-authoring → view TMDM model: both examples shown as not offered; their definitions stay readable",
+  "Work topic → Existing Work Workspace (a Topic Map): navigation of the model continues"
+ ],
+ "errors": [],
+ "externalRequests": [],
+ "clickReadiness": {
+  "waited": 18,
+  "unbound": 0,
+  "maxWaitMs": 0,
+  "settledReads": 7,
+  "unsettled": 0
+ },
+ "shutdownExit": null
+}

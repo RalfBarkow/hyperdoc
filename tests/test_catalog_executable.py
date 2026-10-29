@@ -48,7 +48,7 @@ class CatalogExecutableTests(unittest.TestCase):
     def test_invalid_port(self):
         result = subprocess.run([EXECUTABLE, "65536"], cwd=self.root,
                                 env=self.env, capture_output=True, text=True,
-                                timeout=180)
+                                timeout=600)
         self.assertNotEqual(0, result.returncode)
         self.assertIn("Port must be an integer", result.stderr)
 
@@ -64,14 +64,14 @@ class CatalogExecutableTests(unittest.TestCase):
                     process = subprocess.Popen([EXECUTABLE, str(port)], cwd=self.root,
                                                env=self.env, stdout=log, stderr=log)
                     try:
-                        deadline = time.monotonic() + 180
+                        deadline = time.monotonic() + 600
                         opener = urllib.request.build_opener(urllib.request.ProxyHandler({}))
                         while True:
                             if process.poll() is not None:
                                 log.seek(0)
                                 self.fail(log.read().decode(errors="replace"))
                             try:
-                                with opener.open(f"http://127.0.0.1:{port}/", timeout=1) as response:
+                                with opener.open(f"http://127.0.0.1:{port}/", timeout=30) as response:
                                     self.assertEqual(200, response.status)
                                     self.assertIn(b'/js/boot.js', response.read())
                                 break
@@ -82,13 +82,14 @@ class CatalogExecutableTests(unittest.TestCase):
                                 time.sleep(0.1)
                         # /view responds through the same actual CLOG listener.
                         with opener.open(f"http://127.0.0.1:{port}/view/reading-java-source-as-data",
-                                         timeout=5) as response:
+                                         timeout=30) as response:
                             self.assertEqual(200, response.status)
                         self.assertIsNone(process.poll())
                         process.send_signal(stop_signal)
                         self.assertEqual(0, process.wait(timeout=15))
                         log.seek(0)
                         output = log.read().decode(errors="replace")
+                        self.assertIn("Topic Maps snapshot verified without .git", output)
                         self.assertIn(f"HyperBook Catalog listening on 127.0.0.1:{port}", output)
                         self.assertIn("Stopping HyperBook Catalog", output)
                         with socket.socket() as probe:
@@ -100,6 +101,99 @@ class CatalogExecutableTests(unittest.TestCase):
                         if process.poll() is None:
                             process.kill()
                             process.wait(timeout=10)
+
+    def free_port(self):
+        with socket.socket() as probe:
+            probe.bind(("127.0.0.1", 0))
+            return probe.getsockname()[1]
+
+    def test_project_workspace_refused_before_listening(self):
+        for system in ("dreyeck/work/project", "dreyeck/work/project/tests", "dreyeck/page-attached-hyperdoc"):
+            with self.subTest(system=system):
+                port = self.free_port()
+                result = subprocess.run([EXECUTABLE, str(port)], cwd=self.root, env={**self.env, "HYPERDOC_CATALOG_SYSTEM": system},
+                                        capture_output=True, text=True, timeout=600)
+                self.assertNotEqual(0, result.returncode)
+                self.assertIn("Topic Maps snapshot verified without .git", result.stdout)
+                self.assertIn("which this runtime does not admit", result.stderr)
+                self.assertNotIn("listening", result.stdout)
+                with socket.socket() as probe:
+                    self.assertNotEqual(0, probe.connect_ex(("127.0.0.1", port)))
+
+    def test_topic_maps_readings_are_a_choice_of_the_service(self):
+        """The readings load when the service names them, under the same verification, and the Catalog still serves and stops."""
+        port = self.free_port()
+        environment = {**self.env, "HYPERDOC_CATALOG_SYSTEM": "dreyeck/work/topic-maps-ctm-review"}
+        with tempfile.TemporaryFile(mode="w+b") as log:
+            process = subprocess.Popen([EXECUTABLE, str(port)], cwd=self.root, env=environment, stdout=log, stderr=log)
+            try:
+                deadline = time.monotonic() + 900
+                opener = urllib.request.build_opener(urllib.request.ProxyHandler({}))
+                while True:
+                    if process.poll() is not None:
+                        log.seek(0)
+                        self.fail(log.read().decode(errors="replace"))
+                    try:
+                        with opener.open(f"http://127.0.0.1:{port}/", timeout=30) as response:
+                            self.assertEqual(200, response.status)
+                        break
+                    except (OSError, urllib.error.URLError):
+                        if time.monotonic() >= deadline:
+                            log.seek(0)
+                            self.fail("Catalog not ready:\n" + log.read().decode(errors="replace"))
+                        time.sleep(0.2)
+                process.send_signal(signal.SIGTERM)
+                self.assertEqual(0, process.wait(timeout=15))
+                log.seek(0)
+                output = log.read().decode(errors="replace")
+                self.assertIn("Topic Maps snapshot verified without .git", output)
+                self.assertIn(f"HyperBook Catalog listening on 127.0.0.1:{port}", output)
+            finally:
+                if process.poll() is None:
+                    process.kill()
+                    process.wait(timeout=10)
+
+    def serve_once(self, port, environment, remove=()):
+        """Start the executable with ENVIRONMENT (and without the REMOVE keys), wait for HTTP on loopback, stop it, return its output."""
+        env = {key: value for key, value in {**self.env, **environment}.items() if key not in remove}
+        with tempfile.TemporaryFile(mode="w+b") as log:
+            process = subprocess.Popen([EXECUTABLE, str(port)], cwd=self.root, env=env, stdout=log, stderr=log)
+            try:
+                deadline = time.monotonic() + 600
+                opener = urllib.request.build_opener(urllib.request.ProxyHandler({}))
+                while True:
+                    if process.poll() is not None:
+                        log.seek(0)
+                        self.fail(log.read().decode(errors="replace"))
+                    try:
+                        with opener.open(f"http://127.0.0.1:{port}/", timeout=30) as response:
+                            self.assertEqual(200, response.status)
+                        break
+                    except (OSError, urllib.error.URLError):
+                        if time.monotonic() >= deadline:
+                            log.seek(0)
+                            self.fail("Catalog not ready:\n" + log.read().decode(errors="replace"))
+                        time.sleep(0.2)
+                process.send_signal(signal.SIGTERM)
+                self.assertEqual(0, process.wait(timeout=15))
+                log.seek(0)
+                return log.read().decode(errors="replace")
+            finally:
+                if process.poll() is None:
+                    process.kill()
+                    process.wait(timeout=10)
+
+    def test_host_defaults_to_loopback_and_an_explicit_host_is_kept(self):
+        """Unset or empty: loopback. Named by the service: as named. The Catalog is not made loopback-only; it is made loopback by default."""
+        for label, environment, remove, expected in (
+                ("unset", {}, ("HYPERDOC_CATALOG_HOST",), "127.0.0.1"),
+                ("empty", {"HYPERDOC_CATALOG_HOST": ""}, (), "127.0.0.1"),
+                ("explicit loopback", {"HYPERDOC_CATALOG_HOST": "127.0.0.1"}, (), "127.0.0.1"),
+                ("explicit all interfaces", {"HYPERDOC_CATALOG_HOST": "0.0.0.0"}, (), "0.0.0.0")):
+            with self.subTest(host=label):
+                port = self.free_port()
+                output = self.serve_once(port, environment, remove)
+                self.assertIn(f"HyperBook Catalog listening on {expected}:{port}", output)
 
 
 if __name__ == "__main__":

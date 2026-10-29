@@ -212,8 +212,10 @@ No source span is inferred, and normative interpretation is not a comparison out
     (v:html-view :title "TMDM model" :priority 140
       (v:html (:h2 "Topic → Name → Type Topic")
         (:p "Execute a reading explicitly. Rendering views never reruns a comparison. Each reading keeps actual model references in its own image context.")
-        (:p (v:eval-button "Read default-type example" (v:thunk (default-name-example)) "Run DEFEXAMPLE")
+        (:p (dreyeck/authority-policy:run-button "Read default-type example" (v:thunk (default-name-example)) "Run DEFEXAMPLE")
             " / " (v:object-ref #'default-name-example :display "Default DEFEXAMPLE definition" :select "Source code"))
-        (:p (v:eval-button "Read explicit-type example" (v:thunk (explicit-name-example)) "Run DEFEXAMPLE")
+        (:p (dreyeck/authority-policy:run-button "Read explicit-type example" (v:thunk (explicit-name-example)) "Run DEFEXAMPLE")
             " / " (v:object-ref #'explicit-name-example :display "Explicit DEFEXAMPLE definition" :select "Source code"))
-        (:p (v:object-ref (work:work-workspace) :display "Existing Work Workspace" :select "Topicmap"))))))
+        ;; The shared Workspace is not linked from a served Catalog's view; it stays reachable where it already was, and here locally.
+        (unless (dreyeck/authority-policy:policy-enforced-p)
+          (v:html (:p (v:object-ref (work:work-workspace) :display "Existing Work Workspace" :select "Topicmap"))))))))
