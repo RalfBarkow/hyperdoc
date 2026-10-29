@@ -1,0 +1,27 @@
+{
+  "format": "hyperdoc-project-ctm-snapshot-1",
+  "source_revision": "0484a4b76128c3ed302a6a8d6e0343bfe03cece5",
+  "topic_maps_revision": "88994c1b9e1edbf13e665e984a5c9c3b2cdf7575",
+  "document_iri": "tag:dreyeck.ch,2026:hyperdoc/project.ctm",
+  "ctm_file": "project.ctm",
+  "sha256": "8b4142421f5bfa1cc089e7ac53b43ebc6975e597cdedea5a49f6fc226dcc2e1d",
+  "source_pages": [
+    {
+      "path": "dreyeck/pages/work/Work Breakdown.html",
+      "sha256": "a7dc3d53a1a7312e6feba2350bde7251c222b2acd321ef5a109116f5cf616e13"
+    },
+    {
+      "path": "dreyeck/pages/work/Authoring the CTM Plan Page.html",
+      "sha256": "fced413ad5e893e49973df1fa8fb5ca14dee87695c50100e72ddd12d4d2de75a"
+    },
+    {
+      "path": "dreyeck/pages/work/CTM Plan Page WBS Dictionary.html",
+      "sha256": "de3f372912e0a257a85990686fdcd354f79481af7aecb1ecc5d1ffb171e9d9b5"
+    },
+    {
+      "path": "dreyeck/pages/project/Implementation Assignments.html",
+      "sha256": "0d755af7b32bd02c30d41573afc9956767c8027e0e7fb79f20affa294cc1e463"
+    }
+  ],
+  "publication_status": "isolated-review-fixture-not-publication"
+}

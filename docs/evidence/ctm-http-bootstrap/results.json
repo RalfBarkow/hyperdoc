@@ -1,0 +1,39 @@
+{
+  "baseline": "573fe37611a61d984260ebf43c797f7534211bdd",
+  "artifact_source_revision": "0484a4b76128c3ed302a6a8d6e0343bfe03cece5",
+  "inventory_design_revision": "9cb805a877797d16df9a08f19e2acc882ade651e",
+  "public_observations": [
+    {
+      "url": "https://dreyeck.ch/",
+      "proxy_connect": 200,
+      "http_status": 502
+    },
+    {
+      "url": "https://dreyeck.ch/hyperdoc-project.ctm",
+      "proxy_connect": 200,
+      "http_status": 404
+    },
+    {
+      "url": "https://dreyeck.ch/hyperdoc-project.ctm.sha256",
+      "proxy_connect": 200,
+      "http_status": 404
+    }
+  ],
+  "deployed_revision_established": false,
+  "public_ctm_resource_established": false,
+  "fixture_result": {
+    "process_exit": 0,
+    "native_assertions": 31,
+    "http_negative_cases": 3,
+    "negative_responses_reached_native_reader": false,
+    "ctm_sha256": "8b4142421f5bfa1cc089e7ac53b43ebc6975e597cdedea5a49f6fc226dcc2e1d",
+    "cxtm_sha256": "776145ba5cc30bdf6b699de245f2c0b5ffc08ebbe07d21b8ceb3a46695128f3f",
+    "document_and_base_iri": "tag:dreyeck.ch,2026:hyperdoc/project.ctm"
+  },
+  "script_sha256": {
+    "scripts/test-ctm-http-bootstrap.py": "438211223ee990c3d1ce59dfe9faa668516b894be1365a0be30014f73bdb770d",
+    "scripts/inspect-http-project-ctm.lisp": "7aa54a31d97ee23947f738eb347e0451799183b3c7498c5a1e33cef49e2152b0"
+  },
+  "production_changed": false,
+  "tmcl_validation_executed": false
+}
