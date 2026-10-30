@@ -1,0 +1,8 @@
+RUNTIME SBCL 2.4.10
+SOURCE dreyeck/pull-request-review/reading version=NIL root=/workspace/scratch/hyperdoc-pr-review-reading/
+SOURCE dreyeck/topicmap version=0.0.1 root=/workspace/scratch/hyperdoc-pr-review-reading/
+SOURCE dreyeck/inspector/topicmap version=0.0.1 root=/workspace/scratch/hyperdoc-pr-review-reading/
+SOURCE html-inspector-views version=0.0.1 root=/workspace/tools/nix-portable-data/.nix-portable/nix/store/w26nr9dxpfsyzbviphnaaydmcww2h3y6-source/
+SOURCE clog-moldable-inspector version=0.0.1 root=/workspace/tools/nix-portable-data/.nix-portable/nix/store/7l95gid3niz995qqpkgclj6355k50phf-source/
+SOURCE shasht version=0.1 root=/workspace/tools/nix-portable-data/.nix-portable/nix/store/w7kjy75889x8ivb1zs2diqwnq2bgra12-sbcl-shasht-20241012-git/
+SOURCE ironclad version=NIL root=/workspace/tools/nix-portable-data/.nix-portable/nix/store/xg4ccdsa3hwwj76aac8h4xkm0lw4q4js-sbcl-ironclad-v0.61/

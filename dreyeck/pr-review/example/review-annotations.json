@@ -1,0 +1,162 @@
+{
+  "schemaVersion": 1,
+  "repository": "RalfBarkow/hyperdoc",
+  "authority": "Explicit curated source references; proposed questions, not human acceptance.",
+  "sourceSnapshotSHA256": "be273985ffd339fe7c107f39dc32418422e8fba489d247c4d6cd56e688e900d0",
+  "claims": [
+    {
+      "type": "ctm-source",
+      "from": 1,
+      "to": 3,
+      "fromHead": "0484a4b76128c3ed302a6a8d6e0343bfe03cece5",
+      "toRevision": "db5a77a43742d41855fc9923b24f40f8652c1d04",
+      "level": "derived",
+      "sourcePR": 3,
+      "bodyDigest": "1b7ff428e1898b487d4b4670f2bb0fb4e1c7987cfe92b451c700ba70a93e1a8e",
+      "quote": "The local fixture serves fixed, already verified PR #1 snapshot bytes at review commit 0484a4b76128c3ed302a6a8d6e0343bfe03cece5 with manifest and SHA-256. It rejects missing resources, incorrect digests and forged unexpected content against a trusted revision/digest anchor before invoking Lisp. One verified read-back passes 31 native TMDM/CXTM assertions covering the known assignment, ten identified evidence entries, reification, source Associations/Roles and source references."
+    },
+    {
+      "type": "ctm-source",
+      "from": 1,
+      "to": 4,
+      "fromHead": "0484a4b76128c3ed302a6a8d6e0343bfe03cece5",
+      "toRevision": "521a1f38ffe40edf02f8c3d6faae2c373ad150c1",
+      "level": "derived",
+      "sourcePR": 4,
+      "bodyDigest": "815e8915784488f908c8415f77d05c75694217068f0ad09e453a3a626893b389",
+      "quote": "- The fixed fixture comes from review-candidate PR #1 commit `0484a4b76128c3ed302a6a8d6e0343bfe03cece5`; it is not a claim of a merged or deployed snapshot."
+    },
+    {
+      "type": "source-port",
+      "from": 5,
+      "to": 6,
+      "fromHead": "f512aa847eab05cc2bdf2e78ef0bd1b516a11926",
+      "toRevision": "4ef218a6d273e17091f4ee541965a01ae53d39fc",
+      "level": "derived",
+      "sourcePR": 6,
+      "bodyDigest": "936d3c73e91fbefb25f54f2543080ccccad4d68f9559cb4f5c874767abdf10c9",
+      "quote": "The observed `dreyeck.ch` HEAD (`573fe37611a61d984260ebf43c797f7534211bdd`) has no independently loadable DMX MCP runtime. This ports the necessary closure from the verified repair `f512aa847eab05cc2bdf2e78ef0bd1b516a11926`, without merging historical `hauptsache` or changing the separate ISO MCP work."
+    },
+    {
+      "type": "separate-investigation",
+      "from": 6,
+      "to": 7,
+      "fromHead": "4ef218a6d273e17091f4ee541965a01ae53d39fc",
+      "toRevision": "48fa54e2b0bcaee0c18c3c4f9cdda9fd086528dd6b80aafe1cdc2549276fa365",
+      "level": "derived",
+      "sourcePR": 6,
+      "bodyDigest": "936d3c73e91fbefb25f54f2543080ccccad4d68f9559cb4f5c874767abdf10c9",
+      "quote": "- Journal correctness and any repair/redesign, state migration or Journal-related DMX Topic cleanup are a **separate investigation Topic and subsequent [work item #7](https://github.com/RalfBarkow/hyperdoc/issues/7)**. Retain only dependencies required by the existing MCP contract. Retaining code and passing fixtures are not Journal-correctness proof."
+    }
+  ],
+  "marks": [
+    {
+      "pr": 1,
+      "head": "0484a4b76128c3ed302a6a8d6e0343bfe03cece5",
+      "kind": "evidence",
+      "label": "Reported focused verification (not acceptance)",
+      "url": "https://github.com/RalfBarkow/hyperdoc/tree/0484a4b76128c3ed302a6a8d6e0343bfe03cece5/docs/evidence/codex-project-evidence/",
+      "quote": "**754 assertions passed.** Read-and-model time was **10.6 s**, within the unchanged 90-second assertion. Native checks cover the ten identified evidence Topics, their reified occurrences, values, parents, source Association Roles, assignment/evidence navigation, three still-NOT-RUN contracts, absence of an Acceptance Record and preservation of existing declarations and unrelated assignments.",
+      "bodyDigest": "4aa71c8dc11d37d62e03868b43f08daad45667830e12a0ef175f80a5d974421d"
+    },
+    {
+      "pr": 1,
+      "head": "0484a4b76128c3ed302a6a8d6e0343bfe03cece5",
+      "kind": "question",
+      "label": "Prior normative question and NOT-RUN contracts",
+      "url": "https://github.com/RalfBarkow/hyperdoc/pull/1",
+      "quote": "- The prior normative question and three reported NOT-RUN original contracts remain unresolved. This integration does not independently reproduce that investigation or grant acceptance.",
+      "bodyDigest": "4aa71c8dc11d37d62e03868b43f08daad45667830e12a0ef175f80a5d974421d"
+    },
+    {
+      "pr": 2,
+      "head": "9cb805a877797d16df9a08f19e2acc882ade651e",
+      "kind": "evidence",
+      "label": "Reported inventory/design checks",
+      "url": "https://github.com/RalfBarkow/hyperdoc/blob/9cb805a877797d16df9a08f19e2acc882ade651e/docs/iso-topicmaps-inventory-tmcl-design.md",
+      "quote": "Verification: 411 existing source/emitter assertions and 169 focused inventory/design assertions passed (580 total, exit 0). Ordinary CTM fixtures demonstrate shared application subject identities, distinct source objects, source-preserving import and canonical resolution; this is not TMCL schema validation. Native project read-back, proposal Roles, navigation, preservation and deterministic CTM/CXTM checks passed. The retained CTM/digest were regenerated only after those checks passed.",
+      "bodyDigest": "f1c380e12120dd1bf7b114ed6493716957f34c04489246c1d89454c38d5c48e8"
+    },
+    {
+      "pr": 2,
+      "head": "9cb805a877797d16df9a08f19e2acc882ade651e",
+      "kind": "question",
+      "label": "Published TMCL requirements remain unresolved",
+      "url": "https://github.com/RalfBarkow/hyperdoc/pull/2",
+      "quote": "The design matrix compares eight application requirements with current Lisp enforcement. Published ISO/IEC 19756:2011 provisions, constraint PSIs, validation rules and CTM authoring templates remain UNRESOLVED: the public reference request was refused at proxy CONNECT (403; destination status 000). No inferred rule is substituted. **No runnable TMCL schema, topic-maps/tmcl system or validator is implemented.**",
+      "bodyDigest": "f1c380e12120dd1bf7b114ed6493716957f34c04489246c1d89454c38d5c48e8"
+    },
+    {
+      "pr": 3,
+      "head": "db5a77a43742d41855fc9923b24f40f8652c1d04",
+      "kind": "evidence",
+      "label": "Reported CTM HTTP/native read-back",
+      "url": "https://github.com/RalfBarkow/hyperdoc/tree/db5a77a43742d41855fc9923b24f40f8652c1d04/docs/evidence/ctm-http-bootstrap/",
+      "quote": "The local fixture serves fixed, already verified PR #1 snapshot bytes at review commit 0484a4b76128c3ed302a6a8d6e0343bfe03cece5 with manifest and SHA-256. It rejects missing resources, incorrect digests and forged unexpected content against a trusted revision/digest anchor before invoking Lisp. One verified read-back passes 31 native TMDM/CXTM assertions covering the known assignment, ten identified evidence entries, reification, source Associations/Roles and source references.",
+      "bodyDigest": "1b7ff428e1898b487d4b4670f2bb0fb4e1c7987cfe92b451c700ba70a93e1a8e"
+    },
+    {
+      "pr": 3,
+      "head": "db5a77a43742d41855fc9923b24f40f8652c1d04",
+      "kind": "question",
+      "label": "Publication/operator authorization remains open",
+      "url": "https://github.com/RalfBarkow/hyperdoc/pull/3",
+      "quote": "Evidence: docs/ctm-http-bootstrap-proposal.md and docs/evidence/ctm-http-bootstrap/. Raw HTTP/compiler whitespace is retained verbatim. No production change is authorized; operator approval and actual public verification remain required.",
+      "bodyDigest": "1b7ff428e1898b487d4b4670f2bb0fb4e1c7987cfe92b451c700ba70a93e1a8e"
+    },
+    {
+      "pr": 4,
+      "head": "521a1f38ffe40edf02f8c3d6faae2c373ad150c1",
+      "kind": "evidence",
+      "label": "Reported resources-only MCP checks",
+      "url": "https://github.com/RalfBarkow/hyperdoc/tree/521a1f38ffe40edf02f8c3d6faae2c373ad150c1/docs/evidence/tmdm-mcp-review/",
+      "quote": "**60 focused checks passed; process exit 0.** Covered resource discovery/read, anchored CTM digest and provenance, Subject Identifier lookup, both source associations and role players, all ten identified Evidence entries and their native reification/owner/type links, source references, native CTM read-back, same-base CXTM equivalence, and unchanged source-map CXTM. Negative cases cover bearer/Origin/session boundaries, malformed/oversized requests, unknown resources, wrong digest/MIME/content, and rejected tools/evaluation/subscriptions.",
+      "bodyDigest": "815e8915784488f908c8415f77d05c75694217068f0ad09e453a3a626893b389"
+    },
+    {
+      "pr": 4,
+      "head": "521a1f38ffe40edf02f8c3d6faae2c373ad150c1",
+      "kind": "question",
+      "label": "Connector and production integration decisions",
+      "url": "https://github.com/RalfBarkow/hyperdoc/pull/4",
+      "quote": "- Complete MCP/Codex connector compatibility, public authentication, Host/Origin policy, session limits/expiry and production hardening remain review/operator decisions.",
+      "bodyDigest": "815e8915784488f908c8415f77d05c75694217068f0ad09e453a3a626893b389"
+    },
+    {
+      "pr": 5,
+      "head": "f512aa847eab05cc2bdf2e78ef0bd1b516a11926",
+      "kind": "evidence",
+      "label": "Reported cold-load failure fingerprint",
+      "url": "https://github.com/RalfBarkow/hyperdoc/blob/f512aa847eab05cc2bdf2e78ef0bd1b516a11926/docs/dmx-mcp-resource-discovery-repair.md",
+      "quote": "A fresh `hyperdoc/mcp` image fails resource discovery because it calls `HYPERDOC::JSON-ARRAY-ELEMENTS`, defined only in the unrelated FedWiki slice. A real local HTTP backend reproduces the exact recorded remote response: 214 octets, SHA-256 `4c3cbe31dd2b9f4c489472d172fa90f11e9f144871f1a90f339caa2cbc415df0`, JSON-RPC -32099 and `id:false` for request 2. The matching exception is identified; the running production Git revision remains unknown because no operator deployment record was provided.",
+      "bodyDigest": "0de87b1fd796672e84a12e6e84a1bd00faf68f4aa7deab865f4e2af29092b0c9"
+    },
+    {
+      "pr": 5,
+      "head": "f512aa847eab05cc2bdf2e78ef0bd1b516a11926",
+      "kind": "question",
+      "label": "Deployed package identity and staging",
+      "url": "https://github.com/RalfBarkow/hyperdoc/pull/5",
+      "quote": "The operator must identify the deployed source/package and authentication configuration, build/test against that actual pinned environment, review transport timeouts/response limits and preserved write gates in staging, and separately authorize any package activation/restart. This patch does not prove the production backend payload is otherwise valid after the missing-helper exception is removed. Broader historical load warnings/workflows are not claimed repaired; no full suite, live write or production read-back was run.",
+      "bodyDigest": "0de87b1fd796672e84a12e6e84a1bd00faf68f4aa7deab865f4e2af29092b0c9"
+    },
+    {
+      "pr": 6,
+      "head": "4ef218a6d273e17091f4ee541965a01ae53d39fc",
+      "kind": "evidence",
+      "label": "Reported exact-runtime build and rebuild",
+      "url": "https://github.com/RalfBarkow/hyperdoc/tree/e15e36f34fe3d314d162fee244212d7a7fec3dc2/reports/dmx-mcp-dreyeck-integration/",
+      "quote": "The exact committed application and check were also rebuilt with `--rebuild`: exit 0, no differing outputs. The executable reports `source=e15e36f34fe3d314d162fee244212d7a7fec3dc2 repair=f512aa847eab05cc2bdf2e78ef0bd1b516a11926`.",
+      "bodyDigest": "936d3c73e91fbefb25f54f2543080ccccad4d68f9559cb4f5c874767abdf10c9"
+    },
+    {
+      "pr": 6,
+      "head": "4ef218a6d273e17091f4ee541965a01ae53d39fc",
+      "kind": "question",
+      "label": "State preservation and later activation unresolved",
+      "url": "https://github.com/RalfBarkow/hyperdoc/pull/6",
+      "quote": "The user has confirmed the intended public Common Workspace migration contract. The **installed package/source revision, actual resolved Journal directory/recovery behavior and free host disk/inodes remain unverified**. No replacement is recommended until package identity and state preservation are established; source retention does not settle Journal correctness. The operator runbook first captures the installed release metadata, ExecStart and configuration, checks capacity and retains rollback closures; it then describes an exact pinned candidate and MCP-only deployment/rollback through the existing operator-owned `/etc/nixos` setup. The executable-name change requires an explicit ExecStart adaptation: changing only the historical module's package option would be invalid.",
+      "bodyDigest": "936d3c73e91fbefb25f54f2543080ccccad4d68f9559cb4f5c874767abdf10c9"
+    }
+  ]
+}

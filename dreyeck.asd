@@ -3471,3 +3471,27 @@
   :perform (test-op (operation component)
              (declare (ignore operation component))
              (uiop:symbol-call :dreyeck/topic-maps-public-views/tests :run-tests)))
+
+;; Local-only PR review. No Catalog admission, GitHub client or write dependency.
+(defsystem "dreyeck/pull-request-review"
+  :description "Read-only, revision-qualified GitHub snapshot observations"
+  :license "BSD" :serial t
+  :depends-on ("dreyeck/topicmap" "shasht" "ironclad" "babel")
+  :components ((:file "dreyeck/pr-review/model")))
+
+(defsystem "dreyeck/pull-request-review/reading"
+  :description "Local Inspector Reading for explicit PR review snapshots"
+  :license "BSD" :serial t
+  :depends-on ("dreyeck/pull-request-review" "dreyeck/inspector/topicmap" "dreyeck/hyperdoc")
+  :components ((:file "dreyeck/pr-review/reading")
+               (:static-file "dreyeck/pages/pr-review/Pull Request Review.html")
+               (:static-file "dreyeck/pr-review/example/github-snapshot.json")
+               (:static-file "dreyeck/pr-review/example/review-annotations.json"))
+  :in-order-to ((test-op (test-op "dreyeck/pull-request-review/tests"))))
+
+(defsystem "dreyeck/pull-request-review/tests"
+  :license "BSD" :depends-on ("dreyeck/pull-request-review/reading")
+  :components ((:file "dreyeck/tests/pull-request-review"))
+  :perform (test-op (op component)
+             (declare (ignore op component))
+             (uiop:symbol-call :dreyeck/pull-request-review/tests :run-tests)))
