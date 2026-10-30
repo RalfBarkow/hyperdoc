@@ -1,0 +1,2205 @@
+;;;; Required DMX MCP runtime definitions, extracted from f512aa847eab05cc2bdf2e78ef0bd1b516a11926.
+;;;; See docs/dmx-mcp-source-manifest.json and LICENSE.
+(in-package :hyperdoc)
+
+;; From hyperdoc/mcp-server.lisp, characters 0..162.
+;;;; Streamable HTTP MCP server for the DMX context-window workspace
+;;
+;;;; Part of HyperDoc
+;;;; See LICENSE for licensing information.
+
+(in-package :hyperdoc)
+
+;; From hyperdoc/mcp-server.lisp, characters 162..218.
+(defparameter *dmx-mcp-protocol-version* "2025-03-26")
+
+;; From hyperdoc/mcp-server.lisp, characters 218..274.
+(defparameter *dmx-mcp-server-name* "hyperdoc-dmx-mcp")
+
+;; From hyperdoc/mcp-server.lisp, characters 274..322.
+(defparameter *dmx-mcp-server-version* "0.1.0")
+
+;; From hyperdoc/mcp-server.lisp, characters 322..365.
+(defparameter *dmx-mcp-default-port* 8787)
+
+;; From hyperdoc/mcp-server.lisp, characters 365..423.
+(defparameter *dmx-mcp-default-bind-address* "127.0.0.1")
+
+;; From hyperdoc/mcp-server.lisp, characters 423..485.
+(defparameter *dmx-mcp-default-workspace-topicmap-id* 919822)
+
+;; From hyperdoc/mcp-server.lisp, characters 485..534.
+(defparameter *dmx-mcp-default-topic-id* 907120)
+
+;; From hyperdoc/mcp-server.lisp, characters 534..564.
+(defvar *dmx-mcp-server* nil)
+
+;; From hyperdoc/mcp-server.lisp, characters 564..596.
+(defvar *dmx-mcp-acceptor* nil)
+
+;; From hyperdoc/mcp-server.lisp, characters 596..650.
+(defvar *dmx-mcp-random-state* (make-random-state t))
+
+;; From hyperdoc/mcp-server.lisp, characters 650..830.
+(defstruct dmx-mcp-server
+  read-client
+  write-client
+  workspace-topicmap-id
+  known-topic-ids
+  bearer-token
+  allowed-origins
+  live-writes-enabled-p
+  sessions
+  log-stream)
+
+;; From hyperdoc/mcp-server.lisp, characters 830..1098.
+(defun getenv-truthy-p (name &optional (default nil))
+  (let ((value (uiop:getenv name)))
+    (cond
+      ((null value) default)
+      ((member (string-downcase value)
+               '("1" "true" "yes" "on")
+               :test #'string=)
+       t)
+      (t nil))))
+
+;; From hyperdoc/mcp-server.lisp, characters 1098..1658.
+(defun split-comma-separated-env (name)
+  (let ((value (uiop:getenv name)))
+    (when (dmx-non-empty-string-p value)
+      (loop for start = 0 then (1+ comma)
+            for comma = (position #\, value :start start)
+            for piece = (string-trim '(#\Space #\Tab #\Newline #\Return)
+                                     (subseq value
+                                             start
+                                             (or comma (length value))))
+            when (plusp (length piece))
+            collect piece
+            while comma))))
+
+;; From hyperdoc/mcp-server.lisp, characters 1658..2612.
+(defun make-default-dmx-mcp-server ()
+  (let* ((client (make-http-dmx-import-client-from-environment :verbose nil))
+         (allowed-origins (split-comma-separated-env "HYPERDOC_MCP_ALLOWED_ORIGINS"))
+         (live-writes-enabled-p (getenv-truthy-p "HYPERDOC_MCP_ENABLE_LIVE_WRITES" nil)))
+    (make-dmx-mcp-server
+     :read-client (or client
+                      (make-instance 'null-dmx-import-client))
+     :write-client (or client
+                       (make-instance 'null-dmx-import-client))
+     :workspace-topicmap-id
+     (or (parse-positive-integer (uiop:getenv "HYPERDOC_MCP_WORKSPACE_TOPICMAP_ID"))
+         *dmx-mcp-default-workspace-topicmap-id*)
+     :known-topic-ids (list *dmx-mcp-default-topic-id*)
+     :bearer-token (uiop:getenv "HYPERDOC_MCP_BEARER_TOKEN")
+     :allowed-origins allowed-origins
+     :live-writes-enabled-p live-writes-enabled-p
+     :sessions (make-hash-table :test #'equal)
+     :log-stream *error-output*)))
+
+;; From hyperdoc/mcp-server.lisp, characters 2612..2875.
+(defun dmx-mcp-log (server format-string &rest args)
+  (when-let (stream (and server (dmx-mcp-server-log-stream server)))
+    (apply #'format stream
+           (concatenate 'string "~&[dmx-mcp] " format-string "~%")
+           args)
+    (finish-output stream)))
+
+;; From hyperdoc/mcp-server.lisp, characters 2875..3077.
+(defun dmx-mcp-json-object (&rest key-values)
+  (let ((json (make-hash-table :test #'equal)))
+    (loop for (key value) on key-values by #'cddr
+          do (setf (gethash key json) value))
+    json))
+
+;; From hyperdoc/mcp-server.lisp, characters 3077..3144.
+(defun dmx-mcp-json-array (&rest items)
+  (coerce items 'vector))
+
+;; From hyperdoc/mcp-server.lisp, characters 3144..3505.
+;; MCP owns this small array coercion contract. The fresh MCP ASDF system does
+;; not load collective-knowledge-slice, where the unrelated helper used to live.
+(defun dmx-mcp-array-elements (value)
+  (cond ((null value) nil)
+        ((vectorp value) (coerce value 'list))
+        ((listp value) value)
+        (t (error "Expected JSON array, got ~S" value))))
+
+;; From hyperdoc/mcp-server.lisp, characters 3505..3598.
+(defun dmx-mcp-text-content (text)
+  (dmx-mcp-json-object
+   "type" "text"
+   "text" text))
+
+;; From hyperdoc/mcp-server.lisp, characters 3598..3813.
+(defun dmx-mcp-plist-p (value)
+  (and (listp value)
+       (evenp (length value))
+       (loop for (key value*) on value by #'cddr
+             always (and (keywordp key)
+                         (or value* t)))))
+
+;; From hyperdoc/mcp-server.lisp, characters 3813..3939.
+(defun dmx-mcp-dotted-pair-p (value)
+  (and (consp value)
+       (not (null (cdr value)))
+       (not (listp (cdr value)))))
+
+;; From hyperdoc/mcp-server.lisp, characters 3939..4955.
+(defun dmx-mcp-normalize-json-value (value)
+  (cond
+    ((hash-table-p value)
+     (let ((json (make-hash-table :test #'equal)))
+       (maphash (lambda (key nested-value)
+                  (setf (gethash (princ-to-string key) json)
+                        (dmx-mcp-normalize-json-value nested-value)))
+                value)
+       json))
+    ((dmx-mcp-dotted-pair-p value)
+     (dmx-mcp-json-object
+      "key" (dmx-mcp-normalize-json-value (car value))
+      "value" (dmx-mcp-normalize-json-value (cdr value))))
+    ((dmx-mcp-plist-p value)
+     (let ((json (make-hash-table :test #'equal)))
+       (loop for (key nested-value) on value by #'cddr
+             do (setf (gethash (string-downcase (symbol-name key)) json)
+                      (dmx-mcp-normalize-json-value nested-value)))
+       json))
+    ((and (listp value)
+          (not (null value)))
+     (coerce (mapcar #'dmx-mcp-normalize-json-value value) 'vector))
+    ((keywordp value)
+     (string-downcase (symbol-name value)))
+    (t
+     value)))
+
+;; From hyperdoc/mcp-server.lisp, characters 4955..5113.
+(defun dmx-mcp-content-from-object (object)
+  (dmx-mcp-json-array
+   (dmx-mcp-text-content
+    (encode-json-string (dmx-mcp-normalize-json-value object)))))
+
+;; From hyperdoc/mcp-server.lisp, characters 5113..5201.
+(defun dmx-mcp-topic-resource-uri (topic-id)
+  (format nil "dmx://topic/~D" topic-id))
+
+;; From hyperdoc/mcp-server.lisp, characters 5201..5301.
+(defun dmx-mcp-topicmap-resource-uri (topicmap-id)
+  (format nil "dmx://topicmap/~D" topicmap-id))
+
+;; From hyperdoc/mcp-server.lisp, characters 5301..5379.
+(defun dmx-mcp-workspace-resource-uri ()
+  "dmx://workspace/context-window")
+
+;; From hyperdoc/mcp-server.lisp, characters 5379..5754.
+(defun dmx-mcp-json-response (body &key (status 200) session-id)
+  (setf (hunchentoot:return-code*) status
+        (hunchentoot:content-type*) "application/json; charset=utf-8"
+        (hunchentoot:header-out "MCP-Protocol-Version") *dmx-mcp-protocol-version*)
+  (when session-id
+    (setf (hunchentoot:header-out "Mcp-Session-Id") session-id))
+  (encode-json-string body))
+
+;; From hyperdoc/mcp-server.lisp, characters 5754..6102.
+(defun dmx-mcp-empty-response (&key (status 202) session-id)
+  (setf (hunchentoot:return-code*) status
+        (hunchentoot:content-type*) "application/json; charset=utf-8"
+        (hunchentoot:header-out "MCP-Protocol-Version") *dmx-mcp-protocol-version*)
+  (when session-id
+    (setf (hunchentoot:header-out "Mcp-Session-Id") session-id))
+  "")
+
+;; From hyperdoc/mcp-server.lisp, characters 6102..6293.
+(defun dmx-mcp-json-rpc-success (id result &key session-id)
+  (dmx-mcp-json-response
+   (dmx-mcp-json-object
+    "jsonrpc" "2.0"
+    "id" id
+    "result" result)
+   :session-id session-id))
+
+;; From hyperdoc/mcp-server.lisp, characters 6293..6751.
+(defun dmx-mcp-json-rpc-error (id code message &key data (status 200) session-id)
+  (let ((error-object (dmx-mcp-json-object
+                       "code" code
+                       "message" message)))
+    (when data
+      (setf (gethash "data" error-object) data))
+    (dmx-mcp-json-response
+     (dmx-mcp-json-object
+      "jsonrpc" "2.0"
+      "id" (if (null id) :null id)
+      "error" error-object)
+     :status status
+     :session-id session-id)))
+
+;; From hyperdoc/mcp-server.lisp, characters 6751..6922.
+(defun dmx-mcp-session-id ()
+  (format nil "mcp-~8,'0X~8,'0X"
+          (random #xffffffff *dmx-mcp-random-state*)
+          (random #xffffffff *dmx-mcp-random-state*)))
+
+;; From hyperdoc/mcp-server.lisp, characters 6922..7607.
+(defun dmx-mcp-server-require-auth (server)
+  (let ((expected-token (and server (dmx-mcp-server-bearer-token server))))
+    (when (dmx-non-empty-string-p expected-token)
+      (let ((auth (or (hunchentoot:header-in* "authorization")
+                      "")))
+        (unless (string= auth (format nil "Bearer ~A" expected-token))
+          (setf (hunchentoot:return-code*) 401
+                (hunchentoot:content-type*) "application/json; charset=utf-8")
+          (return-from dmx-mcp-server-require-auth
+            (encode-json-string
+             (dmx-mcp-json-object
+              "error" "unauthorized"
+              "message" "Missing or invalid bearer token")))))))
+  nil)
+
+;; From hyperdoc/mcp-server.lisp, characters 7607..7899.
+(defun dmx-mcp-server-origin-allowed-p (server)
+  (let ((allowed-origins (and server (dmx-mcp-server-allowed-origins server)))
+        (origin (hunchentoot:header-in* "origin")))
+    (or (null origin)
+        (null allowed-origins)
+        (member origin allowed-origins :test #'string=))))
+
+;; From hyperdoc/mcp-server.lisp, characters 7899..8320.
+(defun dmx-mcp-server-require-origin (server)
+  (unless (dmx-mcp-server-origin-allowed-p server)
+    (setf (hunchentoot:return-code*) 403
+          (hunchentoot:content-type*) "application/json; charset=utf-8")
+    (return-from dmx-mcp-server-require-origin
+      (encode-json-string
+       (dmx-mcp-json-object
+        "error" "forbidden_origin"
+        "message" "Origin is not allowed for this MCP server"))))
+  nil)
+
+;; From hyperdoc/mcp-server.lisp, characters 8320..8579.
+(defun dmx-mcp-request-json ()
+  (let ((body (hunchentoot:raw-post-data :force-text t)))
+    (unless (dmx-non-empty-string-p body)
+      (error 'fedwiki-dmx-import-error
+             :message "MCP POST request body was empty"))
+    (shasht:read-json body)))
+
+;; From hyperdoc/mcp-server.lisp, characters 8579..8678.
+(defun dmx-mcp-request-id (request)
+  (and (hash-table-p request)
+       (gethash "id" request)))
+
+;; From hyperdoc/mcp-server.lisp, characters 8678..8790.
+(defun dmx-mcp-request-method-name (request)
+  (and (hash-table-p request)
+       (gethash "method" request)))
+
+;; From hyperdoc/mcp-server.lisp, characters 8790..8897.
+(defun dmx-mcp-request-params (request)
+  (and (hash-table-p request)
+       (gethash "params" request)))
+
+;; From hyperdoc/mcp-server.lisp, characters 8897..9056.
+(defun dmx-mcp-argument (arguments key &optional default)
+  (multiple-value-bind (value present-p) (gethash key arguments)
+    (if present-p value default)))
+
+;; From hyperdoc/mcp-server.lisp, characters 9056..9586.
+(defun dmx-mcp-integer-array-argument (arguments key)
+  (let ((raw (gethash key arguments)))
+    (unless raw
+      (return-from dmx-mcp-integer-array-argument nil))
+    (let ((values '()))
+      (dolist (entry (dmx-mcp-array-elements raw))
+        (unless (integerp entry)
+          (error 'fedwiki-dmx-import-error
+                 :message (format nil "~A entries must be integers, got ~S"
+                                  key
+                                  entry)))
+        (push entry values))
+      (nreverse values))))
+
+;; From hyperdoc/mcp-server.lisp, characters 9586..10018.
+(defun dmx-mcp-session-for-request (server &key initialize?)
+  (let ((session-id (hunchentoot:header-in* "Mcp-Session-Id")))
+    (cond
+      (initialize?
+       (values nil nil))
+      ((null session-id)
+       (values nil :missing))
+      (t
+       (let ((session (gethash session-id (dmx-mcp-server-sessions server))))
+         (if session
+             (values session-id session)
+             (values session-id :unknown)))))))
+
+;; From hyperdoc/mcp-server.lisp, characters 10018..10152.
+(defun dmx-mcp-server-capabilities ()
+  (dmx-mcp-json-object
+   "resources" (dmx-mcp-json-object)
+   "tools" (dmx-mcp-json-object)))
+
+;; From hyperdoc/mcp-server.lisp, characters 10152..10466.
+(defun dmx-mcp-resource-metadata (uri name description &key title)
+  (let ((json (dmx-mcp-json-object
+               "uri" uri
+               "name" name
+               "description" description
+               "mimeType" "application/json")))
+    (when title
+      (setf (gethash "title" json) title))
+    json))
+
+;; From hyperdoc/mcp-server.lisp, characters 10466..10673.
+(defun dmx-mcp-resource-template-metadata (uri-template name description)
+  (dmx-mcp-json-object
+   "uriTemplate" uri-template
+   "name" name
+   "description" description
+   "mimeType" "application/json"))
+
+;; From hyperdoc/mcp-server.lisp, characters 10673..10840.
+(defun dmx-mcp-topic-title (topic)
+  (or (dmx-json-child-value topic *dmx-notes-title-type-uri*)
+      (dmx-json-object-value topic "value")
+      "Untitled topic"))
+
+;; From hyperdoc/mcp-server.lisp, characters 10840..11296.
+(defun dmx-mcp-topic-summary (topic)
+  (dmx-mcp-json-object
+   "id" (dmx-json-object-value topic "id")
+   "uri" (dmx-json-object-value topic "uri")
+   "typeUri" (dmx-json-object-value topic "typeUri")
+   "title" (dmx-mcp-topic-title topic)
+   "value" (dmx-json-object-value topic "value")
+   "text" (dmx-json-child-value topic *dmx-notes-text-type-uri*)
+   "resourceUri" (dmx-mcp-topic-resource-uri
+                  (dmx-json-object-value topic "id"))))
+
+;; From hyperdoc/mcp-server.lisp, characters 11296..11570.
+(defun dmx-mcp-note-summaries (topic-summaries)
+  (remove-if-not
+   (lambda (summary)
+     (and (string= (or (gethash "typeUri" summary) "")
+                   *dmx-notes-note-type-uri*)
+          (not (dmx-workspace-journal-note-summary-p summary))))
+   topic-summaries))
+
+;; From hyperdoc/mcp-server.lisp, characters 11570..11918.
+(defun dmx-mcp-topicmap-topic-summaries (topicmap-json)
+  (sort
+   (loop for topic in (or (and topicmap-json
+                               (dmx-mcp-array-elements (gethash "topics" topicmap-json)))
+                          '())
+         collect (dmx-mcp-topic-summary topic))
+   #'<
+   :key (lambda (summary)
+          (gethash "id" summary))))
+
+;; From hyperdoc/mcp-server.lisp, characters 11918..13544.
+(defun dmx-mcp-workspace-summary (server &optional topicmap-id)
+  (let* ((resolved-topicmap-id (or topicmap-id
+                                   (dmx-mcp-server-workspace-topicmap-id server)))
+         (topicmap-json (dmx-import-read-topicmap
+                         (dmx-mcp-server-read-client server)
+                         resolved-topicmap-id))
+         (topicmap-topic (and topicmap-json (gethash "topic" topicmap-json)))
+         (topic-summaries (and topicmap-json
+                               (dmx-mcp-topicmap-topic-summaries topicmap-json)))
+         (visible-topic-summaries
+          (remove-if #'dmx-workspace-journal-note-summary-p topic-summaries))
+         (note-summaries (dmx-mcp-note-summaries visible-topic-summaries)))
+    (dmx-mcp-json-object
+     "workspace" (dmx-mcp-json-object
+                  "slug" (if (eql resolved-topicmap-id
+                                  (dmx-mcp-server-workspace-topicmap-id server))
+                             "context-window"
+                             (format nil "topicmap-~D" resolved-topicmap-id))
+                  "topicmapId" resolved-topicmap-id
+                  "topicmapTitle" (and topicmap-topic
+                                       (dmx-mcp-topic-title topicmap-topic)))
+     "topicCount" (length visible-topic-summaries)
+     "noteCount" (length note-summaries)
+     "topics" (coerce visible-topic-summaries 'vector)
+     "notes" (coerce note-summaries 'vector)
+     "source" (dmx-mcp-json-object
+               "readPath" "/topicmaps/<id>?children=true"
+               "topicReadPath" "/core/topic/<id>?children=true&assocChildren=true"))))
+
+;; From hyperdoc/mcp-server.lisp, characters 13544..14380.
+(defun dmx-mcp-topic-projection (topic)
+  (let ((selected-children (dmx-mcp-json-object)))
+    (dolist (child-type-uri (list *dmx-notes-title-type-uri*
+                                  *dmx-notes-text-type-uri*
+                                  "dmx.timestamps.created"
+                                  "dmx.timestamps.modified"))
+      (when-let (value (dmx-json-child-value topic child-type-uri))
+        (setf (gethash child-type-uri selected-children) value)))
+    (dmx-mcp-json-object
+     "id" (dmx-json-object-value topic "id")
+     "uri" (dmx-json-object-value topic "uri")
+     "typeUri" (dmx-json-object-value topic "typeUri")
+     "title" (dmx-mcp-topic-title topic)
+     "value" (dmx-json-object-value topic "value")
+     "text" (dmx-json-child-value topic *dmx-notes-text-type-uri*)
+     "children" selected-children)))
+
+;; From hyperdoc/mcp-server.lisp, characters 14380..14716.
+(defun dmx-mcp-topic-ref-object (topic-id &key label)
+  (when topic-id
+    (dmx-mcp-json-object
+     "topicId" topic-id
+     "label" label
+     "resourceUri" (dmx-mcp-topic-resource-uri topic-id)
+     "readPath" (format nil
+                        "/core/topic/~D?children=true&assocChildren=true"
+                        topic-id))))
+
+;; From hyperdoc/mcp-server.lisp, characters 14716..16253.
+(defun dmx-mcp-workspace-annotation-destination-object (destination)
+  (when destination
+    (dmx-mcp-json-object
+     "workspaceId"
+     (dmx-workspace-annotation-destination-workspace-id destination)
+     "workspaceLabel"
+     (dmx-workspace-annotation-workspace-label
+      (dmx-workspace-annotation-destination-workspace-id destination))
+     "workspaceTopicmapId"
+     (dmx-workspace-annotation-destination-workspace-topicmap-id destination)
+     "topicmapLabel"
+     (dmx-workspace-annotation-topicmap-label
+      (dmx-workspace-annotation-destination-workspace-topicmap-id destination))
+     "source"
+     (format nil "~(~A~)"
+             (dmx-workspace-annotation-destination-source destination))
+     "sourceLabel"
+     (dmx-workspace-annotation-destination-source-label
+      (dmx-workspace-annotation-destination-source destination))
+     "workspaceSource"
+     (format nil "~(~A~)"
+             (dmx-workspace-annotation-destination-workspace-source
+              destination))
+     "workspaceSourceLabel"
+     (dmx-workspace-annotation-destination-source-label
+      (dmx-workspace-annotation-destination-workspace-source destination))
+     "topicmapSource"
+     (format nil "~(~A~)"
+             (dmx-workspace-annotation-destination-topicmap-source
+              destination))
+     "topicmapSourceLabel"
+     (dmx-workspace-annotation-destination-source-label
+      (dmx-workspace-annotation-destination-topicmap-source destination))
+     "rationale"
+     (dmx-workspace-annotation-destination-rationale destination))))
+
+;; From hyperdoc/mcp-server.lisp, characters 16253..17640.
+(defun dmx-mcp-workspace-annotation-object (annotation)
+  (when annotation
+    (let ((topic-id (workspace-annotation-topic-id-of annotation)))
+      (dmx-mcp-json-object
+       "kind" "workspace-dock-annotation"
+       "title" (title-of annotation)
+       "summary" (summary-of annotation)
+       "workspaceTopicId" topic-id
+       "workspaceTopicUri" (workspace-annotation-topic-uri-of annotation)
+       "resourceUri" (and topic-id
+                          (dmx-mcp-topic-resource-uri topic-id))
+       "workspaceId" (workspace-annotation-workspace-id-of annotation)
+       "workspaceLabel"
+       (dmx-workspace-annotation-workspace-label
+        (workspace-annotation-workspace-id-of annotation))
+       "workspaceTopicmapId" (workspace-annotation-topicmap-id-of annotation)
+       "topicmapLabel"
+       (dmx-workspace-annotation-topicmap-label
+        (workspace-annotation-topicmap-id-of annotation))
+       "annotationKey" (workspace-annotation-key-of annotation)
+       "runtimeRelationId"
+       (workspace-annotation-runtime-relation-id-of annotation)
+       "storageMode"
+       (format nil "~(~A~)" (workspace-annotation-storage-mode-of annotation))
+       "storageModeLabel"
+       (workspace-annotation-storage-mode-label
+        (workspace-annotation-storage-mode-of annotation))
+       "carrierTypeUri"
+       (workspace-annotation-carrier-type-uri-of annotation)))))
+
+;; From hyperdoc/mcp-server.lisp, characters 17640..19981.
+(defun dmx-mcp-workspace-annotation-plan-object (plan)
+  (when plan
+    (dmx-mcp-json-object
+     "operation"
+     (format nil "~(~A~)" (dmx-workspace-annotation-write-plan-operation plan))
+     "annotationKey" (dmx-workspace-annotation-write-plan-annotation-key plan)
+     "uri" (dmx-workspace-annotation-write-plan-uri plan)
+     "destination"
+     (dmx-mcp-workspace-annotation-destination-object
+      (dmx-workspace-annotation-write-plan-destination plan))
+     "workspaceId" (dmx-workspace-annotation-write-plan-workspace-id plan)
+     "workspaceLabel"
+     (dmx-workspace-annotation-workspace-label
+      (dmx-workspace-annotation-write-plan-workspace-id plan))
+     "workspaceTopicmapId"
+     (dmx-workspace-annotation-write-plan-workspace-topicmap-id plan)
+     "topicmapLabel"
+     (dmx-workspace-annotation-topicmap-label
+      (dmx-workspace-annotation-write-plan-workspace-topicmap-id plan))
+     "storageMode"
+     (format nil "~(~A~)" (dmx-workspace-annotation-write-plan-storage-mode plan))
+     "storageModeLabel"
+     (workspace-annotation-storage-mode-label
+      (dmx-workspace-annotation-write-plan-storage-mode plan))
+     "carrierTypeUri"
+     (dmx-workspace-annotation-write-plan-carrier-type-uri plan)
+     "topicTypeUri"
+     (getf (dmx-workspace-annotation-write-plan-payload plan) :type-uri)
+     "title" (dmx-workspace-annotation-write-plan-title plan)
+     "status" (dmx-workspace-annotation-write-plan-status plan)
+     "payloadValidationStatus"
+     (format nil "~(~A~)"
+             (dmx-workspace-annotation-write-plan-payload-validation-status
+              plan))
+     "topicAction"
+     (format nil "~(~A~)" (dmx-workspace-annotation-write-plan-topic-action plan))
+     "workspaceAction"
+     (format nil "~(~A~)"
+             (dmx-workspace-annotation-write-plan-workspace-action plan))
+     "topicmapAction"
+     (format nil "~(~A~)"
+             (dmx-workspace-annotation-write-plan-topicmap-action plan))
+     "existingTopicId"
+     (dmx-workspace-annotation-write-plan-existing-topic-id plan)
+     "supersedesTopicId"
+     (dmx-workspace-annotation-write-plan-supersedes-topic-id plan)
+     "normalizedViewPropsJson"
+     (and (dmx-workspace-annotation-write-plan-view-props plan)
+          (dmx-topicmap-view-props-json-string
+           (dmx-workspace-annotation-write-plan-view-props plan))))))
+
+;; From hyperdoc/mcp-server.lisp, characters 19981..20122.
+(defun dmx-mcp-workspace-annotation-stage-results (stage-results)
+  (coerce (mapcar #'dmx-mcp-normalize-json-value stage-results) 'vector))
+
+;; From hyperdoc/mcp-server.lisp, characters 20122..23150.
+(defun dmx-mcp-workspace-annotation-report-object (report)
+  (let* ((plan (workspace-annotation-persistence-report-plan-of report))
+         (saved-annotation
+          (workspace-annotation-persistence-report-saved-annotation-of report))
+         (saved-topic-id
+          (workspace-annotation-persistence-report-saved-topic-id-of report))
+         (saved-carrier-type-uri
+          (workspace-annotation-persistence-report-saved-carrier-type-uri-of
+           report))
+         (journal-summary
+          (workspace-annotation-persistence-report-journal-preflight-summary-of
+           report))
+         (journal-topic-id
+          (workspace-annotation-persistence-report-journal-topic-id-of report))
+         (condition
+          (workspace-annotation-persistence-report-condition-of report)))
+    (dmx-mcp-json-object
+     "resultKind" "workspace_annotation_persistence_report"
+     "reportStatus"
+     (format nil "~(~A~)" (workspace-annotation-persistence-report-status-of report))
+     "failureStage"
+     (and (workspace-annotation-persistence-report-failure-stage-of report)
+          (format nil "~(~A~)"
+                  (workspace-annotation-persistence-report-failure-stage-of
+                   report)))
+     "failureStageLabel"
+     (and (workspace-annotation-persistence-report-failure-stage-of report)
+          (workspace-annotation-persistence-stage-label
+           (workspace-annotation-persistence-report-failure-stage-of report)))
+     "condition" (and condition (format nil "~A" condition))
+     "plan" (dmx-mcp-workspace-annotation-plan-object plan)
+     "stageResults"
+     (dmx-mcp-workspace-annotation-stage-results
+      (workspace-annotation-persistence-report-stage-results-of report))
+     "savedAnnotationObject"
+     (dmx-mcp-workspace-annotation-object saved-annotation)
+     "savedCarrierTopic"
+     (dmx-mcp-topic-ref-object
+      saved-topic-id
+      :label
+      (and saved-topic-id
+           (format nil
+                   "saved annotation carrier topic ~D (~A)"
+                   saved-topic-id
+                   (or saved-carrier-type-uri "unknown carrier"))))
+     "journalCompanionTopic"
+     (dmx-mcp-topic-ref-object
+      journal-topic-id
+      :label
+      (and journal-topic-id
+           (format nil
+                   "workspace journal companion topic ~D"
+                   journal-topic-id)))
+     "journalPreflightSummary"
+     (and journal-summary
+          (dmx-mcp-normalize-json-value journal-summary))
+     "journalPreflightAuthContext"
+     (and (workspace-annotation-persistence-report-journal-preflight-auth-context-of
+           report)
+          (dmx-mcp-normalize-json-value
+           (workspace-annotation-persistence-report-journal-preflight-auth-context-of
+            report)))
+     "assignmentAuthContext"
+     (and (workspace-annotation-persistence-report-assignment-auth-context-of
+           report)
+          (dmx-mcp-normalize-json-value
+           (workspace-annotation-persistence-report-assignment-auth-context-of
+            report))))))
+
+;; From hyperdoc/mcp-server.lisp, characters 23150..23749.
+(defun dmx-mcp-merge-journal-event-previews (&rest previews)
+  (let ((events '()))
+    (dolist (preview previews)
+      (let ((journal-preview (and preview
+                                  (getf preview :journal-event-preview))))
+        (when journal-preview
+          (cond
+            ((vectorp journal-preview)
+             (loop for event across journal-preview
+                   do (push event events)))
+            ((listp journal-preview)
+             (dolist (event journal-preview)
+               (push event events)))))))
+    (and events
+         (coerce (nreverse events) 'vector))))
+
+;; From hyperdoc/mcp-server.lisp, characters 23749..24531.
+(defun dmx-mcp-workspace-annotation-dry-run-object (plan dry-run-result annotation)
+  (dmx-mcp-json-object
+   "resultKind" "workspace_annotation_dry_run"
+   "plan" (dmx-mcp-workspace-annotation-plan-object plan)
+   "journalEventPreview"
+   (dmx-mcp-normalize-json-value
+    (getf dry-run-result :journal-event-preview))
+   "workspaceAssignmentPreview"
+   (and (getf dry-run-result :guarded-workspace-assignment)
+        (dmx-mcp-normalize-json-value
+         (getf dry-run-result :guarded-workspace-assignment)))
+   "topicmapPlacementPreview"
+   (and (getf dry-run-result :guarded-topicmap-placement)
+        (dmx-mcp-normalize-json-value
+         (getf dry-run-result :guarded-topicmap-placement)))
+   "savedAnnotationObject"
+   (dmx-mcp-workspace-annotation-object annotation)))
+
+;; From hyperdoc/mcp-server.lisp, characters 24531..25237.
+(defun dmx-mcp-continue-workspace-annotation-explicit-auth-mode (arguments)
+  (let ((requested-mode (dmx-mcp-argument arguments "authMode"))
+        (username (dmx-mcp-argument arguments "username"))
+        (password (dmx-mcp-argument arguments "password"))
+        (authorization-header (dmx-mcp-argument arguments "authorizationHeader"))
+        (auth-token (dmx-mcp-argument arguments "authToken")))
+    (or requested-mode
+        (and (or (dmx-non-empty-string-p username)
+                 (dmx-non-empty-string-p password))
+             :basic)
+        (and (dmx-non-empty-string-p authorization-header)
+             :header)
+        (and (dmx-non-empty-string-p auth-token)
+             :token))))
+
+;; From hyperdoc/mcp-server.lisp, characters 25237..31680.
+(defun dmx-mcp-continue-workspace-annotation-tool (server arguments)
+  (let* ((topic-id
+          (or (parse-positive-integer
+               (gethash "topicId" arguments))
+              (error 'fedwiki-dmx-import-error
+                     :message
+                     "topicId is required for continue_workspace_annotation")))
+         (workspace-topicmap-id
+          (or (dmx-mcp-argument arguments "workspaceTopicmapId")
+              (dmx-mcp-server-workspace-topicmap-id server)))
+         (workspace-id
+          (dmx-mcp-argument arguments "workspaceId"))
+         (auth-mode
+          (dmx-mcp-continue-workspace-annotation-explicit-auth-mode
+           arguments))
+         (username (dmx-mcp-argument arguments "username"))
+         (password (dmx-mcp-argument arguments "password"))
+         (authorization-header
+          (dmx-mcp-argument arguments "authorizationHeader"))
+         (auth-token (dmx-mcp-argument arguments "authToken"))
+         (explicit-auth-requested-p
+          (or auth-mode
+              (dmx-non-empty-string-p username)
+              (dmx-non-empty-string-p password)
+              (dmx-non-empty-string-p authorization-header)
+              (dmx-non-empty-string-p auth-token)))
+         (dry-run (dmx-mcp-argument arguments "dryRun" t))
+         (read-client (dmx-mcp-server-read-client server))
+         (write-client (dmx-mcp-server-write-client server))
+         (annotation
+          (read-dmx-workspace-annotation
+           :topic-id topic-id
+           :workspace-topicmap-id workspace-topicmap-id
+           :client read-client))
+         (plan
+          (plan-dmx-workspace-annotation-write-from-object
+           annotation
+           :workspace-topicmap-id workspace-topicmap-id
+           :workspace-id workspace-id
+           :client write-client))
+         (continuation-report
+          (make-workspace-annotation-continuation-report
+           annotation
+           plan
+           topic-id
+           workspace-topicmap-id
+           write-client)))
+    (if dry-run
+        (let* ((guarded-assignment
+                (and (eql (dmx-workspace-annotation-write-plan-workspace-action
+                           plan)
+                          :assign)
+                     (continue-workspace-annotation-with-guarded-assignment
+                      plan
+                      write-client
+                      topic-id
+                      workspace-topicmap-id
+                      :dry-run t)))
+               (guarded-topicmap
+                (and (eql (dmx-workspace-annotation-write-plan-topicmap-action
+                           plan)
+                          :add)
+                     (continue-workspace-annotation-with-guarded-topicmap-placement
+                      plan
+                      write-client
+                      topic-id
+                      workspace-topicmap-id
+                      :dry-run t)))
+               (dry-run-result
+                (list :journal-event-preview
+                      (dmx-mcp-merge-journal-event-previews
+                       guarded-assignment
+                       guarded-topicmap)
+                      :guarded-workspace-assignment guarded-assignment
+                      :guarded-topicmap-placement guarded-topicmap)))
+          (dmx-mcp-workspace-annotation-dry-run-object
+           plan
+           dry-run-result
+           annotation))
+        (let* ((result
+                (if explicit-auth-requested-p
+                    (continue-workspace-annotation-persistence-with-explicit-auth
+                     continuation-report
+                     :auth-mode auth-mode
+                     :username username
+                     :password password
+                     :authorization-header authorization-header
+                     :auth-token auth-token)
+                    (continue-workspace-annotation-persistence-with-client
+                     continuation-report
+                     write-client)))
+               (status (workspace-annotation-persistence-report-status-of result))
+               (saved-annotation
+                (workspace-annotation-persistence-report-saved-annotation-of
+                 result))
+               (journal-summary
+                (or (workspace-annotation-persistence-report-journal-preflight-summary-of
+                     result)
+                    (and saved-annotation
+                         (dmx-workspace-journal-preflight-summary
+                          write-client
+                          (workspace-annotation-topic-uri-of saved-annotation)
+                          "uri"
+                          (workspace-annotation-topic-uri-of saved-annotation)
+                          (workspace-annotation-topicmap-id-of saved-annotation)
+                          :subject-uri
+                          (workspace-annotation-topic-uri-of saved-annotation)
+                          :subject-kind "workspace-annotation"
+                          :ownership-class "hyperdoc-workspace-annotation")))))
+          (if (and (eq status :persisted)
+                   saved-annotation)
+              (dmx-mcp-json-object
+               "resultKind" "workspace_annotation"
+               "annotation"
+               (dmx-mcp-workspace-annotation-object saved-annotation)
+               "savedCarrierTopic"
+               (dmx-mcp-topic-ref-object
+                (workspace-annotation-topic-id-of saved-annotation)
+                :label
+                (format nil
+                        "saved annotation carrier topic ~D (~A)"
+                        (workspace-annotation-topic-id-of saved-annotation)
+                        (or (workspace-annotation-carrier-type-uri-of saved-annotation)
+                            "native hyperdoc.annotation")))
+               "journalCompanionTopic"
+               (let ((journal-topic-id (and journal-summary
+                                            (getf journal-summary :existing-topic-id))))
+                 (dmx-mcp-topic-ref-object
+                  journal-topic-id
+                  :label
+                  (and journal-topic-id
+                       (format nil
+                               "workspace journal companion topic ~D"
+                               journal-topic-id))))
+               "journalPreflightSummary"
+               (and journal-summary
+                    (dmx-mcp-normalize-json-value journal-summary)))
+	      (dmx-mcp-workspace-annotation-report-object result))))))
+
+;; From hyperdoc/mcp-server.lisp, characters 31680..32288.
+(defun dmx-mcp-repair-workspace-journal-companion-tool (server arguments)
+  (execute-dmx-workspace-journal-companion-repair
+   :journal-topic-id (dmx-mcp-argument arguments "journalTopicId")
+   :subject-key (dmx-mcp-argument arguments "subjectKey")
+   :subject-uri (dmx-mcp-argument arguments "subjectUri")
+   :workspace-topicmap-id
+   (or (dmx-mcp-argument arguments "workspaceTopicmapId")
+       (dmx-mcp-server-workspace-topicmap-id server))
+   :workspace-id (dmx-mcp-argument arguments "workspaceId")
+   :client (dmx-mcp-server-write-client server)
+   :dry-run (dmx-mcp-argument arguments "dryRun" t)))
+
+;; From hyperdoc/mcp-server.lisp, characters 32288..33250.
+(defun dmx-mcp-topicmap-projection (topicmap-json)
+  (let* ((topicmap-topic (gethash "topic" topicmap-json))
+         (topic-summaries (dmx-mcp-topicmap-topic-summaries topicmap-json))
+         (visible-topic-summaries
+          (remove-if #'dmx-workspace-journal-note-summary-p topic-summaries))
+         (note-summaries (dmx-mcp-note-summaries visible-topic-summaries)))
+    (dmx-mcp-json-object
+     "id" (dmx-json-object-value topicmap-topic "id")
+     "uri" (dmx-json-object-value topicmap-topic "uri")
+     "typeUri" (dmx-json-object-value topicmap-topic "typeUri")
+     "title" (dmx-mcp-topic-title topicmap-topic)
+     "topicCount" (length visible-topic-summaries)
+     "topics" (coerce visible-topic-summaries 'vector)
+     "noteCount" (length note-summaries)
+     "notes" (coerce note-summaries 'vector)
+     "assocsCount"
+     (length (dmx-mcp-array-elements (gethash "assocs" topicmap-json)))
+     "viewProps" (gethash "viewProps" topicmap-json))))
+
+;; From hyperdoc/mcp-server.lisp, characters 33250..34411.
+(defun dmx-mcp-known-topic-ids (server)
+  (let* ((topicmap-json (dmx-import-read-topicmap
+                         (dmx-mcp-server-read-client server)
+                         (dmx-mcp-server-workspace-topicmap-id server)))
+         ;; A deliberately unconfigured/null client may still advertise configured URIs.
+         (topics (if (and (null topicmap-json)
+                          (typep (dmx-mcp-server-read-client server) 'null-dmx-import-client)) #()
+                     (and (hash-table-p topicmap-json) (gethash "topics" topicmap-json)))))
+    (unless (and (vectorp topics) (not (stringp topics))
+                 (every (lambda (topic)
+                          (and (hash-table-p topic)
+                               (integerp (gethash "id" topic))
+                               (plusp (gethash "id" topic)))) topics))
+      (error 'fedwiki-dmx-import-error :message "Invalid DMX topicmap discovery response"))
+    (remove-duplicates
+     (append (dmx-mcp-server-known-topic-ids server)
+             (loop for topic across topics
+                   unless (dmx-workspace-journal-topic-p topic) collect (gethash "id" topic)))
+     :test #'eql)))
+
+;; From hyperdoc/mcp-server.lisp, characters 34411..35572.
+(defun dmx-mcp-resource-list (server)
+  (let ((resources
+         (list (dmx-mcp-resource-metadata
+                (dmx-mcp-workspace-resource-uri)
+                "workspace/context-window"
+                "Summary projection of the shared DMX context-window workspace.")
+               (dmx-mcp-resource-metadata
+                (dmx-mcp-topicmap-resource-uri
+                 (dmx-mcp-server-workspace-topicmap-id server))
+                (format nil "topicmap/~D"
+                        (dmx-mcp-server-workspace-topicmap-id server))
+                "Topicmap projection for the current shared workspace."))))
+    (dolist (topic-id (dmx-mcp-known-topic-ids server))
+      ;; Discovery advertises identities; data/title/absence/authorization are read on demand.
+      ;; The topicmap already supplies its member ids: never add N core/topic HTTP reads here.
+      (push (dmx-mcp-resource-metadata
+             (dmx-mcp-topic-resource-uri topic-id)
+             (format nil "topic/~D" topic-id)
+             (format nil "DMX topic ~D through the canonical core/topic read path." topic-id))
+            resources))
+    (coerce (nreverse resources) 'vector)))
+
+;; From hyperdoc/mcp-server.lisp, characters 35572..35863.
+(defun dmx-mcp-resource-templates ()
+  (dmx-mcp-json-array
+   (dmx-mcp-resource-template-metadata
+    "dmx://topic/{id}"
+    "topic/<id>"
+    "Read a DMX topic by id.")
+   (dmx-mcp-resource-template-metadata
+    "dmx://topicmap/{id}"
+    "topicmap/<id>"
+    "Read a DMX topicmap by id.")))
+
+;; From hyperdoc/mcp-server.lisp, characters 35863..37463.
+(defun dmx-mcp-read-resource (server uri)
+  (cond
+    ((string= uri (dmx-mcp-workspace-resource-uri))
+     (dmx-mcp-workspace-summary server))
+    ((string= uri
+              (dmx-mcp-topicmap-resource-uri
+               (dmx-mcp-server-workspace-topicmap-id server)))
+     (dmx-mcp-topicmap-projection
+      (dmx-import-read-topicmap
+       (dmx-mcp-server-read-client server)
+       (dmx-mcp-server-workspace-topicmap-id server))))
+    ((search "dmx://topic/" uri :test #'char=)
+     (let* ((topic-id (parse-positive-integer uri))
+            (topic (and topic-id
+                        (dmx-import-read-topic
+                         (dmx-mcp-server-read-client server)
+                         topic-id))))
+       (unless (and (hash-table-p topic) (eql topic-id (gethash "id" topic)))
+         (error 'fedwiki-dmx-import-error
+                :message (format nil "Unknown DMX topic resource ~A" uri)))
+       (dmx-mcp-topic-projection topic)))
+    ((search "dmx://topicmap/" uri :test #'char=)
+     (let* ((topicmap-id (parse-positive-integer uri))
+            (topicmap-json (and topicmap-id
+                                (dmx-import-read-topicmap
+                                 (dmx-mcp-server-read-client server)
+                                 topicmap-id))))
+       (unless topicmap-json
+         (error 'fedwiki-dmx-import-error
+                :message (format nil "Unknown DMX topicmap resource ~A" uri)))
+       (dmx-mcp-topicmap-projection topicmap-json)))
+    (t
+     (error 'fedwiki-dmx-import-error
+            :message (format nil "Unsupported MCP resource URI ~A" uri)))))
+
+;; From hyperdoc/mcp-server.lisp, characters 37463..38025.
+(defun dmx-mcp-live-write-available-p (server)
+  (and (dmx-mcp-server-live-writes-enabled-p server)
+       (or (typep (dmx-mcp-server-write-client server) 'memory-dmx-import-client)
+           (and (typep (dmx-mcp-server-write-client server) 'http-dmx-import-client)
+                ;; The guarded MCP boundary is enforced on the HyperDoc side.
+                ;; DMX auth headers are optional transport details, not a hard
+                ;; precondition for live availability.
+                (dmx-import-base-url-of (dmx-mcp-server-write-client server))))))
+
+;; From hyperdoc/mcp-server.lisp, characters 38025..38281.
+(defun dmx-mcp-write-unavailable-error ()
+  (dmx-mcp-json-object
+   "status" "write_unavailable"
+   "message"
+   "Live DMX writes are disabled. Set HYPERDOC_MCP_ENABLE_LIVE_WRITES=1 and configure a usable DMX import base URL before calling live tools."))
+
+;; From hyperdoc/mcp-server.lisp, characters 38281..38885.
+(defun dmx-mcp-http-error-boundary (evidence)
+  (let ((method (getf evidence :method))
+        (path (getf evidence :path)))
+    (cond
+      ((and (eq method :post)
+            path
+            (string= path "/core/topic"))
+       "dmx-import-create-topic")
+      ((and (eq method :put)
+            path
+            (search "/core/topic/" path :test #'char=))
+       "dmx-import-update-topic")
+      ((and (member method '(:post :put) :test #'eq)
+            path
+            (search "/topicmaps/" path :test #'char=))
+       "dmx-import-topicmap-context")
+      (t
+       "dmx-import-http-request"))))
+
+;; From hyperdoc/mcp-server.lisp, characters 38885..42630.
+(defun dmx-mcp-validation-error-object (condition)
+  (typecase condition
+    (dmx-topicmap-view-props-validation-error
+     (dmx-mcp-json-object
+      "status" "validation_error"
+      "message" (fedwiki-dmx-import-message-of condition)
+      "boundary"
+      (format nil "~A"
+              (dmx-topicmap-view-props-validation-boundary-of condition))
+      "missingLongKeys"
+      (coerce (dmx-topicmap-view-props-validation-missing-long-keys-of condition)
+              'vector)
+      "forbiddenShortKeys"
+      (coerce (dmx-topicmap-view-props-validation-forbidden-short-keys-of condition)
+              'vector)
+      "normalizedPayload"
+      (dmx-topicmap-view-props-validation-normalized-payload-of condition)))
+    (dmx-workspace-note-validation-error
+     (dmx-mcp-json-object
+      "status" "validation_error"
+      "message" (fedwiki-dmx-import-message-of condition)
+      "boundary"
+      (format nil "~A"
+              (dmx-workspace-note-validation-boundary-of condition))
+      "missingFields"
+      (coerce (dmx-workspace-note-validation-missing-fields-of condition) 'vector)
+      "invalidFields"
+      (coerce (dmx-workspace-note-validation-invalid-fields-of condition) 'vector)))
+    (dmx-workspace-topic-validation-error
+     (dmx-mcp-json-object
+      "status" "validation_error"
+      "message" (fedwiki-dmx-import-message-of condition)
+      "boundary"
+      (format nil "~A"
+              (dmx-workspace-topic-validation-boundary-of condition))
+      "missingFields"
+      (coerce (dmx-workspace-topic-validation-missing-fields-of condition) 'vector)
+      "invalidFields"
+      (coerce (dmx-workspace-topic-validation-invalid-fields-of condition) 'vector)))
+    (dmx-workspace-topic-ownership-error
+     (dmx-mcp-json-object
+      "status" "ownership_error"
+      "message" (fedwiki-dmx-import-message-of condition)
+      "topicId" (dmx-workspace-topic-ownership-topic-id-of condition)
+      "ownershipClass"
+      (format nil "~(~A~)" (dmx-workspace-topic-ownership-class-of condition))
+      "uri" (dmx-workspace-topic-ownership-uri-of condition)
+      "allowedActions"
+      (coerce (mapcar (lambda (action) (format nil "~(~A~)" action))
+                      (dmx-workspace-topic-ownership-allowed-actions-of condition))
+              'vector)))
+    (dmx-import-http-error
+     (let ((evidence (dmx-import-http-evidence-of condition)))
+       (dmx-mcp-json-object
+        "status" "http_error"
+        "message" (princ-to-string condition)
+        "reason" (fedwiki-dmx-import-message-of condition)
+        "boundary" (dmx-mcp-http-error-boundary evidence)
+        "endpoint" (or (getf evidence :path)
+                       (dmx-import-http-url-of condition))
+        "url" (dmx-import-http-url-of condition)
+        "statusCode" (dmx-import-http-status-code-of condition)
+        "responseBody" (dmx-import-http-response-body-of condition)
+        "requestBodyPrefix" (getf evidence :request-body-prefix)
+        "requestBodyLength" (getf evidence :request-body-length)
+        "responseBodyPrefix" (or (getf evidence :response-body-prefix)
+                                  (dmx-import-http-response-body-of condition))
+        "responseBodyLength" (getf evidence :response-body-length)
+        "httpEvidence" evidence)))
+    (dmx-import-unsupported-operation-error
+     (dmx-mcp-json-object
+      "status" "unsupported_operation"
+      "message" (fedwiki-dmx-import-message-of condition)
+      "operation"
+      (format nil "~(~A~)" (dmx-import-unsupported-operation-of condition))
+      "endpoint" (dmx-import-unsupported-endpoint-of condition)
+      "reason" (dmx-import-unsupported-reason-of condition)))
+    (t
+     (dmx-mcp-json-object
+      "status" "error"
+      "message" (princ-to-string condition)))))
+
+;; From hyperdoc/mcp-server.lisp, characters 42630..42996.
+(defun dmx-mcp-tool-result (object &key is-error)
+  (let* ((normalized-object (dmx-mcp-normalize-json-value object))
+         (result (dmx-mcp-json-object
+                  "content" (dmx-mcp-content-from-object normalized-object)
+                  "structuredContent" normalized-object)))
+    (when is-error
+      (setf (gethash "isError" result) t))
+    result))
+
+;; From hyperdoc/mcp-server.lisp, characters 42996..44069.
+(defun dmx-mcp-dry-run-topicmap-context (arguments)
+  (let ((topicmap-id (or (parse-positive-integer
+                          (gethash "topicmapId" arguments))
+                         (error 'fedwiki-dmx-import-error
+                                :message "topicmapId is required for topicmap_context_add")))
+        (topic-id (or (parse-positive-integer
+                       (gethash "topicId" arguments))
+                      (error 'fedwiki-dmx-import-error
+                             :message "topicId is required for topicmap_context_add"))))
+    (multiple-value-bind (normalized-view-props normalization)
+        (normalize-dmx-topicmap-view-props
+         (gethash "viewProps" arguments)
+         :boundary 'validated-dmx-write-dry-run)
+      (dmx-mcp-json-object
+       "writeKind" "topicmap_context_add"
+       "topicmapId" topicmap-id
+       "topicId" topic-id
+       "validationStatus" (getf normalization :status)
+       "normalizedPayload" normalized-view-props
+       "intendedEndpoint"
+       (dmx-topicmap-add-topic-path topicmap-id topic-id)))))
+
+;; From hyperdoc/mcp-server.lisp, characters 44069..44543.
+(defun dmx-mcp-dry-run-topicmap-context-upsert (server arguments)
+  (dmx-mcp-json-object
+   "writeKind" "topicmap_context_upsert"
+   "summary"
+   (execute-dmx-workspace-topicmap-context-upsert
+    (gethash "topicId" arguments)
+    :workspace-topicmap-id
+    (or (dmx-mcp-argument arguments "topicmapId")
+        (dmx-mcp-server-workspace-topicmap-id server))
+    :client (dmx-mcp-server-read-client server)
+    :view-props (gethash "viewProps" arguments)
+    :dry-run t)))
+
+;; From hyperdoc/mcp-server.lisp, characters 44543..44969.
+(defun dmx-mcp-dry-run-topicmap-context-remove (server arguments)
+  (dmx-mcp-json-object
+   "writeKind" "topicmap_context_remove"
+   "summary"
+   (execute-dmx-workspace-topicmap-context-remove
+    (gethash "topicId" arguments)
+    :workspace-topicmap-id
+    (or (dmx-mcp-argument arguments "topicmapId")
+        (dmx-mcp-server-workspace-topicmap-id server))
+    :client (dmx-mcp-server-read-client server)
+    :dry-run t)))
+
+;; From hyperdoc/mcp-server.lisp, characters 44969..45483.
+(defun dmx-mcp-dry-run-workspace-assignment-repair (server arguments)
+  (dmx-mcp-json-object
+   "writeKind" "workspace_assignment_repair"
+   "summary"
+   (execute-dmx-workspace-topic-workspace-assignment-repair
+    (gethash "topicId" arguments)
+    :workspace-id (dmx-mcp-argument arguments "workspaceId")
+    :workspace-topicmap-id
+    (or (dmx-mcp-argument arguments "workspaceTopicmapId")
+        (dmx-mcp-server-workspace-topicmap-id server))
+    :client (dmx-mcp-server-read-client server)
+    :dry-run t)))
+
+;; From hyperdoc/mcp-server.lisp, characters 45483..46282.
+(defun dmx-mcp-dry-run-workspace-note (server arguments)
+  (let ((summary
+         (plan-dmx-workspace-note-write
+          (gethash "title" arguments)
+          (gethash "text" arguments)
+          :workspace-topicmap-id
+          (or (dmx-mcp-argument arguments "workspaceTopicmapId")
+              (dmx-mcp-server-workspace-topicmap-id server))
+          :client (dmx-mcp-server-read-client server)
+          :view-props (gethash "viewProps" arguments)
+          :note-key (dmx-mcp-argument arguments "noteKey")
+          :uri (dmx-mcp-argument arguments "uri"))))
+    (dmx-mcp-json-object
+     "writeKind" "workspace_note_create"
+     "summary" (dmx-workspace-note-plan-summary summary)
+     "payload" (dmx-import-json-object
+                (dmx-workspace-note-write-plan-payload summary)))))
+
+;; From hyperdoc/mcp-server.lisp, characters 46282..46840.
+(defun dmx-mcp-dry-run-workspace-note-update (server arguments)
+  (let ((plan (plan-dmx-workspace-note-update
+               (gethash "topicId" arguments)
+               :title (dmx-mcp-argument arguments "title")
+               :text (dmx-mcp-argument arguments "text")
+               :client (dmx-mcp-server-read-client server))))
+    (dmx-mcp-json-object
+     "writeKind" "workspace_note_update"
+     "summary" (dmx-workspace-note-plan-summary plan)
+     "payload" (dmx-import-json-object
+                (dmx-workspace-note-write-plan-payload plan)))))
+
+;; From hyperdoc/mcp-server.lisp, characters 46840..47878.
+(defun dmx-mcp-dry-run-handover (server arguments)
+  (let ((result
+         (create-dmx-workspace-handover
+          (gethash "title" arguments)
+          (gethash "summary" arguments)
+          :from-agent (dmx-mcp-argument arguments "fromAgent")
+          :to-agent (dmx-mcp-argument arguments "toAgent")
+          :requested-action (dmx-mcp-argument arguments "requestedAction")
+          :artifacts (coerce (or (dmx-mcp-array-elements (gethash "artifacts" arguments))
+                                 #())
+                             'list)
+          :status (dmx-mcp-argument arguments "status")
+          :workspace-topicmap-id
+          (or (dmx-mcp-argument arguments "workspaceTopicmapId")
+              (dmx-mcp-server-workspace-topicmap-id server))
+          :client (dmx-mcp-server-read-client server)
+          :view-props (gethash "viewProps" arguments)
+          :note-key (dmx-mcp-argument arguments "noteKey")
+          :dry-run t)))
+    (dmx-mcp-json-object
+     "writeKind" "handover_create"
+     "summary" result)))
+
+;; From hyperdoc/mcp-server.lisp, characters 47878..48718.
+(defun dmx-mcp-read-topicmap-tool (server arguments)
+  (let* ((topicmap-id (or (parse-positive-integer
+                           (gethash "topicmapId" arguments))
+                          (dmx-mcp-server-workspace-topicmap-id server)))
+         (topicmap-json (dmx-import-read-topicmap
+                         (dmx-mcp-server-read-client server)
+                         topicmap-id)))
+    (unless topicmap-json
+      (error 'fedwiki-dmx-import-error
+             :message (format nil "Unknown DMX topicmap ~D" topicmap-id)))
+    (dmx-mcp-json-object
+     "topicmapId" topicmap-id
+     "projection" (dmx-mcp-topicmap-projection topicmap-json)
+     "source" (dmx-mcp-json-object
+               "resourceUri" (dmx-mcp-topicmap-resource-uri topicmap-id)
+               "readPath" (format nil "/topicmaps/~D?children=true" topicmap-id)))))
+
+;; From hyperdoc/mcp-server.lisp, characters 48718..49590.
+(defun dmx-mcp-read-topic-tool (server arguments)
+  (let* ((topic-id (or (parse-positive-integer
+                        (gethash "topicId" arguments))
+                       (error 'fedwiki-dmx-import-error
+                              :message "topicId is required for read_dmx_topic")))
+         (topic (dmx-import-read-topic
+                 (dmx-mcp-server-read-client server)
+                 topic-id)))
+    (unless topic
+      (error 'fedwiki-dmx-import-error
+             :message (format nil "Unknown DMX topic ~D" topic-id)))
+    (dmx-mcp-json-object
+     "topicId" topic-id
+     "topic" (dmx-mcp-topic-projection topic)
+     "source" (dmx-mcp-json-object
+               "resourceUri" (dmx-mcp-topic-resource-uri topic-id)
+               "readPath" (format nil "/core/topic/~D?children=true&assocChildren=true"
+                                  topic-id)))))
+
+;; From hyperdoc/mcp-server.lisp, characters 49590..51831.
+(defun dmx-mcp-resolve-workspace-note-tool (server arguments)
+  (let* ((note-key
+          (or (dmx-mcp-argument arguments "noteKey")
+              (error 'fedwiki-dmx-import-error
+                     :message "noteKey is required for resolve_workspace_note")))
+         (note-kind
+          (normalize-dmx-workspace-note-kind-designator
+           (dmx-mcp-argument arguments "noteKind")
+           'dmx-mcp-resolve-workspace-note-tool))
+         (resolution
+          (resolve-dmx-workspace-note
+           :workspace-topicmap-id
+           (or (dmx-mcp-argument arguments "workspaceTopicmapId")
+               (dmx-mcp-server-workspace-topicmap-id server))
+           :client (dmx-mcp-server-read-client server)
+           :note-key note-key
+           :note-kind note-kind))
+         (existing-topic
+          (dmx-workspace-note-resolution-existing-topic resolution)))
+    (dmx-mcp-json-object
+     "noteKey" (dmx-workspace-note-resolution-note-key resolution)
+     "noteKind" (format nil "~(~A~)"
+                        (dmx-workspace-note-resolution-note-kind resolution))
+     "uri" (dmx-workspace-note-resolution-uri resolution)
+     "workspaceTopicmapId"
+     (dmx-workspace-note-resolution-workspace-topicmap-id resolution)
+     "existingTopicId"
+     (dmx-workspace-note-resolution-existing-topic-id resolution)
+     "inTopicmap"
+     (and (dmx-workspace-note-resolution-existing-topic-id resolution)
+          (dmx-workspace-note-resolution-in-topicmap-p resolution))
+     "topicAction"
+     (format nil "~(~A~)" (dmx-workspace-note-resolution-topic-action resolution))
+     "topicmapAction"
+     (format nil "~(~A~)" (dmx-workspace-note-resolution-topicmap-action resolution))
+     "lookup" (dmx-mcp-json-object
+               "kind" "uri_lookup"
+               "resourceUri"
+               (and (dmx-workspace-note-resolution-existing-topic-id resolution)
+                    (dmx-mcp-topic-resource-uri
+                     (dmx-workspace-note-resolution-existing-topic-id resolution)))
+               "lookupPath"
+               (format nil "/core/topic/uri/<uri>?~A"
+                       *dmx-topic-fetch-query-string*))
+     "topic" (and existing-topic
+                  (dmx-mcp-topic-projection existing-topic)))))
+
+;; From hyperdoc/mcp-server.lisp, characters 51831..52237.
+(defun dmx-mcp-read-hyperdoc-workspace-journal-tool (server arguments)
+  (when (gethash "reconcile" arguments)
+    (error 'fedwiki-dmx-import-error
+           :message "read_hyperdoc_workspace_journal does not accept reconcile"))
+  (read-hyperdoc-workspace-journal
+   :workspace-topicmap-id
+   (or (dmx-mcp-argument arguments "workspaceTopicmapId")
+       (dmx-mcp-server-workspace-topicmap-id server))))
+
+;; From hyperdoc/mcp-server.lisp, characters 52237..52709.
+(defun dmx-mcp-read-hyperdoc-topic-journal-tool (server arguments)
+  (when (gethash "reconcile" arguments)
+    (error 'fedwiki-dmx-import-error
+           :message "read_hyperdoc_topic_journal does not accept reconcile"))
+  (read-hyperdoc-topic-journal
+   :subject-key (dmx-mcp-argument arguments "subjectKey")
+   :topic-id (dmx-mcp-argument arguments "topicId")
+   :note-key (dmx-mcp-argument arguments "noteKey")
+   :note-kind (dmx-mcp-argument arguments "noteKind")))
+
+;; From hyperdoc/mcp-server.lisp, characters 52709..53187.
+(defun dmx-mcp-list-hyperdoc-topic-revisions-tool (server arguments)
+  (when (gethash "reconcile" arguments)
+    (error 'fedwiki-dmx-import-error
+           :message "list_hyperdoc_topic_revisions does not accept reconcile"))
+  (list-hyperdoc-topic-revisions
+   :subject-key (dmx-mcp-argument arguments "subjectKey")
+   :topic-id (dmx-mcp-argument arguments "topicId")
+   :note-key (dmx-mcp-argument arguments "noteKey")
+   :note-kind (dmx-mcp-argument arguments "noteKind")))
+
+;; From hyperdoc/mcp-server.lisp, characters 53187..53605.
+(defun dmx-mcp-inventory-legacy-workspace-journal-artifacts-tool
+    (server arguments)
+  (inventory-legacy-dmx-workspace-journal-artifacts
+   :workspace-topicmap-id
+   (or (dmx-mcp-argument arguments "workspaceTopicmapId")
+       (dmx-mcp-server-workspace-topicmap-id server))
+   :client (dmx-mcp-server-read-client server)
+   :candidate-topic-ids
+   (dmx-mcp-integer-array-argument arguments "candidateTopicIds")))
+
+;; From hyperdoc/mcp-server.lisp, characters 53605..54009.
+(defun dmx-mcp-plan-legacy-workspace-journal-cleanup-tool
+    (server arguments)
+  (plan-legacy-dmx-workspace-journal-cleanup
+   :workspace-topicmap-id
+   (or (dmx-mcp-argument arguments "workspaceTopicmapId")
+       (dmx-mcp-server-workspace-topicmap-id server))
+   :client (dmx-mcp-server-read-client server)
+   :candidate-topic-ids
+   (dmx-mcp-integer-array-argument arguments "candidateTopicIds")))
+
+;; From hyperdoc/mcp-server.lisp, characters 54009..54525.
+(defun dmx-mcp-restore-workspace-topic-revision-tool (server arguments)
+  (restore-dmx-workspace-topic-revision
+   :workspace-topicmap-id
+   (or (dmx-mcp-argument arguments "workspaceTopicmapId")
+       (dmx-mcp-server-workspace-topicmap-id server))
+   :client (dmx-mcp-server-write-client server)
+   :subject-key (dmx-mcp-argument arguments "subjectKey")
+   :topic-id (dmx-mcp-argument arguments "topicId")
+   :revision (dmx-mcp-argument arguments "revision")
+   :dry-run (dmx-mcp-argument arguments "dryRun" t)))
+
+;; From hyperdoc/mcp-server.lisp, characters 54525..55145.
+(defun dmx-mcp-restore-workspace-note-revision-tool (server arguments)
+  (restore-dmx-workspace-note-revision
+   :workspace-topicmap-id
+   (or (dmx-mcp-argument arguments "workspaceTopicmapId")
+       (dmx-mcp-server-workspace-topicmap-id server))
+   :client (dmx-mcp-server-write-client server)
+   :subject-key (dmx-mcp-argument arguments "subjectKey")
+   :topic-id (dmx-mcp-argument arguments "topicId")
+   :note-key (dmx-mcp-argument arguments "noteKey")
+   :note-kind (dmx-mcp-argument arguments "noteKind")
+   :revision (dmx-mcp-argument arguments "revision")
+   :dry-run (dmx-mcp-argument arguments "dryRun" t)))
+
+;; From hyperdoc/mcp-server.lisp, characters 55145..56235.
+(defun dmx-mcp-call-dry-run-tool (server arguments)
+  (let ((write-kind (gethash "writeKind" arguments)))
+    (cond
+      ((equal write-kind "topicmap_context_add")
+       (dmx-mcp-dry-run-topicmap-context arguments))
+      ((equal write-kind "topicmap_context_upsert")
+       (dmx-mcp-dry-run-topicmap-context-upsert server arguments))
+      ((equal write-kind "topicmap_context_remove")
+       (dmx-mcp-dry-run-topicmap-context-remove server arguments))
+      ((equal write-kind "workspace_assignment_repair")
+       (dmx-mcp-dry-run-workspace-assignment-repair server arguments))
+      ((equal write-kind "workspace_note_create")
+       (dmx-mcp-dry-run-workspace-note server arguments))
+      ((equal write-kind "workspace_note_update")
+       (dmx-mcp-dry-run-workspace-note-update server arguments))
+      ((equal write-kind "handover_create")
+       (dmx-mcp-dry-run-handover server arguments))
+      (t
+       (error 'fedwiki-dmx-import-error
+              :message (format nil "Unsupported validated_dmx_write_dry_run writeKind ~S"
+                               write-kind))))))
+
+;; From hyperdoc/mcp-server.lisp, characters 56235..67785.
+(defun dmx-mcp-call-write-tool (server tool-name arguments)
+  (let ((dry-run (dmx-mcp-argument arguments "dryRun" t)))
+    (flet ((ensure-live-write-available ()
+             (unless (or dry-run
+                         (dmx-mcp-live-write-available-p server))
+               (return-from dmx-mcp-call-write-tool
+                 (dmx-mcp-tool-result (dmx-mcp-write-unavailable-error)
+                                      :is-error t)))))
+      (handler-case
+          (cond
+            ((equal tool-name "validated_dmx_write_dry_run")
+             (dmx-mcp-tool-result (dmx-mcp-call-dry-run-tool server arguments)))
+            ((equal tool-name "read_dmx_topicmap")
+             (dmx-mcp-tool-result
+              (dmx-mcp-read-topicmap-tool server arguments)))
+            ((equal tool-name "read_dmx_topic")
+             (dmx-mcp-tool-result
+              (dmx-mcp-read-topic-tool server arguments)))
+            ((equal tool-name "resolve_workspace_note")
+             (dmx-mcp-tool-result
+              (dmx-mcp-resolve-workspace-note-tool server arguments)))
+            ((equal tool-name "read_hyperdoc_workspace_journal")
+             (dmx-mcp-tool-result
+              (dmx-mcp-read-hyperdoc-workspace-journal-tool server arguments)))
+            ((equal tool-name "read_hyperdoc_topic_journal")
+             (dmx-mcp-tool-result
+              (dmx-mcp-read-hyperdoc-topic-journal-tool server arguments)))
+            ((equal tool-name "list_hyperdoc_topic_revisions")
+             (dmx-mcp-tool-result
+              (dmx-mcp-list-hyperdoc-topic-revisions-tool server arguments)))
+            ((equal tool-name "inventory_legacy_dmx_workspace_journal_artifacts")
+             (dmx-mcp-tool-result
+              (dmx-mcp-inventory-legacy-workspace-journal-artifacts-tool
+               server arguments)))
+            ((equal tool-name "plan_legacy_dmx_workspace_journal_cleanup")
+             (dmx-mcp-tool-result
+              (dmx-mcp-plan-legacy-workspace-journal-cleanup-tool
+               server arguments)))
+            ((member tool-name
+                     '("read_workspace_journal"
+                       "read_topic_journal"
+                       "list_workspace_topic_revisions"
+                       "repair_workspace_journal_companion")
+                     :test #'string=)
+             (error 'fedwiki-dmx-import-error
+                    :message
+                    (format nil
+                            "Tool ~A is deprecated. Use read_hyperdoc_workspace_journal, read_hyperdoc_topic_journal, list_hyperdoc_topic_revisions, inventory_legacy_dmx_workspace_journal_artifacts, and plan_legacy_dmx_workspace_journal_cleanup."
+                            tool-name)))
+            ((equal tool-name "append_workspace_note")
+             (ensure-live-write-available)
+             (dmx-mcp-tool-result
+              (execute-dmx-workspace-note-write
+               (gethash "title" arguments)
+               (gethash "text" arguments)
+               :workspace-topicmap-id
+               (or (dmx-mcp-argument arguments "workspaceTopicmapId")
+                   (dmx-mcp-server-workspace-topicmap-id server))
+               :client (dmx-mcp-server-write-client server)
+               :view-props (gethash "viewProps" arguments)
+               :note-key (dmx-mcp-argument arguments "noteKey")
+               :uri (dmx-mcp-argument arguments "uri")
+               :dry-run dry-run)))
+            ((equal tool-name "update_workspace_note")
+             (ensure-live-write-available)
+             (dmx-mcp-tool-result
+              (execute-dmx-workspace-note-update
+               (gethash "topicId" arguments)
+               :title (dmx-mcp-argument arguments "title")
+               :text (dmx-mcp-argument arguments "text")
+               :workspace-topicmap-id
+               (or (dmx-mcp-argument arguments "workspaceTopicmapId")
+                   (dmx-mcp-server-workspace-topicmap-id server))
+               :client (dmx-mcp-server-write-client server)
+               :dry-run dry-run)))
+            ((equal tool-name "create_handover")
+             (ensure-live-write-available)
+             (dmx-mcp-tool-result
+              (create-dmx-workspace-handover
+               (gethash "title" arguments)
+               (gethash "summary" arguments)
+               :from-agent (dmx-mcp-argument arguments "fromAgent")
+               :to-agent (dmx-mcp-argument arguments "toAgent")
+               :requested-action (dmx-mcp-argument arguments "requestedAction")
+               :artifacts (coerce (or (dmx-mcp-array-elements (gethash "artifacts" arguments))
+                                      #())
+                                  'list)
+               :status (dmx-mcp-argument arguments "status")
+               :workspace-topicmap-id
+               (or (dmx-mcp-argument arguments "workspaceTopicmapId")
+                   (dmx-mcp-server-workspace-topicmap-id server))
+               :client (dmx-mcp-server-write-client server)
+               :view-props (gethash "viewProps" arguments)
+               :note-key (dmx-mcp-argument arguments "noteKey")
+               :uri (dmx-mcp-argument arguments "uri")
+               :dry-run dry-run)))
+            ((member tool-name
+                     '("continue_workspace_annotation"
+                       "dmx-mcp-continue-workspace-annotation")
+                     :test #'string=)
+             (ensure-live-write-available)
+             (dmx-mcp-tool-result
+              (dmx-mcp-continue-workspace-annotation-tool
+               server
+               arguments)))
+            ((equal tool-name "upsert_workspace_topicmap_context")
+             (ensure-live-write-available)
+             (dmx-mcp-tool-result
+              (execute-dmx-workspace-topicmap-context-upsert
+               (gethash "topicId" arguments)
+               :workspace-topicmap-id
+               (or (dmx-mcp-argument arguments "topicmapId")
+                   (dmx-mcp-server-workspace-topicmap-id server))
+               :client (dmx-mcp-server-write-client server)
+               :view-props (gethash "viewProps" arguments)
+               :dry-run dry-run)))
+            ((equal tool-name "remove_workspace_topic_from_topicmap")
+             (ensure-live-write-available)
+             (dmx-mcp-tool-result
+              (execute-dmx-workspace-topicmap-context-remove
+               (gethash "topicId" arguments)
+               :workspace-topicmap-id
+               (or (dmx-mcp-argument arguments "topicmapId")
+                   (dmx-mcp-server-workspace-topicmap-id server))
+               :client (dmx-mcp-server-write-client server)
+               :dry-run dry-run)))
+            ((equal tool-name "repair_workspace_topic_assignment")
+             (ensure-live-write-available)
+             (dmx-mcp-tool-result
+              (execute-dmx-workspace-topic-workspace-assignment-repair
+               (gethash "topicId" arguments)
+               :workspace-id (dmx-mcp-argument arguments "workspaceId")
+               :workspace-topicmap-id
+               (or (dmx-mcp-argument arguments "workspaceTopicmapId")
+                   (dmx-mcp-server-workspace-topicmap-id server))
+               :client (dmx-mcp-server-write-client server)
+               :dry-run dry-run)))
+            ((equal tool-name "delete_workspace_topic")
+             (ensure-live-write-available)
+             (dmx-mcp-tool-result
+              (execute-dmx-workspace-topic-delete
+               (gethash "topicId" arguments)
+               :workspace-topicmap-id
+               (or (dmx-mcp-argument arguments "workspaceTopicmapId")
+                   (dmx-mcp-server-workspace-topicmap-id server))
+               :client (dmx-mcp-server-write-client server)
+               :dry-run dry-run)))
+            ((equal tool-name "delete_workspace_note")
+             (ensure-live-write-available)
+             (dmx-mcp-tool-result
+              (execute-dmx-workspace-note-delete
+               :note-key (dmx-mcp-argument arguments "noteKey")
+               :topic-id (dmx-mcp-argument arguments "topicId")
+               :note-kind (dmx-mcp-argument arguments "noteKind")
+               :workspace-topicmap-id
+               (or (dmx-mcp-argument arguments "workspaceTopicmapId")
+                   (dmx-mcp-server-workspace-topicmap-id server))
+               :client (dmx-mcp-server-write-client server)
+               :dry-run dry-run)))
+            ((equal tool-name "restore_workspace_topic_revision")
+             (ensure-live-write-available)
+             (dmx-mcp-tool-result
+              (dmx-mcp-restore-workspace-topic-revision-tool server arguments)))
+            ((equal tool-name "restore_workspace_note_revision")
+             (ensure-live-write-available)
+             (dmx-mcp-tool-result
+              (dmx-mcp-restore-workspace-note-revision-tool server arguments)))
+            ((equal tool-name "upsert_workspace_topic_factory_snippet")
+             (ensure-live-write-available)
+             (dmx-mcp-tool-result
+              (execute-dmx-workspace-topic-factory-snippet-upsert
+               :snippet-id (dmx-mcp-argument arguments "snippetId")
+               :snippet-text (dmx-mcp-argument arguments "snippetText")
+               :source-path (dmx-mcp-argument arguments "sourcePath")
+               :source-origin-id (dmx-mcp-argument arguments "sourceOriginId")
+               :source-origin-path (dmx-mcp-argument arguments "sourceOriginPath")
+               :related-hyperdoc-page-title
+               (dmx-mcp-argument arguments "relatedHyperdocPageTitle")
+               :related-topic-id (dmx-mcp-argument arguments "relatedTopicId")
+               :references (gethash "references" arguments)
+               :provenance (gethash "provenance" arguments)
+               :workspace-topicmap-id
+               (or (dmx-mcp-argument arguments "workspaceTopicmapId")
+                   (dmx-mcp-server-workspace-topicmap-id server))
+               :workspace-id (dmx-mcp-argument arguments "workspaceId")
+               :client (dmx-mcp-server-write-client server)
+               :topic-type-uri (dmx-mcp-argument arguments "topicTypeUri")
+               :view-props (gethash "viewProps" arguments)
+               :topic-value (dmx-mcp-argument arguments "topicValue")
+               :dry-run dry-run)))
+            (t
+             (dmx-mcp-tool-result
+              (dmx-mcp-json-object
+               "status" "error"
+               "message" (format nil "Unknown MCP tool ~A" tool-name))
+              :is-error t)))
+        (dmx-topicmap-view-props-validation-error (condition)
+          (dmx-mcp-tool-result (dmx-mcp-validation-error-object condition)
+                               :is-error t))
+        (dmx-workspace-note-validation-error (condition)
+          (dmx-mcp-tool-result (dmx-mcp-validation-error-object condition)
+                               :is-error t))
+        (dmx-workspace-topic-validation-error (condition)
+          (dmx-mcp-tool-result (dmx-mcp-validation-error-object condition)
+                               :is-error t))
+        (dmx-workspace-topic-ownership-error (condition)
+          (dmx-mcp-tool-result (dmx-mcp-validation-error-object condition)
+                               :is-error t))
+        (dmx-import-unsupported-operation-error (condition)
+          (dmx-mcp-tool-result (dmx-mcp-validation-error-object condition)
+                               :is-error t))
+        (fedwiki-dmx-import-error (condition)
+          (dmx-mcp-tool-result (dmx-mcp-validation-error-object condition)
+                               :is-error t))))))
+
+;; From hyperdoc/mcp-server.lisp, characters 67785..84472.
+(defun dmx-mcp-tool-definitions ()
+  (dmx-mcp-json-array
+   (dmx-mcp-json-object
+    "name" "validated_dmx_write_dry_run"
+    "description"
+    "Return the normalized payload and validation status for one narrow HyperDoc-to-DMX write shape without mutating DMX."
+    "inputSchema"
+    (dmx-mcp-json-object
+     "type" "object"
+     "properties"
+     (dmx-mcp-json-object
+      "writeKind" (dmx-mcp-json-object
+                   "type" "string"
+                   "enum" (dmx-mcp-json-array
+                           "topicmap_context_add"
+                           "topicmap_context_upsert"
+                           "topicmap_context_remove"
+                           "workspace_assignment_repair"
+                           "workspace_note_create"
+                           "workspace_note_update"
+                           "handover_create"))
+      "topicmapId" (dmx-mcp-json-object "type" "integer")
+      "topicId" (dmx-mcp-json-object "type" "integer")
+      "workspaceId" (dmx-mcp-json-object "type" "integer")
+      "title" (dmx-mcp-json-object "type" "string")
+      "text" (dmx-mcp-json-object "type" "string")
+      "summary" (dmx-mcp-json-object "type" "string")
+      "noteKey" (dmx-mcp-json-object "type" "string")
+      "workspaceTopicmapId" (dmx-mcp-json-object "type" "integer")
+      "viewProps" (dmx-mcp-json-object "type" "object")
+      "artifacts" (dmx-mcp-json-object "type" "array"
+                                       "items" (dmx-mcp-json-object "type" "string")))
+     "required" (dmx-mcp-json-array "writeKind")
+     "additionalProperties" t))
+   (dmx-mcp-json-object
+    "name" "append_workspace_note"
+    "description"
+    "Create or update a typed dmx.notes.note in the shared context-window workspace through the guarded HyperDoc adapter."
+    "inputSchema"
+    (dmx-mcp-json-object
+     "type" "object"
+     "properties"
+     (dmx-mcp-json-object
+      "title" (dmx-mcp-json-object "type" "string")
+      "text" (dmx-mcp-json-object "type" "string")
+      "noteKey" (dmx-mcp-json-object "type" "string")
+      "workspaceTopicmapId" (dmx-mcp-json-object "type" "integer")
+      "viewProps" (dmx-mcp-json-object "type" "object")
+      "dryRun" (dmx-mcp-json-object "type" "boolean"))
+     "required" (dmx-mcp-json-array "title" "text")
+     "additionalProperties" t))
+   (dmx-mcp-json-object
+    "name" "continue_workspace_annotation"
+    "description"
+    "Continue a saved workspace annotation by topic id through journal preflight and the remaining guarded persistence steps through the authenticated shared-workspace adapter."
+    "inputSchema"
+    (dmx-mcp-json-object
+     "type" "object"
+     "properties"
+     (dmx-mcp-json-object
+      "topicId" (dmx-mcp-json-object "type" "integer")
+      "workspaceTopicmapId" (dmx-mcp-json-object "type" "integer")
+      "workspaceId" (dmx-mcp-json-object "type" "integer")
+      "authMode" (dmx-mcp-json-object "type" "string")
+      "username" (dmx-mcp-json-object "type" "string")
+      "password" (dmx-mcp-json-object "type" "string")
+      "authorizationHeader" (dmx-mcp-json-object "type" "string")
+      "authToken" (dmx-mcp-json-object "type" "string")
+      "dryRun" (dmx-mcp-json-object "type" "boolean"))
+     "required" (dmx-mcp-json-array "topicId")
+     "additionalProperties" t))
+   (dmx-mcp-json-object
+    "name" "dmx-mcp-continue-workspace-annotation"
+    "description"
+    "Alias for continue_workspace_annotation to keep dreyeck bridge compatibility while continuing a saved workspace annotation through the authenticated guarded stages."
+    "inputSchema"
+    (dmx-mcp-json-object
+     "type" "object"
+     "properties"
+     (dmx-mcp-json-object
+      "topicId" (dmx-mcp-json-object "type" "integer")
+      "workspaceTopicmapId" (dmx-mcp-json-object "type" "integer")
+      "workspaceId" (dmx-mcp-json-object "type" "integer")
+      "authMode" (dmx-mcp-json-object "type" "string")
+      "username" (dmx-mcp-json-object "type" "string")
+      "password" (dmx-mcp-json-object "type" "string")
+      "authorizationHeader" (dmx-mcp-json-object "type" "string")
+      "authToken" (dmx-mcp-json-object "type" "string")
+      "dryRun" (dmx-mcp-json-object "type" "boolean"))
+     "required" (dmx-mcp-json-array "topicId")
+     "additionalProperties" t))
+   (dmx-mcp-json-object
+    "name" "upsert_workspace_topicmap_context"
+    "description"
+    "Ensure a typed topicmap-context placement for an existing topic by adding it to a workspace topicmap or updating its validated long-form view props."
+    "inputSchema"
+    (dmx-mcp-json-object
+     "type" "object"
+     "properties"
+     (dmx-mcp-json-object
+      "topicId" (dmx-mcp-json-object "type" "integer")
+      "topicmapId" (dmx-mcp-json-object "type" "integer")
+      "viewProps" (dmx-mcp-json-object "type" "object")
+      "dryRun" (dmx-mcp-json-object "type" "boolean"))
+     "required" (dmx-mcp-json-array "topicId" "viewProps")
+     "additionalProperties" t))
+   (dmx-mcp-json-object
+    "name" "remove_workspace_topic_from_topicmap"
+    "description"
+    "Plan or execute a typed workspace-topic unlink from a topicmap. Live HTTP unlink remains disabled until a DELETE contract is proven for the topicmap membership route."
+    "inputSchema"
+    (dmx-mcp-json-object
+     "type" "object"
+     "properties"
+     (dmx-mcp-json-object
+      "topicId" (dmx-mcp-json-object "type" "integer")
+      "topicmapId" (dmx-mcp-json-object "type" "integer")
+      "dryRun" (dmx-mcp-json-object "type" "boolean"))
+     "required" (dmx-mcp-json-array "topicId")
+     "additionalProperties" t))
+   (dmx-mcp-json-object
+    "name" "repair_workspace_topic_assignment"
+    "description"
+    "Read, validate, and backfill a HyperDoc-owned topic's DMX workspace assignment without changing topicmap placement."
+    "inputSchema"
+    (dmx-mcp-json-object
+     "type" "object"
+     "properties"
+     (dmx-mcp-json-object
+      "topicId" (dmx-mcp-json-object "type" "integer")
+      "workspaceId" (dmx-mcp-json-object "type" "integer")
+      "workspaceTopicmapId" (dmx-mcp-json-object "type" "integer")
+      "dryRun" (dmx-mcp-json-object "type" "boolean"))
+     "required" (dmx-mcp-json-array "topicId")
+     "additionalProperties" t))
+   (dmx-mcp-json-object
+    "name" "read_dmx_topicmap"
+    "description"
+    "Read a DMX topicmap projection, defaulting to the current shared workspace topicmap, including topic and note ids."
+    "inputSchema"
+    (dmx-mcp-json-object
+     "type" "object"
+     "properties"
+     (dmx-mcp-json-object
+      "topicmapId" (dmx-mcp-json-object "type" "integer"))
+     "required" (dmx-mcp-json-array)
+     "additionalProperties" t))
+   (dmx-mcp-json-object
+    "name" "read_dmx_topic"
+    "description"
+    "Read a DMX topic by id, including note body and selected child metadata when present."
+    "inputSchema"
+    (dmx-mcp-json-object
+     "type" "object"
+     "properties"
+     (dmx-mcp-json-object
+      "topicId" (dmx-mcp-json-object "type" "integer"))
+     "required" (dmx-mcp-json-array "topicId")
+     "additionalProperties" t))
+   (dmx-mcp-json-object
+    "name" "resolve_workspace_note"
+    "description"
+    "Resolve a workspace note or handover by noteKey through the read client and report the existing topic id plus topicmap membership."
+    "inputSchema"
+    (dmx-mcp-json-object
+     "type" "object"
+     "properties"
+     (dmx-mcp-json-object
+      "noteKey" (dmx-mcp-json-object "type" "string")
+      "noteKind" (dmx-mcp-json-object "type" "string"
+                                      "enum" (dmx-mcp-json-array
+                                              "workspace-note"
+                                              "handover"))
+      "workspaceTopicmapId" (dmx-mcp-json-object "type" "integer"))
+     "required" (dmx-mcp-json-array "noteKey")
+     "additionalProperties" t))
+   (dmx-mcp-json-object
+    "name" "read_hyperdoc_workspace_journal"
+    "description"
+    "Read the HyperDoc-local workspace journal overview. This read path never reconciles, repairs, or persists DMX companion journal topics."
+    "inputSchema"
+    (dmx-mcp-json-object
+     "type" "object"
+     "properties"
+     (dmx-mcp-json-object
+      "workspaceTopicmapId" (dmx-mcp-json-object "type" "integer"))
+     "required" (dmx-mcp-json-array)
+     "additionalProperties" t))
+   (dmx-mcp-json-object
+    "name" "read_hyperdoc_topic_journal"
+    "description"
+    "Read one HyperDoc-local topic journal stream by subject key, topic id, or note key. No reconcile and no DMX persistence side effects."
+    "inputSchema"
+    (dmx-mcp-json-object
+     "type" "object"
+     "properties"
+     (dmx-mcp-json-object
+      "subjectKey" (dmx-mcp-json-object "type" "string")
+      "topicId" (dmx-mcp-json-object "type" "integer")
+      "noteKey" (dmx-mcp-json-object "type" "string")
+      "noteKind" (dmx-mcp-json-object "type" "string"))
+     "required" (dmx-mcp-json-array)
+     "additionalProperties" t))
+   (dmx-mcp-json-object
+    "name" "list_hyperdoc_topic_revisions"
+    "description"
+    "List revision headers for one HyperDoc-local topic journal stream without returning full event payloads."
+    "inputSchema"
+    (dmx-mcp-json-object
+     "type" "object"
+     "properties"
+     (dmx-mcp-json-object
+      "subjectKey" (dmx-mcp-json-object "type" "string")
+      "topicId" (dmx-mcp-json-object "type" "integer")
+      "noteKey" (dmx-mcp-json-object "type" "string")
+      "noteKind" (dmx-mcp-json-object "type" "string"))
+     "required" (dmx-mcp-json-array)
+     "additionalProperties" t))
+   (dmx-mcp-json-object
+    "name" "inventory_legacy_dmx_workspace_journal_artifacts"
+    "description"
+    "Read-only DMX inventory for legacy workspace-journal persistence topics (hyperdoc:mcp/workspace-journal/*). Returns cleanup candidates only."
+    "inputSchema"
+    (dmx-mcp-json-object
+     "type" "object"
+     "properties"
+     (dmx-mcp-json-object
+      "workspaceTopicmapId" (dmx-mcp-json-object "type" "integer")
+      "candidateTopicIds"
+      (dmx-mcp-json-object
+       "type" "array"
+       "items" (dmx-mcp-json-object "type" "integer")))
+     "required" (dmx-mcp-json-array)
+     "additionalProperties" t))
+   (dmx-mcp-json-object
+    "name" "plan_legacy_dmx_workspace_journal_cleanup"
+    "description"
+    "Dry-run-only cleanup planner for legacy DMX workspace-journal artifacts. Requires explicit candidate topic ids and performs no deletion."
+    "inputSchema"
+    (dmx-mcp-json-object
+     "type" "object"
+     "properties"
+     (dmx-mcp-json-object
+      "workspaceTopicmapId" (dmx-mcp-json-object "type" "integer")
+      "candidateTopicIds"
+      (dmx-mcp-json-object
+       "type" "array"
+       "items" (dmx-mcp-json-object "type" "integer")))
+     "required" (dmx-mcp-json-array "candidateTopicIds")
+     "additionalProperties" t))
+   (dmx-mcp-json-object
+    "name" "update_workspace_note"
+    "description"
+    "Update an existing dmx.notes.note topic body by topic id through the guarded HyperDoc adapter."
+    "inputSchema"
+    (dmx-mcp-json-object
+     "type" "object"
+     "properties"
+     (dmx-mcp-json-object
+      "topicId" (dmx-mcp-json-object "type" "integer")
+      "title" (dmx-mcp-json-object "type" "string")
+      "text" (dmx-mcp-json-object "type" "string")
+      "workspaceTopicmapId" (dmx-mcp-json-object "type" "integer")
+      "dryRun" (dmx-mcp-json-object "type" "boolean"))
+     "required" (dmx-mcp-json-array "topicId")
+     "additionalProperties" t))
+   (dmx-mcp-json-object
+    "name" "delete_workspace_note"
+    "description"
+    "Hard-delete a HyperDoc-owned workspace note or handover by noteKey or topic id. Foreign notes are rejected by the ownership guard."
+    "inputSchema"
+    (dmx-mcp-json-object
+     "type" "object"
+     "properties"
+     (dmx-mcp-json-object
+      "noteKey" (dmx-mcp-json-object "type" "string")
+      "topicId" (dmx-mcp-json-object "type" "integer")
+      "noteKind" (dmx-mcp-json-object "type" "string")
+      "workspaceTopicmapId" (dmx-mcp-json-object "type" "integer")
+      "dryRun" (dmx-mcp-json-object "type" "boolean"))
+     "required" (dmx-mcp-json-array)
+     "additionalProperties" t))
+   (dmx-mcp-json-object
+    "name" "delete_workspace_topic"
+    "description"
+    "Hard-delete a HyperDoc-owned workspace topic by topic id. Ownership checks reject foreign topics and unsupported delete targets."
+    "inputSchema"
+    (dmx-mcp-json-object
+     "type" "object"
+     "properties"
+     (dmx-mcp-json-object
+      "topicId" (dmx-mcp-json-object "type" "integer")
+      "workspaceTopicmapId" (dmx-mcp-json-object "type" "integer")
+      "dryRun" (dmx-mcp-json-object "type" "boolean"))
+     "required" (dmx-mcp-json-array "topicId")
+     "additionalProperties" t))
+   (dmx-mcp-json-object
+    "name" "restore_workspace_topic_revision"
+    "description"
+    "Restore a workspace topic to a prior journaled state without rewriting history; missing owned topics are recreated, and missing topicmap membership is reattached explicitly."
+    "inputSchema"
+    (dmx-mcp-json-object
+     "type" "object"
+     "properties"
+     (dmx-mcp-json-object
+      "subjectKey" (dmx-mcp-json-object "type" "string")
+      "topicId" (dmx-mcp-json-object "type" "integer")
+      "revision" (dmx-mcp-json-object "type" "integer")
+      "workspaceTopicmapId" (dmx-mcp-json-object "type" "integer")
+      "dryRun" (dmx-mcp-json-object "type" "boolean"))
+     "required" (dmx-mcp-json-array)
+     "additionalProperties" t))
+   (dmx-mcp-json-object
+    "name" "restore_workspace_note_revision"
+    "description"
+    "Restore a workspace note or handover to a prior journaled state without treating the editor as an implicit undo stack."
+    "inputSchema"
+    (dmx-mcp-json-object
+     "type" "object"
+     "properties"
+     (dmx-mcp-json-object
+      "subjectKey" (dmx-mcp-json-object "type" "string")
+      "topicId" (dmx-mcp-json-object "type" "integer")
+      "noteKey" (dmx-mcp-json-object "type" "string")
+      "noteKind" (dmx-mcp-json-object "type" "string")
+      "revision" (dmx-mcp-json-object "type" "integer")
+      "workspaceTopicmapId" (dmx-mcp-json-object "type" "integer")
+      "dryRun" (dmx-mcp-json-object "type" "boolean"))
+     "required" (dmx-mcp-json-array)
+     "additionalProperties" t))
+   (dmx-mcp-json-object
+    "name" "upsert_workspace_topic_factory_snippet"
+    "description"
+    "Create or update a HyperDoc-owned topic-factory snippet twin and place it into the shared workspace topicmap through the guarded topic/topicmap adapter."
+    "inputSchema"
+    (dmx-mcp-json-object
+     "type" "object"
+     "properties"
+     (dmx-mcp-json-object
+      "snippetId" (dmx-mcp-json-object "type" "string")
+      "snippetText" (dmx-mcp-json-object "type" "string")
+      "sourcePath" (dmx-mcp-json-object "type" "string")
+      "sourceOriginId" (dmx-mcp-json-object "type" "string")
+      "sourceOriginPath" (dmx-mcp-json-object "type" "string")
+      "relatedHyperdocPageTitle" (dmx-mcp-json-object "type" "string")
+      "relatedTopicId" (dmx-mcp-json-object "type" "string")
+      "references" (dmx-mcp-json-object "type" "array"
+                                        "items" (dmx-mcp-json-object "type" "string"))
+      "provenance" (dmx-mcp-json-object "type" "object")
+      "workspaceTopicmapId" (dmx-mcp-json-object "type" "integer")
+      "workspaceId" (dmx-mcp-json-object "type" "integer")
+      "topicTypeUri" (dmx-mcp-json-object "type" "string")
+      "topicValue" (dmx-mcp-json-object "type" "string")
+      "viewProps" (dmx-mcp-json-object "type" "object")
+      "dryRun" (dmx-mcp-json-object "type" "boolean"))
+     "required" (dmx-mcp-json-array "snippetId" "snippetText" "sourcePath")
+     "additionalProperties" t))
+   (dmx-mcp-json-object
+    "name" "create_handover"
+    "description"
+    "Create a structured handover note in the shared context-window workspace through the guarded HyperDoc adapter."
+    "inputSchema"
+    (dmx-mcp-json-object
+     "type" "object"
+     "properties"
+     (dmx-mcp-json-object
+      "title" (dmx-mcp-json-object "type" "string")
+      "summary" (dmx-mcp-json-object "type" "string")
+      "fromAgent" (dmx-mcp-json-object "type" "string")
+      "toAgent" (dmx-mcp-json-object "type" "string")
+      "requestedAction" (dmx-mcp-json-object "type" "string")
+      "status" (dmx-mcp-json-object "type" "string")
+      "artifacts" (dmx-mcp-json-object "type" "array"
+                                       "items" (dmx-mcp-json-object "type" "string"))
+      "noteKey" (dmx-mcp-json-object "type" "string")
+      "workspaceTopicmapId" (dmx-mcp-json-object "type" "integer")
+      "viewProps" (dmx-mcp-json-object "type" "object")
+      "dryRun" (dmx-mcp-json-object "type" "boolean"))
+     "required" (dmx-mcp-json-array "title" "summary")
+     "additionalProperties" t))))
+
+;; From hyperdoc/mcp-server.lisp, characters 84472..85469.
+(defun dmx-mcp-handle-initialize (server request)
+  (let* ((id (dmx-mcp-request-id request))
+         (params (or (dmx-mcp-request-params request)
+                     (make-hash-table :test #'equal)))
+         (requested-version (or (gethash "protocolVersion" params)
+                                *dmx-mcp-protocol-version*))
+         (session-id (dmx-mcp-session-id)))
+    (setf (gethash session-id (dmx-mcp-server-sessions server))
+          (list :client-info (gethash "clientInfo" params)
+                :initialized nil
+                :protocol-version requested-version))
+    (dmx-mcp-log server "initialize session=~A version=~A" session-id requested-version)
+    (dmx-mcp-json-rpc-success
+     id
+     (dmx-mcp-json-object
+      "protocolVersion" *dmx-mcp-protocol-version*
+      "capabilities" (dmx-mcp-server-capabilities)
+      "serverInfo"
+      (dmx-mcp-json-object
+       "name" *dmx-mcp-server-name*
+       "version" *dmx-mcp-server-version*))
+     :session-id session-id)))
+
+;; From hyperdoc/mcp-server.lisp, characters 85469..86528.
+(defun dmx-mcp-resource-rpc-result (server id session-id thunk)
+  (handler-case
+      (dmx-mcp-json-rpc-success id (funcall thunk) :session-id session-id)
+    (dmx-import-http-error (condition)
+      (dmx-mcp-log server "resource backend HTTP failure status=~D"
+                   (dmx-import-http-status-code-of condition))
+      (dmx-mcp-json-rpc-error id -32010 "DMX resource unavailable"
+        :data (dmx-mcp-json-object "status" "backend_http_error"
+                                   "statusCode" (dmx-import-http-status-code-of condition))
+        :session-id session-id))
+    (fedwiki-dmx-import-error (condition)
+      (dmx-mcp-log server "resource validation failure: ~A" (type-of condition))
+      (dmx-mcp-json-rpc-error id -32010 "DMX resource unavailable or invalid"
+        :data (dmx-mcp-json-object "status" "resource_error") :session-id session-id))
+    (error (condition)
+      (dmx-mcp-log server "resource failure: ~A" (type-of condition))
+      (dmx-mcp-json-rpc-error id -32099 "Internal MCP server error" :session-id session-id))))
+
+;; From hyperdoc/mcp-server.lisp, characters 86528..88823.
+(defun dmx-mcp-handle-request (server request session-id session)
+  (let ((id (dmx-mcp-request-id request))
+        (method (dmx-mcp-request-method-name request))
+        (params (or (dmx-mcp-request-params request)
+                    (make-hash-table :test #'equal))))
+    (dmx-mcp-log server "request method=~A session=~A" method session-id)
+    (cond
+      ((string= method "notifications/initialized")
+       (setf (getf session :initialized) t
+             (gethash session-id (dmx-mcp-server-sessions server)) session)
+       (dmx-mcp-empty-response :status 202 :session-id session-id))
+      ((string= method "ping")
+       (dmx-mcp-json-rpc-success id (dmx-mcp-json-object) :session-id session-id))
+      ((string= method "resources/list")
+       (dmx-mcp-resource-rpc-result
+        server id session-id
+        (lambda () (dmx-mcp-json-object "resources" (dmx-mcp-resource-list server)))))
+      ((string= method "resources/templates/list")
+       (dmx-mcp-json-rpc-success
+        id
+        (dmx-mcp-json-object
+         "resourceTemplates" (dmx-mcp-resource-templates))
+        :session-id session-id))
+      ((string= method "resources/read")
+       (dmx-mcp-resource-rpc-result
+        server id session-id
+        (lambda ()
+          (let* ((uri (gethash "uri" params))
+                 (resource (dmx-mcp-read-resource server uri)))
+            (dmx-mcp-json-object
+             "contents" (dmx-mcp-json-array
+                         (dmx-mcp-json-object "uri" uri "mimeType" "application/json"
+                                              "text" (encode-json-string resource))))))))
+      ((string= method "tools/list")
+       (dmx-mcp-json-rpc-success
+        id
+        (dmx-mcp-json-object
+         "tools" (dmx-mcp-tool-definitions))
+        :session-id session-id))
+      ((string= method "tools/call")
+       (dmx-mcp-json-rpc-success
+        id
+        (dmx-mcp-call-write-tool server
+                                 (gethash "name" params)
+                                 (or (gethash "arguments" params)
+                                     (make-hash-table :test #'equal)))
+        :session-id session-id))
+      (t
+       (dmx-mcp-json-rpc-error
+        id
+        -32601
+        (format nil "Method not found: ~A" method)
+        :session-id session-id)))))
+
+;; From hyperdoc/mcp-server.lisp, characters 88823..92014.
+(hunchentoot:define-easy-handler (dmx-mcp-endpoint :uri "/mcp") ()
+  (let ((server *dmx-mcp-server*) (request-id nil))
+    (or (dmx-mcp-server-require-auth server)
+        (dmx-mcp-server-require-origin server)
+        (handler-case
+            (case (hunchentoot:request-method*)
+              (:post
+               (let* ((request (dmx-mcp-request-json))
+                      (method (progn
+                                (setf request-id (dmx-mcp-request-id request))
+                                (dmx-mcp-request-method-name request)))
+                      (initialize? (string= method "initialize")))
+                 (multiple-value-bind (session-id session)
+                     (dmx-mcp-session-for-request server :initialize? initialize?)
+                   (cond
+                     (initialize?
+                      (dmx-mcp-handle-initialize server request))
+                     ((eq session :missing)
+                      (dmx-mcp-json-rpc-error
+                       (dmx-mcp-request-id request)
+                       -32000
+                       "Missing Mcp-Session-Id header"
+                       :status 400))
+                     ((eq session :unknown)
+                      (dmx-mcp-json-rpc-error
+                       (dmx-mcp-request-id request)
+                       -32001
+                       "Unknown MCP session"
+                       :status 404))
+                     (t
+                      (dmx-mcp-handle-request server request session-id session))))))
+              (:delete
+               (multiple-value-bind (session-id session)
+                   (dmx-mcp-session-for-request server)
+                 (declare (ignore session))
+                 (when session-id
+                   (remhash session-id (dmx-mcp-server-sessions server)))
+                 (dmx-mcp-empty-response :status 204)))
+              (otherwise
+               (setf (hunchentoot:return-code*) 405
+                     (hunchentoot:content-type*) "application/json; charset=utf-8")
+               (encode-json-string
+                (dmx-mcp-json-object
+                 "error" "method_not_allowed"
+                 "message" "Use POST for MCP JSON-RPC requests"))))
+          (dmx-topicmap-view-props-validation-error (condition)
+            (dmx-mcp-json-rpc-error
+             request-id
+             -32010
+             (fedwiki-dmx-import-message-of condition)
+             :data (dmx-mcp-validation-error-object condition)))
+          (dmx-workspace-note-validation-error (condition)
+            (dmx-mcp-json-rpc-error
+             request-id
+             -32010
+             (fedwiki-dmx-import-message-of condition)
+             :data (dmx-mcp-validation-error-object condition)))
+          (fedwiki-dmx-import-error (condition)
+            (dmx-mcp-json-rpc-error
+             request-id
+             -32010
+             (fedwiki-dmx-import-message-of condition)
+             :data (dmx-mcp-validation-error-object condition)))
+          (error (condition)
+            (dmx-mcp-log server "unhandled error: ~A" condition)
+            (dmx-mcp-json-rpc-error
+             request-id
+             -32099
+             "Internal MCP server error"))))))
+
+;; From hyperdoc/mcp-server.lisp, characters 92014..93151.
+(defun serve-dmx-mcp-server (&key port address server)
+  (when *dmx-mcp-acceptor*
+    (stop-dmx-mcp-server))
+  (setf *dmx-mcp-server* (or server
+                             (make-default-dmx-mcp-server)))
+  (let ((resolved-port (or port
+                           (parse-positive-integer (uiop:getenv "HYPERDOC_MCP_PORT"))
+                           *dmx-mcp-default-port*))
+        (resolved-address (or address
+                              (uiop:getenv "HYPERDOC_MCP_BIND_ADDRESS")
+                              *dmx-mcp-default-bind-address*)))
+    (setf *dmx-mcp-acceptor*
+          (make-instance 'hunchentoot:easy-acceptor
+                         :port resolved-port
+                         :address resolved-address))
+    (hunchentoot:start *dmx-mcp-acceptor*)
+    (dmx-mcp-log *dmx-mcp-server*
+                 "listening on http://~A:~D/mcp workspace-topicmap-id=~D live-writes=~:[off~;on~]"
+                 resolved-address
+                 resolved-port
+                 (dmx-mcp-server-workspace-topicmap-id *dmx-mcp-server*)
+                 (dmx-mcp-live-write-available-p *dmx-mcp-server*))
+    *dmx-mcp-acceptor*))
+
+;; From hyperdoc/mcp-server.lisp, characters 93151..93338.
+(defun stop-dmx-mcp-server ()
+  (when *dmx-mcp-acceptor*
+    (ignore-errors (hunchentoot:stop *dmx-mcp-acceptor*))
+    (setf *dmx-mcp-acceptor* nil
+          *dmx-mcp-server* nil))
+  t)

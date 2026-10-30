@@ -78,3 +78,23 @@
                              (:file "codemeta")
                              (:file "examples")
                              (:file "hyperdoc")))))
+
+;; Opt-in DMX application. No Catalog, Inspector, FedWiki or ISO Topic Maps dependency.
+(defsystem #:hyperdoc/dmx-import
+  :description "Required guarded DMX runtime for the independent MCP application"
+  :license "BSD" :serial t
+  :depends-on (#:hyperdoc #:babel #:cl-ppcre #:drakma #:shasht)
+  :components ((:module "dmx-mcp" :serial t
+                :components ((:file "models") (:file "dmx-import")
+                             (:file "topic-factory-snippet-dmx")
+                             (:file "dmx-workspace-topics")
+                             (:file "dmx-workspace-journal")
+                             (:file "dmx-workspace-notes")
+                             (:file "dmx-annotations")))))
+
+(defsystem #:hyperdoc/mcp
+  :description "Independent DMX Streamable HTTP MCP server"
+  :license "BSD" :serial t
+  :depends-on (#:hyperdoc/dmx-import #:hunchentoot)
+  :components ((:module "dmx-mcp" :serial t
+                :components ((:file "mcp-server")))))

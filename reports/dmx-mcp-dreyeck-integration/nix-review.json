@@ -1,0 +1,24 @@
+{
+  "architecture": "x86_64-linux",
+  "nixVersion": "2.20.6",
+  "sbclVersion": "2.4.10",
+  "nixpkgsRevision": "50ab793786d9de88ee30ec4e4c24fb4236fc2674",
+  "execution": "isolated Docker; Nix sandbox=false, build-users-group empty; no activation",
+  "containerBase": "debian:bookworm-slim@sha256:99c0b25c46d0214d5a2091092e7908907dcaecd6a962cde0ac700acee222b6f3",
+  "sourceIdentity": "pre-commit review snapshot; exact runtime/test file hashes in source-identities.json; final Git-revision build recorded in PR",
+  "package": "/nix/store/fay25gvjcf9vvnlg2qzxg2h23kpb1ff7-hyperdoc-dmx-mcp",
+  "packageDerivation": "/nix/store/saf80zzqp2q9724r90jnq03b6bh8fqmh-hyperdoc-dmx-mcp.drv",
+  "check": "/nix/store/kf95113d55xqd0yvil84qs5m0bzsfcz5-hyperdoc-dmx-mcp-check",
+  "checkDerivation": "/nix/store/vkn6j5kyszk79dslg0hrwvwi76qkvisp-hyperdoc-dmx-mcp-check.drv",
+  "buildExit": 0,
+  "checks": {
+    "freshASDF": "PASS",
+    "discovery": 72,
+    "packagedApplication": 16,
+    "historicalContractGroups": 11
+  },
+  "dependencyNetwork": "cache.nixos.org downloads successful; session proxy/CA retained",
+  "hostDiskCapacity": "unknown; not inferred from local review",
+  "rebuildExit": 0,
+  "packageAndCheckOutputComparison": "PASS; nix build --rebuild of both immutable derivations, no differing outputs"
+}
