@@ -1,0 +1,17 @@
+;; Read-only fixture audit: compare the producer's type and :kind values.
+(require :asdf)
+(asdf:load-system "dreyeck/pull-request-review/reading")
+(asdf:load-system "dreyeck/work/reading")
+(asdf:load-system "dreyeck/lisp-critic/reading")
+(dolist (entry (list (cons "PR Review" (dreyeck/topicmap:topicmap-projection-of
+                                       (dreyeck/pull-request-review:example-reading)))
+                    (cons "Work" (dreyeck/work/reading:work-projection))
+                    (cons "Lisp Critic" (dreyeck/lisp-critic/reading:lisp-critic-genealogy-projection))))
+  (let ((pairs nil))
+    (dolist (topic (dreyeck/topicmap:topicmap-projection-topics-of (cdr entry)))
+      (pushnew (list (dreyeck/topicmap:topicmap-topic-type-of topic)
+                     (getf (dreyeck/topicmap:topicmap-topic-view-properties-of topic) :kind))
+               pairs :test #'equal))
+    (format t "~&CLASSIFICATION-REVIEW ~A~%" (car entry))
+    (dolist (pair (sort pairs #'string< :key #'prin1-to-string))
+      (format t "  ~S -> ~S~%" (first pair) (second pair)))))

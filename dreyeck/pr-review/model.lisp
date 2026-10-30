@@ -283,7 +283,9 @@
   (let* ((snapshot (reading-snapshot reading))
          (topics (list (tm:make-topicmap-topic :id "snapshot" :type :github-observation
                           :label "Observed GitHub PRs"
-                          :object snapshot :view-properties (list :x 300 :y 40 :visible t :pinned t :kind "snapshot" :status (snapshot-observed-at snapshot)))))
+                          ;; Observation time belongs to the snapshot's provenance,
+                          ;; not to the producer's status classification.
+                          :object snapshot :view-properties (list :x 300 :y 40 :visible t :pinned t :kind "snapshot"))))
          (associations nil))
     (flet ((pr-id (number) (format nil "pr:~A:~D" (snapshot-repository snapshot) number)))
       (loop for item in (reading-items reading) for pr = (review-pr item) for i from 0 do

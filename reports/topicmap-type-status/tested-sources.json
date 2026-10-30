@@ -1,0 +1,13 @@
+{
+  "baseline": "9dfcf4d705302c561535259b87a4a9f64bd61b5f",
+  "sha256": {
+    "dreyeck.asd": "5c65bd3ebc380995e5674cae907ef837468e8544fd2a163c32685a3029a2baa2",
+    "dreyeck/src/topicmap-inspector.lisp": "7c5d9509a8e0af8a572a5bc2bbcbbd712b11305fd8fc020feaa0541d971ecf42",
+    "dreyeck/pr-review/model.lisp": "d407137d28622afe6a6591b44756a93ab7c702b0b3bd790a63ce7d1a3a1b0e0f",
+    "dreyeck/tests/topicmap-presentation.lisp": "328ce6bc8894d3cc2bed9f83d21fec4771489bf22e1ebb765211e8c28247152d",
+    "dreyeck/tests/pull-request-review.lisp": "c4ac662c156b85ac98375ca1877f220cd0a3058a03c4893ece0b5841fdebd885",
+    "reports/topicmap-type-status/baseline-svg.json": "766a8f1b70563702c881807782dad1c01fc61e2baa9ed8fccea958512d599dcb",
+    "reports/topicmap-type-status/existing-topicmap-tests.lisp": "55f7e5379c6669b5662e47b61ef07608f6beef84718dbb065cbf63ded16bd6b2",
+    "reports/topicmap-type-status/classification-review.lisp": "872f4c28e7e97e204f7ab557f424dd15a785cb9894e60e7857daaccd51d2868a"
+  }
+}

@@ -1,0 +1,7 @@
+PR-REVIEW metadata and warranted example PASS
+PR-REVIEW cardinality, unavailable and invalid imports PASS
+PR-REVIEW revision qualification and stale observations PASS
+PR-REVIEW epistemic warrants and separate human notes PASS
+PR-REVIEW Inspector object navigation and native Topicmap PASS
+PR-REVIEW inert source and separate Catalog admission PASS
+PR-REVIEW-PASS 141 checks

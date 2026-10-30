@@ -3495,3 +3495,13 @@
   :perform (test-op (op component)
              (declare (ignore op component))
              (uiop:symbol-call :dreyeck/pull-request-review/tests :run-tests)))
+
+;; Focused local regressions for shared Inspector presentation, not Catalog admission.
+(defsystem "dreyeck/topicmap-presentation/tests"
+  :license "BSD"
+  :depends-on ("dreyeck/pull-request-review/reading" "dreyeck/work/reading"
+               "dreyeck/lisp-critic/reading" "plump")
+  :components ((:file "dreyeck/tests/topicmap-presentation"))
+  :perform (test-op (op component)
+             (declare (ignore op component))
+             (uiop:symbol-call :dreyeck/topicmap-presentation/tests :run-tests)))

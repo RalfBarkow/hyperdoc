@@ -1,0 +1,8 @@
+{
+  "baseline": "9dfcf4d705302c561535259b87a4a9f64bd61b5f",
+  "sha256": {
+    "dreyeck/pr-review/example/github-snapshot.json": "be273985ffd339fe7c107f39dc32418422e8fba489d247c4d6cd56e688e900d0",
+    "dreyeck/pr-review/example/review-annotations.json": "b39e73e0a0ff3c352cd90b95a585ba76397aacfdf41de0357f54569c809c6962",
+    "dreyeck/src/topicmap.lisp": "62ab7f1c7a7769be3ec0f3607ec9dccad6a47bc5753ffe7c57533c04678a3996"
+  }
+}
