@@ -1,0 +1,2 @@
+Installing git. Disable this by specifying the git executable path with 'NP_GIT'
+error: opening file '/proc/self/setgroups': Read-only file system

@@ -85,6 +85,14 @@
 (defun dmx-mcp-json-array (&rest items)
   (coerce items 'vector))
 
+;; MCP owns this small array coercion contract. The fresh MCP ASDF system does
+;; not load collective-knowledge-slice, where the unrelated helper used to live.
+(defun dmx-mcp-array-elements (value)
+  (cond ((null value) nil)
+        ((vectorp value) (coerce value 'list))
+        ((listp value) value)
+        (t (error "Expected JSON array, got ~S" value))))
+
 (defun dmx-mcp-text-content (text)
   (dmx-mcp-json-object
    "type" "text"
@@ -176,7 +184,7 @@
     (dmx-mcp-json-response
      (dmx-mcp-json-object
       "jsonrpc" "2.0"
-      "id" id
+      "id" (if (null id) :null id)
       "error" error-object)
      :status status
      :session-id session-id)))
@@ -247,7 +255,7 @@
     (unless raw
       (return-from dmx-mcp-integer-array-argument nil))
     (let ((values '()))
-      (dolist (entry (json-array-elements raw))
+      (dolist (entry (dmx-mcp-array-elements raw))
         (unless (integerp entry)
           (error 'fedwiki-dmx-import-error
                  :message (format nil "~A entries must be integers, got ~S"
@@ -318,7 +326,7 @@
 (defun dmx-mcp-topicmap-topic-summaries (topicmap-json)
   (sort
    (loop for topic in (or (and topicmap-json
-                               (json-array-elements (gethash "topics" topicmap-json)))
+                               (dmx-mcp-array-elements (gethash "topics" topicmap-json)))
                           '())
          collect (dmx-mcp-topic-summary topic))
    #'<
@@ -786,23 +794,27 @@
      "noteCount" (length note-summaries)
      "notes" (coerce note-summaries 'vector)
      "assocsCount"
-     (length (json-array-elements (gethash "assocs" topicmap-json)))
+     (length (dmx-mcp-array-elements (gethash "assocs" topicmap-json)))
      "viewProps" (gethash "viewProps" topicmap-json))))
 
 (defun dmx-mcp-known-topic-ids (server)
   (let* ((topicmap-json (dmx-import-read-topicmap
                          (dmx-mcp-server-read-client server)
                          (dmx-mcp-server-workspace-topicmap-id server)))
-         (workspace-topic-ids
-          (loop for topic in (or (and topicmap-json
-                                      (json-array-elements (gethash "topics" topicmap-json)))
-                                 '())
-                unless (dmx-workspace-journal-topic-p topic)
-                collect (dmx-json-object-value topic "id") into topic-ids
-                finally (return (remove nil topic-ids)))))
+         ;; A deliberately unconfigured/null client may still advertise configured URIs.
+         (topics (if (and (null topicmap-json)
+                          (typep (dmx-mcp-server-read-client server) 'null-dmx-import-client)) #()
+                     (and (hash-table-p topicmap-json) (gethash "topics" topicmap-json)))))
+    (unless (and (vectorp topics) (not (stringp topics))
+                 (every (lambda (topic)
+                          (and (hash-table-p topic)
+                               (integerp (gethash "id" topic))
+                               (plusp (gethash "id" topic)))) topics))
+      (error 'fedwiki-dmx-import-error :message "Invalid DMX topicmap discovery response"))
     (remove-duplicates
      (append (dmx-mcp-server-known-topic-ids server)
-             workspace-topic-ids)
+             (loop for topic across topics
+                   unless (dmx-workspace-journal-topic-p topic) collect (gethash "id" topic)))
      :test #'eql)))
 
 (defun dmx-mcp-resource-list (server)
@@ -818,14 +830,13 @@
                         (dmx-mcp-server-workspace-topicmap-id server))
                 "Topicmap projection for the current shared workspace."))))
     (dolist (topic-id (dmx-mcp-known-topic-ids server))
-      (let ((topic (dmx-import-read-topic (dmx-mcp-server-read-client server) topic-id)))
-        (when topic
-          (push (dmx-mcp-resource-metadata
-                 (dmx-mcp-topic-resource-uri topic-id)
-                 (format nil "topic/~D" topic-id)
-                 (format nil "DMX topic ~D through the canonical core/topic read path." topic-id)
-                 :title (dmx-mcp-topic-title topic))
-                resources))))
+      ;; Discovery advertises identities; data/title/absence/authorization are read on demand.
+      ;; The topicmap already supplies its member ids: never add N core/topic HTTP reads here.
+      (push (dmx-mcp-resource-metadata
+             (dmx-mcp-topic-resource-uri topic-id)
+             (format nil "topic/~D" topic-id)
+             (format nil "DMX topic ~D through the canonical core/topic read path." topic-id))
+            resources))
     (coerce (nreverse resources) 'vector)))
 
 (defun dmx-mcp-resource-templates ()
@@ -856,7 +867,7 @@
                         (dmx-import-read-topic
                          (dmx-mcp-server-read-client server)
                          topic-id))))
-       (unless topic
+       (unless (and (hash-table-p topic) (eql topic-id (gethash "id" topic)))
          (error 'fedwiki-dmx-import-error
                 :message (format nil "Unknown DMX topic resource ~A" uri)))
        (dmx-mcp-topic-projection topic)))
@@ -1097,7 +1108,7 @@
           :from-agent (dmx-mcp-argument arguments "fromAgent")
           :to-agent (dmx-mcp-argument arguments "toAgent")
           :requested-action (dmx-mcp-argument arguments "requestedAction")
-          :artifacts (coerce (or (json-array-elements (gethash "artifacts" arguments))
+          :artifacts (coerce (or (dmx-mcp-array-elements (gethash "artifacts" arguments))
                                  #())
                              'list)
           :status (dmx-mcp-argument arguments "status")
@@ -1374,7 +1385,7 @@
                :from-agent (dmx-mcp-argument arguments "fromAgent")
                :to-agent (dmx-mcp-argument arguments "toAgent")
                :requested-action (dmx-mcp-argument arguments "requestedAction")
-               :artifacts (coerce (or (json-array-elements (gethash "artifacts" arguments))
+               :artifacts (coerce (or (dmx-mcp-array-elements (gethash "artifacts" arguments))
                                       #())
                                   'list)
                :status (dmx-mcp-argument arguments "status")
@@ -1909,6 +1920,24 @@
        "version" *dmx-mcp-server-version*))
      :session-id session-id)))
 
+(defun dmx-mcp-resource-rpc-result (server id session-id thunk)
+  (handler-case
+      (dmx-mcp-json-rpc-success id (funcall thunk) :session-id session-id)
+    (dmx-import-http-error (condition)
+      (dmx-mcp-log server "resource backend HTTP failure status=~D"
+                   (dmx-import-http-status-code-of condition))
+      (dmx-mcp-json-rpc-error id -32010 "DMX resource unavailable"
+        :data (dmx-mcp-json-object "status" "backend_http_error"
+                                   "statusCode" (dmx-import-http-status-code-of condition))
+        :session-id session-id))
+    (fedwiki-dmx-import-error (condition)
+      (dmx-mcp-log server "resource validation failure: ~A" (type-of condition))
+      (dmx-mcp-json-rpc-error id -32010 "DMX resource unavailable or invalid"
+        :data (dmx-mcp-json-object "status" "resource_error") :session-id session-id))
+    (error (condition)
+      (dmx-mcp-log server "resource failure: ~A" (type-of condition))
+      (dmx-mcp-json-rpc-error id -32099 "Internal MCP server error" :session-id session-id))))
+
 (defun dmx-mcp-handle-request (server request session-id session)
   (let ((id (dmx-mcp-request-id request))
         (method (dmx-mcp-request-method-name request))
@@ -1923,11 +1952,9 @@
       ((string= method "ping")
        (dmx-mcp-json-rpc-success id (dmx-mcp-json-object) :session-id session-id))
       ((string= method "resources/list")
-       (dmx-mcp-json-rpc-success
-        id
-        (dmx-mcp-json-object
-         "resources" (dmx-mcp-resource-list server))
-        :session-id session-id))
+       (dmx-mcp-resource-rpc-result
+        server id session-id
+        (lambda () (dmx-mcp-json-object "resources" (dmx-mcp-resource-list server)))))
       ((string= method "resources/templates/list")
        (dmx-mcp-json-rpc-success
         id
@@ -1935,18 +1962,15 @@
          "resourceTemplates" (dmx-mcp-resource-templates))
         :session-id session-id))
       ((string= method "resources/read")
-       (let* ((uri (gethash "uri" params))
-              (resource (dmx-mcp-read-resource server uri)))
-         (dmx-mcp-json-rpc-success
-          id
-          (dmx-mcp-json-object
-           "contents"
-           (dmx-mcp-json-array
+       (dmx-mcp-resource-rpc-result
+        server id session-id
+        (lambda ()
+          (let* ((uri (gethash "uri" params))
+                 (resource (dmx-mcp-read-resource server uri)))
             (dmx-mcp-json-object
-             "uri" uri
-             "mimeType" "application/json"
-             "text" (encode-json-string resource))))
-          :session-id session-id)))
+             "contents" (dmx-mcp-json-array
+                         (dmx-mcp-json-object "uri" uri "mimeType" "application/json"
+                                              "text" (encode-json-string resource))))))))
       ((string= method "tools/list")
        (dmx-mcp-json-rpc-success
         id
@@ -1969,14 +1993,16 @@
         :session-id session-id)))))
 
 (hunchentoot:define-easy-handler (dmx-mcp-endpoint :uri "/mcp") ()
-  (let ((server *dmx-mcp-server*))
+  (let ((server *dmx-mcp-server*) (request-id nil))
     (or (dmx-mcp-server-require-auth server)
         (dmx-mcp-server-require-origin server)
         (handler-case
             (case (hunchentoot:request-method*)
               (:post
                (let* ((request (dmx-mcp-request-json))
-                      (method (dmx-mcp-request-method-name request))
+                      (method (progn
+                                (setf request-id (dmx-mcp-request-id request))
+                                (dmx-mcp-request-method-name request)))
                       (initialize? (string= method "initialize")))
                  (multiple-value-bind (session-id session)
                      (dmx-mcp-session-for-request server :initialize? initialize?)
@@ -2013,30 +2039,28 @@
                  "message" "Use POST for MCP JSON-RPC requests"))))
           (dmx-topicmap-view-props-validation-error (condition)
             (dmx-mcp-json-rpc-error
-             nil
+             request-id
              -32010
              (fedwiki-dmx-import-message-of condition)
              :data (dmx-mcp-validation-error-object condition)))
           (dmx-workspace-note-validation-error (condition)
             (dmx-mcp-json-rpc-error
-             nil
+             request-id
              -32010
              (fedwiki-dmx-import-message-of condition)
              :data (dmx-mcp-validation-error-object condition)))
           (fedwiki-dmx-import-error (condition)
             (dmx-mcp-json-rpc-error
-             nil
+             request-id
              -32010
              (fedwiki-dmx-import-message-of condition)
              :data (dmx-mcp-validation-error-object condition)))
           (error (condition)
             (dmx-mcp-log server "unhandled error: ~A" condition)
             (dmx-mcp-json-rpc-error
-             nil
+             request-id
              -32099
-             "Internal MCP server error"
-             :data (dmx-mcp-json-object
-                    "detail" (princ-to-string condition))))))))
+             "Internal MCP server error"))))))
 
 (defun serve-dmx-mcp-server (&key port address server)
   (when *dmx-mcp-acceptor*

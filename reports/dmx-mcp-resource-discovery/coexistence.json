@@ -1,0 +1,16 @@
+{
+  "checks": 20,
+  "isoSource": "521a1f38ffe40edf02f8c3d6faae2c373ad150c1",
+  "isoScriptSHA256": "a579c44e465ebd695226e379b135ff307ba2578b7fdc23d6f5f4d44d947e7754",
+  "snapshotSource": "0484a4b76128c3ed302a6a8d6e0343bfe03cece5",
+  "snapshotSHA256": "8b4142421f5bfa1cc089e7ac53b43ebc6975e597cdedea5a49f6fc226dcc2e1d",
+  "topicMapsPin": "88994c1b9e1edbf13e665e984a5c9c3b2cdf7575",
+  "dmxAuthority": "local-dmx-fixture-v1",
+  "dmxNoteURI": "hyperdoc:mcp/workspace-note/local-iso-reference",
+  "referencedSubjectIdentifier": "tag:dreyeck.ch,2026:hyperdoc/assignment/codex-2026-10-29-template-identity-substitution",
+  "dmxRepairSourceSHA256": "9a60b85b4d5c58c3eca653794e1a9f709dabd6f586648028c44b7f97099b42c9",
+  "remoteAccess": false,
+  "writeBack": false,
+  "graphConversion": false,
+  "nativeCXTM": "PASS"
+}
