@@ -14,6 +14,7 @@ import threading
 import time
 
 application = sys.argv[1]
+anonymous = len(sys.argv) > 2 and sys.argv[2] == "--anonymous"
 calls = []
 checks = 0
 
@@ -68,6 +69,8 @@ with tempfile.TemporaryDirectory() as temporary:
     for key in list(env):
         if key.startswith('HYPERDOC_DMX_IMPORT_AUTH_') or key == 'HYPERDOC_DMX_IMPORT_WORKSPACE_ID':
             del env[key]
+    if anonymous:
+        env.pop('HYPERDOC_MCP_BEARER_TOKEN', None)
     log = (Path(temporary) / 'server.log').open('w')
     process = subprocess.Popen([application], env=env, stdout=log, stderr=subprocess.STDOUT)
 
@@ -102,7 +105,8 @@ with tempfile.TemporaryDirectory() as temporary:
                 time.sleep(.1)
         else:
             raise RuntimeError('Application startup timeout')
-        check('bearer-required', rpc('initialize', authorized=False)[0] == 401)
+        check('optional-bearer-contract' if anonymous else 'configured-bearer-required',
+              rpc('initialize', authorized=False)[0] == (200 if anonymous else 401))
         status, sid, body = rpc('initialize', params={'protocolVersion': '2025-03-26',
                                                     'clientInfo': {'name': 'local-review', 'version': '1'}})
         check('initialize', status == 200 and bool(sid) and body['result']['protocolVersion'] == '2025-03-26')

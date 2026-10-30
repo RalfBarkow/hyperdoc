@@ -63,10 +63,12 @@ The tools/list response SHA-256 remains
 `fcb41ea1be5db385ad58060fd45e2dcf0158dc0fb507b6d537029ebd5b9dc85d`.
 Bearer checks, Origin policy, sessions, tool schemas, dry-run defaults, ownership,
 canonical long-form view properties, explicit backend authentication modes and
-live-write gates are unchanged. The new application launcher requires a nonempty
-bearer token, explicit DMX base URL and existing absolute state directory and
-binds only to loopback. It never enables writes implicitly. The library retains
-its historical optional-bearer contract for existing embedders.
+live-write gates are unchanged. The new application launcher requires an explicit DMX base URL and existing
+absolute state directory and binds only to loopback. It never enables writes
+implicitly. The historical optional-bearer contract is retained in both the
+library and launcher: a configured token is enforced; an absent token does not
+add an authentication requirement. Public exposure needs operator review of that
+existing policy.
 
 ## Running and focused verification
 
@@ -87,7 +89,8 @@ The historical-control/source-audit commands require the source Git objects;
 fetch the reviewed repair/base commits explicitly if they are not present.
 The application and Nix checks need neither Git history nor a running DMX service.
 The Nix check runs the application --check, all 72 repaired discovery checks,
-eight checks through the actual packaged executable, and 11 retained historical
+16 checks through the actual packaged executable (eight with a configured bearer
+and eight with the historical optional-bearer configuration), and 11 retained historical
 contract groups against memory/synthetic/local HTTP backends. Contract groups
 cover HTTP content type, delete/remove endpoints, workspace assignment, explicit
 Basic login bootstrap, MCP initialization/read/dry-run/write rejection, owned

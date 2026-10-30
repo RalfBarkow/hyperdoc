@@ -17,8 +17,6 @@
              (or (uiop:getenv "HYPERDOC_SOURCE_REVISION") "unrecorded-local-source")))
     ((null args)
      ;; Environment values are supplied by the operator, not by MCP arguments.
-     (unless (hyperdoc::dmx-non-empty-string-p (uiop:getenv "HYPERDOC_MCP_BEARER_TOKEN"))
-       (error "The application requires HYPERDOC_MCP_BEARER_TOKEN"))
      (unless (hyperdoc::dmx-non-empty-string-p (uiop:getenv "HYPERDOC_DMX_IMPORT_BASE_URL"))
        (error "The application requires HYPERDOC_DMX_IMPORT_BASE_URL"))
      (let* ((state (uiop:getenv "HYPERDOC_MCP_STATE_DIRECTORY"))

@@ -100,13 +100,15 @@ in {
 Do not install this example blindly or import mutable repository modules into
 `/etc/nixos`. Resolve option conflicts against the actual host-owned configuration.
 Use the existing service account/group and file permissions. The launcher binds
-127.0.0.1 only, accepts `HYPERDOC_MCP_PORT`, and requires a bearer token, explicit
+127.0.0.1 only, accepts `HYPERDOC_MCP_PORT`, and requires an explicit
 `HYPERDOC_DMX_IMPORT_BASE_URL` and an existing absolute state directory. Supply
 bearer/backend credentials through the existing operator-owned secret environment
 files, outside the Nix store. It retains all existing backend authentication modes.
 No token value belongs in a Nix expression, commit, command-line argument or PR.
-The old bearer-less configuration, if observed, needs an explicit operator/client
-migration decision before this fail-closed launcher can replace it.
+Bearer authentication remains optional exactly as in the existing server. A
+configured token is enforced. Retain the captured policy during this port; public
+exposure without a token requires explicit operator risk review. Any decision to
+make bearer authentication mandatory is a separate contract change.
 
 Preserve actual workspace IDs, origins, backend authentication and DMX ownership
 rules. Never set `enableLiveWrites = true` merely because a historical example did.
@@ -127,7 +129,7 @@ point the new journal directory into `/nix/store` or silently discard prior data
 A rehearsal process under the service account on a free loopback port (for
 example 8788), using a copied/synthetic backend and isolated state, needs separate
 operator authorization. Keep live writes off. Initialize, notify initialized,
-list templates/resources and read a known local fixture Topic. Confirm missing
+list templates/resources and read a known local fixture Topic. With a bearer configured, confirm missing
 bearer and disallowed Origin are rejected and that resource errors retain ids
 without backend body/condition leakage. Keep credentials/session IDs private.
 No production tool invocation or writes are required for readiness.

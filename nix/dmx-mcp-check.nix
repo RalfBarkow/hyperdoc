@@ -14,6 +14,8 @@ runCommand "hyperdoc-dmx-mcp-check" {
     --artifacts "$TMPDIR/discovery" > "$out/discovery.log" 2>&1
   python3 ${source}/scripts/test-dmx-mcp-application.py ${application}/bin/hyperdoc-dmx-mcp \
     > "$out/application.log" 2>&1
+  python3 ${source}/scripts/test-dmx-mcp-application.py ${application}/bin/hyperdoc-dmx-mcp --anonymous \
+    >> "$out/application.log" 2>&1
   cp "$TMPDIR/discovery/results.json" "$out/discovery.json"
   if ! sbcl --noinform --no-sysinit --no-userinit --disable-debugger \
     --script ${source}/scripts/test-dmx-mcp-contracts.lisp > "$TMPDIR/contracts.log" 2>&1; then
