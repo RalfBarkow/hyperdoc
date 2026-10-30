@@ -1,0 +1,41 @@
+{
+  "revision": "591f275fc26ebef7967cc8d3e3fb5a0efc19cc85",
+  "currentComparisonBase": "573fe37611a61d984260ebf43c797f7534211bdd",
+  "sources": [
+    {
+      "file": "mcp-server.lisp",
+      "sha256": "356758f1dc975fe01f8a69db46076a8140f996279335d83f5d4becde576c9852",
+      "bytes": 91339
+    },
+    {
+      "file": "config.toml",
+      "sha256": "1098977cb6562c35e312de4800d04826f55a6a7151cbcd9fef548b8ffd79f5de",
+      "bytes": 191
+    },
+    {
+      "file": "dmx-mcp-smoke.lisp",
+      "sha256": "bd53099f87a68c21c8deb273962d4c87f30bba4da69dc7e4934a27f41f88ffa4",
+      "bytes": 181852
+    },
+    {
+      "file": "hyperdoc-mcp-release.nix",
+      "sha256": "e4568b3bd2a0affc3df6788b6806b9974c4450aa3ec85cfaab7855615f2e4f65",
+      "bytes": 6871
+    },
+    {
+      "file": "dreyeck-hyperdoc-mcp-sidecar.nix",
+      "sha256": "82ccf171e00ea72bde82e27a2a882657f746c10ff5322bf3a32884090dac1bb3",
+      "bytes": 1205
+    },
+    {
+      "file": "DMX MCP server for shared workspace.html",
+      "sha256": "b9f25e76b9830a1c5fc9e37df2a6cd7da034d2781e90d2e056de627e765492a4",
+      "bytes": 19637
+    },
+    {
+      "file": "Add HyperDoc MCP beside the authoritative host config on dreyeck.ch.html",
+      "sha256": "6e8537b1f4e49cf3ec60a0e960cfc7ca1acd7442b183e36d6dd25cf53d7fc498",
+      "bytes": 9214
+    }
+  ]
+}

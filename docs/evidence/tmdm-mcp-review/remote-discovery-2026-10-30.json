@@ -1,0 +1,364 @@
+{
+  "endpoint": "https://mcp.dreyeck.ch/mcp",
+  "observedDate": "2026-10-30",
+  "clientTimezone": "Europe/Zurich",
+  "reviewedPR": 4,
+  "reviewedCommit": "4f137fb8db1d60f4a526cee986881407a3c09cbf",
+  "networkPolicy": {
+    "observationsCurrent": true,
+    "state": "enforced",
+    "mode": "restricted",
+    "exactHostnameAllowed": true,
+    "vpnConfigured": false
+  },
+  "probePolicy": {
+    "inheritedProxyAndCATrust": true,
+    "tlsVerificationEnabled": true,
+    "redirectsFollowed": false,
+    "explicitApplicationCredentialsSupplied": false,
+    "originHeaderSupplied": false,
+    "sessionValuesRetained": false,
+    "authorizationOrCookieValuesRetained": false,
+    "maxConnectSeconds": 10,
+    "maxRequestSeconds": 25,
+    "maxResponseBytes": 2097152,
+    "maxResourceListRetries": 1,
+    "resourcesReadInvoked": false,
+    "toolMethodsInvoked": false,
+    "evaluationInvoked": false
+  },
+  "requestedProtocolVersion": "2025-03-26",
+  "requestMethods": [
+    "GET",
+    "initialize",
+    "notifications/initialized",
+    "resources/list",
+    "resources/templates/list"
+  ],
+  "firstAttempt": [
+    {
+      "label": "https-get",
+      "observedAt": "2026-10-30T05:01:17.146203+01:00",
+      "request": {
+        "httpMethod": "GET",
+        "mcpMethod": null,
+        "applicationCredentialsSupplied": false,
+        "originHeaderSupplied": false,
+        "sessionHeaderSupplied": false
+      },
+      "curlExit": 0,
+      "httpStatus": 405,
+      "proxyConnectStatus": 200,
+      "tlsVerifyResult": 0,
+      "httpVersion": "2",
+      "responseHeaders": {
+        "server": "envoy",
+        "date": "Fri, 30 Oct 2026 04:01:18 GMT",
+        "content-type": "application/json; charset=utf-8"
+      },
+      "sessionHeaderReceived": false,
+      "wwwAuthenticatePresent": false,
+      "authenticationScheme": null,
+      "bodyBytes": 86,
+      "bodySha256": "405d05ab77fe21303aa254a1cbd238b90d41b85b02f2306eba353589ef29cebf",
+      "jsonrpc": null,
+      "responseId": null,
+      "error": "method_not_allowed"
+    },
+    {
+      "label": "initialize",
+      "observedAt": "2026-10-30T05:01:18.467118+01:00",
+      "request": {
+        "httpMethod": "POST",
+        "mcpMethod": "initialize",
+        "applicationCredentialsSupplied": false,
+        "originHeaderSupplied": false,
+        "sessionHeaderSupplied": false
+      },
+      "curlExit": 0,
+      "httpStatus": 200,
+      "proxyConnectStatus": 200,
+      "tlsVerifyResult": 0,
+      "httpVersion": "2",
+      "responseHeaders": {
+        "server": "envoy",
+        "date": "Fri, 30 Oct 2026 04:01:19 GMT",
+        "content-type": "application/json; charset=utf-8",
+        "mcp-protocol-version": "2025-03-26"
+      },
+      "sessionHeaderReceived": true,
+      "wwwAuthenticatePresent": false,
+      "authenticationScheme": null,
+      "bodyBytes": 244,
+      "bodySha256": "71c94cbe4eb2e0b09734c49205d0c95fb85d827814476cc68852000377ffa274",
+      "jsonrpc": "2.0",
+      "responseId": 1,
+      "result": {
+        "protocolVersion": "2025-03-26",
+        "capabilities": {
+          "resources": {},
+          "tools": {}
+        },
+        "serverInfo": {
+          "name": "hyperdoc-dmx-mcp",
+          "version": "0.1.0"
+        }
+      }
+    },
+    {
+      "label": "initialized-notification",
+      "observedAt": "2026-10-30T05:01:19.084464+01:00",
+      "request": {
+        "httpMethod": "POST",
+        "mcpMethod": "notifications/initialized",
+        "applicationCredentialsSupplied": false,
+        "originHeaderSupplied": false,
+        "sessionHeaderSupplied": true
+      },
+      "curlExit": 0,
+      "httpStatus": 202,
+      "proxyConnectStatus": 200,
+      "tlsVerifyResult": 0,
+      "httpVersion": "2",
+      "responseHeaders": {
+        "server": "envoy",
+        "date": "Fri, 30 Oct 2026 04:01:19 GMT",
+        "content-type": "application/json; charset=utf-8",
+        "mcp-protocol-version": "2025-03-26"
+      },
+      "sessionHeaderReceived": true,
+      "wwwAuthenticatePresent": false,
+      "authenticationScheme": null,
+      "bodyBytes": 0,
+      "bodySha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "resources-list",
+      "observedAt": "2026-10-30T05:01:19.960382+01:00",
+      "request": {
+        "httpMethod": "POST",
+        "mcpMethod": "resources/list",
+        "applicationCredentialsSupplied": false,
+        "originHeaderSupplied": false,
+        "sessionHeaderSupplied": true
+      },
+      "curlExit": 0,
+      "httpStatus": 200,
+      "proxyConnectStatus": 200,
+      "tlsVerifyResult": 0,
+      "httpVersion": "2",
+      "responseHeaders": {
+        "server": "envoy",
+        "date": "Fri, 30 Oct 2026 04:01:23 GMT",
+        "content-type": "application/json; charset=utf-8",
+        "mcp-protocol-version": "2025-03-26"
+      },
+      "sessionHeaderReceived": false,
+      "wwwAuthenticatePresent": false,
+      "authenticationScheme": null,
+      "bodyBytes": 214,
+      "bodySha256": "4c3cbe31dd2b9f4c489472d172fa90f11e9f144871f1a90f339caa2cbc415df0",
+      "jsonrpc": "2.0",
+      "responseId": false,
+      "error": {
+        "code": -32099,
+        "message": "Internal MCP server error"
+      }
+    },
+    {
+      "label": "resource-templates-list",
+      "observedAt": "2026-10-30T05:01:23.949385+01:00",
+      "request": {
+        "httpMethod": "POST",
+        "mcpMethod": "resources/templates/list",
+        "applicationCredentialsSupplied": false,
+        "originHeaderSupplied": false,
+        "sessionHeaderSupplied": true
+      },
+      "curlExit": 0,
+      "httpStatus": 200,
+      "proxyConnectStatus": 200,
+      "tlsVerifyResult": 0,
+      "httpVersion": "2",
+      "responseHeaders": {
+        "server": "envoy",
+        "date": "Fri, 30 Oct 2026 04:01:24 GMT",
+        "content-type": "application/json; charset=utf-8",
+        "mcp-protocol-version": "2025-03-26"
+      },
+      "sessionHeaderReceived": true,
+      "wwwAuthenticatePresent": false,
+      "authenticationScheme": null,
+      "bodyBytes": 451,
+      "bodySha256": "8c419e6efe81bbbd200d4b2acd954da7ee7bc6e777eba29f0aa62192df11c502",
+      "jsonrpc": "2.0",
+      "responseId": 3,
+      "result": {
+        "resourceTemplates": [
+          {
+            "uriTemplate": "dmx://topic/{id}",
+            "name": "topic/<id>",
+            "description": "Read a DMX topic by id.",
+            "mimeType": "application/json"
+          },
+          {
+            "uriTemplate": "dmx://topicmap/{id}",
+            "name": "topicmap/<id>",
+            "description": "Read a DMX topicmap by id.",
+            "mimeType": "application/json"
+          }
+        ]
+      }
+    }
+  ],
+  "resourceListRetry": [
+    {
+      "label": "initialize",
+      "observedAt": "2026-10-30T05:02:26.206541+01:00",
+      "request": {
+        "httpMethod": "POST",
+        "mcpMethod": "initialize",
+        "applicationCredentialsSupplied": false,
+        "originHeaderSupplied": false,
+        "sessionHeaderSupplied": false
+      },
+      "curlExit": 0,
+      "httpStatus": 200,
+      "proxyConnectStatus": 200,
+      "tlsVerifyResult": 0,
+      "httpVersion": "2",
+      "responseHeaders": {
+        "server": "envoy",
+        "date": "Fri, 30 Oct 2026 04:02:27 GMT",
+        "content-type": "application/json; charset=utf-8",
+        "mcp-protocol-version": "2025-03-26"
+      },
+      "sessionHeaderReceived": true,
+      "wwwAuthenticatePresent": false,
+      "authenticationScheme": null,
+      "bodyBytes": 244,
+      "bodySha256": "71c94cbe4eb2e0b09734c49205d0c95fb85d827814476cc68852000377ffa274",
+      "jsonrpc": "2.0",
+      "responseId": 1,
+      "result": {
+        "protocolVersion": "2025-03-26",
+        "capabilities": {
+          "resources": {},
+          "tools": {}
+        },
+        "serverInfo": {
+          "name": "hyperdoc-dmx-mcp",
+          "version": "0.1.0"
+        }
+      }
+    },
+    {
+      "label": "initialized-notification",
+      "observedAt": "2026-10-30T05:02:27.332776+01:00",
+      "request": {
+        "httpMethod": "POST",
+        "mcpMethod": "notifications/initialized",
+        "applicationCredentialsSupplied": false,
+        "originHeaderSupplied": false,
+        "sessionHeaderSupplied": true
+      },
+      "curlExit": 0,
+      "httpStatus": 202,
+      "proxyConnectStatus": 200,
+      "tlsVerifyResult": 0,
+      "httpVersion": "2",
+      "responseHeaders": {
+        "server": "envoy",
+        "date": "Fri, 30 Oct 2026 04:02:27 GMT",
+        "content-type": "application/json; charset=utf-8",
+        "mcp-protocol-version": "2025-03-26"
+      },
+      "sessionHeaderReceived": true,
+      "wwwAuthenticatePresent": false,
+      "authenticationScheme": null,
+      "bodyBytes": 0,
+      "bodySha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "resources-list",
+      "observedAt": "2026-10-30T05:02:27.960825+01:00",
+      "request": {
+        "httpMethod": "POST",
+        "mcpMethod": "resources/list",
+        "applicationCredentialsSupplied": false,
+        "originHeaderSupplied": false,
+        "sessionHeaderSupplied": true
+      },
+      "curlExit": 0,
+      "httpStatus": 200,
+      "proxyConnectStatus": 200,
+      "tlsVerifyResult": 0,
+      "httpVersion": "2",
+      "responseHeaders": {
+        "server": "envoy",
+        "date": "Fri, 30 Oct 2026 04:02:32 GMT",
+        "content-type": "application/json; charset=utf-8",
+        "mcp-protocol-version": "2025-03-26"
+      },
+      "sessionHeaderReceived": false,
+      "wwwAuthenticatePresent": false,
+      "authenticationScheme": null,
+      "bodyBytes": 214,
+      "bodySha256": "4c3cbe31dd2b9f4c489472d172fa90f11e9f144871f1a90f339caa2cbc415df0",
+      "jsonrpc": "2.0",
+      "responseId": false,
+      "error": {
+        "code": -32099,
+        "message": "Internal MCP server error"
+      },
+      "errorDataKeys": [
+        "detail"
+      ],
+      "diagnosticMarkers": [
+        "json"
+      ],
+      "diagnosticHostnames": [],
+      "fullErrorDataRetained": false
+    }
+  ],
+  "observations": {
+    "httpsAndProxy": "CONNECT 200; TLS verify result 0 for all eight requests",
+    "negotiatedProtocolVersion": "2025-03-26",
+    "serverInfo": {
+      "name": "hyperdoc-dmx-mcp",
+      "version": "0.1.0"
+    },
+    "advertisedCapabilities": {
+      "resources": {},
+      "tools": {}
+    },
+    "advertisedResourceTemplates": [
+      "dmx://topic/{id}",
+      "dmx://topicmap/{id}"
+    ],
+    "concreteResourceURIs": null,
+    "concreteResourceURIsReason": "resources/list returned JSON-RPC error -32099 twice; no successful resource array",
+    "authentication": "No credentials explicitly supplied by client; no HTTP 401/403 or WWW-Authenticate challenge observed. Session header issued and used after initialize. Backend authorization and deployment policy unverified.",
+    "resourceListError": {
+      "httpStatus": 200,
+      "code": -32099,
+      "message": "Internal MCP server error",
+      "requestId": 2,
+      "responseId": false,
+      "dataKeys": [
+        "detail"
+      ],
+      "fullInternalDetailRetained": false
+    },
+    "dmx": "Confirmed by serverInfo and both advertised templates; no DMX data read or tool call performed",
+    "iso13250": "Not discovered; no ISO template advertised. Fixed ISO resources cannot be ruled out because resources/list failed.",
+    "deployedCommit": "unknown",
+    "dataRetrieval": "Not tested; no resources/read request or CTM download",
+    "codexConnectorAttachment": "No attached HyperDoc MCP tools in this chat; shell-based protocol discovery only"
+  },
+  "client": {
+    "name": "codex-readonly-discovery",
+    "version": "1",
+    "capabilities": {}
+  }
+}
