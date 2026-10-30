@@ -1,0 +1,7 @@
+{
+  "baseline": "9dfcf4d705302c561535259b87a4a9f64bd61b5f",
+  "work": "49a55201c8eae849e7bef1a1baaa3f51b007bf2399f505bbee1e0bd42998599e",
+  "critic": "60e041bdeec1c27bbd2e58cc5ef65ac3a67acd6fa275128ea4192be2de466bfe",
+  "pr8": "f35632cb9e3d2f00bc7ee1a28a8453c8ec10bcecbc3821b58428efa9a244dc8d",
+  "pr8WithoutObservationCaption": "45307e0821ce5458277c7b245753ee153c83953f4dfbe7dbe36ef04650f82f34"
+}

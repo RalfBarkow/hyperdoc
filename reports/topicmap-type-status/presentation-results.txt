@@ -1,0 +1,4 @@
+TYPE-STATUS independent columns, optional values, identity and SVG captions PASS
+TYPE-STATUS PR Review provenance and native navigation PASS
+TYPE-STATUS Work/Lisp Critic baseline SVG equivalence PASS
+TYPE-STATUS-PASS 269 checks

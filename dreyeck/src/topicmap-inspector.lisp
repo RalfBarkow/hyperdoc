@@ -156,7 +156,7 @@ registered so that the Association gesture is bound to this very element. Only a
                      :path nil))
 
 (defun topicmap-topic-caption (topic)
-  "The line under a node's name: what kind of thing it is, and its status.
+  "Composite SVG caption under a node's name, not a Topic Type or Kind definition.
 
 Reads as prose rather than as keywords. A projection that has nothing to
 say in a slot leaves it out, because a node captioned UNSPECIFIED tells
@@ -340,13 +340,37 @@ readable values stay on the element's data- attributes."
                        '(nil :unspecified))))
         (dreyeck/topicmap:topicmap-projection-topics-of projection)))
 
-(defun render-topicmap-topic-row (topic &key (scope t))
+(defun topicmap-property-column-p (projection key)
+  "Whether a producer supplies KEY for any Topic; do not invent missing values."
+  (some (lambda (topic)
+          (topicmap-property
+           (dreyeck/topicmap:topicmap-topic-view-properties-of topic) key nil))
+        (dreyeck/topicmap:topicmap-projection-topics-of projection)))
+
+(defun render-topicmap-topic-row
+    (topic &key (scope t) (classification t) (status t))
   (views:html
     (:tr
      (:td
       (:code
        (views:esc (dreyeck/topicmap:topicmap-topic-id-of topic))))
-     (:td (views:esc (topicmap-topic-caption topic)))
+     (:td (:code (views:esc
+                  (prin1-to-string
+                   (dreyeck/topicmap:topicmap-topic-type-of topic)))))
+     (when classification
+       (views:html
+         (:td (views:esc
+               (let ((value (topicmap-property
+                             (dreyeck/topicmap:topicmap-topic-view-properties-of topic)
+                             :kind nil)))
+                 (if value (princ-to-string value) ""))))))
+     (when status
+       (views:html
+         (:td (views:esc
+               (let ((value (topicmap-property
+                             (dreyeck/topicmap:topicmap-topic-view-properties-of topic)
+                             :status nil)))
+                 (if value (princ-to-string value) ""))))))
      (when scope
        (views:html
          (:td
@@ -376,19 +400,24 @@ readable values stay on the element's data- attributes."
 
 (defun render-topicmap-legend (projection)
   ;; The temporal scope column is shown only where some topic fills it in.
-  (let ((scope (topicmap-scopes-say-anything-p projection)))
+  (let ((scope (topicmap-scopes-say-anything-p projection))
+        (classification (topicmap-property-column-p projection :kind))
+        (status (topicmap-property-column-p projection :status)))
    (views:html
     (:h3 (views:esc "Topics"))
     (:table :class "inspector-table"
             (:tr
              (:th (views:esc "ID"))
-             (:th (views:esc "Kind"))
+             (:th (views:esc "Topic type"))
+             (when classification (views:html (:th (views:esc "Display classification"))))
+             (when status (views:html (:th (views:esc "Status"))))
              (when scope (views:html (:th (views:esc "Temporal scope"))))
              (:th (views:esc "Inspectable object")))
             (dolist
                 (topic
                   (dreyeck/topicmap:topicmap-projection-topics-of projection))
-              (render-topicmap-topic-row topic :scope scope)))
+              (render-topicmap-topic-row topic :scope scope
+                                        :classification classification :status status)))
     (:h3 (views:esc "Typed associations"))
     (:table :class "inspector-table"
             (:tr

@@ -1,0 +1,17 @@
+CLASSIFICATION-REVIEW PR Review
+  :GITHUB-ISSUE -> NIL
+  :GITHUB-OBSERVATION -> "snapshot"
+  :PULL-REQUEST -> "pull request"
+CLASSIFICATION-REVIEW Work
+  :WORK-PAGE -> "area"
+  :WORK-PAGE -> "concept"
+  :WORK-PAGE -> "relation"
+  :WORK-PAGE -> "work item"
+CLASSIFICATION-REVIEW Lisp Critic
+  :DOCUMENTED-STAGE -> "conceptual paradigm"
+  :DOCUMENTED-STAGE -> "group of documented stages"
+  :STATION -> "HyperDoc projection"
+  :STATION -> "adaptation"
+  :STATION -> "codebase"
+  :STATION -> "page-attached wrapper system"
+  :STATION -> "research system"
