@@ -2647,5 +2647,40 @@
         ]
       ]
     }
+  },
+  "localRepairs": {
+    "dmx-mcp/dmx-workspace-journal.lisp": {
+      "issue": 7,
+      "baseCommit": "4ef218a6d273e17091f4ee541965a01ae53d39fc",
+      "fileSHA256": "f3bdb11944b3684375fbd00c1042eecb56b8a2d59f39b056c55bb5e02db4ef01",
+      "adaptedSpans": [
+        [
+          "hyperdoc/dmx-workspace-journal.lisp",
+          83604,
+          84215
+        ],
+        [
+          "hyperdoc/dmx-workspace-journal.lisp",
+          84215,
+          87962
+        ],
+        [
+          "hyperdoc/dmx-workspace-journal.lisp",
+          100567,
+          100852
+        ],
+        [
+          "hyperdoc/dmx-workspace-journal.lisp",
+          102680,
+          103921
+        ],
+        [
+          "hyperdoc/dmx-workspace-journal.lisp",
+          103921,
+          104768
+        ]
+      ],
+      "reason": "Restore and validate local journal files before reads/writes; preserve no-op history. Original spans remain historical extraction provenance."
+    }
   }
 }

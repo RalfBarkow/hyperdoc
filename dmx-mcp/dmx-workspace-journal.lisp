@@ -1949,10 +1949,118 @@
            (dmx-workspace-journal-subject-key->note-key subject-key))
    *hyperdoc-local-workspace-journal-directory*))
 
+;; Local files remain the durable authority across application processes.
+(define-condition hyperdoc-local-workspace-journal-file-error (error)
+  ((pathname :initarg :pathname
+             :reader hyperdoc-local-workspace-journal-error-pathname)
+   (reason :initarg :reason
+           :reader hyperdoc-local-workspace-journal-error-reason))
+  (:report (lambda (condition stream)
+             (format stream "Cannot restore HyperDoc-local journal file ~A: ~A"
+                     (hyperdoc-local-workspace-journal-error-pathname condition)
+                     (hyperdoc-local-workspace-journal-error-reason condition)))))
+
+(defun validate-hyperdoc-local-workspace-journal-stream
+    (stream pathname &key subject-key)
+  (labels ((require-valid (test reason)
+             (unless test (error "~A" reason))))
+    (require-valid (hash-table-p stream) "Expected a journal JSON object")
+    (let ((key (gethash "subjectKey" stream))
+          (revision (gethash "currentRevision" stream))
+          (events (gethash "events" stream)))
+      (require-valid (and (dmx-non-empty-string-p key)
+                          (or (null subject-key) (equal key subject-key)))
+                     "Subject identity mismatch")
+      (require-valid
+       (equal (file-namestring pathname)
+              (file-namestring (hyperdoc-local-workspace-journal-pathname key)))
+       "Journal filename does not match subject identity")
+      (require-valid
+       (and (equal (gethash "journalOwner" stream) "hyperdoc")
+            (eql (gethash "schemaVersion" stream)
+                 *hyperdoc-local-workspace-journal-schema-version*)
+            (member (gethash "storageModel" stream)
+                    (list *dmx-workspace-journal-storage-model*
+                          *hyperdoc-local-workspace-journal-storage-model*)
+                    :test #'equal)
+            (integerp (gethash "workspaceTopicmapId" stream)))
+       "Unsupported or incomplete journal metadata")
+      (require-valid (and (vectorp events) (not (stringp events))
+                          (integerp revision) (<= 0 revision)
+                          (= revision (length events)))
+                     "Inconsistent journal revision or events")
+      (loop for event across events
+            for expected from 1
+            do (require-valid
+                (and (hash-table-p event)
+                     (eql (gethash "revision" event) expected)
+                     (equal (gethash "subjectKey" event) key)
+                     (dmx-non-empty-string-p (gethash "eventType" event))
+                     (hash-table-p (gethash "nextState" event))
+                     (equal (gethash "subjectKey" (gethash "nextState" event)) key))
+                "Invalid event identity, state or revision sequence")))
+    stream))
+
+(defun read-hyperdoc-local-workspace-journal-file
+    (pathname &key subject-key required-p)
+  "Read and validate without changing either the file or the stream cache."
+  (handler-case
+      (with-open-file (input pathname :direction :input
+                                     :if-does-not-exist nil
+                                     :external-format :utf-8)
+        (cond
+          (input
+           (let ((stream (shasht:read-json input)))
+             (loop for char = (read-char input nil nil)
+                   while char
+                   unless (find char '(#\Space #\Tab #\Newline #\Return))
+                     do (error "Trailing data after journal JSON"))
+             (validate-hyperdoc-local-workspace-journal-stream
+              stream pathname :subject-key subject-key)))
+          (required-p (error "Journal file disappeared during discovery"))
+          (t nil)))
+    (error (condition)
+      (error 'hyperdoc-local-workspace-journal-file-error
+             :pathname pathname :reason (format nil "~A" condition)))))
+
+(defun ensure-hyperdoc-local-workspace-journal-stream (subject-key)
+  ;; Even a cached stream must not conceal a damaged/unreadable existing file.
+  (let ((persisted
+          (read-hyperdoc-local-workspace-journal-file
+           (hyperdoc-local-workspace-journal-pathname subject-key)
+           :subject-key subject-key)))
+    (or (gethash subject-key *hyperdoc-local-workspace-journal-streams*)
+        (when persisted
+          (setf (gethash subject-key *hyperdoc-local-workspace-journal-streams*)
+                persisted)))))
+
+(defun restore-hyperdoc-local-workspace-journal-streams ()
+  "Validate all discovered files before publishing any restored stream."
+  (let* ((pattern (merge-pathnames #p"workspace-journal-*.json"
+                                  *hyperdoc-local-workspace-journal-directory*))
+         (paths
+           (handler-case (directory pattern)
+             (error (condition)
+               (error 'hyperdoc-local-workspace-journal-file-error
+                      :pathname pattern :reason (format nil "~A" condition)))))
+         (streams
+           (mapcar (lambda (path)
+                     (read-hyperdoc-local-workspace-journal-file path :required-p t))
+                   paths)))
+    (dolist (stream streams)
+      (let ((key (gethash "subjectKey" stream)))
+        (unless (gethash key *hyperdoc-local-workspace-journal-streams*)
+          (setf (gethash key *hyperdoc-local-workspace-journal-streams*) stream)))))
+  (values))
+
 ;; From hyperdoc/dmx-workspace-journal.lisp, characters 83604..84215.
 (defun write-hyperdoc-local-workspace-journal-stream (subject-key stream)
   (when *hyperdoc-local-workspace-journal-write-files-p*
     (let ((pathname (hyperdoc-local-workspace-journal-pathname subject-key)))
+      ;; Never replace an unreadable or invalid existing history.
+      (read-hyperdoc-local-workspace-journal-file pathname :subject-key subject-key)
+      (validate-hyperdoc-local-workspace-journal-stream stream pathname
+                                                       :subject-key subject-key)
       (ensure-directories-exist pathname)
       (with-open-file (file-stream pathname
                                    :direction :output
@@ -1977,10 +2085,9 @@
                      (dmx-workspace-journal-snapshot-field previous-state
                                                            "subjectLookup")))
          (stream
-          (or (gethash subject-key *hyperdoc-local-workspace-journal-streams*)
-              (setf (gethash subject-key
-                             *hyperdoc-local-workspace-journal-streams*)
-                    (dmx-workspace-journal-make-base-stream
+          (dmx-workspace-journal-deep-copy
+           (or (ensure-hyperdoc-local-workspace-journal-stream subject-key)
+               (dmx-workspace-journal-make-base-stream
                      subject-key
                      (or (and (hash-table-p lookup)
                               (gethash "kind" lookup))
@@ -2035,11 +2142,16 @@
            "hyperdoc-local-workspace-journal-sink"))
          (pathname nil))
     (when events
-      (dmx-workspace-journal-apply-events-to-stream stream events))
-    (setf (gethash subject-key *hyperdoc-local-workspace-journal-streams*)
-          stream
-          pathname
-          (write-hyperdoc-local-workspace-journal-stream subject-key stream))
+      (dmx-workspace-journal-apply-events-to-stream stream events)
+      (setf pathname
+            (write-hyperdoc-local-workspace-journal-stream subject-key stream)))
+    ;; Preserve the existing diagnostic path for a persisted no-op, without I/O
+    ;; that changes the file. No file is invented for a new empty stream.
+    (when (and (null events) *hyperdoc-local-workspace-journal-write-files-p*)
+      (setf pathname
+            (probe-file (hyperdoc-local-workspace-journal-pathname subject-key))))
+    ;; Publish only after persistence succeeds. A no-op leaves existing bytes alone.
+    (setf (gethash subject-key *hyperdoc-local-workspace-journal-streams*) stream)
     (values events stream pathname)))
 
 ;; From hyperdoc/dmx-workspace-journal.lisp, characters 87962..88404.
@@ -2287,6 +2399,7 @@
 
 ;; From hyperdoc/dmx-workspace-journal.lisp, characters 100567..100852.
 (defun hyperdoc-local-workspace-journal-streams ()
+  (restore-hyperdoc-local-workspace-journal-streams)
   (let ((streams '()))
     (maphash (lambda (_subject-key stream)
                (declare (ignore _subject-key))
@@ -2348,8 +2461,7 @@
            :topic-id topic-id
            :note-key note-key
            :note-kind note-kind))
-         (stream (gethash resolved-subject-key
-                          *hyperdoc-local-workspace-journal-streams*)))
+         (stream (ensure-hyperdoc-local-workspace-journal-stream resolved-subject-key)))
     (unless stream
       (error 'fedwiki-dmx-import-error
              :message "No HyperDoc-local workspace journal stream matched the requested subject"))
@@ -2375,8 +2487,7 @@
            :topic-id topic-id
            :note-key note-key
            :note-kind note-kind))
-         (stream (gethash resolved-subject-key
-                          *hyperdoc-local-workspace-journal-streams*)))
+         (stream (ensure-hyperdoc-local-workspace-journal-stream resolved-subject-key)))
     (unless stream
       (error 'fedwiki-dmx-import-error
              :message "No HyperDoc-local workspace journal stream matched the requested subject"))

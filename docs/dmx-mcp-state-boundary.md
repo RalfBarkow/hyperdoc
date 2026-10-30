@@ -1,5 +1,13 @@
 # DMX MCP launcher state boundary
 
+
+> Superseded operational decision (2026-10-30): the current candidate includes
+> the Issue #7 restart repair and may use an explicitly new empty journal epoch.
+> Preserve old state untouched; no import is required. See the
+> [current operator runbook](dmx-mcp-operator-runbook.md) and
+> [repair notes](dmx-journal-restart-repair.md). The earlier findings/results below
+> describe their named historical revisions, not the repaired integration head.
+
 Source review, 2026-10-30, of verified PR #6 runtime revision
 `e15e36f34fe3d314d162fee244212d7a7fec3dc2`. No Lisp process was started; no production endpoint,
 persisted service state or DMX data was accessed for this assessment. This documents

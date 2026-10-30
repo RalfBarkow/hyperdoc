@@ -26,6 +26,7 @@
        (unless (<= 1024 port 65535) (error "Invalid MCP port"))
        (setf hyperdoc::*hyperdoc-local-workspace-journal-directory*
              (uiop:ensure-directory-pathname state))
+       (hyperdoc::restore-hyperdoc-local-workspace-journal-streams)
        (unwind-protect
             (progn
               (hyperdoc::serve-dmx-mcp-server :address "127.0.0.1" :port port)

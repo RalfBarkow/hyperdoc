@@ -1,5 +1,13 @@
 # DMX MCP integration into dreyeck.ch
 
+
+> Superseded operational decision (2026-10-30): the current candidate includes
+> the Issue #7 restart repair and may use an explicitly new empty journal epoch.
+> Preserve old state untouched; no import is required. See the
+> [current operator runbook](dmx-mcp-operator-runbook.md) and
+> [repair notes](dmx-journal-restart-repair.md). The earlier findings/results below
+> describe their named historical revisions, not the repaired integration head.
+
 Review slice, 2026-10-30, following [PR #5's downstream integration comment](https://github.com/RalfBarkow/hyperdoc/pull/5#issuecomment-6515647691).
 
 The observed target HEAD was `573fe37611a61d984260ebf43c797f7534211bdd`.
