@@ -28,6 +28,15 @@ import/materialization workflows and unrelated page constructors are omitted.
 Historical names such as `fedwiki-dmx-import-error` remain the existing condition
 identities; their names do not imply loading a FedWiki implementation.
 
+The 2026-10-30 scope correction keeps the Journal as a separate investigation
+Topic and [subsequent work item #7](https://github.com/RalfBarkow/hyperdoc/issues/7).
+Retaining dependencies and passing fixture regressions do not demonstrate
+functional Journal correctness. No Journal repair, redesign, migration, Topic
+inventory or cleanup is part of PR #6. The bounded
+[launcher state assessment](dmx-mcp-state-boundary.md) documents potential output
+redirection, cold-process ignorance of persisted streams and later same-subject
+file replacement; it neither changes those behaviors nor observes production data.
+
 [The source manifest](dmx-mcp-source-manifest.json) records original UTF-8 file
 hashes and character spans for 644 retained source forms. Each form has a source
 location comment. `python scripts/check-dmx-mcp-source.py` audits those spans
@@ -67,8 +76,12 @@ live-write gates are unchanged. The new application launcher requires an explici
 absolute state directory and binds only to loopback. It never enables writes
 implicitly. The historical optional-bearer contract is retained in both the
 library and launcher: a configured token is enforced; an absent token does not
-add an authentication requirement. Public exposure needs operator review of that
-existing policy.
+add an authentication requirement. The confirmed migration target is intentional
+public Common Workspace use for topicmap `919822`, with
+`HYPERDOC_MCP_ENABLE_LIVE_WRITES=1`, the existing listener/Origin and state root
+preserved. Do not introduce mandatory bearer authentication or disable production
+writes as a substitute for this migration. The generic false default is unchanged;
+`0` is used only for the isolated, synthetic rehearsal described in the runbook.
 
 ## Running and focused verification
 
@@ -104,6 +117,11 @@ Thread-local dynamic bindings alone do not isolate Hunchentoot worker threads.
 Two Explorer-dependent annotation fixture workflows and the historical localhost
 rehearsal fixture are not included or claimed executed. Existing continuation
 code and guards remain preserved; exhaustive legacy workflow coverage is not claimed.
+In particular, the memory-seeded Journal fixtures with file writes disabled do
+not establish persisted-state recovery, Journal functional correctness, or actual
+production Common Workspace write capability. This scope correction changes only
+documentation: prior verification results stay attributed to `e15e36f...`; the
+regression suite and Nix builds are not repeated without a relevant code change.
 
 The separate coexistence check requires clean checkouts, without modifying either:
 
