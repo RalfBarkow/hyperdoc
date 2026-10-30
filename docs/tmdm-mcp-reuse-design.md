@@ -46,6 +46,11 @@ Catalog or weaken [`catalog-topic-maps.lisp`](../dreyeck/src/catalog-topic-maps.
 
 ## Actual public-service observation
 
+**Dated follow-up, 2026-10-30:** the new environment now reaches the endpoint.
+Initialization and DMX template discovery succeed; concrete resource listing
+returns an internal MCP error. See the [remote discovery evidence](evidence/tmdm-mcp-review/remote-discovery-2026-10-30.md).
+The observations below retain the earlier 2026-10-29 state.
+
 Both a GET and an MCP `initialize` POST were attempted against exactly
 `https://mcp.dreyeck.ch/mcp`, through the configured HTTPS proxy with normal TLS
 verification and no bearer credentials. The POST requested protocol `2025-03-26`
