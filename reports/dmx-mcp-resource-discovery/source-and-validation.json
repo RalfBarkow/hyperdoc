@@ -1,0 +1,67 @@
+{
+  "checkedAt": "2026-10-30T06:11:03.187182+01:00",
+  "dmxSourceBaseline": "591f275fc26ebef7967cc8d3e3fb5a0efc19cc85",
+  "deployedGitRevision": "unknown; no operator deployment evidence",
+  "sourceHashes": {
+    "hyperdoc/mcp-server.lisp": {
+      "baselineSHA256": "356758f1dc975fe01f8a69db46076a8140f996279335d83f5d4becde576c9852",
+      "reviewSHA256": "9a60b85b4d5c58c3eca653794e1a9f709dabd6f586648028c44b7f97099b42c9"
+    },
+    "hyperdoc/dmx-import.lisp": {
+      "baselineSHA256": "514743bdf807a93d802be3df89a0458344fa22d3dc476dd1142f292f366a34a2",
+      "reviewSHA256": "514743bdf807a93d802be3df89a0458344fa22d3dc476dd1142f292f366a34a2"
+    },
+    "tests/dmx-mcp-smoke.lisp": {
+      "baselineSHA256": "bd53099f87a68c21c8deb273962d4c87f30bba4da69dc7e4934a27f41f88ffa4",
+      "reviewSHA256": "bd53099f87a68c21c8deb273962d4c87f30bba4da69dc7e4934a27f41f88ffa4"
+    },
+    "hyperdoc/collective-knowledge-slice.lisp": {
+      "baselineSHA256": "c0083b8eeb819bbe026d64273f0ebcfc5405b8b7a9852b191a136aada4cb9510",
+      "reviewSHA256": "c0083b8eeb819bbe026d64273f0ebcfc5405b8b7a9852b191a136aada4cb9510"
+    }
+  },
+  "guardedFunctionsUnchangedExceptEquivalentArrayHelperReferences": [
+    "dmx-mcp-server-require-auth",
+    "dmx-mcp-server-origin-allowed-p",
+    "dmx-mcp-server-require-origin",
+    "make-default-dmx-mcp-server",
+    "dmx-mcp-live-write-available-p",
+    "dmx-mcp-tool-definitions",
+    "dmx-mcp-call-dry-run-tool",
+    "dmx-mcp-call-write-tool",
+    "dmx-mcp-integer-array-argument"
+  ],
+  "toolDefinitionsSHA256": "fcb41ea1be5db385ad58060fd45e2dcf0158dc0fb507b6d537029ebd5b9dc85d",
+  "historicalInspectorUpstream": "5816eaaf445f0f9dbae67cf07d7706b4fb678b3b",
+  "inspectorArchiveSHA256": "02bdd45081c4de83819e2818c17ef5297d78982e8bfa2736bc533ecf61e161d8",
+  "historicalInspectorOverlayHashGuards": "PASS",
+  "runtime": "SBCL 2.4.10; cached Nix dependencies",
+  "authoritativeNixDevelop": "FAILED before evaluation: /proc/self/setgroups read-only",
+  "tests": {
+    "historicalControl": 8,
+    "focusedRepair": 72,
+    "independentTwoServer": 20
+  },
+  "isoPrototypeSource": "521a1f38ffe40edf02f8c3d6faae2c373ad150c1",
+  "snapshotSource": "0484a4b76128c3ed302a6a8d6e0343bfe03cece5",
+  "snapshotSHA256": "8b4142421f5bfa1cc089e7ac53b43ebc6975e597cdedea5a49f6fc226dcc2e1d",
+  "topicMapsPin": "88994c1b9e1edbf13e665e984a5c9c3b2cdf7575",
+  "noProductionChange": true,
+  "noRemoteDmxReadOrToolCalls": true,
+  "noWriteBack": true,
+  "noGraphConversion": true,
+  "noSourceOrPinChangesToPR4": true,
+  "fixtureDefinitions": {
+    "scripts/test-dmx-mcp-resource-discovery.py": "0bc22b9c33ea49310e6318e7d94ff632a146d832a9b3ac6aa004efffd525e9cc",
+    "scripts/test-dmx-iso-mcp-coexistence.py": "b94a6eeecd1bede59eefc70cec40dbe6eb2400677a51983f754cef4296d74c05",
+    "tests/dmx-mcp-resource-discovery-server.lisp": "060bf3281eb4fe289be28ff0b18e46cd4f664e00ee1b66db50deb190089aef4a"
+  },
+  "memorySnippetConstructionAndSourceLocator": "PASS; interactive CL/CLOG inspection not executed",
+  "runtimeVersions": {
+    "sbcl": "2.4.10",
+    "asdf": "3.3.1",
+    "hunchentoot": "1.3.1",
+    "drakma": "2.0.10",
+    "shasht": "0.1"
+  }
+}

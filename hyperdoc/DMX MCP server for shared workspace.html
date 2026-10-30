@@ -340,6 +340,72 @@ ssh rgb@dreyeck.ch 'sudo /nix/var/nix/profiles/system-&lt;generation&gt;-link/bi
 
 <h2>Related</h2>
 
+<h3>Resource discovery repair, 2026-10-30 (reference contract)</h3>
+<p>The historical <code>hyperdoc/mcp</code> cold-load path did not load the
+FedWiki file that defined <code>json-array-elements</code>. Resource discovery
+therefore failed after its topicmap GET. A fresh local HTTP reproduction produces
+the recorded remote error's exact 214 octets and SHA-256
+<code>4c3cbe31dd2b9f4c489472d172fa90f11e9f144871f1a90f339caa2cbc415df0</code>.
+This identifies the reproduced exception, not the deployed Git revision, which
+still needs operator evidence.</p>
+<p>MCP now owns its array helper. Discovery validates member ids and announces
+the same resource identities with one topicmap GET and no additional Topic GETs.
+Optional titles/content and missing or unauthorized Topics are read on demand.
+Errors preserve request ids, use JSON null when no id is recoverable, and keep
+resource backend bodies and unexpected exception details private. Authentication,
+live-write gates and typed write schemas are unchanged.</p>
+<p>The separate ISO MCP prototype remains at PR #4 commit
+<code>521a1f38ffe40edf02f8c3d6faae2c373ad150c1</code>. A local DMX workspace note
+can reference a stable TMDM Subject Identifier as text while retaining its own
+DMX identity and fixture authority. The two-server test follows that reference
+without converting either model or implementing synchronization/write-back.
+See the <a href="../docs/dmx-mcp-resource-discovery-repair.md">repair evidence,
+source identities, replay commands and operator-controlled deployment proposal</a>.
+No activation is performed by this page or the tests.</p>
+
+<h4>Memory-only SLY reconstruction</h4>
+<p>In a review image with this checkout on the ASDF registry, evaluate the loader
+first. This constructs no HTTP server and contacts no backend:</p>
+<pre>(require :asdf)
+(asdf:load-system "hyperdoc/mcp")</pre>
+<p>Then inspect the announced resources and their source path. Three URIs are
+expected; announcing the configured Topic URI does not assert that its content
+exists in this empty memory fixture.</p>
+<pre>(defun i (object)
+  (let* ((package (find-package "CLOG-MOLDABLE-INSPECTOR"))
+         (symbol (and package (find-symbol "CLOG-INSPECT" package))))
+    (if (and symbol (fboundp symbol))
+        (handler-case (progn (funcall (symbol-function symbol) :object object) object)
+          (condition () (inspect object)))
+        (inspect object))))
+
+(unless (fboundp 'hyperdoc::dmx-mcp-array-elements)
+  (error "Load the reviewed repair sources first."))
+(defparameter *dmx-discovery-memory-server*
+  (hyperdoc::make-dmx-mcp-server
+   :read-client (make-instance 'hyperdoc::memory-dmx-import-client)
+   :workspace-topicmap-id 1 :known-topic-ids '(7)
+   :live-writes-enabled-p nil))
+(defparameter *dmx-discovery-path*
+  (hyperdoc::make-code-path-graph
+   :id "dmx-mcp-resource-discovery-repair"
+   :title "MCP discovery: source-owned array helper, metadata first"
+   :summary "Before: missing external helper. After: one member-list read, then metadata; content is on demand."
+   :nodes '((:id "rpc" :label "resources/list" :role :entrypoint)
+            (:id "members" :label "topicmap GET + validated ids" :role :function)
+            (:id "metadata" :label "identity metadata, no Topic GET" :role :result))
+   :edges '((:from "rpc" :to "members" :kind :call)
+            (:from "members" :to "metadata" :kind :call))))
+(defparameter *dmx-discovery-example*
+  (list :source (asdf:system-relative-pathname "hyperdoc" "hyperdoc/mcp-server.lisp")
+        :path *dmx-discovery-path*
+        :resources (hyperdoc::dmx-mcp-resource-list *dmx-discovery-memory-server*)))
+(format t "~&amp;Type ~S; announced resources ~D; source ~A~%"
+        (type-of *dmx-discovery-example*)
+        (length (getf *dmx-discovery-example* :resources))
+        (getf *dmx-discovery-example* :source))
+(i *dmx-discovery-example*)</pre>
+
 <ul>
   <li><a page="Add HyperDoc MCP beside the authoritative host config on dreyeck.ch">Add HyperDoc MCP beside the authoritative host config on dreyeck.ch</a></li>
   <li><a page="Deploy dreyeck.ch from the local flake">Deploy dreyeck.ch from the local flake</a></li>
