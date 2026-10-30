@@ -1,0 +1,53 @@
+{
+  "baseline": "573fe37611a61d984260ebf43c797f7534211bdd",
+  "repository": {
+    "id": 1172602621,
+    "fullName": "RalfBarkow/hyperdoc"
+  },
+  "observedAt": "2026-10-30T10:26:43Z",
+  "sourceURL": "https://api.github.com/repos/RalfBarkow/hyperdoc/pulls?state=open&per_page=100",
+  "observedPRHeads": {
+    "6": "4ef218a6d273e17091f4ee541965a01ae53d39fc",
+    "5": "f512aa847eab05cc2bdf2e78ef0bd1b516a11926",
+    "4": "521a1f38ffe40edf02f8c3d6faae2c373ad150c1",
+    "3": "db5a77a43742d41855fc9923b24f40f8652c1d04",
+    "2": "9cb805a877797d16df9a08f19e2acc882ade651e",
+    "1": "0484a4b76128c3ed302a6a8d6e0343bfe03cece5"
+  },
+  "sourceIdentities": {
+    "dreyeck.asd": "b81b30e4b9e7a5dad935cbd3b51d08d9f29d1330a76541933a68902216364b9e",
+    "dreyeck/pr-review/model.lisp": "5d657d84a6142d9dd3cd5e1a06ae59bb62244364f2167c1f974dcd9dfac839b4",
+    "dreyeck/pr-review/reading.lisp": "c61705b087f4bcaa729a3660efd022fc212a1eb2913e19f46064e4d4c7d2864e",
+    "dreyeck/pages/pr-review/Pull Request Review.html": "213ae4d07d9174035f33161c9632f6d5904fe8e0676b6920df5cd07c6a29b590",
+    "dreyeck/pr-review/example/github-snapshot.json": "be273985ffd339fe7c107f39dc32418422e8fba489d247c4d6cd56e688e900d0",
+    "dreyeck/pr-review/example/review-annotations.json": "b39e73e0a0ff3c352cd90b95a585ba76397aacfdf41de0357f54569c809c6962",
+    "dreyeck/tests/pull-request-review.lisp": "c4ac662c156b85ac98375ca1877f220cd0a3058a03c4893ece0b5841fdebd885",
+    "scripts/capture-pr-review.py": "2cc0aca5adfcda371b7bb3ac5c7195e8deb0a30d1fefbbfb10ede51e55af76c6",
+    "tests/test_pr_review_capture.py": "61faa261b5e5a3ebe04192ddb1a7319b98d84f8c991f3a9907a8d075e085e2c9",
+    "docs/pull-request-review.md": "4e2b78337cde2a10a3f7e6ea8ed1e13180be941e289cd165f67352a8a26fb6c0"
+  },
+  "verification": {
+    "lispChecks": 141,
+    "captureTests": 6,
+    "lispExit": 0,
+    "captureExit": 0,
+    "manualSLYBrowser": "not run; headless Inspector references/rendering/workspace navigation tested",
+    "nixBuild": "not run; cached declared ASDF dependencies used"
+  },
+  "runtimePolicy": "No GitHub client/writer in Reading; explicit local import; unregistered book; no Catalog admission or production changes.",
+  "reusedFrameworkFileSHA256": {
+    "dreyeck/src/topicmap.lisp": "62ab7f1c7a7769be3ec0f3607ec9dccad6a47bc5753ffe7c57533c04678a3996",
+    "dreyeck/src/topicmap-inspector.lisp": "7d0ef6bb34577458779ad6a8d3075fed309cce64181596ce1c1cab1d555e9311",
+    "dreyeck/src/hyperdoc-pages.lisp": "30d33b53c3f2d1ec6795917446c522cfe1b259968fcca3bf71c772da9fef919e",
+    "dreyeck/src/authority-policy.lisp": "504f81d0efe7d5baffcb557e4a2e83845b47d8346596050d4cf8ea5f2da39b77",
+    "dreyeck/src/catalog-topic-maps.lisp": "70ad70a0c6c2ccf71bab415a2d91824877c0fb5c8d2ec5484f384b0d71b1f9c4",
+    "nix/catalog.nix": "6ae6a69921d254c295860e30d0ed434a6861470c083a9a9323d5af0fe7554c6e",
+    "nix/topic-maps-source.nix": "32a2a2cfe0a565eb2100d70ebb99f205b3170cc23edbd223706265b2f4aa93da",
+    "flake.lock": "f82401946af9fa2467191c454f8ee3f288d76164a00bc41f96f9b36441ede4bc"
+  },
+  "htmlInspectorViewSourceSHA256": {
+    "html.lisp": "505ece8d6a1de546d5b9a195f46b48937675c059a6dc1adf72ed7da70fe24614",
+    "views.lisp": "a8eea6fee85dc396acf44dc36a9e120e029aef3cf23c3dd756e8ab50aaf9f17b",
+    "view-support.lisp": "68f386c27c390c1e8a9db8a67f70c166f29978d84e89a26379a3545cf3e4ccfa"
+  }
+}

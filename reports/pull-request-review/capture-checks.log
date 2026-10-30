@@ -1,0 +1,12 @@
+test_bad_page_shape_is_refused (test_pr_review_capture.CaptureBoundary.test_bad_page_shape_is_refused) ... ok
+test_blank_success_is_not_an_empty_list (test_pr_review_capture.CaptureBoundary.test_blank_success_is_not_an_empty_list) ... ok
+test_changed_head_or_state_cannot_replace_snapshot (test_pr_review_capture.CaptureBoundary.test_changed_head_or_state_cannot_replace_snapshot) ... ok
+test_pagination_includes_all_pages (test_pr_review_capture.CaptureBoundary.test_pagination_includes_all_pages) ... ok
+test_unavailable_capture_preserves_previous_snapshot (test_pr_review_capture.CaptureBoundary.test_unavailable_capture_preserves_previous_snapshot) ... ok
+test_zero_prs_is_a_successful_available_observation (test_pr_review_capture.CaptureBoundary.test_zero_prs_is_a_successful_available_observation) ... ok
+
+----------------------------------------------------------------------
+Ran 6 tests in 0.004s
+
+OK
+Captured 0 open PRs and 0 Issues at 2026-10-30T10:53:02Z

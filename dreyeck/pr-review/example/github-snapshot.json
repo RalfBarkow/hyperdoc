@@ -1,0 +1,200 @@
+{
+  "schemaVersion": 1,
+  "repository": {
+    "id": 1172602621,
+    "fullName": "RalfBarkow/hyperdoc"
+  },
+  "observedAt": "2026-10-30T10:26:43Z",
+  "sourceURL": "https://api.github.com/repos/RalfBarkow/hyperdoc/pulls?state=open&per_page=100",
+  "selection": "open",
+  "status": "available",
+  "pullRequests": [
+    {
+      "number": 6,
+      "title": "Integrate repaired DMX MCP as an independent dreyeck.ch application",
+      "body": "Implements the [downstream integration request on PR #5](https://github.com/RalfBarkow/hyperdoc/pull/5#issuecomment-6515647691).\n\n## Scope correction, 2026-10-30\n\nLatest change: documentation-only commit `4ef218a6d273e17091f4ee541965a01ae53d39fc`; the launcher, DMX runtime, tools/resources, tests and packaging code are unchanged.\n\n- Preserve the intentional public Common Workspace for DMX topicmap `919822`, including `HYPERDOC_MCP_ENABLE_LIVE_WRITES=1`. Do not introduce mandatory bearer authentication. Listener, Origin, existing state and permissions, tool validation and ownership checks remain preserved. The existing public configuration reference is the [historical sidecar](https://github.com/RalfBarkow/hyperdoc/blob/591f275fc26ebef7967cc8d3e3fb5a0efc19cc85/nix/integration/dreyeck-hyperdoc-mcp-sidecar.nix); the required migration contract does not attest the installed package revision.\n- Journal correctness and any repair/redesign, state migration or Journal-related DMX Topic cleanup are a **separate investigation Topic and subsequent [work item #7](https://github.com/RalfBarkow/hyperdoc/issues/7)**. Retain only dependencies required by the existing MCP contract. Retaining code and passing fixtures are not Journal-correctness proof.\n- The [source-only state-boundary review](https://github.com/RalfBarkow/hyperdoc/blob/4ef218a6d273e17091f4ee541965a01ae53d39fc/docs/dmx-mcp-state-boundary.md) finds no automatic data relocation at startup, but an unchecked different existing directory can redirect output. Cold local reads consult memory without persisted-file hydration; a later retained write can supersede a same-subject file without merging prior disk history. Ordinary workspace-write hooks can reach that sink. No production loss or installed-release behavior is claimed observed.\n- The [updated runbook](https://github.com/RalfBarkow/hyperdoc/blob/4ef218a6d273e17091f4ee541965a01ae53d39fc/docs/dmx-mcp-operator-runbook.md) does not authorize migration/cleanup or conceal the gap by using an empty store, disabling intended writes or adding mandatory authentication. Unestablished state preservation remains a hold on later activation, outside the Journal repair scope of this port. A synthetic rehearsal uses `0`; production must preserve `1`. Real production write proof needs a separate authorized, bounded probe and reversal plan; none was performed.\n\nValidation of this documentation update: `git diff --check` passed; all 19 recorded runtime/test file SHA-256 values are unchanged; the offline source audit still verifies 644 source spans; local documentation links resolve. The previous 8 / 72 / 16 checks, 11 regression groups, 20 coexistence checks and Nix build/rebuild evidence below remain results at `e15e36f...`. They were **not rerun** for this documentation-only change. No production access/mutation, Journal tool invocation, deployment, merge, restart or NixOS activation occurred.\n\n## Earlier implementation and verification\n\nThe observed `dreyeck.ch` HEAD (`573fe37611a61d984260ebf43c797f7534211bdd`) has no independently loadable DMX MCP runtime. This ports the necessary closure from the verified repair `f512aa847eab05cc2bdf2e78ef0bd1b516a11926`, without merging historical `hauptsache` or changing the separate ISO MCP work.\n\nThe repaired discovery reads one DMX topicmap member list and performs zero per-Topic reads; content stays on-demand. Resource identities, request-id correlation, bounded resource errors, optional bearer authentication, Origin/session handling, tool schemas, dry-run defaults, backend authentication and guarded DMX writes are preserved. The launcher never enables live writes implicitly.\n\nThe port retains 644 source forms across eight runtime files. The note/ownership/annotation-continuation/journal/restore dependencies are required by the existing tools; Inspector UI, FedWiki import workflows, historical application startup and unrelated page constructors are omitted. Source hashes/spans and an offline audit make the extraction reviewable. The only runtime adaptations are privately owning the other DMX array-helper references, using the MCP caller's explicit snippet DTO instead of the unrelated FedWiki example fallback, and supplying its existing pure annotation formatter/forward special declaration.\n\n- ASDF: opt-in `hyperdoc/dmx-import` and `hyperdoc/mcp`; CLI: `scripts/dmx-mcp-main.lisp`.\n- Nix: separate `hyperdoc-dmx-mcp` package and `checks.<system>.dmx-mcp`, using the target lock and no Topic Maps dependency/pin change.\n- Production Catalog, upstream HyperBook, shared Catalog runtime and active NixOS configuration are unchanged.\n- Current scope adds only three documentation files/edits to the verified runtime; no extra runtime feature, pin, Catalog or test-baseline change.\n\nEarlier verification at `e15e36f34fe3d314d162fee244212d7a7fec3dc2` (not rerun for the documentation correction):\n\n| Check | Result |\n|---|---|\n| Fresh ASDF application load | PASS |\n| Offline source-span audit against f512aa8 | 644 forms verified |\n| Original cold-load failure control | 8 checks PASS; exact 214-byte fingerprint |\n| Repaired local HTTP discovery / malformed payloads / backend 401,403,503 / error ids and privacy | 72 checks PASS |\n| Actual packaged executable, configured bearer and historical optional-bearer configurations | 16 checks PASS |\n| Retained historical guarded-write regression groups | 11 groups PASS |\n| Independent DMX + unchanged PR #4 ISO processes, native CTM/CXTM read-back | 20 checks PASS |\n| Real x86_64-linux Nix package + check builds | PASS |\n| Nix --rebuild output comparison of both reviewed derivations | PASS; no differing outputs |\n\nThe complete tools/list response keeps SHA-256 `fcb41ea1be5db385ad58060fd45e2dcf0158dc0fb507b6d537029ebd5b9dc85d`. The original error fingerprint remains `4c3cbe31dd2b9f4c489472d172fa90f11e9f144871f1a90f339caa2cbc415df0`; this identifies the reproduced exception, not the full deployed source revision.\n\nNix ran in an isolated Docker runtime with Nix 2.20.6, the session proxy/CA and the target's locked nixpkgs `50ab793786d9de88ee30ec4e4c24fb4236fc2674`. Nix sandboxing was disabled inside the container; these are real derivation builds/tests, not a NixOS VM/activation claim. This avoids the earlier portable-wrapper `/proc/self/setgroups` failure. The earlier runtime revision `e15e36f34fe3d314d162fee244212d7a7fec3dc2` was built and its focused Nix check passed with exit 0:\n\n- Application: `/nix/store/00bl0j4cpiv492k6xhxpw93sk2q0k71k-hyperdoc-dmx-mcp`\n- Application derivation: `/nix/store/ld5vwd0hl5xdmgvvngsvfx091xzpxk25-hyperdoc-dmx-mcp.drv`\n- Check: `/nix/store/250jsd266a498kc6wyj8kpsd5jaz2yfd-hyperdoc-dmx-mcp-check`\n- Check derivation: `/nix/store/w22w7gy0z9siivzy5m38v8apd816f3y5-hyperdoc-dmx-mcp-check.drv`\n\nThe exact committed application and check were also rebuilt with `--rebuild`: exit 0, no differing outputs. The executable reports `source=e15e36f34fe3d314d162fee244212d7a7fec3dc2 repair=f512aa847eab05cc2bdf2e78ef0bd1b516a11926`.\n\nFinal application NAR SHA-256: `sha256-QAg/QW9fo86TGpz5chp59c4Zs8gj6xD8dGY0m6r+uJA=`.\nFinal check NAR SHA-256: `sha256-wkElAI3mwPMSNacSorfSVxDjTO/jnqMYECrGR8VhECg=`.\nThese paths/NAR hashes identify the earlier `e15e36f...` tree only, not the latest documentation tree or the installed production package. No new package build is claimed for this documentation-only correction.\n\nISO coexistence uses unchanged PR #4 source `521a1f38ffe40edf02f8c3d6faae2c373ad150c1`, snapshot source `0484a4b76128c3ed302a6a8d6e0343bfe03cece5`, Topic Maps `88994c1b9e1edbf13e665e984a5c9c3b2cdf7575`, reviewed CTM SHA-256 `8b4142421f5bfa1cc089e7ac53b43ebc6975e597cdedea5a49f6fc226dcc2e1d` and same-base native CXTM SHA-256 `776145ba5cc30bdf6b699de245f2c0b5ffc08ebbe07d21b8ceb3a46695128f3f`. A DMX fixture note references a stable ISO Subject Identifier while preserving both authorities. No conversion, synchronization or write-back occurs.\n\nThe user has confirmed the intended public Common Workspace migration contract. The **installed package/source revision, actual resolved Journal directory/recovery behavior and free host disk/inodes remain unverified**. No replacement is recommended until package identity and state preservation are established; source retention does not settle Journal correctness. The operator runbook first captures the installed release metadata, ExecStart and configuration, checks capacity and retains rollback closures; it then describes an exact pinned candidate and MCP-only deployment/rollback through the existing operator-owned `/etc/nixos` setup. The executable-name change requires an explicit ExecStart adaptation: changing only the historical module's package option would be invalid.\n\nInherited Host/body/session/timeout limits remain outside this port; they do not reopen the confirmed public-write/optional-bearer contract as a migration decision. Two Explorer-dependent annotation test-fixture workflows and the historical localhost rehearsal fixture are not claimed executed. No complete project suite, production backend read/write, SSH, service restart, activation, deployment or merge was performed. PRs #4 and #5 stay independent Drafts.\n\nSee [integration/source notes](https://github.com/RalfBarkow/hyperdoc/blob/4ef218a6d273e17091f4ee541965a01ae53d39fc/docs/dmx-mcp-dreyeck-integration.md), [operator deployment/rollback runbook](https://github.com/RalfBarkow/hyperdoc/blob/4ef218a6d273e17091f4ee541965a01ae53d39fc/docs/dmx-mcp-operator-runbook.md), [source manifest](https://github.com/RalfBarkow/hyperdoc/blob/e15e36f34fe3d314d162fee244212d7a7fec3dc2/docs/dmx-mcp-source-manifest.json) and [credential-free results](https://github.com/RalfBarkow/hyperdoc/tree/e15e36f34fe3d314d162fee244212d7a7fec3dc2/reports/dmx-mcp-dreyeck-integration).\n\n",
+      "html_url": "https://github.com/RalfBarkow/hyperdoc/pull/6",
+      "state": "open",
+      "draft": true,
+      "updated_at": "2026-10-30T06:44:37Z",
+      "base": {
+        "ref": "dreyeck.ch",
+        "sha": "573fe37611a61d984260ebf43c797f7534211bdd",
+        "repository": "RalfBarkow/hyperdoc"
+      },
+      "head": {
+        "ref": "codex/dmx-mcp-dreyeck-integration",
+        "sha": "4ef218a6d273e17091f4ee541965a01ae53d39fc",
+        "repository": "RalfBarkow/hyperdoc"
+      },
+      "commits": [
+        {
+          "sha": "e7981653d85333c3de02a1b1645a54a22cae2964",
+          "html_url": "https://github.com/RalfBarkow/hyperdoc/commit/e7981653d85333c3de02a1b1645a54a22cae2964",
+          "message": "feat(mcp): integrate repaired DMX application on dreyeck.ch"
+        },
+        {
+          "sha": "e15e36f34fe3d314d162fee244212d7a7fec3dc2",
+          "html_url": "https://github.com/RalfBarkow/hyperdoc/commit/e15e36f34fe3d314d162fee244212d7a7fec3dc2",
+          "message": "fix(mcp): preserve optional bearer launcher contract"
+        },
+        {
+          "sha": "4ef218a6d273e17091f4ee541965a01ae53d39fc",
+          "html_url": "https://github.com/RalfBarkow/hyperdoc/commit/4ef218a6d273e17091f4ee541965a01ae53d39fc",
+          "message": "docs(mcp): preserve Common Workspace contract and separate Journal scope"
+        }
+      ]
+    },
+    {
+      "number": 5,
+      "title": "Repair DMX MCP discovery and verify separate ISO MCP coexistence",
+      "body": "A fresh `hyperdoc/mcp` image fails resource discovery because it calls `HYPERDOC::JSON-ARRAY-ELEMENTS`, defined only in the unrelated FedWiki slice. A real local HTTP backend reproduces the exact recorded remote response: 214 octets, SHA-256 `4c3cbe31dd2b9f4c489472d172fa90f11e9f144871f1a90f339caa2cbc415df0`, JSON-RPC -32099 and `id:false` for request 2. The matching exception is identified; the running production Git revision remains unknown because no operator deployment record was provided.\n\nThis PR targets **hauptsache**, whose current source is the historical baseline `591f275fc26ebef7967cc8d3e3fb5a0efc19cc85`. It does not merge the old DMX implementation into `dreyeck.ch` or change Draft PR #4.\n\n## Repair\n\n- Give MCP an owned array helper with the previous coercion semantics, removing the accidental load dependency.\n- Validate topicmap/member payloads and enumerate the existing DMX resource identities with one topicmap GET and zero per-Topic GETs. Optional titles/content, missing Topics and authorization remain on-demand `resources/read` operations.\n- Preserve request ids in resource and endpoint errors; use JSON null if no id is recoverable. Keep resource backend bodies/URLs and unexpected exception details private.\n- Preserve the importer/HTTP layer, bearer/Origin checks, live-write gate and typed tool schemas. Before/after `tools/list` responses have identical SHA-256; guarded function bodies differ only by calls to the equivalent MCP-owned array helper.\n\n## Focused verification\n\nAll fresh local processes exited 0:\n\n- **8 historical-failure control checks**, including the exact remote error fingerprint through the real HTTP client.\n- **72 repair checks**, including malformed JSON/HTML/scalars/arrays/false/null/blank/missing fields; duplicate, empty, stale and wrong identities; backend 401/403/503 and refused connections; error ids/privacy; bearer refusal, disabled-write enforcement and unchanged canonical/invalid dry-run validation. The backend receives no writes.\n- **20 independent two-server checks** using the repaired DMX application and the **unchanged ISO prototype exactly at PR #4 commit `521a1f38ffe40edf02f8c3d6faae2c373ad150c1`**. A local DMX workspace note references a stable TMDM SI, preserving its own fixture authority and the ISO snapshot revision. Native Associations, provenance and Evidence reification remain in the ISO model; received CTM/CXTM and unchanged-map checks pass. ISO discovery/read continues after the DMX backend stops. No graph conversion, synchronization or write-back.\n- Memory-only SLY construction/source-path replay passes; interactive inspector rendering was not executed. Staged whitespace and source/contract-preservation checks pass.\n\nReplay commands and exact source hashes/logs are in `docs/dmx-mcp-resource-discovery-repair.md` and `reports/dmx-mcp-resource-discovery/`. Private server/session logs and credentials are excluded.\n\n## Limits and operator boundary\n\n`nix develop --offline --no-write-lock-file --no-update-lock-file --command true` failed before evaluation at `/proc/self/setgroups` (read-only filesystem). This is **not** a passing authoritative Nix build. Tests used cached Nix dependencies with SBCL 2.4.10 and the exact historical inspector upstream `5816eaaf445f0f9dbae67cf07d7706b4fb678b3b`, successfully processed by the repository's hash-guarded overlays in a disposable dependency directory. No production code workaround was added for the environment.\n\nThe operator must identify the deployed source/package and authentication configuration, build/test against that actual pinned environment, review transport timeouts/response limits and preserved write gates in staging, and separately authorize any package activation/restart. This patch does not prove the production backend payload is otherwise valid after the missing-helper exception is removed. Broader historical load warnings/workflows are not claimed repaired; no full suite, live write or production read-back was run.\n\nNo SSH, NixOS activation, service restart, Topic Maps pin change, public endpoint deployment, merge or PR #4 modification. The previously prepared portable ISO application remains on a separate local branch and is not part of this PR.\n",
+      "html_url": "https://github.com/RalfBarkow/hyperdoc/pull/5",
+      "state": "open",
+      "draft": true,
+      "updated_at": "2026-10-30T05:22:03Z",
+      "base": {
+        "ref": "hauptsache",
+        "sha": "591f275fc26ebef7967cc8d3e3fb5a0efc19cc85",
+        "repository": "RalfBarkow/hyperdoc"
+      },
+      "head": {
+        "ref": "codex/dmx-mcp-resource-discovery-repair",
+        "sha": "f512aa847eab05cc2bdf2e78ef0bd1b516a11926",
+        "repository": "RalfBarkow/hyperdoc"
+      },
+      "commits": [
+        {
+          "sha": "f512aa847eab05cc2bdf2e78ef0bd1b516a11926",
+          "html_url": "https://github.com/RalfBarkow/hyperdoc/commit/f512aa847eab05cc2bdf2e78ef0bd1b516a11926",
+          "message": "fix(mcp): repair cold-start DMX resource discovery"
+        }
+      ]
+    },
+    {
+      "number": 4,
+      "title": "Add isolated read-only ISO TMDM MCP review slice",
+      "body": "Adds an isolated, resources-only MCP review dispatcher for a verified HyperDoc project CTM snapshot. Clients can retrieve the original CTM octets and revision/digest metadata, or inspect native TMDM Topics by stable Subject Identifier. The adapter reuses the existing `topic-maps/ctm`, `topic-maps/tmdm` and CXTM operations; it stores no second Topic Maps model.\n\nThe historical HyperDoc MCP transport is compared against `dreyeck.ch`. Only fourteen small JSON-RPC/authentication/session helper definitions are reused, with recorded source hashes and explicit separation from the existing DMX resources and write contracts. This prototype is not registered in an ASDF system, Catalog, release package or production service.\n\n## Validation\n\nFresh focused run on 2026-10-29, from the repository root:\n\n```sh\npython scripts/test-tmdm-mcp-review.py \\\n  --launcher docs/evidence/tmdm-mcp-review/launcher.py \\\n  --artifacts /workspace/scratch/tmdm-mcp-review\n```\n\n**60 focused checks passed; process exit 0.** Covered resource discovery/read, anchored CTM digest and provenance, Subject Identifier lookup, both source associations and role players, all ten identified Evidence entries and their native reification/owner/type links, source references, native CTM read-back, same-base CXTM equivalence, and unchanged source-map CXTM. Negative cases cover bearer/Origin/session boundaries, malformed/oversized requests, unknown resources, wrong digest/MIME/content, and rejected tools/evaluation/subscriptions.\n\nStartup also verifies the unchanged Topic Maps pin `88994c1b9e1edbf13e665e984a5c9c3b2cdf7575` and the same clean source root for all four Topic Maps systems. All seven historical source hashes and the fourteen reused helper definitions were verified against `591f275fc26ebef7967cc8d3e3fb5a0efc19cc85`. Staged whitespace and exact-file scope checks passed. No full corpus or legacy DMX write suite was run.\n\nThe initial prototype failure log is retained as historical evidence; it is not the rerun result. Implementation, test and launcher contents were preserved during this securing task. At secured commit `4f137fb`, the ten-file/930-line slice gained 21 verification-documentation lines (951 insertions total). The 2026-10-30 follow-up adds only 489 documentation/evidence lines across three files; implementation, tests and launcher remain unchanged.\n\n## Limits and boundaries\n\n- The fixed fixture comes from review-candidate PR #1 commit `0484a4b76128c3ed302a6a8d6e0343bfe03cece5`; it is not a claim of a merged or deployed snapshot.\n- The earlier dated CONNECT-403 evidence is preserved. The 2026-10-30 environment now permits HTTPS and initialization; concrete resource listing still fails with an internal MCP error. No remote CTM or native TMDM data retrieval was performed; see the discovery follow-up below.\n- The launcher records this cloud environment's local dependency/cache paths. It is evidence for the isolated run, not a portable installer or production entrypoint.\n- Complete MCP/Codex connector compatibility, public authentication, Host/Origin policy, session limits/expiry and production hardening remain review/operator decisions.\n- No production MCP, NixOS, Catalog safety boundary, Topic Maps pin, DMX write contract or other worktree was changed. No deployment, service restart or merge.\n\nSource-grounded comparison, prototype boundaries, operator decisions and exact logs are included in `docs/tmdm-mcp-reuse-design.md` and `docs/evidence/tmdm-mcp-review/`.\n\n\n## Read-only remote discovery follow-up — 2026-10-30\n\n[New dated evidence and contract comparison](https://github.com/RalfBarkow/hyperdoc/blob/521a1f38ffe40edf02f8c3d6faae2c373ad150c1/docs/evidence/tmdm-mcp-review/remote-discovery-2026-10-30.md) is committed with redacted JSON summaries. Eight bounded requests were made: the initial GET/initialize/notification/resource-list/template-list sequence, followed by one resource-list retry in a new initialized session. All completed with CONNECT 200, curl exit 0 and TLS verification result 0.\n\n- GET `/mcp`: HTTP 405; initialize: HTTP 200; initialized notification: HTTP 202.\n- Negotiated protocol `2025-03-26`; server `hyperdoc-dmx-mcp` version `0.1.0`; capabilities `resources` and `tools`.\n- `resources/templates/list`: HTTP 200, advertising `dmx://topic/{id}` and `dmx://topicmap/{id}`.\n- `resources/list`: HTTP 200 with JSON-RPC `-32099` (`Internal MCP server error`) on both attempts; no concrete resource URI list was obtained.\n- No application credentials were explicitly supplied and no HTTP 401/403 or WWW-Authenticate challenge appeared. Session values, credentials and full internal error details are excluded from the evidence. Backend authorization and global deployment policy remain unknown.\n\nThe observed surface is DMX-oriented. No ISO template was advertised; additional fixed ISO resources cannot be ruled out while resource listing fails. PR #4's ISO prototype was not expected to be deployed. A later integration still needs functioning concrete discovery, an approved immutable CTM snapshot/manifest with revision/hash/base-IRI metadata, native TMDM SI lookup and an explicitly reviewed read-only service/authentication boundary alongside the existing DMX contract.\n\nNo resource data, write tools, evaluation methods or production configuration were accessed or changed by this check. The prior 60 local checks were not rerun, and no remote CTM read-back/CXTM comparison is claimed. This PR remains Draft.\n",
+      "html_url": "https://github.com/RalfBarkow/hyperdoc/pull/4",
+      "state": "open",
+      "draft": true,
+      "updated_at": "2026-10-30T04:06:34Z",
+      "base": {
+        "ref": "dreyeck.ch",
+        "sha": "573fe37611a61d984260ebf43c797f7534211bdd",
+        "repository": "RalfBarkow/hyperdoc"
+      },
+      "head": {
+        "ref": "codex/tmdm-mcp-readonly-design",
+        "sha": "521a1f38ffe40edf02f8c3d6faae2c373ad150c1",
+        "repository": "RalfBarkow/hyperdoc"
+      },
+      "commits": [
+        {
+          "sha": "4f137fb8db1d60f4a526cee986881407a3c09cbf",
+          "html_url": "https://github.com/RalfBarkow/hyperdoc/commit/4f137fb8db1d60f4a526cee986881407a3c09cbf",
+          "message": "feat(mcp): add read-only ISO TMDM review dispatcher"
+        },
+        {
+          "sha": "521a1f38ffe40edf02f8c3d6faae2c373ad150c1",
+          "html_url": "https://github.com/RalfBarkow/hyperdoc/commit/521a1f38ffe40edf02f8c3d6faae2c373ad150c1",
+          "message": "docs(mcp): record read-only remote discovery evidence"
+        }
+      ]
+    },
+    {
+      "number": 3,
+      "title": "Propose read-only CTM publication and demonstrate HTTP bootstrap",
+      "body": "Source-grounded read-only CTM publication proposal and isolated HTTP/native-read-back demonstration. No production endpoint, Catalog admission change, SSH, nginx/NixOS change, service restart, deployment or automatic publication is included.\n\nPublic observations: dreyeck.ch root returned HTTP 502; named CTM and digest candidates returned HTTP 404 after successful HTTPS proxy CONNECT. No suitable public CTM resource or deployed revision was established; these observations do not prove absence at every URL.\n\nThe local fixture serves fixed, already verified PR #1 snapshot bytes at review commit 0484a4b76128c3ed302a6a8d6e0343bfe03cece5 with manifest and SHA-256. It rejects missing resources, incorrect digests and forged unexpected content against a trusted revision/digest anchor before invoking Lisp. One verified read-back passes 31 native TMDM/CXTM assertions covering the known assignment, ten identified evidence entries, reification, source Associations/Roles and source references.\n\nCTM SHA-256: 8b4142421f5bfa1cc089e7ac53b43ebc6975e597cdedea5a49f6fc226dcc2e1d.\nCXTM SHA-256: 776145ba5cc30bdf6b699de245f2c0b5ffc08ebbe07d21b8ceb3a46695128f3f.\n\nThe proposal defines immutable static CTM/digest/manifest publication, source revision/page hashes, explicit Document/base IRI, rejection policy and operator prerequisites. It distinguishes published information (not established here) from local assessments and the unmerged inventory proposals in PR #2. TMCL and general CTM serialization remain out of scope. Source Catalog guards and the Topic Maps pin are unchanged.\n\nEvidence: docs/ctm-http-bootstrap-proposal.md and docs/evidence/ctm-http-bootstrap/. Raw HTTP/compiler whitespace is retained verbatim. No production change is authorized; operator approval and actual public verification remain required.\n\nCommit: db5a77a43742d41855fc9923b24f40f8652c1d04.\n",
+      "html_url": "https://github.com/RalfBarkow/hyperdoc/pull/3",
+      "state": "open",
+      "draft": true,
+      "updated_at": "2026-10-29T21:07:43Z",
+      "base": {
+        "ref": "dreyeck.ch",
+        "sha": "573fe37611a61d984260ebf43c797f7534211bdd",
+        "repository": "RalfBarkow/hyperdoc"
+      },
+      "head": {
+        "ref": "codex/ctm-http-bootstrap",
+        "sha": "db5a77a43742d41855fc9923b24f40f8652c1d04",
+        "repository": "RalfBarkow/hyperdoc"
+      },
+      "commits": [
+        {
+          "sha": "db5a77a43742d41855fc9923b24f40f8652c1d04",
+          "html_url": "https://github.com/RalfBarkow/hyperdoc/commit/db5a77a43742d41855fc9923b24f40f8652c1d04",
+          "message": "test(exchange): demonstrate read-only CTM HTTP bootstrap"
+        }
+      ]
+    },
+    {
+      "number": 2,
+      "title": "Inventory Topic Maps implementations and draft TMCL schema design",
+      "body": "Source-grounded inventory and first TMCL schema design, branched from the observed dreyeck.ch target 573fe37611a61d984260ebf43c797f7534211bdd. Independent PR #1 is not merged, rebased or modified.\n\nThe inventory separates all requested ISO editions, registered Common Lisp systems, source/test artifacts, retained historical execution evidence and unresolved requirements. Existing Project Workspace proposals and relations provide the reading path; no Work status, Acceptance Record or proposal promotion is created.\n\nThe design matrix compares eight application requirements with current Lisp enforcement. Published ISO/IEC 19756:2011 provisions, constraint PSIs, validation rules and CTM authoring templates remain UNRESOLVED: the public reference request was refused at proxy CONNECT (403; destination status 000). No inferred rule is substituted. **No runnable TMCL schema, topic-maps/tmcl system or validator is implemented.**\n\nVerification: 411 existing source/emitter assertions and 169 focused inventory/design assertions passed (580 total, exit 0). Ordinary CTM fixtures demonstrate shared application subject identities, distinct source objects, source-preserving import and canonical resolution; this is not TMCL schema validation. Native project read-back, proposal Roles, navigation, preservation and deterministic CTM/CXTM checks passed. The retained CTM/digest were regenerated only after those checks passed.\n\nCTM SHA-256: 75e4234cea1f3abbdf7d35deba61bba97125bf3af4f3ab8f007c535088a01378.\n\nEvidence and limitations: docs/iso-topicmaps-inventory-tmcl-design.md, docs/iso-topicmaps-inventory-sources.json and docs/evidence/topicmaps-inventory-design/. No full historical corpus, unrelated performance suite or graphical browser acceptance test ran. Topic Maps sources/pin, authoritative Work pages, production Catalog and deployment remain unchanged.\n\nCommit: 9cb805a877797d16df9a08f19e2acc882ade651e. Stop at inventory, project representation and schema design; further normative verification and application-policy decisions are needed before authorizing a TMCL implementation.\n",
+      "html_url": "https://github.com/RalfBarkow/hyperdoc/pull/2",
+      "state": "open",
+      "draft": true,
+      "updated_at": "2026-10-29T21:00:18Z",
+      "base": {
+        "ref": "dreyeck.ch",
+        "sha": "573fe37611a61d984260ebf43c797f7534211bdd",
+        "repository": "RalfBarkow/hyperdoc"
+      },
+      "head": {
+        "ref": "codex/iso-topicmaps-inventory-tmcl-design",
+        "sha": "9cb805a877797d16df9a08f19e2acc882ade651e",
+        "repository": "RalfBarkow/hyperdoc"
+      },
+      "commits": [
+        {
+          "sha": "9cb805a877797d16df9a08f19e2acc882ade651e",
+          "html_url": "https://github.com/RalfBarkow/hyperdoc/commit/9cb805a877797d16df9a08f19e2acc882ade651e",
+          "message": "docs(project): inventory Topic Maps implementation and draft schema design"
+        }
+      ]
+    },
+    {
+      "number": 1,
+      "title": "[Draft] Record Codex CTM template investigation in HyperDoc project evidence",
+      "body": "## Purpose\n\nIntegrate the operator-supplied Codex investigation **CTM Template Identity Substitution** as human-readable HyperDoc Project Workspace evidence. Original corpus expectations, reported observations, competing normative readings and the unresolved question remain separately attributed. No Work-status change or Acceptance Record is created.\n\nThis remains a **Draft PR for human review**. Focused runtime verification has now completed; it does not establish general CTM conformance or authorize merge/deployment.\n\n## Changes\n\n- One authored assignment and ten stable evidence identities, using the existing emitter, TMDM occurrence reification and native Workspace navigation.\n- Focused checks for native evidence objects, parent/reifier identity, provenance, source Association Roles, Inspector references and preservation of unrelated statements.\n- Test runner: replace the nonexistent `UIOP:WITH-TEMPORARY-DIRECTORY` with supported temporary-file reservation and an owned staging directory, cleaned by `UNWIND-PROTECT`. No assertion, expected output or timeout was relaxed.\n- Verified regenerated project CTM and digest. The runner tests a temporary materialization first and writes retained artifacts only after all focused checks pass.\n- Recorded successful output, runtime/source identities and exact external launcher in `docs/evidence/codex-project-evidence/`.\n\n## Verification on 2026-10-29 — PASS\n\n| Existing focused suite | Actual result |\n| --- | --- |\n| Source/emitter | 339 assertions passed |\n| Native read-back, CXTM and Inspector/Workspace navigation | 290 assertions passed |\n| Acceptance fixtures and preservation | 125 assertions passed |\n| Runner | exit 0; `CODEX-PROJECT-EVIDENCE-PASS` |\n\n**754 assertions passed.** Read-and-model time was **10.6 s**, within the unchanged 90-second assertion. Native checks cover the ten identified evidence Topics, their reified occurrences, values, parents, source Association Roles, assignment/evidence navigation, three still-NOT-RUN contracts, absence of an Acceptance Record and preservation of existing declarations and unrelated assignments.\n\nThe retained CTM and digest were regenerated **after** successful verification and matched the tested temporary octets:\n\n`8b4142421f5bfa1cc089e7ac53b43ebc6975e597cdedea5a49f6fc226dcc2e1d`\n\nThe CTM header records the authoritative Assignment-page SHA-256:\n\n`0d755af7b32bd02c30d41573afc9956767c8027e0e7fb79f20affa294cc1e463`\n\nThe original authored Assignment page and focused assertion file are unchanged from prepared commit `0d7610900fc49d8e553683ef351f462728d780e3`. `git diff --check` and recorded tested-file/log/artifact hash checks pass.\n\n## Environment diagnosis\n\nThe updated restricted policy was current and enforced. The formerly failing source URL `http://beta.quicklisp.org/archive/fast-websocket/2024-10-12/fast-websocket-20241012-git.tgz` returned HTTP 200; its HTTPS equivalent also returned 200 after a successful proxy CONNECT. GitHub API access works. No active download-policy blocker remains for this verification.\n\nNix-portable's cached namespace-based runtime failed before Lisp execution (`setting up a private mount namespace: Operation not permitted`); proot also failed before executing a command. The built SBCL 2.4.10 was instead invoked directly through its matching glibc loader and core, with external ASDF/library path relocation. SQLite's matching zlib directory was included. Library relocation was scoped to the Lisp loader so child Git commands retained their normal runtime. No production-code change was used to work around the environment.\n\nTests used a disposable clean checkout at the unchanged Topic Maps pin `88994c1b9e1edbf13e665e984a5c9c3b2cdf7575`; the user's separate Topic Maps checkout and uncommitted decision note were untouched.\n\n## Scope and remaining limits\n\n- Demonstrated: deterministic source-page-to-CTM regeneration, native TMDM read-back, CXTM equivalence under the same Document IRI/base locator, original-octet export, and Lisp Inspector/native Workspace navigation.\n- Original-octet export is **not** serialization of a modified TMDM Map into CTM; no general serializer was added.\n- No full CTM/XTM corpus, Topic Maps performance suite or graphical-browser acceptance test was run. Dependency load warnings are retained in the successful log.\n- The prior normative question and three reported NOT-RUN original contracts remain unresolved. This integration does not independently reproduce that investigation or grant acceptance.\n- No production Catalog/startup, Topic Maps pin/algorithms, NixOS configuration or authorization mechanism changed. No merge or deployment performed.\n\n**Verification commit:** `0484a4b76128c3ed302a6a8d6e0343bfe03cece5`.\n",
+      "html_url": "https://github.com/RalfBarkow/hyperdoc/pull/1",
+      "state": "open",
+      "draft": true,
+      "updated_at": "2026-10-29T20:08:24Z",
+      "base": {
+        "ref": "dreyeck.ch",
+        "sha": "573fe37611a61d984260ebf43c797f7534211bdd",
+        "repository": "RalfBarkow/hyperdoc"
+      },
+      "head": {
+        "ref": "codex/codex-ctm-project-evidence",
+        "sha": "0484a4b76128c3ed302a6a8d6e0343bfe03cece5",
+        "repository": "RalfBarkow/hyperdoc"
+      },
+      "commits": [
+        {
+          "sha": "0d7610900fc49d8e553683ef351f462728d780e3",
+          "html_url": "https://github.com/RalfBarkow/hyperdoc/commit/0d7610900fc49d8e553683ef351f462728d780e3",
+          "message": "feat(project): prepare attributed Codex investigation evidence"
+        },
+        {
+          "sha": "0484a4b76128c3ed302a6a8d6e0343bfe03cece5",
+          "html_url": "https://github.com/RalfBarkow/hyperdoc/commit/0484a4b76128c3ed302a6a8d6e0343bfe03cece5",
+          "message": "test(project): verify Codex evidence read-back and regeneration"
+        }
+      ]
+    }
+  ],
+  "issues": [
+    {
+      "number": 7,
+      "title": "Investigate DMX Workspace Journal persistence and legacy Topics separately from PR #6",
+      "body": "Separate investigation Topic: **DMX Workspace Journal persistence and legacy Topics**.\n\nThis is a proposed subsequent investigation outside Draft PR #6. Retaining Journal dependencies to preserve an existing MCP contract does not demonstrate functional Journal correctness. This issue does not authorize production access, mutations, migration, cleanup or deployment, and is not an Acceptance Record.\n\nScope for later work:\n\n1. Distinguish volatile stream state, persisted local files and Journal-related DMX Topics. Obtain operator evidence privately and publish only a separately reviewed, redacted account.\n2. Trace the already-public local Journal read/write and application-startup code at PR #6 revision `e15e36f34fe3d314d162fee244212d7a7fec3dc2` (`scripts/dmx-mcp-main.lisp` and `dmx-mcp/dmx-workspace-journal.lisp`). Reproduce cold-start, same-subject write collision and recovery behavior only in disposable fixtures.\n3. Establish what existing fixture regressions prove and what they do not. Distinguish an inherited defect from an application-migration effect. Do not assume the running release equals the historical source.\n4. Produce a bounded, separately reviewed recommendation. Any repair, data migration or cleanup must be a subsequent work item with its own authorization and rollback/disposition evidence; do not infer deletion targets from naming or the code's legacy-candidate wording.\n\nNo runtime investigation, inventory of production Topics or cleanup is performed by creating this issue. PR #6 remains the MCP contract-preserving migration; PR #4's ISO Topic Maps service remains independent and read-only.\n",
+      "html_url": "https://github.com/RalfBarkow/hyperdoc/issues/7",
+      "state": "open",
+      "updated_at": "2026-10-30T06:40:25Z"
+    }
+  ],
+  "capturePolicy": "Explicit GET-only, paginated; non-atomic multi-request observation; no headers or credentials retained."
+}
