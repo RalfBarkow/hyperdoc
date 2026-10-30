@@ -125,6 +125,10 @@
             inherit system;
           };
         in {
+          hyperdoc-dmx-mcp = pkgs.callPackage ./nix/dmx-mcp.nix {
+            source = pkgs.lib.cleanSource self.outPath;
+            revision = self.rev or self.dirtyRev or "unrecorded";
+          };
           # The one production Catalog, with the pinned Topic Maps snapshot (nix/catalog.nix).
           hyperdoc-catalog = pkgs.callPackage ./nix/catalog.nix {
             runtime = runtimeFor system;
@@ -159,6 +163,11 @@
       });
 
       checks = forAllSystems (system: {
+        dmx-mcp = let pkgs = import nixpkgs { inherit system; }; in
+          pkgs.callPackage ./nix/dmx-mcp-check.nix {
+            application = self.packages.${system}.hyperdoc-dmx-mcp;
+            source = pkgs.lib.cleanSource self.outPath;
+          };
         common-lisp-hyperspec =
           self.packages.${system}.common-lisp-hyperspec;
         catalog = let pkgs = import nixpkgs { inherit system; }; in

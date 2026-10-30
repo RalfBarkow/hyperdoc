@@ -1,0 +1,7 @@
+these 2 derivations will be built:
+  /nix/store/gm2xy3654gsbi869f11x68vvw0h60drl-hyperdoc-dmx-mcp.drv
+  /nix/store/5l64avxg49a4j74h3w18k4675idl0hbj-hyperdoc-dmx-mcp-check.drv
+building '/nix/store/gm2xy3654gsbi869f11x68vvw0h60drl-hyperdoc-dmx-mcp.drv'...
+building '/nix/store/5l64avxg49a4j74h3w18k4675idl0hbj-hyperdoc-dmx-mcp-check.drv'...
+/nix/store/ap7ss27wd9nd94ljan39ijz17krlbvqk-hyperdoc-dmx-mcp-check
+/nix/store/hr1vc5hafx5r96kaq4z8spmi6i611a4j-hyperdoc-dmx-mcp

@@ -1,0 +1,9 @@
+DMX-MCP-APPLICATION bearer-required PASS
+DMX-MCP-APPLICATION initialize PASS
+DMX-MCP-APPLICATION initialized PASS
+DMX-MCP-APPLICATION resource-identities PASS
+DMX-MCP-APPLICATION one-member-read-no-topic-prefetch PASS
+DMX-MCP-APPLICATION on-demand-read PASS
+DMX-MCP-APPLICATION live-write-gate PASS
+DMX-MCP-APPLICATION no-backend-write PASS
+DMX-MCP-APPLICATION 8 checks passed

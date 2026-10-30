@@ -1,0 +1,9 @@
+{
+  "source": "591f275fc26ebef7967cc8d3e3fb5a0efc19cc85",
+  "checks": 8,
+  "errorBodyBytes": 214,
+  "errorBodySHA256": "4c3cbe31dd2b9f4c489472d172fa90f11e9f144871f1a90f339caa2cbc415df0",
+  "fingerprintMatchedException": "undefined HYPERDOC::JSON-ARRAY-ELEMENTS",
+  "deployedGitRevision": "unknown; no operator deployment evidence",
+  "toolDefinitionsSHA256": "fcb41ea1be5db385ad58060fd45e2dcf0158dc0fb507b6d537029ebd5b9dc85d"
+}
