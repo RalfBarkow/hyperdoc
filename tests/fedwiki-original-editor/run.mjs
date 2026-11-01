@@ -8,6 +8,7 @@ import {fileURLToPath} from 'node:url'
 import {createHash} from 'node:crypto'
 import {chromium} from 'playwright-core'
 import {installBoundClicks} from '../../scripts/lib/inspector-ready.mjs'
+import {catalogStartupTimeoutMs} from './commands.mjs'
 import {slug, paragraphId, codeId, paragraph, code, initialPage} from './fixture.mjs'
 
 const here = path.dirname(fileURLToPath(import.meta.url))
@@ -58,12 +59,19 @@ const start = (command, args, label, env={}) => {
   return child
 }
 const waitHTTP = async (origin, child, label) => {
-  for (let i=0;i<1200;i++) {
-    if (interrupted || child.exitCode !== null || child.signalCode !== null || report.processError) throw Error(report.processError || 'Test process stopped; inspect '+path.join(work,label+'.log'))
-    try {if ((await fetch(origin)).ok) return} catch {}
-    await new Promise(r=>setTimeout(r,100))
+  const maxMs = label==='catalog' ? catalogStartupTimeoutMs() : 120000
+  const began = Date.now()
+  const logFile = path.join(work,label+'.log')
+  while (Date.now()-began < maxMs) {
+    if (child.exitCode !== null || child.signalCode !== null || report.processError) {
+      throw Error(report.processError ||
+        label+' exited before HTTP readiness. '+fs.readFileSync(logFile,'utf8').slice(-5000))
+    }
+    try {if ((await fetch(origin,{signal:AbortSignal.timeout(1500)})).ok) return} catch {}
+    await new Promise(r=>setTimeout(r,250))
   }
-  throw Error(label+' did not become ready; see '+work)
+  throw Error(label+' HTTP startup exceeded '+maxMs/1000+'s. Last log lines:\n'+
+    fs.readFileSync(logFile,'utf8').slice(-5000))
 }
 try {
   fs.mkdirSync(path.join(work,'home'))
