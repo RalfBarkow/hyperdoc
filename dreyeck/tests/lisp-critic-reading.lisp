@@ -1912,6 +1912,9 @@ locally, one create entry each, reading opens exactly them.~%")
 (defparameter +p1-evidence-commit+ "e91349f6171839a12eea7ee2f24da393b4dd870c"
   "The commit that keeps the files of probe P1.")
 
+(defparameter +decision-pages-commit+ "176e6dfc8129743dd0bfb32d223636cd19f209d8"
+  "The commit at which an answer page cites the two decision pages.")
+
 (defun %page-text (title)
   (substitute #\Space #\Newline (uiop:read-file-string (hyperdoc:file-of (page-of title)))))
 
@@ -1964,9 +1967,22 @@ an answer is written."
                         "is deliberately not an address"
                         "<code>question</code>" "<code>claim</code>"
                         "<code>support</code>" "<code>oppose</code>"
-                        "A binding project decision"))
+                        "A binding project decision"
+                        "Write one page for each decision, not one page for both."
+                        "It does not by itself make a Wiki relation."
+                        "each with a stable Wiki identity"
+                        "and none may be invented from them"
+                        "These pages have not yet been checked in a running HyperDoc Catalog."
+                        "This page records no answer and suggests none."))
         (check (search phrase text)
-               "The decision entry page no longer says ~S." phrase)))
+               "The decision entry page no longer says ~S." phrase))
+      ;; Each answer page cites its question at the commit that holds it.
+      (dolist (file '("Code%20Rendering%20and%20Loaded%20Systems.html"
+                      "Code%20Rendering%20and%20the%20Inspector%20Link.html"))
+        (let ((url (concatenate 'string "https://github.com/RalfBarkow/hyperdoc/blob/"
+                                +decision-pages-commit+ "/dreyeck/pages/lisp-critic/" file)))
+          (check (search url text)
+                 "The decision entry page does not cite ~A." url))))
     (check (eq before (find-package "DREYECK/VERIFIED-EXAMPLE"))
            "Reading the decision pages changed whether DREYECK/VERIFIED-EXAMPLE exists."))
   (format t "~&CODE-RENDERING-DECISION-PASS: three pages, linked, pinned to commits, ~

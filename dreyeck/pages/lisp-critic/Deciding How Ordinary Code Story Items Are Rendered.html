@@ -143,52 +143,111 @@ plain text. That is a question of its own.
 <h2>How to give your answer</h2>
 
 <p>
-Your answer is yours, on a Federated Wiki site you own. The review's pages are
-not on any public site. Their site name, <code>trusted-examples-review.invalid</code>,
-is deliberately not an address; do not link to it.
+Both decisions are still open. Your answer is yours, on a Federated Wiki site
+you own. Which site that is, when you write, and whether you publish the
+answer at all, is for you to decide later. This page records no answer and
+suggests none.
+</p>
+
+<h3>One answer page per decision</h3>
+
+<p>
+Write one page for each decision, not one page for both. Each page answers
+exactly one question and holds one position with its own reasons. If two
+questions and two answers shared the same folds, neither a reader nor a later
+survey could tell which reason belongs to which answer.
 </p>
 
 <ol>
-<li>On your own site, create a new page, for example by writing its title as
-  a link in a paragraph and clicking it. Any title will do, for example
-  <em>My Decision on Rendering Ordinary Code Items</em>.</li>
+<li>On your own site, create a new page for Decision 1, for example by
+  writing its title as a link in a paragraph and clicking it. Any title will
+  do.</li>
 <li>Give it four fold items, named exactly as in the Claim Template:
   <code>question</code>, <code>claim</code>, <code>support</code> and
   <code>oppose</code>.</li>
-<li>Under <code>question</code>, one paragraph per decision, naming this page
-  and the commit you read it at (the links below).</li>
-<li>Under <code>claim</code>, your answer to each decision, one paragraph
-  each.</li>
-<li>Under <code>support</code> and <code>oppose</code>, your reasons, one
-  per paragraph. You may cite the evidence links or the review's arguments,
-  or contest them.</li>
+<li>Under <code>question</code>, one paragraph naming the question, with its
+  link below.</li>
+<li>Under <code>claim</code>, one paragraph: your position on this one
+  question.</li>
+<li>Under <code>support</code> and <code>oppose</code>, your reasons for and
+  against that position, one per paragraph.</li>
+<li>Do the same on a second page for Decision 2.</li>
 </ol>
 
-<p>Paragraphs you can copy and complete:</p>
-
-<pre>Decision 1, question: May loading the Verified Example system change how ordinary Code items look? Asked in HyperDoc, "Deciding How Ordinary Code Story Items Are Rendered", repository RalfBarkow/hyperdoc. Evidence: [https://github.com/RalfBarkow/hyperdoc/commit/e91349f6171839a12eea7ee2f24da393b4dd870c P1 evidence e91349f6].
-Decision 2, question: Should an ordinary Code item keep its Inspector link to the item itself? Asked on the same HyperDoc page.
-Decision 1, my answer: ...
-Decision 2, my answer: ...
-Reason: ...</pre>
-
-<p>Public links that stay valid, pinned to a commit:</p>
+<p>The two questions, fixed at commit <code>176e6dfc</code>:</p>
 
 <ul>
-<li><a href="https://github.com/RalfBarkow/hyperdoc/commit/e91349f6171839a12eea7ee2f24da393b4dd870c">The probe's evidence, commit e91349f6</a></li>
-<li><a href="https://github.com/RalfBarkow/hyperdoc/blob/4b56c1d80a6d061e1cc1da9321e132032c019dd8/dreyeck/pages/lisp-critic/trusted-examples-review-site/pages/should-the-code-method-preserve-the-inspector-rendering">The review's question page, as a file at commit 4b56c1d8</a></li>
-<li><a href="https://github.com/RalfBarkow/hyperdoc/blob/9b57bd4bb87d92fbf3061b91a42a6f539e18cdb1/dreyeck/src/verified-example.lisp#L160-L166">The code that causes the difference, at commit 9b57bd4b</a></li>
+<li>Decision 1: <a href="https://github.com/RalfBarkow/hyperdoc/blob/176e6dfc8129743dd0bfb32d223636cd19f209d8/dreyeck/pages/lisp-critic/Code%20Rendering%20and%20Loaded%20Systems.html">Code Rendering and Loaded Systems, at commit 176e6dfc</a></li>
+<li>Decision 2: <a href="https://github.com/RalfBarkow/hyperdoc/blob/176e6dfc8129743dd0bfb32d223636cd19f209d8/dreyeck/pages/lisp-critic/Code%20Rendering%20and%20the%20Inspector%20Link.html">Code Rendering and the Inspector Link, at commit 176e6dfc</a></li>
+<li>The probe's evidence, for your reasons: <a href="https://github.com/RalfBarkow/hyperdoc/commit/e91349f6171839a12eea7ee2f24da393b4dd870c">commit e91349f6</a></li>
 </ul>
 
+<p>Paragraphs you can copy and complete, one block per page:</p>
+
+<pre>Page for Decision 1
+  question: Decision 1: May loading the Verified Example system change how ordinary Code items look? HyperDoc dreyeck/lisp-critic/reading, page "Code Rendering and Loaded Systems", commit 176e6dfc [https://github.com/RalfBarkow/hyperdoc/blob/176e6dfc8129743dd0bfb32d223636cd19f209d8/dreyeck/pages/lisp-critic/Code%20Rendering%20and%20Loaded%20Systems.html question page]
+  claim: My position: ...
+  support: ...
+  oppose: ...
+
+Page for Decision 2
+  question: Decision 2: Should an ordinary Code item keep its Inspector link to the item itself? HyperDoc dreyeck/lisp-critic/reading, page "Code Rendering and the Inspector Link", commit 176e6dfc [https://github.com/RalfBarkow/hyperdoc/blob/176e6dfc8129743dd0bfb32d223636cd19f209d8/dreyeck/pages/lisp-critic/Code%20Rendering%20and%20the%20Inspector%20Link.html question page]
+  claim: My position: ...
+  support: ...
+  oppose: ...</pre>
+
+<h3>What the link to a question establishes, and what it does not</h3>
+
 <p>
-To refer to this page inside your own HyperDoc Catalog, open its URL view,
-which shows the address your Catalog serves it under.
+The link under <code>question</code> tells a reader exactly which HyperDoc
+question the page answers, and at which commit. It does not by itself make a
+Wiki relation. EXTRACT and the Claim Link Survey derive a role from a Wiki
+link to a page that stands under a fold; a link to a file on GitHub is not
+such a link, so no question–position relation is derived from it. That your
+page answers the question stays visible to readers, but no mechanism
+establishes it.
 </p>
 
 <p>
-Nothing links back to your page by itself. If you want the review's pages to
-point to your answer, say so: that is a separate change, made only on your
-explicit request, and it would quote your page, not speak for you.
+Reasons that are pages of their own can be linked as Wiki links under
+<code>support</code> or <code>oppose</code>, to pages on your own site or in
+its neighbourhood. Only such links can later become derived relations. Links
+to evidence on GitHub stay references in the text.
+</p>
+
+<h3>Before the discourse can be federated</h3>
+
+<p>
+For question, position and argument to become relations that a survey can
+derive, the questions themselves have to be reachable as real Federated Wiki
+pages, each with a stable Wiki identity: a site that serves it and a slug on
+that site. Today they are not. The review's own Wiki pages are on no site:
+their site name, <code>trusted-examples-review.invalid</code>, is deliberately
+not an address, and a GitHub file path is not a Wiki page either. Neither may
+be used as such an identity, and none may be invented from them. Which site
+would serve the questions, and whether they are published at all, is a later,
+explicit decision.
+</p>
+
+<p>
+Until then, do not write <code>[[…]]</code> links to the question titles. On
+your site such a link looks for a page of that title in your own site and its
+neighbourhood; it does not reach the HyperDoc question.
+</p>
+
+<h3>Not yet checked</h3>
+
+<p>
+These pages have not yet been checked in a running HyperDoc Catalog. The links
+above are GitHub source views, checked to resolve; they are not Catalog
+addresses. To refer to this page inside your own HyperDoc Catalog, open its
+URL view, which shows the address your Catalog serves it under.
+</p>
+
+<p>
+Nothing links back to your pages by itself. If you want the review's pages to
+point to your answers, say so: that is a separate change, made only on your
+explicit request, and it would quote your pages, not speak for you.
 </p>
 
 <h2>Three different things</h2>
