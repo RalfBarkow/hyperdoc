@@ -2430,7 +2430,10 @@
                          (:static-file "Anatomy of a Critique.html")
                          (:static-file "Where the Source Lives.html")
                          (:static-file "Lisp Critic on the Federated Context.html")
-                         (:static-file "Reading the Trusted Executable Examples Review.html"))))
+                         (:static-file "Reading the Trusted Executable Examples Review.html")
+                         (:static-file "Deciding How Ordinary Code Story Items Are Rendered.html")
+                         (:static-file "Code Rendering and Loaded Systems.html")
+                         (:static-file "Code Rendering and the Inspector Link.html"))))
   :in-order-to ((asdf:test-op (asdf:test-op "dreyeck/lisp-critic/reading/tests"))))
 
 (asdf:defsystem "dreyeck/lisp-critic/reading/tests"

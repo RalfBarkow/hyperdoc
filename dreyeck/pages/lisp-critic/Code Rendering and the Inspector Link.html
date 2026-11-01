@@ -1,0 +1,118 @@
+<h1>Code Rendering and the Inspector Link</h1>
+
+<in-package>dreyeck/lisp-critic/reading</in-package>
+
+<p>
+<strong>Decision 2: should an ordinary Code item keep its Inspector link to
+the item itself?</strong> No decision has been taken. A Claude Code review
+wrote this page to prepare it; the answer is the project owner's.
+</p>
+
+<p>
+The link is the small <code>code</code> label above the source text. Clicking
+it opens the Code item in the Inspector, where its stored data is shown, among
+it the programming language its author gave. Showing the link runs nothing.
+What a reader may do once the item is open is a separate matter, decided by
+the Inspector's own views and the project's rules for operations, not by how
+the Code item is shown.
+</p>
+
+<p>
+The probe saw this link before the Verified Example system was loaded, leading
+to the very same item, and saw no link afterwards:
+<a href="https://github.com/RalfBarkow/hyperdoc/blob/e91349f6171839a12eea7ee2f24da393b4dd870c/docs/trusted-executable-examples-evidence/p1/original/final-result.log?plain=1#L160-L161">link before</a>,
+<a href="https://github.com/RalfBarkow/hyperdoc/blob/e91349f6171839a12eea7ee2f24da393b4dd870c/docs/trusted-executable-examples-evidence/p1/original/final-result.log?plain=1#L199-L200">none after</a>,
+evidence commit <code>e91349f6</code>. It checked the link's data, not a click
+in a browser.
+</p>
+
+<h2>Answer: Keep the link</h2>
+
+<p>
+<strong>In practice:</strong> every ordinary Code item shows the
+<code>code</code> label as a link to itself, as it did before. Items marked
+as Verified Examples are not affected: they have their own, separately
+approved display, which shows no such links.
+</p>
+
+<p><strong>For:</strong></p>
+<ul>
+<li>It is the only way from a shown Code item to its own data, the language
+  included. Without it the language is still stored, but a reader of the page
+  no longer reaches it from the item. <em>(observed that the data stays;
+  the rest follows from it)</em></li>
+<li>The link leads somewhere to look; showing it does not run the code.
+  <em>(observed: the probe rendered it and evaluated nothing; a click was not
+  tested)</em></li>
+<li>It is how ordinary Code was shown before the Verified Example system
+  existed. <em>(observed)</em></li>
+</ul>
+
+<p><strong>Against:</strong></p>
+<ul>
+<li>A link makes more reachable. In a development image, where the rules for
+  operations are not enforced, the Inspector may offer to run functions on an
+  object it has opened. That concerns what happens after following the link,
+  not showing it. <em>(inferred from the rules' code)</em></li>
+<li>Nobody is known to use the link on Code items. <em>(no evidence either
+  way)</em></li>
+</ul>
+
+<h2>Answer: Remove the link</h2>
+
+<p>
+<strong>In practice:</strong> ordinary Code is shown as plain escaped text
+only. To do this in every image, the general way of showing Code has to
+change, for all Code items; doing it only in the Verified Example code
+removes the link only where that code is loaded, which is today's behaviour
+and depends on the first decision.
+</p>
+
+<p><strong>For:</strong></p>
+<ul>
+<li>Fewer ways onward from text written by others. <em>(an assumption about
+  what is safer)</em></li>
+<li>It matches the Verified Examples, which show no links at all.
+  <em>(observed in their tests)</em></li>
+</ul>
+
+<p><strong>Against:</strong></p>
+<ul>
+<li>No test and no document asks for the link to be removed from ordinary
+  items. <em>(observed)</em></li>
+<li>The reader loses the way to the item's data from the page.
+  <em>(follows from the observation)</em></li>
+</ul>
+
+<h2>The earlier question</h2>
+
+<p>
+Keeping the link is part of what
+<a expr="(dreyeck/local-fedwiki-page:make-local-fedwiki-page (asdf:system-relative-pathname &quot;dreyeck&quot; &quot;dreyeck/pages/lisp-critic/trusted-examples-review-site/&quot;) (dreyeck/local-fedwiki-page:make-local-fedwiki (asdf:system-relative-pathname &quot;dreyeck&quot; &quot;dreyeck/pages/lisp-critic/trusted-examples-review-site/&quot;) &quot;fedwiki:trusted-examples-review.invalid&quot;) &quot;preserve-the-prior-code-rendering&quot;)" view="Story">Position A</a>
+asks for, but not all of it: Position A also says the earlier look should not
+have changed unintentionally, which this decision does not settle. Removing
+it is close to
+<a expr="(dreyeck/local-fedwiki-page:make-local-fedwiki-page (asdf:system-relative-pathname &quot;dreyeck&quot; &quot;dreyeck/pages/lisp-critic/trusted-examples-review-site/&quot;) (dreyeck/local-fedwiki-page:make-local-fedwiki (asdf:system-relative-pathname &quot;dreyeck&quot; &quot;dreyeck/pages/lisp-critic/trusted-examples-review-site/&quot;) &quot;fedwiki:trusted-examples-review.invalid&quot;) &quot;passive-code-rendering-may-be-intended&quot;)" view="Story">Position B</a>.
+The two positions conflict only if "passive" is taken to mean "without any
+link"; the earlier look was already passive and escaped. Both answer
+<a expr="(dreyeck/local-fedwiki-page:make-local-fedwiki-page (asdf:system-relative-pathname &quot;dreyeck&quot; &quot;dreyeck/pages/lisp-critic/trusted-examples-review-site/&quot;) (dreyeck/local-fedwiki-page:make-local-fedwiki (asdf:system-relative-pathname &quot;dreyeck&quot; &quot;dreyeck/pages/lisp-critic/trusted-examples-review-site/&quot;) &quot;fedwiki:trusted-examples-review.invalid&quot;) &quot;should-the-code-method-preserve-the-inspector-rendering&quot;)" view="Story">the question</a>.
+That mapping is the review's reading.
+</p>
+
+<p>
+  <a page="Code Rendering and Loaded Systems">
+    Decision 1: May loading the Verified Example system change how ordinary Code items look?
+  </a>
+</p>
+
+<p>
+  <a page="Deciding How Ordinary Code Story Items Are Rendered">
+    Back to Deciding How Ordinary Code Story Items Are Rendered — the evidence, and how to give your answer
+  </a>
+</p>
+
+<p>
+  <a page="Reading the Lisp Critic Genealogy">
+    Back to the genealogy
+  </a>
+</p>

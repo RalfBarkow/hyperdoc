@@ -1,0 +1,114 @@
+<h1>Code Rendering and Loaded Systems</h1>
+
+<in-package>dreyeck/lisp-critic/reading</in-package>
+
+<p>
+<strong>Decision 1: may loading the Verified Example system change how
+ordinary Code items look?</strong> No decision has been taken. A Claude Code
+review wrote this page to prepare it; the answer is the project owner's.
+</p>
+
+<p>
+Today it does: in an image that loads the Verified Example system, every
+ordinary Code item loses its <code>code</code> label, its grey background and
+its Inspector link. In an image that does not load it, nothing changes. This
+was observed, not only read from the code:
+<a href="https://github.com/RalfBarkow/hyperdoc/blob/e91349f6171839a12eea7ee2f24da393b4dd870c/docs/trusted-executable-examples-evidence/p1/original/before-lisp.html">before</a>,
+<a href="https://github.com/RalfBarkow/hyperdoc/blob/e91349f6171839a12eea7ee2f24da393b4dd870c/docs/trusted-executable-examples-evidence/p1/original/after-lisp.html">after</a>,
+evidence commit <code>e91349f6</code>.
+</p>
+
+<h2>Answer: No, loading must not change ordinary Code</h2>
+
+<p>
+<strong>In practice:</strong> ordinary Code looks the same in every image.
+The Verified Example code would handle only items marked as Verified Examples
+and hand every other Code item back to the general way of showing Code. The
+probe shows that this general way is still there, unchanged, after loading,
+so handing back would restore exactly the earlier look; the marked items would
+keep their own separate path. Any later change to how ordinary Code looks
+would then have to be made in that general place, for all images alike.
+</p>
+
+<p><strong>For:</strong></p>
+<ul>
+<li>A reader, or a reviewer, cannot tell from a page which optional systems
+  an image has loaded. If the look depends on it, the same page looks
+  different in two places for no visible reason. <em>(a consequence, read from
+  the observation)</em></li>
+<li>The Verified Example code's own comment says ordinary Code "remains" a
+  passive source view, and its report says it stays one. Both promise that
+  nothing changes. <em>(observed in the text)</em></li>
+<li>Elsewhere in this code base, optional extensions add to an existing
+  rendering instead of replacing it. <em>(inferred from two examples)</em></li>
+</ul>
+
+<p><strong>Against:</strong></p>
+<ul>
+<li>The difference only appears in images that load the Verified Example
+  system, and the public Catalog does not load it. <em>(observed)</em></li>
+<li>An optional system may be allowed to take over how a whole item type is
+  shown; the general way of showing items is a fallback, not a promise.
+  <em>(an assumption about what counts as a contract)</em></li>
+<li>Every future change to ordinary Code then affects every image at once,
+  which makes such changes weightier. <em>(a consequence)</em></li>
+</ul>
+
+<h2>Answer: Yes, loading may change ordinary Code</h2>
+
+<p>
+<strong>In practice:</strong> today's behaviour stays. The comment and the
+report that say the look "remains" would have to be corrected, so that they
+describe what actually happens. Whether a page shows the Inspector link would
+depend on the image, so the second decision could have a different answer in
+different images.
+</p>
+
+<p><strong>For:</strong></p>
+<ul>
+<li>A trust-sensitive optional part may want to show all Code in one plain
+  way while it is loaded. <em>(an assumption about the intended design)</em></li>
+<li>No change to the code is needed. <em>(observed: it is today's
+  behaviour)</em></li>
+</ul>
+
+<p><strong>Against:</strong></p>
+<ul>
+<li>Nothing written so far says the change was intended: no test and no
+  document asks for it, while comment and report say the opposite.
+  <em>(observed)</em></li>
+<li>What a reader sees then depends on something the reader cannot see.
+  <em>(a consequence)</em></li>
+</ul>
+
+<h2>The earlier question</h2>
+
+<p>
+This decision is the general form of the review's earlier question. Answering
+"No" here is what
+<a expr="(dreyeck/local-fedwiki-page:make-local-fedwiki-page (asdf:system-relative-pathname &quot;dreyeck&quot; &quot;dreyeck/pages/lisp-critic/trusted-examples-review-site/&quot;) (dreyeck/local-fedwiki-page:make-local-fedwiki (asdf:system-relative-pathname &quot;dreyeck&quot; &quot;dreyeck/pages/lisp-critic/trusted-examples-review-site/&quot;) &quot;fedwiki:trusted-examples-review.invalid&quot;) &quot;preserve-the-prior-code-rendering&quot;)" view="Story">Position A</a>
+asks for. Answering "Yes" leaves room for
+<a expr="(dreyeck/local-fedwiki-page:make-local-fedwiki-page (asdf:system-relative-pathname &quot;dreyeck&quot; &quot;dreyeck/pages/lisp-critic/trusted-examples-review-site/&quot;) (dreyeck/local-fedwiki-page:make-local-fedwiki (asdf:system-relative-pathname &quot;dreyeck&quot; &quot;dreyeck/pages/lisp-critic/trusted-examples-review-site/&quot;) &quot;fedwiki:trusted-examples-review.invalid&quot;) &quot;passive-code-rendering-may-be-intended&quot;)" view="Story">Position B</a>.
+Both answer
+<a expr="(dreyeck/local-fedwiki-page:make-local-fedwiki-page (asdf:system-relative-pathname &quot;dreyeck&quot; &quot;dreyeck/pages/lisp-critic/trusted-examples-review-site/&quot;) (dreyeck/local-fedwiki-page:make-local-fedwiki (asdf:system-relative-pathname &quot;dreyeck&quot; &quot;dreyeck/pages/lisp-critic/trusted-examples-review-site/&quot;) &quot;fedwiki:trusted-examples-review.invalid&quot;) &quot;should-the-code-method-preserve-the-inspector-rendering&quot;)" view="Story">the question</a>.
+That this decision maps onto those positions so is the review's reading, not
+something the pages establish.
+</p>
+
+<p>
+  <a page="Code Rendering and the Inspector Link">
+    Decision 2: Should an ordinary Code item keep its Inspector link?
+  </a>
+</p>
+
+<p>
+  <a page="Deciding How Ordinary Code Story Items Are Rendered">
+    Back to Deciding How Ordinary Code Story Items Are Rendered — the evidence, and how to give your answer
+  </a>
+</p>
+
+<p>
+  <a page="Reading the Lisp Critic Genealogy">
+    Back to the genealogy
+  </a>
+</p>

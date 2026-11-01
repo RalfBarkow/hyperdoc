@@ -1,0 +1,219 @@
+<h1>Deciding How Ordinary Code Story Items Are Rendered</h1>
+
+<in-package>dreyeck/lisp-critic/reading</in-package>
+
+<p>
+<strong>No decision has been taken.</strong> This page prepares two decisions
+for the owner of the HyperDoc project and says where an answer goes. A Claude
+Code review wrote it. Nothing here is your answer, and nothing here releases a
+change to the code.
+</p>
+
+<h2>What this is about</h2>
+
+<p>
+A Federated Wiki page can hold a <em>Code</em> item: a block of source text.
+HyperDoc shows such an item as text in a grey box, with a small label
+<code>code</code> above it. Clicking the label opens the item itself in the
+Inspector, where its data can be read, for example the programming language
+the author gave it.
+</p>
+
+<p>
+An <em>ordinary</em> Code item is one that is not marked as a Verified Example.
+Verified Examples are a newer, optional part of HyperDoc that shows stored,
+checked results of code, and only after a person has approved them. Loading
+that optional part also changes how <em>every</em> Code item is shown, the
+ordinary ones included. That side effect is what the two decisions are about.
+</p>
+
+<h2>What was observed</h2>
+
+<p>
+A probe rendered one ordinary Code item, the text
+<code>(defun square (x) (* x x))</code> with the language <code>lisp</code>,
+twice in one fresh process: once before and once after loading the Verified
+Example system. The code examined is commit <code>9b57bd4b</code>. The probe
+ran to the end, and a second run gave the same result.
+</p>
+
+<p>Before loading, HyperDoc produced:</p>
+
+<pre>&lt;div&gt;&lt;i&gt;&lt;small&gt;&lt;span class='inspector-inspect'&gt;&lt;span id='inspect-309'&gt;code&lt;/span&gt;&lt;/span&gt;&lt;/small&gt;&lt;/i&gt;&lt;/div&gt;&lt;pre style='background-color: #eee;'&gt;(defun square (x) (* x x))&lt;/pre&gt;</pre>
+
+<p>After loading, it produced:</p>
+
+<pre>&lt;pre&gt;(defun square (x) (* x x))&lt;/pre&gt;</pre>
+
+<ul>
+<li>The text stays the same and stays safely escaped in both cases.</li>
+<li>After loading, the <code>code</code> label, the grey background and the
+  Inspector link to the item are gone.</li>
+<li>The item itself is unchanged: its language is still stored with it. Only
+  the way to reach it from the page is gone.</li>
+<li>It is the loading alone that makes the difference: the general way of
+  showing Code is still there afterwards, but the Verified Example part now
+  answers first for every Code item.</li>
+</ul>
+
+<p>
+The evidence is kept in the repository at commit
+<a href="https://github.com/RalfBarkow/hyperdoc/commit/e91349f6171839a12eea7ee2f24da393b4dd870c"><code>e91349f6171839a12eea7ee2f24da393b4dd870c</code></a>:
+<a href="https://github.com/RalfBarkow/hyperdoc/blob/e91349f6171839a12eea7ee2f24da393b4dd870c/docs/trusted-executable-examples-evidence/p1/report.md">the report</a>,
+<a href="https://github.com/RalfBarkow/hyperdoc/blob/e91349f6171839a12eea7ee2f24da393b4dd870c/docs/trusted-executable-examples-evidence/p1/original/before-lisp.html">the HTML before</a>,
+<a href="https://github.com/RalfBarkow/hyperdoc/blob/e91349f6171839a12eea7ee2f24da393b4dd870c/docs/trusted-executable-examples-evidence/p1/original/after-lisp.html">the HTML after</a>
+and <a href="https://github.com/RalfBarkow/hyperdoc/blob/e91349f6171839a12eea7ee2f24da393b4dd870c/docs/trusted-executable-examples-evidence/p1/original/final-result.log?plain=1#L156-L224">the run's log</a>.
+Every file there matches its recorded SHA-256 checksum. The probe was run
+outside this review; the review read and checked its files.
+</p>
+
+<h2>The two decisions</h2>
+
+<ol>
+<li>
+  <a page="Code Rendering and Loaded Systems">May loading the Verified Example system change how ordinary Code items look?</a>
+</li>
+<li>
+  <a page="Code Rendering and the Inspector Link">Should an ordinary Code item keep its Inspector link to the item itself?</a>
+</li>
+</ol>
+
+<p>
+Each page shows the possible answers, what each would mean in practice, and
+the arguments for and against. The two decisions are separate, but they meet:
+see the table below.
+</p>
+
+<table>
+<tr><th></th><th>Keep the link</th><th>Remove the link</th></tr>
+<tr>
+  <th>Loading must not change ordinary Code</th>
+  <td>The Verified Example part hands ordinary items back to the general way
+      of showing Code. Ordinary Code then looks as it did before.</td>
+  <td>The link goes everywhere, in the general way of showing Code, for every
+      image, whether or not Verified Examples are loaded.</td>
+</tr>
+<tr>
+  <th>Loading may change ordinary Code</th>
+  <td>Unusual: the link stays, but other parts of the look may differ by image.</td>
+  <td>Today's behaviour. Its comments and report, which say the look
+      "remains", would have to be corrected.</td>
+</tr>
+</table>
+
+<h2>The earlier question and its two positions</h2>
+
+<p>
+The review first asked a narrower question, about one piece of code, and
+offered two positions on it. They are Wiki pages written by the review:
+</p>
+
+<ul>
+<li>
+  <a expr="(dreyeck/local-fedwiki-page:make-local-fedwiki-page (asdf:system-relative-pathname &quot;dreyeck&quot; &quot;dreyeck/pages/lisp-critic/trusted-examples-review-site/&quot;) (dreyeck/local-fedwiki-page:make-local-fedwiki (asdf:system-relative-pathname &quot;dreyeck&quot; &quot;dreyeck/pages/lisp-critic/trusted-examples-review-site/&quot;) &quot;fedwiki:trusted-examples-review.invalid&quot;) &quot;should-the-code-method-preserve-the-inspector-rendering&quot;)" view="Story">The question</a>:
+  should the Verified Example code keep the earlier look of ordinary Code
+  items, link included? Its note that the probe had not run was written before
+  the probe ran.
+</li>
+<li>
+  <a expr="(dreyeck/local-fedwiki-page:make-local-fedwiki-page (asdf:system-relative-pathname &quot;dreyeck&quot; &quot;dreyeck/pages/lisp-critic/trusted-examples-review-site/&quot;) (dreyeck/local-fedwiki-page:make-local-fedwiki (asdf:system-relative-pathname &quot;dreyeck&quot; &quot;dreyeck/pages/lisp-critic/trusted-examples-review-site/&quot;) &quot;fedwiki:trusted-examples-review.invalid&quot;) &quot;preserve-the-prior-code-rendering&quot;)" view="Story">Position A</a>:
+  yes, keep the earlier look.
+</li>
+<li>
+  <a expr="(dreyeck/local-fedwiki-page:make-local-fedwiki-page (asdf:system-relative-pathname &quot;dreyeck&quot; &quot;dreyeck/pages/lisp-critic/trusted-examples-review-site/&quot;) (dreyeck/local-fedwiki-page:make-local-fedwiki (asdf:system-relative-pathname &quot;dreyeck&quot; &quot;dreyeck/pages/lisp-critic/trusted-examples-review-site/&quot;) &quot;fedwiki:trusted-examples-review.invalid&quot;) &quot;passive-code-rendering-may-be-intended&quot;)" view="Story">Position B</a>:
+  not necessarily, plain passive text may be what was intended.
+</li>
+</ul>
+
+<p>
+The two decisions above are what that question rests on. Answering them
+answers it: keeping the earlier look regardless of what is loaded is Position
+A; removing the link only when Verified Examples are loaded is today's
+behaviour, which Position B defends as possibly intended.
+</p>
+
+<p>
+Not part of these decisions: whether Code should ever be coloured by language
+(syntax highlighting), and what to do when the language is missing or unknown.
+HyperDoc colours nothing today, the probe found no difference by language, and
+other systems choose differently: Federated Wiki guesses the language, D2 shows
+plain text. That is a question of its own.
+</p>
+
+<h2>How to give your answer</h2>
+
+<p>
+Your answer is yours, on a Federated Wiki site you own. The review's pages are
+not on any public site. Their site name, <code>trusted-examples-review.invalid</code>,
+is deliberately not an address; do not link to it.
+</p>
+
+<ol>
+<li>On your own site, create a new page, for example by writing its title as
+  a link in a paragraph and clicking it. Any title will do, for example
+  <em>My Decision on Rendering Ordinary Code Items</em>.</li>
+<li>Give it four fold items, named exactly as in the Claim Template:
+  <code>question</code>, <code>claim</code>, <code>support</code> and
+  <code>oppose</code>.</li>
+<li>Under <code>question</code>, one paragraph per decision, naming this page
+  and the commit you read it at (the links below).</li>
+<li>Under <code>claim</code>, your answer to each decision, one paragraph
+  each.</li>
+<li>Under <code>support</code> and <code>oppose</code>, your reasons, one
+  per paragraph. You may cite the evidence links or the review's arguments,
+  or contest them.</li>
+</ol>
+
+<p>Paragraphs you can copy and complete:</p>
+
+<pre>Decision 1, question: May loading the Verified Example system change how ordinary Code items look? Asked in HyperDoc, "Deciding How Ordinary Code Story Items Are Rendered", repository RalfBarkow/hyperdoc. Evidence: [https://github.com/RalfBarkow/hyperdoc/commit/e91349f6171839a12eea7ee2f24da393b4dd870c P1 evidence e91349f6].
+Decision 2, question: Should an ordinary Code item keep its Inspector link to the item itself? Asked on the same HyperDoc page.
+Decision 1, my answer: ...
+Decision 2, my answer: ...
+Reason: ...</pre>
+
+<p>Public links that stay valid, pinned to a commit:</p>
+
+<ul>
+<li><a href="https://github.com/RalfBarkow/hyperdoc/commit/e91349f6171839a12eea7ee2f24da393b4dd870c">The probe's evidence, commit e91349f6</a></li>
+<li><a href="https://github.com/RalfBarkow/hyperdoc/blob/4b56c1d80a6d061e1cc1da9321e132032c019dd8/dreyeck/pages/lisp-critic/trusted-examples-review-site/pages/should-the-code-method-preserve-the-inspector-rendering">The review's question page, as a file at commit 4b56c1d8</a></li>
+<li><a href="https://github.com/RalfBarkow/hyperdoc/blob/9b57bd4bb87d92fbf3061b91a42a6f539e18cdb1/dreyeck/src/verified-example.lisp#L160-L166">The code that causes the difference, at commit 9b57bd4b</a></li>
+</ul>
+
+<p>
+To refer to this page inside your own HyperDoc Catalog, open its URL view,
+which shows the address your Catalog serves it under.
+</p>
+
+<p>
+Nothing links back to your page by itself. If you want the review's pages to
+point to your answer, say so: that is a separate change, made only on your
+explicit request, and it would quote your page, not speak for you.
+</p>
+
+<h2>Three different things</h2>
+
+<ul>
+<li><strong>The review's text</strong>: this page, the two decision pages,
+  the question and its positions. Written by a Claude Code review, and marked
+  as such.</li>
+<li><strong>Your position</strong>: your page on your own site. Only you
+  write it.</li>
+<li><strong>A binding project decision</strong>: an explicit instruction from
+  you to change, or not to change, the code. Neither the review nor your Wiki
+  page is one by itself. The project's Acceptance Records page, which records
+  binding decisions on declared work packages, records none today, and none of
+  its work packages concerns this question.</li>
+</ul>
+
+<p>
+  <a page="Reading the Trusted Executable Examples Review">
+    Reading the Trusted Executable Examples Review — the criticism these decisions come from
+  </a>
+</p>
+
+<p>
+  <a page="Reading the Lisp Critic Genealogy">
+    Back to the genealogy
+  </a>
+</p>

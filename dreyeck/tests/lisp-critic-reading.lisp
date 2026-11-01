@@ -14,7 +14,8 @@
                     (#:tm #:dreyeck/topicmap)
                     (#:lp #:dreyeck/local-fedwiki-page))
   (:export #:run-tests #:run-current-tests #:check-under-catalog-runtime
-           #:check-degraded-runtime #:check-trusted-examples-review))
+           #:check-degraded-runtime #:check-trusted-examples-review
+           #:check-code-rendering-decision))
 
 (in-package #:dreyeck/lisp-critic/reading/tests)
 
@@ -27,7 +28,10 @@
     "Where the Source Lives"
     "Reading a Recorded Critique"
     "Lisp Critic on the Federated Context"
-    "Reading the Trusted Executable Examples Review"))
+    "Reading the Trusted Executable Examples Review"
+    "Deciding How Ordinary Code Story Items Are Rendered"
+    "Code Rendering and Loaded Systems"
+    "Code Rendering and the Inspector Link"))
 
 (defun check (value control &rest arguments)
   (unless value
@@ -1877,7 +1881,7 @@ criticises, and says what it is not."
            "The reading's book depends on the slice it criticises.")
     (dolist (phrase '("No critic rule ran"
                       "an Evaluation Record, or a passed"
-                      "The probe P1 has not been executed."
+                      "The probe P1 has since been executed"
                       "This page records no answer, and none is simulated."))
       (check (search phrase (substitute #\Space #\Newline text))
              "The reading no longer says ~S." phrase)))
@@ -1891,6 +1895,82 @@ criticises, and says what it is not."
   (check-review-reading-page)
   (format t "~&TRUSTED-EXAMPLES-REVIEW-PASS: three local pages, links resolved ~
 locally, one create entry each, reading opens exactly them.~%")
+  t)
+
+;;
+;; Deciding how ordinary Code story items are rendered: three reading pages
+;;
+;; Structure and navigation only. The pages prepare two decisions; nothing here
+;; takes one, and nothing loads the slice whose side effect they are about.
+
+(defparameter +decision-pages+
+  '("Deciding How Ordinary Code Story Items Are Rendered"
+    "Code Rendering and Loaded Systems"
+    "Code Rendering and the Inspector Link")
+  "The entry page of the two decisions, then one page per decision.")
+
+(defparameter +p1-evidence-commit+ "e91349f6171839a12eea7ee2f24da393b4dd870c"
+  "The commit that keeps the files of probe P1.")
+
+(defun %page-text (title)
+  (substitute #\Space #\Newline (uiop:read-file-string (hyperdoc:file-of (page-of title)))))
+
+(defun check-decision-page (title)
+  (let* ((page (page-of title))
+         (*package* (page-package page))
+         (text (%page-text title))
+         (links (page-links page))
+         (root (truename (uiop:ensure-directory-pathname (review-site-root))))
+         (opened (mapcar #'hyperdoc::parse-and-eval (page-expressions page))))
+    (check (search "No decision has been taken" text)
+           "~S no longer says that no decision has been taken." title)
+    (dolist (other +decision-pages+)
+      (unless (equal other title)
+        (check (member other links :test #'string=)
+               "~S does not link to ~S." title other)))
+    (check (search +p1-evidence-commit+ text)
+           "~S does not cite the P1 evidence commit." title)
+    (cl-ppcre:do-matches-as-strings (url "https://github\\.com/RalfBarkow/hyperdoc/[^\"' <]*" text)
+      (check (cl-ppcre:scan "^https://github\\.com/RalfBarkow/hyperdoc/(blob/[0-9a-f]{40}/|commit/[0-9a-f]{40}$)" url)
+             "~S links ~A, which is not pinned to a commit." title url))
+    (check (not (cl-ppcre:scan "\\b(N0|R[1-6])\\b" text))
+           "~S uses the review's internal shorthand." title)
+    (check (not (cl-ppcre:scan "https?://[^\"' <]*trusted-examples-review\\.invalid" text))
+           "~S gives the review's local site an address." title)
+    (dolist (object opened)
+      (check (typep object 'lp:local-fedwiki-page)
+             "~S addresses ~S, not a local Wiki page." title object)
+      (check (equal root (lp:local-fedwiki-page-site-root-of object))
+             "~S opens ~A outside the review's site." title (hyperbook:id-of object)))
+    (check (null (set-exclusive-or (remove-duplicates (mapcar #'hyperbook:id-of opened) :test #'equal)
+                                   (mapcar #'first +review-pages+)
+                                   :test #'equal))
+           "~S opens ~S, not the question and both positions."
+           title (mapcar #'hyperbook:id-of opened)))
+  t)
+
+(defun check-code-rendering-decision ()
+  "The three decision pages link each other and the entry, cite the P1 evidence
+commit, open only the review's local Wiki pages, use no internal shorthand and
+take no decision; the entry page shows the observed HTML and says where and how
+an answer is written."
+  (hyperdoc::ensure-pages-loaded reading:*lisp-critic-reading*)
+  (let ((before (find-package "DREYECK/VERIFIED-EXAMPLE")))
+    (mapc #'check-decision-page +decision-pages+)
+    (let ((text (%page-text (first +decision-pages+))))
+      (dolist (phrase '("&lt;pre style='background-color: #eee;'&gt;(defun square (x) (* x x))&lt;/pre&gt;"
+                        "&lt;pre&gt;(defun square (x) (* x x))&lt;/pre&gt;"
+                        "Your answer is yours, on a Federated Wiki site you own."
+                        "is deliberately not an address"
+                        "<code>question</code>" "<code>claim</code>"
+                        "<code>support</code>" "<code>oppose</code>"
+                        "A binding project decision"))
+        (check (search phrase text)
+               "The decision entry page no longer says ~S." phrase)))
+    (check (eq before (find-package "DREYECK/VERIFIED-EXAMPLE"))
+           "Reading the decision pages changed whether DREYECK/VERIFIED-EXAMPLE exists."))
+  (format t "~&CODE-RENDERING-DECISION-PASS: three pages, linked, pinned to commits, ~
+no decision taken.~%")
   t)
 
 (defun run-current-tests ()
@@ -1920,6 +2000,7 @@ locally, one create entry each, reading opens exactly them.~%")
   (check-source-structure-projection)
   (check-reading-examples-honour-the-policy)
   (check-trusted-examples-review)
+  (check-code-rendering-decision)
   (format t "~&LISP-CRITIC-READING-PASS: six pages, two lines kept apart, ~
 three outcomes, source-backed transclusion, source structure across three ~
 kinds of ownership.~%")
