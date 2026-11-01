@@ -3,7 +3,7 @@ import assert from 'node:assert/strict'
 import fs from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
-import {browserCandidates, detectBrowser, checkNode} from './commands.mjs'
+import {browserCandidates, detectBrowser, checkNode, demoFaslCache, catalogStartupTimeoutMs} from './commands.mjs'
 
 test('Darwin detects system and per-user app executables; explicit selection is exclusive',()=>{
   const candidates = browserCandidates('darwin',{},'/Users/test')
@@ -25,4 +25,26 @@ test('browser executable paths with spaces are probed without shell expansion; i
 test('Node 20 is refused before the ESM dependency tree loads',()=>{
   assert.throws(()=>checkNode('20.18.1'),/Node 24 is required/)
   assert.doesNotThrow(()=>checkNode('24.22.1'))
+})
+
+
+test('Catalog startup deadline is bounded, configurable and longer than cold compile',()=>{
+  assert.equal(catalogStartupTimeoutMs({}),900000)
+  assert.equal(catalogStartupTimeoutMs({HYPERDOC_FEDWIKI_CATALOG_START_TIMEOUT_SECONDS:'120'}),120000)
+  assert.throws(()=>catalogStartupTimeoutMs({HYPERDOC_FEDWIKI_CATALOG_START_TIMEOUT_SECONDS:'0'}),/30..3600/)
+  assert.throws(()=>catalogStartupTimeoutMs({HYPERDOC_FEDWIKI_CATALOG_START_TIMEOUT_SECONDS:'99999'}),/30..3600/)
+})
+
+test('Interactive demo FASLs remain in an independent reusable, runtime-scoped cache',()=>{
+  const work = fs.mkdtempSync(path.join(os.tmpdir(),'wiki-fasl-cache-test-'))
+  try {
+    const env = {HYPERDOC_FEDWIKI_FASL_CACHE_ROOT:work,CL_SOURCE_REGISTRY:'/nix/store/example//'}
+    const a = demoFaslCache('/nix/store/sbcl-a/bin/sbcl',env,work,'darwin')
+    const b = demoFaslCache('/nix/store/sbcl-a/bin/sbcl',env,work,'darwin')
+    const c = demoFaslCache('/nix/store/sbcl-b/bin/sbcl',env,work,'darwin')
+    assert.equal(a,b)
+    assert.notEqual(a,c)
+    assert(a.startsWith(work+path.sep))
+    assert(fs.statSync(a).isDirectory())
+  } finally {fs.rmSync(work,{recursive:true,force:true})}
 })
