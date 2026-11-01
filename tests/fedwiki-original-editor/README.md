@@ -5,37 +5,104 @@ client in a fresh Chromium context, edits a Code item with its original plugin,
 and rereads the server's file through the ordinary HyperBook Catalog. No personal
 browser, existing Lisp image, production site, or upstream checkout is used.
 
-## Reproduce
+## Local macOS or Linux: exact commands
 
-Run from this HyperDoc checkout, based on
-`2b864774ee6a1e9e4187e64d863f8ea39e53430f`:
+From the repository root on this feature branch:
 
 ```sh
-npm ci --prefix tests/fedwiki-original-editor --ignore-scripts \
-  --cache /tmp/hyperdoc-fedwiki-npm-cache --no-audit --no-fund
-node tests/fedwiki-original-editor/run.mjs \
-  /absolute/path/to/fresh-sbcl-wrapper /absolute/path/to/chromium \
-  /tmp/hyperdoc-original-editor-evidence
+nix develop .#fedwiki-original-editor
+node --version
+npm --version
+npm ci --prefix tests/fedwiki-original-editor --ignore-scripts --no-audit --no-fund
+fedwiki-original-editor-demo
 ```
 
-The Lisp wrapper must forward all arguments to SBCL, without user/system init,
-with this checkout first in the ASDF source registry and the existing HyperDoc
-dependencies available. `serve.lisp` asserts the actual ASDF origins of `dreyeck`,
-`hyperbook` and the demo. It fails rather than using a different checkout.
-In a working repository `nix develop --no-write-lock-file` shell, `sbcl` can be
-passed directly; put `$PWD//` first in `CL_SOURCE_REGISTRY` before the command.
-The test does not install Lisp dependencies or alter a running image.
+The dedicated shell pins **Node 24** (including npm) through the separate
+`fedwiki-nixpkgs` input, Nixpkgs `nixos-26.05` at
+`fa1373130d5a21c040a47c5dbe1913d59ed91808`. It reuses HyperDoc's existing SBCL,
+ASDF dependency sources and HyperSpec. Neither the default shell nor production
+Catalog package definition or default Catalog membership is changed. Existing
+flake inputs and the npm lockfile are retained. Node 20.18.1 is not sufficient:
+its CommonJS/ESM interoperability causes the reported `ERR_REQUIRE_ESM` in the
+locked jsdom/html-encoding-sniffer dependency chain. The launchers refuse Node
+majors other than 24 before loading that dependency tree.
 
-The observed cloud run used `/tmp/hyperdoc-editor-lisp-wrapper`, forwarding to
-the already available relocated SBCL 2.4.10 and dependency registry from
-`/workspace/scratch/tmdm-mcp-portable/environment.json`, with
-`/workspace/hyperdoc//` replaced by this worktree's path. This is an execution
-environment detail, not a dependency on another worktree's application code.
+Run these commands at the checkout root. No manually invented SBCL path or source
+registry wrapper is needed. The demo creates a new temporary site with exactly
+the Paragraph and original square-function Code Item. It starts the original Wiki
+server and a fresh HyperDoc Catalog on automatically selected, distinct loopback
+ports, never 8080. It prints both URLs **after** receiving successful HTTP replies
+and checking the processes' own bind confirmations. Open the printed Catalog URL:
 
-Output gets a new `run-*` directory, logs, screenshots, `report.json`, and the
-retained test site. Both servers bind to random loopback ports; the fresh browser
-allows only these two origins. Processes stop at the end. There is no deploy,
-push, content evaluation, or Lisp write to the Wiki file.
+**Catalog → Original Wiki Editor Test → Text pages → Editing One Isolated Wiki Page**.
+
+Click **Open original Wiki client**; enable editing with the normal **wiki** footer
+control, double-click Code, edit text and language, and click outside the Item to
+save. Return to HyperDoc and press **Read stored page again**. The Wiki URL opens
+the page, not an individual Item. There is no claimed direct HyperDoc-page URL.
+
+**Stop:** Ctrl-C in the launching terminal stops only the processes it started.
+It first requests normal Catalog shutdown via its private stop file, then uses
+bounded signal fallbacks. Temporary test data and private logs remain at the
+printed directory for inspection. No service, port 8080 or existing Lisp image is
+touched. No personal Wiki root is accepted as an input to the demo command.
+Optional port variables are `HYPERDOC_FEDWIKI_WIKI_PORT` and
+`HYPERDOC_FEDWIKI_CATALOG_PORT` (distinct unused ports 1024–65535, excluding 8080).
+No public tunnel or outward-facing proxy is started.
+
+For the automated browser witness, in the same shell after stopping the demo:
+
+```sh
+fedwiki-original-editor-e2e
+```
+
+It runs the existing `run.mjs` with this shell's SBCL, a verified Chrome/Chromium
+executable and a new temporary evidence directory; the report path is printed.
+An optional single argument selects an output directory outside the checkout:
+
+```sh
+fedwiki-original-editor-e2e /tmp/hyperdoc-original-editor-evidence
+```
+
+Ctrl-C also terminates this command's own test processes. Each run creates a fresh
+site. E2E acceptance remains the same: browser edit, PUT 200, actual file change,
+unchanged Item ID/paragraph, dated journal, no localStorage fallback, and independent
+HyperDoc reread. The initial fixture is shared by demo and test. HyperDoc's actual
+ASDF origins are asserted before startup; FASLs are isolated in the temporary run. Initial Nix downloads and fresh Lisp
+compilation can take several minutes; the interactive command prints its log
+directory before waiting. Set HYPERDOC_FEDWIKI_TMPDIR only if you need a different
+temporary parent (default /tmp, outside nix develop -c's disposable TMPDIR).
+
+### Browser selection
+
+On **macOS**, Playwright Core uses an already installed Google Chrome or Chromium.
+The detector checks executables in `/Applications` and `~/Applications`, including
+spaces in app paths, then verifies the selected program with `--version`. No browser
+is installed globally. An explicit selection is supported (and fails visibly if
+not executable or not identifiable as Chrome/Chromium):
+
+```sh
+export HYPERDOC_FEDWIKI_BROWSER="/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
+fedwiki-original-editor-e2e
+```
+
+On **Linux**, Chromium is supplied by the new Nixpkgs pin. The same explicit
+variable overrides it. The E2E launcher prints the verified executable and version;
+it uses a fresh browser context/profile, not a personal browser session. The
+interactive demo itself does not launch or change any browser profile: open its
+printed URLs in your browser. Browser detection tests on Linux cover Darwin path
+selection but do not establish macOS browser/runtime compatibility.
+
+`commands.test.mjs` checks platform path selection, argument-safe executable probes,
+explicit failure and rejection of Node 20:
+
+```sh
+node --test tests/fedwiki-original-editor/commands.test.mjs
+```
+
+The lower-level `node tests/fedwiki-original-editor/run.mjs LISP CHROMIUM OUTPUT`
+and `serve.lisp` remain available for diagnostics; ordinary local use should use
+the two shell commands above.
 
 ## Versions and compatibility
 
@@ -84,7 +151,64 @@ HyperDoc parse tree and checks the exact Paragraph coordinate. The explanatory
 HTML text is not a duplicate of the Wiki paragraph text. No automatic conversion
 or Topic Map projection is implemented.
 
-## Observed result and limits
+## Nix-shell acceptance (2026-11-01)
+
+Observed on x86_64-linux in the managed cloud, using real Nix develop commands:
+
+| Check | Result |
+| --- | --- |
+| `nix develop .#fedwiki-original-editor -c node --version` | `v24.22.1` |
+| `nix develop .#fedwiki-original-editor -c npm --version` | `11.19.1` |
+| Locked `npm ci --ignore-scripts` | 270 packages installed |
+| `fedwiki-original-editor-e2e` | PASS with Nix Chromium 156.0.8078.79 |
+| Browser selection / Node guard tests | 3 passed |
+| Interactive demo | Both actual URLs returned HTTP 200; fresh two-item page |
+| Ctrl-C / SIGINT | Demo confirmed cleanup; both listeners stopped |
+| Explicit port 8080 | Refused before any service startup |
+| E2E with a symlink evidence directory | Passed; canonical FASL containment checked |
+| `x86_64-darwin` shell evaluation | Passed; no macOS runtime available |
+
+[Validation](evidence/nix-environment/validation.json),
+[E2E report](evidence/nix-environment/report.json),
+[HTTP / ASDF evidence](evidence/nix-environment/http-and-origins.txt),
+[demo lifecycle](evidence/nix-environment/demo-smoke.json),
+[Catalog dependency comparison](evidence/nix-environment/catalog-comparison.json),
+[stored JSON](evidence/nix-environment/persisted-page.json),
+[screenshot](evidence/nix-environment/hyperdoc-reread.png), and
+[checksums](evidence/nix-environment/SHA256SUMS) preserve the observations.
+Historical temporary URLs in these artifacts are not live services.
+
+The cloud's Nix store is relocated. The actual Nix runs used a temporary bwrap
+namespace binding it to /nix outside the shell sandbox; this is an executor
+adapter, not a repository requirement or a replacement Node/Lisp/browser runtime.
+macOS users with ordinary Nix do not need it. No macOS Chrome launch, ESM load or
+E2E success is claimed. Darwin shell evaluation and path-selection tests do not
+close that gap: local macOS acceptance is still required.
+
+The existing Lock nodes are unchanged. Standard-shell and production-package
+**definitions** are byte-identical to cc781f77. The Catalog dependency derivation
+comparison passes after normalizing the changed repository source snapshot and
+its output path; the source snapshot necessarily changes with repository edits.
+No default Catalog membership, Review page, original Wiki package source or npm
+lockfile changed. The initial fixture was extracted unchanged into fixture.mjs;
+all prior E2E acceptance assertions remain in run.mjs.
+
+ASDF setup belongs to the fresh test process only: supplied source trees are
+selected explicitly, personal ASDF configuration is ignored, and all FASLs go to
+an isolated cache preserving full source directories. This avoids appending an
+s-expression to Nix's colon-form ASDF_OUTPUT_TRANSLATIONS and avoids collisions
+between unrelated package.fasl files. The cache directory is canonicalized first (macOS normally links /tmp to
+/private/tmp). The runtime checks cache containment,
+separation of same-named files, and actual application ASDF origins before serving.
+The first startup diagnostics found these integration issues; the recorded final
+Nix E2E run passed after repair. No Nix-store source was modified to work around them.
+
+The SIGINT smoke test signalled its dedicated test process group. The outer
+Nix/bwrap wrapper exited by SIGINT (not exit 0); the demo printed its cleanup
+confirmation, and independent HTTP probes confirmed both listeners were closed.
+Only PIDs created by the launch adapters are targeted during cleanup.
+
+## Earlier cloud witness and remaining limits
 
 The repeat run passed on 2026-11-01 with Chromium 154.0.8037.57.
 Durable review evidence is in [evidence/report.json](evidence/report.json),
@@ -146,69 +270,3 @@ The original file adapter uses `fs.writeFile`; crash durability is not tested.
 HyperDoc's reader can coexist with Node, but this test stops Node before its
 final reread; Lisp never writes the test page. Existing review pages remain
 unchanged. The demo system is opt-in, not added to default Catalog membership.
-
-## Open the opt-in Catalog demonstration locally
-
-This is an operator procedure for a **fresh local test process**, not an
-instruction to reload or modify an existing SLY image or running personal Catalog.
-The only application changes are the six-line ASDF system declaration, the
-read-only demo Lisp file and its HTML page. Loading
-`dreyeck/fedwiki-original-editor-demo` registers the HyperBook named
-**Original Wiki Editor Test**; default Catalog membership is not changed.
-
-First make the branch available in a separate local checkout by your chosen
-review/transfer procedure (nothing has been pushed), install the locked npm
-packages as above and provide SBCL with the existing HyperDoc dependencies and
-this checkout first in its source registry. The cloud test asserted those origins;
-your local dependency installation has not been tested here.
-
-From that checkout, in a test terminal with two **unused** chosen ports:
-
-```sh
-# The port numbers below are examples, not claims about a running local service.
-repo_root="$PWD"
-test_site="$(mktemp -d /tmp/hyperdoc-wiki-review.XXXXXX)"
-mkdir -p "$test_site/pages" "$test_site/home"
-cp tests/fedwiki-original-editor/evidence/persisted-page.json \
-  "$test_site/pages/original-editor-test"
-export HYPERDOC_FEDWIKI_EDITOR_TEST_ROOT="$test_site/"
-export HYPERDOC_FEDWIKI_EDITOR_TEST_ORIGIN="http://127.0.0.1:18091"
-export HYPERDOC_EDITOR_TEST_CHECKOUT="$repo_root/"
-export HYPERDOC_EDITOR_TEST_CATALOG_PORT=18092
-export HYPERDOC_EDITOR_TEST_STOP="$test_site/stop-catalog"
-export HYPERDOC_FEDWIKI_SITE_ROOT="$test_site/"
-
-# Use a temporary HOME only for the original Wiki test server.
-env HOME="$test_site/home" node tests/fedwiki-original-editor/server.mjs \
-  "$test_site" 18091 true >"$test_site/wiki.log" 2>&1 &
-wiki_test_pid=$!
-trap 'kill "$wiki_test_pid" 2>/dev/null || true' EXIT
-
-# SBCL here means your configured fresh runtime/wrapper, as for run.mjs.
-sbcl --noinform --no-sysinit --no-userinit --script \
-  tests/fedwiki-original-editor/serve.lisp
-```
-
-Before using the browser, confirm the Wiki log reports the chosen `db` and the
-Catalog output reports the expected ASDF origins and loopback listener. Change
-both port settings and the origin together if either port is occupied. The above
-manual port selection is configuration guidance; it was not tested on your machine.
-The runner tests the same adapters with allocated free ports.
-
-Open the local Catalog origin **actually reported by that process**, then use the
-browser-tested path:
-
-**Catalog → Original Wiki Editor Test → Text pages → Editing One Isolated Wiki Page**.
-
-The Main page also renders this HTML, but the recorded witness used Text pages.
-There is no claimed direct HTML-page URL. **Open original Wiki client** supplies
-the configured separate Wiki origin and `/view/original-editor-test`; that route
-was exercised at the repeat run's allocated port, not at the example ports above.
-The copied page already contains the recorded edited text; it is a disposable
-copy and may be edited again. **Read stored page again** reads the configured
-JSON file afresh. The signed HyperDoc authoring path is not involved.
-
-To stop cleanly, create the configured stop file from a second terminal (use the
-actual temporary path printed in the JSON-file display). `serve.lisp` shuts the
-Catalog down; the shell's EXIT trap then stops the Wiki process. Retain or remove
-only this temporary test directory. Do not substitute a personal site root.

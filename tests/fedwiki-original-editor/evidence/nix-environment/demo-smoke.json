@@ -1,0 +1,14 @@
+{
+  "passed": true,
+  "urls": {
+    "wiki": "http://127.0.0.1:41245/view/original-editor-test",
+    "catalog": "http://127.0.0.1:35425"
+  },
+  "site": "/tmp/hyperdoc-wiki-demo-OJYosW/site",
+  "bothHTTP200BeforeSIGINT": true,
+  "freshTwoItemFixture": true,
+  "afterSIGINTWrapperExit": -2,
+  "bothListenersStopped": true,
+  "shutdownMessage": true,
+  "note": "SIGINT was sent to the dedicated smoke process group; the outer Nix/bwrap wrapper exited by SIGINT while the demo confirmed cleanup."
+}

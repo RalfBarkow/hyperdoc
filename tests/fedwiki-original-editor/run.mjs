@@ -8,6 +8,7 @@ import {fileURLToPath} from 'node:url'
 import {createHash} from 'node:crypto'
 import {chromium} from 'playwright-core'
 import {installBoundClicks} from '../../scripts/lib/inspector-ready.mjs'
+import {slug, paragraphId, codeId, paragraph, code, initialPage} from './fixture.mjs'
 
 const here = path.dirname(fileURLToPath(import.meta.url))
 const repo = path.resolve(here, '../..')
@@ -19,13 +20,7 @@ fs.mkdirSync(output, {recursive:true})
 const work = fs.mkdtempSync(path.join(output, 'run-'))
 const site = path.join(work, 'site'), pages = path.join(site, 'pages')
 fs.mkdirSync(pages, {recursive:true})
-const slug = 'original-editor-test', paragraphId = '1111111111111111', codeId = '2222222222222222'
-const paragraph = {id:paragraphId, type:'paragraph', text:'An isolated paragraph; this item stays unchanged.'}
-const code = {id:codeId, type:'code', text:'(defun square (x) (* x x))', language:'lisp'}
-const initial = {title:'Original Editor Test', story:[paragraph, code],
-  journal:[{type:'create', id:'3333333333333333', item:{title:'Original Editor Test'}, date:1700000000000},
-    {type:'add', id:paragraphId, item:paragraph, date:1700000000001},
-    {type:'add', id:codeId, item:code, after:paragraphId, date:1700000000002}]}
+const initial = initialPage()
 const file = path.join(pages, slug)
 fs.writeFileSync(file, JSON.stringify(initial, null, 2) + '\n')
 const read = () => JSON.parse(fs.readFileSync(file, 'utf8'))
@@ -39,11 +34,19 @@ for (const name of ['wiki','wiki-client','wiki-server','wiki-plugin-code','wiki-
 const children = [], contexts = []
 const stopFile = path.join(work,'stop-catalog')
 let browser
-const freePort = async () => {
+let interrupted = false
+const abort = () => {
+  interrupted = true
+  for (const child of children) if (child.pid && child.exitCode===null && child.signalCode===null) child.kill('SIGTERM')
+  if (browser) browser.close().catch(()=>{})
+}
+process.once('SIGINT',abort);process.once('SIGTERM',abort)
+const freePort = async (avoid=[]) => {
   const listener = net.createServer()
   await new Promise(r=>listener.listen(0,'127.0.0.1',r))
   const port = listener.address().port
   await new Promise(r=>listener.close(r))
+  if (port===8080 || avoid.includes(port)) return freePort(avoid)
   return port
 }
 const start = (command, args, label, env={}) => {
@@ -56,7 +59,7 @@ const start = (command, args, label, env={}) => {
 }
 const waitHTTP = async (origin, child, label) => {
   for (let i=0;i<1200;i++) {
-    if (child.exitCode !== null || report.processError) throw Error(report.processError || fs.readFileSync(path.join(work,label+'.log'),'utf8').slice(-5000))
+    if (interrupted || child.exitCode !== null || child.signalCode !== null || report.processError) throw Error(report.processError || 'Test process stopped; inspect '+path.join(work,label+'.log'))
     try {if ((await fetch(origin)).ok) return} catch {}
     await new Promise(r=>setTimeout(r,100))
   }
@@ -75,7 +78,7 @@ try {
   denied.kill('SIGTERM'); await new Promise(r=>denied.once('exit',r))
   report.steps.push('Original security denies PUT without grant: 403 and unchanged page bytes')
 
-  const wikiPort = await freePort(), catalogPort = await freePort()
+  const wikiPort = await freePort(), catalogPort = await freePort([wikiPort])
   const wikiOrigin = `http://127.0.0.1:${wikiPort}`, catalogOrigin = `http://127.0.0.1:${catalogPort}`
   Object.assign(report,{wikiOrigin,catalogOrigin,authorization:'original default security, unclaimed isolated loopback site, security_legacy=true'})
   const wiki = start(process.execPath,[path.join(here,'server.mjs'),site,String(wikiPort),'true'],'wiki')
@@ -206,9 +209,10 @@ try {
     if (child.exitCode!==null || child.signalCode!==null || !child.pid) return
     const exited = new Promise(r=>child.once('exit',r))
     if (child !== children.at(-1)) child.kill('SIGTERM')
-    const timer = setTimeout(()=>child.kill('SIGTERM'),5000)
-    await exited; clearTimeout(timer)
+    const timer = setTimeout(()=>child.kill('SIGTERM'),5000), kill = setTimeout(()=>child.kill('SIGKILL'),8000)
+    await exited; clearTimeout(timer);clearTimeout(kill)
   }))
+  process.removeListener('SIGINT',abort);process.removeListener('SIGTERM',abort)
   fs.writeFileSync(path.join(work,'report.json'),JSON.stringify(report,null,2)+'\n')
   console.log(JSON.stringify({passed:report.passed,report:path.join(work,'report.json'),failure:report.failure},null,2))
 }

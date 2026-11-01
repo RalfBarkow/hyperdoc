@@ -1,0 +1,41 @@
+{
+  "baseCommit": "cc781f77e762f9d7279c3d1352837e514198dbce",
+  "platform": "x86_64-linux",
+  "date": "2026-11-01",
+  "fedwikiNixpkgs": {
+    "lastModified": 1793410479,
+    "narHash": "sha256-HzgjxrLY4AEc0044ZuM5CHbLSWLZgDlay1idmzvvpJs=",
+    "owner": "NixOS",
+    "repo": "nixpkgs",
+    "rev": "fa1373130d5a21c040a47c5dbe1913d59ed91808",
+    "type": "github"
+  },
+  "node": "v24.22.1",
+  "npm": "11.19.1",
+  "chromium": "156.0.8078.79",
+  "tests": {
+    "nix develop .#fedwiki-original-editor -c node --version": "PASS",
+    "nix develop .#fedwiki-original-editor -c npm --version": "PASS",
+    "npm ci (locked packages, ignore-scripts)": "PASS",
+    "fedwiki-original-editor-e2e": "PASS",
+    "node --test commands.test.mjs": "3 PASS",
+    "interactive demo / two HTTP 200 replies / SIGINT cleanup": "PASS; outer Nix wrapper terminated by SIGINT",
+    "explicit port 8080": "REFUSED before any service startup",
+    "E2E through symlink output directory": "PASS; canonical FASL containment checked"
+  },
+  "invariants": {
+    "existingFlakeInputsUnchanged": true,
+    "defaultShellDefinitionByteIdentical": true,
+    "productionPackageDefinitionsByteIdentical": true,
+    "catalogDerivationEqualExceptSourceSnapshotAndOutput": true,
+    "npmLockUnchanged": true,
+    "reviewPagesAndDefaultCatalogMembershipUnchanged": true
+  },
+  "macOS": {
+    "x86_64DarwinShellEvaluation": "PASS",
+    "browserPathSelectionUnitTests": "PASS on Linux",
+    "runtimeAndBrowserE2E": "NOT TESTED: no macOS executor"
+  },
+  "cloudExecution": "Actual Nix 2.20.6 develop runs used a temporary bwrap namespace mapping the existing relocated store to /nix. Namespace setup was outside the shell sandbox; no production service or existing Lisp image was used.",
+  "earlierDiagnostics": "Initial Nix runs exposed mixed ASDF output-translations syntax and flattened cache paths. serve.lisp now configures ASDF explicitly with recursive string locations and checks distinct contained outputs before loading application systems."
+}

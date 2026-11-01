@@ -1,5 +1,35 @@
 ;;;; Fresh test runtime, never a user's SLY image. Reads the site, never writes it.
 (require :asdf)
+;; Follow catalog-main.lisp: use only the supplied trees, without personal ASDF
+;; configuration. Nix's SBCL wrapper prefixes colon-form output translations;
+;; do not append a second, s-expression form to that environment variable.
+(asdf:initialize-source-registry
+ `(:source-registry
+   ,@(loop for path in (uiop:split-string (or (uiop:getenv "CL_SOURCE_REGISTRY") "") :separator ":")
+           unless (zerop (length path)) collect
+             `(:tree ,(uiop:ensure-directory-pathname (string-right-trim "/" path))))
+   :ignore-inherited-configuration))
+(let ((fasls (uiop:getenv "HYPERDOC_EDITOR_TEST_FASL_DIR")))
+  (when fasls
+    ;; macOS /tmp is normally a symlink to /private/tmp. Compare canonical
+    ;; pathname identities, just as the ASDF-origin checks below do.
+    (ensure-directories-exist (uiop:ensure-directory-pathname fasls))
+    (setf fasls (namestring (truename (uiop:ensure-directory-pathname fasls))))
+    (asdf:initialize-output-translations
+     `(:output-translations
+       ;; All recompilation belongs in this cache, even when ASDF decides a
+       ;; prebuilt dependency needs rebuilding. Never write into the Nix store.
+       ;; ASDF widens directory STRING designators recursively. A literal
+       ;; pathname destination would flatten unrelated package.fasl files.
+       (t ,(namestring (uiop:ensure-directory-pathname fasls)))
+       :ignore-inherited-configuration))
+    (let* ((root (uiop:ensure-directory-pathname (uiop:getenv "HYPERDOC_EDITOR_TEST_CHECKOUT")))
+           (a (asdf:apply-output-translations (merge-pathnames "hyperbook/package.fasl" root)))
+           (b (asdf:apply-output-translations (merge-pathnames "hyperdoc/package.fasl" root))))
+      (assert (not (equal a b)))
+      (assert (and (uiop:subpathp a (uiop:ensure-directory-pathname fasls))
+                   (uiop:subpathp b (uiop:ensure-directory-pathname fasls))))
+      (format t "~&FASL-CACHE ~A (source directories preserved)~%" fasls))))
 (asdf:load-system "dreyeck/catalog-application")
 (asdf:load-system "dreyeck/fedwiki-original-editor-demo")
 

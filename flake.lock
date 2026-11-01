@@ -16,6 +16,22 @@
         "url": "https://codeberg.org/khinsen/clog-moldable-inspector.git"
       }
     },
+    "fedwiki-nixpkgs": {
+      "locked": {
+        "lastModified": 1793410479,
+        "narHash": "sha256-HzgjxrLY4AEc0044ZuM5CHbLSWLZgDlay1idmzvvpJs=",
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "fa1373130d5a21c040a47c5dbe1913d59ed91808",
+        "type": "github"
+      },
+      "original": {
+        "owner": "NixOS",
+        "ref": "nixos-26.05",
+        "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
     "html-inspector-views": {
       "flake": false,
       "locked": {
@@ -115,6 +131,7 @@
     "root": {
       "inputs": {
         "clog-moldable-inspector": "clog-moldable-inspector",
+        "fedwiki-nixpkgs": "fedwiki-nixpkgs",
         "html-inspector-views": "html-inspector-views",
         "lwcells": "lwcells",
         "named-closure": "named-closure",

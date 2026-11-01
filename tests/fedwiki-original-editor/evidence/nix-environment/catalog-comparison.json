@@ -1,0 +1,22 @@
+{
+ "kind": "hyperdoc-catalog-derivation-comparison",
+ "evaluatedAtUTC": "2026-11-01T18:16:49Z",
+ "system": "x86_64-linux",
+ "a": {
+  "ref": "path:/tmp/fedwiki-nix-baseline",
+  "drv": "/nix/store/yr8fgirw4rdmj6mdf3agr3jgl69aq3x1-hyperdoc-catalog.drv",
+  "hyperdocSource": [
+   "/nix/store/2xxjcfl2v3vvbf944a1lasi0qgvsdjcm-source"
+  ]
+ },
+ "b": {
+  "ref": "path:/workspace/scratch/hyperdoc-fedwiki-original-editor-e2e",
+  "drv": "/nix/store/qkl6l1vkc9x2khr9698v1c893844kxcm-hyperdoc-catalog.drv",
+  "hyperdocSource": [
+   "/nix/store/7rmvwndj7ylk63cr68di598yi640g22w-source"
+  ]
+ },
+ "inputDrvsEqual": true,
+ "equalExceptHyperDocSourceAndOutput": true,
+ "built": false
+}

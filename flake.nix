@@ -3,6 +3,8 @@
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-24.11";
+    # Only the opt-in Wiki demo uses Node 24; the Lisp/production pin stays unchanged.
+    fedwiki-nixpkgs.url = "github:NixOS/nixpkgs/nixos-26.05";
 
     html-inspector-views = {
       url = "git+https://codeberg.org/khinsen/html-inspector-views.git";
@@ -215,6 +217,26 @@
                   ./scripts/hyperdoc-sly.sh;
             };
         in {
+          fedwiki-original-editor = let
+            demoPkgs = import inputs.fedwiki-nixpkgs { inherit system; };
+            command = name: pkgs.writeShellScriptBin name ''
+              exec ${demoPkgs.nodejs_24}/bin/node "$PWD/tests/fedwiki-original-editor/commands.mjs" ${name} "$@"
+            '';
+          in pkgs.mkShell {
+            packages = [
+              pkgs.git sbcl demoPkgs.nodejs_24
+              (command "fedwiki-original-editor-demo")
+              (command "fedwiki-original-editor-e2e")
+            ] ++ pkgs.lib.optionals pkgs.stdenv.isLinux [ demoPkgs.chromium ];
+            shellHook = ''
+              export CL_SOURCE_REGISTRY="$PWD//:${runtime.sourceRegistry}"
+              export HYPERDOC_HYPERSPEC_ROOT="${runtime.hyperspecRoot}"
+              export HYPERDOC_FEDWIKI_SBCL="${sbcl}/bin/sbcl"
+              ${pkgs.lib.optionalString pkgs.stdenv.isLinux ''
+                export HYPERDOC_FEDWIKI_NIX_BROWSER="${demoPkgs.chromium}/bin/chromium"
+              ''}
+            '';
+          };
           workflow-authoring = pkgs.mkShell {
             inputsFrom = [ self.devShells.${system}.default ];
             shellHook = ''
