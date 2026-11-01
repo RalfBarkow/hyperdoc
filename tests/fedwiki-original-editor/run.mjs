@@ -63,7 +63,7 @@ const waitHTTP = async (origin, child, label) => {
   const began = Date.now()
   const logFile = path.join(work,label+'.log')
   while (Date.now()-began < maxMs) {
-    if (child.exitCode !== null || child.signalCode !== null || report.processError) {
+    if (interrupted || child.exitCode !== null || child.signalCode !== null || report.processError) {
       throw Error(report.processError ||
         label+' exited before HTTP readiness. '+fs.readFileSync(logFile,'utf8').slice(-5000))
     }
