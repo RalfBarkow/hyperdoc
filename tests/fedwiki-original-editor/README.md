@@ -28,7 +28,38 @@ locked jsdom/html-encoding-sniffer dependency chain. The launchers refuse Node
 majors other than 24 before loading that dependency tree.
 
 Run these commands at the checkout root. No manually invented SBCL path or source
-registry wrapper is needed. The demo creates a new temporary site with exactly
+registry wrapper is needed.
+
+### macOS cold-compilation startup fix
+
+The former launcher cut off Catalog startup after about 120 seconds and discarded
+a per-run FASL cache. On x86_64-darwin, its resulting log can end in
+"compilation unit aborted; caught 2 fatal ERROR conditions" after the
+launcher terminates an otherwise running compiler. That log alone does not prove
+whether compilation would have succeeded.
+
+The interactive demo now retains FASLs in a dedicated, reusable cache under
+~/Library/Caches/hyperdoc/fedwiki-original-editor/ on macOS (under
+$XDG_CACHE_HOME/hyperdoc/fedwiki-original-editor/, or ~/.cache/..., on Linux).
+The cache key includes the checkout path, SBCL executable, ASDF registry, Nix
+lock and system definition. ASDF still checks source modification times.
+This does not use an existing SLY process or personal ASDF cache.
+A clean initial invocation may still compile many dependencies.
+
+The Catalog has a bounded startup deadline of 900 seconds (15 minutes), not the
+old 120 seconds. The launcher prints readiness progress every 15 seconds and
+includes the last 45 log lines, exit status and full log path on failure;
+an early exit is distinguished from a live process exceeding the deadline.
+For especially slow development machines, optionally set:
+
+    export HYPERDOC_FEDWIKI_CATALOG_START_TIMEOUT_SECONDS=1800
+
+Only values from 30 to 3600 seconds are accepted. The original Wiki server
+retains its shorter startup bound. Neither change alters the original Wiki
+client, plugin, Catalog membership, port 8080 or production services. Do not
+start multiple simultaneous demos sharing the same FASL cache.
+
+The demo creates a new temporary site with exactly
 the Paragraph and original square-function Code Item. It starts the original Wiki
 server and a fresh HyperDoc Catalog on automatically selected, distinct loopback
 ports, never 8080. It prints both URLs **after** receiving successful HTTP replies
