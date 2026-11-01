@@ -1,0 +1,17 @@
+2026-10-31 — local disposable SBCL test processes
+Focused process exit: 0
+Authority-only baseline process exit: 1
+No new example system loaded in the authority-only baseline.
+
+Verified example tests passed: display, denial-before-load, revision, copy, forgery, escaping, revocation, dependency, failure, Catalog independence.
+Local page suite passed.
+Repository: work 573fe37611a61d984260ebf43c797f7534211bdd
+
+Authority-only baseline: Drifted: new title-bar actions on DREYECK/WORK/TRAILS-RENDERED-READING::CONTEXT-FEDWIKI-PAGE
+
+SHA-256 of tested files:
+7f61a5766e97a00adabff8245b7380d5be48ec7418c9cca5f514bc712998dcdf  dreyeck.asd
+981fb3f085a92e33e369a68337872110087205a83e22cd7e5e8c8269eca9339a  dreyeck/src/verified-example.lisp
+75af75a7b2c5658abf2b9aa9d5c5032dba550d5c31d31c7822570512f2c907ab  dreyeck/src/verified-example-fixture.lisp
+a466d2906c312e1a4011892908ee6b19067b988d4fc3b5e2b018ce4e8c481593  dreyeck/tests/verified-example.lisp
+9d56ad253cf8dfc851fa8d8e42c737058fded56b4ed7c39659ae19b213f4cf27  dreyeck/tests/fixtures/verified-example-site/pages/verified-fixture-value

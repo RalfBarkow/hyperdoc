@@ -464,6 +464,25 @@
                                 ((:FILE "upstream-intake-inspector-package")
                                  (:FILE "upstream-intake-views")))
 
+(asdf:defsystem "dreyeck/verified-example"
+  :description "Opt-in revision-bound stored Code examples; no execution runtime"
+  :depends-on ("dreyeck/local-fedwiki-page" "dreyeck/authority-policy"
+               "dreyeck/evaluation-record" "ironclad")
+  :components ((:file "dreyeck/src/verified-example"))
+  :in-order-to ((test-op (test-op "dreyeck/verified-example/tests"))))
+
+(asdf:defsystem "dreyeck/verified-example/fixture"
+  :description "Explicit trusted producer for the existing CL-only page-attached fixture"
+  :depends-on ("dreyeck/verified-example" "dreyeck/page-attached-asdf")
+  :components ((:file "dreyeck/src/verified-example-fixture")))
+
+(asdf:defsystem "dreyeck/verified-example/tests"
+  :depends-on ("dreyeck/verified-example/fixture")
+  :components ((:file "dreyeck/tests/verified-example"))
+  :perform (test-op (op component)
+             (declare (ignore op component))
+             (uiop:symbol-call :dreyeck/verified-example/tests :run-tests-in-fresh-process)))
+
 (asdf:defsystem "dreyeck/authority-policy"
   :description "Operation contracts and disclosure gates over HyperDoc's Inspector: containment, with upstream untouched"
   :depends-on ("html-inspector-views/standard" "cl-who" "closer-mop" "concrete-syntax-tree" "lwcells"
