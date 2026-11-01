@@ -3,6 +3,7 @@ import fs from 'node:fs'
 import os from 'node:os'
 import net from 'node:net'
 import path from 'node:path'
+import {createHash} from 'node:crypto'
 import {spawn, spawnSync} from 'node:child_process'
 import {fileURLToPath} from 'node:url'
 import {slug, initialPage} from './fixture.mjs'
@@ -53,6 +54,32 @@ function checkPackages() {
   }
 }
 
+// Only this disposable demo uses the cache; SLY and normal ASDF outputs are untouched.
+export function demoFaslCache(sbcl, env=process.env, home=os.homedir(), platform=process.platform) {
+  const root = env.HYPERDOC_FEDWIKI_FASL_CACHE_ROOT ||
+    path.join(env.XDG_CACHE_HOME || (platform === 'darwin'
+      ? path.join(home,'Library','Caches') : path.join(home,'.cache')),
+      'hyperdoc','fedwiki-original-editor')
+  const identity = [
+    fs.realpathSync(repo), sbcl, env.CL_SOURCE_REGISTRY || '',
+    platform, process.arch,
+    fs.readFileSync(path.join(repo,'flake.lock'),'utf8'),
+    fs.readFileSync(path.join(repo,'dreyeck.asd'),'utf8'),
+  ].join('\0')
+  const key = createHash('sha256').update(identity).digest('hex').slice(0,24)
+  const cache = path.join(root,key)
+  fs.mkdirSync(cache,{recursive:true,mode:0o700})
+  return cache
+}
+
+export function catalogStartupTimeoutMs(env=process.env) {
+  const raw = env.HYPERDOC_FEDWIKI_CATALOG_START_TIMEOUT_SECONDS || '900'
+  if (!/^\d+$/.test(raw) || +raw < 30 || +raw > 3600) {
+    throw Error('HYPERDOC_FEDWIKI_CATALOG_START_TIMEOUT_SECONDS must be 30..3600')
+  }
+  return Number(raw)*1000
+}
+
 function lispEnvironment(work) {
   return {...process.env,
     CL_SOURCE_REGISTRY:`${repo}//:${process.env.CL_SOURCE_REGISTRY || ''}`,
@@ -75,7 +102,9 @@ async function interactive(sbcl) {
   // nix develop -c removes its TMPDIR on exit; keep review evidence outside it.
   const work = fs.mkdtempSync(path.join(process.env.HYPERDOC_FEDWIKI_TMPDIR || '/tmp','hyperdoc-wiki-demo-'))
   const site = path.join(work,'site'), stop = path.join(work,'stop-catalog')
+  const faslCache = demoFaslCache(sbcl)
   console.log(`Starting isolated demo. Logs and disposable data: ${work}`)
+  console.log('Dedicated reusable FASL cache: '+faslCache)
   fs.mkdirSync(path.join(site,'pages'),{recursive:true}); fs.mkdirSync(path.join(work,'home'))
   fs.writeFileSync(path.join(site,'pages',slug),JSON.stringify(initialPage(),null,2)+'\n')
   const wikiPort = await unusedPort(process.env.HYPERDOC_FEDWIKI_WIKI_PORT)
@@ -94,13 +123,37 @@ async function interactive(sbcl) {
     return child
   }
   const wait = async (origin,child,label) => {
-    for (let i=0;i<1200;i++) {
-      if (interrupted) throw Error('Demo interrupted during startup')
-      if (!child.pid || child.exitCode!==null || child.signalCode!==null) throw Error(`${label} stopped. Inspect ${work}/${label}.log`)
-      try {const response=await fetch(origin,{signal:AbortSignal.timeout(1500)});if(response.ok)return} catch {}
-      await new Promise(r=>setTimeout(r,100))
+    const timeoutMs = label === 'catalog' ? catalogStartupTimeoutMs() : 120000
+    const began = Date.now(), deadline = began + timeoutMs
+    const logFile = path.join(work,label+'.log')
+    const tail = () => {
+      try {return fs.readFileSync(logFile,'utf8').trimEnd().split('\n').slice(-45).join('\n')}
+      catch {return '(no log available)'}
     }
-    throw Error(`${label} did not answer. Inspect ${work}/${label}.log`)
+    let progressAt = began
+    while (Date.now() < deadline) {
+      if (interrupted) throw Error('Demo interrupted during startup')
+      if (!child.pid || child.exitCode !== null || child.signalCode !== null) {
+        throw Error(label+' exited before readiness (exit='+child.exitCode+
+          ', signal='+child.signalCode+').\n'+tail()+'\nFull log: '+logFile)
+      }
+      try {
+        const response = await fetch(origin,{signal:AbortSignal.timeout(1500)})
+        if (response.ok) return
+      } catch {}
+      if (Date.now()-progressAt >= 15000) {
+        progressAt = Date.now()
+        const seconds = Math.round((Date.now()-began)/1000)
+        let bytes = 0
+        try {bytes = fs.statSync(logFile).size} catch {}
+        console.log(label+' not listening yet ('+seconds+'s, '+bytes+
+          ' log bytes); startup/compilation may still be active. Log: '+logFile)
+      }
+      await new Promise(r=>setTimeout(r,250))
+    }
+    throw Error(label+' startup exceeded '+Math.round(timeoutMs/1000)+
+      's (process still alive). This may be a slow first compilation, not a Lisp error.\n'+
+      'Last log lines:\n'+tail()+'\nFull log: '+logFile)
   }
   try {
     const wiki = start(process.execPath,[path.join(here,'server.mjs'),site,String(wikiPort),'true'],'wiki',
@@ -110,7 +163,7 @@ async function interactive(sbcl) {
       throw Error(`No bind confirmation from this Wiki process; inspect ${work}/wiki.log`)
     }
     const catalog = start(sbcl,['--noinform','--no-sysinit','--no-userinit','--script',path.join(here,'serve.lisp')],'catalog',
-      {...lispEnvironment(work), HYPERDOC_EDITOR_TEST_CHECKOUT:repo+'/',
+      {...lispEnvironment(faslCache), HYPERDOC_EDITOR_TEST_CHECKOUT:repo+'/',
         HYPERDOC_EDITOR_TEST_CATALOG_PORT:String(catalogPort), HYPERDOC_EDITOR_TEST_STOP:stop,
         HYPERDOC_FEDWIKI_EDITOR_TEST_ROOT:site+'/', HYPERDOC_FEDWIKI_EDITOR_TEST_ORIGIN:wikiOrigin,
         HYPERDOC_FEDWIKI_SITE_ROOT:site+'/'})
