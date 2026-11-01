@@ -1,0 +1,70 @@
+P1 BASELINE LOADED
+METHODS ((:QUALIFIERS NIL :SPECIALIZERS (T T T)))
+===== before =====
+CASE lisp TYPE :CODE CLASS HYPERBOOK/FEDWIKI::STORY-ITEM LANGUAGE "lisp" PRESENT T
+METHODS ((:QUALIFIERS NIL :SPECIALIZERS (T T T)))
+HTML "<div><i><small><span class='inspector-inspect'><span id='inspect-309'>code</span></span></small></i></div><pre style='background-color: #eee;'>(defun square (x) (* x x))</pre>"
+REFS ((:ID "inspect-309" :ID-IN-HTML T :EQ-ITEM T :EQ-RESOLVED T)) ASSETS NIL
+DATA-HTML "<table class='inspector-table'><tr><td>type</td><td><span class='inspector-inspect'><span id='inspect-310'>code</span></span></td></tr><tr><td>id</td><td><span class='inspector-inspect'><span id='inspect-311'>render-probe</span></span></td></tr><tr><td>text</td><td><span class='inspector-inspect'><span id='inspect-312'>(defun square (x) (* x x))</span></span></td></tr><tr><td>language</td><td><span class='inspector-inspect'><span id='inspect-313'>lisp</span></span></td></tr></table>"
+CASE missing TYPE :CODE CLASS HYPERBOOK/FEDWIKI::STORY-ITEM LANGUAGE NIL PRESENT NIL
+METHODS ((:QUALIFIERS NIL :SPECIALIZERS (T T T)))
+HTML "<div><i><small><span class='inspector-inspect'><span id='inspect-314'>code</span></span></small></i></div><pre style='background-color: #eee;'>(defun square (x) (* x x))</pre>"
+REFS ((:ID "inspect-314" :ID-IN-HTML T :EQ-ITEM T :EQ-RESOLVED T)) ASSETS NIL
+DATA-HTML "<table class='inspector-table'><tr><td>type</td><td><span class='inspector-inspect'><span id='inspect-315'>code</span></span></td></tr><tr><td>id</td><td><span class='inspector-inspect'><span id='inspect-316'>render-probe</span></span></td></tr><tr><td>text</td><td><span class='inspector-inspect'><span id='inspect-317'>(defun square (x) (* x x))</span></span></td></tr></table>"
+CASE unknown TYPE :CODE CLASS HYPERBOOK/FEDWIKI::STORY-ITEM LANGUAGE "p1-unknown-language" PRESENT T
+METHODS ((:QUALIFIERS NIL :SPECIALIZERS (T T T)))
+HTML "<div><i><small><span class='inspector-inspect'><span id='inspect-318'>code</span></span></small></i></div><pre style='background-color: #eee;'>(defun square (x) (* x x))</pre>"
+REFS ((:ID "inspect-318" :ID-IN-HTML T :EQ-ITEM T :EQ-RESOLVED T)) ASSETS NIL
+DATA-HTML "<table class='inspector-table'><tr><td>type</td><td><span class='inspector-inspect'><span id='inspect-319'>code</span></span></td></tr><tr><td>id</td><td><span class='inspector-inspect'><span id='inspect-320'>render-probe</span></span></td></tr><tr><td>text</td><td><span class='inspector-inspect'><span id='inspect-321'>(defun square (x) (* x x))</span></span></td></tr><tr><td>language</td><td><span class='inspector-inspect'><span id='inspect-322'>p1-unknown-language</span></span></td></tr></table>"
+CASE escaping TYPE :CODE CLASS HYPERBOOK/FEDWIKI::STORY-ITEM LANGUAGE "lisp" PRESENT T
+METHODS ((:QUALIFIERS NIL :SPECIALIZERS (T T T)))
+HTML "<div><i><small><span class='inspector-inspect'><span id='inspect-323'>code</span></span></small></i></div><pre style='background-color: #eee;'>&lt;script&gt;alert(1)&lt;/script&gt;&amp;&quot;&#039;</pre>"
+REFS ((:ID "inspect-323" :ID-IN-HTML T :EQ-ITEM T :EQ-RESOLVED T)) ASSETS NIL
+DATA-HTML "<table class='inspector-table'><tr><td>type</td><td><span class='inspector-inspect'><span id='inspect-324'>code</span></span></td></tr><tr><td>id</td><td><span class='inspector-inspect'><span id='inspect-325'>render-probe</span></span></td></tr><tr><td>text</td><td><span class='inspector-inspect'><span id='inspect-326'>&lt;script&gt;alert(1)&lt;/script&gt;&amp;&quot;&#039;</span></span></td></tr><tr><td>language</td><td><span class='inspector-inspect'><span id='inspect-327'>lisp</span></span></td></tr></table>"
+WARNING: redefining CLOG:READ-ONLY-P in DEFGENERIC
+WARNING: redefining (COMMON-LISP:SETF CLOG:READ-ONLY-P) in DEFGENERIC
+WARNING:
+   redefining HV:👀PLAYGROUND (#<SB-PCL:SYSTEM-CLASS COMMON-LISP:T>) in DEFMETHOD
+WARNING:
+   redefining ENCODE-TO-STRING (#<SB-PCL:SYSTEM-CLASS COMMON-LISP:T>) in DEFMETHOD
+WARNING:
+   redefining HVS::👀OPERATIONS (#<SB-PCL:SYSTEM-CLASS COMMON-LISP:T>) in DEFMETHOD
+WARNING:
+   redefining HVS:RENDER-TOPLEVEL-CST :AROUND (#<SB-MOP:EQL-SPECIALIZER HYPERDOC:DEFEXAMPLE>
+                                               #<SB-PCL:SYSTEM-CLASS COMMON-LISP:T>
+                                               #<SB-PCL:SYSTEM-CLASS COMMON-LISP:T>
+                                               #<SB-PCL:SYSTEM-CLASS COMMON-LISP:T>) in DEFMETHOD
+P1 EXPLICIT LOAD DONE
+SOURCE hyperbook/fedwiki /tmp/hyperdoc-p1/source/
+SOURCE dreyeck/verified-example /tmp/hyperdoc-p1/source/
+SOURCE html-inspector-views /workspace/tools/nix-portable-data/.nix-portable/nix/store/w26nr9dxpfsyzbviphnaaydmcww2h3y6-source/
+===== after =====
+CASE lisp TYPE :CODE CLASS HYPERBOOK/FEDWIKI::STORY-ITEM LANGUAGE "lisp" PRESENT T
+METHODS ((:QUALIFIERS NIL :SPECIALIZERS ((EQL :CODE) T T))
+         (:QUALIFIERS NIL :SPECIALIZERS (T T T)))
+HTML "<pre>(defun square (x) (* x x))</pre>"
+REFS NIL ASSETS NIL
+DATA-HTML "<table class='inspector-table'><tr><td>type</td><td><span class='inspector-inspect'><span id='inspect-381'>code</span></span></td></tr><tr><td>id</td><td><span class='inspector-inspect'><span id='inspect-382'>render-probe</span></span></td></tr><tr><td>text</td><td><span class='inspector-inspect'><span id='inspect-383'>(defun square (x) (* x x))</span></span></td></tr><tr><td>language</td><td><span class='inspector-inspect'><span id='inspect-384'>lisp</span></span></td></tr></table>"
+CASE missing TYPE :CODE CLASS HYPERBOOK/FEDWIKI::STORY-ITEM LANGUAGE NIL PRESENT NIL
+METHODS ((:QUALIFIERS NIL :SPECIALIZERS ((EQL :CODE) T T))
+         (:QUALIFIERS NIL :SPECIALIZERS (T T T)))
+HTML "<pre>(defun square (x) (* x x))</pre>"
+REFS NIL ASSETS NIL
+DATA-HTML "<table class='inspector-table'><tr><td>type</td><td><span class='inspector-inspect'><span id='inspect-385'>code</span></span></td></tr><tr><td>id</td><td><span class='inspector-inspect'><span id='inspect-386'>render-probe</span></span></td></tr><tr><td>text</td><td><span class='inspector-inspect'><span id='inspect-387'>(defun square (x) (* x x))</span></span></td></tr></table>"
+CASE unknown TYPE :CODE CLASS HYPERBOOK/FEDWIKI::STORY-ITEM LANGUAGE "p1-unknown-language" PRESENT T
+METHODS ((:QUALIFIERS NIL :SPECIALIZERS ((EQL :CODE) T T))
+         (:QUALIFIERS NIL :SPECIALIZERS (T T T)))
+HTML "<pre>(defun square (x) (* x x))</pre>"
+REFS NIL ASSETS NIL
+DATA-HTML "<table class='inspector-table'><tr><td>type</td><td><span class='inspector-inspect'><span id='inspect-388'>code</span></span></td></tr><tr><td>id</td><td><span class='inspector-inspect'><span id='inspect-389'>render-probe</span></span></td></tr><tr><td>text</td><td><span class='inspector-inspect'><span id='inspect-390'>(defun square (x) (* x x))</span></span></td></tr><tr><td>language</td><td><span class='inspector-inspect'><span id='inspect-391'>p1-unknown-language</span></span></td></tr></table>"
+CASE escaping TYPE :CODE CLASS HYPERBOOK/FEDWIKI::STORY-ITEM LANGUAGE "lisp" PRESENT T
+METHODS ((:QUALIFIERS NIL :SPECIALIZERS ((EQL :CODE) T T))
+         (:QUALIFIERS NIL :SPECIALIZERS (T T T)))
+HTML "<pre>&lt;script&gt;alert(1)&lt;/script&gt;&amp;&quot;&#039;</pre>"
+REFS NIL ASSETS NIL
+DATA-HTML "<table class='inspector-table'><tr><td>type</td><td><span class='inspector-inspect'><span id='inspect-392'>code</span></span></td></tr><tr><td>id</td><td><span class='inspector-inspect'><span id='inspect-393'>render-probe</span></span></td></tr><tr><td>text</td><td><span class='inspector-inspect'><span id='inspect-394'>&lt;script&gt;alert(1)&lt;/script&gt;&amp;&quot;&#039;</span></span></td></tr><tr><td>language</td><td><span class='inspector-inspect'><span id='inspect-395'>lisp</span></span></td></tr></table>"
+METHODS ((:QUALIFIERS NIL :SPECIALIZERS ((EQL :CODE) T T))
+         (:QUALIFIERS NIL :SPECIALIZERS (T T T)))
+DEFAULT-METHOD-IDENTICAL-AND-NEXT T
+MARKED-UNKNOWN HTML "<section class='hyperdoc-stored-example'><p>NOT-APPROVED; execution disabled</p></section>" REFS NIL
+P1-PASS No server started. No example text evaluated.

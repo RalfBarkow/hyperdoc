@@ -1,0 +1,224 @@
+This is SBCL 2.4.10, an implementation of ANSI Common Lisp.
+More information about SBCL is available at <http://www.sbcl.org/>.
+
+SBCL is free software, provided as is, with absolutely no warranty.
+It is mostly in the public domain; some portions are provided under
+BSD-style licenses.  See the CREDITS and COPYING files in the
+distribution for more information.
+P1 RUNTIME SBCL 2.4.10
+WARNING: System definition file #P"/workspace/tools/nix-portable-data/.nix-portable/nix/store/fdrq5ji4dvm7jj0wzfvxcyr0rwiq2c24-sbcl-cl-who-20241012-git/cl-who.asd" contains definition for system "cl-who-test". Please only define "cl-who" and secondary systems with a name starting with "cl-who/" (e.g. "cl-who/test") in that file.
+WARNING: System definition file #P"/workspace/tools/nix-portable-data/.nix-portable/nix/store/rn29yxasws4x3wvcf6d0738zxbcrvmin-sbcl-parse-float-20200218-git/parse-float.asd" contains definition for system "parse-float-tests". Please only define "parse-float" and secondary systems with a name starting with "parse-float/" (e.g. "parse-float/test") in that file.
+WARNING: System definition file #P"/workspace/tools/nix-portable-data/.nix-portable/nix/store/bzssaly51znz21jychrjrjg22cbimv2h-sbcl-cl-template-20130615-git/cl-template.asd" contains definition for system "cl-template-tests". Please only define "cl-template" and secondary systems with a name starting with "cl-template/" (e.g. "cl-template/test") in that file.
+;;; Computing Hangul syllable namesSTYLE-WARNING:
+   The new FTYPE proclamation for FSET::VECTOR-SET-BINARY-SEARCH-LO
+     (FUNCTION (SIMPLE-VECTOR T) FIXNUM)
+   does not match the derived return type
+     (FUNCTION (SIMPLE-VECTOR T)
+      (VALUES (INTEGER -4611686018427387904 4611686018427387904) &OPTIONAL))
+STYLE-WARNING:
+   The new FTYPE proclamation for FSET::WB-BAG-TREE-TOTAL-COUNT
+     (FUNCTION (FSET::WB-BAG-TREE) INTEGER)
+   does not match the derived return type
+     (FUNCTION ((OR LIST FSET::WB-BAG-TREE-NODE)) *)
+STYLE-WARNING:
+   The new FTYPE proclamation for FSET::HASH-VALUE-FIXNUM
+     (FUNCTION (T) FIXNUM)
+   does not match the derived return type
+     (FUNCTION (T) (VALUES INTEGER &OPTIONAL))
+STYLE-WARNING:
+   The new FTYPE proclamation for FSET::CH-SET-NODE-ENTRY-MASK
+     (FUNCTION (T) FIXNUM)
+   does not match the derived return type
+     (FUNCTION (SIMPLE-VECTOR) (VALUES T &OPTIONAL))
+STYLE-WARNING:
+   The new FTYPE proclamation for FSET::CH-SET-NODE-SUBNODE-MASK
+     (FUNCTION (T) FIXNUM)
+   does not match the derived return type
+     (FUNCTION (SIMPLE-VECTOR) (VALUES T &OPTIONAL))
+STYLE-WARNING:
+   The new FTYPE proclamation for FSET::CH-SET-NODE-SIZE
+     (FUNCTION (T) FIXNUM)
+   does not match the derived return type
+     (FUNCTION (SIMPLE-VECTOR) (VALUES T &OPTIONAL))
+STYLE-WARNING:
+   The new FTYPE proclamation for FSET::CH-SET-NODE-HASH-VALUE
+     (FUNCTION (T) FIXNUM)
+   does not match the derived return type
+     (FUNCTION (SIMPLE-VECTOR) (VALUES T &OPTIONAL))
+STYLE-WARNING:
+   The new FTYPE proclamation for FSET::CH-MAP-NODE-ENTRY-MASK
+     (FUNCTION (T) FIXNUM)
+   does not match the derived return type
+     (FUNCTION (SIMPLE-VECTOR) (VALUES T &OPTIONAL))
+STYLE-WARNING:
+   The new FTYPE proclamation for FSET::CH-MAP-NODE-SUBNODE-MASK
+     (FUNCTION (T) FIXNUM)
+   does not match the derived return type
+     (FUNCTION (SIMPLE-VECTOR) (VALUES T &OPTIONAL))
+STYLE-WARNING:
+   The new FTYPE proclamation for FSET::CH-MAP-NODE-SIZE
+     (FUNCTION (T) FIXNUM)
+   does not match the derived return type
+     (FUNCTION (SIMPLE-VECTOR) (VALUES T &OPTIONAL))
+STYLE-WARNING:
+   The new FTYPE proclamation for FSET::CH-MAP-NODE-HASH-VALUE
+     (FUNCTION (T) FIXNUM)
+   does not match the derived return type
+     (FUNCTION (SIMPLE-VECTOR) (VALUES T &OPTIONAL))
+STYLE-WARNING:
+   Generic function FSET:ITERATOR clobbers an earlier FTYPE proclamation
+   (FUNCTION (T &KEY &ALLOW-OTHER-KEYS) (VALUES FUNCTION &REST T)) for the same
+   name with (FUNCTION (T &KEY &ALLOW-OTHER-KEYS) *).
+STYLE-WARNING:
+   The new FTYPE proclamation for SWANK/BACKEND:GETPID
+     (FUNCTION NIL (VALUES (SIGNED-BYTE 32) &OPTIONAL))
+   does not match the derived return type
+     (FUNCTION NIL *)
+WARNING:
+   redefining EMACS-INSPECT (#<SB-PCL:SYSTEM-CLASS COMMON-LISP:T>) in DEFMETHOD
+WARNING:
+   redefining 👀PRINT-STRING (#<SB-PCL:SYSTEM-CLASS COMMON-LISP:T>) in DEFMETHOD
+WARNING:
+   The new FTYPE proclamation for CLSS:MATCH-SELECTOR
+     (FUNCTION (LIST (OR PLUMP-DOM:NODE VECTOR LIST) KEYWORD)
+      (VALUES (AND (VECTOR PLUMP-DOM:NODE) (NOT SIMPLE-ARRAY))))
+   does not match the old FTYPE proclamation
+     (FUNCTION (LIST (OR LIST PLUMP-DOM:NODE VECTOR) &OPTIONAL KEYWORD)
+      (VALUES (AND (VECTOR PLUMP-DOM:NODE) (NOT SIMPLE-ARRAY)) &REST T))
+WARNING: redefining CL-ISAAC:RAND32 in DEFUN
+WARNING: redefining CL-ISAAC:RAND64 in DEFUN
+WARNING:
+   bare references to struct types are deprecated. Please use (:POINTER
+                                                               (:STRUCT
+                                                                SQLITE3)) or (:STRUCT
+                                                                              SQLITE3) instead.
+WARNING:
+   bare references to struct types are deprecated. Please use (:POINTER
+                                                               (:STRUCT
+                                                                SQLITE3-STMT)) or (:STRUCT
+                                                                                   SQLITE3-STMT) instead.
+WARNING: redefining DEFTYPE type to be a class: DBI.ERROR:<DBI-ERROR>
+WARNING: redefining DEFTYPE type to be a class: DBI.ERROR:<DBI-WARNING>
+WARNING: redefining DEFTYPE type to be a class: DBI.ERROR:<DBI-INTERFACE-ERROR>
+WARNING:
+   redefining DEFTYPE type to be a class: DBI.ERROR:<DBI-UNIMPLEMENTED-ERROR>
+WARNING: redefining DEFTYPE type to be a class: DBI.ERROR:<DBI-DATABASE-ERROR>
+WARNING: redefining DEFTYPE type to be a class: DBI.ERROR:<DBI-DATA-ERROR>
+WARNING:
+   redefining DEFTYPE type to be a class: DBI.ERROR:<DBI-OPERATIONAL-ERROR>
+WARNING: redefining DEFTYPE type to be a class: DBI.ERROR:<DBI-INTEGRITY-ERROR>
+WARNING: redefining DEFTYPE type to be a class: DBI.ERROR:<DBI-INTERNAL-ERROR>
+WARNING:
+   redefining DEFTYPE type to be a class: DBI.ERROR:<DBI-PROGRAMMING-ERROR>
+WARNING:
+   redefining DEFTYPE type to be a class: DBI.ERROR:<DBI-NOTSUPPORTED-ERROR>
+WARNING:
+   redefining DEFTYPE type to be a class: DBI.ERROR:<DBI-ALREADY-COMMITED-ERROR>
+WARNING:
+   redefining DEFTYPE type to be a class: DBI.ERROR:<DBI-ALREADY-ROLLED-BACK-ERROR>
+WARNING: redefining DEFTYPE type to be a class: DBI.DRIVER:<DBI-DRIVER>
+WARNING: redefining DEFTYPE type to be a class: DBI.DRIVER:<DBI-CONNECTION>
+WARNING: redefining DEFTYPE type to be a class: DBI.DRIVER:<DBI-QUERY>
+WARNING: redefining IRONCLAD:BLOCK-LENGTH in DEFGENERIC
+WARNING: redefining CLOG:PARENT in DEFGENERIC
+WARNING: redefining CLOG::CONNECTION-ID in DEFGENERIC
+WARNING: redefining CLOG:HTML-ID in DEFGENERIC
+WARNING: redefining CLOG:WINDOW in DEFGENERIC
+WARNING: redefining CLOG:HTML-DOCUMENT in DEFGENERIC
+WARNING: redefining CLOG:LOCATION in DEFGENERIC
+WARNING: redefining CLOG:NAVIGATOR in DEFGENERIC
+WARNING: redefining CLOG:DOCUMENT-ELEMENT in DEFGENERIC
+WARNING: redefining CLOG:HEAD-ELEMENT in DEFGENERIC
+WARNING: redefining CLOG:DISABLEDP in DEFGENERIC
+WARNING: redefining (COMMON-LISP:SETF CLOG:DISABLEDP) in DEFGENERIC
+WARNING: redefining CLOG:VALUE in DEFGENERIC
+WARNING: redefining (COMMON-LISP:SETF CLOG:VALUE) in DEFGENERIC
+WARNING: redefining CLOG:MINIMUM in DEFGENERIC
+WARNING: redefining (COMMON-LISP:SETF CLOG:MINIMUM) in DEFGENERIC
+WARNING: redefining CLOG:MAXIMUM in DEFGENERIC
+WARNING: redefining (COMMON-LISP:SETF CLOG:MAXIMUM) in DEFGENERIC
+WARNING: redefining CLOG:URL-SRC in DEFGENERIC
+WARNING: redefining (COMMON-LISP:SETF CLOG:URL-SRC) in DEFGENERIC
+WARNING: redefining CLOG:ALT-TEXT in DEFGENERIC
+WARNING: redefining (COMMON-LISP:SETF CLOG:ALT-TEXT) in DEFGENERIC
+WARNING: redefining CLOG:CENTER-PANEL in DEFGENERIC
+WARNING: redefining CLOG:TOP-PANEL in DEFGENERIC
+WARNING: redefining CLOG:LEFT-PANEL in DEFGENERIC
+WARNING: redefining CLOG:BOTTOM-PANEL in DEFGENERIC
+WARNING: redefining CLOG:PANEL-BOX in DEFGENERIC
+WARNING: redefining CLOG:TREE-ROOT in DEFGENERIC
+WARNING: redefining CLOG:INDENT-LEVEL in DEFGENERIC
+WARNING: redefining CLOG:TOGGLE-STATE in DEFGENERIC
+WARNING: redefining CLOG:TREE-ITEM in DEFGENERIC
+WARNING: redefining CLOG:DATABASE-CONNECTION in DEFGENERIC
+
+P1 BASELINE LOADED
+METHODS ((:QUALIFIERS NIL :SPECIALIZERS (T T T)))
+===== before =====
+CASE lisp TYPE :CODE CLASS HYPERBOOK/FEDWIKI::STORY-ITEM LANGUAGE "lisp" PRESENT T
+METHODS ((:QUALIFIERS NIL :SPECIALIZERS (T T T)))
+HTML "<div><i><small><span class='inspector-inspect'><span id='inspect-309'>code</span></span></small></i></div><pre style='background-color: #eee;'>(defun square (x) (* x x))</pre>"
+REFS ((:ID "inspect-309" :ID-IN-HTML T :EQ-ITEM T :EQ-RESOLVED T)) ASSETS NIL
+DATA-HTML "<table class='inspector-table'><tr><td>type</td><td><span class='inspector-inspect'><span id='inspect-310'>code</span></span></td></tr><tr><td>id</td><td><span class='inspector-inspect'><span id='inspect-311'>render-probe</span></span></td></tr><tr><td>text</td><td><span class='inspector-inspect'><span id='inspect-312'>(defun square (x) (* x x))</span></span></td></tr><tr><td>language</td><td><span class='inspector-inspect'><span id='inspect-313'>lisp</span></span></td></tr></table>"
+CASE missing TYPE :CODE CLASS HYPERBOOK/FEDWIKI::STORY-ITEM LANGUAGE NIL PRESENT NIL
+METHODS ((:QUALIFIERS NIL :SPECIALIZERS (T T T)))
+HTML "<div><i><small><span class='inspector-inspect'><span id='inspect-314'>code</span></span></small></i></div><pre style='background-color: #eee;'>(defun square (x) (* x x))</pre>"
+REFS ((:ID "inspect-314" :ID-IN-HTML T :EQ-ITEM T :EQ-RESOLVED T)) ASSETS NIL
+DATA-HTML "<table class='inspector-table'><tr><td>type</td><td><span class='inspector-inspect'><span id='inspect-315'>code</span></span></td></tr><tr><td>id</td><td><span class='inspector-inspect'><span id='inspect-316'>render-probe</span></span></td></tr><tr><td>text</td><td><span class='inspector-inspect'><span id='inspect-317'>(defun square (x) (* x x))</span></span></td></tr></table>"
+CASE unknown TYPE :CODE CLASS HYPERBOOK/FEDWIKI::STORY-ITEM LANGUAGE "p1-unknown-language" PRESENT T
+METHODS ((:QUALIFIERS NIL :SPECIALIZERS (T T T)))
+HTML "<div><i><small><span class='inspector-inspect'><span id='inspect-318'>code</span></span></small></i></div><pre style='background-color: #eee;'>(defun square (x) (* x x))</pre>"
+REFS ((:ID "inspect-318" :ID-IN-HTML T :EQ-ITEM T :EQ-RESOLVED T)) ASSETS NIL
+DATA-HTML "<table class='inspector-table'><tr><td>type</td><td><span class='inspector-inspect'><span id='inspect-319'>code</span></span></td></tr><tr><td>id</td><td><span class='inspector-inspect'><span id='inspect-320'>render-probe</span></span></td></tr><tr><td>text</td><td><span class='inspector-inspect'><span id='inspect-321'>(defun square (x) (* x x))</span></span></td></tr><tr><td>language</td><td><span class='inspector-inspect'><span id='inspect-322'>p1-unknown-language</span></span></td></tr></table>"
+CASE escaping TYPE :CODE CLASS HYPERBOOK/FEDWIKI::STORY-ITEM LANGUAGE "lisp" PRESENT T
+METHODS ((:QUALIFIERS NIL :SPECIALIZERS (T T T)))
+HTML "<div><i><small><span class='inspector-inspect'><span id='inspect-323'>code</span></span></small></i></div><pre style='background-color: #eee;'>&lt;script&gt;alert(1)&lt;/script&gt;&amp;&quot;&#039;</pre>"
+REFS ((:ID "inspect-323" :ID-IN-HTML T :EQ-ITEM T :EQ-RESOLVED T)) ASSETS NIL
+DATA-HTML "<table class='inspector-table'><tr><td>type</td><td><span class='inspector-inspect'><span id='inspect-324'>code</span></span></td></tr><tr><td>id</td><td><span class='inspector-inspect'><span id='inspect-325'>render-probe</span></span></td></tr><tr><td>text</td><td><span class='inspector-inspect'><span id='inspect-326'>&lt;script&gt;alert(1)&lt;/script&gt;&amp;&quot;&#039;</span></span></td></tr><tr><td>language</td><td><span class='inspector-inspect'><span id='inspect-327'>lisp</span></span></td></tr></table>"
+WARNING: redefining CLOG:READ-ONLY-P in DEFGENERIC
+WARNING: redefining (COMMON-LISP:SETF CLOG:READ-ONLY-P) in DEFGENERIC
+WARNING:
+   redefining HV:👀PLAYGROUND (#<SB-PCL:SYSTEM-CLASS COMMON-LISP:T>) in DEFMETHOD
+WARNING:
+   redefining ENCODE-TO-STRING (#<SB-PCL:SYSTEM-CLASS COMMON-LISP:T>) in DEFMETHOD
+WARNING:
+   redefining HVS::👀OPERATIONS (#<SB-PCL:SYSTEM-CLASS COMMON-LISP:T>) in DEFMETHOD
+WARNING:
+   redefining HVS:RENDER-TOPLEVEL-CST :AROUND (#<SB-MOP:EQL-SPECIALIZER HYPERDOC:DEFEXAMPLE>
+                                               #<SB-PCL:SYSTEM-CLASS COMMON-LISP:T>
+                                               #<SB-PCL:SYSTEM-CLASS COMMON-LISP:T>
+                                               #<SB-PCL:SYSTEM-CLASS COMMON-LISP:T>) in DEFMETHOD
+P1 EXPLICIT LOAD DONE
+SOURCE hyperbook/fedwiki /tmp/hyperdoc-p1/source/
+SOURCE dreyeck/verified-example /tmp/hyperdoc-p1/source/
+SOURCE html-inspector-views /workspace/tools/nix-portable-data/.nix-portable/nix/store/w26nr9dxpfsyzbviphnaaydmcww2h3y6-source/
+===== after =====
+CASE lisp TYPE :CODE CLASS HYPERBOOK/FEDWIKI::STORY-ITEM LANGUAGE "lisp" PRESENT T
+METHODS ((:QUALIFIERS NIL :SPECIALIZERS ((EQL :CODE) T T))
+         (:QUALIFIERS NIL :SPECIALIZERS (T T T)))
+HTML "<pre>(defun square (x) (* x x))</pre>"
+REFS NIL ASSETS NIL
+DATA-HTML "<table class='inspector-table'><tr><td>type</td><td><span class='inspector-inspect'><span id='inspect-381'>code</span></span></td></tr><tr><td>id</td><td><span class='inspector-inspect'><span id='inspect-382'>render-probe</span></span></td></tr><tr><td>text</td><td><span class='inspector-inspect'><span id='inspect-383'>(defun square (x) (* x x))</span></span></td></tr><tr><td>language</td><td><span class='inspector-inspect'><span id='inspect-384'>lisp</span></span></td></tr></table>"
+CASE missing TYPE :CODE CLASS HYPERBOOK/FEDWIKI::STORY-ITEM LANGUAGE NIL PRESENT NIL
+METHODS ((:QUALIFIERS NIL :SPECIALIZERS ((EQL :CODE) T T))
+         (:QUALIFIERS NIL :SPECIALIZERS (T T T)))
+HTML "<pre>(defun square (x) (* x x))</pre>"
+REFS NIL ASSETS NIL
+DATA-HTML "<table class='inspector-table'><tr><td>type</td><td><span class='inspector-inspect'><span id='inspect-385'>code</span></span></td></tr><tr><td>id</td><td><span class='inspector-inspect'><span id='inspect-386'>render-probe</span></span></td></tr><tr><td>text</td><td><span class='inspector-inspect'><span id='inspect-387'>(defun square (x) (* x x))</span></span></td></tr></table>"
+CASE unknown TYPE :CODE CLASS HYPERBOOK/FEDWIKI::STORY-ITEM LANGUAGE "p1-unknown-language" PRESENT T
+METHODS ((:QUALIFIERS NIL :SPECIALIZERS ((EQL :CODE) T T))
+         (:QUALIFIERS NIL :SPECIALIZERS (T T T)))
+HTML "<pre>(defun square (x) (* x x))</pre>"
+REFS NIL ASSETS NIL
+DATA-HTML "<table class='inspector-table'><tr><td>type</td><td><span class='inspector-inspect'><span id='inspect-388'>code</span></span></td></tr><tr><td>id</td><td><span class='inspector-inspect'><span id='inspect-389'>render-probe</span></span></td></tr><tr><td>text</td><td><span class='inspector-inspect'><span id='inspect-390'>(defun square (x) (* x x))</span></span></td></tr><tr><td>language</td><td><span class='inspector-inspect'><span id='inspect-391'>p1-unknown-language</span></span></td></tr></table>"
+CASE escaping TYPE :CODE CLASS HYPERBOOK/FEDWIKI::STORY-ITEM LANGUAGE "lisp" PRESENT T
+METHODS ((:QUALIFIERS NIL :SPECIALIZERS ((EQL :CODE) T T))
+         (:QUALIFIERS NIL :SPECIALIZERS (T T T)))
+HTML "<pre>&lt;script&gt;alert(1)&lt;/script&gt;&amp;&quot;&#039;</pre>"
+REFS NIL ASSETS NIL
+DATA-HTML "<table class='inspector-table'><tr><td>type</td><td><span class='inspector-inspect'><span id='inspect-392'>code</span></span></td></tr><tr><td>id</td><td><span class='inspector-inspect'><span id='inspect-393'>render-probe</span></span></td></tr><tr><td>text</td><td><span class='inspector-inspect'><span id='inspect-394'>&lt;script&gt;alert(1)&lt;/script&gt;&amp;&quot;&#039;</span></span></td></tr><tr><td>language</td><td><span class='inspector-inspect'><span id='inspect-395'>lisp</span></span></td></tr></table>"
+METHODS ((:QUALIFIERS NIL :SPECIALIZERS ((EQL :CODE) T T))
+         (:QUALIFIERS NIL :SPECIALIZERS (T T T)))
+DEFAULT-METHOD-IDENTICAL-AND-NEXT T
+MARKED-UNKNOWN HTML "<section class='hyperdoc-stored-example'><p>NOT-APPROVED; execution disabled</p></section>" REFS NIL
+P1-PASS No server started. No example text evaluated.

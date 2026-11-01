@@ -1,0 +1,151 @@
+{
+  "action": "Preservation of existing P1 artifacts; no P1 execution",
+  "archive_date": "2026-11-01",
+  "source_directory": "/tmp/hyperdoc-p1",
+  "repository": "RalfBarkow/hyperdoc",
+  "repository_head_at_preservation": "573fe37611a61d984260ebf43c797f7534211bdd",
+  "tested_code_revision": "9b57bd4bb87d92fbf3061b91a42a6f539e18cdb1",
+  "review_artifacts_commit": "4b56c1d80a6d061e1cc1da9321e132032c019dd8",
+  "original_manifest_entries_checked": 10,
+  "original_manifest_mismatches": 0,
+  "missing_required_files": [],
+  "existing_verification_report_consistency": {
+    "blobs": 1510,
+    "mismatches": 0,
+    "matches_archived_source_tree": true
+  },
+  "log_checks": {
+    "both_logs_have_sbcl_2_4_10_and_final_p1_pass": true,
+    "final_html_matches_all_eight_saved_html_files": true,
+    "final_reference_identity_and_method_identity_evidence_present": true,
+    "recorded_exit_code": 0
+  },
+  "checks_performed_now": "File presence, hashes, JSON consistency, existing log markers, saved HTML equality, byte-identical copies; no Lisp process and no source-verification script executed",
+  "not_archived": [
+    "source/ (temporary reconstructed source tree)",
+    "fasl/ (compiled cache)",
+    "review/ (review context copies)"
+  ],
+  "artifacts": [
+    {
+      "path": "original/report.md",
+      "bytes": 5915,
+      "sha256": "d80a5bb829e16001cb0dfa9bad96cb7a8198cba2bd94cc3c9a14ad07208c5664",
+      "identical_to_existing_artifact": true
+    },
+    {
+      "path": "original/probe.lisp",
+      "bytes": 4383,
+      "sha256": "2d4329e4b9119e0da3d42e0f02f633f7aa83a15ca94c247669c10c7f4157f8e0",
+      "identical_to_existing_artifact": true
+    },
+    {
+      "path": "original/run.py",
+      "bytes": 651,
+      "sha256": "72b31f21841c92bdc67555fbf10a2495fa8c3f4e5a2a2aee35d78ef59d860642",
+      "identical_to_existing_artifact": true
+    },
+    {
+      "path": "original/final-result.log",
+      "bytes": 16510,
+      "sha256": "009981044204a4d7c3163a3d5ec391bb755b824b5acafe29083e1479c0c35e24",
+      "identical_to_existing_artifact": true
+    },
+    {
+      "path": "original/result.log",
+      "bytes": 2555561,
+      "sha256": "4e7748b7bee35798d886aa7b0f08c662d16e625affad3e5536e555c47648981b",
+      "identical_to_existing_artifact": true
+    },
+    {
+      "path": "original/source-verification.json",
+      "bytes": 370768,
+      "sha256": "bc144c10c176f01878dd52e1d4f6d677a2c233977bbe6d6651145cb54a10befa",
+      "identical_to_existing_artifact": true
+    },
+    {
+      "path": "original/source-tree.json",
+      "bytes": 447510,
+      "sha256": "805ea7c27fed28cc1f1553505f1b9d25649ac917159c60d1845061fc44c7db8d",
+      "identical_to_existing_artifact": true
+    },
+    {
+      "path": "original/verify-source.py",
+      "bytes": 816,
+      "sha256": "e6549e900d5647f6c3bccef7d472024651e4f82326e6a337d3f7b12e452c4382",
+      "identical_to_existing_artifact": true
+    },
+    {
+      "path": "original/local-environment.json",
+      "bytes": 18413,
+      "sha256": "54bc7a891df4b08062a818ac126944a12118c13b0c96d1cc33385faa1ebb5ab7",
+      "identical_to_existing_artifact": true
+    },
+    {
+      "path": "original/exit-code.txt",
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "identical_to_existing_artifact": true
+    },
+    {
+      "path": "original/evidence.txt",
+      "bytes": 8031,
+      "sha256": "c7532fd78ea95807f887b89732c07537069b530a9472373f418f77fec7696e7d",
+      "identical_to_existing_artifact": true
+    },
+    {
+      "path": "original/artifact-sha256.json",
+      "bytes": 881,
+      "sha256": "ebea26eb8ddb7705c0ffeeb785a3b6457e7d3bf87537203c6e439a1959ae44e9",
+      "identical_to_existing_artifact": true
+    },
+    {
+      "path": "original/before-lisp.html",
+      "bytes": 175,
+      "sha256": "80878431a10d2be82b55ae0c8905042013c206ef5783b724e3ff07830a386a4b",
+      "identical_to_existing_artifact": true
+    },
+    {
+      "path": "original/before-missing.html",
+      "bytes": 175,
+      "sha256": "08170020cf188329bca9b4abcc332d186e272fd01cd1f067b2e3cf601bc8f014",
+      "identical_to_existing_artifact": true
+    },
+    {
+      "path": "original/before-unknown.html",
+      "bytes": 175,
+      "sha256": "8f7d6958cf841857fe5f98ad7c97f93516672654b39245dc39702b93d8ecc1dd",
+      "identical_to_existing_artifact": true
+    },
+    {
+      "path": "original/before-escaping.html",
+      "bytes": 203,
+      "sha256": "87c66ff6afeb516120adf02f44404593eba91923a43dc565b6e12dda0c7c0cca",
+      "identical_to_existing_artifact": true
+    },
+    {
+      "path": "original/after-lisp.html",
+      "bytes": 37,
+      "sha256": "50fc565a4a1efbcfc276303ccf51861c32a85c8aeec895968f49e5857cf4771c",
+      "identical_to_existing_artifact": true
+    },
+    {
+      "path": "original/after-missing.html",
+      "bytes": 37,
+      "sha256": "50fc565a4a1efbcfc276303ccf51861c32a85c8aeec895968f49e5857cf4771c",
+      "identical_to_existing_artifact": true
+    },
+    {
+      "path": "original/after-unknown.html",
+      "bytes": 37,
+      "sha256": "50fc565a4a1efbcfc276303ccf51861c32a85c8aeec895968f49e5857cf4771c",
+      "identical_to_existing_artifact": true
+    },
+    {
+      "path": "original/after-escaping.html",
+      "bytes": 65,
+      "sha256": "1a0b0a8ea3f6b7fb155537680e859c976e2d5fce4a86dfd213a5f9fcbf9d6bd3",
+      "identical_to_existing_artifact": true
+    }
+  ]
+}
