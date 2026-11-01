@@ -1,0 +1,214 @@
+// One end-to-end case. No browser-side substitute for a plugin, editor or writer.
+import assert from 'node:assert/strict'
+import fs from 'node:fs'
+import path from 'node:path'
+import net from 'node:net'
+import {spawn} from 'node:child_process'
+import {fileURLToPath} from 'node:url'
+import {createHash} from 'node:crypto'
+import {chromium} from 'playwright-core'
+import {installBoundClicks} from '../../scripts/lib/inspector-ready.mjs'
+
+const here = path.dirname(fileURLToPath(import.meta.url))
+const repo = path.resolve(here, '../..')
+const [lisp, chrome, destination] = process.argv.slice(2)
+assert(destination, 'usage: node run.mjs LISP_WRAPPER CHROMIUM OUTPUT_OUTSIDE_CHECKOUT')
+const output = path.resolve(destination)
+assert(!output.startsWith(repo + path.sep) && output !== repo)
+fs.mkdirSync(output, {recursive:true})
+const work = fs.mkdtempSync(path.join(output, 'run-'))
+const site = path.join(work, 'site'), pages = path.join(site, 'pages')
+fs.mkdirSync(pages, {recursive:true})
+const slug = 'original-editor-test', paragraphId = '1111111111111111', codeId = '2222222222222222'
+const paragraph = {id:paragraphId, type:'paragraph', text:'An isolated paragraph; this item stays unchanged.'}
+const code = {id:codeId, type:'code', text:'(defun square (x) (* x x))', language:'lisp'}
+const initial = {title:'Original Editor Test', story:[paragraph, code],
+  journal:[{type:'create', id:'3333333333333333', item:{title:'Original Editor Test'}, date:1700000000000},
+    {type:'add', id:paragraphId, item:paragraph, date:1700000000001},
+    {type:'add', id:codeId, item:code, after:paragraphId, date:1700000000002}]}
+const file = path.join(pages, slug)
+fs.writeFileSync(file, JSON.stringify(initial, null, 2) + '\n')
+const read = () => JSON.parse(fs.readFileSync(file, 'utf8'))
+const sha = () => createHash('sha256').update(fs.readFileSync(file)).digest('hex')
+const beforeSha = sha()
+const report = {passed:false, sourceBase:'2b864774ee6a1e9e4187e64d863f8ea39e53430f',
+  work, file, beforeSha, versions:{}, steps:[], browserErrors:[], externalRequests:[]}
+for (const name of ['wiki','wiki-client','wiki-server','wiki-plugin-code','wiki-plugin-paragraph']) {
+  report.versions[name] = JSON.parse(fs.readFileSync(path.join(here,'node_modules',name,'package.json'))).version
+}
+const children = [], contexts = []
+const stopFile = path.join(work,'stop-catalog')
+let browser
+const freePort = async () => {
+  const listener = net.createServer()
+  await new Promise(r=>listener.listen(0,'127.0.0.1',r))
+  const port = listener.address().port
+  await new Promise(r=>listener.close(r))
+  return port
+}
+const start = (command, args, label, env={}) => {
+  const fd = fs.openSync(path.join(work,label+'.log'),'w')
+  const child = spawn(command,args,{cwd:work,stdio:['ignore',fd,fd],
+    env:{...process.env, HOME:path.join(work,'home'), ...env}})
+  fs.closeSync(fd); children.push(child)
+  child.on('error', e => { report.processError = String(e) })
+  return child
+}
+const waitHTTP = async (origin, child, label) => {
+  for (let i=0;i<1200;i++) {
+    if (child.exitCode !== null || report.processError) throw Error(report.processError || fs.readFileSync(path.join(work,label+'.log'),'utf8').slice(-5000))
+    try {if ((await fetch(origin)).ok) return} catch {}
+    await new Promise(r=>setTimeout(r,100))
+  }
+  throw Error(label+' did not become ready; see '+work)
+}
+try {
+  fs.mkdirSync(path.join(work,'home'))
+  // Negative control: the very same original server refuses writes without its legacy grant.
+  const deniedPort = await freePort(), deniedOrigin = `http://127.0.0.1:${deniedPort}`
+  const denied = start(process.execPath,[path.join(here,'server.mjs'),site,String(deniedPort),'false'],'denied')
+  await waitHTTP(deniedOrigin,denied,'denied')
+  const deniedResponse = await fetch(`${deniedOrigin}/page/${slug}/action`,{
+    method:'PUT',headers:{'Content-Type':'application/x-www-form-urlencoded'},
+    body:new URLSearchParams({action:JSON.stringify({type:'edit',id:codeId,item:{...code,text:'must not persist'},date:Date.now()})})})
+  assert.equal(deniedResponse.status,403); assert.equal(sha(),beforeSha)
+  denied.kill('SIGTERM'); await new Promise(r=>denied.once('exit',r))
+  report.steps.push('Original security denies PUT without grant: 403 and unchanged page bytes')
+
+  const wikiPort = await freePort(), catalogPort = await freePort()
+  const wikiOrigin = `http://127.0.0.1:${wikiPort}`, catalogOrigin = `http://127.0.0.1:${catalogPort}`
+  Object.assign(report,{wikiOrigin,catalogOrigin,authorization:'original default security, unclaimed isolated loopback site, security_legacy=true'})
+  const wiki = start(process.execPath,[path.join(here,'server.mjs'),site,String(wikiPort),'true'],'wiki')
+  await waitHTTP(wikiOrigin,wiki,'wiki')
+  const opts = fs.readFileSync(path.join(work,'wiki.log'),'utf8').split('\n').find(l=>l.startsWith('{"db":'))
+  assert.equal(JSON.parse(opts).db,pages)
+  const catalog = start(lisp,['--noinform','--no-sysinit','--no-userinit','--script',path.join(here,'serve.lisp')],'catalog',{
+    HYPERDOC_EDITOR_TEST_CHECKOUT:repo+'/', HYPERDOC_EDITOR_TEST_CATALOG_PORT:String(catalogPort),
+    HYPERDOC_EDITOR_TEST_STOP:stopFile,
+    HYPERDOC_FEDWIKI_EDITOR_TEST_ROOT:site+'/', HYPERDOC_FEDWIKI_EDITOR_TEST_ORIGIN:wikiOrigin,
+    HYPERDOC_FEDWIKI_SITE_ROOT:site+'/'})
+  await waitHTTP(catalogOrigin,catalog,'catalog')
+  browser = await chromium.launch({headless:true,executablePath:chrome,args:['--no-sandbox','--no-proxy-server']})
+  report.browser = browser.version()
+  const context = await browser.newContext({serviceWorkers:'block',viewport:{width:1400,height:1000}})
+  contexts.push(context)
+  const originalAssets = new Map()
+  context.on('response', async response => {
+    const pathname = new URL(response.url()).pathname
+    const source = {'/client.js':'wiki-client/client/client.js','/plugins/code/code.js':'wiki-plugin-code/client/code.js'}[pathname]
+    if (source && response.ok()) {
+      const body = await response.body()
+      originalAssets.set(pathname, body.equals(fs.readFileSync(path.join(here,'node_modules',source))))
+    }
+  })
+  await context.route('**/*',route=>{
+    const url = new URL(route.request().url())
+    if ([wikiOrigin,catalogOrigin].includes(url.origin)) return route.continue()
+    report.externalRequests.push(url.href); return route.abort()
+  })
+  // Observe browser persistence without replacing the client's storage decisions.
+  await context.addInitScript(() => {
+    window.__testStorageWrites = []
+    const original = Storage.prototype.setItem
+    Storage.prototype.setItem = function(key,value) {
+      if (this === localStorage) window.__testStorageWrites.push(key)
+      return original.call(this,key,value)
+    }
+  })
+  const hyperdoc = await context.newPage()
+  installBoundClicks(hyperdoc)
+  hyperdoc.setDefaultTimeout(45000)
+  hyperdoc.on('pageerror',e=>report.browserErrors.push('HyperDoc: '+e.message))
+  await hyperdoc.goto(catalogOrigin)
+  await hyperdoc.getByText('Original Wiki Editor Test',{exact:true}).and(hyperdoc.locator(':visible')).first().click()
+  const last = () => hyperdoc.locator('.inspector-pane').last()
+  await last().getByRole('button',{name:'Text pages',exact:true}).click()
+  await hyperdoc.locator('tr.inspector-inspect:visible').filter({hasText:'Editing One Isolated Wiki Page'}).last().click()
+  await last().getByRole('heading',{name:'Editing One Isolated Wiki Page',exact:true}).waitFor()
+  const demo = hyperdoc.locator('.inspector-pane').nth((await hyperdoc.locator('.inspector-pane').count())-1)
+  assert.equal(await demo.locator('pre[style*="#eee"]').innerText(),code.text)
+  const paneCount = await hyperdoc.locator('.inspector-pane').count()
+  await demo.locator('.inspector-inspect').getByText('code',{exact:true}).click()
+  await hyperdoc.waitForFunction(n=>document.querySelectorAll('.inspector-pane').length>n,paneCount)
+  await last().getByRole('button',{name:'Data',exact:true}).waitFor()
+  await last().getByText(codeId,{exact:true}).waitFor()
+  assert((await last().innerText()).includes(codeId))
+  assert((await last().innerText()).includes('lisp'))
+  report.steps.push('Catalog → demo → original generic grey Code renderer → code Inspector reference')
+  const clientLink = demo.getByRole('link',{name:'Open original Wiki client'})
+  assert.equal(await clientLink.getAttribute('href'),`${wikiOrigin}/view/${slug}`)
+  const [wikiPage] = await Promise.all([context.waitForEvent('page'), clientLink.click()])
+  wikiPage.setDefaultTimeout(45000); wikiPage.on('pageerror',e=>report.browserErrors.push('Wiki: '+e.message))
+  const item = wikiPage.locator(`.item[data-id="${codeId}"]`)
+  await item.waitFor()
+  const api = await wikiPage.evaluate(() => ({
+    emit:typeof window.plugins.code.emit,bind:typeof window.plugins.code.bind,editor:typeof window.plugins.code.editor,
+    doPlugin:typeof wiki.doPlugin,put:typeof wiki.pageHandler.put,renderFrom:typeof wiki.renderFrom,
+    local:wiki.pageHandler.useLocalStorage(), owner:window.isOwner,
+  }))
+  assert.deepEqual(api,{emit:'function',bind:'function',editor:'function',doPlugin:'function',put:'function',renderFrom:'function',local:false,owner:true})
+  report.compatibility = api
+  if (!(await wikiPage.locator('.editEnable').isVisible())) await wikiPage.locator('footer').getByText('wiki',{exact:false}).click()
+  await item.dblclick()
+  await item.locator('textarea').fill('(defun square (x) (expt x 2))')
+  await item.locator('#code-language').fill('commonlisp')
+  const put = wikiPage.waitForResponse(r=>r.request().method()==='PUT' && r.url()===`${wikiOrigin}/page/${slug}/action`)
+  await wikiPage.locator('h1').first().click()
+  const response = await put
+  assert.equal(response.status(),200)
+  const sent = JSON.parse(new URLSearchParams(response.request().postData()).get('action'))
+  assert.equal(sent.type,'edit'); assert.equal(sent.id,codeId); assert(Number.isInteger(sent.date))
+  const persisted = read()
+  assert.equal(persisted.story.length,2)
+  assert.deepEqual(persisted.story[0],paragraph)
+  assert.deepEqual(persisted.story[1],{...code,text:'(defun square (x) (expt x 2))',language:'commonlisp'})
+  assert.equal(persisted.journal.length,initial.journal.length+1)
+  assert.deepEqual(persisted.journal.slice(0,-1),initial.journal)
+  assert.deepEqual(persisted.journal.at(-1),sent)
+  assert.equal(await wikiPage.evaluate(s=>localStorage.getItem(s),slug),null)
+  assert(!(await wikiPage.evaluate(()=>window.__testStorageWrites)).includes(slug))
+  assert.equal(await wikiPage.locator('.page.local').count(),0)
+  assert.deepEqual(fs.readdirSync(pages),[slug])
+  assert.equal(originalAssets.get('/client.js'),true)
+  assert.equal(originalAssets.get('/plugins/code/code.js'),true)
+  report.originalAssetsByteEqual = Object.fromEntries(originalAssets)
+  report.steps.push('Original code plugin edited text and language; authorized PUT 200; disk Item and dated journal match request; no localStorage page/fallback')
+  // Stop the sole writer before HyperDoc's independent reread.
+  wiki.kill('SIGTERM'); await new Promise(r=>wiki.once('exit',r))
+  await demo.getByRole('button',{name:'Read stored page again',exact:true}).click()
+  await last().getByRole('heading',{name:'Stored Wiki page',exact:true}).waitFor()
+  const reread = JSON.parse(await last().locator('.persisted-json').innerText())
+  assert.deepEqual(reread,persisted)
+  assert.equal(await last().locator('pre[style*="#eee"]').innerText(),persisted.story[1].text)
+  assert((await last().innerText()).includes(sha()))
+  await hyperdoc.screenshot({path:path.join(work,'hyperdoc-reread.png'),fullPage:true})
+  assert(fs.readFileSync(path.join(work,'catalog.log'),'utf8').includes('PARSE-TREE-REFERENCE'))
+  report.steps.push('Node writer stopped; HyperDoc independently reread the same file, matching JSON, journal, SHA-256 and generic rendering; explicit P coordinate checked in Lisp parse tree')
+  // Default legacy security has no browser security plugin. Do not hide it with a shim.
+  assert(report.browserErrors.every(e=>e === "Wiki: Cannot read properties of undefined (reading 'setup')"),JSON.stringify(report.browserErrors))
+  report.knownClientLimitation = 'The original default legacy security module supplies no /security/security.js UI plugin (setup error); server authorization and code editing were verified independently.'
+  Object.assign(report,{afterSha:sha(),action:sent,paragraphUnchanged:true,localStorageFallback:false,passed:true})
+} catch (error) {
+  report.failure = error.stack
+  process.exitCode = 1
+  if (browser) {
+    for (const [i,page] of contexts.flatMap(c=>c.pages()).entries()) {
+      try {
+        fs.writeFileSync(path.join(work,`failure-${i}.html`),await page.content())
+        await page.screenshot({path:path.join(work,`failure-${i}.png`),fullPage:true})
+      } catch {}
+    }
+  }
+} finally {
+  if (browser) await browser.close()
+  fs.writeFileSync(stopFile,'stop\n')
+  await Promise.all(children.map(async child => {
+    if (child.exitCode!==null || child.signalCode!==null || !child.pid) return
+    const exited = new Promise(r=>child.once('exit',r))
+    if (child !== children.at(-1)) child.kill('SIGTERM')
+    const timer = setTimeout(()=>child.kill('SIGTERM'),5000)
+    await exited; clearTimeout(timer)
+  }))
+  fs.writeFileSync(path.join(work,'report.json'),JSON.stringify(report,null,2)+'\n')
+  console.log(JSON.stringify({passed:report.passed,report:path.join(work,'report.json'),failure:report.failure},null,2))
+}

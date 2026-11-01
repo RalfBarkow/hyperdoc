@@ -1,0 +1,14 @@
+<h1>Editing One Isolated Wiki Page</h1>
+<in-package>dreyeck/fedwiki-original-editor-demo</in-package>
+<p>This demonstration reads a disposable local Wiki page. Only the original Wiki
+server writes it. Open the original client, enable editing, double-click the code,
+change its text and language, then click outside the item to save. Return here and
+choose <em>Read stored page again</em>. A new observation reads the JSON file.</p>
+<p id="test-paragraph-reference" data-fedwiki-site="fedwiki:original-editor-test.invalid"
+   data-fedwiki-slug="original-editor-test" data-fedwiki-item-id="1111111111111111">
+This HTML paragraph carries an explicit reference to the Wiki paragraph item.
+It contains an explanation of the reference, not a second editable copy of that item's text.
+The attributes are inspectable in the HyperDoc parse tree; they add no automatic conversion.</p>
+<p>The client link opens the page. This demonstration supplies no navigation to an
+individual item. The two-item page makes the code item immediately visible.</p>
+<html-generator>(render-demo)</html-generator>

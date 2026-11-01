@@ -3496,3 +3496,9 @@
   :perform (test-op (operation component)
              (declare (ignore operation component))
              (uiop:symbol-call :dreyeck/topic-maps-public-views/tests :run-tests)))
+
+(asdf:defsystem "dreyeck/fedwiki-original-editor-demo"
+  :description "Read-only Catalog demonstration of one isolated original Wiki editor test"
+  :depends-on ("dreyeck/local-fedwiki-page" "hyperdoc/explorer" "dreyeck/authority-policy")
+  :components ((:file "dreyeck/src/fedwiki-original-editor-demo")
+               (:static-file "dreyeck/pages/fedwiki-original-editor-demo/Editing One Isolated Wiki Page.html")))

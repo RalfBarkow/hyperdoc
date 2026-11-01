@@ -1,0 +1,8 @@
+denied: {"db":"/tmp/hyperdoc-original-editor-review-evidence/run-nEVBrW/site/pages","security_legacy":false}
+denied: localhost PUT /page/original-editor-test/action 403 9 - 7.638 ms
+wiki: {"db":"/tmp/hyperdoc-original-editor-review-evidence/run-nEVBrW/site/pages","security_legacy":true}
+wiki: localhost GET /security/security.js 404 159 - 2.239 ms
+wiki: localhost PUT /page/original-editor-test/action 200 2 - 13.028 ms
+ASDF-ORIGIN dreyeck /workspace/scratch/hyperdoc-fedwiki-original-editor-e2e/
+ASDF-ORIGIN hyperbook /workspace/scratch/hyperdoc-fedwiki-original-editor-e2e/
+ASDF-ORIGIN dreyeck/fedwiki-original-editor-demo /workspace/scratch/hyperdoc-fedwiki-original-editor-e2e/
