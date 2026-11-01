@@ -1,0 +1,166 @@
+{
+  "title": "Passive Code Rendering May Be Intended",
+  "story": [
+    {
+      "type": "paragraph",
+      "id": "eb03a0bee3c46b2b",
+      "text": "Claude review artefact. Written by a Claude Code review of commit 9b57bd4b of RalfBarkow/hyperdoc on 2026-11-01. It is Claude's criticism: not a result of the Riesbeck/Beane Lisp Critic, not an Evaluation Record and not a passed experiment. Every paragraph on this page was written by that review. A reply belongs on the replying person's own site, linking back here."
+    },
+    {
+      "type": "pagefold",
+      "id": "a91b10201a73626d",
+      "text": "question"
+    },
+    {
+      "type": "paragraph",
+      "id": "76a9b91d0ec23233",
+      "text": "Claude review, answers I1: [[Should the Code Method Preserve the Inspector Rendering?]]"
+    },
+    {
+      "type": "pagefold",
+      "id": "cb80e668e5debc68",
+      "text": "claim"
+    },
+    {
+      "type": "paragraph",
+      "id": "86a758d40fe1805f",
+      "text": "Claude review, Position B: Not necessarily. Restricting unmarked Code items to passive, escaped source text may be an intended design decision."
+    },
+    {
+      "type": "pagefold",
+      "id": "d292367513b3ed13",
+      "text": "support"
+    },
+    {
+      "type": "paragraph",
+      "id": "b4a273f9d6e721d8",
+      "text": "Claude review, B+1, fact, observed: the report describes the target as a passive, escaped audit view [https://github.com/RalfBarkow/hyperdoc/blob/9b57bd4bb87d92fbf3061b91a42a6f539e18cdb1/docs/trusted-executable-examples.md?plain=1#L115-L116 trusted-executable-examples.md lines 115-116], and the else branch renders exactly that [https://github.com/RalfBarkow/hyperdoc/blob/9b57bd4bb87d92fbf3061b91a42a6f539e18cdb1/dreyeck/src/verified-example.lisp#L160-L166 verified-example.lisp lines 160-166]."
+    },
+    {
+      "type": "paragraph",
+      "id": "e05f41244f96ae31",
+      "text": "Claude review, B+2, assessment, inferred: the slice avoids Inspector references on its marked path on purpose [https://github.com/RalfBarkow/hyperdoc/blob/9b57bd4bb87d92fbf3061b91a42a6f539e18cdb1/dreyeck/tests/verified-example.lisp#L87-L90 tests/verified-example.lisp lines 87-90]; a Code view without references throughout would be consistent with that."
+    },
+    {
+      "type": "paragraph",
+      "id": "9b995a19c6c599db",
+      "text": "Claude review, B+3, normative assumption: in a trust-sensitive slice, fewer affordances are preferable."
+    },
+    {
+      "type": "pagefold",
+      "id": "31ab8686ecce7605",
+      "text": "oppose"
+    },
+    {
+      "type": "paragraph",
+      "id": "7fcf4f0a064c05a9",
+      "text": "Claude review, B-1, fact, observed: no test or document asks for the reference to be removed from unmarked items; the test of unmarked Code checks escaping only [https://github.com/RalfBarkow/hyperdoc/blob/9b57bd4bb87d92fbf3061b91a42a6f539e18cdb1/dreyeck/tests/verified-example.lisp#L126-L132 tests/verified-example.lisp lines 126-132], and the no-reference check concerns the marked view only [https://github.com/RalfBarkow/hyperdoc/blob/9b57bd4bb87d92fbf3061b91a42a6f539e18cdb1/dreyeck/tests/verified-example.lisp#L87-L90 tests/verified-example.lisp lines 87-90]."
+    },
+    {
+      "type": "paragraph",
+      "id": "f81320541887d25a",
+      "text": "Claude review, B-2, assessment, inferred: the reference is navigation to a story item object, not execution; the code base adds such references on purpose elsewhere [https://github.com/RalfBarkow/hyperdoc/blob/9b57bd4bb87d92fbf3061b91a42a6f539e18cdb1/dreyeck/work/how-trails-sources.lisp#L72 how-trails-sources.lisp line 72]."
+    },
+    {
+      "type": "paragraph",
+      "id": "6ecf10310267ccca",
+      "text": "Claude review, B-3, fact read as assessment, inferred: comment and report claim continuity [https://github.com/RalfBarkow/hyperdoc/blob/9b57bd4bb87d92fbf3061b91a42a6f539e18cdb1/dreyeck/src/verified-example.lisp#L160-L161 verified-example.lisp lines 160-161] [https://github.com/RalfBarkow/hyperdoc/blob/9b57bd4bb87d92fbf3061b91a42a6f539e18cdb1/docs/trusted-executable-examples.md?plain=1#L115-L116 trusted-executable-examples.md lines 115-116]; an intended restriction would presumably have been named there."
+    },
+    {
+      "type": "pagefold",
+      "id": "ddf745853d0442c4",
+      "text": "~"
+    },
+    {
+      "type": "paragraph",
+      "id": "d4e346fa989e40c4",
+      "text": "Claude review, note: each move names its kind (fact, assessment or normative assumption) and the warrant of its content (observed, derived, inferred or hypothesized). That a move supports or opposes the position is Claude's argumentative assignment: interpreted, and checked by nothing."
+    }
+  ],
+  "journal": [
+    {
+      "type": "create",
+      "item": {
+        "title": "Passive Code Rendering May Be Intended",
+        "story": [
+          {
+            "type": "paragraph",
+            "id": "eb03a0bee3c46b2b",
+            "text": "Claude review artefact. Written by a Claude Code review of commit 9b57bd4b of RalfBarkow/hyperdoc on 2026-11-01. It is Claude's criticism: not a result of the Riesbeck/Beane Lisp Critic, not an Evaluation Record and not a passed experiment. Every paragraph on this page was written by that review. A reply belongs on the replying person's own site, linking back here."
+          },
+          {
+            "type": "pagefold",
+            "id": "a91b10201a73626d",
+            "text": "question"
+          },
+          {
+            "type": "paragraph",
+            "id": "76a9b91d0ec23233",
+            "text": "Claude review, answers I1: [[Should the Code Method Preserve the Inspector Rendering?]]"
+          },
+          {
+            "type": "pagefold",
+            "id": "cb80e668e5debc68",
+            "text": "claim"
+          },
+          {
+            "type": "paragraph",
+            "id": "86a758d40fe1805f",
+            "text": "Claude review, Position B: Not necessarily. Restricting unmarked Code items to passive, escaped source text may be an intended design decision."
+          },
+          {
+            "type": "pagefold",
+            "id": "d292367513b3ed13",
+            "text": "support"
+          },
+          {
+            "type": "paragraph",
+            "id": "b4a273f9d6e721d8",
+            "text": "Claude review, B+1, fact, observed: the report describes the target as a passive, escaped audit view [https://github.com/RalfBarkow/hyperdoc/blob/9b57bd4bb87d92fbf3061b91a42a6f539e18cdb1/docs/trusted-executable-examples.md?plain=1#L115-L116 trusted-executable-examples.md lines 115-116], and the else branch renders exactly that [https://github.com/RalfBarkow/hyperdoc/blob/9b57bd4bb87d92fbf3061b91a42a6f539e18cdb1/dreyeck/src/verified-example.lisp#L160-L166 verified-example.lisp lines 160-166]."
+          },
+          {
+            "type": "paragraph",
+            "id": "e05f41244f96ae31",
+            "text": "Claude review, B+2, assessment, inferred: the slice avoids Inspector references on its marked path on purpose [https://github.com/RalfBarkow/hyperdoc/blob/9b57bd4bb87d92fbf3061b91a42a6f539e18cdb1/dreyeck/tests/verified-example.lisp#L87-L90 tests/verified-example.lisp lines 87-90]; a Code view without references throughout would be consistent with that."
+          },
+          {
+            "type": "paragraph",
+            "id": "9b995a19c6c599db",
+            "text": "Claude review, B+3, normative assumption: in a trust-sensitive slice, fewer affordances are preferable."
+          },
+          {
+            "type": "pagefold",
+            "id": "31ab8686ecce7605",
+            "text": "oppose"
+          },
+          {
+            "type": "paragraph",
+            "id": "7fcf4f0a064c05a9",
+            "text": "Claude review, B-1, fact, observed: no test or document asks for the reference to be removed from unmarked items; the test of unmarked Code checks escaping only [https://github.com/RalfBarkow/hyperdoc/blob/9b57bd4bb87d92fbf3061b91a42a6f539e18cdb1/dreyeck/tests/verified-example.lisp#L126-L132 tests/verified-example.lisp lines 126-132], and the no-reference check concerns the marked view only [https://github.com/RalfBarkow/hyperdoc/blob/9b57bd4bb87d92fbf3061b91a42a6f539e18cdb1/dreyeck/tests/verified-example.lisp#L87-L90 tests/verified-example.lisp lines 87-90]."
+          },
+          {
+            "type": "paragraph",
+            "id": "f81320541887d25a",
+            "text": "Claude review, B-2, assessment, inferred: the reference is navigation to a story item object, not execution; the code base adds such references on purpose elsewhere [https://github.com/RalfBarkow/hyperdoc/blob/9b57bd4bb87d92fbf3061b91a42a6f539e18cdb1/dreyeck/work/how-trails-sources.lisp#L72 how-trails-sources.lisp line 72]."
+          },
+          {
+            "type": "paragraph",
+            "id": "6ecf10310267ccca",
+            "text": "Claude review, B-3, fact read as assessment, inferred: comment and report claim continuity [https://github.com/RalfBarkow/hyperdoc/blob/9b57bd4bb87d92fbf3061b91a42a6f539e18cdb1/dreyeck/src/verified-example.lisp#L160-L161 verified-example.lisp lines 160-161] [https://github.com/RalfBarkow/hyperdoc/blob/9b57bd4bb87d92fbf3061b91a42a6f539e18cdb1/docs/trusted-executable-examples.md?plain=1#L115-L116 trusted-executable-examples.md lines 115-116]; an intended restriction would presumably have been named there."
+          },
+          {
+            "type": "pagefold",
+            "id": "ddf745853d0442c4",
+            "text": "~"
+          },
+          {
+            "type": "paragraph",
+            "id": "d4e346fa989e40c4",
+            "text": "Claude review, note: each move names its kind (fact, assessment or normative assumption) and the warrant of its content (observed, derived, inferred or hypothesized). That a move supports or opposes the position is Claude's argumentative assignment: interpreted, and checked by nothing."
+          }
+        ]
+      },
+      "date": 1793491200000
+    }
+  ]
+}

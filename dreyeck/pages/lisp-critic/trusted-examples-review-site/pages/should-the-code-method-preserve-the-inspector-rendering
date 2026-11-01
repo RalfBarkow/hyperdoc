@@ -1,0 +1,116 @@
+{
+  "title": "Should the Code Method Preserve the Inspector Rendering?",
+  "story": [
+    {
+      "type": "paragraph",
+      "id": "5dbd1eac7d9a091f",
+      "text": "Claude review artefact. Written by a Claude Code review of commit 9b57bd4b of RalfBarkow/hyperdoc on 2026-11-01. It is Claude's criticism: not a result of the Riesbeck/Beane Lisp Critic, not an Evaluation Record and not a passed experiment. Every paragraph on this page was written by that review. A reply belongs on the replying person's own site, linking back here."
+    },
+    {
+      "type": "pagefold",
+      "id": "35d6b7e757699f7b",
+      "text": "question"
+    },
+    {
+      "type": "paragraph",
+      "id": "df3fd718a1686aea",
+      "text": "Claude review, I1: Should the new :code method of dreyeck/verified-example preserve the prior Inspector rendering of unmarked Code story items, their Inspector object reference included?"
+    },
+    {
+      "type": "paragraph",
+      "id": "3c4579ae4f9f9b52",
+      "text": "Claude review, context, observed by reading: the new method is defined at [https://github.com/RalfBarkow/hyperdoc/blob/9b57bd4bb87d92fbf3061b91a42a6f539e18cdb1/dreyeck/src/verified-example.lisp#L160-L166 verified-example.lisp lines 160-166]; for Code items it takes the place of the fallback method at [https://github.com/RalfBarkow/hyperdoc/blob/9b57bd4bb87d92fbf3061b91a42a6f539e18cdb1/hyperbook-fedwiki/story-items.lisp#L109-L115 story-items.lisp lines 109-115]."
+    },
+    {
+      "type": "pagefold",
+      "id": "0d0714860cd6261b",
+      "text": "claim"
+    },
+    {
+      "type": "paragraph",
+      "id": "f7be8ac42a455495",
+      "text": "Claude review, Position A: [[Preserve the Prior Code Rendering]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "a4a709dee2b9f04c",
+      "text": "Claude review, Position B: [[Passive Code Rendering May Be Intended]]"
+    },
+    {
+      "type": "pagefold",
+      "id": "333540752a0bed22",
+      "text": "~"
+    },
+    {
+      "type": "paragraph",
+      "id": "e3a68197ef358df2",
+      "text": "Claude review, not executed: the probe P1 would render one unmarked Code item before and after loading dreyeck/verified-example, in a fresh process, and compare the HTML and the Inspector references. Until it runs, the difference between the two renderings is derived from reading only. Even once it has run, whether the difference is a defect stays this question."
+    },
+    {
+      "type": "paragraph",
+      "id": "5c0f0a646c53df96",
+      "text": "Claude review, note: no human reply is recorded on this page. To accept or reject a position, propose another, add or contest evidence, or raise a new question, write on your own site and link here."
+    }
+  ],
+  "journal": [
+    {
+      "type": "create",
+      "item": {
+        "title": "Should the Code Method Preserve the Inspector Rendering?",
+        "story": [
+          {
+            "type": "paragraph",
+            "id": "5dbd1eac7d9a091f",
+            "text": "Claude review artefact. Written by a Claude Code review of commit 9b57bd4b of RalfBarkow/hyperdoc on 2026-11-01. It is Claude's criticism: not a result of the Riesbeck/Beane Lisp Critic, not an Evaluation Record and not a passed experiment. Every paragraph on this page was written by that review. A reply belongs on the replying person's own site, linking back here."
+          },
+          {
+            "type": "pagefold",
+            "id": "35d6b7e757699f7b",
+            "text": "question"
+          },
+          {
+            "type": "paragraph",
+            "id": "df3fd718a1686aea",
+            "text": "Claude review, I1: Should the new :code method of dreyeck/verified-example preserve the prior Inspector rendering of unmarked Code story items, their Inspector object reference included?"
+          },
+          {
+            "type": "paragraph",
+            "id": "3c4579ae4f9f9b52",
+            "text": "Claude review, context, observed by reading: the new method is defined at [https://github.com/RalfBarkow/hyperdoc/blob/9b57bd4bb87d92fbf3061b91a42a6f539e18cdb1/dreyeck/src/verified-example.lisp#L160-L166 verified-example.lisp lines 160-166]; for Code items it takes the place of the fallback method at [https://github.com/RalfBarkow/hyperdoc/blob/9b57bd4bb87d92fbf3061b91a42a6f539e18cdb1/hyperbook-fedwiki/story-items.lisp#L109-L115 story-items.lisp lines 109-115]."
+          },
+          {
+            "type": "pagefold",
+            "id": "0d0714860cd6261b",
+            "text": "claim"
+          },
+          {
+            "type": "paragraph",
+            "id": "f7be8ac42a455495",
+            "text": "Claude review, Position A: [[Preserve the Prior Code Rendering]]"
+          },
+          {
+            "type": "paragraph",
+            "id": "a4a709dee2b9f04c",
+            "text": "Claude review, Position B: [[Passive Code Rendering May Be Intended]]"
+          },
+          {
+            "type": "pagefold",
+            "id": "333540752a0bed22",
+            "text": "~"
+          },
+          {
+            "type": "paragraph",
+            "id": "e3a68197ef358df2",
+            "text": "Claude review, not executed: the probe P1 would render one unmarked Code item before and after loading dreyeck/verified-example, in a fresh process, and compare the HTML and the Inspector references. Until it runs, the difference between the two renderings is derived from reading only. Even once it has run, whether the difference is a defect stays this question."
+          },
+          {
+            "type": "paragraph",
+            "id": "5c0f0a646c53df96",
+            "text": "Claude review, note: no human reply is recorded on this page. To accept or reject a position, propose another, add or contest evidence, or raise a new question, write on your own site and link here."
+          }
+        ]
+      },
+      "date": 1793491200000
+    }
+  ]
+}

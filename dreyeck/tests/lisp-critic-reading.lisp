@@ -11,9 +11,10 @@
                     (#:critic #:dreyeck/lisp-critic)
                     (#:er #:dreyeck/evaluation-record)
                     (#:views #:html-inspector-views)
-                    (#:tm #:dreyeck/topicmap))
+                    (#:tm #:dreyeck/topicmap)
+                    (#:lp #:dreyeck/local-fedwiki-page))
   (:export #:run-tests #:run-current-tests #:check-under-catalog-runtime
-           #:check-degraded-runtime))
+           #:check-degraded-runtime #:check-trusted-examples-review))
 
 (in-package #:dreyeck/lisp-critic/reading/tests)
 
@@ -25,7 +26,8 @@
     "Anatomy of a Critique"
     "Where the Source Lives"
     "Reading a Recorded Critique"
-    "Lisp Critic on the Federated Context"))
+    "Lisp Critic on the Federated Context"
+    "Reading the Trusted Executable Examples Review"))
 
 (defun check (value control &rest arguments)
   (unless value
@@ -1610,6 +1612,287 @@ silently redefined." (getf observation :code-page-count)))
              (set-difference present-after present-before))))
   t)
 
+;;
+;; The Trusted Executable Examples review: three local Wiki pages and one reading
+;;
+;; Structure and navigation only. Nothing here judges the criticism the pages
+;; carry, and nothing loads the slice they criticise.
+
+(defparameter +review-site+ "dreyeck/pages/lisp-critic/trusted-examples-review-site/"
+  "The local site of the review's Wiki pages, relative to the dreyeck system.")
+
+(defparameter +review-wiki-id+ "fedwiki:trusted-examples-review.invalid"
+  "A Wiki id whose domain resolves nowhere: the pages are not a served site.")
+
+(defparameter +reviewed-revision+ "9b57bd4bb87d92fbf3061b91a42a6f539e18cdb1"
+  "The revision of the reviewed code. Not the revision of the review's own files.")
+
+(defparameter +review-pages+
+  '(("should-the-code-method-preserve-the-inspector-rendering"
+     "Should the Code Method Preserve the Inspector Rendering?"
+     ("question" "claim" "~")
+     (("claim" "preserve-the-prior-code-rendering")
+      ("claim" "passive-code-rendering-may-be-intended")))
+    ("preserve-the-prior-code-rendering"
+     "Preserve the Prior Code Rendering"
+     ("question" "claim" "support" "oppose" "~")
+     (("question" "should-the-code-method-preserve-the-inspector-rendering")))
+    ("passive-code-rendering-may-be-intended"
+     "Passive Code Rendering May Be Intended"
+     ("question" "claim" "support" "oppose" "~")
+     (("question" "should-the-code-method-preserve-the-inspector-rendering"))))
+  "Each page: its slug, its title, its folds in order, and its Wiki links as
+(fold target-slug), in story order.")
+
+(defun review-site-root ()
+  (asdf:system-relative-pathname "dreyeck" +review-site+))
+
+(defun %review-title (slug)
+  (second (find slug +review-pages+ :key #'first :test #'string=)))
+
+(defun %json-equal (a b)
+  "Whether two values read by SHASHT are the same JSON."
+  (cond ((and (hash-table-p a) (hash-table-p b))
+         (and (= (hash-table-count a) (hash-table-count b))
+              (loop for key being the hash-keys of a using (hash-value value)
+                    always (multiple-value-bind (other present) (gethash key b)
+                             (and present (%json-equal value other))))))
+        ((and (vectorp a) (vectorp b) (not (stringp a)) (not (stringp b)))
+         (and (= (length a) (length b)) (every #'%json-equal a b)))
+        (t (equal a b))))
+
+(defun %story-json (json)
+  (coerce (or (gethash "story" json) #()) 'list))
+
+(defun %folds (json)
+  (loop for item in (%story-json json)
+        when (equal "pagefold" (gethash "type" item))
+          collect (gethash "text" item)))
+
+(defun %wiki-link-titles (text)
+  (let ((titles '()))
+    (cl-ppcre:do-register-groups (title) ("\\[\\[([^\\]]+)\\]\\]" text)
+      (push title titles))
+    (nreverse titles)))
+
+(defun %links-by-fold (json)
+  "Each Wiki link of the story as (fold target-slug): the fold is the last
+pagefold before the link, as the Claim Template and EXTRACT read it."
+  (let ((fold nil) (links '()))
+    (dolist (item (%story-json json) (nreverse links))
+      (if (equal "pagefold" (gethash "type" item))
+          (setf fold (gethash "text" item))
+          (dolist (title (%wiki-link-titles (or (gethash "text" item) "")))
+            (push (list fold (hyperbook/fedwiki::slug title)) links))))))
+
+(defun check-review-site-pages ()
+  "Each page, read once from its file: its title names its slug; it holds only
+paragraphs and pagefolds, in the expected folds; every paragraph is marked as
+the review's own; one create entry holds exactly this title and story; and
+every link to the repository is pinned to the reviewed revision."
+  (dolist (entry +review-pages+)
+    (destructuring-bind (slug title folds links) entry
+      (let* ((source (lp:observe-local-fedwiki-page-source (review-site-root) slug))
+             (json (lp:page-source-json source))
+             (story (%story-json json))
+             (journal (coerce (or (gethash "journal" json) #()) 'list)))
+        (check (= 64 (length (lp:page-source-sha256 source)))
+               "~A has no SHA-256 of its bytes." slug)
+        (check (equal title (gethash "title" json))
+               "~A is titled ~S, not ~S." slug (gethash "title" json) title)
+        (check (equal slug (hyperbook/fedwiki::slug title))
+               "The title ~S does not name the slug ~A." title slug)
+        (check (every (lambda (item)
+                        (member (gethash "type" item) '("paragraph" "pagefold") :test #'equal))
+                      story)
+               "~A holds an item that is neither a paragraph nor a pagefold." slug)
+        (check (equal folds (%folds json))
+               "~A has the folds ~S, not ~S." slug (%folds json) folds)
+        (check (equal links (%links-by-fold json))
+               "~A links ~S, not ~S." slug (%links-by-fold json) links)
+        (check (= (length story)
+                  (length (remove-duplicates (mapcar (lambda (item) (gethash "id" item)) story)
+                                             :test #'equal)))
+               "~A repeats an item id." slug)
+        (check (and story (equal "paragraph" (gethash "type" (first story)))
+                    (eql 0 (search "Claude review artefact." (gethash "text" (first story)))))
+               "~A does not open with the review's provenance." slug)
+        (dolist (item story)
+          (when (equal "paragraph" (gethash "type" item))
+            (check (eql 0 (search "Claude review" (gethash "text" item)))
+                   "A paragraph of ~A is not marked as the review's: ~S"
+                   slug (gethash "text" item))))
+        (check (= 1 (length journal))
+               "~A has ~D journal entries, not one create entry." slug (length journal))
+        (let* ((create (first journal))
+               (item (gethash "item" create)))
+          (check (equal "create" (gethash "type" create))
+                 "The journal of ~A starts with ~S." slug (gethash "type" create))
+          (check (null (nth-value 1 (gethash "site" create)))
+                 "The journal of ~A names a site: it would be read as a fork." slug)
+          (check (integerp (gethash "date" create))
+                 "The create entry of ~A has no date." slug)
+          (check (and (hash-table-p item) (equal title (gethash "title" item)))
+                 "The create entry of ~A does not hold its title." slug)
+          (check (%json-equal (gethash "story" json) (gethash "story" item))
+                 "The create entry of ~A does not hold exactly its story." slug))
+        (dolist (item story)
+          (cl-ppcre:do-matches-as-strings (url "https://github\\.com/RalfBarkow/hyperdoc/[^ \\]]*"
+                                           (or (gethash "text" item) ""))
+            (check (search (format nil "/blob/~A/" +reviewed-revision+) url)
+                   "~A cites ~A, which is not pinned to the reviewed revision." slug url))))))
+  t)
+
+(defun %call-without-plugin-fallback (thunk)
+  "Call THUNK with the Wiki's remote plugin-page fallback replaced by a trap.
+A link that the local page store does not resolve then fails the check
+instead of being fetched over the network."
+  (let* ((name 'hyperbook/fedwiki::get-plugin-page)
+         (original (symbol-function name))
+         (reached '()))
+    (unwind-protect
+         (progn
+           (setf (symbol-function name)
+                 (lambda (wiki slug)
+                   (declare (ignore wiki))
+                   (push slug reached)
+                   (error "The plugin-page fallback was reached for ~S." slug)))
+           (multiple-value-prog1 (funcall thunk)
+             (check (null reached)
+                    "The plugin-page fallback was reached for ~S." reached)))
+      (setf (symbol-function name) original))))
+
+(defun %fresh-review-page (slug)
+  "SLUG opened in a local Wiki of its own that holds nothing else."
+  (let ((wiki (lp:make-local-fedwiki (review-site-root) +review-wiki-id+)))
+    (values (lp:make-local-fedwiki-page (review-site-root) wiki slug) wiki)))
+
+(defun %check-unloaded-targets (wiki slug targets)
+  (dolist (target-slug targets)
+    (check (null (gethash target-slug (hyperbook/fedwiki::pages-of wiki)))
+           "~A is held by the Wiki before ~A links to it." target-slug slug)))
+
+(defun check-review-site-links ()
+  "Every Wiki link of the three pages resolves, through the FedWiki lookup the
+Story view uses, to the local page file of the same site, and the Story view
+renders each link as a reference rather than a lookup failure.
+
+Each check opens its page in a Wiki of its own that holds nothing else, so a
+target can only be reached by reading its file from the local page store. The
+remote plugin-page fallback is trapped throughout."
+  (let ((root (review-site-root)))
+    (%call-without-plugin-fallback
+     (lambda ()
+       (dolist (entry +review-pages+)
+         (destructuring-bind (slug title folds links) entry
+           (declare (ignore title folds))
+           (let ((targets (mapcar #'second links)))
+             ;; The rendering path: the Story view resolves each link itself.
+             (multiple-value-bind (page wiki) (%fresh-review-page slug)
+               (check (null (hyperbook/fedwiki::context-of page))
+                      "~A has a remote context to fall back on." slug)
+               (%check-unloaded-targets wiki slug targets)
+               (let ((html (views:view-html (hyperbook/fedwiki::👀story page))))
+                 (check (not (search "hyperbook-error" html))
+                        "The Story of ~A renders a link that did not resolve." slug)
+                 (dolist (target-slug targets)
+                   (check (search (%review-title target-slug) html)
+                          "The Story of ~A does not show the link to ~A." slug target-slug)
+                   (check (gethash target-slug (hyperbook/fedwiki::pages-of wiki))
+                          "Rendering ~A did not read ~A from the page store." slug target-slug))
+                 (check (search (format nil "https://github.com/RalfBarkow/hyperdoc/blob/~A/"
+                                        +reviewed-revision+)
+                                html)
+                        "The Story of ~A shows no evidence link at the reviewed revision." slug)
+                 (check (not (search "<script" html :test #'char-equal))
+                        "The Story of ~A carries a script." slug)))
+             ;; The lookup itself, link by link, again from an empty Wiki.
+             (multiple-value-bind (page wiki) (%fresh-review-page slug)
+               (%check-unloaded-targets wiki slug targets)
+               (check (null (set-exclusive-or
+                             targets
+                             (mapcar #'hyperbook/fedwiki::target-slug-of
+                                     (hyperbook/fedwiki::wiki-links-of (hyperbook:links-of page)))
+                             :test #'equal))
+                      "The links FedWiki extracts from ~A differ from ~S." slug targets)
+               (dolist (target-slug targets)
+                 (let ((target (hyperbook/fedwiki::find-target-by-slug target-slug page)))
+                   (check (typep target 'lp:local-fedwiki-page)
+                          "~A -> ~A resolves to ~S, not a local page." slug target-slug target)
+                   (check (eq wiki (hyperbook:hyperbook-of target))
+                          "~A -> ~A leaves the review's local Wiki." slug target-slug)
+                   (check (equal (lp:local-fedwiki-page-site-root-of page)
+                                 (lp:local-fedwiki-page-site-root-of target))
+                          "~A -> ~A resolves in another site root." slug target-slug)
+                   (check (equal target-slug (hyperbook:id-of target))
+                          "~A -> ~A reaches the page ~A." slug target-slug (hyperbook:id-of target))
+                   (check (equal (%review-title target-slug) (hyperbook:title-of target))
+                          "~A -> ~A reaches a page titled ~S." slug target-slug
+                          (hyperbook:title-of target))
+                   (check (%json-equal (hyperbook/fedwiki::raw-json-of target)
+                                       (lp:page-source-json
+                                        (lp:observe-local-fedwiki-page-source root target-slug)))
+                          "~A -> ~A does not hold the JSON of its file." slug target-slug))))))))))
+  t)
+
+(defun %depends-on-p (system other)
+  "Whether the registered SYSTEM depends, directly or not, on OTHER."
+  (let ((seen (make-hash-table :test #'equal)))
+    (labels ((walk (name)
+               (unless (gethash name seen)
+                 (setf (gethash name seen) t)
+                 (let ((registered (asdf:registered-system name)))
+                   (when registered
+                     (dolist (dependency (asdf:system-depends-on registered))
+                       (typecase dependency
+                         (string (walk (string-downcase dependency)))
+                         (symbol (walk (string-downcase (symbol-name dependency)))))))))))
+      (walk (string-downcase system))
+      (and (gethash (string-downcase other) seen) t))))
+
+(defun check-review-reading-page ()
+  "The reading opens exactly the three local pages, does not load the slice it
+criticises, and says what it is not."
+  (let* ((page (page-of "Reading the Trusted Executable Examples Review"))
+         (*package* (page-package page))
+         (before (find-package "DREYECK/VERIFIED-EXAMPLE"))
+         (opened (mapcar #'hyperdoc::parse-and-eval (page-expressions page)))
+         (root (truename (uiop:ensure-directory-pathname (review-site-root))))
+         (text (uiop:read-file-string (hyperdoc:file-of page))))
+    (check (= (length +review-pages+) (length opened))
+           "The reading addresses ~D objects, not the ~D review pages."
+           (length opened) (length +review-pages+))
+    (dolist (object opened)
+      (check (typep object 'lp:local-fedwiki-page)
+             "The reading addresses ~S, not a local Wiki page." object)
+      (check (equal root (lp:local-fedwiki-page-site-root-of object))
+             "The reading opens ~A outside the review's site." (hyperbook:id-of object)))
+    (check (null (set-exclusive-or (mapcar #'hyperbook:id-of opened)
+                                   (mapcar #'first +review-pages+)
+                                   :test #'equal))
+           "The reading opens ~S." (mapcar #'hyperbook:id-of opened))
+    (check (eq before (find-package "DREYECK/VERIFIED-EXAMPLE"))
+           "Reading the review changed whether DREYECK/VERIFIED-EXAMPLE exists.")
+    (check (not (%depends-on-p "dreyeck/lisp-critic/reading" "dreyeck/verified-example"))
+           "The reading's book depends on the slice it criticises.")
+    (dolist (phrase '("No critic rule ran"
+                      "an Evaluation Record, or a passed"
+                      "The probe P1 has not been executed."
+                      "This page records no answer, and none is simulated."))
+      (check (search phrase (substitute #\Space #\Newline text))
+             "The reading no longer says ~S." phrase)))
+  t)
+
+(defun check-trusted-examples-review ()
+  "Structure and navigation of the Trusted Executable Examples review."
+  (hyperdoc::ensure-pages-loaded reading:*lisp-critic-reading*)
+  (check-review-site-pages)
+  (check-review-site-links)
+  (check-review-reading-page)
+  (format t "~&TRUSTED-EXAMPLES-REVIEW-PASS: three local pages, links resolved ~
+locally, one create entry each, reading opens exactly them.~%")
+  t)
+
 (defun run-current-tests ()
   (hyperdoc::ensure-pages-loaded reading:*lisp-critic-reading*)
   (check-pages-present)
@@ -1636,6 +1919,7 @@ silently redefined." (getf observation :code-page-count)))
   (check-transclusions-and-examples)
   (check-source-structure-projection)
   (check-reading-examples-honour-the-policy)
+  (check-trusted-examples-review)
   (format t "~&LISP-CRITIC-READING-PASS: six pages, two lines kept apart, ~
 three outcomes, source-backed transclusion, source structure across three ~
 kinds of ownership.~%")

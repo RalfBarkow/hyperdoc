@@ -1,0 +1,185 @@
+<h1>Reading the Trusted Executable Examples Review</h1>
+
+<in-package>dreyeck/lisp-critic/reading</in-package>
+
+<p>
+One criticism from a Claude Code review of the slice
+<code>dreyeck/verified-example</code> at commit <code>9b57bd4b</code>, kept as
+a question with two positions that anyone can answer. Claude Code wrote the
+criticism and every move below. No critic rule ran: nothing on this page is a
+Critique of the Riesbeck/Beane engine, an Evaluation Record, or a passed
+experiment.
+</p>
+
+<pre>
+1 observed source    what the definitions say, at the reviewed commit
+2 Claude's criticism  one question, two positions, their arguments
+3 checks run          what was actually executed, and what it shows
+4 not yet checked     what nobody has executed
+5 your judgement      not recorded here
+</pre>
+
+<h2>Why this page loads nothing it criticises</h2>
+
+<p>
+The criticism concerns what loading <code>dreyeck/verified-example</code> does
+to every Code item of an image. Reading it must not do that, so this book does
+not depend on that system, and the definitions below are cited at a commit
+rather than shown as loaded functions.
+</p>
+
+<h2>1. Observed source</h2>
+
+<p>
+Two revisions are kept apart. The <strong>reviewed code</strong> is commit
+<code>9b57bd4bb87d92fbf3061b91a42a6f539e18cdb1</code>. The <strong>review
+artefacts</strong> are this page and three Wiki pages, identified by the commit
+that contains them and, for each Wiki page, by the SHA-256 of its file.
+</p>
+
+<ul>
+<li>
+  <a href="https://github.com/RalfBarkow/hyperdoc/blob/9b57bd4bb87d92fbf3061b91a42a6f539e18cdb1/dreyeck/src/verified-example.lisp#L160-L166">The method added for Code items</a>,
+  <code>dreyeck/src/verified-example.lisp</code> lines 160–166. File SHA-256
+  <code>981fb3f0…9339a</code>, the value recorded in
+  <code>docs/trusted-executable-examples-evidence/verification.txt</code>;
+  SHA-256 of the seven lines, each ending in a line feed,
+  <code>9545ac54…ed9c86</code>.
+</li>
+<li>
+  <a href="https://github.com/RalfBarkow/hyperdoc/blob/9b57bd4bb87d92fbf3061b91a42a6f539e18cdb1/hyperbook-fedwiki/story-items.lisp#L109-L115">The method every Item type had before</a>,
+  <code>hyperbook-fedwiki/story-items.lisp</code> lines 109–115, unchanged by
+  the reviewed commit. It renders a type label, an Inspector reference to the
+  item and the escaped text. File SHA-256 <code>b2a75127…6c55d</code>; SHA-256
+  of the seven lines <code>0226bd08…c0439e</code>.
+</li>
+</ul>
+
+<p>
+Line 161 of the first file says: “Ordinary Code remains a passive source
+view.” That documented statement is what the question below examines.
+</p>
+
+<h2>2. Claude's criticism, as a discourse</h2>
+
+<p>
+The criticism is not a verdict but three Wiki pages, structured by the folds of
+the Claim Template: <code>question</code>, <code>claim</code>,
+<code>support</code> and <code>oppose</code>. Each paragraph is one move, and
+each link stands under the fold that gives it its role.
+</p>
+
+<ul>
+<li>
+  <a expr="(dreyeck/local-fedwiki-page:make-local-fedwiki-page (asdf:system-relative-pathname &quot;dreyeck&quot; &quot;dreyeck/pages/lisp-critic/trusted-examples-review-site/&quot;) (dreyeck/local-fedwiki-page:make-local-fedwiki (asdf:system-relative-pathname &quot;dreyeck&quot; &quot;dreyeck/pages/lisp-critic/trusted-examples-review-site/&quot;) &quot;fedwiki:trusted-examples-review.invalid&quot;) &quot;should-the-code-method-preserve-the-inspector-rendering&quot;)" view="Story">The question</a>:
+  should the new <code>:code</code> method preserve the prior Inspector
+  rendering of unmarked Code items? Under its <code>claim</code> fold it links
+  the two positions.
+</li>
+<li>
+  <a expr="(dreyeck/local-fedwiki-page:make-local-fedwiki-page (asdf:system-relative-pathname &quot;dreyeck&quot; &quot;dreyeck/pages/lisp-critic/trusted-examples-review-site/&quot;) (dreyeck/local-fedwiki-page:make-local-fedwiki (asdf:system-relative-pathname &quot;dreyeck&quot; &quot;dreyeck/pages/lisp-critic/trusted-examples-review-site/&quot;) &quot;fedwiki:trusted-examples-review.invalid&quot;) &quot;preserve-the-prior-code-rendering&quot;)" view="Story">Position A</a>:
+  yes, the prior rendering is existing behaviour an opt-in extension should not
+  change unintentionally.
+</li>
+<li>
+  <a expr="(dreyeck/local-fedwiki-page:make-local-fedwiki-page (asdf:system-relative-pathname &quot;dreyeck&quot; &quot;dreyeck/pages/lisp-critic/trusted-examples-review-site/&quot;) (dreyeck/local-fedwiki-page:make-local-fedwiki (asdf:system-relative-pathname &quot;dreyeck&quot; &quot;dreyeck/pages/lisp-critic/trusted-examples-review-site/&quot;) &quot;fedwiki:trusted-examples-review.invalid&quot;) &quot;passive-code-rendering-may-be-intended&quot;)" view="Story">Position B</a>:
+  not necessarily, passive escaped text may be the intended design.
+</li>
+</ul>
+
+<p>
+Every move names its kind, fact, assessment or normative assumption, and the
+warrant of its <em>content</em>: observed, derived, inferred or hypothesized.
+That a move supports or opposes a position is a second claim, Claude's
+argumentative assignment. It is interpreted, and nothing checks it. The
+difference between the two methods is derived from reading them; that this
+difference supports Position A is not derived but argued.
+</p>
+
+<p>
+The pages belong to a local site of their own, named
+<code>trusted-examples-review.invalid</code>, a name that resolves nowhere.
+Their links are resolved in that site's page store, so a link leads to the
+local page, not to a remote one. A role comes from where a link stands, not
+from what its target says: these folds are structure written by Claude, not
+IBIS rules that anything enforces.
+</p>
+
+<h2>3. Checks actually run</h2>
+
+<ul>
+<li>
+  The SHA-256 values in <code>verification.txt</code> were recomputed for the
+  five files at <code>9b57bd4b</code> and match, and the line hashes above were
+  computed from <code>git show</code>. That is <strong>observed</strong>. It
+  says the source cited is the source that was tested, not that the criticism
+  holds.
+</li>
+<li>
+  No other <code>render-story-item</code> method for <code>:code</code> exists
+  in the repository, and no system other than its own subsystems depends on
+  <code>dreyeck/verified-example</code>. Observed by search.
+</li>
+<li>
+  The slice's own test ran on 2026-10-31, run by the slice's implementers. Its
+  case for unmarked Code checks escaping only, so its result does not bear on
+  the question.
+</li>
+<li>
+  This page's structural check reads the three Wiki pages, their folds, their
+  journals and the local resolution of their links. It checks structure, not
+  the criticism.
+</li>
+</ul>
+
+<h2>4. Not yet checked</h2>
+
+<p>
+The probe P1 has not been executed. It would render one unmarked Code item
+before and after loading <code>dreyeck/verified-example</code>, in a fresh
+process, and compare the HTML and the Inspector references. Until it runs, the
+difference between the two renderings rests on reading alone. Once it has run,
+its run and its result will be observed; whether the difference is a defect
+will still be the question above, open to argument.
+</p>
+
+<p>
+Nor has EXTRACT or the Claim Link Survey been run over these pages. Which
+typed relations those mechanisms would derive from the folds is therefore
+not observed either.
+</p>
+
+<h2>5. Your judgement</h2>
+
+<p>
+This page records no answer, and none is simulated. You may accept or reject a
+position, propose another, add or contest evidence, raise a new question, or
+judge the criticism unwarranted. Each of these is a paragraph on your own site
+that links back to the page it answers, so that a reply stays yours and
+Claude's moves stay Claude's.
+</p>
+
+<p>
+Fischer's response step, accept, reject or explain, is not implemented here.
+A binding decision on work is a different thing again: the project's
+Acceptance Records are written by the project owner, about declared work
+packages, and none of them concerns this question.
+</p>
+
+<p>
+  <a page="Lisp Critic on the Federated Context">
+    Lisp Critic on the Federated Context — observations, judgements and a recommendation, kept as three kinds of record
+  </a>
+</p>
+
+<p>
+  <a page="Anatomy of a Critique">
+    Anatomy of a Critique — what a rule's finding is, and why this page is not one
+  </a>
+</p>
+
+<p>
+  <a page="Reading the Lisp Critic Genealogy">
+    Back to the genealogy
+  </a>
+</p>

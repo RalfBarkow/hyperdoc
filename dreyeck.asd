@@ -2413,7 +2413,9 @@
                ;; The source structure is projected through the same
                ;; readable-D2 boundary the other readings use.
                "dreyeck/topicmap/tala"
-               "hyperdoc/explorer")
+               "hyperdoc/explorer"
+               ;; The Trusted Executable Examples review opens its local Wiki pages.
+               "dreyeck/local-fedwiki-page")
   :components ((:module "dreyeck/src" :components
                         ((:file "lisp-critic-reading")
                          (:file "historical-claims-views"
@@ -2427,7 +2429,8 @@
                          (:static-file "From Riesbeck Run to HyperDoc Critique.html")
                          (:static-file "Anatomy of a Critique.html")
                          (:static-file "Where the Source Lives.html")
-                         (:static-file "Lisp Critic on the Federated Context.html"))))
+                         (:static-file "Lisp Critic on the Federated Context.html")
+                         (:static-file "Reading the Trusted Executable Examples Review.html"))))
   :in-order-to ((asdf:test-op (asdf:test-op "dreyeck/lisp-critic/reading/tests"))))
 
 (asdf:defsystem "dreyeck/lisp-critic/reading/tests"
