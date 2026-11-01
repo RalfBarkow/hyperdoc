@@ -1,0 +1,29 @@
+{
+  "baseCommit": "f03d9a15234b5fdbb7c339c480d021e4a854b38a",
+  "branch": "codex/fedwiki-code-editor-inspector",
+  "initialWorkingTree": "clean new worktree",
+  "asdfOriginsBeforeChanges": {
+    "dreyeck": "/workspace/scratch/hyperdoc-fedwiki-code-editor-inspector/",
+    "hyperbook": "/workspace/scratch/hyperdoc-fedwiki-code-editor-inspector/",
+    "dreyeck/fedwiki-original-editor-demo": "/workspace/scratch/hyperdoc-fedwiki-code-editor-inspector/"
+  },
+  "linuxTests": {
+    "standalone": "PASS",
+    "inspector": "PASS",
+    "existingLauncherTests": "5 PASS under Nix Node 24"
+  },
+  "macOS": "Not executed: no macOS executor",
+  "unchanged": [
+    "flake.nix",
+    "flake.lock",
+    "hyperbook-fedwiki/",
+    "npm package.json and package-lock.json",
+    "original installed Wiki JS assets",
+    "other worktree sources",
+    "productive/personal sites and running Lisp images"
+  ],
+  "editorObservation": "Test-only wrapper counts one invocation and delegates to the shipped editor function; no editor markup or PUT implementation is supplied by the adapter. Original JS assets are byte-equal.",
+  "layout": "Original Wiki runtime in a different-origin iframe; only selected Code Item exposed; existing page/lineup model and hidden journal retained.",
+  "protocol": "No added CORS or postMessage API. Dedicated bootstrap frame-ancestors matches the exact assigned Catalog origin; sandbox allows scripts/same-origin, not popups/top-navigation/forms.",
+  "rawLogsExcluded": "Generated test-server session secret remains in private temporary logs; only HTTP summaries and ASDF origins are retained."
+}

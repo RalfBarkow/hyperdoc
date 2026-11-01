@@ -157,7 +157,7 @@ async function interactive(sbcl) {
   }
   try {
     const wiki = start(process.execPath,[path.join(here,'server.mjs'),site,String(wikiPort),'true'],'wiki',
-      {...process.env, HOME:path.join(work,'home')})
+      {...process.env, HOME:path.join(work,'home'), HYPERDOC_FEDWIKI_INSPECTOR_ORIGIN:catalogOrigin})
     await wait(wikiOrigin,wiki,'wiki')
     if (!fs.readFileSync(path.join(work,'wiki.log'),'utf8').includes(JSON.stringify({db:path.join(site,'pages'),security_legacy:true}))) {
       throw Error(`No bind confirmation from this Wiki process; inspect ${work}/wiki.log`)
@@ -203,13 +203,16 @@ async function main() {
     const browser = detectBrowser()
     console.log(`Browser verified: ${browser.executable}\n${browser.version}`)
     const output = args[0] || fs.mkdtempSync(path.join(process.env.HYPERDOC_FEDWIKI_TMPDIR || '/tmp','hyperdoc-wiki-e2e-'))
-    const child = spawn(process.execPath,[path.join(here,'run.mjs'),sbcl,browser.executable,output],
-      {cwd:repo,stdio:'inherit',env:lispEnvironment(path.resolve(output))})
-    const forward = () => child.kill('SIGINT')
-    process.on('SIGINT',forward);process.on('SIGTERM',forward)
-    const code = await new Promise((resolve,reject)=>{child.once('error',reject);child.once('exit',resolve)})
-    process.off('SIGINT',forward);process.off('SIGTERM',forward)
-    process.exitCode = code===null ? 1 : code
+    for (const mode of [[],['--inspector']]) {
+      const child = spawn(process.execPath,[path.join(here,'run.mjs'),sbcl,browser.executable,output,...mode],
+        {cwd:repo,stdio:'inherit',env:lispEnvironment(path.resolve(output))})
+      const forward = () => child.kill('SIGINT')
+      process.on('SIGINT',forward);process.on('SIGTERM',forward)
+      const code = await new Promise((resolve,reject)=>{child.once('error',reject);child.once('exit',resolve)})
+      process.off('SIGINT',forward);process.off('SIGTERM',forward)
+      process.exitCode = code===null ? 1 : code
+      if (process.exitCode) break
+    }
   } else throw Error('Use fedwiki-original-editor-demo or fedwiki-original-editor-e2e')
 }
 

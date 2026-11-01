@@ -1,0 +1,59 @@
+{
+  "title": "Original Editor Test",
+  "story": [
+    {
+      "id": "1111111111111111",
+      "type": "paragraph",
+      "text": "An isolated paragraph; this item stays unchanged."
+    },
+    {
+      "id": "2222222222222222",
+      "type": "code",
+      "text": "(defun square (x) (expt x 2))",
+      "language": "commonlisp"
+    }
+  ],
+  "journal": [
+    {
+      "type": "create",
+      "id": "3333333333333333",
+      "item": {
+        "title": "Original Editor Test"
+      },
+      "date": 1700000000000
+    },
+    {
+      "type": "add",
+      "id": "1111111111111111",
+      "item": {
+        "id": "1111111111111111",
+        "type": "paragraph",
+        "text": "An isolated paragraph; this item stays unchanged."
+      },
+      "date": 1700000000001
+    },
+    {
+      "type": "add",
+      "id": "2222222222222222",
+      "item": {
+        "id": "2222222222222222",
+        "type": "code",
+        "text": "(defun square (x) (* x x))",
+        "language": "lisp"
+      },
+      "after": "1111111111111111",
+      "date": 1700000000002
+    },
+    {
+      "type": "edit",
+      "id": "2222222222222222",
+      "item": {
+        "id": "2222222222222222",
+        "type": "code",
+        "text": "(defun square (x) (expt x 2))",
+        "language": "commonlisp"
+      },
+      "date": 1793569598378
+    }
+  ]
+}

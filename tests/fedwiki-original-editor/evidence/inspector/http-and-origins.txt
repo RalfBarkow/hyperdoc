@@ -1,0 +1,12 @@
+denied: {"db":"/tmp/hyperdoc-inspector-final-witness/run-LKb1SV/site/pages","security_legacy":false}
+denied: localhost PUT /page/original-editor-test/action 403 9 - 9.149 ms
+wiki: {"db":"/tmp/hyperdoc-inspector-final-witness/run-LKb1SV/site/pages","security_legacy":true}
+wiki: localhost GET /client.js 200 131747 - 1.646 ms
+wiki: localhost GET /security/security.js 404 159 - 1.505 ms
+wiki: localhost GET /original-editor-test.json 200 714 - 1.602 ms
+wiki: localhost GET /plugins/code/code.js 200 1092430 - 1.436 ms
+wiki: localhost PUT /page/original-editor-test/action 200 2 - 10.955 ms
+FASL-CACHE /tmp/hyperdoc-inspector-final-witness/fasl/ (source directories preserved)
+ASDF-ORIGIN dreyeck /workspace/scratch/hyperdoc-fedwiki-code-editor-inspector/
+ASDF-ORIGIN hyperbook /workspace/scratch/hyperdoc-fedwiki-code-editor-inspector/
+ASDF-ORIGIN dreyeck/fedwiki-original-editor-demo /workspace/scratch/hyperdoc-fedwiki-code-editor-inspector/

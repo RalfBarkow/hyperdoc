@@ -9,6 +9,11 @@
 (defparameter +slug+ "original-editor-test")
 (defparameter +site+ "fedwiki:original-editor-test.invalid")
 
+;; Only this demo's hydrated code object gains a view. Its inherited id, text
+;; and data remain those of the real page; no upstream renderer is replaced.
+(defclass inspector-code-item (hyperbook/fedwiki::story-item)
+  ((source :initarg :source :reader item-source)))
+
 (defun test-root ()
   (let ((root (uiop:getenv "HYPERDOC_FEDWIKI_EDITOR_TEST_ROOT")))
     (unless root (error "No isolated original-editor test site configured."))
@@ -22,9 +27,36 @@
   "Read the actual JSON file again; do not reuse a hydrated page cache."
   (let* ((root (test-root))
          (wiki (lp:make-local-fedwiki root +site+)))
-    (make-instance 'stored-page
-                   :source (lp:observe-local-fedwiki-page-source root +slug+)
-                   :page (lp:make-local-fedwiki-page root wiki +slug+))))
+    (let* ((source (lp:observe-local-fedwiki-page-source root +slug+))
+           (page (lp:make-local-fedwiki-page root wiki +slug+))
+           (items (remove-if-not
+                   (lambda (item) (and (eq :code (hyperbook/fedwiki::item-type-of item))
+                                       (equal "2222222222222222" (hyperbook/fedwiki::id-of item))))
+                   (coerce (hyperbook/fedwiki::story-of page) 'list))))
+      (unless (= 1 (length items)) (error "The isolated Code target is not unique."))
+      (change-class (first items) 'inspector-code-item :source source)
+      (make-instance 'stored-page :source source :page page))))
+
+(v:defview original-code-editor-view (item inspector-code-item)
+  (v:html-view :title "Original Wiki editor" :priority 5
+    (let* ((source (item-source item))
+           (origin (uiop:getenv "HYPERDOC_FEDWIKI_EDITOR_TEST_ORIGIN"))
+           (url (format nil "~A/view/~A?hyperdocCodeItem=~A&revision=~A"
+                        origin (lp:page-source-slug source) (hyperbook/fedwiki::id-of item)
+                        (lp:page-source-sha256 source))))
+      (v:html
+        (:h2 "Original Code plugin editor")
+        (:p "Target: " (:code (v:esc +site+)) " / "
+            (:code (v:esc (lp:page-source-slug source))) " / "
+            (:code (v:esc (hyperbook/fedwiki::id-of item))))
+        (:p "Observed JSON SHA-256: " (:code (v:esc (lp:page-source-sha256 source))))
+        (:iframe :class "original-code-editor" :title "Original Wiki Code editor"
+                 :src url :sandbox "allow-scripts allow-same-origin"
+                 :style "width:100%;height:430px;border:1px solid #aaa;" "")
+        (:p "The frame has its own Wiki origin and the original client runtime. Only the selected Item is exposed. Click outside the Item to save, then verify from disk:")
+        (v:eval-button "Read stored page again"
+          (dreyeck/authority-policy:reviewed-thunk "fedwiki-original-editor-demo/reread"
+            (read-stored-page)))))))
 
 (dreyeck/authority-policy:register-reviewed-control
  "fedwiki-original-editor-demo/reread"

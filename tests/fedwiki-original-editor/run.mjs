@@ -13,7 +13,9 @@ import {slug, paragraphId, codeId, paragraph, code, initialPage} from './fixture
 
 const here = path.dirname(fileURLToPath(import.meta.url))
 const repo = path.resolve(here, '../..')
-const [lisp, chrome, destination] = process.argv.slice(2)
+const [lisp, chrome, destination, mode] = process.argv.slice(2)
+const inspectorCase = mode === "--inspector"
+assert(!mode || inspectorCase, "Unknown integration case")
 assert(destination, 'usage: node run.mjs LISP_WRAPPER CHROMIUM OUTPUT_OUTSIDE_CHECKOUT')
 const output = path.resolve(destination)
 assert(!output.startsWith(repo + path.sep) && output !== repo)
@@ -27,8 +29,8 @@ fs.writeFileSync(file, JSON.stringify(initial, null, 2) + '\n')
 const read = () => JSON.parse(fs.readFileSync(file, 'utf8'))
 const sha = () => createHash('sha256').update(fs.readFileSync(file)).digest('hex')
 const beforeSha = sha()
-const report = {passed:false, sourceBase:'2b864774ee6a1e9e4187e64d863f8ea39e53430f',
-  work, file, beforeSha, versions:{}, steps:[], browserErrors:[], externalRequests:[]}
+const report = {passed:false, sourceBase:'f03d9a15234b5fdbb7c339c480d021e4a854b38a',
+  integrationCase:inspectorCase ? 'inspector' : 'standalone', work, file, beforeSha, versions:{}, steps:[], browserErrors:[], externalRequests:[]}
 for (const name of ['wiki','wiki-client','wiki-server','wiki-plugin-code','wiki-plugin-paragraph']) {
   report.versions[name] = JSON.parse(fs.readFileSync(path.join(here,'node_modules',name,'package.json'))).version
 }
@@ -89,7 +91,7 @@ try {
   const wikiPort = await freePort(), catalogPort = await freePort([wikiPort])
   const wikiOrigin = `http://127.0.0.1:${wikiPort}`, catalogOrigin = `http://127.0.0.1:${catalogPort}`
   Object.assign(report,{wikiOrigin,catalogOrigin,authorization:'original default security, unclaimed isolated loopback site, security_legacy=true'})
-  const wiki = start(process.execPath,[path.join(here,'server.mjs'),site,String(wikiPort),'true'],'wiki')
+  const wiki = start(process.execPath,[path.join(here,'server.mjs'),site,String(wikiPort),'true'],'wiki',{HYPERDOC_FEDWIKI_INSPECTOR_ORIGIN:catalogOrigin})
   await waitHTTP(wikiOrigin,wiki,'wiki')
   const opts = fs.readFileSync(path.join(work,'wiki.log'),'utf8').split('\n').find(l=>l.startsWith('{"db":'))
   assert.equal(JSON.parse(opts).db,pages)
@@ -129,7 +131,7 @@ try {
   const hyperdoc = await context.newPage()
   installBoundClicks(hyperdoc)
   hyperdoc.setDefaultTimeout(45000)
-  hyperdoc.on('pageerror',e=>report.browserErrors.push('HyperDoc: '+e.message))
+  hyperdoc.on('pageerror',e=>report.browserErrors.push((e.stack?.includes(wikiOrigin) ? 'Wiki: ' : 'HyperDoc: ')+e.message))
   await hyperdoc.goto(catalogOrigin)
   await hyperdoc.getByText('Original Wiki Editor Test',{exact:true}).and(hyperdoc.locator(':visible')).first().click()
   const last = () => hyperdoc.locator('.inspector-pane').last()
@@ -146,10 +148,35 @@ try {
   assert((await last().innerText()).includes(codeId))
   assert((await last().innerText()).includes('lisp'))
   report.steps.push('Catalog → demo → original generic grey Code renderer → code Inspector reference')
-  const clientLink = demo.getByRole('link',{name:'Open original Wiki client'})
-  assert.equal(await clientLink.getAttribute('href'),`${wikiOrigin}/view/${slug}`)
-  const [wikiPage] = await Promise.all([context.waitForEvent('page'), clientLink.click()])
-  wikiPage.setDefaultTimeout(45000); wikiPage.on('pageerror',e=>report.browserErrors.push('Wiki: '+e.message))
+  let wikiPage
+  const codePane = hyperdoc.locator('.inspector-pane').nth((await hyperdoc.locator('.inspector-pane').count())-1)
+  if (inspectorCase) {
+    assert.equal(context.pages().length,1)
+    for (const query of [`hyperdocCodeItem=${codeId}&revision=stale`, `hyperdocCodeItem=${paragraphId}&revision=${beforeSha}`]) {
+      const refused = await fetch(`${wikiOrigin}/view/${slug}?${query}`)
+      assert.equal(refused.status,409)
+      assert.equal(sha(),beforeSha)
+    }
+    await codePane.getByRole('button',{name:'Original Wiki editor',exact:true}).click()
+    await codePane.getByRole('heading',{name:'Original Code plugin editor',exact:true}).waitFor()
+    const frameElement = codePane.locator('iframe.original-code-editor')
+    await frameElement.waitFor()
+    const src = await frameElement.getAttribute('src')
+    assert.equal(new URL(src).origin,wikiOrigin)
+    assert.equal(new URL(src).searchParams.get('hyperdocCodeItem'),codeId)
+    const boundary = await fetch(src)
+    assert.equal(boundary.headers.get('content-security-policy'),`frame-ancestors ${catalogOrigin}`)
+    assert.equal(boundary.headers.get('access-control-allow-origin'),null)
+    const handle = await frameElement.elementHandle()
+    wikiPage = await handle.contentFrame()
+    await wikiPage.getByRole('button',{name:'Edit with original Wiki plugin',exact:true}).waitFor()
+  } else {
+    const clientLink = demo.getByRole('link',{name:'Open original Wiki client'})
+    assert.equal(await clientLink.getAttribute('href'),`${wikiOrigin}/view/${slug}`)
+    const [popup] = await Promise.all([context.waitForEvent('page'), clientLink.click()])
+    wikiPage = popup
+    wikiPage.on('pageerror',e=>report.browserErrors.push('Wiki: '+e.message))
+  }
   const item = wikiPage.locator(`.item[data-id="${codeId}"]`)
   await item.waitFor()
   const api = await wikiPage.evaluate(() => ({
@@ -159,12 +186,43 @@ try {
   }))
   assert.deepEqual(api,{emit:'function',bind:'function',editor:'function',doPlugin:'function',put:'function',renderFrom:'function',local:false,owner:true})
   report.compatibility = api
-  if (!(await wikiPage.locator('.editEnable').isVisible())) await wikiPage.locator('footer').getByText('wiki',{exact:false}).click()
-  await item.dblclick()
+  if (inspectorCase) {
+    const action = wikiPage.getByRole('button',{name:'Edit with original Wiki plugin',exact:true})
+    await action.waitFor({state:'visible'})
+    // Observe and delegate to the shipped function, never supply editor markup.
+    await wikiPage.locator('#hyperdoc-code-toolbar button:not([disabled])').waitFor()
+    const originalSource = await wikiPage.evaluate(() => {
+      const plugin = window.plugins.code, original = plugin.editor
+      window.__originalEditorCalls = 0
+      plugin.editor = function(...args) {window.__originalEditorCalls++;return original.apply(this,args)}
+      return original.toString()
+    })
+    assert(originalSource.includes('code-language'))
+    report.originalEditorFunctionSHA256 = createHash('sha256').update(originalSource).digest('hex')
+    // Inspector's jQuery binding helper is inapplicable to this frame's native
+    // addEventListener control. Use actual browser pointer input after readiness.
+    await action.scrollIntoViewIfNeeded()
+    const box = await action.boundingBox()
+    assert(box)
+    await hyperdoc.mouse.click(box.x+box.width/2,box.y+box.height/2)
+    await item.locator('textarea').waitFor()
+    assert.equal(await wikiPage.evaluate(()=>window.__originalEditorCalls),1)
+    assert.equal(await item.locator('textarea').inputValue(),code.text)
+    assert.equal(await wikiPage.locator('.item:visible').count(),1)
+    assert.equal(context.pages().length,1)
+    assert((await codePane.innerText()).includes(codeId))
+    assert((await codePane.innerText()).includes('fedwiki:original-editor-test.invalid'))
+    await hyperdoc.screenshot({path:path.join(work,'inspector-original-editor.png'),fullPage:true})
+    report.inspector = {target:['fedwiki:original-editor-test.invalid',slug,codeId],originalEditorCalls:1,browserPages:context.pages().length,visibleItems:1,staleAndWrongTargetRefused:true,frameAncestors:catalogOrigin,additionalCORS:false}
+  } else {
+    if (!(await wikiPage.locator('.editEnable').isVisible())) await wikiPage.locator('footer').getByText('wiki',{exact:false}).click()
+    await item.dblclick()
+  }
   await item.locator('textarea').fill('(defun square (x) (expt x 2))')
   await item.locator('#code-language').fill('commonlisp')
-  const put = wikiPage.waitForResponse(r=>r.request().method()==='PUT' && r.url()===`${wikiOrigin}/page/${slug}/action`)
-  await wikiPage.locator('h1').first().click()
+  const put = hyperdoc.context().waitForEvent('response', {predicate:r=>r.request().method()==='PUT' && r.url()===`${wikiOrigin}/page/${slug}/action`})
+  if (inspectorCase) await wikiPage.getByRole('status').click()
+  else await wikiPage.locator('h1').first().click()
   const response = await put
   assert.equal(response.status(),200)
   const sent = JSON.parse(new URLSearchParams(response.request().postData()).get('action'))
@@ -186,7 +244,8 @@ try {
   report.steps.push('Original code plugin edited text and language; authorized PUT 200; disk Item and dated journal match request; no localStorage page/fallback')
   // Stop the sole writer before HyperDoc's independent reread.
   wiki.kill('SIGTERM'); await new Promise(r=>wiki.once('exit',r))
-  await demo.getByRole('button',{name:'Read stored page again',exact:true}).click()
+  if (inspectorCase) await codePane.getByRole('button',{name:'Read stored page again',exact:true}).click()
+  else await demo.getByRole('button',{name:'Read stored page again',exact:true}).click()
   await last().getByRole('heading',{name:'Stored Wiki page',exact:true}).waitFor()
   const reread = JSON.parse(await last().locator('.persisted-json').innerText())
   assert.deepEqual(reread,persisted)
@@ -194,6 +253,8 @@ try {
   assert((await last().innerText()).includes(sha()))
   await hyperdoc.screenshot({path:path.join(work,'hyperdoc-reread.png'),fullPage:true})
   assert(fs.readFileSync(path.join(work,'catalog.log'),'utf8').includes('PARSE-TREE-REFERENCE'))
+  assert.deepEqual(report.externalRequests,[])
+  if (inspectorCase) assert.equal(context.pages().length,1)
   report.steps.push('Node writer stopped; HyperDoc independently reread the same file, matching JSON, journal, SHA-256 and generic rendering; explicit P coordinate checked in Lisp parse tree')
   // Default legacy security has no browser security plugin. Do not hide it with a shim.
   assert(report.browserErrors.every(e=>e === "Wiki: Cannot read properties of undefined (reading 'setup')"),JSON.stringify(report.browserErrors))

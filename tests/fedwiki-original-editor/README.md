@@ -67,10 +67,15 @@ and checking the processes' own bind confirmations. Open the printed Catalog URL
 
 **Catalog → Original Wiki Editor Test → Text pages → Editing One Isolated Wiki Page**.
 
-Click **Open original Wiki client**; enable editing with the normal **wiki** footer
-control, double-click Code, edit text and language, and click outside the Item to
-save. Return to HyperDoc and press **Read stored page again**. The Wiki URL opens
-the page, not an individual Item. There is no claimed direct HyperDoc-page URL.
+For the **embedded Inspector case**, click the small **code** reference above the
+grey code block. In that actual Item's Inspector pane, select **Original Wiki
+editor**, then click **Edit with original Wiki plugin** inside the frame. Edit
+text and language; click the frame's status text outside the Item to save. Then
+press **Read stored page again** in the Inspector to verify from the file.
+This path opens no second tab. The item ID, logical site, slug and source revision
+remain visible above the editor. The separate **Open original Wiki client** link
+is retained for the earlier standalone case. There is no claimed direct
+HyperDoc-page URL. See [the integration boundary and evidence](INSPECTOR-INTEGRATION.md).
 
 **Stop:** Ctrl-C in the launching terminal stops only the processes it started.
 It first requests normal Catalog shutdown via its private stop file, then uses
@@ -87,8 +92,10 @@ For the automated browser witness, in the same shell after stopping the demo:
 fedwiki-original-editor-e2e
 ```
 
-It runs the existing `run.mjs` with this shell's SBCL, a verified Chrome/Chromium
-executable and a new temporary evidence directory; the report path is printed.
+It runs `run.mjs` twice with this shell's SBCL and a verified Chrome/Chromium:
+first the existing standalone case, then the item-specific Inspector case. Each
+gets its own temporary site, browser context and report (`integrationCase` is
+`standalone` or `inspector`). Both must pass; both report paths are printed.
 An optional single argument selects an output directory outside the checkout:
 
 ```sh
