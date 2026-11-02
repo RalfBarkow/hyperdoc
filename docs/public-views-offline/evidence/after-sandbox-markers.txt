@@ -1,0 +1,14 @@
+# After: sandboxed 'nix build .#checks.x86_64-linux.catalog' at 4435a3e7369027ac0f47ff391f592914e520d02f (check derivation nz7ig021q8k4dx6p0s4mz3jd4d056nng-catalog-startup-contract.drv; sandbox = true; started/ended 2026-11-02T08:47:24Z / 2026-11-02T08:52:42Z)
+application.log:Catalog application tests passed: graph, configuration, routes, lifecycle; a further registered HyperBook is tolerated by these checks and named by the admission check.
+asdf-methods.log:ASDF-METHOD-PRESERVATION-PASS: 183 assertions; ASDF 3.3.1 methods unchanged by identity, behaviour equal before and after, a control collision is seen.
+lisp.log:CATALOG-TOPIC-MAPS-PACKAGE-PASS
+membership-ctm-review.log:DEFAULT-CATALOG 24 HyperBooks: the 23 of 19e824d, each once, and dreyeck/fedwiki-original-editor-demo once; no other.
+membership-ctm-review.log:EDITOR-DEMO-MEMBERSHIP-PASS
+membership-default.log:DEFAULT-CATALOG 24 HyperBooks: the 23 of 19e824d, each once, and dreyeck/fedwiki-original-editor-demo once; no other.
+membership-default.log:EDITOR-DEMO-MEMBERSHIP-PASS
+original-editor-demo.log:FEDWIKI-ORIGINAL-EDITOR-CONFIGURATION-PASS: unset and unusable values give an unconfigured, read-only demonstration with the reason; no other site variable is used; only isolated-loopback with http://127.0.0.1:PORT embeds the editor; unknown modes and malformed origins are refused and named; the target c
+original-editor-demo.log:FEDWIKI-ORIGINAL-EDITOR-DEMO-PASS: admitted once from this checkout, and loading it again adds nothing; served without a configured site the page says so, signals nothing, links and embeds nothing; an unreadable site is explained read-only; read-only withholds the frame; isolated-loopback embeds the one 
+public-views.log:TOPIC-MAPS-PUBLIC-VIEWS-PASS: 6 objects, rendered served and developing; 7 run buttons are markers served and buttons developing; no plain thunk is reachable from any served view. Walked 300 objects by navigation (bounded, not exhaustive): 9538 controls (inert=8478, slot-reader=993, reviewed=11, reviewed-class=5
+public-views.log:TOPIC-MAPS-PUBLIC-VIEWS-OFFLINE: 3 remote FedWiki sites asked for by the views, none contacted (every host fails to resolve, a case the FedWiki client retains as the site's status): ward.voices.ustawi.wiki, next.ward.dojo.fed.wiki, mech.dreyeck.ch.
+topic-maps-asd: /nix/store/kna6395gl32f2hl4n3ha4776zm9r0sgb-source/topic-maps.asd
+executable.log: Ran 6 tests in 160.105s OK 
