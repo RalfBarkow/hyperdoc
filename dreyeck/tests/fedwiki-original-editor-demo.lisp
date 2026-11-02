@@ -24,6 +24,18 @@
                     (loop for view in (hv:all-views object)
                           when (typep view 'hv:html-view) collect (hv:view-html view))))))
 
+(defun %controls-of-views (object)
+  "The controls (references with an eval- or action- id, the ones dreyeck/authority-policy contains) of OBJECT's HTML views, served."
+  (served (lambda ()
+            (loop for view in (hv:all-views object)
+                  when (typep view 'hv:html-view)
+                    append (progn (hv:view-html view)
+                                  (remove-if-not (lambda (reference)
+                                                   (and (consp reference) (stringp (car reference))
+                                                        (or (uiop:string-prefix-p "eval-" (car reference))
+                                                            (uiop:string-prefix-p "action-" (car reference)))))
+                                                 (hv:view-references view)))))))
+
 (defun %view-html (object title)
   (let ((view (find title (hv:all-views object) :key #'hv:view-title :test #'string=)))
     (assert view () "~S has no view ~S" object title)
@@ -89,7 +101,13 @@
        (assert (search "HYPERDOC_FEDWIKI_EDITOR_TEST_ROOT" html))
        (assert (not (search "<iframe" html)))
        (assert (not (search "Open original Wiki client" html)))
-       (assert (not (search "Read stored page again" html)))
+       ;; The page's prose names the reread button; what must be absent is the control itself. The only controls left are the
+       ;; Inspector's generic Operations, which dreyeck/authority-policy decides again when clicked.
+       (let ((controls (%controls-of-views page)))
+         (assert (notany (lambda (reference) (typep (cdr reference) 'dreyeck/authority-policy:reviewed-thunk)) controls)
+                 () "the unconfigured page offers a reviewed control: ~S" controls)
+         (assert (every (lambda (reference) (typep (cdr reference) 'dreyeck/authority-policy:operation-thunk)) controls)
+                 () "the unconfigured page offers a control that is not a policy Operation: ~S" controls))
        (assert (not (search "No isolated original-editor test site configured" html)) () "the former error is still signalled")
        (assert (not (search "No original Wiki client origin configured" html)) () "the former error is still signalled")
        ;; The reviewed control, invoked anyway, gives an object that says why, not a condition.
@@ -132,6 +150,10 @@ writes: the site's files are the same octets afterwards."
          (assert (eq :read-only (cfg:configuration-mode configuration)))
          (assert (typep observation 'demo:stored-page))
          (assert (search "(defun square (x) (* x x))" (%view-html observation "Stored Wiki page")))
+         ;; Positive control for %CONTROLS-OF-VIEWS: a configured stored page does offer the reviewed reread.
+         (assert (some (lambda (reference) (typep (cdr reference) 'dreyeck/authority-policy:reviewed-thunk))
+                       (%controls-of-views observation))
+                 () "the configured stored page offers no reread control")
          (assert (not (search "<iframe" editor)))
          (assert (search "not offered" editor))
          (assert (search "fedwiki:original-editor-test.invalid" editor)))
