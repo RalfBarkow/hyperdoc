@@ -3548,3 +3548,10 @@
   :serial t
   :pathname "dreyeck/src/"
   :components ((:file "upstream-assessment-inspector-package") (:file "upstream-assessment-views")))
+
+(asdf:defsystem "dreyeck/workflow/code-ownership"
+  :description "The code ownership inventory of upstream's library paths: a manifest of upstream, the fork's differences by definition, their owners and plans"
+  :depends-on ("dreyeck/workflow/upstream-assessment")
+  :serial t
+  :pathname "dreyeck/src/"
+  :components ((:file "code-ownership-package") (:file "code-ownership")))
