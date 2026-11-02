@@ -1,0 +1,12 @@
+# RED: the new regression check against the UNCHANGED library (fix absent), same committed test
+## exit status and process output of the two children (injected probe; real resolver under 'unshare -rn')
+=== INJECTED: exit 1
+  OUTCOME NS-HOST-NOT-FOUND-ERROR NS-HOST-NOT-FOUND-ERROR ns-error=T snapshot=failed
+  Unhandled USOCKET:NS-TRY-AGAIN-ERROR in thread #<SB-THREAD:THREAD tid=1605 "Anonymous thread" RUNNING
+  unhandled condition in --disable-debugger mode, quitting
+=== REAL: exit 1
+  Unhandled USOCKET:NS-TRY-AGAIN-ERROR in thread #<SB-THREAD:THREAD tid=1611 "Anonymous thread" RUNNING
+  unhandled condition in --disable-debugger mode, quitting
+
+## the check itself
+CHECK-FAILED: A name-resolution failure of a FedWiki site ended the process (exit 1):

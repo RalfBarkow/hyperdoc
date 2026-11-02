@@ -1,0 +1,12 @@
+rcode0    -> SB-BSD-SOCKETS:NAME-SERVICE-ERROR  ns-error-p=NIL  try-again-p=NIL
+rcode1    -> USOCKET:NS-HOST-NOT-FOUND-ERROR  ns-error-p=T  try-again-p=NIL
+rcode2    -> USOCKET:NS-TRY-AGAIN-ERROR  ns-error-p=T  try-again-p=T
+rcode3    -> USOCKET:NS-HOST-NOT-FOUND-ERROR  ns-error-p=T  try-again-p=NIL
+rcode4    -> USOCKET:NS-TRY-AGAIN-ERROR  ns-error-p=T  try-again-p=T
+rcode5    -> USOCKET:NS-TRY-AGAIN-ERROR  ns-error-p=T  try-again-p=T
+noserver  -> USOCKET:NS-TRY-AGAIN-ERROR  ns-error-p=T  try-again-p=T
+silent    -> USOCKET:NS-TRY-AGAIN-ERROR  ns-error-p=T  try-again-p=T
+rcode6    -> USOCKET:NS-HOST-NOT-FOUND-ERROR  ns-error-p=T  try-again-p=NIL
+rcode9    -> USOCKET:NS-HOST-NOT-FOUND-ERROR  ns-error-p=T  try-again-p=NIL
+rcode10   -> USOCKET:NS-HOST-NOT-FOUND-ERROR  ns-error-p=T  try-again-p=NIL
+rcode15   -> USOCKET:NS-HOST-NOT-FOUND-ERROR  ns-error-p=T  try-again-p=NIL

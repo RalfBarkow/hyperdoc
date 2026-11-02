@@ -1,0 +1,6 @@
+# INITIALIZE-FEDWIKI against +PREVIOUS+: the contract of the change, and its mutants
+ENTRY-MISSING: CONTRACT-VIOLATED: INITIALIZE-FEDWIKI must name USOCKET:NS-NO-RECOVERY-ERROR exactly once, in its handler; it names it 0 times.
+EXTRA-CLAUSE: CONTRACT-VIOLATED: INITIALIZE-FEDWIKI differs from its form at +PREVIOUS+ in more than the two name-resolution conditions.
+OTHER-CHANGE: CONTRACT-VIOLATED: INITIALIZE-FEDWIKI differs from its form at +PREVIOUS+ in more than the two name-resolution conditions.
+REAL: CONTRACT-HOLDS
+TWICE: CONTRACT-VIOLATED: INITIALIZE-FEDWIKI must name USOCKET:NS-TRY-AGAIN-ERROR exactly once, in its handler; it names it 2 times.
