@@ -1,0 +1,15 @@
+# Catalog startup assertions of both E2E runs (tests/fedwiki-original-editor/serve.lisp), at b989c01
+## standalone
+ASDF-ORIGIN dreyeck <checkout>/
+ASDF-ORIGIN hyperbook <checkout>/
+ASDF-ORIGIN dreyeck/fedwiki-original-editor-demo <checkout>/
+PARSE-TREE-REFERENCE ("fedwiki:original-editor-test.invalid"
+CATALOG-MEMBERSHIP dreyeck/fedwiki-original-editor-demo once among 24
+EDITOR-MODE isolated-loopback-editor
+## inspector
+ASDF-ORIGIN dreyeck <checkout>/
+ASDF-ORIGIN hyperbook <checkout>/
+ASDF-ORIGIN dreyeck/fedwiki-original-editor-demo <checkout>/
+PARSE-TREE-REFERENCE ("fedwiki:original-editor-test.invalid"
+CATALOG-MEMBERSHIP dreyeck/fedwiki-original-editor-demo once among 24
+EDITOR-MODE isolated-loopback-editor

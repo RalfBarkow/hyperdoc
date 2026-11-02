@@ -1,0 +1,15 @@
+v24.22.1
+Chromium 156.0.8078.79 
+✔ Darwin detects system and per-user app executables; explicit selection is exclusive (2.775894ms)
+✔ browser executable paths with spaces are probed without shell expansion; invalid override fails (7.595525ms)
+✔ Node 20 is refused before the ESM dependency tree loads (0.766628ms)
+✔ Catalog startup deadline is bounded, configurable and longer than cold compile (0.400089ms)
+✔ Interactive demo FASLs remain in an independent reusable, runtime-scoped cache (4.492304ms)
+✔ without security_legacy the original security refuses every write and the frame adapter (1162.213567ms)
+✔ the frame adapter serves the one Code item to the exact loopback parent, and refuses everything else (1158.531965ms)
+✔ the frame adapter refuses a parent that is not a loopback origin (2892.219724ms)
+✔ security_legacy=true authorizes anyone for any page of an unclaimed site (the reason it stays loopback-only) (1083.850848ms)
+ℹ tests 9
+ℹ pass 9
+ℹ fail 0
+Chromium 156.0.8078.79

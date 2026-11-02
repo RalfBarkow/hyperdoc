@@ -1,0 +1,58 @@
+{
+  "passed": true,
+  "sourceBase": "f03d9a15234b5fdbb7c339c480d021e4a854b38a",
+  "integrationCase": "standalone",
+  "work": "<evidence>/run-SE0q7W",
+  "file": "<evidence>/run-SE0q7W/site/pages/original-editor-test",
+  "beforeSha": "42953ba47d6fea227f84d1430a0b41cbdfa98ddaa96a90e5215f9c155b479288",
+  "versions": {
+    "wiki": "0.41.0",
+    "wiki-client": "0.33.0",
+    "wiki-server": "0.28.1",
+    "wiki-plugin-code": "0.6.1",
+    "wiki-plugin-paragraph": "0.4.0"
+  },
+  "steps": [
+    "Original security denies PUT without grant: 403 and unchanged page bytes",
+    "Catalog → demo → original generic grey Code renderer → code Inspector reference",
+    "Original code plugin edited text and language; authorized PUT 200; disk Item and dated journal match request; no localStorage page/fallback",
+    "Node writer stopped; HyperDoc independently reread the same file, matching JSON, journal, SHA-256 and generic rendering; explicit P coordinate checked in Lisp parse tree"
+  ],
+  "browserErrors": [
+    "Wiki: Cannot read properties of undefined (reading 'setup')"
+  ],
+  "externalRequests": [],
+  "wikiOrigin": "http://127.0.0.1:37341",
+  "catalogOrigin": "http://127.0.0.1:44435",
+  "authorization": "original default security, unclaimed isolated loopback site, security_legacy=true",
+  "browser": "156.0.8078.79",
+  "compatibility": {
+    "emit": "function",
+    "bind": "function",
+    "editor": "function",
+    "doPlugin": "function",
+    "put": "function",
+    "renderFrom": "function",
+    "local": false,
+    "owner": true
+  },
+  "originalAssetsByteEqual": {
+    "/client.js": true,
+    "/plugins/code/code.js": true
+  },
+  "knownClientLimitation": "The original default legacy security module supplies no /security/security.js UI plugin (setup error); server authorization and code editing were verified independently.",
+  "afterSha": "8361b746e66cc075a7a2ef2cbfc89cfc5f9f82945c1689f8366b37f5d5a917d0",
+  "action": {
+    "type": "edit",
+    "id": "2222222222222222",
+    "item": {
+      "id": "2222222222222222",
+      "type": "code",
+      "text": "(defun square (x) (expt x 2))",
+      "language": "commonlisp"
+    },
+    "date": 1793607455435
+  },
+  "paragraphUnchanged": true,
+  "localStorageFallback": false
+}

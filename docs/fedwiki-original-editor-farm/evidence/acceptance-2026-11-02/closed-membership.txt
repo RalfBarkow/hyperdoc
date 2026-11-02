@@ -1,0 +1,3 @@
+# Fresh process: (asdf:load-system "dreyeck/catalog") then the form of DREYECK/CATALOG/TESTS::CLOSED-MEMBERSHIP-EVALUATION, at b989c01
+ADMITTED-CATALOG-PROOF: 24 admitted HyperBooks, each once, no other.
+EXIT=0

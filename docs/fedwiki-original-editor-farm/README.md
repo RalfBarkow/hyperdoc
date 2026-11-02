@@ -43,11 +43,10 @@ Considered, in order of size:
 3. A list-valued `HYPERDOC_CATALOG_SYSTEM`: changes the startup contract and the guard, which the one-catalog review
    deliberately left untouched.
 
-A side effect of option 1 [der, not executed]: since `cc781f7`, `check-reviewed-controls-match-their-sites` (run by
+A side effect of option 1 (derived first, observed on 2026-11-02, see [verification.md](verification.md#the-base-observed)): since `cc781f7`, `check-reviewed-controls-match-their-sites` (run by
 `dreyeck/topic-maps-public-views/tests`, part of `checks.<system>.catalog`) scans `dreyeck/src/*.lisp`, finds the demo's
 `reviewed-thunk "fedwiki-original-editor-demo/reread"` and would report it *used but not registered*, because no test
-image loaded the demo. With the demo in `dreyeck/catalog` it is registered in every Catalog image. The Nix check was not
-runnable here (see *Not run*), so this is a reading of the code, not an observed failure.
+image loaded the demo. With the demo in `dreyeck/catalog` it is registered in every Catalog image.
 
 ## 2. The Wiki farm: what the repository records
 
@@ -113,6 +112,10 @@ Not changed: original Wiki client, server and plugin sources and the npm lockfil
 
 ## Evidence (2026-11-02, x86_64-linux cloud container)
 
+The acceptance with the real runtime (Nix check, closed membership, both browser E2E cases) is recorded in
+[verification.md](verification.md#acceptance-record-2026-11-02). The table below is the earlier evidence, gathered while
+codeberg.org was unreachable: configuration tests in a bare SBCL, stubs and Node tests only.
+
 | Check | Result |
 |---|---|
 | `dreyeck/tests/fedwiki-original-editor-configuration.lisp` in a bare SBCL 2.4.10 (`run-tests`) | pass [obs]; two mutants (any origin counted as loopback; root falling back to `HYPERDOC_FEDWIKI_SITE_ROOT`) are killed [obs] |
@@ -124,13 +127,9 @@ Not changed: original Wiki client, server and plugin sources and the npm lockfil
 
 ## Not run here
 
-`codeberg.org` is refused by this environment's network policy, and the Lisp runtime needs `html-inspector-views`,
-`plump-inspector-views`, `clog-moldable-inspector` (and the workflow editor) from there. Therefore **not run**:
-`checks.x86_64-linux.catalog` (including the closed-membership check, the public-views walk with
-`check-reviewed-controls-match-their-sites`, and the new `dreyeck/fedwiki-original-editor-demo/tests`),
-`dreyeck/catalog-application` tests, `nix develop .#fedwiki-original-editor`, and both browser cases of
-`fedwiki-original-editor-e2e` (standalone and Inspector). They must pass on a machine with that access before the PR is
-merged. The exact blocker, the commands and the expected output are in [verification.md](verification.md).
+Superseded: on 2026-11-02 the network access was widened and the real runtime ran; see
+[verification.md](verification.md#acceptance-record-2026-11-02) for what passed and what cannot pass in a network-less
+build sandbox.
 
 ## Decisions
 

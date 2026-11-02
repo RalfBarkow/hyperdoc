@@ -1,11 +1,16 @@
 # Verifying RalfBarkow/hyperdoc#12 with the real HyperDoc/Inspector runtime
 
+**Acceptance run 2026-11-02, x86_64-linux cloud container, at `b989c01`:** see [Acceptance record](#acceptance-record-2026-11-02)
+at the end. In short: everything below passed with the real runtime, except that `checks.x86_64-linux.catalog` as a whole cannot
+pass in a network-less build sandbox, for a reason that predates this PR.
+
 What has to pass before the PR is merged, why it could not run where the PR was prepared, and the exact commands for a
 machine with working Nix access. None of these commands contacts dreyeck.ch, starts a service there or writes a Wiki.
 
 ## The blocker
 
-The PR was prepared in a Claude Code cloud container whose egress proxy refuses two hosts:
+*Resolved 2026-11-02 by widening the environment's network access; kept as the record of why the first runs were
+missing.* The PR was prepared in a Claude Code cloud container whose egress proxy refuses two hosts:
 
 | Host | Observed (UTC) | Response |
 |---|---|---|
@@ -60,7 +65,9 @@ WITH-CATALOG-SYSTEM dreyeck/work/topic-maps-ctm-review: … HyperBooks; the prev
 EDITOR-DEMO-MEMBERSHIP-PASS
 ```
 
-`TOPIC-MAPS-PUBLIC-VIEWS-PASS` includes `check-reviewed-controls-match-their-sites`. If the base commit `19e824d` fails
+`TOPIC-MAPS-PUBLIC-VIEWS-PASS` includes `check-reviewed-controls-match-their-sites`. In a Linux build sandbox without network
+the public-views walk cannot pass (it probes remote wikis; see the acceptance record); on such a machine expect that step to
+fail and compare with the record. If the base commit `19e824d` fails
 the same check (expected from reading the code, not observed), that is the earlier state this PR corrects; to see it:
 
 ```bash
@@ -123,3 +130,46 @@ Catalog has no isolated test site configured", shows mode `unconfigured`, and ha
 
 Attach or paste, without secrets: the `git log -1` line, the `grep` outputs of steps 1–3, both E2E `report.json` files,
 and any failing log in full. A failure is a result: report it rather than re-running until green.
+
+## Acceptance record (2026-11-02)
+
+Run in the Claude Code cloud container after its network access was set to *Full*, on x86_64-linux, at
+`b989c010fbcca1276afd24d32d0f1c5f52fa03e2` (PR head after the two corrections below). Evidence, with `SHA256SUMS`:
+[evidence/acceptance-2026-11-02/](evidence/acceptance-2026-11-02/). Everything here is the real HyperDoc/Inspector runtime
+(SBCL 2.4.10 with the locked registry, Chromium 156.0.8078.79, Node 24.22.1); none of it is the earlier stub or bare-SBCL testing.
+
+### How the sources were obtained
+
+`flake.lock` is unchanged and every source was verified against it. Two proxy limits needed a controlled path:
+
+- The session proxy refuses GitHub's tarball endpoint for repositories outside the session (HTTP 403) but serves git reads.
+  The ten `github:` inputs were fetched with git at their locked revision; each `narHash` equals `flake.lock`'s, so the store
+  paths are the ones Nix would have produced (`fetch-verification.txt`).
+- The proxy accepts HTTPS `CONNECT` only (405 for plain HTTP), and eleven nixpkgs Quicklisp sources have `http://` URLs, which
+  failed in the build sandbox ("Could not resolve host"). They were fetched from the same URLs over `https` with the pinned
+  `outputHash` as `--expected-hash`; each store path equals the derivation's output (`fetch-verification.txt`).
+
+### Results
+
+| Check | Result |
+|---|---|
+| **1. `nix build .#checks.x86_64-linux.catalog`** (sandboxed) | **fails, not because of this PR**: the public-views walk (`dreyeck/topic-maps-public-views/tests`) makes `hyperbook/fedwiki` probe three remote wikis (`mech.dreyeck.ch`, `next.ward.dojo.fed.wiki`, `ward.voices.ustawi.wiki`) in background threads; without network `getaddrinfo` fails (`USOCKET:NS-TRY-AGAIN-ERROR`) and the unhandled condition ends the process. The walk visits **no** object of the demo (diagnostic run: 0). The earlier Linux evidence (docs/one-catalog) was recorded with the sandbox off. Proposed as a separate task. |
+| 1a. The same contract script, outside the sandbox, the remote probe replaced by a recorder that ends its thread (the only change) | **pass** (`contract-markers.txt`): Catalog application suite; `FEDWIKI-ORIGINAL-EDITOR-CONFIGURATION-PASS`, `FEDWIKI-ORIGINAL-EDITOR-DEMO-PASS`; membership (below); `CATALOG-TOPIC-MAPS-PACKAGE-PASS`; `TOPIC-MAPS-PUBLIC-VIEWS-PASS` (300 objects, 9 534 controls: inert 8 478, slot-reader 989, reviewed 11, reviewed-class 56, refused 0, unknown 0; the authority-policy gate checks including `check-reviewed-controls-match-their-sites`); `ASDF-METHOD-PRESERVATION-PASS` (183); one `topic-maps.asd`; executable tests 6/6 OK (161.7 s) |
+| **2. Closed membership of `dreyeck/catalog`** | `ADMITTED-CATALOG-PROOF: 24 admitted HyperBooks, each once, no other.` [obs], from the test's own assertion form in a fresh process after loading `dreyeck/catalog` (`closed-membership.txt`). The full `asdf:test-system "dreyeck/catalog"` stops earlier, at `dreyeck/lisp-critic/reading/tests:check-under-catalog-runtime` ("cannot reach the Riesbeck engine"): that check needs the engine in a local Wiki asset directory (`~/.wiki/…` or `DREYECK_LISP_CRITIC_ROOT`) that is deliberately not deployed and was not copied here. (Its upstream-intake check needed a full clone: this checkout was shallow and was unshallowed.) |
+| **3. Membership kept, demo added once** | `DEFAULT-CATALOG 24 HyperBooks: the 23 of 19e824d, each once, and dreyeck/fedwiki-original-editor-demo once; no other.`; with `HYPERDOC_CATALOG_SYSTEM=dreyeck/work/topic-maps-ctm-review`: 26, the previous 24 kept once each, added `dreyeck/work/topic-maps-project-example` and `dreyeck/work/topic-maps-ctm-review`; loading the demo again changes nothing. Both E2E Catalogs: `CATALOG-MEMBERSHIP … once among 24`. |
+| **4. Browser E2E** `fedwiki-original-editor-e2e` | **both pass**. *standalone* and *inspector*: 403 without grant, original Code plugin edit, PUT 200, disk item and dated journal match, no localStorage fallback, paragraph unchanged, original assets byte-equal, no external request, HyperDoc reread matches JSON and SHA-256. *inspector* additionally: one browser page, one visible item, one call of the original editor, stale and wrong targets refused, `frame-ancestors` the Catalog origin. Known and unchanged: the legacy security module's missing UI plugin (`setup` error). Catalog logs: `ASDF-ORIGIN` this checkout, `EDITOR-MODE isolated-loopback-editor`. |
+| Node tests (`commands.test.mjs`, `server.test.mjs`) in the dev shell | 9/9 pass |
+
+### Corrections made on the PR branch
+
+- `c7c1faf`: the demo test asserted that the text "Read stored page again" is absent from the unconfigured page; the page's
+  prose names that button. It now checks the controls: no reviewed control, only the Inspector's generic Operations.
+- `b989c01`: pre-existing, not caused by this PR — since `573fe37` `dreyeck/catalog-application` also declares `hunchentoot`,
+  and the E3 edit-view diagnosis still observed three dependencies, so it refused; `checks.x86_64-linux.catalog` at base
+  `19e824d` fails there with the same message [obs]. The observation now lists four; its claim is unchanged.
+
+### The base, observed
+
+At `19e824d` the check fails at the stale diagnosis observation. With only `b989c01` applied on top of it, it fails next at
+`check-reviewed-controls-match-their-sites`: `used but not registered: ("fedwiki-original-editor-demo/reread")` [obs]. At the
+PR head both pass.
