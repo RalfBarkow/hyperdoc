@@ -8,8 +8,8 @@
   (:export #:run-tests #:public-views #:walk-controls))
 (in-package #:dreyeck/topic-maps-public-views/tests)
 
-;;; No network. Rendering these views makes HyperBook's FedWiki client create remote sites (HYPERBOOK/FEDWIKI::GET-FEDWIKI, from the Trails and
-;;; hub readings of Working on HyperDoc, reached from the public Work Breakdown page). Each site starts a thread that probes its host on port
+;;; No network. Rendering these views makes HyperBook's FedWiki client create remote sites (HYPERBOOK/FEDWIKI::GET-FEDWIKI; the hosts are named
+;;; by the Work readings on Trails, hub selection and deployment, which the walk reaches from its roots). Each site starts a thread that probes its host on port
 ;;; 443 and fetches its sitemap. Run as it was, the test depended on the network of the machine it ran on: with live hosts the walk read their
 ;;; sitemaps (so what it met varied with them); in a build sandbox without network the lookup fails with USOCKET:NS-TRY-AGAIN-ERROR, which
 ;;; INITIALIZE-FEDWIKI does not handle (it handles host-not-found, timeout, stream and JSON errors), so the unhandled condition in that thread

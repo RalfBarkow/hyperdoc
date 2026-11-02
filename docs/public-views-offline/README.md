@@ -12,9 +12,9 @@ demo; the Original Wiki Editor demo does not use the network).
 
 Mechanism, from the code and the failing log ([before-sandbox-failure.txt](evidence/before-sandbox-failure.txt)):
 
-1. Rendering the public views reaches the Trails and hub readings of *Working on HyperDoc* (from the public `Work Breakdown`
-   page). They ask `hyperbook/fedwiki::get-fedwiki` for three remote wikis: `ward.voices.ustawi.wiki`,
-   `next.ward.dojo.fed.wiki`, `mech.dreyeck.ch`.
+1. Rendering the public views and walking from them asks `hyperbook/fedwiki::get-fedwiki` for three remote wikis:
+   `ward.voices.ustawi.wiki`, `next.ward.dojo.fed.wiki`, `mech.dreyeck.ch`. The sources name them in the Work readings on
+   Trails, hub selection and deployment (`dreyeck/work/`); which single visited object asks for which host was not traced.
 2. `get-fedwiki` calls `make-fedwiki` with the production operations. `make-fedwiki` starts a thread that runs
    `initialize-fedwiki`: probe port 443 with `usocket`, fetch the sitemap, fetch plugin data.
 3. Without network `getaddrinfo` fails with `EAI_AGAIN`, i.e. `usocket:ns-try-again-error`. `initialize-fedwiki` handles only
