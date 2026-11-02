@@ -1,0 +1,13 @@
+# The tests of the record and the demo, checked by mutants (2026-11-02). Each mutant changes one thing in the source or in the committed record,
+# with the compiled files purged before each run; "DETECTED" means dreyeck/fedwiki-without-dns or dreyeck/fedwiki-without-dns-demo stopped.
+# The unmutated sources pass both (SYSTEM-RESULT PASSED in existing-tests.txt).
+M1 the demo view offers a control                              DETECTED by the demo test (the control is refused: not a reviewed control)
+M2 a different-content answer counts as the same page          DETECTED by the library test (the verdict assertion)
+M3 :real-host dropped: the endpoint is ignored                 DETECTED by the library test (the loopback read through a given endpoint)
+M4 the site identity is taken from the endpoint                DETECTED by the library test ("the site identity is the name that was put in the URL")
+M5 the inferred identity claim is labelled observed            DETECTED by the library test (the warrants of the derived claims)
+M6 committed record: the failed ordinary path got an HTTP status DETECTED by the demo test (record consistency)
+M7 committed record: C's endpoint is not A's resolved address  DETECTED by the demo test (record consistency)
+M8 committed record: a warrant outside the four                DETECTED by the demo test (the record is refused)
+M9 the demo reaches for the network (resolves a name, errors swallowed) DETECTED by the demo test ("the demo went to the network: (USOCKET:GET-HOSTS-BY-NAME)")
+# The source files were restored byte for byte after the run (cmp identical).

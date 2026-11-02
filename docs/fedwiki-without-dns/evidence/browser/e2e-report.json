@@ -1,0 +1,16 @@
+{
+  "steps": [
+    "Catalog started with the demo named; it is not in the default membership, and present once afterwards",
+    "Catalog lists \"Reading a Wiki Page Without DNS\" and it opens",
+    "The page shows the stored page and the six observations, with no frame, form or input",
+    "The Inspector compares the access paths: six observations, the failed resolution, the given endpoint and its origin",
+    "Observed, derived, inferred and hypothesized claims are separate sections; the inferred one states its assumption",
+    "Observation B (ordinary path) and C (given endpoint) open as Inspector objects with per-field warrants"
+  ],
+  "browserErrors": [],
+  "externalRequests": [],
+  "requestedOrigins": [
+    "http://127.0.0.1:33851"
+  ],
+  "passed": true
+}
