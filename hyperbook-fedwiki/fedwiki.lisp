@@ -82,7 +82,7 @@ that occurred when reading the site map.")))
                           (setf (status-of wiki) t))
                  ((or stream-error
                    usocket:timeout-error
-                   usocket:ns-host-not-found-error
+                   usocket:ns-error
                    shasht:shasht-invalid-char) (c)
                    (setf (status-of wiki) c))))))
     wiki))
