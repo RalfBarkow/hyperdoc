@@ -148,11 +148,12 @@ demo that resolves a name are each detected.
 - `dreyeck/catalog/tests` does **not** pass in the dev shell `.#fedwiki-original-editor` ("The Catalog runtime cannot reach the Riesbeck
   engine"), and it fails the same way at the unmodified base `0a7d4dee`. That is the dev shell's registry, not this change; the Catalog is tested
   by the Nix check.
-- **The unchanged `nix build .#checks.x86_64-linux.catalog`, `sandbox = true`: exit 0** (5 min 53 s) at `55c6d77` ([evidence/nix-check.txt](evidence/nix-check.txt)).
-  The last commit that changes code is `cd27b704`; `55c6d77` differs from it in `docs/` only, and the commits after it change `docs/` only
+- **The unchanged `nix build .#checks.x86_64-linux.catalog`, `sandbox = true`: exit 0** (5 min 43 s) at `74f9d649` ([evidence/nix-check.txt](evidence/nix-check.txt)).
+  The last commit that changes code is `2cbbcc34`; `74f9d649` differs from it in `docs/` only, and the commits after it change `docs/` only
   (the package sources include `docs/`, so the commit that records this can never be the tested one). `nix/`, `flake.*`, `hyperbook`,
   `hyperbook-fedwiki` and `hyperdoc` are unchanged: `git diff dreyeck.ch` over them is empty. The check does not run the new tests; they are run
   by `scripts/check-fedwiki-without-dns.sh`, because the experiment needs network namespaces and a browser, which a Nix sandbox does not give.
+  (An earlier run, 5 min 53 s at `55c6d77`, before the Host header evidence, also exited 0.)
 
 ## Limits
 
