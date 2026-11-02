@@ -39,7 +39,7 @@
            ;; Access to the global catalog of registered HyperDocs
            #:*catalog* #:hyperdocs-of
            ;; Access to HyperDoc data
-           #:title-of #:directory-of #:asdf-system-of #:pages-of
+           #:title-of #:directory-of #:writable-of #:asdf-system-of #:pages-of
            #:hyperdoc-of #:file-of
            ;; HTML page assets
            #:*hyperdoc-html-page-assets*
