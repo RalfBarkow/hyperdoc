@@ -1,6 +1,6 @@
 (defpackage #:dreyeck/catalog-application/tests
   (:use #:cl)
-  (:export #:run-tests))
+  (:export #:run-tests #:check-fedwiki-real-resolver-integration))
 (in-package #:dreyeck/catalog-application/tests)
 
 (defun rejects (thunk)
@@ -223,12 +223,12 @@ without a default route. Where the interfaces cannot be read the process is not 
     (and names (every (lambda (name) (string= name "lo")) names))))
 
 (defun %offline-prefix ()
-  "A command prefix under which the real resolver can reach no network, and why: NIL when this process is isolated already (a Nix build
-sandbox), a list for `unshare` where it can make an empty network namespace, and :NONE when neither holds. The real resolver is run only
-under one of these two, so a machine with a network is never asked."
-  (cond ((%isolated-p) (values nil "this process sees no network interface but loopback"))
-        ((ignore-errors (zerop (nth-value 2 (uiop:run-program '("unshare" "-rn" "true") :ignore-error-status t))))
+  "A command prefix under which the real resolver can reach no host outside its network namespace, and why: a list for `unshare` where it can
+make an empty network namespace (its loopback is empty, nothing listens on it), NIL when this process sees no interface but loopback already
+(then a resolver on that loopback is NOT excluded), and :NONE when neither holds. Used by the explicit integration test only."
+  (cond ((ignore-errors (zerop (nth-value 2 (uiop:run-program '("unshare" "-rn" "true") :ignore-error-status t))))
          (values '("unshare" "-rn") "an empty network namespace (unshare -rn)"))
+        ((%isolated-p) (values nil "this process sees no network interface but loopback"))
         (t (values :none "this process can reach a network and no empty network namespace can be made"))))
 
 (defun %initialization-outcome (probe)
@@ -277,17 +277,24 @@ conditions are new, and an error that is none of them still leaves INITIALIZE-FE
       (let ((expected (format nil "OUTCOME ~A ~A ns-error=T snapshot=failed" class class)))
         (assert (search expected output) ()
                 "The condition ~A was not kept as the site's status (expected ~S):~%~A" class expected output))))
-  ;; Real: the platform's resolver, where it can be made to fail without touching a network.
+  t)
+
+(defun check-fedwiki-real-resolver-integration ()
+  "INTEGRATION TEST, not part of RUN-TESTS and so not of the Nix check: the platform's own resolver is asked for a name that cannot exist, and
+the process must survive with a name-resolution condition as the site's status. Call it explicitly (scripts/check-fedwiki-real-resolver.sh).
+It runs under `unshare -rn`, an empty network namespace, so no host outside the namespace is reachable and nothing listens on its loopback; if that
+cannot be made it runs only where the process sees nothing but loopback already, and otherwise it signals an error instead of passing silently.
+Its outcome depends on the resolver configuration of the environment, which is why it is kept out of the regular test (see docs/fedwiki-dns-failure)."
   (multiple-value-bind (prefix reason) (%offline-prefix)
-    (cond ((eq prefix :none)
-           (format t "~&FEDWIKI-NAME-RESOLUTION-FAILURE: real resolver not exercised: ~A.~%" reason))
-          (t (multiple-value-bind (status output) (%run-fresh-sbcl (list +site-outcome-form+ (%real-resolution-failure-form)) prefix)
-               (assert (and (eql 0 status) (search "ALL-SITES-FINISHED" output)) ()
-                       "The platform resolver's failure ended the process (exit ~A):~%~A" status
-                       (subseq output (max 0 (- (length output) 700))))
-               (assert (search "ns-error=T" output) () "The real resolver's failure was not kept as a name-resolution condition:~%~A" output)
-               (format t "~&FEDWIKI-NAME-RESOLUTION-FAILURE: real resolver exercised under ~A: ~A~%" reason
-                       (string-trim '(#\Newline) (subseq output (search "OUTCOME" output) (position #\Newline output :start (search "OUTCOME" output)))))))))
+    (when (eq prefix :none)
+      (error "The real-resolver integration test cannot run here: ~A." reason))
+    (multiple-value-bind (status output) (%run-fresh-sbcl (list +site-outcome-form+ (%real-resolution-failure-form)) prefix)
+      (assert (and (eql 0 status) (search "ALL-SITES-FINISHED" output)) ()
+              "The platform resolver's failure ended the process (exit ~A):~%~A" status
+              (subseq output (max 0 (- (length output) 700))))
+      (assert (search "ns-error=T" output) () "The real resolver's failure was not kept as a name-resolution condition:~%~A" output)
+      (format t "~&FEDWIKI-REAL-RESOLVER-INTEGRATION: PASS under ~A: ~A~%" reason
+              (string-trim '(#\Newline) (subseq output (search "OUTCOME" output) (position #\Newline output :start (search "OUTCOME" output)))))))
   t)
 
 (defun run-tests ()
