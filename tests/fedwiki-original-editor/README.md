@@ -21,7 +21,9 @@ The dedicated shell pins **Node 24** (including npm) through the separate
 `fedwiki-nixpkgs` input, Nixpkgs `nixos-26.05` at
 `fa1373130d5a21c040a47c5dbe1913d59ed91808`. It reuses HyperDoc's existing SBCL,
 ASDF dependency sources and HyperSpec. Neither the default shell nor production
-Catalog package definition or default Catalog membership is changed. Existing
+Catalog package definition is changed. Since 2026-11-02 the demo is a member of the
+default Catalog, read-only there unless configured (see *Catalog membership and
+configuration* below). Existing
 flake inputs and the npm lockfile are retained. Node 20.18.1 is not sufficient:
 its CommonJS/ESM interoperability causes the reported `ERR_REQUIRE_ESM` in the
 locked jsdom/html-encoding-sniffer dependency chain. The launchers refuse Node
@@ -141,6 +143,37 @@ node --test tests/fedwiki-original-editor/commands.test.mjs
 The lower-level `node tests/fedwiki-original-editor/run.mjs LISP CHROMIUM OUTPUT`
 and `serve.lisp` remain available for diagnostics; ordinary local use should use
 the two shell commands above.
+
+## Catalog membership and configuration
+
+`dreyeck/fedwiki-original-editor-demo` is admitted to `dreyeck/catalog`, so every
+Catalog, including the public one, lists *Original Wiki Editor Test*. Loading it
+reads no variable and offers no editor. Three variables, all unset by default,
+configure it (`dreyeck/src/fedwiki-original-editor-configuration.lisp`):
+
+| Variable | Effect |
+| --- | --- |
+| `HYPERDOC_FEDWIKI_EDITOR_TEST_ROOT` | The one site directory read back. Unset: *unconfigured*, nothing is read, linked or embedded; the page says so. Never falls back to `HYPERDOC_FEDWIKI_SITE_ROOT`. |
+| `HYPERDOC_FEDWIKI_EDITOR_TEST_ORIGIN` | The original Wiki origin linked as *Open original Wiki client*. Must be `http(s)://host[:port]` without a path. |
+| `HYPERDOC_FEDWIKI_EDITOR_TEST_MODE` | Unset or `read-only`: no frame. `isolated-loopback` with an origin `http://127.0.0.1:PORT`: the item-specific frame. Anything else is refused and named. |
+
+Both launchers set `isolated-loopback`; `serve.lisp` asserts that mode and that the
+demo is in the Catalog once. A missing page or a page without exactly one target
+Code Item gives a read-only explanation instead of a condition. The mode decides
+only whether HyperDoc offers the frame; the original server authorizes every write.
+
+`server.test.mjs` runs the original server through `server.mjs` without Lisp or a
+browser (after `npm ci`): without `security_legacy` every PUT is 403 and the adapter
+refuses; the adapter serves only the one Item at the observed revision to the exact
+loopback parent; and with `security_legacy=true` any visitor can create any page of
+the unclaimed site, which is why that grant stays in this loopback test:
+
+```sh
+node --test tests/fedwiki-original-editor/server.test.mjs
+```
+
+Wiki-farm connection, its open decisions and the operator steps:
+[docs/fedwiki-original-editor-farm](../../docs/fedwiki-original-editor-farm/README.md).
 
 ## Versions and compatibility
 

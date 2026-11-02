@@ -1,0 +1,168 @@
+;;;; The Original Wiki Editor demonstration as a member of the Catalog: once in the membership, from this checkout, rendered
+;;;; served without a configured site and without a signalled condition, read-only for a configured site, the editor frame
+;;;; only in the isolated loopback mode, and no byte of the site written in any mode.
+(defpackage #:dreyeck/fedwiki-original-editor-demo/tests
+  (:use #:cl)
+  (:local-nicknames (#:demo #:dreyeck/fedwiki-original-editor-demo)
+                    (#:cfg #:dreyeck/fedwiki-original-editor-configuration)
+                    (#:ct #:dreyeck/fedwiki-original-editor-configuration/tests)
+                    (#:hv #:html-inspector-views))
+  (:export #:run-tests))
+(in-package #:dreyeck/fedwiki-original-editor-demo/tests)
+
+(defparameter +id+ "dreyeck/fedwiki-original-editor-demo")
+
+(defun served (thunk)
+  "THUNK run as the served Catalog runs: a server up, not in development mode."
+  (progv (list (find-symbol "*SERVER-PARAMETERS*" :hyperbook/server)) (list (list "700px" nil))
+    (funcall thunk)))
+
+(defun %html-of-views (object)
+  "The HTML of each HTML view of OBJECT, as a served visitor gets it, joined."
+  (served (lambda ()
+            (format nil "~{~A~^~%~}"
+                    (loop for view in (hv:all-views object)
+                          when (typep view 'hv:html-view) collect (hv:view-html view))))))
+
+(defun %view-html (object title)
+  (let ((view (find title (hv:all-views object) :key #'hv:view-title :test #'string=)))
+    (assert view () "~S has no view ~S" object title)
+    (served (lambda () (hv:view-html view)))))
+
+(defun %configuration (&rest alist)
+  (cfg:read-editor-configuration (lambda (name) (cdr (assoc name alist :test #'equal)))))
+
+(defun %with-environment-unset (function)
+  "Call FUNCTION with the demonstration's three variables empty (as unset), restoring them afterwards."
+  (let ((saved (mapcar (lambda (name) (cons name (uiop:getenv name)))
+                       (list cfg:+root-variable+ cfg:+origin-variable+ cfg:+mode-variable+))))
+    (unwind-protect
+         (progn (dolist (entry saved) (setf (uiop:getenv (car entry)) ""))
+                (funcall function))
+      (dolist (entry saved) (setf (uiop:getenv (car entry)) (or (cdr entry) ""))))))
+
+(defparameter +fixture+
+  "{\"title\":\"Original Editor Test\",\"story\":[{\"id\":\"1111111111111111\",\"type\":\"paragraph\",\"text\":\"An isolated paragraph; this item stays unchanged.\"},{\"id\":\"2222222222222222\",\"type\":\"code\",\"text\":\"(defun square (x) (* x x))\",\"language\":\"lisp\"}],\"journal\":[{\"type\":\"create\",\"id\":\"3333333333333333\",\"item\":{\"title\":\"Original Editor Test\"},\"date\":1700000000000}]}
+"
+  "The shape of tests/fedwiki-original-editor/fixture.mjs's page, shortened journal.")
+
+(defun %snapshot (root)
+  "Every file under ROOT with its octets: what a write would change."
+  (sort (mapcar (lambda (file)
+                  (cons (namestring file)
+                        (with-open-file (in file :element-type '(unsigned-byte 8))
+                          (let ((octets (make-array (file-length in) :element-type '(unsigned-byte 8))))
+                            (read-sequence octets in) octets))))
+                (remove-if #'uiop:directory-pathname-p (directory (merge-pathnames "**/*.*" root))))
+        #'string< :key #'car))
+
+(defun %write-fixture (site &optional (text +fixture+))
+  (let ((file (merge-pathnames "pages/original-editor-test" (uiop:ensure-directory-pathname site))))
+    (ensure-directories-exist file)
+    (with-open-file (out file :direction :output :if-exists :supersede :external-format :utf-8)
+      (write-string text out))
+    file))
+
+(defun check-membership ()
+  "Admitted once, from the same tree as dreyeck and hyperbook; loading it again, as HYPERDOC_CATALOG_SYSTEM would, adds nothing."
+  (flet ((count-in-catalog () (count +id+ (dreyeck/catalog/tests:catalog-hyperbook-ids) :test #'string=)))
+    (assert (member +id+ dreyeck/catalog/tests:+admitted-hyperbook-ids+ :test #'string=))
+    (assert (= 1 (count-in-catalog)))
+    (asdf:load-system +id+)
+    (assert (= 1 (count-in-catalog)))
+    (assert (member "dreyeck/fedwiki-original-editor-demo" (asdf:system-depends-on (asdf:find-system "dreyeck/catalog"))
+                    :test #'equal))
+    (assert (equal (truename (asdf:system-source-directory "dreyeck"))
+                   (truename (asdf:system-source-directory +id+))))
+    (assert (null (getf (dreyeck/catalog/tests:admitted-membership-problems (dreyeck/catalog/tests:catalog-hyperbook-ids))
+                        :duplicated))))
+  t)
+
+(defun check-unconfigured-page ()
+  "The page, as a served visitor gets it with nothing configured: it says so, signals nothing, embeds and links nothing."
+  (%with-environment-unset
+   (lambda ()
+     (let* ((book (hyperbook:find-hyperbook +id+ :signal-error? t))
+            (page (hyperbook:find-page book "Editing One Isolated Wiki Page" :signal-error? t))
+            (html (%html-of-views page)))
+       (assert (search "no isolated test site configured" html) () "the unconfigured state is not shown")
+       (assert (search "HYPERDOC_FEDWIKI_EDITOR_TEST_ROOT" html))
+       (assert (not (search "<iframe" html)))
+       (assert (not (search "Open original Wiki client" html)))
+       (assert (not (search "Read stored page again" html)))
+       (assert (not (search "No isolated original-editor test site configured" html)) () "the former error is still signalled")
+       (assert (not (search "No original Wiki client origin configured" html)) () "the former error is still signalled")
+       ;; The reviewed control, invoked anyway, gives an object that says why, not a condition.
+       (let ((observation (demo:read-stored-page)))
+         (assert (typep observation 'demo:unavailable-page))
+         (assert (search "Not configured" (%view-html observation "Stored Wiki page")))))))
+  t)
+
+(defun check-unreadable-site ()
+  "A configured directory without the page, or with a page that is not the target, gives a read-only explanation."
+  (ct:call-with-site-directory
+   (lambda (site)
+     (let* ((configuration (%configuration (cons cfg:+root-variable+ site)))
+            (observation (demo:read-stored-page configuration)))
+       (assert (typep observation 'demo:unavailable-page))
+       (assert (search "no readable target page" (demo:unavailable-reason observation)))
+       (assert (search "Nothing was written" (%view-html observation "Stored Wiki page"))))
+     (%write-fixture site (substitute #\3 #\2 +fixture+))
+     (let ((observation (demo:read-stored-page (%configuration (cons cfg:+root-variable+ site)))))
+       (assert (typep observation 'demo:unavailable-page))
+       (assert (search "not unique" (demo:unavailable-reason observation))))))
+  t)
+
+(defun %code-item (observation)
+  (find "2222222222222222" (coerce (hyperbook/fedwiki::story-of (demo::page-of observation)) 'list)
+        :key #'hyperbook/fedwiki::id-of :test #'equal))
+
+(defun check-modes-and-no-write ()
+  "Read-only shows the stored page and withholds the frame; isolated-loopback embeds exactly the configured frame. Neither
+writes: the site's files are the same octets afterwards."
+  (ct:call-with-site-directory
+   (lambda (site)
+     (%write-fixture site)
+     (let ((before (%snapshot site)))
+       (let* ((configuration (%configuration (cons cfg:+root-variable+ site)
+                                             (cons cfg:+origin-variable+ "http://127.0.0.1:41234")))
+              (observation (demo:read-stored-page configuration))
+              (item (%code-item observation))
+              (editor (%view-html item "Original Wiki editor")))
+         (assert (eq :read-only (cfg:configuration-mode configuration)))
+         (assert (typep observation 'demo:stored-page))
+         (assert (search "(defun square (x) (* x x))" (%view-html observation "Stored Wiki page")))
+         (assert (not (search "<iframe" editor)))
+         (assert (search "not offered" editor))
+         (assert (search "fedwiki:original-editor-test.invalid" editor)))
+       (let* ((configuration (%configuration (cons cfg:+root-variable+ site)
+                                             (cons cfg:+origin-variable+ "http://127.0.0.1:41234")
+                                             (cons cfg:+mode-variable+ "isolated-loopback")))
+              (observation (demo:read-stored-page configuration))
+              (item (%code-item observation))
+              (editor (%view-html item "Original Wiki editor"))
+              (sha (dreyeck/local-fedwiki-page:page-source-sha256 (demo::source-of observation))))
+         (assert (eq :isolated-loopback-editor (cfg:configuration-mode configuration)))
+         (assert (search "<iframe" editor))
+         (assert (some (lambda (separator)
+                         (search (format nil "http://127.0.0.1:41234/view/original-editor-test?hyperdocCodeItem=2222222222222222~Arevision=~A"
+                                         separator sha)
+                                 editor))
+                       '("&" "&amp;"))
+                 () "the frame does not name the observed revision of the one item")
+         (assert (= 1 (count-matches "<iframe" editor))))
+       (assert (equalp before (%snapshot site)) () "the demonstration wrote to the site"))))
+  t)
+
+(defun count-matches (needle haystack)
+  (loop for start = 0 then (+ at (length needle))
+        for at = (search needle haystack :start2 start)
+        while at count t))
+
+(defun run-tests ()
+  (check-membership)
+  (check-unconfigured-page)
+  (check-unreadable-site)
+  (check-modes-and-no-write)
+  (format t "~&FEDWIKI-ORIGINAL-EDITOR-DEMO-PASS: admitted once from this checkout, and loading it again adds nothing; served without a configured site the page says so, signals nothing, links and embeds nothing; an unreadable site is explained read-only; read-only withholds the frame; isolated-loopback embeds the one item's frame at the observed revision; the site's files are unchanged.~%")
+  t)

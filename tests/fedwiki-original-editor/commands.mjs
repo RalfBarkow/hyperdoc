@@ -166,6 +166,7 @@ async function interactive(sbcl) {
       {...lispEnvironment(faslCache), HYPERDOC_EDITOR_TEST_CHECKOUT:repo+'/',
         HYPERDOC_EDITOR_TEST_CATALOG_PORT:String(catalogPort), HYPERDOC_EDITOR_TEST_STOP:stop,
         HYPERDOC_FEDWIKI_EDITOR_TEST_ROOT:site+'/', HYPERDOC_FEDWIKI_EDITOR_TEST_ORIGIN:wikiOrigin,
+        HYPERDOC_FEDWIKI_EDITOR_TEST_MODE:'isolated-loopback',
         HYPERDOC_FEDWIKI_SITE_ROOT:site+'/'})
     await wait(catalogOrigin,catalog,'catalog')
     if (!fs.readFileSync(path.join(work,'catalog.log'),'utf8').includes(`Listening on 127.0.0.1:${catalogPort}.`)) {

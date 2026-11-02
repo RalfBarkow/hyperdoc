@@ -18,7 +18,8 @@
 
 (defparameter +admitted-hyperbook-ids+
   '("asdf-systems" "dreyeck/authority/reading" "dreyeck/clog-tutorial/reading"
-    "dreyeck/fedwiki-config/reading" "dreyeck/fedwiki-source-relations" "dreyeck/gesture/reading"
+    "dreyeck/fedwiki-config/reading" "dreyeck/fedwiki-original-editor-demo" "dreyeck/fedwiki-source-relations"
+    "dreyeck/gesture/reading"
     "dreyeck/lisp-critic/reading" "dreyeck/lisp-image" "dreyeck/mech-intake/reading"
     "dreyeck/nested-actions/reading" "dreyeck/topicmap/tala/reading" "dreyeck/traverse/reading"
     "dreyeck/upstream-intake" "dreyeck/upstream-intake/temporal" "dreyeck/wiki-link"
