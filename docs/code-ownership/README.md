@@ -62,14 +62,15 @@ fix RalfBarkow/hyperdoc#17**: `dreyeck/hyperdoc/library-tests` still compares wi
 
 ## How the check is meant to be run every time (no scheduler, no CI is introduced)
 
-The check is a flake check: `checks.<system>.library-inventory`. It is a pure derivation of the source snapshot, so two things follow without any infrastructure:
+The check is a flake check: `checks.<system>.library-inventory`. It is a pure derivation of the source snapshot. Two things are therefore different and are kept apart here: its **reproducibility** (a property of the check, below) and its **execution** (not yet technically enforced, below):
 
-1. **It cannot be stale.** Its inputs are the library paths, the manifest and the inventory themselves. Any change to them is a new derivation that must be built again; a cached "pass" can never
-   stand for changed sources.
-2. **It runs wherever the existing acceptance command runs.** `nix flake check` builds every `checks` attribute, so whoever runs the flake check that already accepts a change to this repository
-   also runs `library-inventory` (and `catalog`). It can be called alone: `nix build .#checks.x86_64-linux.library-inventory`.
+1. **A result belongs to exactly one state of the sources.** Its inputs are the library paths, the manifest and the inventory themselves. Any change to them is a new derivation, so a cached "pass"
+   is never the result for changed sources: the check is reproducible and depends only on those inputs. This is a property of the check, **not a guarantee that it is run**: if nobody builds it after a change,
+   nothing re-runs it, and an earlier result can still be quoted as if it were current. Whether a stated result belongs to the head under review has to be checked by the reviewer (the PR description names the commit it was run on).
+2. **It is part of the existing acceptance command, if that command is run.** `nix flake check` builds every `checks` attribute, so whoever runs the flake check that already accepts a change to this repository
+   also gets `library-inventory` (and `catalog`); running it remains a person's act, not a technical requirement. It can be called alone: `nix build .#checks.x86_64-linux.library-inventory`.
 
-What this does **not** do: nothing forces anybody to run it. There is no required status, no pre-merge hook, no timer. The proposed rule is a review rule, to be adopted or not by the maintainers:
+What this does **not** do: the execution is **not yet technically enforced**; nothing forces anybody to run it. There is no required status, no pre-merge hook, no timer. The proposed rule is a review rule, to be adopted or not by the maintainers:
 *a change that touches a library path, `docs/code-ownership/` or `scripts/code-ownership.lisp` states the result of `library-inventory` (and of the unchanged `catalog` check) in its PR description,
 as this PR does; a reviewer may ask for it.* Making the run mandatory by machine (a required CI job, a branch protection rule) needs infrastructure and is a separate decision that is **not made here**.
 When a difference is added on purpose, the same change regenerates the inventory (`scripts/code-ownership.lisp --inventory`) and adds a rule to `decisions.lisp-data`, so the new difference is
