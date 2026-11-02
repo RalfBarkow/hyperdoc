@@ -1,0 +1,64 @@
+{
+  "title": "Without DNS Test Page",
+  "story": [
+    {
+      "id": "a1a1a1a1a1a1a1a1",
+      "type": "paragraph",
+      "text": "A frozen page for one experiment: it is read by name, then by a given address, and must be the same page."
+    },
+    {
+      "id": "b2b2b2b2b2b2b2b2",
+      "type": "paragraph",
+      "text": "Its identity is the site it belongs to and its slug, not the address it is read from."
+    },
+    {
+      "id": "c3c3c3c3c3c3c3c3",
+      "type": "code",
+      "text": "(defun same-page-p (a b) (equal (sha256 a) (sha256 b)))",
+      "language": "lisp"
+    }
+  ],
+  "journal": [
+    {
+      "type": "create",
+      "id": "d4d4d4d4d4d4d4d4",
+      "item": {
+        "title": "Without DNS Test Page"
+      },
+      "date": 1700000000000
+    },
+    {
+      "type": "add",
+      "id": "a1a1a1a1a1a1a1a1",
+      "item": {
+        "id": "a1a1a1a1a1a1a1a1",
+        "type": "paragraph",
+        "text": "A frozen page for one experiment: it is read by name, then by a given address, and must be the same page."
+      },
+      "date": 1700000000001
+    },
+    {
+      "type": "add",
+      "id": "b2b2b2b2b2b2b2b2",
+      "item": {
+        "id": "b2b2b2b2b2b2b2b2",
+        "type": "paragraph",
+        "text": "Its identity is the site it belongs to and its slug, not the address it is read from."
+      },
+      "after": "a1a1a1a1a1a1a1a1",
+      "date": 1700000000002
+    },
+    {
+      "type": "add",
+      "id": "c3c3c3c3c3c3c3c3",
+      "item": {
+        "id": "c3c3c3c3c3c3c3c3",
+        "type": "code",
+        "text": "(defun same-page-p (a b) (equal (sha256 a) (sha256 b)))",
+        "language": "lisp"
+      },
+      "after": "b2b2b2b2b2b2b2b2",
+      "date": 1700000000003
+    }
+  ]
+}

@@ -1,0 +1,16 @@
+mode	qname	qtype	answer
+resolve	raw.githubusercontent.com	1	NXDOMAIN
+resolve	wiki.without-dns.test	28	NOERROR
+resolve	wiki.without-dns.test	1	NOERROR +A 10.77.0.1
+resolve	raw.githubusercontent.com	1	NXDOMAIN
+resolve	raw.githubusercontent.com	1	NXDOMAIN
+resolve	wiki.without-dns.test	1	NOERROR +A 10.77.0.1
+resolve	wiki.without-dns.test	1	NOERROR +A 10.77.0.1
+servfail	wiki.without-dns.test	28	SERVFAIL
+servfail	wiki.without-dns.test	1	SERVFAIL
+servfail	wiki.without-dns.test	1	SERVFAIL
+servfail	wiki.without-dns.test	1	SERVFAIL
+servfail	wiki.without-dns.test	1	SERVFAIL
+servfail	wiki.without-dns.test	1	SERVFAIL
+servfail	wiki.without-dns.test	1	SERVFAIL
+servfail	wiki.without-dns.test	1	SERVFAIL

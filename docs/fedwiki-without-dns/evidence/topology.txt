@@ -1,0 +1,5 @@
+lo               UNKNOWN        127.0.0.1/8 
+veth-server@if2  UP             10.77.0.1/24 10.77.0.3/24 10.77.0.4/24 
+--- client namespace ---
+lo               UNKNOWN        127.0.0.1/8 
+veth-client@if2  DOWN           10.77.0.2/24 

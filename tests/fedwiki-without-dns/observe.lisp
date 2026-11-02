@@ -1,0 +1,36 @@
+;;;; One observation, made in whatever network namespace this process runs in. Run by harness.py as `sbcl --script observe.lisp`.
+;;;; Reads its parameters from the environment, writes one observation form to OBS_OUT, reads no wiki data and writes nothing else.
+;;;;   OBS_ID OBS_ROLE OBS_SITE OBS_SLUG OBS_STORED (the stored page file) OBS_OUT; optional: OBS_ENDPOINT, OBS_ORIGIN (earlier:ID | declared:TEXT), OBS_TIMEOUT
+(require :asdf)
+(asdf:initialize-source-registry
+ `(:source-registry ,@(loop for p in (uiop:split-string (or (uiop:getenv "CL_SOURCE_REGISTRY") "") :separator ":")
+                            unless (zerop (length p)) collect `(:tree ,(uiop:ensure-directory-pathname (string-right-trim "/" p))))
+   :ignore-inherited-configuration))
+(let ((*error-output* (make-broadcast-stream)) (*standard-output* (make-broadcast-stream)))
+  (asdf:load-system "dreyeck/fedwiki-without-dns"))
+(defun env (name &optional required)
+  (let ((value (uiop:getenv name)))
+    (cond ((and value (plusp (length value))) value)
+          (required (error "~A is required." name)))))
+(defun origin ()
+  (let ((value (env "OBS_ORIGIN")))
+    (when value
+      (let ((colon (position #\: value)))
+        (list (ecase (intern (string-upcase (subseq value 0 colon)) :keyword)
+                (:earlier :earlier-resolution) (:declared :declared))
+              (subseq value (1+ colon)))))))
+(defun octets-of (path)
+  (with-open-file (in path :element-type '(unsigned-byte 8))
+    (let ((octets (make-array (file-length in) :element-type '(unsigned-byte 8)))) (read-sequence octets in) octets)))
+(let ((observation (dreyeck/fedwiki-without-dns:observe-access
+                    (env "OBS_SITE" t) (env "OBS_SLUG" t)
+                    :id (env "OBS_ID" t) :role (intern (string-upcase (env "OBS_ROLE" t)) :keyword)
+                    :endpoint (env "OBS_ENDPOINT") :endpoint-origin (origin)
+                    :stored-octets (octets-of (env "OBS_STORED" t))
+                    :timeout (parse-integer (or (env "OBS_TIMEOUT") "5")))))
+  (dreyeck/fedwiki-without-dns:write-form (dreyeck/fedwiki-without-dns:observation-form observation) (env "OBS_OUT" t))
+  (format t "~A ~(~A~) dns=~(~A~) connection=~(~A~) http=~A~%" (dreyeck/fedwiki-without-dns:observation-id observation)
+          (dreyeck/fedwiki-without-dns:observation-verdict observation)
+          (getf (dreyeck/fedwiki-without-dns:observation-dns observation) :outcome)
+          (getf (dreyeck/fedwiki-without-dns:observation-connection observation) :outcome)
+          (getf (dreyeck/fedwiki-without-dns:observation-http observation) :status)))

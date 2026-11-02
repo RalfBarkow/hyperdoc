@@ -1,0 +1,39 @@
+
+
+INFORMATION: Using default security module.
+security_type ./security.js
+[
+  {
+    root: '/home/user/hyperdoc/tests/fedwiki-original-editor/node_modules/wiki-server',
+    data: '/tmp/nix-shell.BPw7nd/fedwiki-without-dns-work-bv6rrpxv/altered',
+    db: '/tmp/nix-shell.BPw7nd/fedwiki-without-dns-work-bv6rrpxv/altered/pages',
+    host: '10.77.0.4',
+    port: 80,
+    packageDir: '/home/user/hyperdoc/tests/fedwiki-original-editor/node_modules',
+    home: 'without-dns-test-page',
+    security_type: './security.js',
+    security_legacy: false,
+    client: '/home/user/hyperdoc/tests/fedwiki-original-editor/node_modules/wiki-client/client',
+    status: '/tmp/nix-shell.BPw7nd/fedwiki-without-dns-work-bv6rrpxv/altered/status',
+    assets: '/tmp/nix-shell.BPw7nd/fedwiki-without-dns-work-bv6rrpxv/altered/assets',
+    recycler: '/tmp/nix-shell.BPw7nd/fedwiki-without-dns-work-bv6rrpxv/altered/recycle',
+    commons: '/tmp/nix-shell.BPw7nd/fedwiki-without-dns-work-bv6rrpxv/altered/commons',
+    url: 'http://localhost',
+    id: '/tmp/nix-shell.BPw7nd/fedwiki-without-dns-work-bv6rrpxv/altered/status/owner.json',
+    uploadLimit: '5mb',
+    cookieSecret: '2b903b877975e8d1f4d4104690a3e072ce3b32f2ef0caaf94ae0f9e00bd89ace052cb39da410a69b49e56681f48c153eaf81216391296da1011b4cf644259dd6',
+    secure_cookie: false,
+    session_duration: 7,
+    neighbors: '',
+    debug: true,
+    test: false,
+    database: { type: './page.js' }
+  }
+]
+owner: 
+{"listening":"10.77.0.4:80","db":"/tmp/nix-shell.BPw7nd/fedwiki-without-dns-work-bv6rrpxv/altered/pages","security_legacy":false}
+SITE INDEX localhost : StartUp
+starting plugin wiki-plugin-assets
+starting plugin wiki-plugin-image
+starting plugin wiki-plugin-plugmatic
+[38;2:147:39:51mlocalhost[0m GET /without-dns-test-page.json 200 1264 - 6.511 ms

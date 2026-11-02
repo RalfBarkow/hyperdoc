@@ -3520,3 +3520,38 @@
              (declare (ignore op component))
              (uiop:symbol-call :dreyeck/fedwiki-original-editor-configuration/tests :run-tests)
              (uiop:symbol-call :dreyeck/fedwiki-original-editor-demo/tests :run-tests)))
+
+(asdf:defsystem "dreyeck/fedwiki-without-dns"
+  :description "A record of reading one known Federated Wiki page without name resolution, through a given endpoint"
+  ;; No wiki data structure and no second HTTP client: drakma (as hyperbook/fedwiki) with :real-host, hyperbook/fedwiki's page class.
+  :depends-on ("hyperbook/fedwiki" "drakma" "usocket" "ironclad" "shasht")
+  :components ((:file "dreyeck/src/fedwiki-without-dns"))
+  :in-order-to ((test-op (test-op "dreyeck/fedwiki-without-dns/tests"))))
+
+(asdf:defsystem "dreyeck/fedwiki-without-dns/tests"
+  :description "The record, its derivations and a loopback observation, without a network"
+  :depends-on ("dreyeck/fedwiki-without-dns" "hunchentoot")
+  :components ((:file "dreyeck/tests/fedwiki-without-dns"))
+  :perform (test-op (op component)
+             (declare (ignore op component))
+             (uiop:symbol-call :dreyeck/fedwiki-without-dns/tests :run-tests)))
+
+(asdf:defsystem "dreyeck/fedwiki-without-dns-demo"
+  :description "Catalog demonstration: the experiment record of reading a Wiki page without DNS, read-only"
+  ;; NOT a member of dreyeck/catalog. Loaded explicitly: HYPERDOC_CATALOG_SYSTEM=dreyeck/fedwiki-without-dns-demo.
+  :depends-on ("dreyeck/fedwiki-without-dns" "dreyeck/local-fedwiki-page" "hyperdoc/explorer" "dreyeck/authority-policy" "uiop")
+  ;; dreyeck/authority-policy gates the Inspector's generic Operations; without it they would run ungated.
+  :serial t
+  :components ((:file "dreyeck/src/fedwiki-without-dns-demo")
+               (:static-file "dreyeck/pages/fedwiki-without-dns-demo/Reading One Wiki Page Without DNS.html")
+               (:static-file "tests/fedwiki-without-dns/frozen-site/pages/without-dns-test-page")
+               (:static-file "docs/fedwiki-without-dns/experiment-record.lisp-data"))
+  :in-order-to ((test-op (test-op "dreyeck/fedwiki-without-dns-demo/tests"))))
+
+(asdf:defsystem "dreyeck/fedwiki-without-dns-demo/tests"
+  :description "The demo is not in the default Catalog, loads once, and offers no network or write action"
+  :depends-on ("dreyeck/fedwiki-without-dns-demo" "dreyeck/catalog/tests" "hyperbook/server")
+  :components ((:file "dreyeck/tests/fedwiki-without-dns-demo"))
+  :perform (test-op (op component)
+             (declare (ignore op component))
+             (uiop:symbol-call :dreyeck/fedwiki-without-dns-demo/tests :run-tests)))
