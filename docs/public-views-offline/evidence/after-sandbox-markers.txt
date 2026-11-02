@@ -1,5 +1,5 @@
-# After: sandboxed 'nix build .#checks.x86_64-linux.catalog' at 1465c171ae878306ee5126af2b1d0373b8b898fd (check derivation x028mk61l0n2m42n459iaxjr7yw91xrz-catalog-startup-contract.drv; sandbox = true; started/ended 2026-11-02T08:54:03Z / 2026-11-02T08:59:17Z)
-# An earlier identical run at 4435a3e (the same code, one comment differs) also exited 0.
+# Sandboxed 'nix build .#checks.x86_64-linux.catalog' at 7fba5583819044a7b336dde18c23497c98c79515 (check derivation jdixpbznbc9a77sijdb36z0qsi3yhcn6-catalog-startup-contract.drv; sandbox = true; started/ended 2026-11-02T09:33:23Z / 2026-11-02T09:38:52Z)
+# Earlier runs of the previous version of the harness (without the thread guard), both exit 0: 4435a3e and 1465c17.
 application.log:Catalog application tests passed: graph, configuration, routes, lifecycle; a further registered HyperBook is tolerated by these checks and named by the admission check.
 asdf-methods.log:ASDF-METHOD-PRESERVATION-PASS: 183 assertions; ASDF 3.3.1 methods unchanged by identity, behaviour equal before and after, a control collision is seen.
 lisp.log:CATALOG-TOPIC-MAPS-PACKAGE-PASS
@@ -12,4 +12,4 @@ original-editor-demo.log:FEDWIKI-ORIGINAL-EDITOR-DEMO-PASS: admitted once from t
 public-views.log:TOPIC-MAPS-PUBLIC-VIEWS-PASS: 6 objects, rendered served and developing; 7 run buttons are markers served and buttons developing; no plain thunk is reachable from any served view. Walked 300 objects by navigation (bounded, not exhaustive): 9538 controls (inert=8478, slot-reader=993, reviewed=11, reviewed-class=5
 public-views.log:TOPIC-MAPS-PUBLIC-VIEWS-OFFLINE: 3 remote FedWiki sites asked for by the views, none contacted (every host fails to resolve, a case the FedWiki client retains as the site's status): ward.voices.ustawi.wiki, next.ward.dojo.fed.wiki, mech.dreyeck.ch.
 topic-maps-asd: /nix/store/kna6395gl32f2hl4n3ha4776zm9r0sgb-source/topic-maps.asd
-executable.log: Ran 6 tests in 158.527s OK 
+executable.log: Ran 6 tests in 161.723s OK 

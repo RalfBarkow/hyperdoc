@@ -1,0 +1,22 @@
+# Review of the temporary replacement of hyperbook/fedwiki::make-fedwiki (experiments, not committed): the harness before and after 7fba558
+## before (4435a3e / 1465c17)
+E1 restored after normal return: T
+E1 table restored: T
+E2 restored after an error: T
+E2 table restored: T
+E3 status right after the unwinding (a thread object means it was not joined): THREAD
+E4 another thread's make-fedwiki during the harness: BREAKS THE HARNESS: The sites in the table, ("e4.invalid"), are not the hosts asked for, ("other-thread.invalid"                                                                 
+E4 hosts recorded: (other-thread.invalid e4.invalid)
+## after (7fba558)
+E1 restored after normal return: T
+E1 table restored: T
+E2 restored after an error: T
+E2 table restored: T
+E3 status right after the unwinding (a thread object means it was not joined): NS-HOST-NOT-FOUND-ERROR
+E4 another thread's make-fedwiki during the harness: no effect on the harness
+E4 hosts recorded: (e4.invalid)
+
+## mutants of the harness's self-check (CHECK-OFFLINE-HARNESS)
+HARNESS-MUTANT-SURVIVED CONTROL
+HARNESS-MUTANT-KILLED NO-JOIN: check-normal.invalid did not finish by retaining the host-not-found condition: #<SB-THREAD:THREAD "Anonymous thread" FINISHED values: #<USOCKET:NS-HOS
+HARNESS-MUTANT-KILLED GLOBAL-GUARD: The offline harness did not restore the function and the table after a normal exit.
