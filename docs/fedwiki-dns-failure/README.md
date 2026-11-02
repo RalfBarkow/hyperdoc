@@ -67,20 +67,26 @@ A host name that exists but has **no address record** (the resolver answers NOER
 neither a `usocket:ns-error` nor a `usocket:socket-error`. It is **not a connection failure** and **not** what this fix handles. It would
 end the process the same way. Measured with the response code 0 and no answer ([resolver-conditions.txt](evidence/resolver-conditions.txt),
 the `rcode0` line). Handling it would need an implementation-specific symbol (`sb-bsd-sockets:name-service-error`) in a library file
-that otherwise names only `usocket` conditions, or a fix in `usocket`'s mapping. It is a known gap, with no issue and no decision yet.
+that otherwise names only `usocket` conditions, or a fix in `usocket`'s mapping. It is a known gap, tracked on its own in #18 (observations, source findings and hypotheses kept apart; no decision yet).
 
 ## The regression test
 
 In `dreyeck/tests/catalog-application.lisp`, which the Nix `catalog` check already runs (that check is not changed):
 
-- `check-fedwiki-name-resolution-failure` starts a fresh SBCL with the debugger disabled and looks at its exit status.
-  1. One site per condition the backend raises, the probe signalling it: the process must survive, the condition must be the site's
-     status (and an `ns-error`), `wait-for-sitemap` must return, and the site's sitemap snapshot must say `failed`. Deterministic
-     everywhere.
-  2. The platform's resolver itself, **only where isolation is proved**: the process sees no network interface but loopback
-     (`/proc/net/dev`; this is what a Nix build sandbox shows, and `/sys` is not mounted there), or an empty network namespace is made
-     with `unshare -rn`. Where neither holds (a machine with a network and no `unshare`, macOS) the real resolver is not run, the test
-     says so, and only the first part runs. Nowhere can a DNS query leave the machine.
+- `check-fedwiki-name-resolution-failure` starts a fresh SBCL with the debugger disabled and looks at its exit status. It has two parts that
+  are kept apart, because only the first is the regression test:
+  1. **The regression test: injected and deterministic.** One site per condition the backend raises, the probe signalling it: the process
+     must survive, the condition must be the site's status (and an `ns-error`), `wait-for-sitemap` must return, and the site's sitemap
+     snapshot must say `failed`. It asks no resolver and opens no connection, so its verdict does not depend on the network or the resolver
+     configuration of the machine it runs on. It is red on the unfixed library and green with the fix, and it is what establishes this change.
+  2. **A supplementary check: the platform's resolver, environment-dependent.** The real resolver is asked for a name that cannot exist
+     (`wiki.test-host.invalid`) and the process must survive with an `ns-error` as the site's status. It runs **only where isolation is
+     proved**: the process sees no network interface but loopback (`/proc/net/dev`; this is what a Nix build sandbox shows, and `/sys`
+     is not mounted there), or an empty network namespace is made with `unshare -rn`. Where neither holds (a machine with a network and
+     no `unshare`, macOS) it is not run, and the test says so. **What this isolation rules out and what it does not** is stated under
+     *Review of the two guards*: it rules out a connection to a host outside the network namespace; it does **not** rule out a DNS
+     resolver that answers on the loopback of that namespace. Its result is therefore a measurement of the environment's resolver
+     configuration as much as of the library, and it is not part of the regression guarantee.
 - `check-fedwiki-initialization-outcomes` is a table of what `initialize-fedwiki` does with each outcome: both success paths (an
   initial HTTPS stays, `"http"` sets HTTP), the failures kept before, the two new ones, and an error that is none of them (a
   programming error), which still leaves the function. The first rows were already true on the unfixed library.
@@ -133,6 +139,26 @@ namespace by `unshare -rn`, which is isolated by construction; failing that, the
 shows only `lo` in `/proc/net/dev` ([nix-sandbox-network-view.txt](evidence/nix-sandbox-network-view.txt)); `/sys/class/net` is not
 there, which is why `/proc` is read. On macOS neither holds (no `/proc/net/dev`, no `unshare`): the real resolver is not run there, and
 the injected part is. Not run on macOS.
+
+**What the isolation guard does and does not exclude.** Seeing only `lo` in `/proc/net/dev`, or running under `unshare -rn`, means that the
+process has **no route to a host outside its network namespace**, so no connection to an external DNS server (or any other external
+host) can be made. It does **not** mean that no resolver is reachable: a resolver that listens on the loopback of that namespace is
+reachable, and `lo` alone cannot tell it from none. Measured: in `unshare -rnm` with only `lo`, a UDP stub on `127.0.0.1:53` named in
+`/etc/resolv.conf` received the real resolver's queries, and the outcome followed the stub's answer
+([resolver-conditions.txt](evidence/resolver-conditions.txt), [no-route-guard-hole.txt](evidence/no-route-guard-hole.txt)). The two paths
+differ in what they promise:
+
+| Path | Loopback resolver | Established |
+|---|---|---|
+| `unshare -rn` (an empty namespace is made by the test) | none: the new loopback is empty, nothing listens on it | measured: no further query reached a server on the outer interface |
+| the process already sees only `lo` (a Nix build sandbox) | **not excluded**: whatever listens on that loopback is asked | measured for the sandbox: `lo` only; whether anything listens on its `127.0.0.1:53` was not recorded. The outcome there, `ns-try-again-error`, is what a missing server gives (`noserver` in the table), so it is consistent with no listener, but it is not proof of one |
+
+Two consequences. (1) The expected `ns-error` of the real-resolver part holds where nothing answers on loopback (or something answers
+SERVFAIL, NXDOMAIN and the like); a loopback resolver that answers differently, for example NODATA (#18), gives another outcome and the
+supplementary part fails there, with the condition printed. That is a finding about the environment or the library, not a regression of
+this change. (2) A path that does not go through a UDP port on the loopback, such as the `nscd` socket or a resolver reached through a
+Unix-domain socket, is a **hypothesis, not a measurement**: a Unix-domain socket is not confined by the network namespace, so it could answer
+from outside it. No such path was looked for or found in the build sandbox, and none is excluded by the guard.
 
 **2. Does the inventory contract see the two conditions moved out of the type list?** It did not. Moved as bare elements into the `progn`,
 the check still held (`MOVED-TO-PROGN: CONTRACT-HOLDS`): a count and a difference to `+PREVIOUS+` cannot tell where the symbols stand
