@@ -1,13 +1,13 @@
-(defpackage :hyperbook/fedwiki/tests
+(defpackage :dreyeck/fedwiki-mech/tests
   (:use :cl)
   (:local-nicknames (:fw :hyperbook/fedwiki) (:v :html-inspector-views))
   (:export :run-tests :serve-browser-witness))
-(in-package :hyperbook/fedwiki/tests)
+(in-package :dreyeck/fedwiki-mech/tests)
 
 (defun original-page ()
   "Use the existing retained original; do not manufacture a Wiki fixture."
   (let* ((json (with-open-file
-                  (in (asdf:system-relative-pathname :hyperbook
+                  (in (asdf:system-relative-pathname :dreyeck
                         "dreyeck/work/trails-rendered-evidence/ward.voices.ustawi.wiki--trails-rendered.json"))
                 (shasht:read-json in)))
          (fw::*neighborhood* (make-hash-table :test #'equal)))

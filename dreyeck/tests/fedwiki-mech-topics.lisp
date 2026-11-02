@@ -1,7 +1,7 @@
-(in-package :hyperbook/fedwiki/tests)
+(in-package :dreyeck/fedwiki-mech/tests)
 
 (defun topics-json (name)
-  (with-open-file (in (asdf:system-relative-pathname :hyperbook
+  (with-open-file (in (asdf:system-relative-pathname :dreyeck
                        (concatenate 'string "tests/fixtures/mech-topics/" name)))
     (shasht:read-json in)))
 

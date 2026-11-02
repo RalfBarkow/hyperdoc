@@ -49,7 +49,10 @@
       (assert (member (getf fragment :status) '(:before-elsewhere :extended-elsewhere)))
       (assert (equal '("hyperbook-fedwiki/fedwiki.lisp" "function:initialize-fedwiki") (subseq (first (getf fragment :elsewhere)) 0 2))))
     (assert (equal '("hyperbook/fedwiki") (ua:change-assessment-owners change)))
-    (assert (eq :upstream-owned (getf o :category)))
+    ;; Without an ownership inventory the library path is upstream-owned; with docs/code-ownership/inventory.lisp-data (which this checkout has) the inventory decides case by case:
+    ;; MAKE-FEDWIKI's neighbours are recorded as a reusable extension that stays in hyperbook/fedwiki until upstream has the seam.
+    (let ((inventory-p (probe-file (in-checkout "docs/code-ownership/inventory.lisp-data"))))
+      (assert (eq (if inventory-p :reusable-extension :upstream-owned) (getf o :category)) () "~S" (getf o :category)))
     (assert (member "hyperbook/fedwiki" (let ((should (getf o :should-own))) (if (listp should) should (list should))) :test #'equal))
     ;; the dependents and tests that may be affected are real systems of this checkout
     (let ((impact (ua:change-assessment-impact change)))

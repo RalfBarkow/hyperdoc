@@ -1,7 +1,7 @@
-(in-package :hyperbook/fedwiki/tests)
+(in-package :dreyeck/fedwiki-mech/tests)
 
 (defun sitemap-fixture ()
-  (with-open-file (in (asdf:system-relative-pathname :hyperbook
+  (with-open-file (in (asdf:system-relative-pathname :dreyeck
                        "tests/fixtures/mech-sitemaps.json"))
     (shasht:read-json in)))
 

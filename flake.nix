@@ -171,6 +171,12 @@
             topicMaps = self.packages.${system}.topic-maps-source;
             revision = self.rev or self.dirtyRev or "";
           };
+        # The library ownership contract on a source snapshot: no Git history needed (the history-based dreyeck/hyperdoc/library-tests cannot run in a build).
+        library-inventory = let pkgs = import nixpkgs { inherit system; }; in
+          pkgs.callPackage ./nix/library-inventory-check.nix {
+            runtime = runtimeFor system;
+            source = pkgs.lib.cleanSource self.outPath;
+          };
         catalog-topic-maps = let pkgs = import nixpkgs { inherit system; }; in
           pkgs.callPackage ./nix/catalog-topic-maps-check.nix {
             catalog = self.packages.${system}.hyperdoc-catalog-topic-maps;

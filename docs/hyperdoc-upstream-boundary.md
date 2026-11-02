@@ -21,7 +21,7 @@ Konrad Hinsen's locally available `8a1149197fabcb1ab5622316f09c5a60c2d3f1f8`, su
 | FedWiki image URLs, dimensions and rendering | :LOCAL-COMPATIBILITY-REQUIREMENT; reusable renderer fixes | Origin-relative resources and validated plugin metadata work for any wiki. Responsive figure rendering is general content presentation, not a site-specific rule. |
 | HyperBook server HOST forwarding | :LOCAL-COMPATIBILITY-REQUIREMENT; reusable server option | SERVE-CATALOG forwards HOST to SERVE-HYPERBOOKS, which forwards it to CLOG. Both complete forms are pinned to existing commit `53732270d42177eb01a46dad7940e60244ec52a2`; all other server forms must still match upstream. |
 | FedWiki slug navigation | :LOCAL-COMPATIBILITY-REQUIREMENT; reusable bug fix | Preserve slug identity instead of interpreting it as a title. |
-| Local ASDF test attachment | :DREYECK-INTEGRATION; dreyeck test systems | Tests moved off upstream system definitions. CLOG remains a direct dependency required by existing library source. |
+| Local ASDF test attachment | :DREYECK-INTEGRATION; dreyeck test systems | Tests moved off upstream system definitions. CLOG remains a direct dependency required by existing library source. The last one that stood in `hyperbook.asd`, `hyperbook/fedwiki/tests`, is now `dreyeck/fedwiki-mech/tests` in `dreyeck.asd` (docs/code-ownership/README.md); the old name is retired. |
 | Catalog, Topicmap, Workspace, Workflow | Existing dreyeck ownership | Semantics unchanged; reading books explicitly select the page policy. |
 | Intake model versus its reading registration | Optional workflow capability | Core moved by ASDF ownership, not duplicated; existing package/API preserved. |
 
@@ -36,7 +36,7 @@ All are candidate upstream contributions, not unexplained dreyeck policy. The so
 * `hyperbook-fedwiki/wiki-links.lisp`: the wiki-link thunk resolves a slug as a slug; LOOKUP-SLUG-IN-PAGE-CONTEXT has an injectable plugin resolver. Tested by wiki-link and fedwiki-navigation tests.
 * `hyperbook.asd`: hyperbook/fedwiki directly depends on CLOG, already named by upstream-owned pages.lisp and views.lisp. This makes a real dependency explicit instead of depending on load order.
 
-The remaining textual differences in package declarations, generic/method forms and ASDF layout are serialization/ordering differences. The CST inventory checks structural equivalence. No other semantic difference is allowed. There is no LOAD-PAGE-only replacement for the code-directory or FedWiki behavior.
+The remaining textual differences in package declarations, generic/method forms and ASDF layout are serialization/ordering differences. They, and every semantic delta above, are now also listed one by one, with a plan and without being accepted as permanent, in docs/code-ownership/inventory.lisp-data (README: docs/code-ownership/README.md); `scripts/code-ownership.lisp --check` verifies them without Git history. The CST inventory checks structural equivalence. No other semantic difference is allowed. There is no LOAD-PAGE-only replacement for the code-directory or FedWiki behavior.
 
 ## Intake ownership and evidence
 
