@@ -203,24 +203,33 @@ signalling it, then the site's outcome. USOCKET:NS-UNKNOWN-ERROR is not among th
     (format t \"~&ALL-SITES-FINISHED~%\"))
   (sb-ext:timeout () (format t \"~&TIMEOUT~%\") (sb-ext:exit :code 3 :abort t)))")
 
-(defun %no-route-p ()
-  "Whether this process has no route to any network (a Nix build sandbox, for example). Connecting a datagram socket to an address reserved
-for documentation (RFC 5737) fails for lack of a route and otherwise only records the peer: nothing is sent."
-  (let ((socket (make-instance 'sb-bsd-sockets:inet-socket :type :datagram :protocol :udp)))
-    (unwind-protect
-         (handler-case (progn (sb-bsd-sockets:socket-connect socket #(192 0 2 1) 9) nil)
-           (sb-bsd-sockets:network-unreachable-error () t)
-           (error () nil))
-      (sb-bsd-sockets:socket-close socket))))
+(defun %network-interface-names ()
+  "The names of the network interfaces this process sees, from /proc/net/dev: NIL where that file is not there (macOS, for one) or lists none.
+/proc is what a Nix build sandbox shows (/sys is not mounted in it), and /proc/net is that process's own network namespace."
+  (let ((file #p"/proc/net/dev"))
+    (when (probe-file file)
+      (with-open-file (in file)
+        (read-line in nil) (read-line in nil)   ; the two header lines
+        (loop for line = (read-line in nil)
+              for colon = (and line (position #\: line))
+              while line
+              when colon collect (string-trim " " (subseq line 0 colon)))))))
+
+(defun %isolated-p ()
+  "Whether this process can reach nothing beyond the machine: it sees no network interface but loopback. Then no resolver setting, route or
+stub can lead to a DNS server outside it. A missing route to some address does not say that: a loopback or an internal resolver answers
+without a default route. Where the interfaces cannot be read the process is not known to be isolated."
+  (let ((names (%network-interface-names)))
+    (and names (every (lambda (name) (string= name "lo")) names))))
 
 (defun %offline-prefix ()
-  "A command prefix under which the real resolver has no network, and why: NIL when this process has no route anyway, a list for `unshare`
-where it can make an empty network namespace, and :NONE when neither holds. A real lookup is made only where it cannot reach a network,
-so a machine with network is never asked."
-  (cond ((%no-route-p) (values nil "this process has no route to any network"))
+  "A command prefix under which the real resolver can reach no network, and why: NIL when this process is isolated already (a Nix build
+sandbox), a list for `unshare` where it can make an empty network namespace, and :NONE when neither holds. The real resolver is run only
+under one of these two, so a machine with a network is never asked."
+  (cond ((%isolated-p) (values nil "this process sees no network interface but loopback"))
         ((ignore-errors (zerop (nth-value 2 (uiop:run-program '("unshare" "-rn" "true") :ignore-error-status t))))
          (values '("unshare" "-rn") "an empty network namespace (unshare -rn)"))
-        (t (values :none "this process has a network and no empty network namespace can be made"))))
+        (t (values :none "this process can reach a network and no empty network namespace can be made"))))
 
 (defun %initialization-outcome (probe)
   "What INITIALIZE-FEDWIKI does with a PROBE (a function of the host name), run here with no network: :ESCAPED when a condition leaves it,
