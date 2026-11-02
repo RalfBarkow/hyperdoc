@@ -1,0 +1,7 @@
+# Before: sandboxed 'nix build .#checks.x86_64-linux.catalog' at b989c01 (PR #12 code), failing step excerpt (public-views.log)
+Unhandled USOCKET:NS-TRY-AGAIN-ERROR in thread #<SB-THREAD:THREAD tid=110 "Anonymous thread" RUNNING
+3: (ERROR USOCKET:NS-TRY-AGAIN-ERROR :SOCKET NIL :HOST-OR-IP "ward.voices.ustawi.wiki")
+9: (USOCKET:GET-HOSTS-BY-NAME "ward.voices.ustawi.wiki")
+12: (HYPERBOOK/FEDWIKI::PROBE-FEDWIKI-PROTOCOL "ward.voices.ustawi.wiki")
+13: (HYPERBOOK/FEDWIKI::INITIALIZE-FEDWIKI #<HYPERBOOK/FEDWIKI::FEDWIKI {10146B3D73}> "ward.voices.ustawi.wiki" :PROTOCOL-PROBE #<FUNCTION HYPERBOOK/FEDWIKI::PROBE-FEDWIKI-PROTOCOL> :SITEMAP-FETCHER #
+unhandled condition in --disable-debugger mode, quitting

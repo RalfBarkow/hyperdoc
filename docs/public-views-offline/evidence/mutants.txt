@@ -1,0 +1,5 @@
+# Mutants run through the complete RUN-TESTS under CALL-WITH-OFFLINE-FEDWIKI (outside the sandbox); each must be killed
+MUTANT-KILLED blind-walk: expected exactly the plain probe button, found NIL
+MUTANT-KILLED no-containment: The assertion(EQ :REFUSED    (DREYECK/TOPIC-MAPS-PUBLIC-VIEWS/TESTS::CONTROL-KIND     (FIRST DREYECK/TOPIC-MAPS-PUBLIC-VIEWS/TESTS::CONTROLS)))failed with(DREYE
+MUTANT-KILLED permit-all: The assertion(EQ :REFUSED    (DREYECK/TOPIC-MAPS-PUBLIC-VIEWS/TESTS::CONTROL-KIND     (FIRST DREYECK/TOPIC-MAPS-PUBLIC-VIEWS/TESTS::CONTROLS)))failed with(DREYE
+# Note: the walk alone (CHECK-REACHABLE-CONTROLS) does not kill permit-all or no-containment: no plain thunk is reachable in the 300 objects (the readings use run-button/reviewed-thunk). Containment is proven by CHECK-AN-EXTRA-BUTTON-IS-REFUSED and the authority-policy gate checks, which RUN-TESTS runs.
