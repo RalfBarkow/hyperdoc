@@ -1,0 +1,11 @@
+# The unchanged Nix acceptance check, on the last code commit of this branch (3a6eb2ae), 2026-11-02:
+#   nix build .#checks.x86_64-linux.catalog --no-link -L        -> exit 0
+# flake.nix and flake.lock are unchanged against the base 0a7d4dee. The check builds in the Nix sandbox (no network, no Git history of this repository),
+# and does not load the systems added by this branch.
+#
+# Test systems in the development shell (nix develop .#fedwiki-original-editor), compared with the base 0a7d4dee:
+#   dreyeck/upstream-assessment/tests   new   PASS (UPSTREAM-ASSESSMENT-PASS, UPSTREAM-ASSESSMENT-EXAMPLE-PASS)
+#   dreyeck/upstream-intake             smoke PASS
+#   dreyeck/hyperdoc/library-tests      FAILS at the base and here, identically (RalfBarkow/hyperdoc#17)
+#   dreyeck/hyperdoc/boundary-tests     FAILS at the base (recorded before this branch)
+#   dreyeck/catalog/tests               FAILS at the base and here (the Catalog runtime cannot reach the Riesbeck engine)
