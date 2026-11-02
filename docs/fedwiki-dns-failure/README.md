@@ -180,10 +180,24 @@ the check still held (`MOVED-TO-PROGN: CONTRACT-HOLDS`): a count and a differenc
 of the `or` type list of a `handler-case` clause that already names `usocket:ns-host-not-found-error`. The move is now rejected, as are
 the other mutants ([contract-after-hardening.txt](evidence/contract-after-hardening.txt)).
 
-## Candidate upstream contribution
+## Upstream commit 58a2b2c, and the candidate upstream contribution
 
-The change to `initialize-fedwiki` alters nothing for a reachable host and adds two entries to an existing list. It is recorded as such in
-`docs/hyperdoc-upstream-boundary.md` and in the contract (`dreyeck/tests/hyperdoc-library-delta.lisp`).
+On 2026-11-02 upstream published `58a2b2c` "Catch more name service errors", which replaces `ns-host-not-found-error` by `ns-error` in the
+handler of `fetch-sitemap` and `fetch-plugin-data`. It was compared with this change, with a reproducible test:
+[upstream-comparison/README.md](upstream-comparison/README.md). In short:
+
+- It corrects, demonstrably, `ns-try-again-error` and `ns-no-recovery-error` in the **second** attempt of upstream's `make-fedwiki`. It leaves the
+  **first** attempt, the HTTPS probe with `usocket:socket-connect`, with its narrow handler: `ns-try-again-error` there still ends the process, also with
+  the real resolver in an empty namespace (thirteen scenarios, four checkouts).
+- PR #15 covers both attempts, because in our fork the probe runs inside the one handler of `initialize-fedwiki`. It does not cover NODATA (#18),
+  connection failures (#16) or `ns-unknown-error`, and neither does upstream.
+- We keep the explicit classes; upstream chose the parent class. The reasons, and what switching would take, are in the comparison.
+- Nothing was taken over, `+PREVIOUS+` and the upstream reference (`8a1149197`, an ancestor of 58a2b2c) were not moved, and the upstream hunk does
+  not apply to our file.
+
+**The candidate contribution is therefore not "two entries to an existing list" any more.** Upstream's list has changed, and what upstream still
+lacks is the handler of the first attempt: handling `ns-try-again-error` and `ns-no-recovery-error` (or `ns-error`) around the HTTPS probe.
+That is recorded here and in `docs/hyperdoc-upstream-boundary.md`; nothing is offered or sent upstream.
 
 ## Reproduce
 

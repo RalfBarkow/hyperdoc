@@ -1,0 +1,13 @@
+diff --git a/hyperbook-fedwiki/fedwiki.lisp b/hyperbook-fedwiki/fedwiki.lisp
+index f0a2da7..308f321 100644
+--- a/hyperbook-fedwiki/fedwiki.lisp
++++ b/hyperbook-fedwiki/fedwiki.lisp
+@@ -82,7 +82,7 @@ that occurred when reading the site map.")))
+                           (setf (status-of wiki) t))
+                  ((or stream-error
+                    usocket:timeout-error
+-                   usocket:ns-host-not-found-error
++                   usocket:ns-error
+                    shasht:shasht-invalid-char) (c)
+                    (setf (status-of wiki) c))))))
+     wiki))
