@@ -35,6 +35,20 @@ already said in prose; here it is a field.
 Every claim carries one of the epistemic statuses of the existing workflow reading, with the words of the request in brackets:
 `:SOURCE-OBSERVED` (observation), `:MECHANICALLY-DERIVED` (derived evidence), `:DESIGN-INFERENCE` (inference), `:WORKING-HYPOTHESIS` (hypothesis).
 
+## Status: a manual workflow, not yet an automated one
+
+Today a person runs the entry point (below), reads the report and decides. **Nothing triggers it, nothing runs it periodically, and nothing acts on its result.** Three things stay
+separate, and none of them is an integration:
+
+| | What it is | What it is not |
+|---|---|---|
+| **Observation** | which upstream commits exist, and which of them this checkout has objects for | not a fetch, not a merge |
+| **Impact assessment** | per changed definition: where it stands in the fork, who owns it, what it may affect, and a *proposal* | not a decision |
+| **Decision log** | `ledger.lisp-data`: what a person decided, against which state of the fork, with supersession and history | not an execution; recording `:adopt-upstream-change` changes no source |
+
+An actual integration (taking an upstream change into the fork) is a separate, explicitly authorized operation that this workflow does not contain. Triggering it automatically (a webhook receiver, a mail rule,
+a periodic job) is described below as a possibility only; it is not installed, and doing so is a separate decision.
+
 ## The entry point
 
 ```bash
