@@ -1,0 +1,11 @@
+# The tests of the ownership check, checked by mutants (2026-11-02): one change at a time to dreyeck/src/code-ownership.lisp, compiled files purged, then
+# asdf:test-system "dreyeck/code-ownership/tests". DETECTED means the tests stopped. The unmutated tests pass.
+baseline (NOT DETECTED = the tests pass)                               NOT DETECTED
+K1 a difference nobody recorded is not a problem  DETECTED
+K2 a pending entry counts as accepted  DETECTED
+K3 an entry whose form changed after it was recorded is not stale  DETECTED
+K4 a migrated definition is not looked for at its new place  DETECTED
+K5 the definitions of a removed file are not differences  DETECTED
+K6 an entry with nothing left to compare is kept silently  DETECTED
+K7 the inventory's reference need not be the manifest's  DETECTED
+K8 an incomplete entry is accepted  DETECTED

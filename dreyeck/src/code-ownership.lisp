@@ -98,6 +98,43 @@ file). Git-free: the fork's files are scanned as syntax."
 
 ;;; The inventory
 
+(defun read-decisions (pathname) (ua::read-plain-data pathname))
+
+(defun decision-rule-for (decisions path key)
+  "The rule of DECISIONS (plain data) that covers the definition KEY of PATH, or NIL."
+  (find-if (lambda (rule) (and (equal path (getf rule :path))
+                               (let ((keys (getf rule :keys))) (or (eq keys :all) (member key keys :test #'equal)))))
+           (getf (rest decisions) :rules)))
+
+(defun build-inventory (root repository manifest decisions)
+  "The inventory for the fork at ROOT: one PENDING entry for every difference from MANIFEST, joined with the rule of DECISIONS that covers it, the ASDF owner of its file
+and the commit where its current form first stood (from REPOSITORY's history). A difference no rule covers is an error: nobody has said what it is."
+  (let* ((deviations (current-deviations root manifest)) (index (ua:make-fork-index root)) (origins (make-hash-table :test #'equal)) (entries '()))
+    ;; the origin of an added or changed form: where its digest first stood. A removed form takes the origin of what replaced it in the same file.
+    (dolist (d deviations)
+      (when (deviation-current-digest d)
+        (multiple-value-bind (sha subject) (deviation-origin-commit repository (deviation-path d) (deviation-current-digest d))
+          (setf (gethash (list (deviation-path d) (deviation-key d)) origins) (list sha subject)))))
+    (dolist (d deviations)
+      (let* ((rule (decision-rule-for decisions (deviation-path d) (deviation-key d)))
+             (own (gethash (list (deviation-path d) (deviation-key d)) origins))
+             (origin (or own
+                         (loop for other in deviations
+                               for found = (and (equal (deviation-path other) (deviation-path d)) (gethash (list (deviation-path other) (deviation-key other)) origins))
+                               when (and found (first found)) return found)))
+             (owners (if (uiop:string-prefix-p "system:" (deviation-key d))
+                         (list (subseq (deviation-key d) (length "system:")))   ; an ASDF system definition is owned by itself
+                         (ua:system-owners-of index (deviation-path d)))))
+        (unless rule (error "No ownership rule covers ~A ~A." (deviation-path d) (deviation-key d)))
+        (push (list :path (deviation-path d) :key (deviation-key d) :kind (deviation-kind d)
+                    :upstream-digest (deviation-upstream-digest d) :current-digest (deviation-current-digest d)
+                    :status :pending :nature (getf rule :nature) :category (getf rule :category) :owner-now (or owners (list "none"))
+                    :target-system (getf rule :target-system) :proposed-target (getf rule :proposed-target) :priority (getf rule :priority)
+                    :basis (getf rule :basis) :plan (getf rule :plan) :documented-in (getf rule :documented-in)
+                    :origin-commit (first origin) :origin-subject (second origin))
+              entries)))
+    (list :library-inventory :version 1 :reference (manifest-reference manifest) :entries (nreverse entries))))
+
 (defun read-inventory (pathname) (ua::read-plain-data pathname))
 (defun write-inventory (inventory pathname) (ua::write-plain-data inventory pathname))
 (defun inventory-entries (inventory) (getf (rest inventory) :entries))

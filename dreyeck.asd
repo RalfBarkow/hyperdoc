@@ -3569,3 +3569,11 @@
   :perform (test-op (op system)
              (declare (ignore op system))
              (uiop:symbol-call :dreyeck/fedwiki-mech/tests :run-tests)))
+
+(asdf:defsystem "dreyeck/code-ownership/tests"
+  :description "The code ownership inventory against synthetic Git and ASDF fixtures and against this checkout; the check itself needs no Git"
+  :depends-on ("dreyeck/workflow/code-ownership" "dreyeck/fedwiki-mech/tests")
+  :components ((:file "dreyeck/tests/code-ownership"))
+  :perform (test-op (op system)
+             (declare (ignore op system))
+             (uiop:symbol-call :dreyeck/code-ownership/tests :run-tests)))

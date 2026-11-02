@@ -1,0 +1,92 @@
+;;; Ownership decisions for the definitions in which the fork's library paths differ from upstream (8a1149197). A person's file: scripts/code-ownership.lisp
+;;; --inventory joins it with the measured differences (digests, origin commits, ASDF owners). Nothing here accepts a difference as permanent: every entry is
+;;; PENDING with a plan, because ownership is decided by the maintainers, and a rule that classified a difference as dreyeck-specific or as the library's for good
+;;; would be an unproven equation. CATEGORY is the proposed owner class (:upstream-owned, :dreyeck-owned, :reusable-extension); NATURE says what kind of difference it is.
+;;; A rule matches a path and one key, a list of keys, or :ALL.
+(:code-ownership-decisions
+ :version 1
+ :rules
+ ((:path "hyperbook-explorer/package.lisp" :keys :all :nature :serialization-only :category :upstream-owned :priority 1
+   :target-system "hyperbook/explorer" :proposed-target "upstream: restore upstream's text"
+   :basis ("The export list differs from upstream only in how it was printed: (QUOTE ...) instead of ', and hyperbook::*current-page* / *current-hyperbook* qualified in their own package. The symbols exported are the same."
+           "docs/hyperdoc-upstream-boundary.md: 'The remaining textual differences in package declarations ... are serialization/ordering differences.'")
+   :plan "Restore the upstream text of the export form (a mechanical revert of the printing), then run dreyeck/hyperdoc/library-tests. No behaviour changes; the two entries (removed upstream form, added printed form) disappear together.")
+  (:path "hyperdoc-explorer/html-pages.lisp" :keys :all :nature :serialization-only :category :upstream-owned :priority 1
+   :target-system "hyperdoc/explorer" :proposed-target "upstream: restore upstream's text"
+   :basis ("The PAGE-CLASS method for :html differs from upstream only in printing: hyperdoc::hd and hyperdoc:hyperdoc are written package-qualified, (QUOTE ...) for '. Same specializers, same body."
+           "docs/hyperdoc-upstream-boundary.md: 'PAGE-CLASS dispatch ... Formatting differences from CST serialization are nonsemantic.'")
+   :plan "Restore the upstream text. The package-qualified spelling is the one that the identity rules of dreyeck/upstream-assessment treat as different from upstream's unless the file's own package says otherwise, which is why it shows here.")
+  (:path "hyperdoc-explorer/markdown-pages.lisp" :keys :all :nature :serialization-only :category :upstream-owned :priority 1
+   :target-system "hyperdoc/explorer" :proposed-target "upstream: restore upstream's text"
+   :basis ("The PAGE-CLASS method for :md differs from upstream only in printing, as the :html one does.")
+   :plan "Restore the upstream text, with the :html method.")
+  (:path "hyperdoc/core.lisp" :keys ("generic:page-class") :nature :serialization-only :category :upstream-owned :priority 1
+   :target-system "hyperdoc" :proposed-target "upstream: restore upstream's text"
+   :basis ("DEFGENERIC PAGE-CLASS differs only in the package-qualified parameter name (hyperdoc::hdoc).")
+   :plan "Restore the upstream text.")
+  (:path "hyperdoc/core.lisp" :keys ("function:cl-source-file-components-under" "function:make-hyperdoc") :nature :behaviour :category :reusable-extension :priority 3
+   :target-system "hyperdoc" :proposed-target "upstream, by contribution (code-subdirectory option)"
+   :documented-in "docs/hyperdoc-upstream-boundary.md: 'Separate and recursive ASDF code directory', 'Exact remaining semantic library deltas'"
+   :basis ("MAKE-HYPERDOC gains an optional CODE-SUBDIRECTORY; CL-SOURCE-FILE-COMPONENTS-UNDER discovers the Lisp components recursively. Workflow, TALA, wiki-link and page-attached books keep pages and Lisp components in separate modules."
+           "The constructor has no public discovery hook, so the behaviour cannot move to a dreyeck system without a seam upstream does not have.")
+   :plan "Prepare an upstream contribution (code-subdirectory option with its test). Until it is accepted the definitions stay where they are as a reusable extension; if upstream offers a discovery hook instead, move them to dreyeck/hyperdoc.")
+  (:path "hyperdoc/defining.lisp" :keys ("macro:defhyperdoc") :nature :behaviour :category :reusable-extension :priority 3
+   :target-system "hyperdoc" :proposed-target "upstream, by contribution (with the code-subdirectory option)"
+   :documented-in "docs/hyperdoc-upstream-boundary.md: 'Exact remaining semantic library deltas'"
+   :basis ("DEFHYPERDOC forwards the CODE-SUBDIRECTORY option to MAKE-HYPERDOC.")
+   :plan "Travels with MAKE-HYPERDOC's option, in the same contribution.")
+  (:path "hyperbook-fedwiki/fedwiki.lisp" :keys ("function:domain-name-of" "function:probe-fedwiki-protocol" "function:initialize-fedwiki" "function:make-fedwiki")
+   :nature :behaviour :category :reusable-extension :priority 3
+   :target-system "hyperbook/fedwiki" :proposed-target "upstream, by contribution (see RalfBarkow/hyperdoc#13, #15 for the open handler question)"
+   :documented-in "docs/hyperdoc-upstream-boundary.md: 'FedWiki operational initialization failures and startup race'"
+   :basis ("URI prefix removal preserves host ports; PROBE-FEDWIKI-PROTOCOL, INITIALIZE-FEDWIKI and MAKE-FEDWIKI expose injected operations; the startup lock keeps a fast result from being overwritten by the thread object; failure aborts dependent fetches and stays observable."
+           "docs/upstream-intake/ledger.lisp-data: upstream 58a2b2c changes the type list that now stands in INITIALIZE-FEDWIKI; the assessment of it is a proposed :DEFER.")
+   :plan "Contribute with the error-handling decision of #13/#15 so that upstream sees one coherent change. No Dreyeck hostname or policy is in these definitions.")
+  (:path "hyperbook-fedwiki/fedwiki.lisp" :keys ("class:fedwiki" "function:fetch-sitemap" "function:sitemap-snapshot") :nature :behaviour :category :reusable-extension :priority 2
+   :target-system "hyperbook/fedwiki" :proposed-target "upstream seam first (retained page-scoped sitemaps), then the Mech use of it moves to dreyeck/fedwiki-mech"
+   :documented-in "docs/fedwiki-mech-story.md"
+   :basis ("The FEDWIKI class retains the raw sitemap, FETCH-SITEMAP keeps it with provenance, SITEMAP-SNAPSHOT exposes a retained copy. Originated for the Mech host (99521dc6a); the retention itself is general.")
+   :plan "Propose a retention seam upstream (a slot and an accessor) or an :after method hook; the Mech-specific consumer then moves with the rest of dreyeck/fedwiki-mech. Blocked on upstream's willingness: until then these three stay and block the move of the Mech definitions that read them.")
+  (:path "hyperbook-fedwiki/pages.lisp" :keys ("class:fedwiki-page" "function:copy-page-json" "function:set-page-data") :nature :behaviour :category :reusable-extension :priority 2
+   :target-system "hyperbook/fedwiki" :proposed-target "upstream seam first (retained raw page JSON), consumers move to dreyeck/fedwiki-mech"
+   :documented-in "docs/fedwiki-mech-story.md"
+   :basis ("FEDWIKI-PAGE retains the original JSON, SET-PAGE-DATA stores it, COPY-PAGE-JSON gives a copy. Introduced for the Mech story item (e90397462); the Mech tests assert that the original page JSON is never mutated.")
+   :plan "As the sitemap retention: an upstream seam, with the Mech consumers moving afterwards.")
+  (:path "hyperbook-fedwiki/pages.lisp" :keys ("function:context-site-references" "function:resolve-context-site-references" "function:extract-context") :nature :behaviour :category :reusable-extension :priority 3
+   :target-system "hyperbook/fedwiki" :proposed-target "upstream, by contribution"
+   :documented-in "docs/hyperdoc-upstream-boundary.md: 'FedWiki context extraction/resolution'"
+   :basis ("CONTEXT-SITE-REFERENCES and RESOLVE-CONTEXT-SITE-REFERENCES factor EXTRACT-CONTEXT so that the journal ordering can be read without remote resolution.")
+   :plan "Contribute with the initialization changes above.")
+  (:path "hyperbook-fedwiki/story-items.lisp" :keys ("function:resolve-story-item-url" "function:story-item-image-presentation-hints" "method:render-story-item::(eql :image),t,t") :nature :behaviour
+   :category :reusable-extension :priority 3
+   :target-system "hyperbook/fedwiki" :proposed-target "upstream, by contribution (image URLs, dimensions, responsive figure)"
+   :documented-in "docs/hyperdoc-upstream-boundary.md: 'FedWiki image URLs, dimensions and rendering'"
+   :basis ("Origin-relative image URLs (also with ports), validated dimensions and a responsive figure; any wiki benefits. The image RENDER-STORY-ITEM method is a method on upstream's generic function, so it is the one that needs the upstream file only because it replaces upstream's method of the same specializers.")
+   :plan "Contribute. A method with identical specializers replaces upstream's in the same image, so it cannot move to another system without removing upstream's: it stays with the library until upstream has it.")
+  (:path "hyperbook-fedwiki/story-items.lisp" :keys ("parameter:*mech-plugin-host-url*" "function:mech-neighborhood-snapshot" "function:mech-json-base64" "method:render-story-item::(eql :mech),t,t")
+   :nature :behaviour :category :dreyeck-owned :priority 2
+   :target-system "dreyeck/fedwiki-mech" :proposed-target "a new dreyeck system dreyeck/fedwiki-mech, same package, after the retention seams"
+   :documented-in "docs/fedwiki-mech-story.md"
+   :basis ("The Mech story item runs in an isolated browser host that dreyeck provides. The :mech method has no counterpart in upstream (an added method, not a replacement), so it can be defined from any system once the data it reads is reachable."
+           "It reads the retained sitemap (SITEMAP-SNAPSHOT) and the retained page JSON (COPY-PAGE-JSON); those are the two seams above.")
+   :plan "1) Seams for retained sitemap and page JSON upstream (or as reusable extension hooks). 2) Create dreyeck/fedwiki-mech with these four definitions under the library package. 3) Add cl-base64 to that system instead of hyperbook/fedwiki (flexi-streams stays: upstream's utilities.lisp uses it). 4) Delete from story-items.lisp. Test: dreyeck/fedwiki-mech/tests (already dreyeck's, in this PR).")
+  (:path "hyperbook-fedwiki/wiki-links.lisp" :keys ("function:make-wiki-link" "function:lookup-slug-in-page-context") :nature :behaviour :category :reusable-extension :priority 3
+   :target-system "hyperbook/fedwiki" :proposed-target "upstream, by contribution (slug navigation)"
+   :documented-in "docs/hyperdoc-upstream-boundary.md: 'FedWiki slug navigation'"
+   :basis ("The wiki-link thunk resolves a slug as a slug; LOOKUP-SLUG-IN-PAGE-CONTEXT has an injectable plugin resolver.")
+   :plan "Contribute with the initialization changes.")
+  (:path "hyperbook-fedwiki/wiki-links.lisp" :keys ("function:make-remote") :nature :behaviour :category :reusable-extension :priority 2
+   :target-system "hyperbook/fedwiki" :proposed-target "to be decided with the retention seams (changed in the Mech commit e90397462)"
+   :basis ("MAKE-REMOTE changed in the commit that introduced the Mech host. What the change does beyond Mech is not yet separated; this is the least-understood entry.")
+   :plan "Read the change against upstream's MAKE-REMOTE; either it belongs to the retention seam (then it travels with it) or to the Mech system.")
+  (:path "hyperbook-server/server.lisp" :keys ("function:serve-hyperbooks" "function:serve-catalog") :nature :behaviour :category :reusable-extension :priority 3
+   :target-system "hyperbook/server" :proposed-target "upstream, by contribution (HOST option)"
+   :documented-in "docs/hyperdoc-upstream-boundary.md: 'HyperBook server HOST forwarding'; dreyeck/hyperdoc/library-tests pins both forms to 53732270d"
+   :basis ("SERVE-CATALOG forwards HOST to SERVE-HYPERBOOKS, which forwards it to CLOG; a runtime can bind an address. The existing contract pins both complete forms to their introducing commit.")
+   :plan "Contribute the option. The pin to 53732270d stays in the strict test until then.")
+  (:path "hyperbook.asd" :keys ("system:hyperbook/fedwiki") :nature :behaviour :category :reusable-extension :priority 2
+   :target-system "hyperbook/fedwiki" :proposed-target "split: clog and flexi-streams stay (real dependencies of upstream files); cl-base64 moves to dreyeck/fedwiki-mech"
+   :documented-in "docs/hyperdoc-upstream-boundary.md (clog); docs/fedwiki-mech-story.md"
+   :basis ("Three dependencies differ from upstream: CLOG (already used by upstream's pages.lisp and views.lisp), FLEXI-STREAMS (already used by upstream's utilities.lisp): declaring them repairs a missing dependency; CL-BASE64 is used by MECH-JSON-BASE64 only."
+           "The component list is not different: since this change hyperbook.asd no longer defines the test system hyperbook/fedwiki/tests, which was a dreyeck test attached to upstream's system file.")
+   :plan "clog and flexi-streams: contribute with the others, or keep. cl-base64: moves with MECH-JSON-BASE64 (see above).")))
