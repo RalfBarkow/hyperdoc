@@ -86,8 +86,9 @@ report; they are not clock times.")
   '((:id "src-catalog-application" :file "dreyeck.asd"
      :marker "(defsystem \"dreyeck/catalog-application\""
      :system "dreyeck/catalog-application"
-     :declares ("dreyeck/local-fedwiki-view" "clack-handler-hunchentoot" "uiop")
-     :statement "The ASDF system dreyeck/catalog-application declares three dependencies; the preview system is none of them.")
+     ;; hunchentoot since 573fe37 (a disconnected HTTP client no longer terminates the Catalog process).
+     :declares ("dreyeck/local-fedwiki-view" "clack-handler-hunchentoot" "hunchentoot" "uiop")
+     :statement "The ASDF system dreyeck/catalog-application declares four dependencies; the preview system is none of them.")
     (:id "src-preview-system" :file "dreyeck.asd"
      :marker "(defsystem \"dreyeck/fedwiki-item-edit-preview\""
      :system "dreyeck/fedwiki-item-edit-preview"
