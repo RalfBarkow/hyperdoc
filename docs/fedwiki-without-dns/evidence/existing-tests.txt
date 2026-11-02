@@ -1,0 +1,16 @@
+# Existing and new test systems, in the dev shell .#fedwiki-original-editor, at this change (2026-11-02); each line is one asdf:test-system
+# or one membership script.
+hyperbook/fedwiki/tests                          SYSTEM-RESULT PASSED (5s)
+dreyeck/wiki-link/tests                          SYSTEM-RESULT PASSED (5s)
+dreyeck/local-fedwiki-view/tests                 SYSTEM-RESULT PASSED (5s)
+dreyeck/catalog/tests                            SYSTEM-RESULT FAILED (see below) (14s)
+dreyeck/catalog-application                      SYSTEM-RESULT PASSED (5s)
+dreyeck/fedwiki-original-editor-demo             SYSTEM-RESULT PASSED (5s)
+dreyeck/fedwiki-without-dns                      SYSTEM-RESULT PASSED (5s)
+dreyeck/fedwiki-without-dns-demo                 SYSTEM-RESULT PASSED (13s)
+scripts/check-editor-demo-membership.lisp        EDITOR-DEMO-MEMBERSHIP-PASS 
+scripts/check-without-dns-demo-membership.lisp   WITHOUT-DNS-DEMO-MEMBERSHIP-PASS 
+
+# dreyeck/catalog/tests fails with "The Catalog runtime cannot reach the Riesbeck engine." in this dev shell. It fails the same way at the
+# unmodified base 0a7d4dee (dreyeck.ch), checked out detached and run with the same command: the engine comes from the packaged registry
+# of the Nix check, which is where the Catalog is tested (below), not from this dev shell. It is not caused by this change.

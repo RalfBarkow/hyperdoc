@@ -1,0 +1,9 @@
+# The requests each wiki server received, from the server's own HTTP layer (tests/fedwiki-without-dns/server.mjs), per observation.
+# Site identity wiki.without-dns.test. The harness asserts exactly these: A and C each reached the original server once, GET /without-dns-test-page.json,
+# with Host: wiki.without-dns.test (not an address), from the observer at 10.77.0.2; B and E reached no server.
+A  server=main    GET /without-dns-test-page.json  Host: wiki.without-dns.test  from 10.77.0.2
+B  (no request reached any server)
+C  server=main    GET /without-dns-test-page.json  Host: wiki.without-dns.test  from 10.77.0.2
+D  server=empty   GET /without-dns-test-page.json  Host: wiki.without-dns.test  from 10.77.0.2
+E  (no request reached any server)
+F  server=altered GET /without-dns-test-page.json  Host: wiki.without-dns.test  from 10.77.0.2

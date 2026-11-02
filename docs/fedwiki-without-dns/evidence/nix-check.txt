@@ -1,0 +1,12 @@
+# Unchanged `nix build .#checks.x86_64-linux.catalog -L`, sandbox = true (true), at 74f9d649 (clean tree), 2026-11-02
+# exit 0, real 5m43s. The last commit that changes code is 2cbbcc34; 74f9d649 differs from it in docs/ only.
+# The check does not name the new systems (nix/ is unchanged), and the default Catalog does not contain the demo.
+catalog-startup-contract> Ran 9 tests in 0.276s
+catalog-startup-contract> 
+catalog-startup-contract> OK
+
+real	5m42.617s
+user	5m8.060s
+sys	0m33.700s
+exit 0
+1311:Catalog application tests passed: graph, configuration, routes, lifecycle; a further registered HyperBook is tolera

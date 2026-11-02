@@ -1,0 +1,42 @@
+
+
+INFORMATION: Using default security module.
+security_type ./security.js
+[
+  {
+    root: '<checkout>/tests/fedwiki-original-editor/node_modules/wiki-server',
+    data: '<work>/main',
+    db: '<work>/main/pages',
+    host: '10.77.0.1',
+    port: 80,
+    packageDir: '<checkout>/tests/fedwiki-original-editor/node_modules',
+    home: 'without-dns-test-page',
+    security_type: './security.js',
+    security_legacy: false,
+    client: '<checkout>/tests/fedwiki-original-editor/node_modules/wiki-client/client',
+    status: '<work>/main/status',
+    assets: '<work>/main/assets',
+    recycler: '<work>/main/recycle',
+    commons: '<work>/main/commons',
+    url: 'http://localhost',
+    id: '<work>/main/status/owner.json',
+    uploadLimit: '5mb',
+    cookieSecret: '<redacted: generated per run>',
+    secure_cookie: false,
+    session_duration: 7,
+    neighbors: '',
+    debug: true,
+    test: false,
+    database: { type: './page.js' }
+  }
+]
+owner: 
+{"listening":"10.77.0.1:80","db":"<work>/main/pages","security_legacy":false}
+SITE INDEX localhost : StartUp
+starting plugin wiki-plugin-assets
+starting plugin wiki-plugin-image
+starting plugin wiki-plugin-plugmatic
+{"request":{"method":"GET","url":"/without-dns-test-page.json","host":"wiki.without-dns.test","remote":"10.77.0.2"}}
+[38;2:147:39:51mlocalhost[0m GET /without-dns-test-page.json 200 1260 - 6.502 ms
+{"request":{"method":"GET","url":"/without-dns-test-page.json","host":"wiki.without-dns.test","remote":"10.77.0.2"}}
+[38;2:147:39:51mlocalhost[0m GET /without-dns-test-page.json 200 1260 - 2.221 ms

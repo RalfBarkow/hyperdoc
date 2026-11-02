@@ -1,0 +1,14 @@
+<h1>Reading One Wiki Page Without DNS</h1>
+<in-package>dreyeck/fedwiki-without-dns-demo</in-package>
+<p>A Federated Wiki page belongs to a site, and a site is named by a host name. When ordinary name resolution fails but an
+IP endpoint that was known before still answers, can the <em>same</em> page of the <em>same</em> site be read? This page shows
+the result of one experiment, recorded as data: two Linux network namespaces, the original Wiki server, a DNS server made to
+fail, and an observer that asks for the page by name and then through a given address.</p>
+<p>What follows is a record, not a live test. Nothing here opens a connection, reads a wiki site or writes anything; the page
+offers no control. The stored page and the record are two files of this checkout. Open the <em>Experiment record</em> in the
+Inspector to compare the access paths and to see what was observed, what only derived, what inferred and what merely
+hypothesized.</p>
+<p>The endpoint was given, not discovered. HTTP without TLS authenticates nothing: that the endpoint belongs to the site is
+an inference from equal content. This is not a DNS replacement, a peer discovery or a synchronization.
+The experiment and how to repeat it: <code>docs/fedwiki-without-dns/README.md</code>.</p>
+<html-generator>(render-demo)</html-generator>

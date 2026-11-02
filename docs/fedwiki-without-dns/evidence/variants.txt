@@ -1,0 +1,11 @@
+# Three ways for name resolution to fail, one run each (2026-11-02): which condition the ordinary path (B) recorded, and that the rest is unchanged.
+# Source: harness.py --dns-failure MODE; the full records are not kept, the committed one is the servfail run (../experiment-record.lisp-data).
+# mode      condition recorded for B's resolution            B outcome / stage            C (given endpoint)         D     E            F
+servfail  USOCKET:NS-TRY-AGAIN-ERROR                     failed / name-resolution  HTTP 200 sha 07e7b53749ce...  404   timeout      HTTP 200 sha e68d1ef59124...   (A sha 07e7b53749ce...)
+nxdomain  USOCKET:NS-HOST-NOT-FOUND-ERROR                failed / name-resolution  HTTP 200 sha 07e7b53749ce...  404   timeout      HTTP 200 sha e68d1ef59124...   (A sha 07e7b53749ce...)
+silent    USOCKET:NS-TRY-AGAIN-ERROR                     failed / name-resolution  HTTP 200 sha 07e7b53749ce...  404   timeout      HTTP 200 sha e68d1ef59124...   (A sha 07e7b53749ce...)
+#
+# All three: A resolved and was read; B failed at name resolution and made no connection; C read the page with the same digest as A;
+# D answered 404, E timed out, F answered 200 with another digest. getent failed (exit 2) and raw TCP to 10.77.0.1:80 connected under each failure.
+# NXDOMAIN gives ns-host-not-found-error, which the production initialize-fedwiki already keeps; SERVFAIL and a silent server give
+# ns-try-again-error, which it keeps only with PR #15. The observer here records whichever condition arrives and depends on neither.

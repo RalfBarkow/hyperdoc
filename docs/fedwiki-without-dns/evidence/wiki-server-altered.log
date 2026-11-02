@@ -1,0 +1,40 @@
+
+
+INFORMATION: Using default security module.
+security_type ./security.js
+[
+  {
+    root: '<checkout>/tests/fedwiki-original-editor/node_modules/wiki-server',
+    data: '<work>/altered',
+    db: '<work>/altered/pages',
+    host: '10.77.0.4',
+    port: 80,
+    packageDir: '<checkout>/tests/fedwiki-original-editor/node_modules',
+    home: 'without-dns-test-page',
+    security_type: './security.js',
+    security_legacy: false,
+    client: '<checkout>/tests/fedwiki-original-editor/node_modules/wiki-client/client',
+    status: '<work>/altered/status',
+    assets: '<work>/altered/assets',
+    recycler: '<work>/altered/recycle',
+    commons: '<work>/altered/commons',
+    url: 'http://localhost',
+    id: '<work>/altered/status/owner.json',
+    uploadLimit: '5mb',
+    cookieSecret: '<redacted: generated per run>',
+    secure_cookie: false,
+    session_duration: 7,
+    neighbors: '',
+    debug: true,
+    test: false,
+    database: { type: './page.js' }
+  }
+]
+owner: 
+{"listening":"10.77.0.4:80","db":"<work>/altered/pages","security_legacy":false}
+SITE INDEX localhost : StartUp
+starting plugin wiki-plugin-image
+starting plugin wiki-plugin-plugmatic
+starting plugin wiki-plugin-assets
+{"request":{"method":"GET","url":"/without-dns-test-page.json","host":"wiki.without-dns.test","remote":"10.77.0.2"}}
+[38;2:147:39:51mlocalhost[0m GET /without-dns-test-page.json 200 1264 - 10.699 ms
