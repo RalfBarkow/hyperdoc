@@ -3311,7 +3311,7 @@
 
 (defsystem "dreyeck/catalog-application/tests"
   :depends-on ("dreyeck/catalog-application" "dreyeck/local-fedwiki-view/tests"
-               "hyperbook/fedwiki/tests" "dreyeck/catalog/tests")
+               "dreyeck/fedwiki-mech/tests" "dreyeck/catalog/tests")
   :components ((:file "dreyeck/tests/catalog-application"))
   :perform (test-op (op component)
              (declare (ignore op component))
@@ -3555,3 +3555,17 @@
   :serial t
   :pathname "dreyeck/src/"
   :components ((:file "code-ownership-package") (:file "code-ownership")))
+
+(asdf:defsystem "dreyeck/fedwiki-mech/tests"
+  :description "Original Mech Story browser-host boundary contracts"
+  ;; Moved from hyperbook.asd, where it was defined as hyperbook/fedwiki/tests: these are dreyeck's tests of dreyeck's Mech story-item integration,
+  ;; not upstream's. Same dependencies, same components in the same order, same entry point; only the owner and the names changed.
+  :depends-on ("hyperbook/fedwiki" "clog-moldable-inspector")
+  :serial t
+  :components ((:file "dreyeck/tests/fedwiki-mech-story")
+               (:file "dreyeck/tests/fedwiki-mech-sitemaps")
+               (:file "dreyeck/tests/fedwiki-mech-topics")
+               (:file "dreyeck/tests/fedwiki-mech-dialog"))
+  :perform (test-op (op system)
+             (declare (ignore op system))
+             (uiop:symbol-call :dreyeck/fedwiki-mech/tests :run-tests)))

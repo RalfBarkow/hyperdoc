@@ -1,4 +1,4 @@
-(in-package :hyperbook/fedwiki/tests)
+(in-package :dreyeck/fedwiki-mech/tests)
 
 (defun dialog-large-page (fixture-file)
   "Trusted generated 1500-entry input supplied by the offline driver only."

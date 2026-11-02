@@ -22,7 +22,7 @@ const probe = net.createServer(); await new Promise(r => probe.listen(0,'127.0.0
 const port = probe.address().port; await new Promise(r => probe.close(r))
 const origin = `http://127.0.0.1:${port}`
 const script = path.join(work, 'witness.lisp')
-fs.writeFileSync(script, `(require :asdf)\n(asdf:load-system "hyperbook/fedwiki/tests")\n(hyperbook/fedwiki/tests::serve-topics-browser-witness ${port} "${hostOrigin}/" #p"${stop}")\n`)
+fs.writeFileSync(script, `(require :asdf)\n(asdf:load-system "dreyeck/fedwiki-mech/tests")\n(dreyeck/fedwiki-mech/tests::serve-topics-browser-witness ${port} "${hostOrigin}/" #p"${stop}")\n`)
 const log = fs.openSync(path.join(output,'lisp.log'),'w')
 const child = spawn(lisp,['--load',script],{stdio:['ignore',log,log]})
 const report = {kind:'Offline actual Inspector / original Pattern Machinery / retained original Ward sitemap',

@@ -87,7 +87,7 @@ this intentionally small host. They are not required by the CODE/Solo path.
 ## Repeatable acceptance
 
 ```lisp
-(asdf:test-system "hyperbook/fedwiki/tests")
+(asdf:test-system "dreyeck/fedwiki-mech/tests")
 ```
 
 ```sh
