@@ -137,9 +137,6 @@
       (let ((before (ua:top-level-definitions "(setf (get 'a 'b) 1) (setf (get 'c 'd) 2)"))
             (after (ua:top-level-definitions "(setf (get 'x 'y) 0) (setf (get 'a 'b) 1) (setf (get 'c 'd) 2)")))
         (assert (equal (mapcar #'ua:source-definition-key before) (cdr (mapcar #'ua:source-definition-key after)))))))
-  ;; the same method spelled with and without the package of its specializer is the same method
-  (assert (equal (mapcar #'ua:source-definition-key (ua:top-level-definitions "(defmethod page-class ((h hyperdoc:hyperdoc) (type (eql :html))) 1)"))
-                 (mapcar #'ua:source-definition-key (ua:top-level-definitions "(defmethod page-class ((h hyperdoc) (type (eql :html))) 2)"))))
   ;; a reader-evaluation form is data, not an instruction
   (setf (get 'iafx-unit-canary 'ran) nil)
   (ua:top-level-definitions "#.(setf (get 'iafx-unit-canary 'ran) t) (in-package :nowhere-at-all) (defun x () (nowhere:thing))")
@@ -315,14 +312,215 @@
       (assert (eq :proposed (ua:decision-status (ua:change-assessment-proposal change))))))
   t)
 
+
+;;; Identity of definitions: the five points. Keys are of source text and package context only; nothing is read, nothing is loaded.
+
+(defun keys-of (text) (mapcar #'ua:source-definition-key (ua:top-level-definitions text)))
+(defun last-key (text) (car (last (keys-of text))))
+
+(defun check-package-context ()
+  "HYPERDOC:HYPERDOC and HYPERDOC are one symbol only where the file's own package says so; nowhere is a name normalized by its symbol name alone."
+  (let ((qualified "(defmethod page-class ((h hyperdoc:hyperdoc) (type (eql :html))) 1)") (plain "(defmethod page-class ((h hyperdoc) (type (eql :html))) 2)")
+        (function-q "(defun hyperdoc::render (x) 1)") (function-p "(defun render (x) 2)"))
+    ;; without a package context nothing shows them to be the same
+    (assert (not (equal (keys-of qualified) (keys-of plain))) () "no in-package: HYPERDOC:HYPERDOC is not shown to be HYPERDOC")
+    (assert (not (equal (keys-of function-q) (keys-of function-p))))
+    ;; in the file's own package they are the same symbol: same key, whichever way the package is named
+    (dolist (in-package '("(in-package :hyperdoc)" "(in-package #:hyperdoc)" "(in-package \"HYPERDOC\")" "(in-package hyperdoc)"))
+      (assert (equal (last-key (format nil "~A ~A" in-package qualified)) (last-key (format nil "~A ~A" in-package plain))) () "~A" in-package)
+      (assert (equal (last-key (format nil "~A ~A" in-package function-q)) (last-key (format nil "~A ~A" in-package function-p))) () "~A" in-package))
+    ;; in another package, or with another qualifier, they are not
+    (assert (not (equal (last-key (format nil "(in-package :other) ~A" qualified)) (last-key (format nil "(in-package :other) ~A" plain)))))
+    (assert (not (equal (last-key (format nil "(in-package :hyperdoc) ~A" "(defun other:render (x) 1)")) (last-key (format nil "(in-package :hyperdoc) ~A" function-p)))))
+    ;; the context is that of the form: a later IN-PACKAGE changes it for the forms after it, not for those before
+    (assert (equal '("in-package:a" "function:f" "in-package:b" "function:a:f") (keys-of "(in-package :a) (defun a:f ()) (in-package :b) (defun a:f ())")))
+    ;; the same text in two files with different contexts has two keys: the key is of the text in its context, never of the symbol name alone
+    (assert (not (equal (last-key "(in-package :hyperdoc) (defun hyperdoc:x ())") (last-key "(in-package :elsewhere) (defun hyperdoc:x ())"))))
+    ;; in a change between two versions, the spellings are told apart without a context and the same with one
+    (let ((without (ua:definition-changes "lib/a.lisp" plain qualified))
+          (within (ua:definition-changes "lib/a.lisp" (format nil "(in-package :hyperdoc) ~A" plain) (format nil "(in-package :hyperdoc) ~A" qualified))))
+      (assert (equal '(:added :removed) (sort (mapcar #'ua:definition-change-kind without) #'string<)) () "without context: one removed, one added, never one changed")
+      (dolist (c without) (assert (= 1 (length (ua:definition-change-counterparts c))) () "the other spelling is shown as a possible counterpart"))
+      (assert (equal '(:changed) (mapcar #'ua:definition-change-kind within))))
+    ;; a candidate is not an equation: counterparts are listed, and the two keys stay two
+    (let ((c (find :added (ua:definition-changes "lib/a.lisp" plain qualified) :key #'ua:definition-change-kind)))
+      (assert (not (equal (ua:definition-change-key c) (first (ua:definition-change-counterparts c)))))))
+  t)
+
+(defun check-method-identity ()
+  "A method is its generic function, its qualifiers and its specializers, as written."
+  (let* ((base "(defmethod render ((x page) (type (eql :html))) 1)")
+         (variants (list base
+                         "(defmethod display ((x page) (type (eql :html))) 1)"                  ; other generic function
+                         "(defmethod render :around ((x page) (type (eql :html))) 1)"          ; qualifier
+                         "(defmethod render :before ((x page) (type (eql :html))) 1)"          ; other qualifier
+                         "(defmethod render ((x view) (type (eql :html))) 1)"                  ; other specializer
+                         "(defmethod render ((x page) (type (eql :json))) 1)"                  ; other eql specializer
+                         "(defmethod render ((x page) type) 1)"                                ; unspecialized second argument
+                         "(defmethod render ((x page)) 1)"                                     ; fewer arguments
+                         "(defmethod (setf render) (v (x page)) v)"))                          ; a setf method
+         (keys (mapcar #'last-key variants)))
+    (assert (= (length keys) (length (remove-duplicates keys :test #'equal))) () "every difference of generic function, qualifier or specializer is a different key: ~S" keys)
+    ;; what does not belong to the identity does not change it
+    (assert (equal (last-key base) (last-key "(defmethod RENDER ((object page) (kind (eql :html)))
+  ;; a comment
+  (list 1 2 3))")) () "parameter names, body, case and layout are not identity")
+    (assert (equal (last-key base) (last-key "(defmethod render ((x page) (type (eql :html)) &key a b) 1)")) () "lambda-list keywords after the specializers are not identity"))
+  ;; two methods of one generic function are two definitions that a change tells apart
+  (let ((changes (ua:definition-changes "lib/m.lisp" "(defmethod render ((x page)) 1) (defmethod render ((x view)) 1)" "(defmethod render ((x page)) 1) (defmethod render ((x view)) 2)")))
+    (assert (= 1 (length changes)))
+    (assert (equal "method:render::view" (ua:definition-change-key (first changes)))))
+  t)
+
+(defun check-repeated-anonymous-forms ()
+  "Forms that define nothing named are identified by their text; identical ones are told apart by their number among the identical, and different ones never merge."
+  (let ((a "(setf (get 'a 'b) 1)") (b "(setf (get 'c 'd) 2)"))
+    (let ((keys (keys-of (format nil "~A ~A ~A" a a b))))
+      (assert (= 3 (length (remove-duplicates keys :test #'equal))) () "~S" keys)
+      (assert (equal (first keys) (subseq (second keys) 0 (position #\# (second keys)))) () "the second identical form is numbered, the first is not")
+      (assert (uiop:string-suffix-p (second keys) "#2")))
+    ;; one of two identical forms removed: exactly one removal, whichever of the two it was
+    (let ((changes (ua:definition-changes "lib/f.lisp" (format nil "~A ~A ~A" a b a) (format nil "~A ~A" a b))))
+      (assert (= 1 (length changes))) (assert (eq :removed (ua:definition-change-kind (first changes)))))
+    ;; one added: exactly one addition; a third identical form is the third
+    (let ((changes (ua:definition-changes "lib/f.lisp" (format nil "~A" a) (format nil "~A ~A ~A" a a a))))
+      (assert (equal '(:added :added) (mapcar #'ua:definition-change-kind changes)))
+      (assert (equal '("#2" "#3") (mapcar (lambda (c) (let ((k (ua:definition-change-key c))) (subseq k (position #\# k)))) changes))))
+    ;; two forms of the same shape and different text are not one form that changed: no equation without proof
+    (let ((changes (ua:definition-changes "lib/f.lisp" "(setf (get 'a 'b) 1)" "(setf (get 'a 'b) 2)")))
+      (assert (equal '(:added :removed) (sort (mapcar #'ua:definition-change-kind changes) #'string<))))
+    (let ((changes (ua:definition-changes "lib/f.lisp" (format nil "~A ~A" a b) (format nil "~A ~A" b a))))
+      (assert (null changes) () "reordering is not a change of a form")))
+  t)
+
+(defmacro with-scratch-index ((index files) &body body)
+  "An index over FILES, a list of (path text), in a scratch directory that exists for BODY."
+  `(let ((root (uiop:ensure-directory-pathname (merge-pathnames (format nil "ua-index-~D/" (random 1000000 (make-random-state t))) (uiop:temporary-directory)))))
+     (unwind-protect
+          (progn (dolist (f ,files) (write-file root (first f) (second f)))
+                 (let ((,index (ua:make-fork-index root))) ,@body))
+       (uiop:delete-directory-tree root :validate t :if-does-not-exist :ignore))))
+
+(defun relation-in (files path before after &key (key nil))
+  (with-scratch-index (index files)
+    (let* ((changes (ua:definition-changes path before after))
+           (change (if key (find key changes :key #'ua:definition-change-key :test #'equal) (first changes))))
+      (assert change () "no such change in ~S" (mapcar #'ua:definition-change-key changes))
+      (values (ua:fork-situation-relation (ua:situation-of change index)) (ua:situation-of change index)))))
+
+(defun check-ambiguity ()
+  "A definition that the fork has twice, or that it has only under another spelling, stays visible as that: it is neither adopted nor absent without a trace."
+  ;; two definitions with one key: ambiguous, whatever either says
+  (multiple-value-bind (relation situation)
+      (relation-in '(("x/a.lisp" "(defun greet (x) 1)") ("x/b.lisp" "(defun greet (x) 3)")) "lib/core.lisp" "(defun greet (x) 1)" "(defun greet (x) 3)")
+    (assert (eq :ambiguous relation) () "~S" relation)
+    (assert (= 2 (length (ua:fork-situation-locations situation))) () "both definitions stay in view")
+    (assert (find :mechanically-derived (ua:fork-situation-claims situation) :key #'ua:claim-status)))
+  ;; only one of them has the commit's text: still ambiguous, not adopted
+  (assert (eq :ambiguous (relation-in '(("lib/core.lisp" "(defun greet (x) 3)") ("x/b.lisp" "(defun greet (x) 9)")) "lib/core.lisp" "(defun greet (x) 1)" "(defun greet (x) 3)")))
+  ;; one definition: not ambiguous
+  (assert (eq :adopted (relation-in '(("lib/core.lisp" "(defun greet (x) 3)")) "lib/core.lisp" "(defun greet (x) 1)" "(defun greet (x) 3)")))
+  ;; the same definition under another spelling of its package is a candidate, listed, with the relation left at :absent
+  (multiple-value-bind (relation situation)
+      (relation-in '(("lib/page.lisp" "(defmethod render ((h hyperdoc) (type (eql :html))) 2)")) "lib/page.lisp" "" "(defmethod render ((h hyperdoc:hyperdoc) (type (eql :html))) 1)")
+    (assert (eq :absent relation) () "not equated: ~S" relation)
+    (assert (= 1 (length (ua:fork-situation-counterparts situation))))
+    (assert (eq :working-hypothesis (claim-status-of situation "differ")) () "a candidate is a working hypothesis"))
+  ;; with the context that proves it, there is nothing to guess
+  (assert (eq :changed (relation-in '(("lib/page.lisp" "(in-package :hyperdoc) (defmethod render ((h hyperdoc) (type (eql :html))) 2)")) "lib/page.lisp"
+                                    "(in-package :hyperdoc) (defmethod render ((h hyperdoc:hyperdoc) (type (eql :html))) 0)" "(in-package :hyperdoc) (defmethod render ((h hyperdoc:hyperdoc) (type (eql :html))) 1)")))
+  ;; an unnamed form is the same form only in the same file
+  (assert (eq :absent (relation-in '(("elsewhere.lisp" "(setf (get 'a 'b) 1)")) "lib/p.lisp" "" "(setf (get 'a 'b) 1)")))
+  (assert (eq :adopted (relation-in '(("lib/p.lisp" "(setf (get 'a 'b) 1)")) "lib/p.lisp" "" "(setf (get 'a 'b) 1)")))
+  ;; through the whole assessment: an ambiguous definition is no adoption, and the proposal is to defer
+  (let ((extra "ext/greet-copy.lisp"))
+    (unwind-protect
+         (progn
+           (write-file *fork-root* extra "(defun greet (name) (format nil \"hi again ~A\" name))")
+           (let* ((assessment (assessment-of (third *commits*)))
+                  (greet (find "function:greet" (ua:commit-assessment-changes assessment) :key (lambda (c) (ua:definition-change-key (ua:change-assessment-change c))) :test #'equal)))
+             (assert (eq :ambiguous (ua:fork-situation-relation (ua:change-assessment-situation greet))))
+             (assert (eq :defer (ua:decision-kind (ua:change-assessment-proposal greet))))
+             (assert (not (eq :all-adopted (ua:commit-assessment-source-adoption assessment))))
+             (let ((report (with-output-to-string (s) (ua:report-run (policy-run :upstream-repository *upstream* :commits (list (third *commits*))) s))))
+               (assert (search "fork: ambiguous" report)))))
+      (ignore-errors (delete-file (merge-pathnames extra *fork-root*)))))
+  t)
+
+(defun claim-status-of (situation text-part)
+  (let ((claim (find-if (lambda (c) (search text-part (ua:claim-text c))) (ua:fork-situation-claims situation)))) (and claim (ua:claim-status claim))))
+
+(defun report-of (run) (with-output-to-string (s) (ua:report-run run s)))
+
+(defun check-intake-is-idempotent-and-history-is-kept ()
+  "Taking in a revision again changes nothing. When the fork changes, a new assessment is possible; the decisions taken before stay as they were."
+  (let* ((ledger (ua:make-ledger)) (u1 (second *commits*)) (subject "lib/net.lisp::function:connect")
+         (state (list :upstream-intake-state :last-examined (first *commits*))))
+    ;; the same revision twice: the same report, the same digests, nothing recorded
+    (let ((first (policy-run :upstream-repository *upstream* :state state :ledger ledger)) (second (policy-run :upstream-repository *upstream* :state state :ledger ledger)))
+      (assert (string= (report-of first) (report-of second)))
+      (assert (null (ua:ledger-decisions ledger)) () "an assessment records no decision"))
+    (let* ((before (change-of (assessment-of u1 :ledger ledger))) (again (change-of (assessment-of u1 :ledger ledger)))
+           (digest (ua:change-assessment-situation-digest before)))
+      (assert (equal digest (ua:change-assessment-situation-digest again)))
+      ;; a person decides, against the situation as it is
+      (let* ((d1 (ua:make-decision :commit u1 :subject subject :kind :defer :status :accepted :rationale "compare by hand" :proposed-by "maintainer"
+                                   :assessed-situation digest))
+             (d1-form (ua::decision-form d1)))
+        (ua:ledger-record ledger d1)
+        (assert (null (ua:change-assessment-stale (change-of (assessment-of u1 :ledger ledger)))) () "a decision against the present situation is not stale")
+        ;; the fork changes
+        (let ((original (uiop:read-file-string (merge-pathnames "lib/net.lisp" *fork-root*))))
+          (unwind-protect
+               (progn
+                 (write-file *fork-root* "lib/net.lisp"
+                             (let ((p (search "other-error)" original)))
+                               (concatenate 'string (subseq original 0 p) "other-error extra-error)" (subseq original (+ p (length "other-error)"))))))
+                 (let* ((after (change-of (assessment-of u1 :ledger ledger))) (new-digest (ua:change-assessment-situation-digest after)))
+                   (assert (not (equal digest new-digest)) () "another fork, another situation")
+                   ;; the historical decision is still there, unchanged, and marked as taken against another situation
+                   (assert (equal (list d1) (ua:change-assessment-recorded after)))
+                   (assert (equal (list d1) (ua:change-assessment-stale after)))
+                   (assert (equal d1-form (ua::decision-form (first (ua:ledger-decisions ledger)))) () "the old decision was not touched")
+                   (assert (search "STALE" (string-upcase (report-of (policy-run :upstream-repository *upstream* :commits (list u1) :ledger ledger)))) () "the report says so")
+                   ;; a new decision may be recorded beside it, naming what it supersedes
+                   (assert (handler-case (progn (ua:ledger-record ledger (ua:make-decision :commit u1 :subject subject :kind :adopt-upstream-change :rationale "no" :proposed-by "x")) nil)
+                             (ua:decision-conflict () t))
+                           () "without naming the decision it replaces, a second decision for the subject is a conflict")
+                   (let ((d2 (ua:make-decision :commit u1 :subject subject :kind :prepare-upstream-contribution :status :proposed :rationale "the fork extends the list"
+                                               :proposed-by "maintainer" :supersedes (ua:decision-id d1) :assessed-situation new-digest)))
+                     (assert (eq d2 (ua:ledger-record ledger d2)))
+                     (assert (eq d2 (ua:ledger-record ledger d2)) () "recording it again is the same record")
+                     (assert (= 2 (length (ua:ledger-decisions ledger))))
+                     (assert (equal (list d1 d2) (ua:ledger-history ledger u1 subject)) () "both stay in the history, oldest first")
+                     (assert (equal (list d2) (ua:ledger-find ledger u1 subject)) () "only the later one is in force")
+                     (assert (equal d1-form (ua::decision-form (first (ua:ledger-decisions ledger)))))
+                     (let ((now (change-of (assessment-of u1 :ledger ledger))))
+                       (assert (equal (list d2) (ua:change-assessment-recorded now)))
+                       (assert (null (ua:change-assessment-stale now))))
+                     ;; the superseded decision cannot be superseded a second time
+                     (assert (handler-case (progn (ua:ledger-record ledger (ua:make-decision :commit u1 :subject subject :kind :do-not-adopt :rationale "other" :proposed-by "y"
+                                                                                           :supersedes (ua:decision-id d1)))
+                                                  nil)
+                               (ua:decision-conflict () t)))
+                     ;; the ledger as plain data keeps the whole history
+                     (let ((back (ua:ledger-from-form (read-from-string (prin1-to-string (ua:ledger-form ledger))))))
+                       (assert (equal (ua:ledger-form ledger) (ua:ledger-form back)))
+                       (assert (= 1 (length (ua:ledger-find back u1 subject))))))))
+            (write-file *fork-root* "lib/net.lisp" original))))))
+  t)
+
 (defun run-tests ()
   (check-syntax-layer)
+  (check-package-context)
+  (check-method-identity)
+  (check-repeated-anonymous-forms)
   (with-fixture ()
     (let ((untouched (list (repository-fingerprint *upstream-root*) (repository-fingerprint *fork-root*))))
       (run-fixture-checks)
       (assert (equal untouched (list (repository-fingerprint *upstream-root*) (repository-fingerprint *fork-root*)))
               () "the whole run, every assessment of every commit, left both repositories exactly as it found them")))
-  (format t "~&UPSTREAM-ASSESSMENT-PASS: syntax without READ; a replaced handler, adoption without ancestry, runs over several commits, missing and recorded evidence, nothing executed or changed, the ledger.~%")
+  (format t "~&UPSTREAM-ASSESSMENT-PASS: syntax without READ; the identity of definitions (package context, methods, repeated anonymous forms, ambiguity); idempotent intake and a kept history; a replaced handler, adoption without ancestry, runs over several commits, missing and recorded evidence, nothing executed or changed, the ledger.~%")
   t)
 
 (defun run-fixture-checks ()
@@ -333,4 +531,6 @@
     (check-runs-and-observation)
     (check-nothing-executed-nothing-changed)
     (check-recorded-evidence)
-    (check-ledger)))
+    (check-ledger)
+    (check-ambiguity)
+    (check-intake-is-idempotent-and-history-is-kept)))

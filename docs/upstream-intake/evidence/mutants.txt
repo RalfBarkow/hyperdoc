@@ -9,6 +9,22 @@ M6 the changed part is not looked for in other definitions           DETECTED  (
 M7 the last examined state is advanced to the assessed commit        DETECTED  (nothing moved)
 M8 a recorded decision is marked accepted                            DETECTED  (no decision has been accepted or executed)
 M9 a read leaves a mark (a ref) in a repository                      DETECTED  (the whole run left both repositories as it found them)
+M10 a package qualifier is dropped from any name (global normalization)  DETECTED  (no in-package: HYPERDOC:HYPERDOC is not HYPERDOC; another qualifier stays)
+M11 the file's own package is never taken into account                    DETECTED  (in the file's own package the two spellings are one key)
+M12 a method's key forgets qualifiers and specializers                    DETECTED  (every difference of qualifier or specializer is a different key)
+M13 a method's key forgets its qualifiers                                 DETECTED
+M14 identical anonymous forms collapse into one key                       DETECTED  (the second identical form is numbered)
+M15 a definition the fork has twice is not reported as ambiguous          DETECTED  (relation :AMBIGUOUS, both locations)
+M16 keys drop package qualifiers (candidate becomes identity)             DETECTED
+M17 a second decision for a subject overwrites without superseding        NOT DETECTED, and equivalent: the guard it disabled could not fire, because a decision
+                                                                          without SUPERSEDES has the id of the recorded one, which the last branch of LEDGER-RECORD already
+                                                                          rejects when the content differs. The dead guard was removed; the conflict test (check-ledger, and
+                                                                          "without naming the decision it replaces") stays.
+M18 superseding a decision deletes it from the ledger                     DETECTED  (both stay in the history)
+M19 a decision taken against another fork is never stale                  DETECTED
+M20 the situation digest does not depend on the situation                 DETECTED  (another fork, another situation)
+#
+# M10-M20 were added for the identity corrections (package context, methods, anonymous forms, ambiguity, idempotent intake, kept history).
 #
 # Two of them were first NOT detected, and that was a gap in the tests, not in the mutant: M1, because no fixture had a definition that the fork had changed in its
 # own way (the fixture's greeting is now a local version, and the commit changes it); M9, because the fingerprint of the repositories was taken after earlier checks had

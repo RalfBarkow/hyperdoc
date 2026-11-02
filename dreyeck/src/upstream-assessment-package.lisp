@@ -18,20 +18,20 @@
    #:evidence-from-repository #:missing-evidence #:read-recorded-evidence #:write-recorded-evidence #:recorded-evidence-form
    #:verify-recorded-evidence
    #:definition-change #:definition-change-key #:definition-change-kind #:definition-change-path #:definition-change-before
-   #:definition-change-after #:definition-change-fragments #:definition-change-handlers
+   #:definition-change-after #:definition-change-fragments #:definition-change-handlers #:definition-change-counterparts #:definition-changes #:loose-key
    ;; the fork
    #:fork-index #:make-fork-index #:fork-integration #:fork-situation #:fork-situation-relation #:fork-situation-locations
-   #:fork-situation-fragments #:fork-situation-claims #:situation-of
+   #:fork-situation-fragments #:fork-situation-claims #:fork-situation-counterparts #:situation-of #:situation-digest
    #:ownership-policy #:make-ownership-policy #:ownership-of #:system-owners-of #:dependent-systems
    #:impact-of #:impact-systems #:impact-tests #:impact-callers #:impact-pages #:impact-contracts #:impact-claims
    ;; decisions
    #:decision #:make-decision #:decision-id #:decision-commit #:decision-subject #:decision-kind #:decision-status
    #:decision-rationale #:decision-evidence #:decision-required-migration #:decision-verification #:decision-proposed-by
-   #:+decision-kinds+ #:propose-decision #:ledger #:make-ledger #:ledger-decisions #:ledger-record #:ledger-find
+   #:+decision-kinds+ #:propose-decision #:ledger #:make-ledger #:ledger-decisions #:ledger-record #:ledger-find #:ledger-history #:decision-supersedes #:decision-assessed-situation
    #:ledger-from-form #:ledger-form #:read-ledger #:write-ledger #:decision-conflict
    ;; the assessment as a whole
    #:change-assessment #:change-assessment-change #:change-assessment-situation #:change-assessment-owners
-   #:change-assessment-commit #:change-assessment-ownership #:change-assessment-impact #:change-assessment-proposal #:change-assessment-recorded
+   #:change-assessment-commit #:change-assessment-situation-digest #:change-assessment-stale #:change-assessment-ownership #:change-assessment-impact #:change-assessment-proposal #:change-assessment-recorded
    #:commit-assessment #:commit-assessment-evidence #:commit-assessment-integration #:commit-assessment-changes
    #:commit-assessment-source-adoption #:commit-assessment-notes
    #:intake-run #:intake-run-observation #:intake-run-last-examined #:intake-run-commits #:intake-run-status #:intake-run-state

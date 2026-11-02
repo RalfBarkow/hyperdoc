@@ -1,5 +1,5 @@
 (:UPSTREAM-DECISION-LEDGER :VERSION 1 :DECISIONS
- ((:ID "e5db10019c8b6eb0" :COMMIT "58a2b2c66f0f5a0900a32910e5991e7d1833d9ed" :SUBJECT "hyperbook-fedwiki/fedwiki.lisp::function:make-fedwiki" :KIND
+ ((:ID "c1eab91cfc5dfabc" :COMMIT "58a2b2c66f0f5a0900a32910e5991e7d1833d9ed" :SUBJECT "hyperbook-fedwiki/fedwiki.lisp::function:make-fedwiki" :KIND
    :DEFER :STATUS :PROPOSED :RATIONALE
    "Do not adopt the line as it is, and do not decide between usocket:ns-error and the explicit condition classes here. The upstream line has no place in the fork: the handler list that it changes now stands in INITIALIZE-FEDWIKI, which replaced the inline thread of MAKE-FEDWIKI. For the three name-service conditions that the SBCL backend of usocket raises, the two choices behave the same; they differ only for NS-UNKNOWN-ERROR, which the backend never raises and which cannot be printed. Which choice the fork follows is for the maintainers, with upstream's choice in view."
    :EVIDENCE
@@ -31,8 +31,9 @@
    ("RalfBarkow/hyperdoc#15: check-initialize-fedwiki-dns-change in dreyeck/tests/hyperdoc-library-delta.lisp (not on dreyeck.ch yet)"
     "RalfBarkow/hyperdoc#15: docs/fedwiki-dns-failure/upstream-comparison/run-matrix.sh"
     "dreyeck/hyperdoc/library-tests (red at the base for other reasons: RalfBarkow/hyperdoc#17)")
-   :PROPOSED-BY "Claude, from the analysis of RalfBarkow/hyperdoc#15")
-  (:ID "4ab5f725a963d41b" :COMMIT "58a2b2c66f0f5a0900a32910e5991e7d1833d9ed" :SUBJECT
+   :PROPOSED-BY "Claude, from the analysis of RalfBarkow/hyperdoc#15" :SUPERSEDES NIL :ASSESSED-SITUATION
+   "398b505134464749589bafe873c743d0a27e9dfec00231a9ceaa50b0dc4eadd7")
+  (:ID "9676639894f8a349" :COMMIT "58a2b2c66f0f5a0900a32910e5991e7d1833d9ed" :SUBJECT
    "hyperbook-fedwiki/fedwiki.lisp::function:make-fedwiki#first-attempt-handler" :KIND :PREPARE-UPSTREAM-CONTRIBUTION :STATUS :PROPOSED :RATIONALE
    "Upstream still has no handler for NS-TRY-AGAIN-ERROR and NS-NO-RECOVERY-ERROR around the first connection attempt, the HTTPS probe; the commit widens only the second handler. A contribution would add the handling there. It is a reusable library fix that every process run without a debugger needs, and it is what the fork's change does in the one place where it stands. Prepare it; sending it is a separate decision."
    :EVIDENCE
@@ -51,4 +52,5 @@
    "Write the upstream patch against the first handler-case of MAKE-FEDWIKI (a candidate contribution; docs/hyperdoc-upstream-boundary.md). Until it exists upstream, the fork keeps its reusable extension."
    :VERIFICATION
    ("the first-attempt rows of the matrix turn from DIED to S for an upstream checkout with the patch (docs/fedwiki-dns-failure/upstream-comparison/run-matrix.sh of RalfBarkow/hyperdoc#15)")
-   :PROPOSED-BY "Claude, from the analysis of RalfBarkow/hyperdoc#15")))
+   :PROPOSED-BY "Claude, from the analysis of RalfBarkow/hyperdoc#15" :SUPERSEDES NIL :ASSESSED-SITUATION
+   "398b505134464749589bafe873c743d0a27e9dfec00231a9ceaa50b0dc4eadd7")))

@@ -65,11 +65,36 @@
     ("deftype" . :type) ("defpackage" . :package) ("defsystem" . :system) ("defview" . :view) ("defexample" . :example)
     ("defhyperdoc" . :hyperdoc) ("define-compiler-macro" . :compiler-macro) ("defsetf" . :setf-expander)))
 
+(defvar *strip-qualifiers* nil
+  "True only while computing a LOOSE key, which is used to point at candidate counterparts. Keys themselves keep every package qualifier as it is written:
+whether HYPERDOC:HYPERDOC and HYPERDOC name the same symbol depends on the package of the file, which is not resolved here.")
+
+(defvar *current-package* nil
+  "The package the file being scanned is in, as its last IN-PACKAGE form names it (a downcased string), or NIL before any. It is the only package context there
+is: a qualifier is dropped from a name only when it is exactly this package, because then the qualified and the unqualified spelling are the same symbol of this
+file. HYPERDOC:HYPERDOC in a file in package HYPERDOC is HYPERDOC; in a file without that context it is not shown to be.")
+
+(defun contextual-token (token)
+  "TOKEN, a symbol spelling, with the qualifier of the file's own package dropped (P:X and P::X in a file in package P), and no other qualifier touched."
+  (let ((position (position #\: token)))
+    (if (and *current-package* position (plusp position)
+             (string-equal *current-package* token :end2 position)
+             (not (find #\: token :end position)))
+        (let ((rest (subseq token (if (and (< (1+ position) (length token)) (char= #\: (char token (1+ position)))) (+ position 2) (1+ position)))))
+          (if (plusp (length rest)) rest token))
+        token)))
+
 (defun name-string (tree)
+  (cond ((and (stringp tree) *strip-qualifiers*) (name-string-1 (strip-package tree)))
+        ((stringp tree) (name-string-1 tree))
+        ((and (consp tree) (eq (car tree) :s)) (string-downcase (second tree)))
+        (t (tree-text tree))))
+
+(defun name-string-1 (tree)
   (cond ((stringp tree)
-         (cond ((and (> (length tree) 2) (string= "#:" tree :end2 2)) (subseq tree 2))
+         (cond ((and (> (length tree) 2) (string= "#:" tree :end2 2)) (contextual-token (subseq tree 2)))
                ((and (> (length tree) 1) (char= #\: (char tree 0))) (subseq tree 1))
-               (t tree)))
+               (t (contextual-token tree))))
         ((and (consp tree) (eq (car tree) :s)) (string-downcase (second tree)))
         (t (tree-text tree))))
 
@@ -81,7 +106,8 @@
                             (loop for parameter in lambda-list
                                   until (and (stringp parameter) (plusp (length parameter)) (char= #\& (char parameter 0)))
                                   collect (if (and (consp parameter) (not (keyword-headed-p parameter)))
-                                      (let ((specializer (second parameter))) (if (stringp specializer) (strip-package specializer) (tree-text specializer)))
+                                      (let ((specializer (second parameter)))
+                                        (cond ((and *strip-qualifiers* (stringp specializer)) (strip-package specializer)) ((stringp specializer) (contextual-token specializer)) (t (tree-text specializer))))
                                       "t")))))
     (format nil "~{~A~^,~}:~{~A~^,~}" qualifiers specializers)))
 
@@ -100,15 +126,16 @@
 (defun top-level-definitions (text &key path)
   "The top-level forms of TEXT as SOURCE-DEFINITIONs, in order, scanned and not read. A form that defines nothing named has no name to follow across
 versions: its key is FORM:HEAD:DIGEST, so that it is the same form only when it is the same text, and inserting one does not renumber the others."
-  (let ((seen (make-hash-table :test #'equal)) (definitions '()))
+  (let ((seen (make-hash-table :test #'equal)) (definitions '()) (*current-package* nil))
     (multiple-value-bind (nodes) (src:scan-asdf-source text)
       (dolist (node nodes)
         (when (eq :list (src:asdf-source-node-kind node))
           (let ((tree (node-tree node)))
             (multiple-value-bind (kind name key) (definition-identity tree)
+              (when (eq kind :in-package) (setf *current-package* (string-downcase name)))
               (unless key
                 (let ((head (if (and (consp tree) (stringp (first tree))) (strip-package (first tree)) "list")))
-                  (setf kind :form name head key (format nil "form:~A:~A" head (subseq (tree-digest tree) 0 10)))))
+                  (setf kind :form name head key (format nil "form:~A:~A" head (subseq (tree-digest tree) 0 16)))))
               (let ((n (incf (gethash key seen 0)))) (when (> n 1) (setf key (format nil "~A#~D" key n))))
               (push (make-source-definition
                      :key key :kind kind :name name :tree tree
@@ -194,7 +221,8 @@ versions: its key is FORM:HEAD:DIGEST, so that it is the same form only when it 
               :test #'string=)))
 
 (defstruct (definition-change (:conc-name definition-change-))
-  key kind path before after fragments handlers)
+  key kind path before after fragments handlers
+  counterparts)  ; keys of removed or added definitions that differ from this one only in package qualification: candidates, never equated
 
 (defclass commit-evidence ()
   ((sha :initarg :sha :reader commit-evidence-sha)
@@ -221,6 +249,23 @@ versions: its key is FORM:HEAD:DIGEST, so that it is the same form only when it 
                                               :changed-p (not (equal (nth index b) (nth index a)))))))))
     (make-definition-change :key key :kind kind :path path :before before :after after :fragments fragments :handlers handlers)))
 
+(defun loose-key (definition)
+  "The key of DEFINITION with every package qualifier of its name and specializers dropped, or NIL for a form that defines nothing named. Two definitions with the
+same loose key and different keys MAY be the same definition spelled in two package contexts; nothing here decides that."
+  (let ((*strip-qualifiers* t))
+    (nth-value 2 (definition-identity (source-definition-tree definition)))))
+
+(defun mark-counterparts (changes)
+  "Where a removed and an added definition differ only in package qualification, say so on both: a candidate pairing, kept visible, not an identity."
+  (dolist (removed (remove :removed changes :key #'definition-change-kind :test-not #'eq))
+    (dolist (added (remove :added changes :key #'definition-change-kind :test-not #'eq))
+      (let ((a (definition-change-before removed)) (b (definition-change-after added)))
+        (when (and (eq (source-definition-kind a) (source-definition-kind b)) (loose-key a)
+                   (equal (loose-key a) (loose-key b)) (not (equal (definition-change-key removed) (definition-change-key added))))
+          (pushnew (definition-change-key added) (definition-change-counterparts removed) :test #'equal)
+          (pushnew (definition-change-key removed) (definition-change-counterparts added) :test #'equal)))))
+  changes)
+
 (defun definition-changes (path before-text after-text)
   "The definitions that differ between two texts of PATH (either may be NIL), by key."
   (let* ((before (and before-text (top-level-definitions before-text :path path)))
@@ -234,7 +279,7 @@ versions: its key is FORM:HEAD:DIGEST, so that it is the same form only when it 
                (push (make-change (source-definition-key d) :changed path old d) changes)))))
     (dolist (d before)
       (unless (gethash (source-definition-key d) a) (push (make-change (source-definition-key d) :removed path d nil) changes)))
-    (nreverse changes)))
+    (mark-counterparts (nreverse changes))))
 
 (defun blob-text (repository sha path)
   (multiple-value-bind (stdout stderr code) (g:git-run-values (repository-root repository) "show" "--no-color" (format nil "~A:~A" sha path))
@@ -404,13 +449,15 @@ versions: its key is FORM:HEAD:DIGEST, so that it is the same form only when it 
       (loop for path in (files-mentioning index anchor)
             append (remove-if-not (lambda (d) (tree-contains-p (source-definition-tree d) fragment)) (index-definitions index path))))))
 
-(defstruct fork-situation relation locations fragments claims)
+(defstruct fork-situation relation locations fragments claims counterparts)
 
 (defun location (definition) (list (source-definition-path definition) (source-definition-key definition) (source-definition-digest definition)))
 
 (defun situation-of (change index)
   "Where CHANGE's definition stands in the fork. RELATION is :UNCHANGED (as upstream had it before), :ADOPTED (as upstream has it after), :CHANGED (a local
-version), :REPLACED (its changed part now stands in other definitions), :MOVED (the same key at another path) or :ABSENT."
+version), :REPLACED (its changed part now stands in other definitions), :MOVED (the same key at another path), :ABSENT, or :AMBIGUOUS (more than one
+definition in the fork has this key: which one is meant is not decided). Definitions that differ from the key only in package qualification are listed as
+COUNTERPARTS, candidates that nothing equates with it."
   (let* ((before (definition-change-before change)) (after (definition-change-after change))
          (key (definition-change-key change)) (path (definition-change-path change))
          (name (source-definition-name (or after before)))
@@ -425,6 +472,10 @@ version), :REPLACED (its changed part now stands in other definitions), :MOVED (
         ((some (lambda (d) (digest= d before)) defs)
          (setf relation :unchanged))
         (t (setf relation :changed)))
+      (when (> (length defs) 1)
+        (setf relation :ambiguous)
+        (push (make-claim (format nil "~D definitions in the fork have the key ~A (~{~A~^, ~}): none was chosen." (length defs) key (mapcar #'source-definition-path defs))
+                          :mechanically-derived (list "scan of the fork's Lisp and ASDF files")) claims))
       (when (and defs (null same-path) (member relation '(:unchanged :adopted :changed)))
         (setf relation :moved)
         (push (make-claim (format nil "The key ~A stands only at ~{~A~^, ~}, not at ~A." key (mapcar #'source-definition-path defs) path)
@@ -455,10 +506,34 @@ version), :REPLACED (its changed part now stands in other definitions), :MOVED (
                           (:changed "The fork has a version of this definition that is neither the upstream one before nor after the commit.")
                           (:replaced "The definition's changed part no longer stands in it: it stands, before or after, in other definitions.")
                           (:moved "The definition stands at another path than upstream's.")
-                          (:absent "The fork has no definition with this key."))
+                          (:absent "The fork has no definition with this key.")
+                          (:ambiguous "More than one definition in the fork has this key; the assessment does not choose between them."))
                         :mechanically-derived (list "digests of canonical source trees, compared; no source was read or loaded"))
             claims))
-    (make-fork-situation :relation relation :locations (mapcar #'location defs) :fragments fragments :claims (nreverse claims))))
+    (let ((counterparts (and (eq relation :absent) (find-counterparts index change))))
+      (when counterparts
+        (push (make-claim (format nil "The fork has no definition with this key, but ~{~A~^, ~} differ from it only in package qualification: a candidate, not an identity (the package context of the files is not resolved)."
+                                  (mapcar (lambda (l) (format nil "~A in ~A" (second l) (first l))) counterparts))
+                          :working-hypothesis (list "loose key: package qualifiers dropped from names and specializers"))
+              claims))
+      (make-fork-situation :relation relation :locations (mapcar #'location defs) :fragments fragments :claims (nreverse claims) :counterparts counterparts))))
+
+(defun find-counterparts (index change)
+  "Definitions of the fork whose key differs from CHANGE's only in package qualification. Looked for in the files that mention the unqualified name."
+  (let* ((definition (or (definition-change-after change) (definition-change-before change))) (loose (loose-key definition)))
+    (when loose
+      (loop for path in (files-mentioning index (strip-package (source-definition-name definition)))
+            append (loop for d in (index-definitions index path)
+                         when (and (equal loose (loose-key d)) (not (equal (source-definition-key d) (definition-change-key change))))
+                           collect (location d))))))
+
+(defun situation-digest (situation)
+  "A digest of what a situation says: the relation, where the definitions stand and with which digests, and where each changed part stands. A decision records
+it, so that a later assessment against a changed fork can tell that the decision was taken against another situation."
+  (sha256-hex (format nil "~(~A~)|~{~A~^;~}|~{~A~^;~}"
+                      (fork-situation-relation situation)
+                      (sort (mapcar (lambda (l) (format nil "~{~A~^ ~}" l)) (fork-situation-locations situation)) #'string<)
+                      (sort (mapcar (lambda (f) (format nil "~(~A~)~{ ~{~A~^ ~}~}" (getf f :status) (getf f :elsewhere))) (fork-situation-fragments situation)) #'string<))))
 
 (defun fork-integration (fork-repository sha)
   "What the fork's own Git says of SHA, through the existing intake classification: whether its objects are there, whether it is an ancestor of HEAD, and
@@ -611,13 +686,16 @@ pages that mention it, and the contract files that name it. Found by search over
 (defparameter +decision-statuses+ '(:proposed :accepted :rejected :executed))
 
 (defstruct (decision (:conc-name decision-) (:constructor %make-decision))
-  id commit subject kind status rationale evidence required-migration verification proposed-by)
+  id commit subject kind status rationale evidence required-migration verification proposed-by
+  supersedes          ; the id of the decision this one replaces for the same subject; the replaced one stays in the ledger
+  assessed-situation) ; the SITUATION-DIGEST of the fork when it was taken
 
-(defun make-decision (&key commit subject kind (status :proposed) rationale evidence required-migration verification proposed-by)
+(defun make-decision (&key commit subject kind (status :proposed) rationale evidence required-migration verification proposed-by supersedes assessed-situation)
   (unless (member kind +decision-kinds+) (error "~S is not a decision kind: ~S." kind +decision-kinds+))
   (unless (member status +decision-statuses+) (error "~S is not a decision status: ~S." status +decision-statuses+))
-  (%make-decision :id (subseq (sha256-hex (format nil "~A|~A" commit subject)) 0 16) :commit commit :subject subject :kind kind :status status
-                  :rationale rationale :evidence evidence :required-migration required-migration :verification verification :proposed-by proposed-by))
+  (%make-decision :id (subseq (sha256-hex (format nil "~A|~A|~A" commit subject (or supersedes ""))) 0 16) :commit commit :subject subject :kind kind :status status
+                  :rationale rationale :evidence evidence :required-migration required-migration :verification verification :proposed-by proposed-by
+                  :supersedes supersedes :assessed-situation assessed-situation))
 
 (defun claim-form (claim) (list :text (claim-text claim) :status (claim-status claim) :basis (claim-basis claim)))
 (defun form-claim (form) (destructuring-bind (&key text status basis) form (make-claim text status basis)))
@@ -625,12 +703,14 @@ pages that mention it, and the contract files that name it. Found by search over
 (defun decision-form (d)
   (list :id (decision-id d) :commit (decision-commit d) :subject (decision-subject d) :kind (decision-kind d) :status (decision-status d)
         :rationale (decision-rationale d) :evidence (mapcar #'claim-form (decision-evidence d))
-        :required-migration (decision-required-migration d) :verification (decision-verification d) :proposed-by (decision-proposed-by d)))
+        :required-migration (decision-required-migration d) :verification (decision-verification d) :proposed-by (decision-proposed-by d)
+        :supersedes (decision-supersedes d) :assessed-situation (decision-assessed-situation d)))
 
 (defun form-decision (form)
-  (destructuring-bind (&key commit subject kind status rationale evidence required-migration verification proposed-by &allow-other-keys) form
+  (destructuring-bind (&key commit subject kind status rationale evidence required-migration verification proposed-by supersedes assessed-situation &allow-other-keys) form
     (make-decision :commit commit :subject subject :kind kind :status status :rationale rationale :evidence (mapcar #'form-claim evidence)
-                   :required-migration required-migration :verification verification :proposed-by proposed-by)))
+                   :required-migration required-migration :verification verification :proposed-by proposed-by
+                   :supersedes supersedes :assessed-situation assessed-situation)))
 
 (define-condition decision-conflict (error)
   ((existing :initarg :existing :reader conflict-existing) (offered :initarg :offered :reader conflict-offered))
@@ -640,17 +720,33 @@ pages that mention it, and the contract files that name it. Found by search over
 (defun make-ledger () (make-instance 'ledger))
 (defun ledger-decisions (ledger) (reverse (ledger-decisions-slot ledger)))
 
-(defun ledger-find (ledger commit &optional subject-prefix)
-  "The recorded decisions for COMMIT; with SUBJECT, those for that subject and for its sub-subjects (SUBJECT#PART)."
-  (remove-if-not (lambda (d) (and (equal commit (decision-commit d)) (or (null subject-prefix) (string= subject-prefix (decision-subject d))
-                                                                                           (uiop:string-prefix-p (concatenate 'string subject-prefix "#") (decision-subject d)))))
+(defun ledger-history (ledger commit &optional subject)
+  "Every decision recorded for COMMIT (and for SUBJECT and its sub-subjects SUBJECT#PART when given), the superseded ones too, oldest first."
+  (remove-if-not (lambda (d) (and (equal commit (decision-commit d))
+                                  (or (null subject) (string= subject (decision-subject d))
+                                      (uiop:string-prefix-p (concatenate 'string subject "#") (decision-subject d)))))
                  (ledger-decisions ledger)))
 
+(defun superseded-p (decision ledger)
+  (find (decision-id decision) (ledger-decisions ledger) :key #'decision-supersedes :test #'equal))
+
+(defun ledger-find (ledger commit &optional subject)
+  "The decisions in force for COMMIT (and SUBJECT and its sub-subjects): those that no later decision supersedes. The history is LEDGER-HISTORY."
+  (remove-if (lambda (d) (superseded-p d ledger)) (ledger-history ledger commit subject)))
+
 (defun ledger-record (ledger decision)
-  "Record DECISION once. The same decision again returns the recorded one (observing a commit twice does not double its decisions); a different decision for
-the same commit and subject is a conflict that a person resolves, never an overwrite."
-  (let ((existing (find (decision-id decision) (ledger-decisions-slot ledger) :key #'decision-id :test #'string=)))
-    (cond ((null existing) (push decision (ledger-decisions-slot ledger)) decision)
+  "Record DECISION once. The same decision again returns the recorded one (observing a commit twice does not double its decisions). A different decision for the same
+commit and subject is a conflict (its id is that of the recorded one, which differs in content) unless it names, as SUPERSEDES, the decision in force that it replaces: then both stay in the ledger, and nothing is overwritten."
+  (let ((existing (find (decision-id decision) (ledger-decisions-slot ledger) :key #'decision-id :test #'string=))
+        (replaced (and (decision-supersedes decision)
+                       (find (decision-supersedes decision) (ledger-decisions-slot ledger) :key #'decision-id :test #'string=))))
+    (when (and (decision-supersedes decision)
+               (or (null replaced) (not (equal (decision-subject replaced) (decision-subject decision))) (not (equal (decision-commit replaced) (decision-commit decision)))))
+      (error "A decision can supersede only a recorded decision for the same commit and subject: ~A." (decision-supersedes decision)))
+    (cond ((null existing)
+           (when (and replaced (superseded-p replaced ledger))
+             (error 'decision-conflict :existing (superseded-p replaced ledger) :offered decision))
+           (push decision (ledger-decisions-slot ledger)) decision)
           ((equal (decision-form existing) (decision-form decision)) existing)
           (t (error 'decision-conflict :existing existing :offered decision)))))
 
@@ -666,7 +762,7 @@ the same commit and subject is a conflict that a person resolves, never an overw
 
 ;;; The assessment of one change and of one commit
 
-(defstruct change-assessment change situation owners ownership impact proposal recorded commit)
+(defstruct change-assessment change situation owners ownership impact proposal recorded commit situation-digest stale)
 (defstruct commit-assessment evidence integration changes source-adoption notes)
 
 (defun change-subject (change) (format nil "~A::~A" (definition-change-path change) (definition-change-key change)))
@@ -709,6 +805,9 @@ the same commit and subject is a conflict that a person resolves, never an overw
                                      :impact (impact-of change situation index policy owners)
                                      :proposal (propose-decision sha change situation category)
                                      :recorded (ledger-find ledger sha (change-subject change))
+                                     :situation-digest (situation-digest situation)
+                                     :stale (remove-if-not (lambda (d) (and (decision-assessed-situation d) (not (equal (decision-assessed-situation d) (situation-digest situation)))))
+                                                           (ledger-find ledger sha (change-subject change)))
                                      :commit nil)))))
          (notes '()))
     (when (eq :missing (commit-evidence-availability evidence))
@@ -802,8 +901,13 @@ that tells of a commit). Nothing is fetched, written or loaded."
                     (change-assessment-owners change) (getf o :category) (let ((so (getf o :should-own))) (if (listp so) so (list so)))
                     (length (impact-systems i)) (length (impact-tests i)) (length (impact-callers i)) (length (impact-pages i)) (length (impact-contracts i))
                     (decision-kind p) (decision-status p))
+            (dolist (cp (definition-change-counterparts c))
+              (format stream "    possible counterpart (qualification differs; package context not resolved): ~A~%" cp))
+            (dolist (l (fork-situation-counterparts s))
+              (format stream "    possible counterpart in the fork (qualification differs; not equated): ~A at ~A~%" (second l) (first l)))
             (dolist (r (change-assessment-recorded change))
-              (format stream "    recorded: ~(~A~) (~(~A~)), by ~A~%" (decision-kind r) (decision-status r) (decision-proposed-by r)))))))))
+              (format stream "    recorded: ~(~A~) (~(~A~)), by ~A~:[~; -- STALE: the fork's situation has changed since; assess again and record a decision that supersedes this one~]~%"
+                      (decision-kind r) (decision-status r) (decision-proposed-by r) (member r (change-assessment-stale change))))))))))
 
 ;;; Printing: short, and never circular (a change assessment points back to its commit assessment, which holds it).
 

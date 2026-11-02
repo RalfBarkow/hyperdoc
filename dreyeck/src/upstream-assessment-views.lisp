@@ -130,6 +130,10 @@
         (dolist (f (ua:fork-situation-fragments s))
           (v:html (:p (v:esc (format nil "The changed part is ~(~A~)~@[ in ~{~A~^, ~}~]." (getf f :status) (mapcar #'second (getf f :elsewhere)))))))
         (render-claims (ua:fork-situation-claims s))
+        (dolist (key (ua:definition-change-counterparts c))
+          (v:html (:p (v:esc (format nil "Possible counterpart among upstream's own changes (differs in package qualification only; not equated): ~A" key)))))
+        (dolist (l (ua:fork-situation-counterparts s))
+          (v:html (:p (v:esc (format nil "Possible counterpart in the fork (differs in package qualification only; not equated): ~A in ~A" (second l) (first l))))))
         (:h3 "3. ASDF owner now, and who should own it")
         (:p "Now: " (dolist (name (ua:change-assessment-owners change)) (v:html (system-ref name) " ")))
         (:p (v:esc (format nil "Category: ~(~A~)." (getf o :category))) " Should own: "
@@ -147,6 +151,8 @@
         (:p (v:esc "Recorded: ") (if (ua:change-assessment-recorded change)
                                      (dolist (d (ua:change-assessment-recorded change)) (v:html (v:object-ref d :display (v:text-representation d)) " "))
                                      (v:html "none")))
+        (dolist (d (ua:change-assessment-stale change))
+          (v:html (:p (:strong "Stale: ") (v:esc (format nil "the decision ~A was taken against another state of the fork than the present one; it stands in the ledger, a new assessment is possible beside it." (ua:decision-id d))))))
         (:p (v:object-ref (change-chain-workspace change) :display "The chain as a Topicmap"))
         (when (and before after) (v:html (:h3 "Source (before / after)") (:pre (v:esc (ua:source-definition-text before))) (:pre (v:esc (ua:source-definition-text after)))))))))
 

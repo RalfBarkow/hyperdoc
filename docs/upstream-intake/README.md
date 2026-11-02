@@ -60,6 +60,27 @@ shows, as plain data. That is how a commit whose objects are not in this checkou
 or a mail rule that calls it with `--commit SHA`, a periodic job that calls it without, or a person. Its exit status says whether anything needs
 attention. **Nothing is installed here**: no service, no cron entry, no timer, no scheduler. That is a separate decision.
 
+## Identity of a definition
+
+A definition is followed across versions by a **key**, computed from source text and the file's own package context. Nothing is loaded, so nothing is looked up: whatever
+the text and the `in-package` forms do not prove is not assumed.
+
+| | Rule | Consequence |
+|---|---|---|
+| Package qualifiers | `P:x` and `P::x` read as `x` **only** in a file whose current `in-package` is exactly `P`. No other qualifier is touched; names are never normalized by their symbol name alone | `hyperdoc:hyperdoc` and `hyperdoc` are the same key in a file in package `hyperdoc`, two keys anywhere else (and in a file without `in-package`) |
+| Candidates | Where a removed and an added definition (or a commit's definition and a fork definition) differ **only** in package qualification, both are listed as *possible counterparts*, marked `:WORKING-HYPOTHESIS` | the pairing is visible and decides nothing: the relation stays `:absent`, and the change is a removal plus an addition, not a modification |
+| Methods | `method:GENERIC:QUALIFIERS:SPECIALIZERS`, as written (`(eql :html)` and all). Parameter names, the body, layout, case and the lambda-list keywords after the specializers are not identity | `render :around`, `render` on another class, `(setf render)` are different definitions |
+| Anonymous forms | `form:HEAD:DIGEST` of the form's own text; identical forms in one file are numbered `#2`, `#3`. A form found in the fork counts only in the same file | inserting one does not renumber the others; two different forms never merge; one of two identical forms removed is one removal; a form that is modified is a removal and an addition (no equation without proof) |
+| Ambiguity | More than one fork definition with the key → relation `:AMBIGUOUS`, all locations listed, nothing chosen; it is never `:adopted`, and the proposal is `:defer` | the case stays visible in the report, the views and the chain |
+
+## Repeating an intake, and a fork that changes
+
+Intake is idempotent: the same revision assessed twice gives the same report, the same digests, and writes nothing (the ledger is changed only by a person, or by the
+command that is told to). Each decision records the **situation digest** of the fork it was taken against (relation, where the definitions stand and with which digests, where each
+changed part stands). When the fork changes, a new assessment has a new digest and the older decision is shown **stale** (`STALE` in the report, a note in the view); it is not removed
+and not rewritten. A new decision for the same subject is recorded **beside** it and names the one it `:supersedes`; both stay in the ledger (`ledger-history`), only the later is in
+force (`ledger-find`). A second decision for a subject without naming what it supersedes, or a second supersession of the same decision, is a conflict.
+
 ## Impact assessment
 
 For each changed definition (`defun`, `defmethod` with its qualifiers and specializers, `defclass`, `defpackage`, `defsystem`, ...; forms that define nothing named
@@ -110,8 +131,8 @@ exports one symbol, `c165990` changes CSS only) have a proposal or no code chang
 The tests (`dreyeck/upstream-assessment/tests`) use no real upstream. They build an "upstream" repository with four commits and a "fork" that replaced, adopted and
 extended parts of it, with ASDF definitions of their own, and check, among others: that no library source ran (a canary and a package stay untouched),
 that no repository changed (refs, `HEAD`, status and object count equal before and after), that a commit that is nowhere is missing evidence and nothing is
-fetched, that recorded evidence gives the same assessment as the objects and is refused when its digests do not match, that several commits are told apart and
-observing twice records nothing twice, that adoption without ancestry and ancestry without adoption are different answers, and that a decision for the same
+fetched, that recorded evidence gives the same assessment as the objects and is refused when its digests do not match, that the identity points above hold (package context, methods, repeated anonymous forms, ambiguity), that several commits are told apart and
+observing twice records nothing twice, that a changed fork gives a stale decision and a new one beside it, that adoption without ancestry and ancestry without adoption are different answers, and that a decision for the same
 subject cannot be overwritten. The worked example has its own checks against the real source.
 
 ## Limits
@@ -119,6 +140,7 @@ subject cannot be overwritten. The worked example has its own checks against the
 - **The state is advanced by a person.** After a commit is decided, moving `:last-examined` is a deliberate edit; the run only proposes the range.
 - **Fragments are lists, not semantics.** The tool finds that a changed list stands elsewhere in the fork; whether the two versions *behave* the same is a
   decision, which is why such a change is proposed as `:defer`.
+- **Package context is the file's `in-package` only.** A `defpackage` with `:use`, shadowing or nicknames is not interpreted; where the spelling differs and the text does not show the packages equal, the two are kept apart and offered as candidates.
 - **Reading by scanning.** `#+`/`#-` are not applied and `#.` is not evaluated, so the tree is the same in every image; that is also why what ASDF would see can
   differ from what is scanned.
 - **Mentions are leads.** Impact lists are searches over the fork's source, not call graphs.
