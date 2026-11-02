@@ -4,24 +4,24 @@ INFORMATION: Using default security module.
 security_type ./security.js
 [
   {
-    root: '/home/user/hyperdoc/tests/fedwiki-original-editor/node_modules/wiki-server',
-    data: '/tmp/nix-shell.BPw7nd/fedwiki-without-dns-work-bv6rrpxv/main',
-    db: '/tmp/nix-shell.BPw7nd/fedwiki-without-dns-work-bv6rrpxv/main/pages',
+    root: '<checkout>/tests/fedwiki-original-editor/node_modules/wiki-server',
+    data: '<work>/main',
+    db: '<work>/main/pages',
     host: '10.77.0.1',
     port: 80,
-    packageDir: '/home/user/hyperdoc/tests/fedwiki-original-editor/node_modules',
+    packageDir: '<checkout>/tests/fedwiki-original-editor/node_modules',
     home: 'without-dns-test-page',
     security_type: './security.js',
     security_legacy: false,
-    client: '/home/user/hyperdoc/tests/fedwiki-original-editor/node_modules/wiki-client/client',
-    status: '/tmp/nix-shell.BPw7nd/fedwiki-without-dns-work-bv6rrpxv/main/status',
-    assets: '/tmp/nix-shell.BPw7nd/fedwiki-without-dns-work-bv6rrpxv/main/assets',
-    recycler: '/tmp/nix-shell.BPw7nd/fedwiki-without-dns-work-bv6rrpxv/main/recycle',
-    commons: '/tmp/nix-shell.BPw7nd/fedwiki-without-dns-work-bv6rrpxv/main/commons',
+    client: '<checkout>/tests/fedwiki-original-editor/node_modules/wiki-client/client',
+    status: '<work>/main/status',
+    assets: '<work>/main/assets',
+    recycler: '<work>/main/recycle',
+    commons: '<work>/main/commons',
     url: 'http://localhost',
-    id: '/tmp/nix-shell.BPw7nd/fedwiki-without-dns-work-bv6rrpxv/main/status/owner.json',
+    id: '<work>/main/status/owner.json',
     uploadLimit: '5mb',
-    cookieSecret: 'f8923ddf6394376fff2bdf76dee71b0c1bdb6bd0ee05e4143466e12ad18163b1e4acfc37df5748cda07469da18cef04d7df1eac6feb70ee523577b8c9f8332e3',
+    cookieSecret: '<redacted: generated per run>',
     secure_cookie: false,
     session_duration: 7,
     neighbors: '',
@@ -31,10 +31,12 @@ security_type ./security.js
   }
 ]
 owner: 
-{"listening":"10.77.0.1:80","db":"/tmp/nix-shell.BPw7nd/fedwiki-without-dns-work-bv6rrpxv/main/pages","security_legacy":false}
+{"listening":"10.77.0.1:80","db":"<work>/main/pages","security_legacy":false}
 SITE INDEX localhost : StartUp
 starting plugin wiki-plugin-assets
 starting plugin wiki-plugin-image
 starting plugin wiki-plugin-plugmatic
-[38;2:147:39:51mlocalhost[0m GET /without-dns-test-page.json 200 1260 - 6.452 ms
-[38;2:147:39:51mlocalhost[0m GET /without-dns-test-page.json 200 1260 - 2.311 ms
+{"request":{"method":"GET","url":"/without-dns-test-page.json","host":"wiki.without-dns.test","remote":"10.77.0.2"}}
+[38;2:147:39:51mlocalhost[0m GET /without-dns-test-page.json 200 1260 - 6.502 ms
+{"request":{"method":"GET","url":"/without-dns-test-page.json","host":"wiki.without-dns.test","remote":"10.77.0.2"}}
+[38;2:147:39:51mlocalhost[0m GET /without-dns-test-page.json 200 1260 - 2.221 ms

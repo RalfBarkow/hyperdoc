@@ -1,4 +1,4 @@
-# 2026-11-02T15:36:41.907097+00:00  failure mode: servfail
+# 2026-11-02T17:00:03.690789+00:00  failure mode: servfail
 independent witness before [dns=resolve]: getent hosts wiki.without-dns.test -> exit 0 10.77.0.1       wiki.without-dns.test; raw TCP to 10.77.0.1:80 -> tcp connect ok
 A [baseline, dns=resolve, endpoint=None]: A read-identical dns=resolved connection=connected http=200
 independent witness under the failure [dns=servfail]: getent hosts wiki.without-dns.test -> exit 2 (nothing); raw TCP to 10.77.0.1:80 -> tcp connect ok

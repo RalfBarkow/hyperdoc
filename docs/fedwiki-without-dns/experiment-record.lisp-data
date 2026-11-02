@@ -1,5 +1,5 @@
 (:fedwiki-without-dns-record :version 1 :title "Reading one Wiki page without DNS" :site "wiki.without-dns.test" :slug "without-dns-test-page"
- :fixture-sha256 "335357a8ba446ab59cc4efcfcb69b5dc124f447415d54a500d43068320c8d84f" :fixture-octets 1712 :recorded-at 4002622630
+ :fixture-sha256 "335357a8ba446ab59cc4efcfcb69b5dc124f447415d54a500d43068320c8d84f" :fixture-octets 1712 :recorded-at 4002627631
  :dns-failure "servfail: the DNS server answers every query with SERVFAIL (the resolver cannot answer)"
  :environment (:topology "two Linux network namespaces joined by a veth pair on 10.77.0.0/24: the wiki server and the DNS server at 10.77.0.1, the observer at 10.77.0.2" :failure "the DNS server answers every query with SERVFAIL (the resolver cannot answer)" :kernel "Linux 6.18.44-fc-v185" :sbcl "SBCL 2.4.10" :node "v24.22.1" :wiki-server "the original wiki-server 0.28.1 (npm), security_legacy=false: read-only for visitors" :http "drakma, HTTP without TLS" :endpoint-mapping "drakma :real-host; the URL and the Host header keep the site name")
  :limits ("HTTP without TLS: no authenticated site identity; the endpoint's identity is inferred from equal content, not proven." "One site, one page, one failure mode per run; a production farm and other DNS failures were not tested." "No DNS replacement, peer discovery, synchronisation or editor: the endpoint was given, not found." "The addresses are private, in disposable network namespaces; no production data was read or written.")
@@ -9,38 +9,38 @@
  (:OUTCOME :RESOLVED :ADDRESSES ("10.77.0.1")) :CONNECTION (:OUTCOME :CONNECTED) :HTTP (:STATUS 200) :TLS
  (:STATUS :NOT-PERFORMED :REASON "HTTP was used: no TLS, so no authenticated site identity") :JSON-SHA256
  "07e7b53749cef5aa35aa64cb038bfa2de9ddc3dd58ac4154eabde63d3356f7db" :OCTET-COUNT 1260 :CONTENT
- (:RELATION :EQUIVALENT-JSON :TITLE "Without DNS Test Page" :STORY-ITEMS 3 :JOURNAL-ENTRIES 4) :OBSERVED-AT 4002622606 :WARRANT :OBSERVED)
+ (:RELATION :EQUIVALENT-JSON :TITLE "Without DNS Test Page" :STORY-ITEMS 3 :JOURNAL-ENTRIES 4) :OBSERVED-AT 4002627607 :WARRANT :OBSERVED)
 (:OBSERVATION :ID "B" :ROLE :DNS-FAILURE :SITE "wiki.without-dns.test" :SLUG "without-dns-test-page" :ACCESS :ORDINARY-RESOLUTION :URL
  "http://wiki.without-dns.test/without-dns-test-page.json" :ENDPOINT NIL :ENDPOINT-ORIGIN NIL :DNS
  (:OUTCOME :FAILED :CONDITION "USOCKET:NS-TRY-AGAIN-ERROR" :MESSAGE "Condition USOCKET:NS-TRY-AGAIN-ERROR was signalled.") :CONNECTION
  (:OUTCOME :FAILED :STAGE :NAME-RESOLUTION :CONDITION "USOCKET:NS-TRY-AGAIN-ERROR" :MESSAGE
   "Condition USOCKET:NS-TRY-AGAIN-ERROR was signalled.")
  :HTTP NIL :TLS (:STATUS :NOT-PERFORMED :REASON "HTTP was used: no TLS, so no authenticated site identity") :JSON-SHA256 NIL :OCTET-COUNT
- NIL :CONTENT NIL :OBSERVED-AT 4002622610 :WARRANT :OBSERVED)
+ NIL :CONTENT NIL :OBSERVED-AT 4002627611 :WARRANT :OBSERVED)
 (:OBSERVATION :ID "C" :ROLE :EXPLICIT-ENDPOINT :SITE "wiki.without-dns.test" :SLUG "without-dns-test-page" :ACCESS :EXPLICIT-ENDPOINT :URL
  "http://wiki.without-dns.test/without-dns-test-page.json" :ENDPOINT "10.77.0.1" :ENDPOINT-ORIGIN (:EARLIER-RESOLUTION "A") :DNS
  (:OUTCOME :FAILED :CONDITION "USOCKET:NS-TRY-AGAIN-ERROR" :MESSAGE "Condition USOCKET:NS-TRY-AGAIN-ERROR was signalled.") :CONNECTION
  (:OUTCOME :CONNECTED) :HTTP (:STATUS 200) :TLS (:STATUS :NOT-PERFORMED :REASON "HTTP was used: no TLS, so no authenticated site identity")
  :JSON-SHA256 "07e7b53749cef5aa35aa64cb038bfa2de9ddc3dd58ac4154eabde63d3356f7db" :OCTET-COUNT 1260 :CONTENT
- (:RELATION :EQUIVALENT-JSON :TITLE "Without DNS Test Page" :STORY-ITEMS 3 :JOURNAL-ENTRIES 4) :OBSERVED-AT 4002622614 :WARRANT :OBSERVED)
+ (:RELATION :EQUIVALENT-JSON :TITLE "Without DNS Test Page" :STORY-ITEMS 3 :JOURNAL-ENTRIES 4) :OBSERVED-AT 4002627615 :WARRANT :OBSERVED)
 (:OBSERVATION :ID "D" :ROLE :CONTROL-WRONG-ENDPOINT :SITE "wiki.without-dns.test" :SLUG "without-dns-test-page" :ACCESS :EXPLICIT-ENDPOINT
  :URL "http://wiki.without-dns.test/without-dns-test-page.json" :ENDPOINT "10.77.0.3" :ENDPOINT-ORIGIN
  (:DECLARED "the address of a different, empty wiki server on the same link") :DNS
  (:OUTCOME :FAILED :CONDITION "USOCKET:NS-TRY-AGAIN-ERROR" :MESSAGE "Condition USOCKET:NS-TRY-AGAIN-ERROR was signalled.") :CONNECTION
  (:OUTCOME :CONNECTED) :HTTP (:STATUS 404) :TLS (:STATUS :NOT-PERFORMED :REASON "HTTP was used: no TLS, so no authenticated site identity")
- :JSON-SHA256 NIL :OCTET-COUNT NIL :CONTENT NIL :OBSERVED-AT 4002622618 :WARRANT :OBSERVED)
+ :JSON-SHA256 NIL :OCTET-COUNT NIL :CONTENT NIL :OBSERVED-AT 4002627618 :WARRANT :OBSERVED)
 (:OBSERVATION :ID "E" :ROLE :CONTROL-UNREACHABLE-ENDPOINT :SITE "wiki.without-dns.test" :SLUG "without-dns-test-page" :ACCESS
  :EXPLICIT-ENDPOINT :URL "http://wiki.without-dns.test/without-dns-test-page.json" :ENDPOINT "10.77.0.9" :ENDPOINT-ORIGIN
  (:DECLARED "an address on the link at which nothing answers") :DNS
  (:OUTCOME :FAILED :CONDITION "USOCKET:NS-TRY-AGAIN-ERROR" :MESSAGE "Condition USOCKET:NS-TRY-AGAIN-ERROR was signalled.") :CONNECTION
  (:OUTCOME :FAILED :STAGE :TIMEOUT :CONDITION "USOCKET:TIMEOUT-ERROR" :MESSAGE "Condition USOCKET:TIMEOUT-ERROR was signalled.") :HTTP NIL
  :TLS (:STATUS :NOT-PERFORMED :REASON "HTTP was used: no TLS, so no authenticated site identity") :JSON-SHA256 NIL :OCTET-COUNT NIL
- :CONTENT NIL :OBSERVED-AT 4002622622 :WARRANT :OBSERVED)
+ :CONTENT NIL :OBSERVED-AT 4002627622 :WARRANT :OBSERVED)
 (:OBSERVATION :ID "F" :ROLE :CONTROL-DIFFERENT-CONTENT :SITE "wiki.without-dns.test" :SLUG "without-dns-test-page" :ACCESS
  :EXPLICIT-ENDPOINT :URL "http://wiki.without-dns.test/without-dns-test-page.json" :ENDPOINT "10.77.0.4" :ENDPOINT-ORIGIN
  (:DECLARED "the address of a wiki server holding the same slug with one changed sentence") :DNS
  (:OUTCOME :FAILED :CONDITION "USOCKET:NS-TRY-AGAIN-ERROR" :MESSAGE "Condition USOCKET:NS-TRY-AGAIN-ERROR was signalled.") :CONNECTION
  (:OUTCOME :CONNECTED) :HTTP (:STATUS 200) :TLS (:STATUS :NOT-PERFORMED :REASON "HTTP was used: no TLS, so no authenticated site identity")
  :JSON-SHA256 "e68d1ef5912411b866e358b6ac0daf44971f4a0f961a6cd4de926794a369d799" :OCTET-COUNT 1264 :CONTENT
- (:RELATION :DIFFERENT :TITLE "Without DNS Test Page" :STORY-ITEMS 3 :JOURNAL-ENTRIES 4) :OBSERVED-AT 4002622630 :WARRANT :OBSERVED)
+ (:RELATION :DIFFERENT :TITLE "Without DNS Test Page" :STORY-ITEMS 3 :JOURNAL-ENTRIES 4) :OBSERVED-AT 4002627630 :WARRANT :OBSERVED)
 ))

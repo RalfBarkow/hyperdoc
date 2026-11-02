@@ -68,6 +68,15 @@ Independent of the Lisp code, the harness also asks `getent hosts` and makes a r
 the observer. The DNS server's own log is `evidence/dns-queries.txt` (it also shows that the wiki server's start-up looks up
 `raw.githubusercontent.com`, which the namespace answers with NXDOMAIN; nothing leaves the namespaces).
 
+**The Host header actually received.** The observer puts the site name in the URL, and drakma sends it as `Host` whether or not `:real-host`
+chose the address. That is what the client does; whether it is what the *server* received is shown by the server: the adapter
+`tests/fedwiki-without-dns/server.mjs` logs each request as its own HTTP layer got it, and the harness asserts, per observation, what arrived
+([evidence/host-headers.txt](evidence/host-headers.txt)). A and C each reached the original server once, `GET /without-dns-test-page.json` with
+`Host: wiki.without-dns.test` (not an address), from the observer's address 10.77.0.2; B and E reached no server at all; D and F reached the decoys with the
+same Host. The run fails if any of this differs. The process-local test checks the same on a loopback server (`check-observer-against-loopback`:
+`localhost:PORT` for the ordinary path, `wiki.without-dns.test:PORT` for the given endpoint, never the address). The original server does not use
+the Host header to pick a site (it is not a farm), so what this shows is what was *sent and received*, not that a farm would route by it.
+
 The DNS failure is `servfail` by default. `--dns-failure nxdomain` and `silent` give other conditions of the same resolver family; their runs
 are summarized in [evidence/variants.txt](evidence/variants.txt).
 
@@ -121,7 +130,7 @@ own: no fetch, no write. (The Inspector's generic *Operations* tab, which every 
 | 1 | Ordinary retrieval succeeds with working resolution | observation A: DNS resolved to 10.77.0.1, HTTP 200, `read; the same page`; `getent` resolves (`evidence/run.txt`); test `check-record-is-consistent` |
 | 2 | DNS fails under the controlled condition | observation B: `USOCKET:NS-TRY-AGAIN-ERROR` for SERVFAIL, stage `name-resolution`, no HTTP; `getent` exit 2; DNS log shows the SERVFAIL answers |
 | 3 | The given IP endpoint stays reachable | raw TCP to 10.77.0.1:80 connects under the failure (`evidence/run.txt`); observation C connects |
-| 4 | The same unchanged wiki JSON is read again | C has the same SHA-256 as A, `equivalent-json` to the frozen stored page; frozen and served files unchanged (`evidence/stored-pages.txt`) |
+| 4 | The same unchanged wiki JSON is read again, under the site name | the server received `Host: wiki.without-dns.test` for A and for C (`evidence/host-headers.txt`); C has the same SHA-256 as A, `equivalent-json` to the frozen stored page; frozen and served files unchanged (`evidence/stored-pages.txt`) |
 | 5 | The Inspector view distinguishes the observed states | `Comparison of the access paths`, `Claims by warrant`, and one view per observation and claim; tests and browser walk assert the distinct outcomes and the four warrants |
 | 6 | No production wiki data read or changed | only the frozen test site and two files of the checkout are read; a test forbids network calls while the demo renders and compares the bytes of the record and the frozen page before and after |
 | 7 | Existing FedWiki and Catalog tests stay green | [evidence/existing-tests.txt](evidence/existing-tests.txt) and the unchanged Nix `catalog` check, see *Existing checks* |
@@ -163,6 +172,10 @@ demo that resolves a name are each detected.
 - The browser walk was made with Chromium on Linux only. The packaged `hyperdoc-catalog` with `HYPERDOC_CATALOG_SYSTEM` naming the demo
   was **not** run; the local launcher above calls the same `start-catalog` with the same `catalog-system` argument. Nothing is added to the
   default Catalog, to `nix/` or to any service configuration.
+
+The wiki-server logs in `evidence/` are written through `sanitize` in `harness.py`: the server's generated `cookieSecret` is redacted and absolute
+paths of the machine are replaced (`<work>`, `<checkout>`, `<path>`). A first version of this evidence had both; they were generated per run for a
+read-only throwaway server that no longer exists, but they stay in the history of the commits before this fix.
 
 ## Reproduce
 
