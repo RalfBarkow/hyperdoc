@@ -17,48 +17,109 @@
 ;;; The harness gives the test the network it can rely on everywhere: every host fails to resolve, which is a case INITIALIZE-FEDWIKI
 ;;; handles and keeps as the site's status. It uses only MAKE-FEDWIKI's own keyword seam (:PROTOCOL-PROBE, :SITEMAP-FETCHER,
 ;;; :PLUGIN-DATA-FETCHER, there to inject operations while preserving production behaviour) and replaces the visited-site table for the
-;;; duration. No library function is changed; calls that name their own operations are left as they are.
+;;; duration. No library source is changed; the function is replaced only while the harness runs and only in its thread; calls that
+;;; name their own operations are left as they are.
 
+;;; The replacement of MAKE-FEDWIKI is a global SETF of its function, which every thread sees, so it acts only in the thread that bound
+;;; *OFFLINE-FEDWIKI-P* (a binding is thread-local): any other thread, such as a request thread of a Catalog served from the same image,
+;;; gets the original function and the original table. The sites' threads are finished and the original function is restored on every
+;;; exit, normal or not.
+
+(defvar *offline-fedwiki-p* nil "True only inside CALL-WITH-OFFLINE-FEDWIKI and only in the thread that called it.")
 (defvar *offline-hosts* nil "The hosts the views asked FedWiki for during the last CALL-WITH-OFFLINE-FEDWIKI, in order of first request.")
 
 (defun %host-not-found (host)
   (error 'usocket:ns-host-not-found-error :socket nil :host-or-ip host))
 
+(defun %finish-offline-sites ()
+  "Wait for the thread of every site in the table. A thread that ended abnormally is left to the status check."
+  (loop for wiki being the hash-values of hyperbook/fedwiki::*neighborhood*
+        for status = (hyperbook/fedwiki::status-of wiki)
+        do (when (typep status 'bordeaux-threads:thread)
+             (handler-case (bordeaux-threads:join-thread status) (error () nil)))))
+
 (defun call-with-offline-fedwiki (function)
   "Call FUNCTION in a world where no FedWiki host resolves: no socket is opened and no file is read from a remote site. Afterwards, check that
 every site the views created finished by retaining the host-not-found condition, as INITIALIZE-FEDWIKI does for it, and return FUNCTION's
-values; the hosts are in *OFFLINE-HOSTS*."
+values; the hosts are in *OFFLINE-HOSTS*. Only this thread is affected; the original function is restored on every exit."
   (let* ((symbol 'hyperbook/fedwiki::make-fedwiki)
          (original (fdefinition symbol))
          (hyperbook/fedwiki::*neighborhood* (make-hash-table :test #'equal))
+         (*offline-fedwiki-p* t)
          (hosts nil) values)
+    (setf *offline-hosts* nil)
     (unwind-protect
          (progn
            (setf (fdefinition symbol)
                  (lambda (domain-name &rest arguments)
-                   (pushnew domain-name hosts :test #'string=)
-                   ;; ARGUMENTS come first, so a caller that names an operation keeps it.
-                   (apply original domain-name
-                          (append arguments
-                                  (list :protocol-probe (lambda (host) (%host-not-found host))
-                                        :sitemap-fetcher (lambda (wiki) (%host-not-found (hyperbook/fedwiki::domain-name-of wiki)))
-                                        :plugin-data-fetcher (lambda (wiki) (%host-not-found (hyperbook/fedwiki::domain-name-of wiki))))))))
+                   (if *offline-fedwiki-p*
+                       (progn
+                         (pushnew domain-name hosts :test #'string=)
+                         ;; ARGUMENTS come first, so a caller that names an operation keeps it.
+                         (apply original domain-name
+                                (append arguments
+                                        (list :protocol-probe (lambda (host) (%host-not-found host))
+                                              :sitemap-fetcher (lambda (wiki) (%host-not-found (hyperbook/fedwiki::domain-name-of wiki)))
+                                              :plugin-data-fetcher (lambda (wiki) (%host-not-found (hyperbook/fedwiki::domain-name-of wiki)))))))
+                       (apply original domain-name arguments))))
            (setf values (multiple-value-list (funcall function)))
            (setf *offline-hosts* (reverse hosts))
            ;; The sites' threads are finished before judging them: none may outlive the harness or die with an unhandled condition.
+           (%finish-offline-sites)
            (loop for wiki being the hash-values of hyperbook/fedwiki::*neighborhood*
-                 for status = (hyperbook/fedwiki::status-of wiki)
-                 do (when (typep status 'bordeaux-threads:thread) (bordeaux-threads:join-thread status))
-                    (let ((final (hyperbook/fedwiki::status-of wiki)))
-                      (assert (typep final 'usocket:ns-host-not-found-error) ()
-                              "~A did not finish by retaining the host-not-found condition: ~S" (hyperbook/fedwiki::domain-name-of wiki) final)))
-           (let ((names (sort (loop for wiki being the hash-values of hyperbook/fedwiki::*neighborhood*
-                                    collect (hyperbook/fedwiki::domain-name-of wiki))
-                              #'string<)))
-             (assert (equal names (sort (copy-list *offline-hosts*) #'string<)) ()
-                     "The sites in the table, ~S, are not the hosts asked for, ~S." names *offline-hosts*))
+                 for final = (hyperbook/fedwiki::status-of wiki)
+                 do (assert (typep final 'usocket:ns-host-not-found-error) ()
+                            "~A did not finish by retaining the host-not-found condition: ~S" (hyperbook/fedwiki::domain-name-of wiki) final)
+                    (assert (member (hyperbook/fedwiki::domain-name-of wiki) *offline-hosts* :test #'string=) ()
+                            "~A is in the table but was not made by the offline harness." (hyperbook/fedwiki::domain-name-of wiki)))
            (values-list values))
+      ;; Every exit: the threads of the sites first, then the original function.
+      (%finish-offline-sites)
       (setf (fdefinition symbol) original))))
+
+(defun check-offline-harness ()
+  "The harness itself, run outside it: it restores the function and the table on a normal and on a non-local exit, finishes the sites'
+threads on both, acts only in its own thread, and leaves an operation that a caller names to that caller."
+  (let ((original (fdefinition 'hyperbook/fedwiki::make-fedwiki))
+        (table hyperbook/fedwiki::*neighborhood*)
+        (own-probe-called nil) wiki)
+    (flet ((restored-p ()
+             (and (eq original (fdefinition 'hyperbook/fedwiki::make-fedwiki)) (eq table hyperbook/fedwiki::*neighborhood*)
+                  (not *offline-fedwiki-p*)))
+           (own-operations (host)
+             (list :protocol-probe (lambda (h) (declare (ignore h)) (setf own-probe-called t) (%host-not-found host))
+                   :sitemap-fetcher (lambda (w) (declare (ignore w)) (%host-not-found host))
+                   :plugin-data-fetcher (lambda (w) (declare (ignore w)) (%host-not-found host)))))
+      ;; Normal exit.
+      (call-with-offline-fedwiki (lambda () (hyperbook/fedwiki::get-fedwiki "check-normal.invalid")))
+      (assert (restored-p) () "The offline harness did not restore the function and the table after a normal exit.")
+      (assert (equal '("check-normal.invalid") *offline-hosts*))
+      ;; Non-local exit: restored, and the site's thread finished, not left running.
+      (assert (handler-case (call-with-offline-fedwiki
+                             (lambda () (setf wiki (hyperbook/fedwiki::get-fedwiki "check-error.invalid")) (error "the test fails here")))
+                (error () t))
+              () "The error did not propagate out of the offline harness.")
+      (assert (restored-p) () "The offline harness did not restore the function and the table after an error.")
+      (assert (typep (hyperbook/fedwiki::status-of wiki) 'usocket:ns-host-not-found-error) ()
+              "The site's thread was not finished when the harness was left by an error: ~S" (hyperbook/fedwiki::status-of wiki))
+      ;; Another thread is not affected, and does not disturb the harness.
+      (call-with-offline-fedwiki
+       (lambda ()
+         (bordeaux-threads:join-thread
+          (bordeaux-threads:make-thread
+           (lambda () (apply #'hyperbook/fedwiki::make-fedwiki "check-other-thread.invalid" (own-operations "check-other-thread.invalid")))))
+         (hyperbook/fedwiki::get-fedwiki "check-own-thread.invalid")))
+      (assert (equal '("check-own-thread.invalid") *offline-hosts*) ()
+              "The offline harness acted in another thread: ~S" *offline-hosts*)
+      ;; An operation the caller names is the caller's.
+      (setf own-probe-called nil)
+      (call-with-offline-fedwiki
+       (lambda ()
+         (let ((site (apply #'hyperbook/fedwiki::make-fedwiki "check-own-operations.invalid" (own-operations "check-own-operations.invalid"))))
+           (hyperbook/fedwiki::wait-for-sitemap site))))
+      (assert own-probe-called () "The offline harness replaced an operation the caller named.")
+      (assert (restored-p))))
+  t)
 
 (defun served (thunk)
   "THUNK run as the served Catalog runs: a server up, not in development mode."
@@ -371,6 +432,7 @@ A class the policy's drift report names (CONTEXT-FEDWIKI-PAGE) is covered throug
   t)
 
 (defun run-tests ()
+  (check-offline-harness)
   (prog1 (call-with-offline-fedwiki #'run-tests-1)
     (format t "~&TOPIC-MAPS-PUBLIC-VIEWS-OFFLINE: ~D remote FedWiki site~:P asked for by the views, none contacted (every host fails to resolve, a case the FedWiki client retains as the site's status): ~{~A~^, ~}.~%"
             (length *offline-hosts*) *offline-hosts*)))
