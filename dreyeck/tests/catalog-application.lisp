@@ -152,7 +152,138 @@ judged elsewhere."
       (setf (hyperbook:hyperbooks-of hyperbook:*catalog*) before))
     (assert (equal before (hyperbook:hyperbooks-of hyperbook:*catalog*)))))
 
+;;; A name-resolution failure of a remote FedWiki site must not end the process (RalfBarkow/hyperdoc#13).
+;;; MAKE-FEDWIKI starts a thread for every site. The packaged hyperdoc-catalog runs with the debugger disabled (sbcl --script), where a
+;;; condition that escapes such a thread ends the whole process. So the checks run in a fresh SBCL with the debugger disabled, and
+;;; look at its exit status and at what it reports after WAIT-FOR-SITEMAP has returned.
+
+(defun %fresh-sbcl-command (forms &optional prefix)
+  (append prefix
+          (list (namestring sb-ext:*runtime-pathname*) "--core" (namestring sb-ext:*core-pathname*)
+                "--noinform" "--no-sysinit" "--no-userinit" "--non-interactive"
+                "--eval" "(require :asdf)"
+                "--eval" "(let ((*error-output* (make-broadcast-stream)) (*standard-output* (make-broadcast-stream))) (asdf:load-system \"hyperbook/fedwiki\"))")
+          (loop for form in forms append (list "--eval" form))))
+
+(defun %run-fresh-sbcl (forms &optional prefix)
+  "Run FORMS in a fresh SBCL with the debugger disabled. Returns the exit status and the output."
+  (multiple-value-bind (output error-output status)
+      (uiop:run-program (%fresh-sbcl-command forms prefix) :output :string :error-output :string :ignore-error-status t)
+    (values status (format nil "~A~A" output error-output))))
+
+(defparameter +site-outcome-form+
+  "(defun site-outcome (label wiki)
+     ;; Called after WAIT-FOR-SITEMAP has returned: the thread of the site is finished.
+     (let ((status (hyperbook/fedwiki::status-of wiki)))
+       (format t \"~&OUTCOME ~A ~A ns-error=~A snapshot=~A~%\" label (type-of status) (typep status 'usocket:ns-error)
+               (gethash \"state\" (hyperbook/fedwiki::sitemap-snapshot wiki)))
+       (finish-output)))"
+  "Defined in the child process: what a site reports once its initialization has finished.")
+
+(defun %injected-resolution-failures-form ()
+  "A child form: one site per name-resolution condition the SBCL backend of usocket can signal (it maps exactly these three), the probe
+signalling it, then the site's outcome. USOCKET:NS-UNKNOWN-ERROR is not among them: the backend never raises it, and it cannot even be printed."
+  "(handler-case
+  (sb-ext:with-timeout 240
+    (dolist (class '(usocket:ns-host-not-found-error usocket:ns-try-again-error usocket:ns-no-recovery-error))
+      (let ((wiki (hyperbook/fedwiki::make-fedwiki (format nil \"~(~A~).test-host.invalid\" (symbol-name class))
+                    :protocol-probe (lambda (host) (error class :socket nil :host-or-ip host)))))
+        (hyperbook/fedwiki::wait-for-sitemap wiki)
+        (site-outcome class wiki)))
+    (format t \"~&ALL-SITES-FINISHED~%\"))
+  (sb-ext:timeout () (format t \"~&TIMEOUT~%\") (sb-ext:exit :code 3 :abort t)))")
+
+(defun %real-resolution-failure-form ()
+  "A child form: one site whose probe is the real one, its host name not resolvable, then its outcome."
+  "(handler-case
+  (sb-ext:with-timeout 240
+    (let ((wiki (hyperbook/fedwiki::make-fedwiki \"wiki.test-host.invalid\")))
+      (hyperbook/fedwiki::wait-for-sitemap wiki)
+      (site-outcome :real-resolver wiki))
+    (format t \"~&ALL-SITES-FINISHED~%\"))
+  (sb-ext:timeout () (format t \"~&TIMEOUT~%\") (sb-ext:exit :code 3 :abort t)))")
+
+(defun %no-route-p ()
+  "Whether this process has no route to any network (a Nix build sandbox, for example). Connecting a datagram socket to an address reserved
+for documentation (RFC 5737) fails for lack of a route and otherwise only records the peer: nothing is sent."
+  (let ((socket (make-instance 'sb-bsd-sockets:inet-socket :type :datagram :protocol :udp)))
+    (unwind-protect
+         (handler-case (progn (sb-bsd-sockets:socket-connect socket #(192 0 2 1) 9) nil)
+           (sb-bsd-sockets:network-unreachable-error () t)
+           (error () nil))
+      (sb-bsd-sockets:socket-close socket))))
+
+(defun %offline-prefix ()
+  "A command prefix under which the real resolver has no network, and why: NIL when this process has no route anyway, a list for `unshare`
+where it can make an empty network namespace, and :NONE when neither holds. A real lookup is made only where it cannot reach a network,
+so a machine with network is never asked."
+  (cond ((%no-route-p) (values nil "this process has no route to any network"))
+        ((ignore-errors (zerop (nth-value 2 (uiop:run-program '("unshare" "-rn" "true") :ignore-error-status t))))
+         (values '("unshare" "-rn") "an empty network namespace (unshare -rn)"))
+        (t (values :none "this process has a network and no empty network namespace can be made"))))
+
+(defun %initialization-outcome (probe)
+  "What INITIALIZE-FEDWIKI does with a PROBE (a function of the host name), run here with no network: :ESCAPED when a condition leaves it,
+else the site's status and protocol. The sitemap and plugin-data fetchers are replaced by no-ops."
+  (let ((wiki (make-instance 'hyperbook/fedwiki::fedwiki :id "fedwiki:matrix.test-host.invalid")))
+    (handler-case
+        (progn (hyperbook/fedwiki::initialize-fedwiki wiki "matrix.test-host.invalid" :protocol-probe probe
+                                                      :sitemap-fetcher #'identity :plugin-data-fetcher #'identity)
+               (list :status (let ((status (hyperbook/fedwiki::status-of wiki))) (if (typep status 'condition) (type-of status) status))
+                     :protocol (hyperbook/fedwiki::protocol-of wiki)))
+      (error () :escaped))))
+
+(defun check-fedwiki-initialization-outcomes ()
+  "The handler's whole behaviour in one table: the two success paths and the failures it already kept are as before, the two name-resolution
+conditions are new, and an error that is none of them still leaves INITIALIZE-FEDWIKI (the handler is a list of operational failures, not a blanket)."
+  (flet ((signalling (condition-type &rest initargs) (lambda (host) (declare (ignore host)) (error (apply #'make-condition condition-type initargs)))))
+    (dolist (case `(;; the success paths: the initial HTTPS stays; a refused connection (probe answers "http") sets HTTP
+                    (,(constantly "https") (:status t :protocol "https"))
+                    (,(constantly "http") (:status t :protocol "http"))
+                    ;; failures kept as the status before this change
+                    (,(signalling 'usocket:ns-host-not-found-error :socket nil :host-or-ip "h")
+                     (:status usocket:ns-host-not-found-error :protocol "https"))
+                    (,(signalling 'usocket:timeout-error :socket nil) (:status usocket:timeout-error :protocol "https"))
+                    (,(signalling 'stream-error :stream *standard-input*) (:status stream-error :protocol "https"))
+                    ;; new: the other conditions the SBCL backend of usocket raises for a host name
+                    (,(signalling 'usocket:ns-try-again-error :socket nil :host-or-ip "h")
+                     (:status usocket:ns-try-again-error :protocol "https"))
+                    (,(signalling 'usocket:ns-no-recovery-error :socket nil :host-or-ip "h")
+                     (:status usocket:ns-no-recovery-error :protocol "https"))
+                    ;; still not kept: anything else, such as a programming error
+                    (,(signalling 'simple-error :format-control "a programming error" :format-arguments nil) :escaped)))
+      (destructuring-bind (probe expected) case
+        (let ((outcome (%initialization-outcome probe)))
+          (assert (equal expected outcome) () "INITIALIZE-FEDWIKI gave ~S, expected ~S." outcome expected)))))
+  t)
+
+(defun check-fedwiki-name-resolution-failure ()
+  "A site whose host name cannot be resolved keeps the process alive: the condition is the site's status and WAIT-FOR-SITEMAP returns."
+  ;; Injected: deterministic everywhere. Each condition of usocket's name-resolution family is signalled by the probe.
+  (multiple-value-bind (status output) (%run-fresh-sbcl (list +site-outcome-form+ (%injected-resolution-failures-form)))
+    (assert (and (eql 0 status) (search "ALL-SITES-FINISHED" output)) ()
+            "A name-resolution failure of a FedWiki site ended the process (exit ~A):~%~A" status
+            (subseq output (max 0 (- (length output) 700))))
+    (dolist (class '("NS-HOST-NOT-FOUND-ERROR" "NS-TRY-AGAIN-ERROR" "NS-NO-RECOVERY-ERROR"))
+      (let ((expected (format nil "OUTCOME ~A ~A ns-error=T snapshot=failed" class class)))
+        (assert (search expected output) ()
+                "The condition ~A was not kept as the site's status (expected ~S):~%~A" class expected output))))
+  ;; Real: the platform's resolver, where it can be made to fail without touching a network.
+  (multiple-value-bind (prefix reason) (%offline-prefix)
+    (cond ((eq prefix :none)
+           (format t "~&FEDWIKI-NAME-RESOLUTION-FAILURE: real resolver not exercised: ~A.~%" reason))
+          (t (multiple-value-bind (status output) (%run-fresh-sbcl (list +site-outcome-form+ (%real-resolution-failure-form)) prefix)
+               (assert (and (eql 0 status) (search "ALL-SITES-FINISHED" output)) ()
+                       "The platform resolver's failure ended the process (exit ~A):~%~A" status
+                       (subseq output (max 0 (- (length output) 700))))
+               (assert (search "ns-error=T" output) () "The real resolver's failure was not kept as a name-resolution condition:~%~A" output)
+               (format t "~&FEDWIKI-NAME-RESOLUTION-FAILURE: real resolver exercised under ~A: ~A~%" reason
+                       (string-trim '(#\Newline) (subseq output (search "OUTCOME" output) (position #\Newline output :start (search "OUTCOME" output)))))))))
+  t)
+
 (defun run-tests ()
+  (check-fedwiki-initialization-outcomes)
+  (check-fedwiki-name-resolution-failure)
   (check-configuration)
   (check-start)
   (check-start-with-another-hyperbook)
