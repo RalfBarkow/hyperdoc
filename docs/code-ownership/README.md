@@ -54,6 +54,27 @@ move before the seam exists would break them. That is the documented blocker of 
 without network, so that comparison cannot run there. The manifest and inventory are that comparison's content, stored: `nix build .#checks.<system>.library-inventory` runs `--check` on a
 snapshot (and asserts that it has no `.git`). `catalog` itself is unchanged. Neither `+PREVIOUS+` nor the upstream reference is moved, and `library-tests` is not weakened by this PR.
 
+## What the `library-inventory` check is, and is not
+
+It checks that the inventory is **consistent with the files**: every difference from upstream is recorded, no entry is stale or incomplete, a migrated definition stands at its new place.
+It is **not an ownership approval**: a `:pending` entry passes it, and that means "documented", not "accepted" (the report counts them as not accepted; 34 of 34 are pending). And it does **not
+fix RalfBarkow/hyperdoc#17**: `dreyeck/hyperdoc/library-tests` still compares with `+PREVIOUS+` and `8a1149197` by Git history and stays as it is, failing at the base and here.
+
+## How the check is meant to be run every time (no scheduler, no CI is introduced)
+
+The check is a flake check: `checks.<system>.library-inventory`. It is a pure derivation of the source snapshot, so two things follow without any infrastructure:
+
+1. **It cannot be stale.** Its inputs are the library paths, the manifest and the inventory themselves. Any change to them is a new derivation that must be built again; a cached "pass" can never
+   stand for changed sources.
+2. **It runs wherever the existing acceptance command runs.** `nix flake check` builds every `checks` attribute, so whoever runs the flake check that already accepts a change to this repository
+   also runs `library-inventory` (and `catalog`). It can be called alone: `nix build .#checks.x86_64-linux.library-inventory`.
+
+What this does **not** do: nothing forces anybody to run it. There is no required status, no pre-merge hook, no timer. The proposed rule is a review rule, to be adopted or not by the maintainers:
+*a change that touches a library path, `docs/code-ownership/` or `scripts/code-ownership.lisp` states the result of `library-inventory` (and of the unchanged `catalog` check) in its PR description,
+as this PR does; a reviewer may ask for it.* Making the run mandatory by machine (a required CI job, a branch protection rule) needs infrastructure and is a separate decision that is **not made here**.
+When a difference is added on purpose, the same change regenerates the inventory (`scripts/code-ownership.lisp --inventory`) and adds a rule to `decisions.lisp-data`, so the new difference is
+visible in review as a new pending entry.
+
 ## Limits
 
 * The inventory is a *measurement plus a plan*: it records which definitions differ; it does not prove that a differing definition behaves differently or the same.
