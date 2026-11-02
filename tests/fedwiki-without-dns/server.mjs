@@ -17,7 +17,11 @@ const app = await server({
   security_type: './security.js', security_legacy: false,
 })
 app.on('owner-set', () => {
-  const listener = http.createServer((req, res) => app(req, res))
+  // The request as this server's HTTP layer received it: the evidence of which Host header arrived (host-headers.txt). Nothing else is added.
+  const listener = http.createServer((req, res) => {
+    console.log(JSON.stringify({request: {method: req.method, url: req.url, host: req.headers.host ?? null, remote: req.socket.remoteAddress}}))
+    app(req, res)
+  })
   listener.listen(Number(port), host, () => {
     console.log(JSON.stringify({listening: `${host}:${port}`, db: app.startOpts.db, security_legacy: app.startOpts.security_legacy}))
     app.emit('running-serv', listener)

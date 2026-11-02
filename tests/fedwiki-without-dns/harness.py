@@ -11,7 +11,7 @@ Needs: unshare with user namespaces, `ip` (iproute2; set IP=/path/to/ip otherwis
 (npm ci --prefix tests/fedwiki-original-editor --ignore-scripts), and SBCL with the HyperDoc registry (HYPERDOC_FEDWIKI_SBCL or SBCL,
 CL_SOURCE_REGISTRY), as `nix develop .#fedwiki-original-editor` provides. It re-executes itself under `unshare -rnm`.
 """
-import argparse, datetime, hashlib, os, shutil, socket, struct, subprocess, sys, tempfile, threading, time
+import argparse, datetime, hashlib, json, os, re, shutil, socket, struct, subprocess, sys, tempfile, threading, time
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
@@ -54,6 +54,14 @@ class Dns(threading.Thread):
             reply = data[:2] + struct.pack(">HHHHH", 0x8580 | rcode, 1, 1 if answers else 0, 0, 0) + question[:end] + answers
             self.sock.sendto(reply, addr)
             self.log.append((mode, qname, qtype, {0: "NOERROR", 2: "SERVFAIL", 3: "NXDOMAIN"}[rcode] + (" +A " + SERVER_IP if answers else "")))
+
+
+def sanitize(text, work):
+    """A server log without what it should not carry into a repository: the generated cookieSecret, and absolute paths of this machine."""
+    text = re.sub(r"(cookieSecret:\s*)'[^']*'", r"\1'<redacted: generated per run>'", text)
+    text = text.replace(work, "<work>").replace(os.path.dirname(ROOT), "<checkout>")
+    text = re.sub(r"/(?:tmp|home|nix/store|root)/[^\s'\",]*", "<path>", text)
+    return text
 
 
 def run(command, **kwargs):
@@ -120,6 +128,21 @@ def inner(out, dns_failure):
             else: sys.exit(f"the wiki server on {address} did not start")
         # --- the observations
         results = {}
+        logs = {name: os.path.join(work, name + ".log") for name in ("main", "empty", "altered")}
+        seen = {name: len(open(path).read().splitlines()) for name, path in logs.items()}
+        requests = {}   # observation id -> [(server, method, url, Host, remote)]
+
+        def new_requests():
+            """Requests the three servers received since the last call, from their own logs."""
+            found = []
+            for name, path in logs.items():
+                lines = open(path).read().splitlines()
+                for line in lines[seen[name]:]:
+                    if line.startswith('{"request"'):
+                        r = json.loads(line)["request"]; found.append((name, r["method"], r["url"], r["host"], r["remote"]))
+                seen[name] = len(lines)
+            return found
+        new_requests()
         def phase(id, role, mode, endpoint=None, origin=None, timeout=5):
             dns.mode = mode
             path = os.path.join(work, f"obs-{id}.lisp-data")
@@ -127,6 +150,7 @@ def inner(out, dns_failure):
                        OBS_ENDPOINT=endpoint or "", OBS_ORIGIN=origin or "")
             done = subprocess.run(inc + [sbcl, "--script", os.path.join(HERE, "observe.lisp")], env=env, text=True, capture_output=True)
             results[id] = open(path, encoding="utf-8").read() if os.path.exists(path) else None
+            time.sleep(0.3); requests[id] = new_requests()
             line = f"{id} [{role}, dns={mode}, endpoint={endpoint}]: " + (done.stdout.strip() or "NO OUTPUT") + ("" if done.returncode == 0 else f"  (exit {done.returncode}) {done.stderr[-300:]}")
             print(line); witness.write(line + "\n"); return done.returncode == 0
         def independent(label, mode):
@@ -146,6 +170,26 @@ def inner(out, dns_failure):
             phase("D", "control-wrong-endpoint", dns_failure, endpoint=EMPTY_IP, origin="declared:the address of a different, empty wiki server on the same link")
             phase("E", "control-unreachable-endpoint", dns_failure, endpoint=DEAD_IP, origin="declared:an address on the link at which nothing answers", timeout=4)
             phase("F", "control-different-content", dns_failure, endpoint=ALTERED_IP, origin="declared:the address of a wiki server holding the same slug with one changed sentence")
+        # --- the Host header the servers received (their own logs), per observation
+        def check_host(id, server, expected_count):
+            got = requests[id]
+            assert len(got) == expected_count, f"observation {id}: {len(got)} requests reached the servers, expected {expected_count}: {got}"
+            for r in got:
+                assert r[0] == server and r[1] == "GET" and r[2] == f"/{SLUG}.json" and r[3] == SITE and r[4] == CLIENT_IP, f"observation {id}: unexpected request {r}"
+        check_host("A", "main", 1)       # by name, resolved to the server: Host is the site name
+        check_host("B", "main", 0)       # no connection was made: no server saw anything
+        check_host("C", "main", 1)       # by the given endpoint: Host is still the site name, not the address
+        check_host("D", "empty", 1); check_host("E", "main", 0); check_host("F", "altered", 1)
+        with open(os.path.join(evidence, "host-headers.txt"), "w") as f:
+            f.write("# The requests each wiki server received, from the server's own HTTP layer (tests/fedwiki-without-dns/server.mjs), per observation.\n"
+                    f"# Site identity {SITE}. The harness asserts exactly these: A and C each reached the original server once, GET /{SLUG}.json,\n"
+                    f"# with Host: {SITE} (not an address), from the observer at {CLIENT_IP}; B and E reached no server.\n")
+            for id in "ABCDEF":
+                if requests[id]:
+                    for server, method, url, host, remote in requests[id]:
+                        f.write(f"{id}  server={server:7s} {method} {url}  Host: {host}  from {remote}\n")
+                else:
+                    f.write(f"{id}  (no request reached any server)\n")
         # --- nothing was written
         main_after = sha256(os.path.join(sites["main"], "pages", SLUG))
         frozen_after = sha256(stored)
@@ -174,7 +218,8 @@ def inner(out, dns_failure):
         with open(os.path.join(evidence, "stored-pages.txt"), "w") as f:
             f.write(f"frozen page before {frozen_before}\nfrozen page after  {frozen_after}\nserved copy before {main_before}\nserved copy after  {main_after}\n"
                     f"altered copy       {sha256(os.path.join(sites['altered'], 'pages', SLUG))}\n")
-        for name in ("main", "empty", "altered"): shutil.copy(os.path.join(work, name + ".log"), os.path.join(evidence, f"wiki-server-{name}.log"))
+        for name in ("main", "empty", "altered"):
+            with open(os.path.join(evidence, f"wiki-server-{name}.log"), "w") as f: f.write(sanitize(open(os.path.join(work, name + ".log")).read(), work))
         print("record written:", os.path.join(out, "experiment-record.lisp-data"))
         dns.stop.set()
     finally:

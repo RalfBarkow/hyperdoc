@@ -26,8 +26,11 @@
 
 ;;; A loopback server whose answers a test chooses: path -> (status . body), the body a string.
 
-(defclass test-acceptor (hunchentoot:acceptor) ((answers :initarg :answers :accessor answers)))
+(defclass test-acceptor (hunchentoot:acceptor)
+  ((answers :initarg :answers :accessor answers)
+   (hosts :initform '() :accessor hosts :documentation "The Host header of each request as the server received it, newest first.")))
 (defmethod hunchentoot:acceptor-dispatch-request ((acceptor test-acceptor) request)
+  (push (hunchentoot:host request) (hosts acceptor))
   (let ((answer (assoc (hunchentoot:script-name request) (answers acceptor) :test #'string=)))
     (cond (answer (setf (hunchentoot:return-code*) (second answer)
                         (hunchentoot:content-type*) "application/json")
@@ -35,6 +38,7 @@
           (t (setf (hunchentoot:return-code*) 404) "not found"))))
 
 (defmacro with-server ((port answers) &body body)
+  "Run BODY with PORT bound to a loopback server; the symbol ACCEPTOR is bound to it too, so that a test can ask what it received."
   `(let ((acceptor (make-instance 'test-acceptor :address "127.0.0.1" :port 0 :answers ,answers :access-log-destination nil :message-log-destination nil)))
      (hunchentoot:start acceptor)
      (unwind-protect (let ((,port (hunchentoot:acceptor-port acceptor))) ,@body)
@@ -69,6 +73,10 @@
           (assert (typep page 'hyperbook/fedwiki::fedwiki-page))
           (assert (= 1 (length (hyperbook/fedwiki::story-of page))))
           (assert (equal "T" (hyperbook:title-of page))))
+        ;; The Host header the server received: the site's name with the port, whatever address was connected to; the address is never the Host
+        (let ((hosts (reverse (hosts acceptor))))
+          (assert (equal (list (format nil "localhost:~D" port) name) (subseq hosts 0 2)) () "Host headers received: ~S" hosts)
+          (assert (notany (lambda (host) (search "127.0.0.1" host)) hosts) () "the address reached the server as Host: ~S" hosts))
         ;; negative controls
         (let ((o (x:observe-access name "missing" :id "D" :role :control-wrong-endpoint :endpoint "127.0.0.1" :stored-octets stored)))
           (assert (eq :page-absent (x:observation-verdict o))) (assert (null (x:observation-json-sha256 o))))
