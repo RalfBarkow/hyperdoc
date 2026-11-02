@@ -8,6 +8,58 @@
   (:export #:run-tests #:public-views #:walk-controls))
 (in-package #:dreyeck/topic-maps-public-views/tests)
 
+;;; No network. Rendering these views makes HyperBook's FedWiki client create remote sites (HYPERBOOK/FEDWIKI::GET-FEDWIKI, from the Trails and
+;;; hub readings of Working on HyperDoc, reached from the public Work Breakdown page). Each site starts a thread that probes its host on port
+;;; 443 and fetches its sitemap. Run as it was, the test depended on the network of the machine it ran on: with live hosts the walk read their
+;;; sitemaps (so what it met varied with them); in a build sandbox without network the lookup fails with USOCKET:NS-TRY-AGAIN-ERROR, which
+;;; INITIALIZE-FEDWIKI does not handle (it handles host-not-found, timeout, stream and JSON errors), so the unhandled condition in that thread
+;;; ended the whole test process (dreyeck/tests ... Nix check, observed 2026-11-02).
+;;; The harness gives the test the network it can rely on everywhere: every host fails to resolve, which is a case INITIALIZE-FEDWIKI
+;;; handles and keeps as the site's status. It uses only MAKE-FEDWIKI's own keyword seam (:PROTOCOL-PROBE, :SITEMAP-FETCHER,
+;;; :PLUGIN-DATA-FETCHER, there to inject operations while preserving production behaviour) and replaces the visited-site table for the
+;;; duration. No library function is changed; calls that name their own operations are left as they are.
+
+(defvar *offline-hosts* nil "The hosts the views asked FedWiki for during the last CALL-WITH-OFFLINE-FEDWIKI, in order of first request.")
+
+(defun %host-not-found (host)
+  (error 'usocket:ns-host-not-found-error :socket nil :host-or-ip host))
+
+(defun call-with-offline-fedwiki (function)
+  "Call FUNCTION in a world where no FedWiki host resolves: no socket is opened and no file is read from a remote site. Afterwards, check that
+every site the views created finished by retaining the host-not-found condition, as INITIALIZE-FEDWIKI does for it, and return FUNCTION's
+values; the hosts are in *OFFLINE-HOSTS*."
+  (let* ((symbol 'hyperbook/fedwiki::make-fedwiki)
+         (original (fdefinition symbol))
+         (hyperbook/fedwiki::*neighborhood* (make-hash-table :test #'equal))
+         (hosts nil) values)
+    (unwind-protect
+         (progn
+           (setf (fdefinition symbol)
+                 (lambda (domain-name &rest arguments)
+                   (pushnew domain-name hosts :test #'string=)
+                   ;; ARGUMENTS come first, so a caller that names an operation keeps it.
+                   (apply original domain-name
+                          (append arguments
+                                  (list :protocol-probe (lambda (host) (%host-not-found host))
+                                        :sitemap-fetcher (lambda (wiki) (%host-not-found (hyperbook/fedwiki::domain-name-of wiki)))
+                                        :plugin-data-fetcher (lambda (wiki) (%host-not-found (hyperbook/fedwiki::domain-name-of wiki))))))))
+           (setf values (multiple-value-list (funcall function)))
+           (setf *offline-hosts* (reverse hosts))
+           ;; The sites' threads are finished before judging them: none may outlive the harness or die with an unhandled condition.
+           (loop for wiki being the hash-values of hyperbook/fedwiki::*neighborhood*
+                 for status = (hyperbook/fedwiki::status-of wiki)
+                 do (when (typep status 'bordeaux-threads:thread) (bordeaux-threads:join-thread status))
+                    (let ((final (hyperbook/fedwiki::status-of wiki)))
+                      (assert (typep final 'usocket:ns-host-not-found-error) ()
+                              "~A did not finish by retaining the host-not-found condition: ~S" (hyperbook/fedwiki::domain-name-of wiki) final)))
+           (let ((names (sort (loop for wiki being the hash-values of hyperbook/fedwiki::*neighborhood*
+                                    collect (hyperbook/fedwiki::domain-name-of wiki))
+                              #'string<)))
+             (assert (equal names (sort (copy-list *offline-hosts*) #'string<)) ()
+                     "The sites in the table, ~S, are not the hosts asked for, ~S." names *offline-hosts*))
+           (values-list values))
+      (setf (fdefinition symbol) original))))
+
 (defun served (thunk)
   "THUNK run as the served Catalog runs: a server up, not in development mode."
   (progv (list (find-symbol "*SERVER-PARAMETERS*" :hyperbook/server)) (list (list "700px" nil))
@@ -319,6 +371,11 @@ A class the policy's drift report names (CONTEXT-FEDWIKI-PAGE) is covered throug
   t)
 
 (defun run-tests ()
+  (prog1 (call-with-offline-fedwiki #'run-tests-1)
+    (format t "~&TOPIC-MAPS-PUBLIC-VIEWS-OFFLINE: ~D remote FedWiki site~:P asked for by the views, none contacted (every host fails to resolve, a case the FedWiki client retains as the site's status): ~{~A~^, ~}.~%"
+            (length *offline-hosts*) *offline-hosts*)))
+
+(defun run-tests-1 ()
   (let ((count 0) (buttons 0))
     (dolist (entry (public-views))
       (destructuring-bind (label object-thunk titles run-buttons) entry
