@@ -191,8 +191,21 @@
         ((member (car tree) atoms) (without-atoms atoms (cdr tree)))
         (t (cons (without-atoms atoms (car tree)) (without-atoms atoms (cdr tree))))))
 
+(defun handler-clause-type-specifiers (form)
+  "The type specifier (first element) of every clause of every HANDLER-CASE in FORM."
+  (let ((found '()))
+    (labels ((walk (x)
+               (when (consp x)
+                 (when (and (symbolp (car x)) (string= "HANDLER-CASE" (symbol-name (car x))))
+                   (dolist (clause (cddr x)) (when (consp clause) (push (car clause) found))))
+                 (loop for rest on x while (consp rest) do (walk (car rest))))))
+      (walk form))
+    (nreverse found)))
+
 (defun check-initialize-fedwiki-dns-change (root)
-  "INITIALIZE-FEDWIKI equals its form at +PREVIOUS+ plus exactly the two conditions, each once, and nothing else."
+  "INITIALIZE-FEDWIKI equals its form at +PREVIOUS+ plus exactly the two conditions, each once, nothing else, and where they stand: in the
+type list of the handler clause that already names USOCKET:NS-HOST-NOT-FOUND-ERROR (a count and a difference could not tell that apart
+from the same symbols moved to another element of the form)."
   (let* ((path "hyperbook-fedwiki/fedwiki.lisp")
          (before (find "INITIALIZE-FEDWIKI" (forms-at root +previous+ path) :key #'form-name :test #'equal))
          (after (find "INITIALIZE-FEDWIKI" (forms-at root nil path) :key #'form-name :test #'equal))
@@ -205,6 +218,12 @@
               condition (count-atoms (list condition) after)))
     (assert (source-equal (without-atoms added after) before) ()
             "INITIALIZE-FEDWIKI differs from its form at +PREVIOUS+ in more than the two name-resolution conditions.")
+    (assert (some (lambda (specifier)
+                    (and (consp specifier) (symbolp (car specifier)) (string= "OR" (symbol-name (car specifier)))
+                         (member 'usocket:ns-host-not-found-error specifier)
+                         (every (lambda (condition) (member condition specifier)) added)))
+                  (handler-clause-type-specifiers after))
+            () "The two name-resolution conditions are not in the type list of the handler clause that names USOCKET:NS-HOST-NOT-FOUND-ERROR.")
     (format t "~&INITIALIZE-FEDWIKI-DNS-CHANGE: INITIALIZE-FEDWIKI equals its form at +PREVIOUS+ (~A) plus exactly ~{~(~A~)~^ and ~}.~%"
             (subseq +previous+ 0 9) added))
   t)
