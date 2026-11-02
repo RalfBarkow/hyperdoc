@@ -159,8 +159,60 @@
              (HYPERBOOK/FEDWIKI::STORY-ITEM-IMAGE-PRESENTATION-HINTS ITEM)))))
   T)
 
+;;; RalfBarkow/hyperdoc#13: the one deliberate change to a form of a hyperbook-fedwiki file that this contract meets after +PREVIOUS+.
+;;;
+;;; INITIALIZE-FEDWIKI keeps, as the site's status, the operational failures that belong to that one site. The resolver's answers "try again
+;;; later" (EAI_AGAIN: no network, or failing name servers) and "cannot recover" were not among them, so such a condition left the site's
+;;; thread and ended a process that runs without a debugger, as the packaged hyperdoc-catalog does. The change adds exactly
+;;; USOCKET:NS-TRY-AGAIN-ERROR and USOCKET:NS-NO-RECOVERY-ERROR to the handler's list of conditions, next to the USOCKET:NS-HOST-NOT-FOUND-ERROR
+;;; that was there. They are the other two conditions that the SBCL backend of usocket raises for a host name. USOCKET:NS-ERROR is not used:
+;;; it would also admit NS-UNKNOWN-ERROR, which that backend never raises and which cannot even be printed. Connection failures
+;;; (USOCKET:SOCKET-ERROR and its subclasses) are a different failure and not part of this change.
+;;; Candidate upstream contribution: it changes nothing for a reachable host, and adds two entries to an existing list.
+;;;
+;;; This check is relative to +PREVIOUS+ and nothing else. The form is the same at +PREVIOUS+ and at the base of the change (0a7d4de), so its
+;;; whole difference from +PREVIOUS+ is this change. It accepts no other difference: those that already exist in the four FedWiki files and in
+;;; hyperbook.asd stay what they are, and the assertions below that name them still fail until they are reviewed (docs/fedwiki-dns-failure).
+
+(defparameter +name-resolution-conditions-added+ '(usocket:ns-try-again-error usocket:ns-no-recovery-error))
+
+(defun form-name (form)
+  (and (consp form) (symbolp (second form)) (symbol-name (second form))))
+
+(defun count-atoms (atoms tree)
+  "How many times one of ATOMS occurs in TREE."
+  (cond ((consp tree) (+ (count-atoms atoms (car tree)) (count-atoms atoms (cdr tree))))
+        ((member tree atoms) 1)
+        (t 0)))
+
+(defun without-atoms (atoms tree)
+  "TREE with every element that is one of ATOMS left out of its list."
+  (cond ((atom tree) tree)
+        ((member (car tree) atoms) (without-atoms atoms (cdr tree)))
+        (t (cons (without-atoms atoms (car tree)) (without-atoms atoms (cdr tree))))))
+
+(defun check-initialize-fedwiki-dns-change (root)
+  "INITIALIZE-FEDWIKI equals its form at +PREVIOUS+ plus exactly the two conditions, each once, and nothing else."
+  (let* ((path "hyperbook-fedwiki/fedwiki.lisp")
+         (before (find "INITIALIZE-FEDWIKI" (forms-at root +previous+ path) :key #'form-name :test #'equal))
+         (after (find "INITIALIZE-FEDWIKI" (forms-at root nil path) :key #'form-name :test #'equal))
+         (added +name-resolution-conditions-added+))
+    (assert (and before after) () "INITIALIZE-FEDWIKI is missing from ~A, now or at +PREVIOUS+." path)
+    (assert (zerop (count-atoms added before)) () "+PREVIOUS+ already has ~S: this change is stale." added)
+    (dolist (condition added)
+      (assert (= 1 (count-atoms (list condition) after)) ()
+              "INITIALIZE-FEDWIKI must name ~S exactly once, in its handler; it names it ~D times."
+              condition (count-atoms (list condition) after)))
+    (assert (source-equal (without-atoms added after) before) ()
+            "INITIALIZE-FEDWIKI differs from its form at +PREVIOUS+ in more than the two name-resolution conditions.")
+    (format t "~&INITIALIZE-FEDWIKI-DNS-CHANGE: INITIALIZE-FEDWIKI equals its form at +PREVIOUS+ (~A) plus exactly ~{~(~A~)~^ and ~}.~%"
+            (subseq +previous+ 0 9) added))
+  t)
+
 (COMMON-LISP:DEFUN DREYECK/HYPERDOC/LIBRARY-TESTS:RUN-TESTS NIL
                    (DREYECK/HYPERDOC/LIBRARY-TESTS::CHECK-FEDWIKI-IMAGE-COMPATIBILITY)
+                   (DREYECK/HYPERDOC/LIBRARY-TESTS::CHECK-INITIALIZE-FEDWIKI-DNS-CHANGE
+                    (ASDF/SYSTEM:SYSTEM-SOURCE-DIRECTORY (ASDF/SYSTEM:FIND-SYSTEM "dreyeck")))
                    (COMMON-LISP:LET*
                                      ((DREYECK/HYPERDOC/LIBRARY-TESTS::ROOT
                                                                             (ASDF/SYSTEM:SYSTEM-SOURCE-DIRECTORY
