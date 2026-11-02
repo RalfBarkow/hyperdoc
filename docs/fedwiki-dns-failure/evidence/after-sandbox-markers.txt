@@ -1,5 +1,6 @@
-# Sandboxed 'nix build .#checks.x86_64-linux.catalog' at a44973151653e581cf471922bfd05eac531f2265 (check derivation waxg3vwg8ri9v7kh1rrmb65g8827qqvv-catalog-startup-contract.drv; sandbox = true; started/ended 2026-11-02T13:53:51Z / 2026-11-02T13:59:35Z)
-application.log:FEDWIKI-NAME-RESOLUTION-FAILURE: real resolver exercised under this process has no route to any network: OUTCOME REAL-RESOLVER NS-TRY-AGAIN-ERROR ns-error=T snapshot=failed
+# Sandboxed 'nix build .#checks.x86_64-linux.catalog' at 09f0768c891ab6794e01bec9656b2384ad1167e5 (check derivation 6x26xyn2isdjmq6zmxxm6ym6cj5pmww6-catalog-startup-contract.drv; sandbox = true; started/ended 2026-11-02T14:21:37Z / 2026-11-02T14:27:29Z)
+# An earlier run at a449731, before the two hardenings of the review, also exited 0.
+application.log:FEDWIKI-NAME-RESOLUTION-FAILURE: real resolver exercised under this process sees no network interface but loopback: OUTCOME REAL-RESOLVER NS-TRY-AGAIN-ERROR ns-error=T snapshot=failed
 application.log:Catalog application tests passed: graph, configuration, routes, lifecycle; a further registered HyperBook is tolerated by these checks and named by the admission check.
 asdf-methods.log:ASDF-METHOD-PRESERVATION-PASS: 183 assertions; ASDF 3.3.1 methods unchanged by identity, behaviour equal before and after, a control collision is seen.
 lisp.log:CATALOG-TOPIC-MAPS-PACKAGE-PASS
@@ -12,4 +13,4 @@ original-editor-demo.log:FEDWIKI-ORIGINAL-EDITOR-DEMO-PASS: admitted once from t
 public-views.log:TOPIC-MAPS-PUBLIC-VIEWS-PASS: 6 objects, rendered served and developing; 7 run buttons are markers served and buttons developing; no plain thunk is reachable from any served view. Walked 300 objects by navigation (bounded, not exhaustive): 9538 controls (inert=8478, slot-reader=993,
 public-views.log:TOPIC-MAPS-PUBLIC-VIEWS-OFFLINE: 3 remote FedWiki sites asked for by the views, none contacted (every host fails to resolve, a case the FedWiki client retains as the site's status): ward.voices.ustawi.wiki, next.ward.dojo.fed.wiki, mech.dreyeck.ch.
 topic-maps-asd: /nix/store/kna6395gl32f2hl4n3ha4776zm9r0sgb-source/topic-maps.asd
-executable.log: Ran 6 tests in 165.291s OK 
+executable.log: Ran 6 tests in 177.882s OK 

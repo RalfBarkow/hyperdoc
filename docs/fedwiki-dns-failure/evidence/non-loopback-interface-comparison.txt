@@ -1,0 +1,6 @@
+INTERFACES lo dummy0
+INTERFACES-SEEN lo dummy0
+OLD-GUARD no-route-p=T  (it would run the real resolver here, with no prefix)
+NEW-GUARD isolated-p=NIL
+NEW-GUARD offline-prefix=("unshare" "-rn") (an empty network namespace (unshare -rn))
+DNS queries the server received: before the old-guard run 0, after it 1; after the new-guard run 1

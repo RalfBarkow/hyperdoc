@@ -1,0 +1,4 @@
+NO-ROUTE-P=T
+OFFLINE-PREFIX=NIL (this process has no route to any network)
+REAL-RESOLVER-CHILD exit=0
+DNS-QUERIES-RECEIVED-BY-THE-SERVER=2

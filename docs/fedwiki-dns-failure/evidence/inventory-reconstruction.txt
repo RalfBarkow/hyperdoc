@@ -1,0 +1,56 @@
+PATHS-THE-TEST-WALKS 15 (git diff --name-only upstream 8a1149197)
+hyperbook-explorer/package.lisp
+  assertions: retained compatibility forms equal their pinned revision -> HOLDS; same count as upstream (4 / 4) -> HOLDS; no form only here -> HOLDS; no form only upstream -> HOLDS
+hyperbook-fedwiki/fedwiki.lisp
+  assertion: equals +PREVIOUS+ 401953522 -> FAILS
+  forms at the base that differ from +PREVIOUS+: defclass FEDWIKI; defun FETCH-SITEMAP; defun SITEMAP-SNAPSHOT
+  forms of +PREVIOUS+ not at the base: defclass FEDWIKI; defun FETCH-SITEMAP
+  introduced by:
+    99521dc6 feat(fedwiki): pass retained page-scoped sitemaps to Mech host: defclass FEDWIKI; defun FETCH-SITEMAP; defun SITEMAP-SNAPSHOT
+hyperbook-fedwiki/pages.lisp
+  assertion: equals +PREVIOUS+ 401953522 -> FAILS
+  forms at the base that differ from +PREVIOUS+: defclass FEDWIKI-PAGE; defun COPY-PAGE-JSON; defun SET-PAGE-DATA
+  forms of +PREVIOUS+ not at the base: defclass FEDWIKI-PAGE; defun SET-PAGE-DATA
+  introduced by:
+    e9039746 feat(fedwiki): execute Mech story items in isolated browser host: defclass FEDWIKI-PAGE; defun COPY-PAGE-JSON; defun SET-PAGE-DATA
+hyperbook-fedwiki/story-items.lisp
+  assertion: equals +PREVIOUS+ 401953522 -> FAILS
+  forms at the base that differ from +PREVIOUS+: defvar *MECH-PLUGIN-HOST-URL*; defun MECH-NEIGHBORHOOD-SNAPSHOT; defun MECH-JSON-BASE64; defmethod RENDER-STORY-ITEM
+  forms of +PREVIOUS+ not at the base: 
+  introduced by:
+    e9039746 feat(fedwiki): execute Mech story items in isolated browser host: defvar *MECH-PLUGIN-HOST-URL*; defmethod RENDER-STORY-ITEM
+    99521dc6 feat(fedwiki): pass retained page-scoped sitemaps to Mech host: defun MECH-NEIGHBORHOOD-SNAPSHOT; defun MECH-JSON-BASE64; defmethod RENDER-STORY-ITEM
+hyperbook-fedwiki/wiki-links.lisp
+  assertion: equals +PREVIOUS+ 401953522 -> FAILS
+  forms at the base that differ from +PREVIOUS+: defun MAKE-REMOTE
+  forms of +PREVIOUS+ not at the base: defun MAKE-REMOTE
+  introduced by:
+    e9039746 feat(fedwiki): execute Mech story items in isolated browser host: defun MAKE-REMOTE
+hyperbook-server/server.lisp
+  assertions: retained compatibility forms equal their pinned revision -> HOLDS; same count as upstream (13 / 13) -> HOLDS; no form only here -> HOLDS; no form only upstream -> HOLDS
+hyperbook.asd
+  assertions: retained compatibility forms equal their pinned revision -> HOLDS; same count as upstream (6 / 5) -> FAILS; no form only here -> FAILS; no form only upstream -> FAILS
+  only at the base: defsystem HYPERBOOK/FEDWIKI/TESTS; defsystem HYPERBOOK/FEDWIKI
+  only upstream: defsystem HYPERBOOK/FEDWIKI
+  introduced by:
+    b2c20224 refactor(hyperdoc): move dreyeck policy behind library boundary: defsystem HYPERBOOK
+    e9039746 feat(fedwiki): execute Mech story items in isolated browser host: defsystem HYPERBOOK/FEDWIKI; defsystem HYPERBOOK/FEDWIKI/TESTS
+    99521dc6 feat(fedwiki): pass retained page-scoped sitemaps to Mech host: defsystem HYPERBOOK/FEDWIKI/TESTS
+    394bb79f feat(fedwiki): backport original Ward WALK topics: defsystem HYPERBOOK/FEDWIKI/TESTS
+    77bfb29e feat(fedwiki): integrate original POPUP state dialog: defsystem HYPERBOOK/FEDWIKI/TESTS
+hyperdoc-explorer/html-pages.lisp
+  assertions: retained compatibility forms equal their pinned revision -> HOLDS; same count as upstream (32 / 32) -> HOLDS; no form only here -> HOLDS; no form only upstream -> HOLDS
+hyperdoc-explorer/markdown-pages.lisp
+  assertions: retained compatibility forms equal their pinned revision -> HOLDS; same count as upstream (4 / 4) -> HOLDS; no form only here -> HOLDS; no form only upstream -> HOLDS
+hyperdoc-explorer/package.lisp
+  assertions: retained compatibility forms equal their pinned revision -> HOLDS; same count as upstream (6 / 6) -> HOLDS; no form only here -> HOLDS; no form only upstream -> HOLDS
+hyperdoc.asd
+  assertions: retained compatibility forms equal their pinned revision -> HOLDS; same count as upstream (3 / 3) -> HOLDS; no form only here -> HOLDS; no form only upstream -> HOLDS
+hyperdoc/core.lisp
+  assertions: retained compatibility forms equal their pinned revision -> HOLDS; same count as upstream (13 / 13) -> HOLDS; no form only here -> HOLDS; no form only upstream -> HOLDS
+hyperdoc/defining.lisp
+  assertions: retained compatibility forms equal their pinned revision -> HOLDS; same count as upstream (1 / 1) -> HOLDS; no form only here -> HOLDS; no form only upstream -> HOLDS
+hyperdoc/package.lisp
+  assertions: retained compatibility forms equal their pinned revision -> HOLDS; same count as upstream (2 / 2) -> HOLDS; no form only here -> HOLDS; no form only upstream -> HOLDS
+inspector-hyperdoc/package.lisp
+  assertions: retained compatibility forms equal their pinned revision -> HOLDS; same count as upstream (3 / 3) -> HOLDS; no form only here -> HOLDS; no form only upstream -> HOLDS
