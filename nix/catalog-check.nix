@@ -19,6 +19,16 @@ runCommand "catalog-startup-contract" { nativeBuildInputs = [ python3 ]; } ''
     || { cat "$out/original-editor-demo.log"; exit 1; }
   grep -q '^FEDWIKI-ORIGINAL-EDITOR-CONFIGURATION-PASS' "$out/original-editor-demo.log"
   grep -q '^FEDWIKI-ORIGINAL-EDITOR-DEMO-PASS' "$out/original-editor-demo.log"
+  # Membership against the frozen 19e824d set: the demo added once, with no further system and with the reviewed service's one.
+  ${runtime.sbcl}/bin/sbcl --noinform --no-sysinit --no-userinit --non-interactive \
+    --load ${source}/scripts/check-editor-demo-membership.lisp >"$out/membership-default.log" 2>&1 \
+    || { cat "$out/membership-default.log"; exit 1; }
+  grep -q '^EDITOR-DEMO-MEMBERSHIP-PASS$' "$out/membership-default.log"
+  HYPERDOC_CATALOG_SYSTEM=dreyeck/work/topic-maps-ctm-review ${runtime.sbcl}/bin/sbcl --noinform --no-sysinit --no-userinit --non-interactive \
+    --load ${source}/scripts/check-editor-demo-membership.lisp >"$out/membership-ctm-review.log" 2>&1 \
+    || { cat "$out/membership-ctm-review.log"; exit 1; }
+  grep -q '^WITH-CATALOG-SYSTEM dreyeck/work/topic-maps-ctm-review' "$out/membership-ctm-review.log"
+  grep -q '^EDITOR-DEMO-MEMBERSHIP-PASS$' "$out/membership-ctm-review.log"
   # Topic Maps: every system from the verified snapshot, the startup guard, and the views a served Catalog offers.
   export HYPERDOC_EXPECTED_TOPIC_MAPS_SOURCE=nix-store-snapshot
   ${runtime.sbcl}/bin/sbcl --noinform --no-sysinit --no-userinit --non-interactive \

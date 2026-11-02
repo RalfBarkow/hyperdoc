@@ -19,7 +19,8 @@ nix build .#checks.x86_64-linux.catalog -L
 nix develop .#fedwiki-original-editor -c bash -c 'npm ci --prefix tests/fedwiki-original-editor --ignore-scripts --no-audit --no-fund && node --test tests/fedwiki-original-editor/commands.test.mjs tests/fedwiki-original-editor/server.test.mjs && fedwiki-original-editor-e2e'
 ```
 
-Both must pass (the E2E runs the standalone and the Inspector case). The change must be in the branch the server's
+Both must pass (the E2E runs the standalone and the Inspector case); the full list with expected output is in
+[verification.md](verification.md). The change must be in the branch the server's
 `hyperdoc` input follows (recorded as `github:RalfBarkow/hyperdoc?ref=dreyeck.ch`) or pinned to its reviewed commit,
 as in [CATALOG-OPERATIONS.md](../../dreyeck/CATALOG-OPERATIONS.md#choose-one-update-mode).
 
@@ -181,4 +182,4 @@ Neither touches Wiki data, the Wiki farm or the Mech asset selection. Nothing is
 ## Not part of this step
 
 Creating or claiming a farm test site, setting `HYPERDOC_FEDWIKI_EDITOR_TEST_*`, any frame adapter on the farm, any change
-to `wiki.service`, `/home/rgb/.wiki/config.json` or nginx. Those wait for decisions D2–D6 in [README.md](README.md#open-decisions).
+to `wiki.service`, `/home/rgb/.wiki/config.json` or nginx. Those wait for decisions D2–D6 in [README.md](README.md#decisions).

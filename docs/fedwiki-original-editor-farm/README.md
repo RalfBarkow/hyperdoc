@@ -102,7 +102,11 @@ is an operator decision (D2, D3) and none is made here.
 - `tests/fedwiki-original-editor/{run,commands}.mjs` set `HYPERDOC_FEDWIKI_EDITOR_TEST_MODE=isolated-loopback`;
   `serve.lisp` asserts the demo is in the Catalog once, before and after the additive `:catalog-system`, and that the
   mode is the editor mode (so a browser run cannot silently test the read-only page).
-- `nix/catalog-check.nix` runs the demo's test system.
+- `nix/catalog-check.nix` runs the demo's test system and `scripts/check-editor-demo-membership.lisp` twice: with no further
+  system, and with `HYPERDOC_CATALOG_SYSTEM=dreyeck/work/topic-maps-ctm-review`. The script compares against the 23 ids
+  admitted at `19e824d`, frozen in the script, and requires each once, the demo once, nothing else by default, nothing
+  lost when the further system loads, and nothing added when the demo is named again. (The closed-membership check of
+  `dreyeck/catalog/tests` asserts the same set but is not part of the Nix check.)
 
 Not changed: original Wiki client, server and plugin sources and the npm lockfile; `server.mjs` and
 `inspector-code-editor.js`; `catalog-application`, `catalog-topic-maps` (the guard), `nix/catalog.nix`, `flake.nix`.
@@ -116,6 +120,7 @@ Not changed: original Wiki client, server and plugin sources and the npm lockfil
 | `node --test tests/fedwiki-original-editor/server.test.mjs` with Node 24.22.1 and the locked packages (`npm ci`) | 4/4 pass [obs]: without legacy every PUT is 403 and the adapter 409; the adapter serves only the one item at the observed revision to the exact loopback parent (CSP, no CORS, coordinates only, original `client.js` bytes) and refuses stale, other item, no revision, POST, other slug, non-loopback or missing parent; legacy lets anyone create another page |
 | `node --test tests/fedwiki-original-editor/commands.test.mjs` | 5/5 pass [obs] |
 | `node --check` of `run.mjs`, `commands.mjs`, `server.mjs`; `nix-instantiate --parse nix/catalog-check.nix` | ok [obs] |
+| `scripts/check-editor-demo-membership.lisp` over a fake ASDF registry (not committed) | its logic only [obs]: passes with and without a further system; fails on a book registered twice by the further system and on a base without the demo (the state at `19e824d`). Its frozen list is byte-identical to `19e824d`'s admitted set. |
 
 ## Not run here
 
@@ -124,13 +129,13 @@ Not changed: original Wiki client, server and plugin sources and the npm lockfil
 `checks.x86_64-linux.catalog` (including the closed-membership check, the public-views walk with
 `check-reviewed-controls-match-their-sites`, and the new `dreyeck/fedwiki-original-editor-demo/tests`),
 `dreyeck/catalog-application` tests, `nix develop .#fedwiki-original-editor`, and both browser cases of
-`fedwiki-original-editor-e2e` (standalone and Inspector). They must pass on a machine with that access before review
-is closed; the commands are in [operator.md](operator.md#before-the-server).
+`fedwiki-original-editor-e2e` (standalone and Inspector). They must pass on a machine with that access before the PR is
+merged. The exact blocker, the commands and the expected output are in [verification.md](verification.md).
 
-## Open decisions
+## Decisions
 
-- **D1 Membership.** Admit the demo to every Catalog, including the public one, where it shows as *not configured*
-  (proposed here), or keep it local-only and choose option 2 or 3 above.
+- **D1 Membership — decided 2026-11-02 by the owner:** the unconfigured, read-only demo is admitted to the public
+  Catalog (option 1).
 - **D2 Farm test site.** Whether a dedicated site (for example `original-editor-test.dreyeck.ch`) is created at all; it
   must be claimed by the operator **before** it is reachable, since an unclaimed friends site goes to the first visitor.
   Whether the farm restricts hosts (`allowed`, `wikiDomains`) is unknown.
@@ -146,4 +151,4 @@ is closed; the commands are in [operator.md](operator.md#before-the-server).
 - **D6 Versions.** Whether `inspector-code-editor.js` works with the farm's client revision (it relies on
   `wiki.getPlugin`, `wiki.pageHandler.useLocalStorage`, `isOwner`, `.editEnable`); tested only with client 0.33.0.
 
-Until D2–D5 are decided, the editor stays available only inside the isolated loopback test.
+D2–D6 belong to a separate task. Until they are decided, the editor stays available only inside the isolated loopback test.
