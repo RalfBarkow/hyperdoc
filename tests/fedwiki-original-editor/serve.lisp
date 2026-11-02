@@ -48,11 +48,22 @@
   (format t "~&PARSE-TREE-REFERENCE ~S~%" coordinate))
 
 (assert (not (asdf:component-loaded-p (asdf:find-system "dreyeck/verified-example"))))
+;; The demo is a member of the default Catalog: present once before the additive CATALOG-SYSTEM below names it again.
+(let ((ids (mapcar #'hyperbook:id-of (hyperbook:hyperbooks-of hyperbook:*catalog*))))
+  (assert (= 1 (count "dreyeck/fedwiki-original-editor-demo" ids :test #'string=)))
+  (format t "~&CATALOG-MEMBERSHIP dreyeck/fedwiki-original-editor-demo once among ~D~%" (length ids)))
+;; This launcher embeds the editor on purpose; the configuration must say so, or the browser case would test nothing.
+(let ((configuration (dreyeck/fedwiki-original-editor-configuration:editor-configuration)))
+  (assert (eq :isolated-loopback-editor (dreyeck/fedwiki-original-editor-configuration:configuration-mode configuration))
+          () "Editor not offered: ~S" (dreyeck/fedwiki-original-editor-configuration:configuration-problems configuration))
+  (format t "~&EDITOR-MODE ~(~A~)~%" (dreyeck/fedwiki-original-editor-configuration:configuration-mode configuration)))
 (dreyeck/catalog-application:start-catalog
  :port (parse-integer (uiop:getenv "HYPERDOC_EDITOR_TEST_CATALOG_PORT"))
  :host "127.0.0.1"
  :site-root (uiop:getenv "HYPERDOC_FEDWIKI_EDITOR_TEST_ROOT")
  :catalog-system "dreyeck/fedwiki-original-editor-demo")
+(assert (= 1 (count "dreyeck/fedwiki-original-editor-demo" (mapcar #'hyperbook:id-of (hyperbook:hyperbooks-of hyperbook:*catalog*))
+                    :test #'string=)))
 (finish-output)
 (loop until (probe-file (uiop:getenv "HYPERDOC_EDITOR_TEST_STOP")) do (sleep 0.1))
 (clog:shutdown)

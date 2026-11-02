@@ -12,6 +12,23 @@ runCommand "catalog-startup-contract" { nativeBuildInputs = [ python3 ]; } ''
     --eval '(asdf:test-system "dreyeck/catalog-application")' >"$out/application.log" 2>&1 \
     || { cat "$out/application.log"; exit 1; }
   python3 ${source}/tests/test_conversation_sources.py
+  # The Original Wiki Editor demonstration, a Catalog member: its configuration, and read-only without that configuration.
+  ${runtime.sbcl}/bin/sbcl --noinform --no-sysinit --no-userinit --non-interactive \
+    --eval '(require :asdf)' \
+    --eval '(asdf:test-system "dreyeck/fedwiki-original-editor-demo")' >"$out/original-editor-demo.log" 2>&1 \
+    || { cat "$out/original-editor-demo.log"; exit 1; }
+  grep -q '^FEDWIKI-ORIGINAL-EDITOR-CONFIGURATION-PASS' "$out/original-editor-demo.log"
+  grep -q '^FEDWIKI-ORIGINAL-EDITOR-DEMO-PASS' "$out/original-editor-demo.log"
+  # Membership against the frozen 19e824d set: the demo added once, with no further system and with the reviewed service's one.
+  ${runtime.sbcl}/bin/sbcl --noinform --no-sysinit --no-userinit --non-interactive \
+    --load ${source}/scripts/check-editor-demo-membership.lisp >"$out/membership-default.log" 2>&1 \
+    || { cat "$out/membership-default.log"; exit 1; }
+  grep -q '^EDITOR-DEMO-MEMBERSHIP-PASS$' "$out/membership-default.log"
+  HYPERDOC_CATALOG_SYSTEM=dreyeck/work/topic-maps-ctm-review ${runtime.sbcl}/bin/sbcl --noinform --no-sysinit --no-userinit --non-interactive \
+    --load ${source}/scripts/check-editor-demo-membership.lisp >"$out/membership-ctm-review.log" 2>&1 \
+    || { cat "$out/membership-ctm-review.log"; exit 1; }
+  grep -q '^WITH-CATALOG-SYSTEM dreyeck/work/topic-maps-ctm-review' "$out/membership-ctm-review.log"
+  grep -q '^EDITOR-DEMO-MEMBERSHIP-PASS$' "$out/membership-ctm-review.log"
   # Topic Maps: every system from the verified snapshot, the startup guard, and the views a served Catalog offers.
   export HYPERDOC_EXPECTED_TOPIC_MAPS_SOURCE=nix-store-snapshot
   ${runtime.sbcl}/bin/sbcl --noinform --no-sysinit --no-userinit --non-interactive \

@@ -1,0 +1,18 @@
+# Success markers, contract script of checks.x86_64-linux.catalog (drv mrp66a5y7cfiv9sjhk7savwg3s726l8x, source = b989c01), run outside the build sandbox
+# with one change: hyperbook/fedwiki::probe-fedwiki-protocol replaced by a recorder that ends its thread (no network) in the public-views step.
+application.log:Catalog application tests passed: graph, configuration, routes, lifecycle; a further registered HyperBook is tolerated by these checks and named by the admission check.
+original-editor-demo.log:FEDWIKI-ORIGINAL-EDITOR-CONFIGURATION-PASS: unset and unusable values give an unconfigured, read-only demonstration with the reason; no other site variable is used; only isolated-loopback with http://127.0.0.1:PORT embeds the editor; unknown modes and malformed origins are refused and named; the target coordinates are fixed.
+original-editor-demo.log:FEDWIKI-ORIGINAL-EDITOR-DEMO-PASS: admitted once from this checkout, and loading it again adds nothing; served without a configured site the page says so, signals nothing, links and embeds nothing; an unreadable site is explained read-only; read-only withholds the frame; isolated-loopback embeds the one item's frame at the observed revision; the site's files are unchanged.
+membership-default.log:DEFAULT-CATALOG 24 HyperBooks: the 23 of 19e824d, each once, and dreyeck/fedwiki-original-editor-demo once; no other.
+membership-default.log:EDITOR-DEMO-MEMBERSHIP-PASS
+membership-ctm-review.log:DEFAULT-CATALOG 24 HyperBooks: the 23 of 19e824d, each once, and dreyeck/fedwiki-original-editor-demo once; no other.
+membership-ctm-review.log:WITH-CATALOG-SYSTEM dreyeck/work/topic-maps-ctm-review: 26 HyperBooks; the previous 24 kept once each; added ("dreyeck/work/topic-maps-project-example"
+membership-ctm-review.log:EDITOR-DEMO-MEMBERSHIP-PASS
+lisp.log:CATALOG-TOPIC-MAPS-PACKAGE-PASS
+public-views.log:NEUTRALIZED-NETWORK-PROBE ward.voices.ustawi.wiki
+public-views.log:NEUTRALIZED-NETWORK-PROBE next.ward.dojo.fed.wiki
+public-views.log:NEUTRALIZED-NETWORK-PROBE mech.dreyeck.ch
+public-views.log:TOPIC-MAPS-PUBLIC-VIEWS-PASS: 6 objects, rendered served and developing; 7 run buttons are markers served and buttons developing; no plain thunk is reachable from any served view. Walked 300 objects by navigation (bounded, not exhaustive): 9534 controls (inert=8478, slot-reader=989, reviewed=11, reviewed-class=56, refused=0); none of an unknown kind; reviewed ones met: (("topicmap/workspace-go-to"
+asdf-methods.log:ASDF-METHOD-PRESERVATION-PASS: 183 assertions; ASDF 3.3.1 methods unchanged by identity, behaviour equal before and after, a control collision is seen.
+topic-maps-asd: /nix/store/kna6395gl32f2hl4n3ha4776zm9r0sgb-source/topic-maps.asd
+executable.log: Ran 6 tests in 161.700s OK 

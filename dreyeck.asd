@@ -1057,7 +1057,9 @@
                                  "dreyeck/work/reading"
                                  "dreyeck/authority/reading"
                                  "dreyeck/clog-tutorial/reading"
-                                 "dreyeck/traverse/reading")
+                                 "dreyeck/traverse/reading"
+                                 ;; Read-only unless its own configuration embeds the loopback test editor.
+                                 "dreyeck/fedwiki-original-editor-demo")
                                 :IN-ORDER-TO
                                 ((ASDF/LISP-ACTION:TEST-OP
                                                            (ASDF/LISP-ACTION:TEST-OP
@@ -3499,6 +3501,22 @@
 
 (asdf:defsystem "dreyeck/fedwiki-original-editor-demo"
   :description "Read-only Catalog demonstration of one isolated original Wiki editor test"
-  :depends-on ("dreyeck/local-fedwiki-page" "hyperdoc/explorer" "dreyeck/authority-policy")
-  :components ((:file "dreyeck/src/fedwiki-original-editor-demo")
-               (:static-file "dreyeck/pages/fedwiki-original-editor-demo/Editing One Isolated Wiki Page.html")))
+  ;; A member of dreyeck/catalog. Loading it offers no editor: that is HYPERDOC_FEDWIKI_EDITOR_TEST_MODE's decision
+  ;; (dreyeck/src/fedwiki-original-editor-configuration.lisp), and every write is the original Wiki server's.
+  :depends-on ("dreyeck/local-fedwiki-page" "hyperdoc/explorer" "dreyeck/authority-policy" "uiop")
+  :serial t
+  :components ((:file "dreyeck/src/fedwiki-original-editor-configuration")
+               (:file "dreyeck/src/fedwiki-original-editor-demo")
+               (:static-file "dreyeck/pages/fedwiki-original-editor-demo/Editing One Isolated Wiki Page.html"))
+  :in-order-to ((test-op (test-op "dreyeck/fedwiki-original-editor-demo/tests"))))
+
+(asdf:defsystem "dreyeck/fedwiki-original-editor-demo/tests"
+  :description "Configuration modes, read-only rendering without a configured site, Catalog membership once"
+  :depends-on ("dreyeck/fedwiki-original-editor-demo" "dreyeck/catalog/tests" "hyperbook/server")
+  :serial t
+  :components ((:file "dreyeck/tests/fedwiki-original-editor-configuration")
+               (:file "dreyeck/tests/fedwiki-original-editor-demo"))
+  :perform (test-op (op component)
+             (declare (ignore op component))
+             (uiop:symbol-call :dreyeck/fedwiki-original-editor-configuration/tests :run-tests)
+             (uiop:symbol-call :dreyeck/fedwiki-original-editor-demo/tests :run-tests)))

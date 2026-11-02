@@ -1,0 +1,24 @@
+# GitHub flake inputs fetched over git at the locked rev (tarball endpoint refused by the session proxy); narHash compared with flake.lock
+lwcells	kchanqvq/lwcells@e7446ac146a31b630e74c9bce7dab34b50cc333d	sha256-zI67bTVQ6gP7Qm17k9PydnOetTPM+H4NJ+HqKIosCt0=	/nix/store/p62cd9zn5gnrd34wgbjjnqragxwx6dhh-source	MATCH
+named-closure	BlueFlo0d/named-closure@d57305582137a24d6c8f8375fba496c653bb5699	sha256-xfXyblX8aNUFFFH5SFibIYMiVWi2ySvhuwlWdSbVl54=	/nix/store/w15dbn9gy780n3p9k5b69dr3rrr5lczr-source	MATCH
+njson	atlas-engineer/njson@b8566457379f48ab3baf627f1cc3df76327fd631	sha256-A8DCCX7FNZoTh2J1KhwIgRO3OdOze+SmnS1GwdxVYS0=	/nix/store/9zkvhs70z8w06kximfrw3zm099qa87vj-source	MATCH
+shop3	shop-planner/shop3@ce53f9b651acde8c44dc21eddb1a1c5b97f10536	sha256-uJ4Fxv82wvZn+tgZjAswcqXxHfNDh2w5kOKrJKVwsRU=	/nix/store/r40b3p08hidpxcf6cvdhfazlvlig1dyn-source	MATCH
+shop3-documentation-utils	Shinmera/documentation-utils@fcbd927dee7f311915a27ee557e3db1d4510403c	sha256-DkqB8Hc0VBrMLLcP3xBBwguOFVVe4dAHR9WCrgFe90E=	/nix/store/l4sgpdmp3siiy430nqdw0b3b2s23l4w6-source	MATCH
+shop3-fiveam-asdf	rpgoldman/fiveam-asdf@7f11d9f5bdf6be425ffc9c1744955b1c460d9183	sha256-B2eHl+dSrACNVI4rLwwom3Ocak+Pt4TEvdQUyu33sKE=	/nix/store/9krmxz2ri6fal0135y8q3zindx1v8b3r-source	MATCH
+shop3-pddl-tools	rpgoldman/pddl-tools@fc2de73c9e6ef732cceb3c74d22a25724ae697e4	sha256-SD9rOROOOFYM7jWcdPCaVAo7HDBgb6NW0i20VQIU4Ss=	/nix/store/wzikvxsqhg07y862kz3ljn6gvh2c3ijl-source	MATCH
+shop3-random-state	rpgoldman/random-state@1eda41f2f392b09305c72113226da0814a1137b8	sha256-hKYYCN7nbPYR+fUkiSDURL+whwPHwciXaNDcxXjwBCM=	/nix/store/5zzdqpa66a6imm6007s8q7392plkrjw1-source	MATCH
+shop3-trivial-garbage	shop-planner/trivial-garbage@fff99d96b6a94811606dc8019cd25c771575dc30	sha256-xauepYecUQmKbUEFT0APAMujzQPxnGoJUcEVEIWtzpo=	/nix/store/4ab75xd8k9p4nq75p9iiz7mcwfyb4l34-source	MATCH
+shop3-trivial-indent	Shinmera/trivial-indent@87b35ff9202b107230e35790e93c471cc7880900	sha256-I8VM8EBTZx0X49e76RuOTHZWgmJk/FoiL7FZAwTnb9c=	/nix/store/j7gvc1zmvf7gp6ymdjra8vn33am1npmi-source	MATCH
+
+# Quicklisp fixed-output sources (nixpkgs urls are http://; the proxy accepts HTTPS CONNECT only): fetched from the same URL over https with --expected-hash; store path compared with the derivation output
+https://beta.quicklisp.org/archive/atomics/2024-10-12/atomics-20241012-git.tgz	sha256-aUikKTR3cRAbSmnbC6cLhHv5jMfhaiKh7Qqo7fZzBqo=	MATCH /nix/store/vn9zr7p5rdyqw7kzqkx458nc3wwhaz1l-source valid
+https://beta.quicklisp.org/archive/fast-websocket/2024-10-12/fast-websocket-20241012-git.tgz	sha256-Xw6vlbKdGu5XPGY9D13Ty0al3lWGTQT6pcakIxoqX4A=	MATCH /nix/store/7nyj675q9zhymjrl112vcg1fs5s6062f-source valid
+https://beta.quicklisp.org/archive/3bmd/2024-10-12/3bmd-20241012-git.tgz	sha256-+6eAt+zhzAp3dbCQ7t5683ivhKXVqXHMCGVYlLGx15g=	MATCH /nix/store/ijaiaywibyk7zj0cn6hvc19pmrckc8hi-source valid
+https://beta.quicklisp.org/archive/cl-base32/2024-10-12/cl-base32-20241012-git.tgz	sha256-lhXN3i4vjvqk0ArMEu9VpoGq2ejII/rznmUq0XnPgE0=	MATCH /nix/store/hqnb9sy6ijjixckf578i0b5kvmkpbn89-source valid
+https://beta.quicklisp.org/archive/arrow-macros/2024-10-12/arrow-macros-20241012-git.tgz	sha256-hBk488oMiYItShd0YFE838vkJ43/2/qLhi9BMrW/m2A=	MATCH /nix/store/2ha8m7zfdz4dfdppybaz235sl9ywjlxa-source valid
+https://beta.quicklisp.org/archive/event-emitter/2024-10-12/event-emitter-20241012-git.tgz	sha256-1l+bI8xEfK5hDZbCyvyw454BXZpvb2GswVEvnkA+R04=	MATCH /nix/store/na0jah3avd0xhpkawqrwxpia3ycgzcyl-source valid
+https://beta.quicklisp.org/archive/clog/2024-10-12/clog-20241012-git.tgz	sha256-nRauNVhGY0ob9IzLOts/q34sgOiHWdc6e9jNE2WSF0M=	MATCH /nix/store/g35ddihh5x6x247ry0qgqpbh6hx0jb87-source valid
+https://beta.quicklisp.org/archive/literate-lisp/2023-06-18/literate-lisp-20230618-git.tgz	sha256-AlxlmmkU376j24KZ3zptqWNbLOmz6aW7Y9w2YRRwvWo=	MATCH /nix/store/b4vm6dwczah0z15p81g3xwkj4y6nybdp-source valid
+https://beta.quicklisp.org/archive/websocket-driver/2024-10-12/websocket-driver-20241012-git.tgz	sha256-QsI8op3qA8jSJuVm2YgkiRsU38WH1tkUTSkIk7PqRtI=	MATCH /nix/store/bs5xhy23nd02x1wqbl5bf2psbhpagg01-source valid
+https://beta.quicklisp.org/archive/damn-fast-priority-queue/2024-10-12/damn-fast-priority-queue-20241012-git.tgz	sha256-vFkiBBSmw7SCDIq1j/fyADyGxT0u0FTk3XjhE999cdU=	MATCH /nix/store/f8573hk86gi69lp0bd3qrkgaj5qpgj9y-source valid
+https://beta.quicklisp.org/archive/clog-ace/2024-10-12/clog-ace-20241012-git.tgz	sha256-UpO1ZhkRIT85ptNCsWI0XN7HtARA+SkEDygWz1hUHAY=	MATCH /nix/store/7jzx5ny4qlpgm741izd6f6cyf4q1c746-source valid

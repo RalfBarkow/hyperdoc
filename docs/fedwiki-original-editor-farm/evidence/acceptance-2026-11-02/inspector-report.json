@@ -1,0 +1,72 @@
+{
+  "passed": true,
+  "sourceBase": "f03d9a15234b5fdbb7c339c480d021e4a854b38a",
+  "integrationCase": "inspector",
+  "work": "<evidence>/run-nyeUZj",
+  "file": "<evidence>/run-nyeUZj/site/pages/original-editor-test",
+  "beforeSha": "42953ba47d6fea227f84d1430a0b41cbdfa98ddaa96a90e5215f9c155b479288",
+  "versions": {
+    "wiki": "0.41.0",
+    "wiki-client": "0.33.0",
+    "wiki-server": "0.28.1",
+    "wiki-plugin-code": "0.6.1",
+    "wiki-plugin-paragraph": "0.4.0"
+  },
+  "steps": [
+    "Original security denies PUT without grant: 403 and unchanged page bytes",
+    "Catalog → demo → original generic grey Code renderer → code Inspector reference",
+    "Original code plugin edited text and language; authorized PUT 200; disk Item and dated journal match request; no localStorage page/fallback",
+    "Node writer stopped; HyperDoc independently reread the same file, matching JSON, journal, SHA-256 and generic rendering; explicit P coordinate checked in Lisp parse tree"
+  ],
+  "browserErrors": [
+    "Wiki: Cannot read properties of undefined (reading 'setup')"
+  ],
+  "externalRequests": [],
+  "wikiOrigin": "http://127.0.0.1:32983",
+  "catalogOrigin": "http://127.0.0.1:40087",
+  "authorization": "original default security, unclaimed isolated loopback site, security_legacy=true",
+  "browser": "156.0.8078.79",
+  "compatibility": {
+    "emit": "function",
+    "bind": "function",
+    "editor": "function",
+    "doPlugin": "function",
+    "put": "function",
+    "renderFrom": "function",
+    "local": false,
+    "owner": true
+  },
+  "originalEditorFunctionSHA256": "e0154620583c2bb4a608f66194aca7097bf1b51b186f264d9b5d6b39665772d6",
+  "inspector": {
+    "target": [
+      "fedwiki:original-editor-test.invalid",
+      "original-editor-test",
+      "2222222222222222"
+    ],
+    "originalEditorCalls": 1,
+    "browserPages": 1,
+    "visibleItems": 1,
+    "staleAndWrongTargetRefused": true,
+    "frameAncestors": "http://127.0.0.1:40087",
+    "additionalCORS": false
+  },
+  "originalAssetsByteEqual": {
+    "/client.js": true,
+    "/plugins/code/code.js": true
+  },
+  "knownClientLimitation": "The original default legacy security module supplies no /security/security.js UI plugin (setup error); server authorization and code editing were verified independently.",
+  "afterSha": "7aa612a82f5eda3b9d0b38ad8ab200a1e57453cc9e7f58b25d5fbcc4543ee64f",
+  "action": {
+    "type": "edit",
+    "id": "2222222222222222",
+    "item": {
+      "id": "2222222222222222",
+      "type": "code",
+      "text": "(defun square (x) (expt x 2))",
+      "language": "commonlisp"
+    },
+    "date": 1793607498325
+  },
+  "paragraphUnchanged": true,
+  "localStorageFallback": false
+}

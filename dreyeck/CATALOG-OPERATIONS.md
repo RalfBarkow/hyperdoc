@@ -115,6 +115,16 @@ the CTM reading and the TMDM navigation are in `dreyeck/ctm-page-authoring/local
 packaged registry, so it cannot be named by the variable. The Work page *Item Edit Path in HyperDoc* describes
 the objects, the limits and the tests.
 
+## The Original Wiki Editor demo
+
+`dreyeck/catalog` admits `dreyeck/fedwiki-original-editor-demo`, so the Catalog lists
+*Original Wiki Editor Test* without any service variable; `HYPERDOC_CATALOG_SYSTEM` stays
+as it is. Without `HYPERDOC_FEDWIKI_EDITOR_TEST_ROOT` the demo is unconfigured and
+read-only and says so; a service sets none of its variables. The embedded original
+editor exists only in the isolated loopback test. The Wiki-farm analysis, the open
+decisions and the operator steps are in
+[docs/fedwiki-original-editor-farm](../docs/fedwiki-original-editor-farm/README.md).
+
 ## Not verified
 
 The successful operator update above does not verify NixOS activation of the
