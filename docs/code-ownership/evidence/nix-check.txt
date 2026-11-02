@@ -1,0 +1,12 @@
+# Nix checks on the last code commit of this branch (1df526bf), 2026-11-02:
+#   nix build .#checks.x86_64-linux.catalog           -> exit 0   (nix/catalog-check.nix unchanged against the base 0a7d4dee)
+#   nix build .#checks.x86_64-linux.library-inventory -> exit 0   (new: scripts/code-ownership.lisp --check on a source snapshot without .git; asserts "uninventoried: 0; problems: 0")
+#
+# Test systems in the development shell (nix develop .#fedwiki-original-editor), compared with the base 0a7d4dee:
+#   dreyeck/code-ownership/tests         new   PASS (CODE-OWNERSHIP-PASS), mutants K1-K8 all detected (mutants.txt)
+#   dreyeck/fedwiki-mech/tests           moved from hyperbook/fedwiki/tests: the five FEDWIKI-MECH-*-PASS / PAGE-SELECTION-CONTRACT-PASS lines
+#   dreyeck/upstream-assessment/tests    PASS (PR A), with the owner-class expectation of the worked example following the inventory
+#   dreyeck/upstream-intake              PASS
+#   dreyeck/hyperdoc/library-tests       FAILS at the base and here at the same assertion (RalfBarkow/hyperdoc#17); the per-file comparison with +PREVIOUS+ gives the same failing files
+#                                        at the base and with this branch (9 library paths, the same files); +PREVIOUS+ and the upstream reference are not moved
+#   dreyeck/hyperdoc/boundary-tests, dreyeck/catalog/tests   FAIL at the base (recorded before this branch); not touched
