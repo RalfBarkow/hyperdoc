@@ -1,0 +1,15 @@
+# Unchanged `nix build .#checks.x86_64-linux.catalog -L`, sandbox = true (nix config show sandbox: true), at 0d89285 (clean tree), 2026-11-02
+# exit 0, real 6m31s. Output of the build, last lines:
+catalog-startup-contract> ----------------------------------------------------------------------
+catalog-startup-contract> Ran 9 tests in 0.262s
+catalog-startup-contract> 
+catalog-startup-contract> OK
+
+real	6m31.224s
+user	5m55.159s
+sys	0m39.675s
+exit 0
+
+# application.log of the check: the regular test passed; it holds no real-resolver marker
+# (grep -c -i 'real.resolver\|REAL-RESOLVER\|FEDWIKI-NAME-RESOLUTION' application.log: 0)
+1311:Catalog application tests passed: graph, configuration, routes, lifecycle; a further registered HyperBook is tolerated by these checks and named by the admission check.

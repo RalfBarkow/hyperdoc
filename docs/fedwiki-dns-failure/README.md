@@ -73,25 +73,37 @@ that otherwise names only `usocket` conditions, or a fix in `usocket`'s mapping.
 
 In `dreyeck/tests/catalog-application.lisp`, which the Nix `catalog` check already runs (that check is not changed):
 
-- `check-fedwiki-name-resolution-failure` starts a fresh SBCL with the debugger disabled and looks at its exit status. It has two parts that
-  are kept apart, because only the first is the regression test:
-  1. **The regression test: injected and deterministic.** One site per condition the backend raises, the probe signalling it: the process
-     must survive, the condition must be the site's status (and an `ns-error`), `wait-for-sitemap` must return, and the site's sitemap
-     snapshot must say `failed`. It asks no resolver and opens no connection, so its verdict does not depend on the network or the resolver
-     configuration of the machine it runs on. It is red on the unfixed library and green with the fix, and it is what establishes this change.
-  2. **A supplementary check: the platform's resolver, environment-dependent.** The real resolver is asked for a name that cannot exist
-     (`wiki.test-host.invalid`) and the process must survive with an `ns-error` as the site's status. It runs **only where isolation is
-     proved**: the process sees no network interface but loopback (`/proc/net/dev`; this is what a Nix build sandbox shows, and `/sys`
-     is not mounted there), or an empty network namespace is made with `unshare -rn`. Where neither holds (a machine with a network and
-     no `unshare`, macOS) it is not run, and the test says so. **What this isolation rules out and what it does not** is stated under
-     *Review of the two guards*: it rules out a connection to a host outside the network namespace; it does **not** rule out a DNS
-     resolver that answers on the loopback of that namespace. Its result is therefore a measurement of the environment's resolver
-     configuration as much as of the library, and it is not part of the regression guarantee.
+- `check-fedwiki-name-resolution-failure` is **the regression test**. It starts a fresh SBCL with the debugger disabled and looks at its exit
+  status. One site per condition the backend raises, the probe signalling it: the process must survive, the condition must be the site's
+  status (and an `ns-error`), `wait-for-sitemap` must return, and the site's sitemap snapshot must say `failed`. It asks no resolver and
+  opens no connection, so its verdict does not depend on the network or the resolver configuration of the machine it runs on. It is red
+  on the unfixed library and green with the fix, it is what establishes this change, and it is called by `run-tests`, hence by the Nix
+  check.
 - `check-fedwiki-initialization-outcomes` is a table of what `initialize-fedwiki` does with each outcome: both success paths (an
   initial HTTPS stays, `"http"` sets HTTP), the failures kept before, the two new ones, and an error that is none of them (a
   programming error), which still leaves the function. The first rows were already true on the unfixed library.
 
 Red without the fix, green with it ([red](evidence/red-without-fix.txt), [green](evidence/green-with-fix.txt)).
+
+### The integration test with the real resolver, run explicitly
+
+`check-fedwiki-real-resolver-integration`, in the same file, is **not called by `run-tests`** and so not by the Nix `catalog` check. It
+asks the platform's own resolver for a name that cannot exist (`wiki.test-host.invalid`) and requires that the process survives with an
+`ns-error` as the site's status. It was part of the regular test in the first versions of this change (`369c745d` to `209f25b`). It was
+moved out because its outcome depends on the resolver configuration of the environment (a loopback resolver that answers differently, for
+example NODATA, #18, would make the Nix check fail for a reason that is not the code under test), and a build should not need a real name
+resolution.
+
+- Run it with `scripts/check-fedwiki-real-resolver.sh` (Linux, `nix develop`, `unshare`). It runs the child SBCL **under `unshare -rn`**, an
+  empty network namespace whose loopback is empty. Where `unshare` cannot make one it runs only if the process sees nothing but `lo`
+  already (a resolver on that loopback is then not excluded, see *Review of the two guards*), and otherwise it **signals an error** instead
+  of passing silently.
+- Result at `0d89285`: **pass** with the fix, `OUTCOME REAL-RESOLVER NS-TRY-AGAIN-ERROR ns-error=T snapshot=failed`; **fails** (exit 1,
+  the child process ended) with `hyperbook-fedwiki/fedwiki.lisp` as at the base `0a7d4de`
+  ([real-resolver-integration.txt](evidence/real-resolver-integration.txt)).
+- The regular test asks no resolver any more. Measured by running `dreyeck/catalog-application` in `unshare -rnm` with a counting DNS stub
+  on the loopback that `resolv.conf` names: the test file at `209f25b` made **2** queries (`wiki.test-host.invalid`), the test file at
+  `0d89285` made **0** ([regular-test-dns-queries.txt](evidence/regular-test-dns-queries.txt)).
 
 ## Results, kept apart
 
@@ -99,10 +111,10 @@ Red without the fix, green with it ([red](evidence/red-without-fix.txt), [green]
 
 | Check | Result |
 |---|---|
-| New regression check, unfixed library | **fails**: exit 1; the control `host-not-found` finishes, then `try-again` ends the process; both with an injected probe and with the real resolver in `unshare -rn` |
-| The same, with the fix | **passes**; the real resolver in the namespace answers `ns-try-again-error`, the status is kept |
+| Regression test (injected), unfixed library | **fails**: exit 1; the control `host-not-found` finishes, then `try-again` ends the process. The integration test with the real resolver in `unshare -rn` fails the same way ([real-resolver-integration.txt](evidence/real-resolver-integration.txt)) |
+| The same, with the fix | **passes**; the integration test: the real resolver in the namespace answers `ns-try-again-error`, the status is kept |
 | Reproduction of #13 (`sbcl --script`, `unshare -rn`), modes `real`, `try-again`, `not-found` | before: exit 1, 1, 0. **After: 0, 0, 0** ([reproduction.txt](evidence/reproduction.txt)) |
-| **Unchanged** `nix build .#checks.x86_64-linux.catalog`, `sandbox = true`, at **`09f0768`** (clean tree; the last commit that changes code) | **exit 0**, 5 min 52 s. `git diff 0a7d4de 09f0768` touches `hyperbook-fedwiki/fedwiki.lisp` and two test files only; `nix/`, `flake.*` and `scripts/` are unchanged. In the sandbox the real resolver was exercised under isolation: `FEDWIKI-NAME-RESOLUTION-FAILURE: real resolver exercised under this process sees no network interface but loopback: OUTCOME REAL-RESOLVER NS-TRY-AGAIN-ERROR` ([after-sandbox-markers.txt](evidence/after-sandbox-markers.txt)). An earlier run at `a449731`, before the two hardenings below, also exited 0 |
+| **Unchanged** `nix build .#checks.x86_64-linux.catalog`, `sandbox = true`, at **`0d89285`** (clean tree; the last commit that changes code) | **exit 0**, 6 min 31 s. `git diff 0a7d4de 0d89285` touches `hyperbook-fedwiki/fedwiki.lisp`, two test files and the new `scripts/check-fedwiki-real-resolver.sh`; `nix/` and `flake.*` are unchanged, and the check is the same command. The regular test now asks no resolver (0 queries, see above), so the check needs no real name resolution: its `application.log` holds no real-resolver marker ([nix-check-at-0d89285.txt](evidence/nix-check-at-0d89285.txt)). Earlier runs, when the real-resolver part was still in the regular test, also exited 0: `09f0768` (isolation path, `OUTCOME REAL-RESOLVER NS-TRY-AGAIN-ERROR`, [after-sandbox-markers.txt](evidence/after-sandbox-markers.txt)) and `a449731` |
 | Related test systems at the base and with the change: `hyperbook/fedwiki/tests`, `dreyeck/wiki-link/tests`, `dreyeck/local-fedwiki-view/tests`, `dreyeck/catalog-application` | **pass at both**: no regression ([related-test-systems.txt](evidence/related-test-systems.txt)) |
 | Inventory contract of this change (`check-initialize-fedwiki-dns-change`) | holds; rejects an added `usocket:ns-error`, a missing or doubled entry, the two symbols **moved** out of the handler's type list (into the `progn`, a quoted list, a clause of their own), and any other change to the form ([mutants](evidence/contract-after-hardening.txt)) |
 
@@ -134,11 +146,12 @@ device, `10.7.7.1/24`), the DNS server on it and no default route: the old guard
 **1 query**; the new guard saw the interface (`isolated-p` = `NIL`), ran the resolver in a nested empty namespace, and the server received
 **no further query** ([non-loopback-interface-comparison.txt](evidence/non-loopback-interface-comparison.txt)).
 
-The guard is now isolation (`%isolated-p`): the process sees no interface but loopback, read from `/proc/net/dev`; failing that, an empty
-namespace by `unshare -rn`, which is isolated by construction; failing that, the real resolver is not run. A Nix build sandbox on Linux
+The guard is now isolation. It applies to the explicit integration test only, since the regular test no longer asks a resolver (see *The
+integration test with the real resolver*): an empty namespace by `unshare -rn`, which is isolated by construction; failing that, the process
+sees no interface but loopback (`%isolated-p`, read from `/proc/net/dev`); failing that, the integration test signals an error. A Nix build sandbox on Linux
 shows only `lo` in `/proc/net/dev` ([nix-sandbox-network-view.txt](evidence/nix-sandbox-network-view.txt)); `/sys/class/net` is not
-there, which is why `/proc` is read. On macOS neither holds (no `/proc/net/dev`, no `unshare`): the real resolver is not run there, and
-the injected part is. Not run on macOS.
+there, which is why `/proc` is read. On macOS neither holds (no `/proc/net/dev`, no `unshare`): the integration test cannot run there; the
+regular test, which is injected, does. Not run on macOS.
 
 **What the isolation guard does and does not exclude.** Seeing only `lo` in `/proc/net/dev`, or running under `unshare -rn`, means that the
 process has **no route to a host outside its network namespace**, so no connection to an external DNS server (or any other external
@@ -146,16 +159,17 @@ host) can be made. It does **not** mean that no resolver is reachable: a resolve
 reachable, and `lo` alone cannot tell it from none. Measured: in `unshare -rnm` with only `lo`, a UDP stub on `127.0.0.1:53` named in
 `/etc/resolv.conf` received the real resolver's queries, and the outcome followed the stub's answer
 ([resolver-conditions.txt](evidence/resolver-conditions.txt), [no-route-guard-hole.txt](evidence/no-route-guard-hole.txt)). The two paths
-differ in what they promise:
+differ in what they promise (the first is the one the integration test takes by preference; the second was the only one used in the sandbox
+while the real-resolver part was still in the regular test, at `09f0768`):
 
 | Path | Loopback resolver | Established |
 |---|---|---|
 | `unshare -rn` (an empty namespace is made by the test) | none: the new loopback is empty, nothing listens on it | measured: no further query reached a server on the outer interface |
 | the process already sees only `lo` (a Nix build sandbox) | **not excluded**: whatever listens on that loopback is asked | measured for the sandbox: `lo` only; whether anything listens on its `127.0.0.1:53` was not recorded. The outcome there, `ns-try-again-error`, is what a missing server gives (`noserver` in the table), so it is consistent with no listener, but it is not proof of one |
 
-Two consequences. (1) The expected `ns-error` of the real-resolver part holds where nothing answers on loopback (or something answers
+Two consequences. (1) The expected `ns-error` of the integration test holds where nothing answers on loopback (or something answers
 SERVFAIL, NXDOMAIN and the like); a loopback resolver that answers differently, for example NODATA (#18), gives another outcome and the
-supplementary part fails there, with the condition printed. That is a finding about the environment or the library, not a regression of
+integration test fails there, with the condition printed. Because it is no longer part of the regular test, that cannot fail the Nix check. That is a finding about the environment or the library, not a regression of
 this change. (2) A path that does not go through a UDP port on the loopback, such as the `nscd` socket or a resolver reached through a
 Unix-domain socket, is a **hypothesis, not a measurement**: a Unix-domain socket is not confined by the network namespace, so it could answer
 from outside it. No such path was looked for or found in the build sandbox, and none is excluded by the guard.
@@ -177,5 +191,11 @@ The change to `initialize-fedwiki` alters nothing for a reachable host and adds 
 nix build .#checks.x86_64-linux.catalog -L --out-link result-dns
 ```
 
-A dev machine with `unshare` also runs the real-resolver part of the check; one without it runs only the injected part and prints that.
+The check runs the regression test with injected conditions and asks no resolver. The real resolver is a separate, explicit run
+(Linux with `unshare`; it signals an error where it cannot run):
+
+```bash
+scripts/check-fedwiki-real-resolver.sh
+```
+
 The package sources include `docs/`, so the commit that records this evidence cannot be the one that was tested.
