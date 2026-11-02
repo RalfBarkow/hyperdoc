@@ -80,7 +80,9 @@
          (specializers (and (listp lambda-list) (not (keyword-headed-p lambda-list))
                             (loop for parameter in lambda-list
                                   until (and (stringp parameter) (plusp (length parameter)) (char= #\& (char parameter 0)))
-                                  collect (if (and (consp parameter) (not (keyword-headed-p parameter))) (tree-text (second parameter)) "t")))))
+                                  collect (if (and (consp parameter) (not (keyword-headed-p parameter)))
+                                      (let ((specializer (second parameter))) (if (stringp specializer) (strip-package specializer) (tree-text specializer)))
+                                      "t")))))
     (format nil "~{~A~^,~}:~{~A~^,~}" qualifiers specializers)))
 
 (defun definition-identity (tree)

@@ -137,6 +137,9 @@
       (let ((before (ua:top-level-definitions "(setf (get 'a 'b) 1) (setf (get 'c 'd) 2)"))
             (after (ua:top-level-definitions "(setf (get 'x 'y) 0) (setf (get 'a 'b) 1) (setf (get 'c 'd) 2)")))
         (assert (equal (mapcar #'ua:source-definition-key before) (cdr (mapcar #'ua:source-definition-key after)))))))
+  ;; the same method spelled with and without the package of its specializer is the same method
+  (assert (equal (mapcar #'ua:source-definition-key (ua:top-level-definitions "(defmethod page-class ((h hyperdoc:hyperdoc) (type (eql :html))) 1)"))
+                 (mapcar #'ua:source-definition-key (ua:top-level-definitions "(defmethod page-class ((h hyperdoc) (type (eql :html))) 2)"))))
   ;; a reader-evaluation form is data, not an instruction
   (setf (get 'iafx-unit-canary 'ran) nil)
   (ua:top-level-definitions "#.(setf (get 'iafx-unit-canary 'ran) t) (in-package :nowhere-at-all) (defun x () (nowhere:thing))")
