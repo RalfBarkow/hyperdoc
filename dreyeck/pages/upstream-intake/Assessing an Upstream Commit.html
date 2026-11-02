@@ -1,0 +1,57 @@
+<h1>Assessing an Upstream Commit</h1>
+
+<in-package>dreyeck/upstream-intake</in-package>
+
+<p>
+Observing an upstream commit says where it stands. Assessing it asks what it means for <code>dreyeck.ch</code>: what it changed, where that definition
+stands in the fork, which ASDF system owns it and which should, what it may affect, and what to do about it. The assessment reads Git objects and
+source text; it loads no library code, fetches nothing, and records no decision. A decision is a proposal until a person accepts it, and accepting it
+is not carrying it out.
+</p>
+
+<h2>One commit, from the change to the decision</h2>
+
+<p>
+Konrad Hinsen's <code>58a2b2c</code>, "Catch more name service errors" (2026-11-02), replaces
+<code>usocket:ns-host-not-found-error</code> by <code>usocket:ns-error</code> in one handler of <code>make-fedwiki</code>.
+</p>
+
+<p>
+  <a expr="(upstream-assessment-commit-example)">
+    Assess 58a2b2c against this checkout's source
+  </a>
+</p>
+
+<source-of-function>upstream-assessment-commit-example</source-of-function>
+
+<p>
+Open the changed definition in the result. Three things are separated there, each with the epistemic status of its support:
+the handler that upstream changed is the <em>second</em> of the two in <code>make-fedwiki</code>, and the first, around the HTTPS connection attempt,
+is the same before and after; in the fork the changed type list no longer stands in <code>make-fedwiki</code> but in
+<code>initialize-fedwiki</code>, so the upstream hunk cannot be applied as it is; and the choice between the parent class and the explicit condition
+classes is a decision that is deferred, with its evidence, rather than made.
+</p>
+
+<h2>The chain as a Topicmap</h2>
+
+<p>
+  <a expr="(upstream-assessment-chain-example)">
+    Follow the chain: commit, changed definition, current definition, ASDF owner, impact, decision, required migration, verification
+  </a>
+</p>
+
+<source-of-function>upstream-assessment-chain-example</source-of-function>
+
+<h2>Where the run starts</h2>
+
+<p>
+  <a expr="(upstream-assessment-run-example)">
+    The intake run: last examined, observed, assessed
+  </a>
+</p>
+
+<p>
+The same assessment runs from <code>scripts/upstream-intake.lisp</code>, which is read-only and repeatable and tells by its exit status whether anything
+new needs a decision. Nothing schedules it here; a notification or a timer would call it with the same arguments. See
+<code>docs/upstream-intake/README.md</code>.
+</p>

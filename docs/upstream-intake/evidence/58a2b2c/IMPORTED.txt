@@ -1,0 +1,14 @@
+# Evidence imported, unchanged, from the draft PR RalfBarkow/hyperdoc#15 (the DNS-failure change), for the intake of upstream commit 58a2b2c.
+# That analysis is reused here; it was not redone. The copies are byte for byte what the PR's branch holds, and the digests below say so.
+# Source: RalfBarkow/hyperdoc, branch claude/fedwiki-dns-try-again at commit 7d1adce085a0c1e324f674343f53be24a92738a1 (draft; not on dreyeck.ch).
+#
+# sha256                                                            imported as                   source path in that commit
+7d9a6ab14bafbf0dbede8c486a4599328384c36953da746fa32fc377c6fc2ed8  pr15-matrix.tsv               docs/fedwiki-dns-failure/upstream-comparison/evidence/matrix.tsv
+c5efdce03e291dcb61a9b4ac9b8d53e1c4652da2af1d372c1446059210492f7b  pr15-snapshot-unknown.txt     docs/fedwiki-dns-failure/upstream-comparison/evidence/snapshot-unknown.txt
+6132ec11c8e04426ab23bdaabfe78a221905761f50f81a1a2bb111610ca1e692  pr15-provenance.txt           docs/fedwiki-dns-failure/upstream-comparison/evidence/provenance.txt
+915876e4674a95944fb7067ceb9250ed443e22d240c8c42c21735aed9d7df8ee  (referenced, not copied)      docs/fedwiki-dns-failure/upstream-comparison/README.md
+#
+# What they show, in the words of that analysis: thirteen scenarios against four checkouts (upstream before and at 58a2b2c, ours at dreyeck.ch 0a7d4de, ours with
+# PR #15), each in a fresh SBCL with the debugger disabled under an empty network namespace. Upstream 58a2b2c survives a name-service condition in the
+# site-map step and still ends the process in the first connection attempt (the HTTPS probe), also with the real resolver.
+# When #15 is merged these paths exist on dreyeck.ch under docs/fedwiki-dns-failure/ and the references in the ledger resolve there too.

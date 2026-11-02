@@ -1,0 +1,6 @@
+(:upstream-intake-state :version 1
+ :upstream-url "https://codeberg.org/khinsen/hyperdoc"
+ :ref "main"
+ :last-examined "8a1149197fabcb1ab5622316f09c5a60c2d3f1f8"
+ :last-examined-means "The upstream commit this checkout's library source was last compared with and adopted from by a person (docs/hyperdoc-upstream-boundary.md, +UPSTREAM+ of dreyeck/hyperdoc/library-tests). It is not an ancestor claim, and no run of the intake moves it."
+ :examined-individually ("58a2b2c66f0f5a0900a32910e5991e7d1833d9ed"))

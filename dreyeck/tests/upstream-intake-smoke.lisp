@@ -284,7 +284,9 @@
                       ("Specialization Without Integration"
                        "Specialization Without Integration.html")
                       ("What Upstream History Warrants"
-                       "What Upstream History Warrants.html"))))
+                       "What Upstream History Warrants.html")
+                      ("Assessing an Upstream Commit"
+                       "Assessing an Upstream Commit.html"))))
 
 (defun page-elements (page tag-name)
   (plump:get-elements-by-tag-name (hyperdoc::dom-of page) tag-name))

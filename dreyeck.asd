@@ -438,13 +438,15 @@
                                 ("dreyeck/hyperdoc/curation"
                                  "dreyeck/workflow"
                                  "dreyeck/workflow/upstream-intake"
+                                 "dreyeck/inspector/upstream-assessment"
                                  "dreyeck/hyperdoc")
                                 :COMPONENTS
                                 ((:MODULE "dreyeck/pages/upstream-intake"
                                           :PATHNAME
                                           "../pages/upstream-intake/")
                                  (:FILE "upstream-intake-hyperdoc")
-                                 (:FILE "upstream-page-loading-history"))
+                                 (:FILE "upstream-page-loading-history")
+                                 (:FILE "upstream-assessment-hyperdoc"))
                                 :IN-ORDER-TO
                                 ((ASDF/LISP-ACTION:TEST-OP
                                                            (ASDF/LISP-ACTION:TEST-OP
@@ -3520,3 +3522,29 @@
              (declare (ignore op component))
              (uiop:symbol-call :dreyeck/fedwiki-original-editor-configuration/tests :run-tests)
              (uiop:symbol-call :dreyeck/fedwiki-original-editor-demo/tests :run-tests)))
+
+(asdf:defsystem "dreyeck/workflow/upstream-assessment"
+  :description "Read-only assessment of upstream commits: what changed, where it stands in the fork, who owns it, what it may affect, what to do"
+  ;; Builds on the existing intake (dreyeck/workflow/upstream-intake: availability, ancestry, classification), dreyeck/git, dreyeck/asdf-source
+  ;; (syntax without READ) and dreyeck/workflow (OWNED-PATHS). It loads, compiles and evaluates no library source.
+  :depends-on ("dreyeck/workflow/upstream-intake" "dreyeck/git" "dreyeck/asdf-source" "dreyeck/workflow" "ironclad" "uiop")
+  :serial t
+  :pathname "dreyeck/src/"
+  :components ((:file "upstream-assessment-package") (:file "upstream-assessment")))
+
+(asdf:defsystem "dreyeck/upstream-assessment/tests"
+  :description "The upstream assessment against synthetic Git and ASDF fixtures, and the worked example 58a2b2c against this checkout"
+  :depends-on ("dreyeck/inspector/upstream-assessment" "hyperbook/server")
+  :serial t
+  :components ((:file "dreyeck/tests/upstream-assessment") (:file "dreyeck/tests/upstream-assessment-example"))
+  :perform (test-op (op component)
+             (declare (ignore op component))
+             (uiop:symbol-call :dreyeck/upstream-assessment/tests :run-tests)
+             (uiop:symbol-call :dreyeck/upstream-assessment/tests :run-example-tests)))
+
+(asdf:defsystem "dreyeck/inspector/upstream-assessment"
+  :description "Inspector views of upstream assessments, and the chain of one change as a Topicmap workspace"
+  :depends-on ("dreyeck/workflow/upstream-assessment" "dreyeck/inspector/topicmap" "html-inspector-views")
+  :serial t
+  :pathname "dreyeck/src/"
+  :components ((:file "upstream-assessment-inspector-package") (:file "upstream-assessment-views")))

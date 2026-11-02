@@ -1,0 +1,15 @@
+# The tests of the assessment, checked by mutants (2026-11-02): one change at a time to the source or the recorded data, compiled files purged, then
+# `asdf:test-system "dreyeck/upstream-assessment/tests"`. DETECTED means the tests stopped. The unmutated tests pass.
+M1 a locally changed definition counts as adopted                    DETECTED  (the source adoption of a commit that has a local version of one definition: :PARTIAL)
+M2 every commit is reported as an ancestor of the fork's HEAD        DETECTED  (adoption without ancestry)
+M3 a different decision for the same subject overwrites              DETECTED  (conflict, not overwrite)
+M4 the commits of a range come newest first                          DETECTED  (the three new commits, oldest first)
+M5 the handler profile reads the wrong element of HANDLER-CASE       DETECTED  (what each handler protects)
+M6 the changed part is not looked for in other definitions           DETECTED  (the fork's relation :REPLACED)
+M7 the last examined state is advanced to the assessed commit        DETECTED  (nothing moved)
+M8 a recorded decision is marked accepted                            DETECTED  (no decision has been accepted or executed)
+M9 a read leaves a mark (a ref) in a repository                      DETECTED  (the whole run left both repositories as it found them)
+#
+# Two of them were first NOT detected, and that was a gap in the tests, not in the mutant: M1, because no fixture had a definition that the fork had changed in its
+# own way (the fixture's greeting is now a local version, and the commit changes it); M9, because the fingerprint of the repositories was taken after earlier checks had
+# already read them (it is now taken before the first and compared after the last). The first version of M9 also did not compile and was not counted.

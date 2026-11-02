@@ -1,0 +1,15 @@
+# Existing and new test systems, dev shell .#fedwiki-original-editor, branch claude/upstream-intake-workflow (2026-11-02).
+# FAILED lines marked 'pre-existing' fail identically at the unmodified base dreyeck.ch 0a7d4dee (checked with a work tree of it).
+dreyeck/upstream-assessment/tests                SYSTEM-RESULT PASSED (17s)
+dreyeck/upstream-intake                          SYSTEM-RESULT PASSED (21s)
+dreyeck/hyperdoc/boundary-tests                  SYSTEM-RESULT FAILED (pre-existing: the same assertion fails at 0a7d4dee in this dev shell)
+dreyeck/hyperdoc/compatibility-tests             SYSTEM-RESULT PASSED (1s)
+dreyeck/authority/reading                        SYSTEM-RESULT PASSED (5s)
+hyperbook/fedwiki/tests                          SYSTEM-RESULT PASSED (4s)
+dreyeck/wiki-link/tests                          SYSTEM-RESULT PASSED (5s)
+dreyeck/local-fedwiki-view/tests                 SYSTEM-RESULT PASSED (8s)
+dreyeck/catalog-application                      SYSTEM-RESULT PASSED (4s)
+dreyeck/fedwiki-original-editor-demo             SYSTEM-RESULT PASSED (5s)
+dreyeck/hyperdoc/library-tests                   SYSTEM-RESULT FAILED (pre-existing: the upstream-inventory contract is red at 0a7d4dee, RalfBarkow/hyperdoc#17)
+dreyeck/catalog/tests                            SYSTEM-RESULT FAILED (pre-existing: "The Catalog runtime cannot reach the Riesbeck engine" in this dev shell at 0a7d4dee too; the Catalog is tested by the Nix check)
+scripts/check-editor-demo-membership.lisp        EDITOR-DEMO-MEMBERSHIP-PASS 

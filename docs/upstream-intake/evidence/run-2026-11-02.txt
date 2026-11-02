@@ -1,0 +1,121 @@
+# scripts/upstream-intake.lisp --upstream-repository <a full clone of https://codeberg.org/khinsen/hyperdoc, read only>   (2026-11-02, this checkout at 0a7d4dee plus the uncommitted change)
+# exit status 10: new commits were assessed. Nothing was fetched, written or loaded; the state file still says 8a1149197.
+Upstream intake
+  last examined : 8a1149197
+  observed      : main = c16599006 (objects present in the upstream repository given)
+  status        : new-commits (8 commits to assess)
+
+commit 9891d6b10  Collect page assets recursively
+  evidence      : git-object
+  fork objects   : t   Git ancestry (of HEAD): nil   source adoption: none-adopted
+  changed function:collect-assets  [hyperbook-explorer/rendering.lisp]
+    fork: unchanged at hyperbook-explorer/rendering.lisp
+    owner now: hyperbook/explorer  upstream-owned  should own: hyperbook/explorer
+    impact: 136 systems, 67 test systems, 2 mentioning definitions, 0 pages, 1 contract file
+    proposal: adopt-upstream-change (proposed)
+
+commit b9c45a38d  Make it possible to reload the systems without an error message
+  evidence      : git-object
+  fork objects   : t   Git ancestry (of HEAD): nil   source adoption: partial
+  removed form:export:f4d4e34f66  [hyperbook-explorer/package.lisp]
+    fork: absent
+    owner now: hyperbook/explorer  upstream-owned  should own: hyperbook/explorer
+    impact: 136 systems, 67 test systems, 0 mentioning definitions, 0 pages, 0 contract files
+    proposal: already-covered (proposed)
+  changed package:hyperbook  [hyperbook/package.lisp]
+    fork: unchanged at hyperbook/package.lisp
+    owner now: hyperbook  upstream-owned  should own: hyperbook
+    impact: 148 systems, 71 test systems, 60 mentioning definitions, 34 pages, 2 contract files
+    proposal: adopt-upstream-change (proposed)
+  removed form:export:d7cd5e142f  [hyperdoc-explorer/package.lisp]
+    fork: unchanged at hyperdoc-explorer/package.lisp
+    owner now: hyperdoc/explorer  upstream-owned  should own: hyperdoc/explorer
+    impact: 112 systems, 58 test systems, 0 mentioning definitions, 0 pages, 0 contract files
+    proposal: defer (proposed)
+  changed package:hyperdoc  [hyperdoc/package.lisp]
+    fork: unchanged at hyperdoc/package.lisp
+    owner now: hyperdoc  upstream-owned  should own: hyperdoc
+    impact: 129 systems, 64 test systems, 60 mentioning definitions, 71 pages, 2 contract files
+    proposal: adopt-upstream-change (proposed)
+
+commit 92273739e  Load new text pages only once
+  evidence      : git-object
+  fork objects   : t   Git ancestry (of HEAD): nil   source adoption: none-adopted
+  changed function:reload-text-pages  [hyperdoc-explorer/explorer.lisp]
+    fork: unchanged at hyperdoc-explorer/explorer.lisp
+    owner now: hyperdoc/explorer  upstream-owned  should own: hyperdoc/explorer
+    impact: 112 systems, 58 test systems, 2 mentioning definitions, 0 pages, 0 contract files
+    proposal: adopt-upstream-change (proposed)
+
+commit 09dab4cb4  More informative print representations of hyperbooks and pages
+  evidence      : git-object
+  fork objects   : t   Git ancestry (of HEAD): nil   source adoption: none-adopted
+  added method:print-object::hyperbook,t  [hyperbook/hyperbooks.lisp]
+    fork: absent
+    owner now: hyperbook  upstream-owned  should own: hyperbook
+    impact: 148 systems, 71 test systems, 60 mentioning definitions, 0 pages, 0 contract files
+    proposal: adopt-upstream-change (proposed)
+  added method:print-object::page,t  [hyperbook/hyperbooks.lisp]
+    fork: absent
+    owner now: hyperbook  upstream-owned  should own: hyperbook
+    impact: 148 systems, 71 test systems, 60 mentioning definitions, 0 pages, 0 contract files
+    proposal: adopt-upstream-change (proposed)
+  added method:print-object::hyperdoc,t  [hyperdoc/core.lisp]
+    fork: absent
+    owner now: hyperdoc  upstream-owned  should own: hyperdoc
+    impact: 129 systems, 64 test systems, 60 mentioning definitions, 0 pages, 0 contract files
+    proposal: adopt-upstream-change (proposed)
+  added method:print-object::page,t  [hyperdoc/core.lisp]
+    fork: absent
+    owner now: hyperdoc  upstream-owned  should own: hyperdoc
+    impact: 129 systems, 64 test systems, 60 mentioning definitions, 0 pages, 0 contract files
+    proposal: adopt-upstream-change (proposed)
+
+commit 9f919fc64  Allow HyperDocs to iterate over their pages
+  evidence      : git-object
+  fork objects   : nil   Git ancestry (of HEAD): nil   source adoption: none-adopted
+  added function:text-pages  [hyperdoc-explorer/explorer.lisp]
+    fork: absent
+    owner now: hyperdoc/explorer  upstream-owned  should own: hyperdoc/explorer
+    impact: 112 systems, 58 test systems, 4 mentioning definitions, 0 pages, 0 contract files
+    proposal: adopt-upstream-change (proposed)
+  added function:code-pages  [hyperdoc-explorer/explorer.lisp]
+    fork: absent
+    owner now: hyperdoc/explorer  upstream-owned  should own: hyperdoc/explorer
+    impact: 112 systems, 58 test systems, 2 mentioning definitions, 1 page, 0 contract files
+    proposal: adopt-upstream-change (proposed)
+  added function:tool-pages  [hyperdoc-explorer/explorer.lisp]
+    fork: absent
+    owner now: hyperdoc/explorer  upstream-owned  should own: hyperdoc/explorer
+    impact: 112 systems, 58 test systems, 0 mentioning definitions, 0 pages, 0 contract files
+    proposal: adopt-upstream-change (proposed)
+  changed package:hyperdoc  [hyperdoc/package.lisp]
+    fork: changed at hyperdoc/package.lisp
+    owner now: hyperdoc  upstream-owned  should own: hyperdoc
+    impact: 129 systems, 64 test systems, 60 mentioning definitions, 71 pages, 2 contract files
+    proposal: defer (proposed)
+
+commit 58a2b2c66  Catch more name service errors
+  evidence      : git-object
+  fork objects   : nil   Git ancestry (of HEAD): nil   source adoption: none-adopted
+  changed function:make-fedwiki  [hyperbook-fedwiki/fedwiki.lisp]
+    fork: replaced at hyperbook-fedwiki/fedwiki.lisp
+    owner now: hyperbook/fedwiki  upstream-owned  should own: hyperbook/fedwiki
+    impact: 116 systems, 61 test systems, 5 mentioning definitions, 4 pages, 0 contract files
+    proposal: defer (proposed)
+    recorded: defer (proposed), by Claude, from the analysis of RalfBarkow/hyperdoc#15
+    recorded: prepare-upstream-contribution (proposed), by Claude, from the analysis of RalfBarkow/hyperdoc#15
+
+commit 8d1cc1cd0  Export writable-of
+  evidence      : git-object
+  fork objects   : nil   Git ancestry (of HEAD): nil   source adoption: none-adopted
+  changed package:hyperdoc  [hyperdoc/package.lisp]
+    fork: changed at hyperdoc/package.lisp
+    owner now: hyperdoc  upstream-owned  should own: hyperdoc
+    impact: 129 systems, 64 test systems, 60 mentioning definitions, 71 pages, 2 contract files
+    proposal: defer (proposed)
+
+commit c16599006  Adjust CSS margins
+  evidence      : git-object
+  fork objects   : nil   Git ancestry (of HEAD): nil   source adoption: no-code-change
+# exit status 10

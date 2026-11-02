@@ -1,0 +1,67 @@
+(:UPSTREAM-COMMIT-EVIDENCE :VERSION 1 :SHA "58a2b2c66f0f5a0900a32910e5991e7d1833d9ed" :PARENTS ("9f919fc64f13a9101c970bbea10a2524576723d2") :SUBJECT
+ "Catch more name service errors" :AUTHORED-AT "2026-11-02T14:10:42+01:00" :RECORDED-FROM
+ (:UPSTREAM-URL "https://codeberg.org/khinsen/hyperdoc" :METHOD
+  "scripts/upstream-intake.lisp --record-evidence: git rev-list, diff-tree and show, read-only" :RECORDED-AT "2026-11-02T17:52:54Z")
+ :FILES ((:PATH "hyperbook-fedwiki/fedwiki.lisp" :STATUS "M")) :CHANGES
+ ((:KEY "function:make-fedwiki" :KIND :CHANGED :PATH "hyperbook-fedwiki/fedwiki.lisp" :BEFORE-TEXT "(defun make-fedwiki (domain-name)
+  (let* ((wiki (make-instance 'fedwiki
+                              :id (str:concat *uri-scheme* domain-name))))
+    (setf (status-of wiki)
+          (bt:make-thread
+           #'(lambda ()
+               ;; Check if the site supports HTTPS. Use low-level USOCKET
+               ;; for this because high-level access via drakma waits for
+               ;; a connection timeout rather than detecting the immediate
+               ;; connection-refused error.
+               (handler-case
+                   (-> domain-name
+                     copy-seq ;; ensure simple-string
+                     (usocket:socket-connect 443)
+                     (usocket:socket-close))
+                 (usocket:connection-refused-error (c)
+                   (declare (ignore c))
+                   (setf (slot-value wiki 'protocol) \"http\"))
+                 (usocket:ns-host-not-found-error (c)
+                   (setf (status-of wiki) c)))
+               (handler-case
+                   (progn (fetch-sitemap wiki)
+                          (fetch-plugin-data wiki)
+                          (setf (status-of wiki) t))
+                 ((or stream-error
+                   usocket:timeout-error
+                   usocket:ns-host-not-found-error
+                   shasht:shasht-invalid-char) (c)
+                   (setf (status-of wiki) c))))))
+    wiki))"
+   :AFTER-TEXT "(defun make-fedwiki (domain-name)
+  (let* ((wiki (make-instance 'fedwiki
+                              :id (str:concat *uri-scheme* domain-name))))
+    (setf (status-of wiki)
+          (bt:make-thread
+           #'(lambda ()
+               ;; Check if the site supports HTTPS. Use low-level USOCKET
+               ;; for this because high-level access via drakma waits for
+               ;; a connection timeout rather than detecting the immediate
+               ;; connection-refused error.
+               (handler-case
+                   (-> domain-name
+                     copy-seq ;; ensure simple-string
+                     (usocket:socket-connect 443)
+                     (usocket:socket-close))
+                 (usocket:connection-refused-error (c)
+                   (declare (ignore c))
+                   (setf (slot-value wiki 'protocol) \"http\"))
+                 (usocket:ns-host-not-found-error (c)
+                   (setf (status-of wiki) c)))
+               (handler-case
+                   (progn (fetch-sitemap wiki)
+                          (fetch-plugin-data wiki)
+                          (setf (status-of wiki) t))
+                 ((or stream-error
+                   usocket:timeout-error
+                   usocket:ns-error
+                   shasht:shasht-invalid-char) (c)
+                   (setf (status-of wiki) c))))))
+    wiki))"
+   :BEFORE-DIGEST "f09cba303cc1030b9a7c0fcaa766f3048b7d51bdf9dcb99405457df561b5e091" :AFTER-DIGEST
+   "a4c4effa1bc62d12d847b302d35dd3dc855242e3a2a0a1ffd1b1d4381871f958")))
