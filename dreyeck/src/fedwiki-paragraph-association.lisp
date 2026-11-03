@@ -17,7 +17,7 @@
                     (#:cfg #:dreyeck/fedwiki-original-editor-configuration)
                     (#:v #:html-inspector-views))
   (:export #:associated-paragraph #:paragraph-binding #:binding-of #:associated-paragraph-p
-           #:binding-html-text #:binding-stored-text #:binding-configuration #:binding-problem #:binding-source
+           #:binding-html-text #:binding-markup #:binding-withheld-markup #:binding-stored-text #:binding-configuration #:binding-problem #:binding-source
            #:plain-text #:introduction-paragraph #:association-page-p #:bind-page #:refresh-from-storage))
 (in-package #:dreyeck/fedwiki-paragraph-association)
 
@@ -33,6 +33,11 @@
                 :documentation "The Item's text as the last reading of the stored page found it, or NIL.")
    (source :initform nil :accessor binding-source
            :documentation "The LOCAL-FEDWIKI-PAGE-SOURCE of that reading, or NIL.")
+   (original-children :initarg :original-children :reader binding-original-children
+                      :documentation "The paragraph's own child nodes as the HTML file parsed them, kept so that replacing the
+text is reversible: the inline markup (for instance CODE) is not lost, only withheld while the Item's text differs.")
+   (markup :initform :original :accessor binding-markup
+           :documentation ":ORIGINAL while the paragraph shows its HTML children, :REPLACED while it shows the Item's text.")
    (configuration :initform nil :accessor binding-configuration
                   :documentation "The configuration the last reading used; the view offers what that configuration offers.")
    (problem :initform nil :accessor binding-problem
@@ -55,25 +60,18 @@ source: STORED-TEXT is the last observation of it."))
                  (progn (write-string new out) (setf start (+ hit (length old))))
                  (return)))))
 
-(defun %decode (text)
-  (dolist (pair '(("&lt;" "<") ("&gt;" ">") ("&quot;" "\"") ("&#39;" "'") ("&amp;" "&")) text)
-    (setf text (%replace-all text (first pair) (second pair)))))
-
 (defun plain-text (string)
-  "STRING (raw parse-tree text) with entities decoded and whitespace runs collapsed to one space, trimmed. The same rule
-as introductionText in tests/fedwiki-original-editor/fixture.mjs, which seeds the Wiki Item."
+  "STRING (parse-tree text: plump has already decoded entities, and encodes them again when it serializes) with whitespace
+runs collapsed to one space, trimmed. The same rule as introductionText in tests/fedwiki-original-editor/fixture.mjs, which
+seeds the Wiki Item."
   (let ((words '()) (word (make-string-output-stream)) (any nil))
     (flet ((end-word () (when any (push (get-output-stream-string word) words) (setf any nil))))
-      (loop for c across (%decode string)
+      (loop for c across string
             do (if (member c '(#\Space #\Tab #\Newline #\Return #\Page))
                    (end-word)
                    (progn (write-char c word) (setf any t))))
       (end-word))
     (format nil "~{~A~^ ~}" (nreverse words))))
-
-(defun %escape (text)
-  "TEXT as raw parse-tree text: the parse tree holds source text with entities, which the serializer writes unchanged."
-  (%replace-all (%replace-all (%replace-all text "&" "&amp;") "<" "&lt;") ">" "&gt;"))
 
 ;;; Identification: the page's file and the first P of its parse tree. Declared, so it is explicit, and not encoded in
 ;;; the HTML, so the file is not touched.
@@ -121,13 +119,39 @@ as introductionText in tests/fedwiki-original-editor/fixture.mjs, which seeds th
   (plump:set-attribute element "data-fedwiki-slug" cfg:+paragraph-slug+)
   (plump:set-attribute element "data-fedwiki-item-id" cfg:+paragraph-item-id+))
 
+(defun %inline-elements (nodes)
+  (remove-if-not #'plump:element-p nodes))
+
+(defun binding-withheld-markup (binding)
+  "The inline elements of the HTML paragraph that are not shown now, as strings like <code>dreyeck.ch</code>; NIL when
+the paragraph shows its own children or had none."
+  (when (eq :replaced (binding-markup binding))
+    (mapcar (lambda (node) (with-output-to-string (s) (plump:serialize node s)))
+            (%inline-elements (coerce (binding-original-children binding) 'list)))))
+
+(defun %restore-children (element binding)
+  (plump:clear element)
+  (loop for child across (binding-original-children binding)
+        do (plump:append-child element child)))
+
 (defun %apply (element binding)
-  "Put the stored text into the in-memory parse tree when it differs from what the HTML file says. When equal, the HTML's own
-markup (for instance CODE) stays; when different the paragraph shows the Item's plain text. The HTML file is not touched."
+  "Make the in-memory paragraph show the Item's text when it differs from the HTML paragraph's plain text, and its own HTML
+children again when it equals it. Nothing is destroyed: the original children stay in the BINDING, so any number of
+changes and returns is consistent. While the Item's text is shown the paragraph says that inline markup is withheld
+(attribute data-fedwiki-inline-markup, and the Inspector view). The HTML file is not touched."
   (let ((stored (binding-stored-text binding)))
-    (when (and stored (not (equal (plain-text stored) (binding-html-text binding))))
-      (plump:clear element)
-      (plump:make-text-node element (%escape stored)))))
+    (cond ((or (null stored) (equal (plain-text stored) (binding-html-text binding)))
+           (unless (eq :original (binding-markup binding))
+             (%restore-children element binding)
+             (setf (binding-markup binding) :original))
+           (plump:remove-attribute element "data-fedwiki-inline-markup"))
+          (t
+           (plump:clear element)
+           (plump:make-text-node element stored)
+           (setf (binding-markup binding) :replaced)
+           (if (%inline-elements (coerce (binding-original-children binding) 'list))
+               (plump:set-attribute element "data-fedwiki-inline-markup" "withheld")
+               (plump:remove-attribute element "data-fedwiki-inline-markup"))))))
 
 (defun refresh-from-storage (element &optional (configuration (cfg:editor-configuration)))
   "Read the stored Wiki page again and make the in-memory paragraph show the Item's text. Returns ELEMENT."
@@ -146,7 +170,8 @@ markup (for instance CODE) stays; when different the paragraph shows the Item's 
           (change-class element 'associated-paragraph
                         :binding (make-instance 'paragraph-binding
                                                 :html-pathname (pathname (slot-value page 'hyperdoc::file))
-                                                :html-text (plain-text (plump:text element)))))
+                                                :html-text (plain-text (plump:text element))
+                                                :original-children (copy-seq (plump:children element)))))
         (refresh-from-storage element configuration)))))
 
 (defmethod hyperdoc:load-page :after ((page hyperdoc::html-page))
@@ -186,6 +211,12 @@ markup (for instance CODE) stays; when different the paragraph shows the Item's 
                          (v:esc "none"))))
           (:tr (:th "Observed SHA-256") (:td (if source (v:html (:code (v:esc (lp:page-source-sha256 source)))) (v:esc "none"))))
           (:tr (:th "Journal") (:td (v:esc (if source (%journal-summary source) "not read")))))
+        (when (binding-withheld-markup binding)
+          (v:html (:p :class "paragraph-association-markup"
+                      "The page shows the Wiki Item's plain text. Inline markup of the HTML paragraph is withheld, not deleted: "
+                      (dolist (markup (binding-withheld-markup binding))
+                        (v:html (:code (v:esc markup)) " "))
+                      "It returns when the Wiki text equals the HTML text again.")))
         (when (binding-problem binding)
           (v:html (:p :class "paragraph-association-problem" (v:esc (binding-problem binding)))))
         (cond (url
