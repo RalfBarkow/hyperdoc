@@ -3509,8 +3509,6 @@
   :serial t
   :components ((:file "dreyeck/src/fedwiki-original-editor-configuration")
                (:file "dreyeck/src/fedwiki-original-editor-demo")
-               ;; One HTML paragraph of the upstream-intake pages as an Inspector object, associated with a Wiki paragraph Item.
-               (:file "dreyeck/src/fedwiki-paragraph-association")
                (:static-file "dreyeck/pages/fedwiki-original-editor-demo/Editing One Isolated Wiki Page.html"))
   :in-order-to ((test-op (test-op "dreyeck/fedwiki-original-editor-demo/tests"))))
 
@@ -3519,13 +3517,11 @@
   :depends-on ("dreyeck/fedwiki-original-editor-demo" "dreyeck/catalog/tests" "hyperbook/server")
   :serial t
   :components ((:file "dreyeck/tests/fedwiki-original-editor-configuration")
-               (:file "dreyeck/tests/fedwiki-original-editor-demo")
-               (:file "dreyeck/tests/fedwiki-paragraph-association"))
+               (:file "dreyeck/tests/fedwiki-original-editor-demo"))
   :perform (test-op (op component)
              (declare (ignore op component))
              (uiop:symbol-call :dreyeck/fedwiki-original-editor-configuration/tests :run-tests)
-             (uiop:symbol-call :dreyeck/fedwiki-original-editor-demo/tests :run-tests)
-             (uiop:symbol-call :dreyeck/fedwiki-paragraph-association/tests :run-tests)))
+             (uiop:symbol-call :dreyeck/fedwiki-original-editor-demo/tests :run-tests)))
 
 (asdf:defsystem "dreyeck/workflow/upstream-assessment"
   :description "Read-only assessment of upstream commits: what changed, where it stands in the fork, who owns it, what it may affect, what to do"

@@ -104,7 +104,14 @@
        (assert (equal "http://127.0.0.1:41234" (cfg:configuration-origin c)))
        (assert (equal "http://127.0.0.1:41234/view/original-editor-test?hyperdocCodeItem=2222222222222222&revision=abc"
                       (cfg:embedded-editor-url c "abc")))
-       (assert (null (cfg:embedded-editor-url c nil))))
+       (assert (null (cfg:embedded-editor-url c nil)))
+       ;; The generic frame names only declared (slug, id) pairs of the one disposable page.
+       (assert (equal "http://127.0.0.1:41234/view/original-editor-test?hyperdocItem=1111111111111111&revision=abc"
+                      (cfg:embedded-item-editor-url c "original-editor-test" "1111111111111111" "abc")))
+       (assert (cfg:embedded-item-editor-url c "original-editor-test" "2222222222222222" "abc"))
+       (assert (null (cfg:embedded-item-editor-url c "original-editor-test" "3333333333333333" "abc")))
+       (assert (null (cfg:embedded-item-editor-url c "another-page" "1111111111111111" "abc")))
+       (assert (null (cfg:embedded-item-editor-url c "original-editor-test" "1111111111111111" nil))))
      ;; Not loopback, not http, no port, another loopback spelling: read-only, with the reason.
      (dolist (origin '("https://dreyeck.ch" "https://original-editor-test.dreyeck.ch" "http://localhost:3000"
                        "https://127.0.0.1:3000" "http://127.0.0.1" "http://127.0.0.1:0" "http://127.0.0.1:65536"
