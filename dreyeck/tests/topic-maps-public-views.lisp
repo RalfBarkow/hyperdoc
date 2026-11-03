@@ -139,7 +139,48 @@ A control is a reference the Inspector evaluates when clicked: its id begins eva
 
 (defun controls-of-kind (kind controls) (remove-if-not (lambda (control) (eq kind (control-kind control))) controls))
 
-(defun served-walk (roots &rest keys) (served (lambda () (apply #'walk-controls roots keys))))
+;;; The walk reaches pages that make remote FedWiki sites (the Trails and hub readings of Working on HyperDoc, from Work Breakdown), and each
+;;; one starts a thread that probes its host and fetches its sitemap. The test runs offline instead: what is reached must not depend on the
+;;; network, and in a build sandbox there is none. Both the probe and drakma open their connections with USOCKET:SOCKET-CONNECT.
+
+(defvar *offline* nil "True while CALL-OFFLINE is in effect.")
+(defvar *connection-attempts* '() "Every (HOST PORT) asked for while offline, newest first.")
+(defvar *connection-attempts-lock* (sb-thread:make-mutex :name "offline connection attempts"))
+
+(defun join-fedwiki-initializers ()
+  "Wait until every FedWiki site made so far has finished initializing."
+  (loop for wiki being the hash-values of hyperbook/fedwiki::*neighborhood* do (hyperbook/fedwiki::wait-for-sitemap wiki)))
+
+(defun call-offline (thunk)
+  "THUNK run with no network. Every USOCKET:SOCKET-CONNECT, in any thread, is recorded in *CONNECTION-ATTEMPTS* and fails at once with
+USOCKET:NS-HOST-NOT-FOUND-ERROR, which the FedWiki initializer records in the wiki's status as it does for an unknown host. Before the
+real function is restored, every FedWiki initializer is joined, so none of them reaches the network afterwards."
+  (if *offline*
+      (funcall thunk)
+      (let ((real (fdefinition 'usocket:socket-connect)))
+        (setf (fdefinition 'usocket:socket-connect)
+              (lambda (host &optional port &rest arguments)
+                (declare (ignore arguments))
+                (sb-thread:with-mutex (*connection-attempts-lock*) (push (list host port) *connection-attempts*))
+                (error 'usocket:ns-host-not-found-error :host-or-ip host)))
+        (unwind-protect (let ((*offline* t)) (funcall thunk))
+          (join-fedwiki-initializers)
+          (setf (fdefinition 'usocket:socket-connect) real)))))
+
+(defun connection-hosts (attempts)
+  "The hosts of ATTEMPTS, each once, sorted."
+  (sort (remove-duplicates (mapcar (lambda (attempt) (princ-to-string (first attempt))) attempts) :test #'string=) #'string<))
+
+(defun served-walk (roots &rest keys)
+  "WALK-CONTROLS, served and offline. The result also holds :CONNECTION-HOSTS, the hosts the walk would have contacted."
+  (call-offline
+   (lambda ()
+     (let* ((before (sb-thread:with-mutex (*connection-attempts-lock*) (length *connection-attempts*)))
+            (result (served (lambda () (apply #'walk-controls roots keys)))))
+       ;; The initializers this walk started are finished before their attempts are counted.
+       (join-fedwiki-initializers)
+       (let ((attempts (sb-thread:with-mutex (*connection-attempts-lock*) (copy-list *connection-attempts*))))
+         (list* :connection-hosts (connection-hosts (subseq attempts 0 (- (length attempts) before))) result))))))
 
 (defun click (reference) (uiop:symbol-call :dreyeck/authority-policy/tests :click reference))
 
@@ -159,6 +200,7 @@ A control is a reference the Inspector evaluates when clicked: its id begins eva
     (assert (or (controls-of-kind :reviewed controls) (controls-of-kind :reviewed-class controls)) ()
             "no reviewed control was met: the cursor and point controls are not reachable in this walk")
     (list :objects (getf result :objects) :truncated (getf result :truncated) :controls (length controls)
+          :connection-hosts (getf result :connection-hosts)
           :kinds (loop for kind in '(:inert :slot-reader :reviewed :reviewed-class :refused) collect (cons kind (length (controls-of-kind kind controls))))
           :reviewed-met (remove-duplicates
                          (loop for c in controls
@@ -319,6 +361,10 @@ A class the policy's drift report names (CONTEXT-FEDWIKI-PAGE) is covered throug
   t)
 
 (defun run-tests ()
+  "All checks, offline (see CALL-OFFLINE)."
+  (call-offline #'%run-tests))
+
+(defun %run-tests ()
   (let ((count 0) (buttons 0))
     (dolist (entry (public-views))
       (destructuring-bind (label object-thunk titles run-buttons) entry
@@ -332,6 +378,6 @@ A class the policy's drift report names (CONTEXT-FEDWIKI-PAGE) is covered throug
     (uiop:symbol-call :dreyeck/authority-policy/tests :run-gate-tests)
     (let ((walk (check-reachable-controls)))
       (check-allowed-controls-work)
-      (format t "~&TOPIC-MAPS-PUBLIC-VIEWS-PASS: ~D objects, rendered served and developing; ~D run buttons are markers served and buttons developing; no plain thunk is reachable from any served view. Walked ~D objects by navigation (~:[complete~;bounded, not exhaustive~]): ~D controls (~{~(~A~)~^, ~}); none of an unknown kind; reviewed ones met: ~S; refused as unreviewed: ~S. The reviewed cursor and Point controls work when clicked; an extra button is refused at run time; the authority-policy gate checks pass; the readings make no direct control; the refused systems are unreachable; every title-bar action is withheld; the Workspace link is not in the served view.~%"
-              count buttons (getf walk :objects) (getf walk :truncated) (getf walk :controls) (mapcar (lambda (kind) (format nil "~(~A~)=~D" (car kind) (cdr kind))) (getf walk :kinds)) (getf walk :reviewed-met) (getf walk :refused)))
+      (format t "~&TOPIC-MAPS-PUBLIC-VIEWS-PASS: ~D objects, rendered served and developing; ~D run buttons are markers served and buttons developing; no plain thunk is reachable from any served view. Walked ~D objects by navigation (~:[complete~;bounded, not exhaustive~]): ~D controls (~{~(~A~)~^, ~}); none of an unknown kind; reviewed ones met: ~S; refused as unreviewed: ~S; offline, connections refused to ~:[no host~;~:*~{~A~^, ~}~]. The reviewed cursor and Point controls work when clicked; an extra button is refused at run time; the authority-policy gate checks pass; the readings make no direct control; the refused systems are unreachable; every title-bar action is withheld; the Workspace link is not in the served view.~%"
+              count buttons (getf walk :objects) (getf walk :truncated) (getf walk :controls) (mapcar (lambda (kind) (format nil "~(~A~)=~D" (car kind) (cdr kind))) (getf walk :kinds)) (getf walk :reviewed-met) (getf walk :refused) (getf walk :connection-hosts)))
     t))

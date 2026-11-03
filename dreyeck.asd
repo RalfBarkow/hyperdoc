@@ -3491,7 +3491,9 @@
 
 (defsystem "dreyeck/topic-maps-public-views/tests"
   :depends-on ("dreyeck/topic-maps-public-views" "dreyeck/work/tmdm-reading" "dreyeck/work/reading" "hyperbook/server"
-               "dreyeck/catalog-topic-maps" "dreyeck/topicmap" "dreyeck/inspector/topicmap" "dreyeck/authority-policy/tests" "sb-introspect")
+               "dreyeck/catalog-topic-maps" "dreyeck/topicmap" "dreyeck/inspector/topicmap" "dreyeck/authority-policy/tests" "sb-introspect"
+               ;; The walk runs offline: it replaces usocket's connect while FedWiki sites initialize.
+               "hyperbook/fedwiki" "usocket")
   :components ((:file "dreyeck/tests/topic-maps-public-views"))
   :perform (test-op (operation component)
              (declare (ignore operation component))
