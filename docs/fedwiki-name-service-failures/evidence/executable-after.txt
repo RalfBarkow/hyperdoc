@@ -1,0 +1,15 @@
+# After: /nix/store/rcb5l6dznny4cjk652r9irphxp6xbvxd-hyperdoc-catalog (this change), same namespace and walk
+## browser walk (hub.mjs)
+lo up
+READY
+AT Work Breakdown: catalog alive
+AFTER From Two Hubs to One Trail: catalog alive
+AFTER Dewey Alexander Trail: catalog alive
+HTTP after walk: 200
+NODE-EXIT 0
+CATALOG-ALIVE
+CATALOG-EXIT-AFTER-SIGTERM 0
+## catalog.log: unhandled conditions: 0
+Local FedWiki /view route installed from /home/user/hyperdoc/dreyeck/tests/fixtures/local-fedwiki-view-site/
+New connection id - 8e84dfb2d0b452628da92ee15213ec7e - #<SERVER {10142FEAF3}>
+Stopping HyperBook Catalog

@@ -1,0 +1,36 @@
+# The systems of scripts/check-upstream-boundary.sh, each in its own process, at this change (x86_64-linux, 2026-11-03)
+# Upstream object 8a11491 fetched from codeberg.org/khinsen/hyperdoc; history unshallowed for 4019535.
+dreyeck/hyperdoc/boundary-tests EXIT 0
+dreyeck/hyperdoc/compatibility-tests EXIT 0
+dreyeck/hyperdoc/library-tests EXIT 1
+dreyeck/hyperspec/tests EXIT 0
+dreyeck/upstream-intake/tests EXIT 0
+dreyeck/wiki-link/tests EXIT 0
+dreyeck/fedwiki-navigation/tests EXIT 0
+dreyeck/page-attached-hyperdoc/tests EXIT 0
+dreyeck/fedwiki-hyperdoc/tests EXIT 0
+dreyeck/workflow/tests EXIT 0
+dreyeck/workflow/reading/tests EXIT 0
+dreyeck/catalog/tests EXIT 1
+dreyeck/topicmap/tala/tests EXIT 0
+dreyeck/topicmap/tala/reading/tests EXIT 0
+
+
+## dreyeck/hyperdoc/library-tests (also fails on clean 0a7d4de, same assertion)
+Unhandled SIMPLE-ERROR in thread #<SB-THREAD:THREAD tid=7122 "main thread" RUNNING
+                                    {10003C8143}>:
+  The assertion
+  (DREYECK/HYPERDOC/LIBRARY-TESTS::SOURCE-EQUAL
+   DREYECK/HYPERDOC/LIBRARY-TESTS::LOCAL
+   (DREYECK/HYPERDOC/LIBRARY-TESTS::APPLY-LATER-DELTAS
+    DREYECK/HYPERDOC/LIBRARY-TESTS::PATH
+    (DREYECK/HYPERDOC/LIBRARY-TESTS::FORMS-AT
+     DREYECK/HYPERDOC/LIBRARY-TESTS::ROOT
+## dreyeck/catalog/tests (environmental: the Lisp Critic engine asset is not deployed here; see docs/fedwiki-original-editor-farm/verification.md)
+Unhandled SIMPLE-ERROR in thread #<SB-THREAD:THREAD tid=8894 "main thread" RUNNING
+                                    {10003C8143}>:
+  The Catalog runtime cannot reach the Riesbeck engine.
+## wiki-link/tests
+All Wiki-link contract demonstration tests passed.
+FedWiki journal-context debugger tests passed.
+FedWiki story-item transfer tests passed.

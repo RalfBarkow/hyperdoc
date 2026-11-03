@@ -12,8 +12,9 @@
 ;;; by the Work readings on Trails, hub selection and deployment, which the walk reaches from its roots). Each site starts a thread that probes its host on port
 ;;; 443 and fetches its sitemap. Run as it was, the test depended on the network of the machine it ran on: with live hosts the walk read their
 ;;; sitemaps (so what it met varied with them); in a build sandbox without network the lookup fails with USOCKET:NS-TRY-AGAIN-ERROR, which
-;;; INITIALIZE-FEDWIKI does not handle (it handles host-not-found, timeout, stream and JSON errors), so the unhandled condition in that thread
-;;; ended the whole test process (dreyeck/tests ... Nix check, observed 2026-11-02).
+;;; INITIALIZE-FEDWIKI then did not handle (it handled host-not-found, timeout, stream and JSON errors), so the unhandled condition in that thread
+;;; ended the whole test process (dreyeck/tests ... Nix check, observed 2026-11-02). INITIALIZE-FEDWIKI now retains every USOCKET:NS-ERROR,
+;;; NS-TRY-AGAIN-ERROR included (docs/fedwiki-name-service-failures.md); the harness stays, because it is what makes the walk independent of the network.
 ;;; The harness gives the test the network it can rely on everywhere: every host fails to resolve, which is a case INITIALIZE-FEDWIKI
 ;;; handles and keeps as the site's status. It uses only MAKE-FEDWIKI's own keyword seam (:PROTOCOL-PROBE, :SITEMAP-FETCHER,
 ;;; :PLUGIN-DATA-FETCHER, there to inject operations while preserving production behaviour) and replaces the visited-site table for the

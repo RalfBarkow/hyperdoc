@@ -79,7 +79,7 @@ The packaged executable also starts with `--script` (no debugger) and the same `
 failure (`EAI_AGAIN`) while a visitor opens a page that reaches a not-yet-visited remote wiki therefore ends the Catalog
 process, the way a broken pipe did before `573fe37`. The fix belongs to the FedWiki client (handle the condition, or all
 `usocket` name-service errors) and to its upstream-inventory test; it is out of scope for this test-only change and is proposed
-as its own task.
+as its own task. Since verified and fixed: [../fedwiki-name-service-failures.md](../fedwiki-name-service-failures.md).
 
 ## Reproduce
 

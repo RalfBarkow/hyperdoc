@@ -1,0 +1,28 @@
+# Before: /nix/store/wpr0bw8qdhm5ig4kjfajs9wf0scs8fwi-hyperdoc-catalog (HEAD 0a7d4de), unshare -rn (loopback only, getaddrinfo -> EAI_AGAIN)
+## browser walk (hub.mjs)
+lo up
+READY
+AT Work Breakdown: catalog alive
+STEP-ERROR From Two Hubs to One Trail: locator.waitFor: Timeout 60000ms exceeded.
+AFTER From Two Hubs to One Trail: catalog DEAD
+NODE-EXIT 0
+CATALOG-DIED exit=1
+## catalog.log, the unhandled condition
+45:Unhandled USOCKET:NS-TRY-AGAIN-ERROR in thread #<SB-THREAD:THREAD tid=6030 "Anonymous thread" RUNNING
+46-                                                  {1015375253}>:
+47-  Condition USOCKET:NS-TRY-AGAIN-ERROR was signalled.
+48-
+49-Backtrace for: #<SB-THREAD:THREAD tid=6030 "Anonymous thread" RUNNING {1015375253}>
+50-0: (SB-DEBUG::DEBUGGER-DISABLED-HOOK #<USOCKET:NS-TRY-AGAIN-ERROR {10153800E3}> #<unused argument> :QUIT T)
+51-1: (SB-DEBUG::RUN-HOOK *INVOKE-DEBUGGER-HOOK* #<USOCKET:NS-TRY-AGAIN-ERROR {10153800E3}>)
+52-2: (INVOKE-DEBUGGER #<USOCKET:NS-TRY-AGAIN-ERROR {10153800E3}>)
+53-3: (ERROR USOCKET:NS-TRY-AGAIN-ERROR :SOCKET NIL :HOST-OR-IP "ward.voices.ustawi.wiki")
+54-4: (USOCKET::HANDLE-CONDITION #<SB-BSD-SOCKETS:TRY-AGAIN-ERROR {10153800A3}> NIL "ward.voices.ustawi.wiki")
+55-5: (SB-KERNEL::%SIGNAL #<SB-BSD-SOCKETS:TRY-AGAIN-ERROR {10153800A3}>)
+56-6: (ERROR SB-BSD-SOCKETS:TRY-AGAIN-ERROR :ERRNO -3 :SYSCALL "getaddrinfo")
+57-7: (SB-BSD-SOCKETS:NAME-SERVICE-ERROR "getaddrinfo" -3)
+58-8: (SB-BSD-SOCKETS:GET-HOST-BY-NAME #<unavailable argument>)
+59-9: (USOCKET:GET-HOSTS-BY-NAME "ward.voices.ustawi.wiki")
+60-10: (USOCKET::SOCKET-CONNECT-INTERNAL "ward.voices.ustawi.wiki" :PORT 443 :PROTOCOL :STREAM :ELEMENT-TYPE CHARACTER :TIMEOUT NIL :CONNECTION-TIMEOUT NIL :READ-TIMEOUT NIL :DEADLINE NIL :NODELAY T :LOCAL-HOST NIL :LOCAL-PORT NIL)
+61-11: (USOCKET:SOCKET-CONNECT "ward.voices.ustawi.wiki" 443)
+62-12: (HYPERBOOK/FEDWIKI::PROBE-FEDWIKI-PROTOCOL "ward.voices.ustawi.wiki")

@@ -1,0 +1,10 @@
+# dreyeck/wiki-link/tests with the new tests, library unchanged (fails)
+783:Unhandled SIMPLE-ERROR in thread #<SB-THREAD:THREAD tid=4740 "main thread" RUNNING
+784-                                    {10003C8143}>:
+785-  INITIALIZE-FEDWIKI let USOCKET:NS-TRY-AGAIN-ERROR escape instead of retaining it.
+786-
+
+# dreyeck/wiki-link/tests after the fix
+199:All Wiki-link contract demonstration tests passed.
+200:FedWiki journal-context debugger tests passed.
+201:FedWiki story-item transfer tests passed.

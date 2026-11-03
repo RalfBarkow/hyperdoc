@@ -98,7 +98,7 @@ existing production behavior and escape to the caller."
         (setf (status-of wiki) t))
     ((or stream-error
          usocket:timeout-error
-         usocket:ns-host-not-found-error
+         usocket:ns-error
          shasht:shasht-invalid-char) (condition)
       (setf (status-of wiki) condition))))
 

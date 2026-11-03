@@ -65,6 +65,25 @@
       '("SERVE-HYPERBOOKS" "SERVE-CATALOG")))
     :TEST #'COMMON-LISP:EQUAL)))
 
+(defun apply-later-deltas (path forms)
+  "FORMS of PATH as read at +PREVIOUS+, with the library deltas made after it applied, each stated as the exact change to one form.
+hyperbook-fedwiki/fedwiki.lisp, INITIALIZE-FEDWIKI: retain every USOCKET name-service error (USOCKET:NS-ERROR), not only
+NS-HOST-NOT-FOUND-ERROR. A temporary resolver failure (EAI_AGAIN, signalled as USOCKET:NS-TRY-AGAIN-ERROR) otherwise escaped the
+initialization thread and ended a process whose debugger is disabled. Every other form of every file must still equal +PREVIOUS+."
+  (if (string= path "hyperbook-fedwiki/fedwiki.lisp")
+      (mapcar (lambda (form)
+                (if (and (consp form)
+                         (symbolp (second form))
+                         (string= (symbol-name (second form)) "INITIALIZE-FEDWIKI"))
+                    (let ((changed (subst 'usocket:ns-error 'usocket:ns-host-not-found-error form)))
+                      ;; The stated delta must apply to the retained form; otherwise the inventory itself is stale.
+                      (assert (not (equal changed form)) ()
+                              "INITIALIZE-FEDWIKI at ~A no longer names USOCKET:NS-HOST-NOT-FOUND-ERROR." +previous+)
+                      changed)
+                    form))
+              forms)
+      forms))
+
 (COMMON-LISP:DEFUN DREYECK/HYPERDOC/LIBRARY-TESTS::NORMALIZE-DEPENDENCIES
                    (DREYECK/HYPERDOC/LIBRARY-TESTS::PATH
                     DREYECK/HYPERDOC/LIBRARY-TESTS::FORMS)
@@ -225,10 +244,12 @@
                                                                                            (COMMON-LISP:ASSERT
                                                                                                                (DREYECK/HYPERDOC/LIBRARY-TESTS::SOURCE-EQUAL
                                                                                                                                                              DREYECK/HYPERDOC/LIBRARY-TESTS::LOCAL
-                                                                                                                                                             (DREYECK/HYPERDOC/LIBRARY-TESTS::FORMS-AT
-                                                                                                                                                                                                       DREYECK/HYPERDOC/LIBRARY-TESTS::ROOT
-                                                                                                                                                                                                       DREYECK/HYPERDOC/LIBRARY-TESTS::+PREVIOUS+
-                                                                                                                                                                                                       DREYECK/HYPERDOC/LIBRARY-TESTS::PATH)))
+                                                                                                                                                             (apply-later-deltas
+                                                                                                                                                              DREYECK/HYPERDOC/LIBRARY-TESTS::PATH
+                                                                                                                                                              (DREYECK/HYPERDOC/LIBRARY-TESTS::FORMS-AT
+                                                                                                                                                                                                        DREYECK/HYPERDOC/LIBRARY-TESTS::ROOT
+                                                                                                                                                                                                        DREYECK/HYPERDOC/LIBRARY-TESTS::+PREVIOUS+
+                                                                                                                                                                                                        DREYECK/HYPERDOC/LIBRARY-TESTS::PATH))))
                                                                                            (COMMON-LISP:LET*
                                                                                                              ((DREYECK/HYPERDOC/LIBRARY-TESTS::ALLOWED
                                                                                                                                                        (COMMON-LISP:LAMBDA

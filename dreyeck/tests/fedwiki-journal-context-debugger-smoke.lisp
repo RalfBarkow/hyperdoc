@@ -364,14 +364,58 @@
                type (hyperbook:url-of (first links))))))
   t)
 
-(defun run-initialization-worker-containment-test ()
+(defparameter *name-service-failure-types*
+  '(usocket:ns-host-not-found-error
+    usocket:ns-try-again-error
+    usocket:ns-no-recovery-error
+    usocket:ns-unknown-error)
+  "Every USOCKET name-service error. NS-TRY-AGAIN-ERROR is getaddrinfo's EAI_AGAIN: a temporary resolver failure, observed in the
+Nix build sandbox for ward.voices.ustawi.wiki, where it escaped the initialization thread and ended the whole process.")
+
+(defun run-initialization-name-service-failures-test ()
+  "INITIALIZE-FEDWIKI retains each name-service failure of the protocol probe as the site's status and signals nothing.
+Called directly, so that a regression fails here as a CHECK instead of ending the process from a worker thread."
+  (dolist (type *name-service-failure-types*)
+    (let* ((wiki (make-instance 'hyperbook/fedwiki::fedwiki
+                                :id "fedwiki:unresolvable.invalid"))
+           (failure (make-condition type :socket nil
+                                         :host-or-ip "unresolvable.invalid"))
+           (fetch-count 0)
+           (escaped
+             (handler-case
+                 (progn
+                   (hyperbook/fedwiki::initialize-fedwiki
+                    wiki "unresolvable.invalid"
+                    :protocol-probe (lambda (domain-name)
+                                      (declare (ignore domain-name))
+                                      (error failure))
+                    :sitemap-fetcher (lambda (wiki)
+                                       (declare (ignore wiki))
+                                       (incf fetch-count))
+                    :plugin-data-fetcher (lambda (wiki)
+                                           (declare (ignore wiki))
+                                           (incf fetch-count)))
+                   nil)
+               (serious-condition (condition)
+                 condition))))
+      (check (null escaped)
+             "INITIALIZE-FEDWIKI let ~S escape instead of retaining it."
+             (type-of escaped))
+      (check (eq failure (hyperbook/fedwiki::status-of wiki))
+             "STATUS-OF did not retain the identical ~S: ~S."
+             type (hyperbook/fedwiki::status-of wiki))
+      (check (zerop fetch-count)
+             "Fetching continued after the failed probe (~S)." type)))
+  t)
+
+(defun run-initialization-worker-containment-test
+    (&optional (network-condition (make-network-condition)))
   (let ((lock (bt:make-lock "FedWiki initialization test lock"))
         (gate (bt:make-condition-variable))
         (probe-entered-p nil)
         (release-probe-p nil)
         (sitemap-fetch-count 0)
         (plugin-fetch-count 0)
-        (network-condition (make-network-condition))
         wiki
         worker)
     (flet ((failing-probe (domain-name)
@@ -678,7 +722,12 @@
   (run-image-story-item-rendering-test)
   (run-image-story-item-defensive-dimensions-test)
   (run-story-item-link-extraction-preservation-test)
+  (run-initialization-name-service-failures-test)
   (run-initialization-worker-containment-test)
+  ;; The real MAKE-FEDWIKI worker thread with the condition that ended the process (EAI_AGAIN).
+  (run-initialization-worker-containment-test
+   (make-condition 'usocket:ns-try-again-error :socket nil
+                                               :host-or-ip "localhost:3000"))
   (run-local-page-with-failed-context-test)
   (run-context-site-references-test)
   (run-resolution-boundary-test)
