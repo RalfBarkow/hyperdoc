@@ -133,6 +133,7 @@ package sources include, so the committed package's store path differs from the 
 ## What did not run, or is not established
 
 - **The Nix sandbox was off in the Linux builder** (Docker). The server's `nix build` of the NixOS configuration ran with the daemon's defaults, but it did not build the check; the check ran only in the container and on Darwin.
+  With the sandbox on, the walk could not pass: it reaches remote FedWiki sites, whose initializer threads probe their hosts, and an unresolvable host (`USOCKET:NS-TRY-AGAIN-ERROR`) ended the test process. The public-views test now runs offline: every connection is recorded and refused, and the PASS line names the hosts. A strict Linux sandbox run on RalfBarkow/hyperdoc#12 plus this change passes with the walk's counts unchanged, and the walk's negative control still fails (`evidence/sandbox-linux/runs.md`) [obs].
 - **Nothing ran on the public URL**: nothing is deployed. Public HTTP, runtime identity and memory after activation are the operator's checks below.
 - **`dreyeck/authority-policy/tests` is not part of the Nix contract and reports adapter drift on Darwin at the base already** ("new title-bar actions on TRAILS-RENDERED-READING::CONTEXT-FEDWIKI-PAGE"). Its new check, `check-run-buttons`, runs before the drift check and passes. The drift was not investigated.
 - **The `Work Breakdown` page, an existing public page, gains two views**, and rendering the TMDM one computes the Work projection. Its cost was not measured apart from the browser walk, which completed.

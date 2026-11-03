@@ -1,0 +1,3 @@
+WALK (developing, offline): 300 objects, 12713 controls, kinds ((:INERT . 8478) (:SLOT-READER . 993) (:REVIEWED . 18) (:REVIEWED-CLASS . 84) (:REFUSED . 0) (:UNKNOWN . 3140)); connections refused to ("mech.dreyeck.ch" "next.ward.dojo.fed.wiki" "ward.voices.ustawi.wiki")
+
+NEGATIVE-CONTROL-FAILS-AS-EXPECTED: Controls reachable when served that are none of the allowed kinds: ((HV:THUNK HYPERDOC:HTML-PAGE "Topic Maps 22U") (HV:THUNK REVIEW:REVIEW-CLAIM "Claim") (AP:EXAMPLE-THUNK

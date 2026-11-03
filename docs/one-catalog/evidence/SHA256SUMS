@@ -11,6 +11,12 @@ eff403c1c4815c8b5fb8c68b2006937349b9044ec82b5f6bb7996759476e00e8  ./linux-check/
 f2921e9846e029587bc738a25a07ff799a68f26bc898c6fdb6b1138d0bc864f4  ./linux-check/public-views.log
 51e97250de6ef20f42872ba1bef13bcc8dfcc49e17b06b2131db8cf885b4e3ec  ./linux-check/topic-maps-asd
 e881ac09664ba77307bb4606d81772b7634638fc0f2b74896e9658dd59ab2365  ./linux-measure.txt
+0050bd55cc0f72812f44e89ddab60de84cb9f1b68b1feaa8dc4497e31a351d6c  ./sandbox-linux/failure-before.txt
+a2568dcafb577b6466b8253d16505a87bd5646b8c8aa8f7764862bbc5e720314  ./sandbox-linux/negative-control.lisp
+fa94384a3f45932212b556c761ad8e67a01a4e48ab64b50f84bc1d4fb6519cc8  ./sandbox-linux/negative-control.nix
+e077a43c01c1c89bf3947798dd0f721a176bb42c7b3af62fb7b24d71cc262971  ./sandbox-linux/negative-control.txt
+0cf4e46ee9cbadf4a68050f8c2bce9a650631f84541fdd0c76411423b0255d94  ./sandbox-linux/public-views.log
+2434f05ac4b51bf16cb7376db34f51c19e59440e56ddbdf89dd34164d111eb96  ./sandbox-linux/runs.md
 30e9087564ab1044944c21396437602580c4f33e4f9032f77c6d9a399ef6606f  ./security-2/base-vs-candidate-views.txt
 e01e76de69fc572f8415dda571fffb378df74f446f7ef3ce4bd3b4a56366a9b5  ./security-2/browser/darwin-served-browser.json
 be90a54be5bf91f61c375bdca9bb852de7b58d9697635449a9454c257cee372b  ./security-2/browser/development-control.txt
