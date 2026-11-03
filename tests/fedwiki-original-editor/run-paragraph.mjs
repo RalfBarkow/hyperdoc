@@ -134,7 +134,7 @@ try {
   hyperdoc.setDefaultTimeout(45000)
   hyperdoc.on('pageerror',e=>report.browserErrors.push((e.stack?.includes(wikiOrigin) ? 'Wiki: ' : 'HyperDoc: ')+e.message))
   await hyperdoc.goto(catalogOrigin)
-  const changedText = 'A paragraph changed in the original Wiki editor, with a [[Link Target]] & markup < >.'
+  const changedText = 'A paragraph changed in the original Wiki editor, with markup characters & < >.'
   await hyperdoc.getByText('Original Wiki Editor Test',{exact:true}).and(hyperdoc.locator(':visible')).first().click()
   const last = () => hyperdoc.locator('.inspector-pane').last()
   const paneCount = () => hyperdoc.locator('.inspector-pane').count()
@@ -156,6 +156,7 @@ try {
   await hyperdoc.waitForFunction(n=>document.querySelectorAll('.inspector-pane').length>n,before)
   const itemPane = last()
   await itemPane.getByRole('button',{name:'Original Wiki editor',exact:true}).waitFor()
+  await itemPane.getByText(paragraphId,{exact:true}).waitFor()
   const itemText = await itemPane.innerText()
   assert(itemText.includes(paragraphId)); assert(itemText.includes(paragraph.text))
   report.steps.push('Paragraph Item selected as its own Inspector object')
@@ -222,13 +223,17 @@ try {
   assert.deepEqual(reread,persisted)
   const shown = last().locator(`p.story-paragraph[data-fedwiki-item-id="${paragraphId}"]`)
   await shown.waitFor()
-  assert((await shown.innerText()).includes(changedText.replace('[[Link Target]]','Link Target')) || (await shown.innerText()).includes('A paragraph changed in the original Wiki editor'))
+  assert.equal((await shown.innerText()).replace(/\s*paragraph$/,'').trim(),changedText)
   assert(!(await shown.innerText()).includes(paragraph.text))
   assert.equal(await shown.getAttribute('data-fedwiki-slug'),slug)
   assert.equal((await last().innerText()).includes(sha()),true)
   assert((await last().locator('.persisted-json').innerText()).includes('"type": "edit"'))
   await hyperdoc.screenshot({path:path.join(work,'hyperdoc-reread.png'),fullPage:true})
-  assert.deepEqual(report.externalRequests,[])
+  // The existing Story view asks for the page origin's favicon. The test site's origin is the reserved, never resolvable
+  // original-editor-test.invalid, and the context route aborts the request: it is recorded, and nothing else may leave.
+  const faviconUrl = 'https://original-editor-test.invalid/favicon.png'
+  report.abortedFaviconRequests = report.externalRequests.filter(u=>u===faviconUrl).length
+  assert.deepEqual(report.externalRequests.filter(u=>u!==faviconUrl),[])
   assert.equal(context.pages().length,1)
   report.steps.push('Node writer stopped; HyperDoc reread the same file: Story view shows the changed text for the same item id, journal shows the edit Action')
   assert(report.browserErrors.every(e=>e === "Wiki: Cannot read properties of undefined (reading 'setup')"),JSON.stringify(report.browserErrors))

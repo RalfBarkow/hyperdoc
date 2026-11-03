@@ -10,8 +10,6 @@ Before edits, a fresh Nix/SBCL process observed the ASDF origins of `dreyeck`,
 `hyperbook` and `dreyeck/fedwiki-original-editor-demo` at that worktree.
 Existing worktrees and running Lisp images were not reused or modified.
 
-See also `docs/fedwiki-paragraph-association.md` for the second target, a `paragraph` Item.
-
 Only `(fedwiki:original-editor-test.invalid, original-editor-test,
 2222222222222222)` of type `code` is supported. The test fixture starts with
 `(defun square (x) (* x x))`, language `lisp`. No new generic editor framework,
@@ -143,3 +141,28 @@ inspection after a stale-revision refusal; there is no automatic conflict merge,
 cross-process locking or crash-durability proof. Original client/plugin defects
 and broader keyboard/navigation behavior are not repaired here. A personal macOS
 Chrome launch and macOS E2E acceptance remain untested.
+
+## Paragraph Item (Story Item identity and the original text editor)
+
+The same disposable page has a second selectable Item: the Paragraph `1111111111111111`. It is a Story Item of an existing
+Wiki page, nothing else: no HTML file is associated with it and the fixture site is not a second source next to any page.
+
+* **Rendering.** The demo's stored page is shown by the page's own existing Story view (`hyperbook/fedwiki` `👀story`),
+  transcluded. For the Paragraph Item the upstream `render-story-item` output is kept; the `P` additionally carries
+  `data-fedwiki-site`, `-slug` and `-item-id` and an Inspector reference to the Item (a method specialised on the demo's
+  `inspector-paragraph-item`, as `inspector-code-item` is for Code).
+* **Identity.** `%read-stored-page` finds the declared Items by type and id, never by position (the unit test reorders the
+  story). The frame URL names `(slug, id)` taken from the Item itself (`hyperdocItem=`); the server adapter holds a
+  slug → id → type table of the two Items and refuses everything else. `hyperdocCodeItem=` stays Code-only.
+* **Original editor.** `paragraph` has no `plugin.editor`; the original plugin binds `wiki.textEditor` to a double-click.
+  The frame adapter triggers that binding. The browser case asserts `plugins.paragraph.editor` is `undefined` and
+  `wiki.textEditor` is a function, then types in the original textarea.
+* **Reread.** After the Node writer stops, **Read stored page again** observes the file; the Story view shows the new
+  text for the same id, and the JSON shows one appended `edit` Action equal to the PUT.
+* **Known upstream behaviours seen, not changed.** The Story view requests the page origin's favicon
+  (`https://original-editor-test.invalid/favicon.png`; the browser context aborts it, the report counts it). A wiki
+  link `[[...]]` in a stored text makes the upstream renderer fetch `https://<origin>/<slug>.json`; for the fictitious
+  `.invalid` origin that signals an error in the Inspector event thread, so the test text contains no wiki link.
+
+Evidence: `evidence/paragraph-item/` (report, screenshots, SHA256SUMS). Run: `fedwiki-original-editor-e2e` now runs
+three cases (standalone, inspector, paragraph-item; `run-paragraph.mjs`).

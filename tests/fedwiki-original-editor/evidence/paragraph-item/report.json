@@ -1,0 +1,59 @@
+{
+  "passed": true,
+  "sourceBase": "f03d9a15234b5fdbb7c339c480d021e4a854b38a",
+  "integrationCase": "paragraph-item",
+  "beforeSha": "42953ba47d6fea227f84d1430a0b41cbdfa98ddaa96a90e5215f9c155b479288",
+  "versions": {
+    "wiki": "0.41.0",
+    "wiki-client": "0.33.0",
+    "wiki-server": "0.28.1",
+    "wiki-plugin-code": "0.6.1",
+    "wiki-plugin-paragraph": "0.4.0"
+  },
+  "steps": [
+    "Original security denies PUT without grant: 403 and unchanged page bytes",
+    "Catalog \u2192 demo page \u2192 existing Story view shows the Paragraph Item with site, slug and item id",
+    "Paragraph Item selected as its own Inspector object",
+    "Original text editor changed the Paragraph Item; authorized PUT 200; same item id; one dated edit Action equal to the request; Code Item and earlier journal unchanged",
+    "Node writer stopped; HyperDoc reread the same file: Story view shows the changed text for the same item id, journal shows the edit Action"
+  ],
+  "browserErrors": [
+    "Wiki: Cannot read properties of undefined (reading 'setup')"
+  ],
+  "externalRequests": [
+    "https://original-editor-test.invalid/favicon.png",
+    "https://original-editor-test.invalid/favicon.png",
+    "https://original-editor-test.invalid/favicon.png"
+  ],
+  "wikiOrigin": "http://127.0.0.1:<allocated>",
+  "catalogOrigin": "http://127.0.0.1:<allocated>",
+  "authorization": "original default security, unclaimed isolated loopback site, security_legacy=true",
+  "browser": "156.0.8078.79",
+  "compatibility": {
+    "textEditor": "function",
+    "paragraphBind": "function",
+    "paragraphEditor": "undefined",
+    "put": "function",
+    "local": false,
+    "owner": true
+  },
+  "originalAssetsByteEqual": {
+    "/client.js": true,
+    "/plugins/code/code.js": true
+  },
+  "abortedFaviconRequests": 3,
+  "knownClientLimitation": "The original default legacy security module supplies no /security/security.js UI plugin (setup error); server authorization and editing were verified independently.",
+  "afterSha": "200283c1e1b111f47405fa0e562f8bf0b48216a45019ac47780fce31d15b9791",
+  "action": {
+    "type": "edit",
+    "id": "1111111111111111",
+    "item": {
+      "id": "1111111111111111",
+      "type": "paragraph",
+      "text": "A paragraph changed in the original Wiki editor, with markup characters & < >."
+    },
+    "date": 1793720982830
+  },
+  "codeItemUnchanged": true,
+  "localStorageFallback": false
+}
