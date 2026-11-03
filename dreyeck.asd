@@ -3534,7 +3534,9 @@
 
 (asdf:defsystem "dreyeck/upstream-assessment/tests"
   :description "The upstream assessment against synthetic Git and ASDF fixtures, and the worked example 58a2b2c against this checkout"
-  :depends-on ("dreyeck/inspector/upstream-assessment" "hyperbook/server")
+  ;; dreyeck/upstream-intake is the book whose page links the worked example, and dreyeck/authority-policy the gate that a served Catalog puts on it: the tests
+  ;; read the page as a served Catalog does.
+  :depends-on ("dreyeck/inspector/upstream-assessment" "hyperbook/server" "dreyeck/upstream-intake" "dreyeck/authority-policy")
   :serial t
   :components ((:file "dreyeck/tests/upstream-assessment") (:file "dreyeck/tests/upstream-assessment-example"))
   :perform (test-op (op component)

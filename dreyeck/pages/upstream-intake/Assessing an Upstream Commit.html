@@ -9,6 +9,52 @@ source text; it loads no library code, fetches nothing, and records no decision.
 is not carrying it out.
 </p>
 
+<h2>Five words that are not the same thing</h2>
+
+<p>
+A question about an upstream commit mixes five relations. The assessment keeps them apart, and says for each what it can find out and from where.
+</p>
+
+<h3>Git fork</h3>
+<p>
+A relation of history. <code>dreyeck.ch</code> is a fork of Konrad Hinsen's repository if its Git history contains upstream's commits. Whether a commit is
+an ancestor of the fork's <code>HEAD</code> says nothing about whether its definitions stand in the fork's source, and the reverse. The run reports both,
+as <em>Git ancestry</em> and <em>source adoption</em>.
+</p>
+
+<h3>Library dependency</h3>
+<p>
+A relation of loading. <code>dreyeck.ch</code> uses Konrad's systems, for example <code>hyperbook/fedwiki</code>, as a library: ASDF loads them because a
+dreyeck system lists them in <code>:depends-on</code>. The assessment reads the ASDF definitions as text; it loads nothing.
+</p>
+
+<h3>Local definition</h3>
+<p>
+A relation of text. A definition is local if its text in the fork differs from upstream's, or if upstream has no definition with that key. This is found by
+comparing digests of syntax trees. It says nothing about why the text differs.
+</p>
+
+<h3>Dreyeck extension</h3>
+<p>
+A relation of intent. A local definition is an extension if dreyeck keeps it in order to extend or adapt the library. Source text cannot show that. Where this
+checkout says it, a document says it (<code>docs/hyperdoc-upstream-boundary.md</code>), in general terms and for groups of definitions, not for each one.
+</p>
+
+<h3>Code ownership</h3>
+<p>
+A relation of maintenance: who changes the text, and which ASDF system carries it. The assessment shows three things next to each other and decides none:
+the ASDF system that lists the file now (derived from the ASDF definitions), the default by path (a file under a library path of the upstream contract is
+upstream's), and what is stated or proposed for this definition, each with its source. A per-definition ownership inventory is proposed in
+<a href="https://github.com/RalfBarkow/hyperdoc/pull/21">RalfBarkow/hyperdoc#21</a>, a draft that is not integrated into <code>dreyeck.ch</code>; the
+assessment lists what that draft proposes as a proposal that is not in force, and does not presuppose it.
+</p>
+
+<p>
+The relation of a definition to the fork is therefore worded as a finding about text. Where the text that upstream changed no longer stands in the upstream
+definition but does stand in another definition of the fork, the finding is <em>the changed text stands in other definitions of the fork</em>. It is not
+called a replacement: that would claim that the two definitions do the same, which the text does not show.
+</p>
+
 <h2>One commit, from the change to the decision</h2>
 
 <p>
@@ -24,12 +70,54 @@ Konrad Hinsen's <code>58a2b2c</code>, "Catch more name service errors" (2026-11-
 
 <source-of-function>upstream-assessment-commit-example</source-of-function>
 
+<h2>The case, in five steps</h2>
+
 <p>
-Open the changed definition in the result. Three things are separated there, each with the epistemic status of its support:
-the handler that upstream changed is the <em>second</em> of the two in <code>make-fedwiki</code>, and the first, around the HTTPS connection attempt,
-is the same before and after; in the fork the changed type list no longer stands in <code>make-fedwiki</code> but in
-<code>initialize-fedwiki</code>, so the upstream hunk cannot be applied as it is; and the choice between the parent class and the explicit condition
-classes is a decision that is deferred, with its evidence, rather than made.
+Open the link above, then follow the references in the result. Each is an underlined name; a click opens it in a new pane.
+</p>
+
+<ol>
+<li><strong>The commit.</strong> Its page shows the commit, its evidence (recorded: its objects are not in this checkout) and the changed definition,
+<code>function:make-fedwiki</code>. Open <em>What 58a2b2c changed</em> for the change itself: upstream changed the type list of the <em>second</em> handler of
+<code>make-fedwiki</code>, the one that protects <code>fetch-sitemap</code> and <code>fetch-plugin-data</code>; the first handler, around the HTTPS connection
+attempt, is the same before and after.</li>
+<li><strong>The definition in the fork.</strong> <code>make-fedwiki</code> exists in the fork, but the old type list stands in
+<code>initialize-fedwiki</code>, which <code>make-fedwiki</code> now calls on a thread. Open <em>function:initialize-fedwiki</em> for its source. That the
+text of the two lists matches is a finding. That <code>initialize-fedwiki</code> is the dreyeck counterpart of upstream's second handler is a working
+hypothesis from reading the two definitions; it is not equated by any rule.</li>
+<li><strong>The owner.</strong> Open <em>Ownership</em>. It shows the ASDF system that lists <code>hyperbook-fedwiki/fedwiki.lisp</code> now
+(<code>hyperbook/fedwiki</code>), the path default (upstream-owned), what <code>docs/hyperdoc-upstream-boundary.md</code> says (reusable library fixes,
+candidates for contribution), and what #21 proposes (not in force). The intended owner of this definition is not decided; the page says so.</li>
+<li><strong>What may be affected.</strong> The change view lists the systems and tests that own or depend on it and the definitions that mention the name.
+A mention is a lead, not proof of a call.</li>
+<li><strong>The decision.</strong> Two proposals are recorded, <em>defer</em> (do not adopt the line and do not choose between <code>usocket:ns-error</code>
+and the explicit condition classes here) and <em>prepare-upstream-contribution</em>. Each shows its rationale, its evidence by epistemic status, the migration
+it would need and how it would be verified. Under <em>Open</em> the change view lists what is still undecided. A proposal is not accepted until a person
+accepts it, and accepting it changes no source.</li>
+</ol>
+
+<h2>Why the source above says &#9655; and &ldquo;Not run here&rdquo;</h2>
+
+<p>
+The example is shown with its source, and before the source stands a marker, &#9655;. In a served Catalog its tooltip says <em>Not run here: no operation
+contract</em>. That is not an error and not a missing permission for reading. Two different things are being told apart:
+</p>
+
+<ul>
+<li><strong>Navigation</strong> is the link above. The page author wrote the expression <code>(upstream-assessment-commit-example)</code> into the page, so it
+is part of the repository, not of what a visitor types. It is evaluated when the page is rendered, and its result is an object that the Inspector opens.
+Reading needs no contract: a visitor chooses which pane to open, never what is evaluated.</li>
+<li><strong>Execution</strong> is the run button that upstream puts before an example's source. A click would evaluate the example in the served image on
+the visitor's request. The authority policy offers that only for an example with a reviewed operation contract. These examples have none, on purpose,
+because nothing here needs to be run: the link already shows the result. The marker says exactly that, and a run obtained in another way is refused before
+the example is called.</li>
+</ul>
+
+<p>
+Should a run ever be needed, the proposal would be a contract of its own for each example, not a general permission: observational only; it reads
+<code>docs/upstream-intake/</code> (state, ledger, recorded evidence) and the checkout's own source files and allocates its result in memory; it opens no
+Git repository of an upstream and none of the fork, runs no process, fetches nothing and writes no file; reviewed against the source of
+<code>upstream-assessment-run</code>, with the tests that show no repository changed. No such contract is registered here.
 </p>
 
 <h2>The chain as a Topicmap</h2>

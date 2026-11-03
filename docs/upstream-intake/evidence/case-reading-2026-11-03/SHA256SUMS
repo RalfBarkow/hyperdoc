@@ -1,0 +1,12 @@
+9cc27784f7353c8b1cc31429781351696b04ebca077a2054449d00d31802597b  ./README.md
+bd591baaea34f856f6e55d73bb5c5846561ff1b8eeb0a54f8e90004d66c44467  ./browser/1-page.png
+3c6dfb4dffd6848c3353d16584b365616f07bb47b894a47bddfac4e5948d0706  ./browser/2-commit.png
+0cc3a674f7a071e0fd817b3620d6dd55ac74f6edcfdbbe9ccb2dc90830f363e1  ./browser/3-change.png
+b2d0161eee0bda6aeb20666ecb1665e1d40750347afbf07ca702191116145f84  ./browser/4-definition.png
+3cbef65223b7a68eb5cf2d3a6a3c5589a97fa979944dff4fbe11734a427dcffb  ./browser/5-ownership.png
+3d6f163680459d3a0b2180064ee648b0952947eba3a1ab06732d3af38a06e2bf  ./browser/6-decision.png
+11c150d6a38934d9d5b8ba48e2655082725b7e3fa2d2107c4b9eed6c32653901  ./browser/7-change-view.png
+a74e283f5d7b758bd9656d42acc9e4b8712b0383b0c8004e7be3c97b5b2c8e17  ./browser/8-commit-narrow.png
+896eeb553581a98ab1aca8f11daca30dd51efb43ad7ffce189e208774fe5bbd1  ./browser/upstream-assessment-browser.json
+74e3dbface90e202175574409052332ae455dd571db15e39c3805cf4c8de5bbe  ./mutants.txt
+7e01af980184f92b619b727c77b1027e9b03311bc4e4b3c8b37c06863dc00b55  ./tests.txt

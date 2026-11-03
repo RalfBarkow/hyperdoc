@@ -44,7 +44,7 @@
 (defun check-example-in-the-fork ()
   (let* ((change (example-change)) (s (ua:change-assessment-situation change)) (o (ua:change-assessment-ownership change)))
     ;; its definition stands in the fork, but the changed list is in another definition: the upstream hunk has no place
-    (assert (eq :replaced (ua:fork-situation-relation s)) () "~S" (ua:fork-situation-relation s))
+    (assert (eq :changed-part-elsewhere (ua:fork-situation-relation s)) () "~S" (ua:fork-situation-relation s))
     (let ((fragment (first (ua:fork-situation-fragments s))))
       (assert (member (getf fragment :status) '(:before-elsewhere :extended-elsewhere)))
       (assert (equal '("hyperbook-fedwiki/fedwiki.lisp" "function:initialize-fedwiki") (subseq (first (getf fragment :elsewhere)) 0 2))))
@@ -125,7 +125,7 @@
   (let* ((run (example-run)) (assessment (first (ua:intake-run-commits run))) (change (example-change)) (decision (first (ua:change-assessment-recorded change))))
     (dolist (needle '("Upstream intake" "58a2b2c")) (assert (search needle (rendered-views run)) () "the run does not show ~S" needle))
     (let ((html (rendered-views assessment)))
-      (dolist (needle '("Catch more name service errors" "recorded" "Git ancestry and source adoption are different relations" "function:make-fedwiki" "replaced"))
+      (dolist (needle '("Catch more name service errors" "recorded" "Git ancestry and source adoption are different relations" "function:make-fedwiki" "the changed text stands in other definitions of the fork"))
         (assert (search needle html) () "the commit view does not show ~S" needle)))
     (let ((html (rendered-views change)))
       (dolist (needle '("1. What upstream changed" "usocket:ns-host-not-found-error" "usocket:ns-error" "usocket:socket-connect" "fetch-sitemap"
@@ -144,9 +144,159 @@
             (dolist (control '("<button" "<form" "<input")) (assert (not (search control html)) () "view ~A has ~A" (html-inspector-views:view-title view) control)))))))
   ;; the chain: eight steps, each linked to the next with an epistemic status
   (let* ((workspace (dreyeck/inspector/upstream-assessment:change-chain-workspace (example-change))) (html (rendered-views workspace)))
-    (dolist (label '("Upstream commit" "Changed definition function:make-fedwiki" "Current definition: replaced" "ASDF owner hyperbook/fedwiki" "Impact:" "Decision:" "Required migration" "Verification"))
+    (dolist (label '("Upstream commit" "Changed definition function:make-fedwiki" "Current definition: the changed text stands in other definitions of the fork" "ASDF owner hyperbook/fedwiki" "Impact:" "Decision:" "Required migration" "Verification"))
       (assert (search label html) () "the chain does not show ~S" label))
     (assert (= 8 (length (dreyeck/inspector/upstream-assessment:chain-steps (example-change))))))
+  t)
+
+
+;;; Vocabulary: the relation says what was found in the text, not that one definition replaces another.
+
+(defun check-example-vocabulary ()
+  (let* ((change (example-change)) (s (ua:change-assessment-situation change)))
+    (assert (eq :changed-part-elsewhere (ua:fork-situation-relation s)))
+    (assert (not (member :replaced (mapcar #'car ua::+relation-labels+))) () "no relation is called :REPLACED")
+    (let ((claim (find-if (lambda (c) (search "does not show that those definitions replace this one" (ua:claim-text c))) (ua:fork-situation-claims s))))
+      (assert claim () "the claim says that a textual match is not a replacement")
+      (assert (eq :mechanically-derived (ua:claim-status claim))))
+    ;; the vocabulary changed, the fork did not: the decisions recorded under the old name are still in force and not stale
+    (assert (null (ua:change-assessment-stale change)) () "a change of name made a recorded decision stale")
+    (assert (= 2 (length (ua:change-assessment-recorded change))))
+    (assert (every (lambda (d) (equal (ua:decision-assessed-situation d) (ua:change-assessment-situation-digest change))) (ua:change-assessment-recorded change))
+            () "the situation digest is the one that the decisions recorded"))
+  t)
+
+;;; Ownership: what is derived, what this checkout says, and what a draft proposes without being in force.
+
+(defun check-example-ownership-evidence ()
+  (let* ((change (example-change)) (o (ua:change-assessment-ownership change)))
+    (assert (eq :upstream-owned (getf o :category)) () "a proposal that is not in force does not change the category")
+    (assert (eq :mechanically-derived (ua:claim-status (getf o :claim))) () "the category comes from the path rule, not from an inventory")
+    (let ((statements (getf o :statements)) (outside (getf o :outside)))
+      (assert (= 2 (length statements)))
+      (assert (every (lambda (c) (and (eq :source-observed (ua:claim-status c)) (search "docs/hyperdoc-upstream-boundary.md" (ua:claim-text c)))) statements))
+      (assert (every (lambda (c) (search "not a decision about this definition" (ua:claim-text c))) statements))
+      (assert (= 1 (length outside)))
+      (let ((text (ua:claim-text (first outside))))
+        (dolist (needle '("RalfBarkow/hyperdoc#21" "draft" "not integrated" "not in force here" "reusable-extension" "hyperbook/fedwiki" "pending"))
+          (assert (search needle text) () "the proposal claim does not say ~S: ~A" needle text)))
+      (assert (search "1d41463daaf6451f73aa1a9be9a407933c139f13" (first (ua:claim-basis (first outside)))))))
+  ;; the proposal is bound to the text it was made against: the three entries are for the fork's present text, and a changed text is said to differ
+  (let* ((root (checkout-root)) (policy (ua:default-ownership-policy root)) (index (ua:make-fork-index root)) (file "hyperbook-fedwiki/fedwiki.lisp"))
+    (declare (ignorable index))
+    (dolist (key '("function:initialize-fedwiki" "function:probe-fedwiki-protocol"))
+      (let* ((definition (find key (ua:top-level-definitions (uiop:read-file-string (merge-pathnames file root) :external-format :utf-8) :path file) :key #'ua:source-definition-key :test #'equal))
+             (situation (ua::make-fork-situation :locations (list (list file key (ua:source-definition-digest definition)))))
+             (claims (ua:outside-ownership-claims policy file key situation)))
+        (assert (= 1 (length claims)))
+        (assert (search "the text that the fork has now" (ua:claim-text (first claims))) () "~A: ~A" key (ua:claim-text (first claims)))
+        (let ((other (ua:outside-ownership-claims policy file key (ua::make-fork-situation :locations (list (list file key "0000"))))))
+          (assert (search "a text that is not the fork's present text" (ua:claim-text (first other))))))))
+  ;; a quotation that is no longer in the document is not repeated
+  (let* ((policy (ua:make-ownership-policy :root (checkout-root)
+                                           :outside (list :checkout (list (list :path "p" :keys '("k") :document "docs/hyperdoc-upstream-boundary.md" :quote "words that are not there" :meaning "x")))))
+         (claim (first (ua:checkout-ownership-claims policy "p" "k"))))
+    (assert (search "is not in the document now" (ua:claim-text claim)))
+    (assert (not (search "That is x" (ua:claim-text claim)))))
+  ;; without the file there is no statement and nothing breaks
+  (assert (null (ua:checkout-ownership-claims (ua:make-ownership-policy) "p" "k")))
+  t)
+
+;;; The reading: objects with references, no table of prose, nothing cut off.
+
+(defun view-references-of (object title)
+  (let ((view (find title (hv:all-views object) :key #'hv:view-title :test #'equal)))
+    (progv (list (find-symbol "*SERVER-PARAMETERS*" :hyperbook/server)) (list (list "700px" nil))
+      (hv:view-html view)
+      (values (hv:view-html view) (mapcar #'cdr (hv:view-references view))))))
+
+(defun count-of-type (type objects) (count-if (lambda (o) (typep o type)) objects))
+
+(defun check-example-reading ()
+  (let* ((assessment (first (ua:intake-run-commits (example-run)))) (change (example-change)))
+    ;; The commit view leads to the changed definition, its counterpart in the fork, the ownership judgement and the decisions, each as an Inspector reference.
+    (multiple-value-bind (html objects) (view-references-of assessment "Upstream commit")
+      (assert (find-if (lambda (o) (typep o 'ua:definition-change)) objects) () "the changed definition")
+      (assert (find-if (lambda (o) (typep o 'ua:fork-situation)) objects) () "the situation in the fork")
+      (assert (find-if (lambda (o) (typep o 'uv::ownership-judgement)) objects) () "the ownership judgement")
+      (assert (find-if (lambda (o) (typep o 'asdf:system)) objects) () "the ASDF system")
+      (assert (find-if (lambda (o) (typep o 'ua:change-assessment)) objects))
+      (let ((located (remove-if-not (lambda (o) (typep o 'uv::located)) objects)))
+        (assert (find "function:initialize-fedwiki" located :key (lambda (o) (ua:source-definition-key (uv::located-definition o))) :test #'equal)
+                () "the fork's counterpart, initialize-fedwiki, is a reference")
+        (assert (find "function:make-fedwiki" located :key (lambda (o) (ua:source-definition-key (uv::located-definition o))) :test #'equal)))
+      (assert (>= (count-of-type 'ua:decision objects) 3) () "the proposal and the two recorded decisions")
+      (assert (not (search "<table" html)) () "no table of prose")
+      (assert (not (search "<button" html))))
+    ;; The change view: every part reachable, and the claims too.
+    (multiple-value-bind (html objects) (view-references-of change "Change in the fork")
+      (assert (find-if (lambda (o) (typep o 'ua:claim)) objects) () "claims are references")
+      (assert (>= (count-of-type 'uv::located objects) 4) () "before and after upstream, and the fork's definitions")
+      (assert (find-if (lambda (o) (typep o 'uv::ownership-judgement)) objects))
+      (assert (>= (count-of-type 'ua:decision objects) 3))
+      (dolist (needle '("Stated in this checkout" "Proposed elsewhere" "Intended owner" "RalfBarkow/hyperdoc#21" "not in force" "Open"))
+        (assert (search needle html) () "the change view does not show ~S" needle))
+      ;; no identifier is cut off: the style never clips, hides or keeps to one line, and it lets identifiers wrap
+      (dolist (clip '("nowrap" "ellipsis" "overflow:hidden" "overflow: hidden" "white-space:pre;" "text-overflow"))
+        (assert (not (search clip html)) () "the style contains ~S" clip))
+      ;; each rule that sets identifiers, source and references lets them wrap (the property is checked inside the rule, not anywhere in the style)
+      (flet ((rule-wraps-p (selector)
+               (let* ((start (search selector html)) (end (and start (position #\} html :start start))))
+                 (and start end (search "overflow-wrap:anywhere" (subseq html start end))))))
+        (dolist (selector '(".ua code,.ua .ua-id{" ".ua pre{" ".ua .inspector-inspect{" ".ua h2{" ".ua h4{"))
+          (assert (rule-wraps-p selector) () "the rule ~A does not let its text wrap" selector)))
+      (assert (search "max-width:44rem" html) () "a measure is set")
+      (assert (not (search "<table" html))))
+    ;; Each object the chain leads to has a view of its own
+    (dolist (object (list (ua:change-assessment-change change) (ua:change-assessment-situation change) (uv::ownership-judgement change)
+                          (uv::located (ua:definition-change-before (ua:change-assessment-change change)) :upstream-before)))
+      (assert (find-if (lambda (view) (typep view 'hv:html-view)) (hv:all-views object)) () "~S has a view of its own" object))
+    (let ((html (view-references-of (uv::located (first (ua:fork-situation-definitions (ua:change-assessment-situation change))) :fork '("hyperbook/fedwiki")) "Definition")))
+      (assert (search "hyperbook/fedwiki" html)) (assert (search "Digest" html)))
+    ;; a long identifier is shown whole in the view: a method key of a hundred characters
+    (let* ((key (format nil "method:~A:~A:~A" (make-string 60 :initial-element #\a) "(eql :html)" (make-string 60 :initial-element #\b)))
+           (d (ua::make-source-definition :key key :kind :method :name "x" :text "(defmethod x ())" :digest "00" :path "p.lisp"))
+           (html (view-references-of (uv::located d :fork) "Definition")))
+      (assert (search key html) () "a long key is shown whole")))
+  t)
+
+;;; defexample: reading is navigation, running is execution. The page offers the first without the second.
+
+(defun check-example-navigation-needs-no-contract ()
+  (let* ((book (hyperbook:find-hyperbook "dreyeck/upstream-intake"))
+         (page (hyperbook:find-page book "Assessing an Upstream Commit" :signal-error? t))
+         (examples '(dreyeck/upstream-intake::upstream-assessment-commit-example dreyeck/upstream-intake::upstream-assessment-chain-example
+                     dreyeck/upstream-intake::upstream-assessment-run-example)))
+    ;; there is, deliberately, no operation contract for these examples: nothing here needs to run
+    (dolist (name examples)
+      (assert (null (ap:find-example-contract name)) () "~S has a contract" name))
+    (flet ((references ()
+             (let ((view (find "Content" (hv:all-views page) :key #'hv:view-title :test #'equal)))
+               (hv:view-html view)
+               (labels ((all (v) (loop for (nil . object) in (hv:view-references v) append (cons object (and (typep object 'hv:view) (all object))))))
+                 (all view)))))
+      (progv (list (find-symbol "*SERVER-PARAMETERS*" :hyperbook/server)) (list (list "700px" nil))
+        (let ((objects (references)) (html (hv:view-html (find "Content" (hv:all-views page) :key #'hv:view-title :test #'equal))))
+          ;; served: the links of the page lead to the assessment, the chain and the run, which the page evaluated when it rendered
+          (assert (find-if (lambda (o) (typep o 'ua:commit-assessment)) objects) () "the link to the assessment leads to its objects")
+          (assert (find-if (lambda (o) (typep o 'ua:intake-run)) objects))
+          (assert (find-if (lambda (o) (typep o 'dreyeck/topicmap:topicmap-workspace)) objects))
+          ;; nothing on the page can run code: no thunk at all, and each example's run button is a marker that says why
+          (assert (notany (lambda (o) (typep o 'hv:thunk)) objects) () "a served page offers a thunk")
+          (assert (some (lambda (o) (and (typep o 'hv:view) (search "Not run here: no operation contract" (hv:view-html o)))) objects))
+          (assert (search "no operation contract" (format nil "~{~A~}" (mapcar (lambda (o) (if (typep o 'hv:view) (hv:view-html o) "")) objects))))
+          ;; a run that is obtained anyway is refused before it is called
+          (let ((ran nil))
+            (let ((result (hv:eval-thunk (make-instance 'ap:example-thunk :fn (lambda () (setf ran t)) :example (first examples)))))
+              (assert (typep result 'ap:invocation-refused))
+              (assert (not ran)))))))
+    ;; in a development server the run button is there, and the same links
+    (progv (list (find-symbol "*SERVER-PARAMETERS*" :hyperbook/server)) (list (list "700px" t))
+      (let ((view (find "Content" (hv:all-views page) :key #'hv:view-title :test #'equal)))
+        (hv:view-html view)
+        (assert (some (lambda (o) (typep o 'ap:example-thunk))
+                      (labels ((all (v) (loop for (nil . object) in (hv:view-references v) append (cons object (and (typep object 'hv:view) (all object))))))
+                        (all view)))))))
   t)
 
 (defun run-example-tests ()
@@ -156,5 +306,9 @@
   (check-example-reused-analysis)
   (check-example-nothing-moved)
   (check-example-views)
-  (format t "~&UPSTREAM-ASSESSMENT-EXAMPLE-PASS: 58a2b2c from recorded evidence against the real source: the changed handler, the untouched first attempt, the replaced definition, owners, impact, decisions, the reused analysis, nothing moved, the views and the chain.~%")
+  (check-example-vocabulary)
+  (check-example-ownership-evidence)
+  (check-example-reading)
+  (check-example-navigation-needs-no-contract)
+  (format t "~&UPSTREAM-ASSESSMENT-EXAMPLE-PASS: 58a2b2c from recorded evidence against the real source: the changed handler, the untouched first attempt, the definition whose changed text stands elsewhere, owners and what is said about them, impact, decisions, the reused analysis, nothing moved, the views with their references, and a page that navigates without running anything.~%")
   t)

@@ -1,0 +1,35 @@
+(:OWNERSHIP-STATEMENTS :VERSION 1
+ :NOTE "What is said about who should own definitions, recorded as plain data so that an assessment shows each statement beside the path-based default with its source, and presupposes none of them. Nothing here is a decision; removing this file changes no decision. :CHECKOUT statements are quoted from a document of this checkout, and the assessment checks that the quote is still there. :SOURCE and :ENTRIES are a proposal outside this checkout (a draft that is not integrated) and are NOT in force."
+ :CHECKOUT
+ ((:PATH "hyperbook-fedwiki/fedwiki.lisp"
+   :KEYS ("function:make-fedwiki" "function:initialize-fedwiki" "function:probe-fedwiki-protocol")
+   :DOCUMENT "docs/hyperdoc-upstream-boundary.md"
+   :QUOTE "FedWiki operational initialization failures and startup race | :LOCAL-COMPATIBILITY-REQUIREMENT; reusable library fixes"
+   :MEANING "dreyeck keeps these definitions because it needs them, and the document calls them reusable library fixes")
+  (:PATH "hyperbook-fedwiki/fedwiki.lisp"
+   :KEYS ("function:make-fedwiki" "function:initialize-fedwiki" "function:probe-fedwiki-protocol")
+   :DOCUMENT "docs/hyperdoc-upstream-boundary.md"
+   :QUOTE "All are candidate upstream contributions, not unexplained dreyeck policy."
+   :MEANING "the remaining deltas in the library paths are candidates for contribution upstream; the document does not say that any of them has been offered or accepted"))
+ :SOURCE
+ (:KIND :PULL-REQUEST :REPOSITORY "RalfBarkow/hyperdoc" :NUMBER 21
+  :STATE "open, draft; base claude/upstream-intake-workflow; not integrated into dreyeck.ch"
+  :HEAD-COMMIT "1d41463daaf6451f73aa1a9be9a407933c139f13"
+  :FILE "docs/code-ownership/inventory.lisp-data"
+  :FILE-BLOB "6f10da07dd0f77f0ee8528f76383dc34c2f46569"
+  :FILE-SHA256 "af18b99a099fa25eb9b387ceceb05ec3cdb712e8e81c1fd705232c7b38dfe74b"
+  :READ-ON "2026-11-03"
+  :METHOD "GitHub REST contents API at the head branch claude/code-ownership-migration; the three entries for hyperbook-fedwiki/fedwiki.lisp that concern 58a2b2c are copied unchanged, other entries are not recorded")
+ :ENTRIES
+ ((:PATH "hyperbook-fedwiki/fedwiki.lisp" :KEY "function:make-fedwiki" :CURRENT-DIGEST "f29f9a2273a8512d29e41527d2af0007a96bb9cda264a231241eedebc4bec3f5"
+   :UPSTREAM-DIGEST "f09cba303cc1030b9a7c0fcaa766f3048b7d51bdf9dcb99405457df561b5e091" :STATUS :PENDING :CATEGORY :REUSABLE-EXTENSION :NATURE :BEHAVIOUR
+   :TARGET-SYSTEM "hyperbook/fedwiki" :PROPOSED-TARGET "upstream, by contribution (see RalfBarkow/hyperdoc#13, #15 for the open handler question)"
+   :PLAN "Contribute with the error-handling decision of #13/#15 so that upstream sees one coherent change. No Dreyeck hostname or policy is in these definitions." :PRIORITY 3)
+  (:PATH "hyperbook-fedwiki/fedwiki.lisp" :KEY "function:initialize-fedwiki" :CURRENT-DIGEST "97e2decd9532ee959d80ceafdcc4e1a50dcbc98da196cb8393f735c75358abba"
+   :UPSTREAM-DIGEST NIL :STATUS :PENDING :CATEGORY :REUSABLE-EXTENSION :NATURE :BEHAVIOUR
+   :TARGET-SYSTEM "hyperbook/fedwiki" :PROPOSED-TARGET "upstream, by contribution (see RalfBarkow/hyperdoc#13, #15 for the open handler question)"
+   :PLAN "Contribute with the error-handling decision of #13/#15 so that upstream sees one coherent change. No Dreyeck hostname or policy is in these definitions." :PRIORITY 3)
+  (:PATH "hyperbook-fedwiki/fedwiki.lisp" :KEY "function:probe-fedwiki-protocol" :CURRENT-DIGEST "718ac7a84faddd356c5ded2ad3740d94f32018ce6687a94ecd0cd7fee9718364"
+   :UPSTREAM-DIGEST NIL :STATUS :PENDING :CATEGORY :REUSABLE-EXTENSION :NATURE :BEHAVIOUR
+   :TARGET-SYSTEM "hyperbook/fedwiki" :PROPOSED-TARGET "upstream, by contribution (see RalfBarkow/hyperdoc#13, #15 for the open handler question)"
+   :PLAN "Contribute with the error-handling decision of #13/#15 so that upstream sees one coherent change. No Dreyeck hostname or policy is in these definitions." :PRIORITY 3)))

@@ -1,0 +1,31 @@
+# Tests, dev shell .#fedwiki-original-editor, 2026-11-03: the base afe2dfc0 (an unmodified work tree of it) against this branch.
+# One process per column, the systems in this order. Same sandbox for both. FAILED lines fail identically at the base (see existing-tests.txt, RalfBarkow/hyperdoc#17):
+# the failures are not caused by this branch, and none of them is in a file this branch changes.
+
+system                                           base     branch  
+dreyeck/authority-policy/tests (RUN-GATE-TESTS)  PASSED   PASSED  
+dreyeck/upstream-assessment/tests                PASSED   PASSED  
+dreyeck/upstream-intake                          FAILED   FAILED  
+dreyeck/authority/reading                        PASSED   PASSED  
+dreyeck/catalog-application                      PASSED   PASSED  
+dreyeck/hyperdoc/compatibility-tests             PASSED   PASSED  
+dreyeck/hyperdoc/boundary-tests                  FAILED   FAILED  
+dreyeck/hyperdoc/library-tests                   FAILED   FAILED  
+dreyeck/wiki-link/tests                          PASSED   PASSED  
+hyperbook/fedwiki/tests                          PASSED   PASSED  
+dreyeck/local-fedwiki-view/tests                 PASSED   PASSED  
+dreyeck/catalog/tests                            FAILED   FAILED  
+
+# dreyeck/upstream-intake in a process of its own, with an `upstream` remote in the sandbox clone (read-only fetch of khinsen/hyperdoc main = c165990):
+#   base: PASSED   branch: PASSED
+# In the combined process above it fails at both, "authority containment points drifted" for a title-bar action of CONTEXT-FEDWIKI-PAGE: an order effect of
+# loading dreyeck/authority-policy/tests first, the same at the base.
+
+# dreyeck/authority-policy/tests: RUN-GATE-TESTS (the checks that need nothing of the machine). RUN-TESTS needs ~/.wiki/dreyeck.ch, absent in the sandbox.
+
+# The unchanged Nix acceptance check of the Catalog, on this branch's working tree (dirty, nothing committed yet when it ran):
+#   nix build --no-write-lock-file --override-input <the ten github: inputs> git+https://github.com/<owner>/<repo>?rev=<the locked rev> .#checks.x86_64-linux.catalog --no-link
+#   -> exit 0, /nix/store/w5fyxxcc8frb6gywrp8fb3phnldi7w5r-catalog-startup-contract
+# flake.nix and flake.lock are unchanged. The override exists only because the sandbox's proxy refuses GitHub archive tarballs of repositories that are not attached
+# to the session; the revisions are the locked ones, fetched as Git. The pinned narHashes were therefore not checked here: this is not a replacement for the check run
+# against the lock file on the maintainers' machine. The check builds without .git and does not load the test systems of this branch.

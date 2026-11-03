@@ -2,7 +2,8 @@
 ;;;; extended some of it. Nothing of the fixture's library source is loaded: it holds a canary that must stay untouched and a package that must not appear.
 (defpackage #:dreyeck/upstream-assessment/tests
   (:use #:cl)
-  (:local-nicknames (#:ua #:dreyeck/upstream-assessment) (#:g #:dreyeck/git))
+  (:local-nicknames (#:ua #:dreyeck/upstream-assessment) (#:g #:dreyeck/git) (#:hv #:html-inspector-views) (#:ap #:dreyeck/authority-policy)
+                    (#:uv #:dreyeck/inspector/upstream-assessment))
   (:export #:run-tests #:run-example-tests #:with-fixture #:*upstream* #:*fork* #:*commits* #:*fork-root* #:*upstream-root* #:fixture-policy))
 (in-package #:dreyeck/upstream-assessment/tests)
 
@@ -154,7 +155,7 @@
 
 ;;; The one-commit story: U1 changes a handler list that the fork has moved into another definition
 
-(defun check-replaced-handler (&optional (u1 (second *commits*)))
+(defun check-changed-part-elsewhere-handler (&optional (u1 (second *commits*)))
   (let* ((assessment (assessment-of u1)) (change (change-of assessment))
          (c (ua:change-assessment-change change)) (s (ua:change-assessment-situation change)) (i (ua:change-assessment-impact change))
          (o (ua:change-assessment-ownership change)))
@@ -169,7 +170,7 @@
     (let ((handlers (ua:definition-change-handlers c)))
       (assert (equal '(nil t) (mapcar (lambda (h) (getf h :changed-p)) handlers)) () "the first handler must be unchanged and the second changed: ~S" handlers))
     ;; where it stands in the fork: the definition is there, its changed part is not; the part stands in ATTEMPT
-    (assert (eq :replaced (ua:fork-situation-relation s)))
+    (assert (eq :changed-part-elsewhere (ua:fork-situation-relation s)))
     (let ((fragment (first (ua:fork-situation-fragments s))))
       (assert (eq :before-elsewhere (getf fragment :status)))
       (assert (equal "function:attempt" (second (first (getf fragment :elsewhere))))))
@@ -199,7 +200,7 @@
                        (let ((p (search "other-error)" original)))
                          (concatenate 'string (subseq original 0 p) "other-error extra-error)" (subseq original (+ p (length "other-error)"))))))
            (let* ((change (change-of (assessment-of (second *commits*)))) (s (ua:change-assessment-situation change)))
-             (assert (eq :replaced (ua:fork-situation-relation s)))
+             (assert (eq :changed-part-elsewhere (ua:fork-situation-relation s)))
              (assert (eq :extended-elsewhere (getf (first (ua:fork-situation-fragments s)) :status)))))
       (write-file *fork-root* "lib/net.lisp" original)))
   t)
@@ -525,7 +526,7 @@
 
 (defun run-fixture-checks ()
   (progn
-    (check-replaced-handler)
+    (check-changed-part-elsewhere-handler)
     (check-extended-fragment)
     (check-adoption-is-not-ancestry)
     (check-runs-and-observation)

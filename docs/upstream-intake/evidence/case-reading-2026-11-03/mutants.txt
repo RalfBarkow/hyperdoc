@@ -1,0 +1,9 @@
+# Mutants of the new checks in dreyeck/upstream-assessment/tests (dev shell, one process; the control is the unmutated tree). Each mutant is applied at run time and one check is expected to fail.
+CONTROL: all pass
+MUTANT no digest alias / CHECK-EXAMPLE-VOCABULARY: detected
+MUTANT contract registered for the example / CHECK-EXAMPLE-NAVIGATION-NEEDS-NO-CONTRACT: detected
+MUTANT nowrap in style / CHECK-EXAMPLE-READING: detected
+MUTANT .ua code,.ua .ua-id{ / CHECK-EXAMPLE-READING: detected
+MUTANT .ua pre{ / CHECK-EXAMPLE-READING: detected
+MUTANT .ua .inspector-inspect{ / CHECK-EXAMPLE-READING: detected
+MUTANT .ua h4{ / CHECK-EXAMPLE-READING: detected

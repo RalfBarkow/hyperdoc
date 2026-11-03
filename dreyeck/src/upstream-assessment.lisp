@@ -449,13 +449,32 @@ same loose key and different keys MAY be the same definition spelled in two pack
       (loop for path in (files-mentioning index anchor)
             append (remove-if-not (lambda (d) (tree-contains-p (source-definition-tree d) fragment)) (index-definitions index path))))))
 
-(defstruct fork-situation relation locations fragments claims counterparts)
+(defstruct fork-situation relation locations fragments claims counterparts
+  definitions ; the SOURCE-DEFINITIONs of the fork that have the key (the objects behind LOCATIONS), so that a reading can refer to them
+  owners      ; an alist (PATH . ASDF-SYSTEM-NAMES) for every path in LOCATIONS and in the :ELSEWHERE of the fragments, from the ASDF definitions of the checkout
+  )
+
+(defparameter +relation-labels+
+  '((:unchanged . "as upstream had it before the commit")
+    (:adopted . "as upstream has it after the commit")
+    (:changed . "a local version, neither upstream's before nor after")
+    (:changed-part-elsewhere . "the changed text stands in other definitions of the fork")
+    (:moved . "the same key at another path")
+    (:absent . "no definition with this key")
+    (:ambiguous . "more than one definition with this key"))
+  "How each relation is read aloud. A relation is a finding about source text; none of them says that one definition replaces another.")
+
+(defun relation-label (relation) (or (cdr (assoc relation +relation-labels+)) (string-downcase (symbol-name relation))))
+
+(defparameter +relation-digest-names+ '((:changed-part-elsewhere . "replaced"))
+  "The relation :CHANGED-PART-ELSEWHERE was called :REPLACED when the first decisions were recorded. A situation digest is taken over the old name so that a
+change of vocabulary does not make a recorded decision stale: nothing about the fork changed.")
 
 (defun location (definition) (list (source-definition-path definition) (source-definition-key definition) (source-definition-digest definition)))
 
 (defun situation-of (change index)
   "Where CHANGE's definition stands in the fork. RELATION is :UNCHANGED (as upstream had it before), :ADOPTED (as upstream has it after), :CHANGED (a local
-version), :REPLACED (its changed part now stands in other definitions), :MOVED (the same key at another path), :ABSENT, or :AMBIGUOUS (more than one
+version), :CHANGED-PART-ELSEWHERE (the text that the commit changed now stands in other definitions; a textual finding, not a statement that one definition replaces another), :MOVED (the same key at another path), :ABSENT, or :AMBIGUOUS (more than one
 definition in the fork has this key: which one is meant is not decided). Definitions that differ from the key only in package qualification are listed as
 COUNTERPARTS, candidates that nothing equates with it."
   (let* ((before (definition-change-before change)) (after (definition-change-after change))
@@ -495,16 +514,16 @@ COUNTERPARTS, candidates that nothing equates with it."
                       (b-found (setf status :before-elsewhere elsewhere b-found))
                       (extended (setf status :extended-elsewhere elsewhere extended))
                       (t (setf status :absent)))))
-            (push (list :before b :after a :status status :elsewhere (mapcar #'location elsewhere)) fragments)))
+            (push (list :before b :after a :status status :elsewhere (mapcar #'location elsewhere) :definitions elsewhere) fragments)))
         (setf fragments (nreverse fragments))
         (when (and fragments (member relation '(:changed :absent))
                    (every (lambda (f) (member (getf f :status) '(:before-elsewhere :after-elsewhere :extended-elsewhere))) fragments))
-          (setf relation :replaced)))
+          (setf relation :changed-part-elsewhere)))
       (push (make-claim (ecase relation
                           (:unchanged "The fork's definition is the upstream definition as it was before the commit.")
                           (:adopted "The fork's definition is the upstream definition as it is after the commit.")
                           (:changed "The fork has a version of this definition that is neither the upstream one before nor after the commit.")
-                          (:replaced "The definition's changed part no longer stands in it: it stands, before or after, in other definitions.")
+                          (:changed-part-elsewhere "The text that upstream changed no longer stands in this definition. The same text stands, before or after the change, in other definitions of the fork. That is a finding about source text: it does not show that those definitions replace this one or that they behave the same.")
                           (:moved "The definition stands at another path than upstream's.")
                           (:absent "The fork has no definition with this key.")
                           (:ambiguous "More than one definition in the fork has this key; the assessment does not choose between them."))
@@ -516,7 +535,11 @@ COUNTERPARTS, candidates that nothing equates with it."
                                   (mapcar (lambda (l) (format nil "~A in ~A" (second l) (first l))) counterparts))
                           :working-hypothesis (list "loose key: package qualifiers dropped from names and specializers"))
               claims))
-      (make-fork-situation :relation relation :locations (mapcar #'location defs) :fragments fragments :claims (nreverse claims) :counterparts counterparts))))
+      (make-fork-situation :relation relation :locations (mapcar #'location defs) :definitions defs :fragments fragments :claims (nreverse claims) :counterparts counterparts
+                           :owners (let ((paths (remove-duplicates (append (mapcar #'source-definition-path defs)
+                                                                           (loop for f in fragments append (mapcar #'first (getf f :elsewhere))))
+                                                                   :test #'equal)))
+                                     (loop for path in paths collect (cons path (system-owners-of index path))))))))
 
 (defun find-counterparts (index change)
   "Definitions of the fork whose key differs from CHANGE's only in package qualification. Looked for in the files that mention the unqualified name."
@@ -531,7 +554,7 @@ COUNTERPARTS, candidates that nothing equates with it."
   "A digest of what a situation says: the relation, where the definitions stand and with which digests, and where each changed part stands. A decision records
 it, so that a later assessment against a changed fork can tell that the decision was taken against another situation."
   (sha256-hex (format nil "~(~A~)|~{~A~^;~}|~{~A~^;~}"
-                      (fork-situation-relation situation)
+                      (or (cdr (assoc (fork-situation-relation situation) +relation-digest-names+)) (fork-situation-relation situation))
                       (sort (mapcar (lambda (l) (format nil "~{~A~^ ~}" l)) (fork-situation-locations situation)) #'string<)
                       (sort (mapcar (lambda (f) (format nil "~(~A~)~{ ~{~A~^ ~}~}" (getf f :status) (getf f :elsewhere))) (fork-situation-fragments situation)) #'string<))))
 
@@ -553,6 +576,9 @@ the classification (:NOT-AVAILABLE-LOCALLY, :AVAILABLE-NOT-INTEGRATED, :ALREADY-
   ((upstream-paths :initarg :upstream-paths :initform nil :reader policy-upstream-paths)
    (inventory :initarg :inventory :initform nil :reader policy-inventory
               :documentation "Plists (:PATH :KEY :CATEGORY :TARGET-SYSTEM :BASIS) of decided ownership, from the ownership inventory.")
+   (outside :initarg :outside :initform nil :reader policy-outside
+            :documentation "Ownership proposals that are NOT in force here (a draft change not integrated): a plist (:SOURCE ... :ENTRIES ...). They are shown beside the default, never used as it.")
+   (root :initarg :root :initform nil :reader policy-root :documentation "The checkout's root, where the documents that statements quote are read.")
    (contract-paths :initarg :contract-paths :initform nil :reader policy-contract-paths)
    (page-directory :initarg :page-directory :initform "dreyeck/pages" :reader policy-page-directory)))
 
@@ -574,6 +600,35 @@ the classification (:NOT-AVAILABLE-LOCALLY, :AVAILABLE-NOT-INTEGRATED, :ALREADY-
           (t (values :dreyeck-owned owners
                      (make-claim "The path is not a library path: dreyeck owns it." :mechanically-derived (list "library paths of dreyeck/hyperdoc/library-tests")))))))
 
+;;; Proposals from outside this checkout (a draft change that is not integrated). They are evidence of what has been proposed; they are not ownership.
+
+(defun checkout-ownership-claims (policy path key)
+  "Claims about what a document of this checkout says of the definition PATH/KEY, each :SOURCE-OBSERVED. A statement is a quotation, and the quotation is looked for in the
+document now: where it is no longer there, the claim says so instead of repeating it."
+  (loop for statement in (getf (policy-outside policy) :checkout)
+        when (and (equal path (getf statement :path)) (member key (getf statement :keys) :test #'equal))
+          collect (let* ((document (getf statement :document))
+                         (file (and (policy-root policy) (merge-pathnames document (policy-root policy))))
+                         (text (and file (probe-file file) (ignore-errors (uiop:read-file-string file :external-format :utf-8))))
+                         (present (and text (search (getf statement :quote) text))))
+                    (make-claim (if present
+                                    (format nil "~A says: \"~A\". Read here as: ~A. It is a statement, not a decision about this definition."
+                                            document (getf statement :quote) (getf statement :meaning))
+                                    (format nil "~A once said \"~A\"; that text is not in the document now, so the statement is not repeated." document (getf statement :quote)))
+                                :source-observed (list document)))))
+
+(defun outside-ownership-claims (policy path key situation)
+  "Claims about what a proposal outside this checkout says of the definition PATH/KEY, each :SOURCE-OBSERVED in the recorded file, and each saying that the proposal is not in force.
+Whether the text the proposal was made against is the text of the fork now is compared by digest."
+  (let* ((outside (policy-outside policy)) (source (getf outside :source)))
+    (loop for entry in (getf outside :entries)
+          when (and (equal path (getf entry :path)) (equal key (getf entry :key)))
+            collect (let ((same-text (member (getf entry :current-digest) (mapcar #'third (fork-situation-locations situation)) :test #'equal)))
+                      (make-claim (format nil "~A#~D (~A) proposes for this definition: ~(~A~), target ~A, status ~(~A~). That is a proposal outside this checkout and not in force here. It was made against ~:[a text that is not the fork's present text~;the text that the fork has now~]."
+                                          (getf source :repository) (getf source :number) (getf source :state)
+                                          (getf entry :category) (getf entry :target-system) (getf entry :status) same-text)
+                                  :source-observed (list (format nil "~A at ~A (blob ~A, sha256 ~A)" (getf source :file) (getf source :head-commit) (getf source :file-blob) (getf source :file-sha256))))))))
+
 (defparameter +library-paths+
   '("hyperdoc" "hyperbook" "hyperdoc-explorer" "hyperbook-explorer" "inspector-hyperdoc" "hyperbook-fedwiki" "hyperbook-wikipedia" "hyperbook-server"
     "hyperdoc.asd" "hyperbook.asd")
@@ -583,7 +638,9 @@ the classification (:NOT-AVAILABLE-LOCALLY, :AVAILABLE-NOT-INTEGRATED, :ALREADY-
   "The policy for the checkout at ROOT: the contract's library paths, its contract files, and the ownership inventory when the checkout has one."
   (let* ((inventory-file (merge-pathnames "docs/code-ownership/inventory.lisp-data" (uiop:ensure-directory-pathname root)))
          (inventory (and (probe-file inventory-file) (getf (rest (read-plain-data inventory-file)) :entries))))
-    (make-ownership-policy :upstream-paths +library-paths+ :inventory inventory :page-directory "dreyeck/pages"
+    (make-ownership-policy :upstream-paths +library-paths+ :inventory inventory :page-directory "dreyeck/pages" :root (uiop:ensure-directory-pathname root)
+                           :outside (let ((file (merge-pathnames "docs/upstream-intake/ownership-statements.lisp-data" (uiop:ensure-directory-pathname root))))
+                                      (and (probe-file file) (rest (read-plain-data file))))
                            :contract-paths '("dreyeck/tests/hyperdoc-library-delta.lisp" "dreyeck/tests/hyperdoc-boundary.lisp"))))
 
 (defun system-names-in-root (root)
@@ -634,7 +691,8 @@ ASDF is asked what the definitions say (component pathnames, DEPENDS-ON); no com
 ;;; ------------------------------------------------------------------------------------------------------------------------------------
 ;;; Impact
 
-(defstruct impact systems tests callers pages contracts claims)
+;; CALLER-OWNERS is an alist (PATH . ASDF-SYSTEM-NAMES) for the paths of CALLERS; the third element of a caller is the SOURCE-DEFINITION that mentions the name.
+(defstruct impact systems tests callers pages contracts claims caller-owners)
 
 (defun tree-mentions-p (tree token)
   (cond ((stringp tree) (string= (strip-package tree) token))
@@ -658,7 +716,7 @@ pages that mention it, and the contract files that name it. Found by search over
                       (dolist (d (index-definitions index path))
                         (when (and (not (and (equal path (definition-change-path change)) (equal (source-definition-key d) (definition-change-key change))))
                                    (tree-mentions-p (source-definition-tree d) token))
-                          (push (list path (source-definition-key d)) found))))
+                          (push (list path (source-definition-key d) d) found))))
                     (let ((list (nreverse found))) (subseq list 0 (min 60 (length list))))))
          (pages (let ((dir (merge-pathnames (uiop:ensure-directory-pathname (policy-page-directory policy)) (fork-index-root index))))
                   (when (and named (probe-file dir))
@@ -672,6 +730,7 @@ pages that mention it, and the contract files that name it. Found by search over
     (make-impact :systems (sort (copy-list systems) #'string<)
                  :tests (sort (remove-if-not #'test-system-name-p systems) #'string<)
                  :callers callers :pages pages :contracts contracts
+                 :caller-owners (loop for path in (remove-duplicates (mapcar #'first callers) :test #'equal) collect (cons path (system-owners-of index path)))
                  :claims (list (make-claim (format nil "Search for the name ~S over the fork's Lisp, ASDF and page files; owners and dependents from the ASDF definitions." token)
                                            :mechanically-derived (list "text search" "ASDF DEPENDS-ON of the systems the root defines"))))))
 
@@ -779,7 +838,7 @@ commit and subject is a conflict (its id is that of the recorded one, which diff
          (rationale (ecase decision-kind
                       (:already-covered "The fork already has the definition as the commit leaves it, or already lacks what the commit removed.")
                       (:adopt-upstream-change "The fork's definition is as upstream had it before the commit and upstream owns the path: the change can be taken as it is, by an explicit step.")
-                      (:defer (format nil "The fork's definition stands as ~(~A~) against upstream's: a person must compare what the local version does that the commit changes." relation)))))
+                      (:defer (format nil "In the fork this definition is: ~A. A person must compare what the fork's text does that the commit changes." (relation-label relation))))))
     (make-decision :commit commit-sha :subject (change-subject change) :kind decision-kind :status :proposed :rationale rationale
                    :evidence (fork-situation-claims situation) :proposed-by "rule")))
 
@@ -801,7 +860,9 @@ commit and subject is a conflict (its id is that of the recorded one, which diff
                                   (multiple-value-bind (category should-own claim) (ownership-of policy path (definition-change-key change) owners)
                                     (make-change-assessment
                                      :change change :situation situation :owners owners
-                                     :ownership (list :category category :should-own should-own :claim claim)
+                                     :ownership (list :category category :should-own should-own :claim claim
+                                                      :statements (checkout-ownership-claims policy path (definition-change-key change))
+                                                      :outside (outside-ownership-claims policy path (definition-change-key change) situation))
                                      :impact (impact-of change situation index policy owners)
                                      :proposal (propose-decision sha change situation category)
                                      :recorded (ledger-find ledger sha (change-subject change))

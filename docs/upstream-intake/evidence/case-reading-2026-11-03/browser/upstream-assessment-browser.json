@@ -1,0 +1,23 @@
+{
+ "kind": "served-Catalog-read-only-case-58a2b2c",
+ "startedAtUTC": "2026-11-03T11:59:02.653Z",
+ "finishedAtUTC": "2026-11-03T11:59:16.556Z",
+ "mode": "--origin",
+ "origin": "http://127.0.0.1:8099",
+ "success": true,
+ "failure": null,
+ "steps": [
+  "Catalog → Upstream Intake → Text pages → Assessing an Upstream Commit: the five terms, the case in five steps, 2 examples with the marker \"Not run here: no operation contract\", no run button",
+  "the link evaluated when the page rendered: the commit pane opens (no run button was clicked; none exists)",
+  "commit → the upstream change: the type list before and after, handler 1 unchanged, handler 2 changed",
+  "commit → function:initialize-fedwiki (a reference): file, ASDF system, digest and source of the fork's definition, where the changed type list stands",
+  "commit → Ownership: ASDF system now, path rule, what this checkout states, what #21 proposes (not in force), and \"Not decided for this definition\"",
+  "Ownership → the ASDF system hyperbook/fedwiki (an object of the image): the owner is reachable",
+  "commit → the decision prepare-upstream-contribution: rationale, evidence by status, required migration, verification; a proposal, not accepted",
+  "decision → a claim: its text and its basis",
+  "commit → the change: five parts and the list of what is still open",
+  "at 520px wide: the commit pane does not scroll sideways (477 <= 477), no element clips its text, no identifier is wider than its box"
+ ],
+ "errors": [],
+ "externalRequests": []
+}

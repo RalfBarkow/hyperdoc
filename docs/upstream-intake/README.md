@@ -17,6 +17,23 @@ It builds on what was there and adds one layer:
 | Inspector views and the chain as a Topicmap workspace | `dreyeck/inspector/upstream-assessment` | **new**, on `dreyeck/inspector/topicmap` |
 | The page and examples that read it | `dreyeck/upstream-intake` (the existing HyperBook, one page more) | extended |
 
+## Terms
+
+A question about an upstream commit mixes five relations. They are different, and the assessment keeps them apart.
+
+| Term | A relation of | Found from | The assessment says | It does not say |
+|---|---|---|---|---|
+| **Git fork** | history | the fork's Git: objects present, `merge-base --is-ancestor` | `Git ancestry`: not available, available not integrated, already integrated | whether the commit's definitions stand in the fork's source |
+| **Library dependency** | loading | the ASDF definitions as text: `:depends-on`, component paths | which systems list a file and which depend on them | anything that loading would do; nothing is loaded |
+| **Local definition** | text | digests of canonical syntax trees, compared | unchanged, adopted, changed, changed-part-elsewhere, moved, absent, ambiguous | why the text differs |
+| **Dreyeck extension** | intent | not from source text; from what a document of the checkout states, quoted and checked | the statement, with its source | that a definition is an extension, unless a recorded inventory says so |
+| **Code ownership** | maintenance | the ASDF owner (derived), the path default (derived), statements and proposals (observed in their source) | all three side by side, and whether the intended owner is decided | a decision; ownership here is never inferred from where a file came from |
+
+A proposal that is not integrated (today: the per-definition inventory of draft #21) is shown as *proposed elsewhere, not in force*. It is recorded as data with
+its source, the head commit it was read at and the digest of its file, and it is compared by digest with the text of the fork now. It changes no category, no
+proposal and no decision. Integrating #21 would put an inventory in `docs/code-ownership/`, which `default-ownership-policy` already reads; the statements file
+would then be superseded by it.
+
 ## What is kept apart
 
 | | Where it comes from | Who changes it |
@@ -103,7 +120,7 @@ are followed by the digest of their text) the assessment gives:
 1. **What upstream changed**: the definition before and after, the smallest changed list pairs (`CHANGED-FRAGMENTS`), and the handler forms of the
    definition with what each protects and which clauses it has, so that "which attempt did this change" is a derived fact.
 2. **Where the definition stands in the fork**: `:unchanged` (as upstream had it before), `:adopted` (as upstream has it after), `:changed` (a local version),
-   `:replaced` (its changed part stands in other definitions, before, after or extended), `:moved` (the same key at another path), `:absent`.
+   `:changed-part-elsewhere` (the text that the commit changed no longer stands in it, and the same text stands, before, after or extended, in other definitions: **a finding about text, not a statement that those definitions replace this one or behave the same**; the relation was called `:replaced` until 2026-11-03, and decisions recorded under that name stay in force, because the situation digest still reads it as `replaced`), `:moved` (the same key at another path), `:absent`.
 3. **Which ASDF system owns it now**, from the ASDF definitions of the checkout (component pathnames; nothing is loaded), and **which should**, from the
    ownership policy: the contract's library paths are upstream-owned, everything else dreyeck-owned, and an ownership inventory, when the checkout has one
    (`docs/code-ownership/inventory.lisp-data`), decides case by case.
@@ -111,6 +128,28 @@ are followed by the digest of their text) the assessment gives:
    contract files that name it. A mention is a lead, not proof of a call.
 5. **A proposal**, by rule: `:adopt-upstream-change`, `:already-covered`, or `:defer`; never executed. A person's **recorded decision** stands beside it, from the
    ledger: also `:move-dreyeck-extension`, `:prepare-upstream-contribution`, `:do-not-adopt`.
+
+## Reading it: objects, not a table
+
+The Inspector views are laid out for two kinds of reading, the distinction that Hans Peter Willberg and Friedrich Forssman draw in *Lesetypografie* (informing and consulting reading). *Informing* reading is a glance down a pane that may be narrow: one idea per block, headings that
+differ by weight and size, the labels in a column of their own, a measure of about 70 characters, left-aligned and ragged. *Consulting* reading looks something
+up and goes on: every definition, ASDF system, claim, decision and ownership judgement that the text names is an Inspector reference, drawn alike (underlined,
+one colour), and no identifier is cut off. Identifiers wrap where they must, they are never clipped or hidden, and nothing uses a `nowrap` table cell. (The
+Inspector's own title bar clips what does not fit; the views therefore keep the title short and put the full identifier in the first heading.) The commit
+view lists each changed definition as a card with its references: the change, the situation in the fork, the definitions that the fork has, the ASDF system, the
+ownership judgement and the decisions. `dreyeck/upstream-assessment/tests` checks that those references are there, that there is no table of prose, and that the
+style does not clip; `scripts/test-upstream-assessment-browser.mjs` walks the case in a served Catalog with a real browser, from the page to the claim, at 1280 and at 520 pixels.
+
+## Reading a page that links an example, served
+
+`defexample` marks a function of no arguments as an example. In a served Catalog the page shows its source with a marker, `▷`, whose tooltip reads *Not run here:
+no operation contract*. That marker is about **execution**: upstream puts a run button before an example's source, and dreyeck offers it only for an example
+with a reviewed operation contract. The link `<a expr="(example)">` is **navigation**: the page's own expression is evaluated when the page renders, which a
+visitor cannot choose, and the Inspector opens its result. These examples have no contract, deliberately, because nothing needs to run; `check-example-navigation-needs-no-contract`
+asserts that a served page leads to the assessment, the chain and the run, offers no thunk, shows the marker, refuses a run obtained anyway, and that a development
+server offers the button. If an execution is ever needed, the proposal is a contract for that one example: observational, reading only `docs/upstream-intake/` and
+the checkout's source files, opening no Git repository, running no process, fetching and writing nothing, with the tests that show no repository changed. None is
+registered.
 
 ## The worked example: 58a2b2c "Catch more name service errors"
 
@@ -120,9 +159,9 @@ read-only look at upstream; the commit's objects are not in this checkout) shows
 - **the changed handler**: the second of the two `handler-case` forms, the one that protects `fetch-sitemap` and `fetch-plugin-data`;
 - **the first connection attempt**, the HTTPS probe with `usocket:socket-connect`, as its own handler with clauses `connection-refused-error` and
   `ns-host-not-found-error`: *unchanged* by the commit (derived from the syntax of the two texts);
-- **the fork**: `:REPLACED`. `make-fedwiki` is there, but the changed type list stands in `initialize-fedwiki` (`hyperbook-fedwiki/fedwiki.lisp`). The upstream
+- **the fork**: `:CHANGED-PART-ELSEWHERE`. `make-fedwiki` is there, but the text of the changed type list stands in `initialize-fedwiki` (`hyperbook-fedwiki/fedwiki.lisp`), which the fork's `make-fedwiki` calls. That `initialize-fedwiki` is the dreyeck counterpart of upstream's second handler is a working hypothesis from reading both; no rule equates them. The upstream
   hunk does not apply to the fork's file; with RalfBarkow/hyperdoc#15 merged the same finding reads "extended" instead of "before";
-- **owner**: `hyperbook/fedwiki`, upstream-owned; dependents, tests, the HyperDoc pages and the contract files that may be affected;
+- **owner**: three things side by side, none of them a decision for this definition: the ASDF system that lists the file now (`hyperbook/fedwiki`, derived), the path default (upstream-owned, derived), what `docs/hyperdoc-upstream-boundary.md` says of the FedWiki initialization deltas (reusable library fixes, candidates for contribution; quoted, and the quotation is checked against the document), and what the draft RalfBarkow/hyperdoc#21 proposes (`:reusable-extension`, target `hyperbook/fedwiki`, `:pending`; **not integrated, not in force**, recorded in `ownership-statements.lisp-data` with the head commit and the file's digest). The intended owner is not decided; the views say so under *Open*. Dependents, tests, the HyperDoc pages and the contract files that may be affected;
 - **issue #13 and PR #15**: the analysis of #15 is *reused, not redone*: its measured scenario matrix and the `ns-unknown-error` evidence are imported byte for
   byte (`docs/upstream-intake/evidence/58a2b2c/`, with their digests and their source commit) and the decisions cite them. The matrix shows that upstream
   `58a2b2c` still ends the process in the first connection attempt, with the real resolver, and survives the site-map step;
@@ -169,4 +208,5 @@ subject cannot be overwritten. The worked example has its own checks against the
 | `dreyeck/src/upstream-assessment-hyperdoc.lisp`, `dreyeck/pages/upstream-intake/Assessing an Upstream Commit.html` | the examples and the page |
 | `scripts/upstream-intake.lisp` | the entry point |
 | `docs/upstream-intake/state.lisp-data`, `ledger.lisp-data`, `evidence/` | the recorded state, decisions and evidence |
+| `docs/upstream-intake/ownership-statements.lisp-data` | what is said about ownership: quotations from this checkout, and the proposal of a draft that is not in force |
 | `dreyeck/tests/upstream-assessment*.lisp` | the tests |

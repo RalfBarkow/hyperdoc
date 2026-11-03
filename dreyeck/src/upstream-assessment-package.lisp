@@ -21,9 +21,9 @@
    #:definition-change-after #:definition-change-fragments #:definition-change-handlers #:definition-change-counterparts #:definition-changes #:loose-key
    ;; the fork
    #:fork-index #:make-fork-index #:fork-integration #:fork-situation #:fork-situation-relation #:fork-situation-locations
-   #:fork-situation-fragments #:fork-situation-claims #:fork-situation-counterparts #:situation-of #:situation-digest
+   #:fork-situation-fragments #:fork-situation-claims #:fork-situation-counterparts #:fork-situation-definitions #:fork-situation-owners #:relation-label #:outside-ownership-claims #:checkout-ownership-claims #:policy-outside #:situation-of #:situation-digest
    #:ownership-policy #:make-ownership-policy #:ownership-of #:system-owners-of #:dependent-systems
-   #:impact-of #:impact-systems #:impact-tests #:impact-callers #:impact-pages #:impact-contracts #:impact-claims
+   #:impact-of #:impact-systems #:impact-tests #:impact-callers #:impact-pages #:impact-contracts #:impact-claims #:impact-caller-owners
    ;; decisions
    #:decision #:make-decision #:decision-id #:decision-commit #:decision-subject #:decision-kind #:decision-status
    #:decision-rationale #:decision-evidence #:decision-required-migration #:decision-verification #:decision-proposed-by
