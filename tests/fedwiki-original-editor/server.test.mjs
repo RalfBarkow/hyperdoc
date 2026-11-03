@@ -10,7 +10,7 @@ import path from 'node:path'
 import {spawn} from 'node:child_process'
 import {createHash} from 'node:crypto'
 import {fileURLToPath} from 'node:url'
-import {slug, codeId, paragraphId, code, initialPage} from './fixture.mjs'
+import {slug, codeId, paragraphId, code, initialPage, upstreamSlug, upstreamParagraphId, upstreamPage} from './fixture.mjs'
 
 const here = path.dirname(fileURLToPath(import.meta.url))
 
@@ -31,6 +31,7 @@ function freshSite() {
   const site = path.join(work,'site')
   fs.mkdirSync(path.join(site,'pages'),{recursive:true}); fs.mkdirSync(path.join(work,'home'))
   fs.writeFileSync(path.join(site,'pages',slug),JSON.stringify(initialPage(),null,2)+'\n')
+  fs.writeFileSync(path.join(site,'pages',upstreamSlug),JSON.stringify(upstreamPage('An introduction.'),null,2)+'\n')
   return {work, site}
 }
 
@@ -113,6 +114,27 @@ test('the frame adapter serves the one Code item to the exact loopback parent, a
     }
     const other = await fetch(`${server.origin}/view/welcome-visitors?hyperdocCodeItem=${codeId}&revision=${revision}`)
     assert.equal(other.status, 409)
+    assert.deepEqual(snapshot(site), before)
+  } finally { await server.stop() }
+})
+
+test('the frame adapter serves the one Paragraph item of its own page, and no other pairing', async () => {
+  const {work, site} = freshSite(), before = snapshot(site)
+  const server = await start({site, work, legacy:true, parentOrigin:'http://127.0.0.1:41234'})
+  try {
+    const revision = createHash('sha256').update(fs.readFileSync(path.join(site,'pages',upstreamSlug))).digest('hex')
+    const view = query => fetch(`${server.origin}/view/${upstreamSlug}?${query}`)
+    const served = await view(`hyperdocItem=${upstreamParagraphId}&revision=${revision}`)
+    assert.equal(served.status, 200)
+    const config = JSON.parse((await served.text()).match(/<script id="hyperdoc-code-target" type="application\/json">(.*?)<\/script>/)[1])
+    assert.deepEqual(config, {site:'fedwiki:original-editor-test.invalid', slug:upstreamSlug, id:upstreamParagraphId})
+    for (const query of [`hyperdocItem=${upstreamParagraphId}&revision=stale`,
+                         `hyperdocItem=${codeId}&revision=${revision}`,            // another page's item
+                         `hyperdocCodeItem=${upstreamParagraphId}&revision=${revision}`]) { // legacy parameter is Code only
+      assert.equal((await view(query)).status, 409, query)
+    }
+    // The Paragraph's id on the Code page, and the Code's id with the new parameter on the Code page, are not a pairing either.
+    assert.equal((await fetch(`${server.origin}/view/${slug}?hyperdocItem=${upstreamParagraphId}&revision=${sha(site)}`)).status, 409)
     assert.deepEqual(snapshot(site), before)
   } finally { await server.stop() }
 })

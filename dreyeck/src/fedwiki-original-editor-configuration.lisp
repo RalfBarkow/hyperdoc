@@ -12,7 +12,8 @@
 ;;;;     No mode for a Wiki farm exists: that needs an authorization decision (docs/fedwiki-original-editor-farm/README.md).
 (defpackage #:dreyeck/fedwiki-original-editor-configuration
   (:use #:cl)
-  (:export #:+site+ #:+slug+ #:+code-item-id+ #:+root-variable+ #:+origin-variable+ #:+mode-variable+
+  (:export #:+site+ #:+slug+ #:+code-item-id+ #:+paragraph-slug+ #:+paragraph-item-id+ #:embedded-item-editor-url
+           #:+root-variable+ #:+origin-variable+ #:+mode-variable+
            #:editor-configuration #:read-editor-configuration
            #:configuration-root #:configuration-origin #:configuration-requested-mode #:configuration-mode
            #:configuration-problems #:configuration-site #:configuration-slug #:configuration-code-item-id
@@ -25,6 +26,11 @@
 (defparameter +site+ "fedwiki:original-editor-test.invalid")
 (defparameter +slug+ "original-editor-test")
 (defparameter +code-item-id+ "2222222222222222")
+;;; The second declared target, on the same disposable site: the Paragraph Item that is the Wiki counterpart of the
+;;; introductory paragraph of "Assessing an Upstream Commit" (docs/fedwiki-paragraph-association.md). The original server
+;;; adapter (tests/fedwiki-original-editor/server.mjs) holds the same pair and refuses any other.
+(defparameter +paragraph-slug+ "assessing-an-upstream-commit")
+(defparameter +paragraph-item-id+ "5555555555555555")
 
 (defparameter +root-variable+ "HYPERDOC_FEDWIKI_EDITOR_TEST_ROOT")
 (defparameter +origin-variable+ "HYPERDOC_FEDWIKI_EDITOR_TEST_ORIGIN")
@@ -139,6 +145,14 @@ meets the Wiki server's own authorization."
   (and (editor-offered-p configuration) (stringp revision)
        (format nil "~A/view/~A?hyperdocCodeItem=~A&revision=~A" (configuration-origin configuration)
                (configuration-slug configuration) (configuration-code-item-id configuration) revision)))
+
+(defun embedded-item-editor-url (configuration slug item-id revision)
+  "The frame URL of the original editor of the one declared Item ITEM-ID of page SLUG for REVISION, or NIL unless the
+editor is offered. Only the pair (+PARAGRAPH-SLUG+, +PARAGRAPH-ITEM-ID+) is a target here; the server adapter refuses
+every other pairing as well."
+  (and (editor-offered-p configuration) (stringp revision)
+       (equal slug +paragraph-slug+) (equal item-id +paragraph-item-id+)
+       (format nil "~A/view/~A?hyperdocItem=~A&revision=~A" (configuration-origin configuration) slug item-id revision)))
 
 (defun mode-description (configuration)
   (ecase (configuration-mode configuration)

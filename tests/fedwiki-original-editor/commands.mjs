@@ -6,7 +6,7 @@ import path from 'node:path'
 import {createHash} from 'node:crypto'
 import {spawn, spawnSync} from 'node:child_process'
 import {fileURLToPath} from 'node:url'
-import {slug, initialPage} from './fixture.mjs'
+import {slug, initialPage, upstreamSlug, upstreamPage, introductionText} from './fixture.mjs'
 
 const here = path.dirname(fileURLToPath(import.meta.url))
 const repo = path.resolve(here, '../..')
@@ -107,6 +107,8 @@ async function interactive(sbcl) {
   console.log('Dedicated reusable FASL cache: '+faslCache)
   fs.mkdirSync(path.join(site,'pages'),{recursive:true}); fs.mkdirSync(path.join(work,'home'))
   fs.writeFileSync(path.join(site,'pages',slug),JSON.stringify(initialPage(),null,2)+'\n')
+  // Seeded once from the checkout's HTML paragraph (read only); afterwards the Wiki Item is the authoritative text.
+  fs.writeFileSync(path.join(site,'pages',upstreamSlug),JSON.stringify(upstreamPage(introductionText(fs.readFileSync(new URL('../../dreyeck/pages/upstream-intake/Assessing an Upstream Commit.html',import.meta.url),'utf8'))),null,2)+'\n')
   const wikiPort = await unusedPort(process.env.HYPERDOC_FEDWIKI_WIKI_PORT)
   const catalogPort = await unusedPort(process.env.HYPERDOC_FEDWIKI_CATALOG_PORT,[wikiPort])
   const wikiOrigin = `http://127.0.0.1:${wikiPort}`, catalogOrigin = `http://127.0.0.1:${catalogPort}`

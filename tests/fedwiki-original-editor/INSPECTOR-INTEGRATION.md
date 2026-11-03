@@ -10,6 +10,8 @@ Before edits, a fresh Nix/SBCL process observed the ASDF origins of `dreyeck`,
 `hyperbook` and `dreyeck/fedwiki-original-editor-demo` at that worktree.
 Existing worktrees and running Lisp images were not reused or modified.
 
+See also `docs/fedwiki-paragraph-association.md` for the second target, a `paragraph` Item.
+
 Only `(fedwiki:original-editor-test.invalid, original-editor-test,
 2222222222222222)` of type `code` is supported. The test fixture starts with
 `(defun square (x) (* x x))`, language `lisp`. No new generic editor framework,
