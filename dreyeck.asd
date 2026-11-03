@@ -106,7 +106,8 @@
   :COMPONENTS
   ((:FILE "wiki-link-slug-contract")
    (:FILE "fedwiki-journal-context-debugger-smoke")
-   (:FILE "fedwiki-story-item-transfer-smoke"))
+   (:FILE "fedwiki-story-item-transfer-smoke")
+   (:FILE "fedwiki-name-service-smoke"))
   :PERFORM
   (ASDF/LISP-ACTION:TEST-OP (OPERATION COMPONENT)
    (DECLARE (IGNORE OPERATION COMPONENT))
@@ -115,7 +116,9 @@
    (UIOP/PACKAGE:SYMBOL-CALL :DREYECK/FEDWIKI-JOURNAL-CONTEXT-DEBUGGER/TESTS
                              :RUN-FEDWIKI-JOURNAL-CONTEXT-DEBUGGER-TESTS)
    (UIOP/PACKAGE:SYMBOL-CALL :DREYECK/FEDWIKI-STORY-ITEM-TRANSFER/TESTS
-                             :RUN-FEDWIKI-STORY-ITEM-TRANSFER-TESTS)))
+                             :RUN-FEDWIKI-STORY-ITEM-TRANSFER-TESTS)
+   (UIOP/PACKAGE:SYMBOL-CALL :DREYECK/FEDWIKI-NAME-SERVICE/TESTS
+                             :RUN-FEDWIKI-NAME-SERVICE-TESTS)))
 
 (ASDF/PARSE-DEFSYSTEM:DEFSYSTEM #:DREYECK/FEDWIKI-NAVIGATION
   :DESCRIPTION

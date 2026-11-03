@@ -96,9 +96,13 @@ existing production behavior and escape to the caller."
         (funcall sitemap-fetcher wiki)
         (funcall plugin-data-fetcher wiki)
         (setf (status-of wiki) t))
+    ;; USOCKET:NS-ERROR covers every resolver failure (host not found, try
+    ;; again, no recovery, unknown), not only a missing host. This runs in the
+    ;; initializer thread: a condition that escapes it invokes the debugger,
+    ;; which ends the whole process when the debugger is disabled (sbcl --script).
     ((or stream-error
          usocket:timeout-error
-         usocket:ns-host-not-found-error
+         usocket:ns-error
          shasht:shasht-invalid-char) (condition)
       (setf (status-of wiki) condition))))
 

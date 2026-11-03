@@ -159,6 +159,46 @@
              (HYPERBOOK/FEDWIKI::STORY-ITEM-IMAGE-PRESENTATION-HINTS ITEM)))))
   T)
 
+(defparameter +fedwiki-sitemap+ "99521dc6a8df21fd56fc0e9da25302bfb7b87f3f"
+  "Last revision of hyperbook-fedwiki/fedwiki.lisp before the name-service delta.
+It already carries the retained-sitemap forms added after +PREVIOUS+, which the
+inventory had not recorded.")
+
+(defun fedwiki-retained-revision (path)
+  (if (string= path "hyperbook-fedwiki/fedwiki.lisp") +fedwiki-sitemap+ +previous+))
+
+(defparameter +name-service-delta+
+  '("hyperbook-fedwiki/fedwiki.lisp" "INITIALIZE-FEDWIKI" "NS-ERROR"
+    "NS-HOST-NOT-FOUND-ERROR")
+  "The one deliberate change to this file after +FEDWIKI-SITEMAP+:
+INITIALIZE-FEDWIKI handles USOCKET:NS-ERROR, which covers every name-service
+failure (including NS-TRY-AGAIN-ERROR), where it handled only
+NS-HOST-NOT-FOUND-ERROR. Candidate upstream contribution.")
+
+(defun undo-name-service-delta (path forms)
+  "FORMS with the name-service delta of PATH reverted, so that every form can
+still be compared with the revision it is pinned to. The revert is confined to the
+named form and must apply exactly once, so no other change can hide behind it."
+  (destructuring-bind (delta-path form-name new old) +name-service-delta+
+    (if (not (string= path delta-path))
+        forms
+        (let ((count 0))
+          (labels ((revert (tree)
+                     (cond ((consp tree)
+                            (cons (revert (car tree)) (revert (cdr tree))))
+                           ((and (symbolp tree) tree (string= (symbol-name tree) new))
+                            (incf count)
+                            (if (symbol-package tree)
+                                (intern old (symbol-package tree))
+                                (make-symbol old)))
+                           (t tree)))
+                   (target-p (form)
+                     (and (consp form) (consp (cdr form)) (symbolp (second form))
+                          (second form) (string= (symbol-name (second form)) form-name))))
+            (prog1 (mapcar (lambda (form) (if (target-p form) (revert form) form))
+                           forms)
+              (assert (= 1 count))))))))
+
 (COMMON-LISP:DEFUN DREYECK/HYPERDOC/LIBRARY-TESTS:RUN-TESTS NIL
                    (DREYECK/HYPERDOC/LIBRARY-TESTS::CHECK-FEDWIKI-IMAGE-COMPATIBILITY)
                    (COMMON-LISP:LET*
@@ -224,10 +264,10 @@
                                                                                                                          COMMON-LISP:EQUAL))
                                                                                            (COMMON-LISP:ASSERT
                                                                                                                (DREYECK/HYPERDOC/LIBRARY-TESTS::SOURCE-EQUAL
-                                                                                                                                                             DREYECK/HYPERDOC/LIBRARY-TESTS::LOCAL
+                                                                                                                                                             (UNDO-NAME-SERVICE-DELTA DREYECK/HYPERDOC/LIBRARY-TESTS::PATH DREYECK/HYPERDOC/LIBRARY-TESTS::LOCAL)
                                                                                                                                                              (DREYECK/HYPERDOC/LIBRARY-TESTS::FORMS-AT
                                                                                                                                                                                                        DREYECK/HYPERDOC/LIBRARY-TESTS::ROOT
-                                                                                                                                                                                                       DREYECK/HYPERDOC/LIBRARY-TESTS::+PREVIOUS+
+                                                                                                                                                                                                       (FEDWIKI-RETAINED-REVISION DREYECK/HYPERDOC/LIBRARY-TESTS::PATH)
                                                                                                                                                                                                        DREYECK/HYPERDOC/LIBRARY-TESTS::PATH)))
                                                                                            (COMMON-LISP:LET*
                                                                                                              ((DREYECK/HYPERDOC/LIBRARY-TESTS::ALLOWED
