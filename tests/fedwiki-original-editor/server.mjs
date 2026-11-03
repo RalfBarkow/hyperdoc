@@ -6,7 +6,11 @@ import fs from 'node:fs'
 import {createHash} from 'node:crypto'
 import server from 'wiki-server'
 const [site, port, legacy] = process.argv.slice(2)
-if (!site || !port) throw Error('SITE PORT LEGACY required')
+// The only Items whose original editor a frame may expose: by page slug, then Item id -> type. These are the Items of the
+// disposable test page; no HTML file and no second page is involved. The legacy parameter hyperdocCodeItem is Code only.
+const targets = {
+  'original-editor-test': {'2222222222222222':'code', '1111111111111111':'paragraph'},
+}
 const packages = path.join(path.dirname(fileURLToPath(import.meta.url)), 'node_modules')
 const app = await server({
   root: path.join(packages, 'wiki-server'),
@@ -21,21 +25,25 @@ app.on('owner-set', () => {
       res.writeHead(200,{'Content-Type':'text/javascript','Cache-Control':'no-store'})
       return res.end(fs.readFileSync(new URL('./inspector-code-editor.js',import.meta.url)))
     }
-    if (url.searchParams.has('hyperdocCodeItem')) {
+    if (url.searchParams.has('hyperdocCodeItem') || url.searchParams.has('hyperdocItem')) {
       try {
         const parentOrigin = process.env.HYPERDOC_FEDWIKI_INSPECTOR_ORIGIN
-        if (req.method!=='GET' || url.pathname!=='/view/original-editor-test' || legacy!=='true' ||
-            !/^http:\/\/127\.0\.0\.1:\d+$/.test(parentOrigin || '') ||
-            url.searchParams.get('hyperdocCodeItem')!=='2222222222222222') throw Error('Not an authorized isolated Code target')
-        const bytes = fs.readFileSync(path.join(site,'pages','original-editor-test'))
+        const slug = url.pathname.startsWith('/view/') ? url.pathname.slice('/view/'.length) : ''
+        const items = Object.hasOwn(targets, slug) ? targets[slug] : null
+        const legacyParameter = !url.searchParams.has('hyperdocItem')
+        const requested = url.searchParams.get(legacyParameter ? 'hyperdocCodeItem' : 'hyperdocItem')
+        const type = items && Object.hasOwn(items, requested) ? items[requested] : null
+        if (req.method!=='GET' || !type || (legacyParameter && type!=='code') || legacy!=='true' ||
+            !/^http:\/\/127\.0\.0\.1:\d+$/.test(parentOrigin || '')) throw Error(`Not an authorized isolated ${legacyParameter ? 'Code' : 'Item'} target`)
+        const bytes = fs.readFileSync(path.join(site,'pages',slug))
         if (url.searchParams.get('revision')!==createHash('sha256').update(bytes).digest('hex')) throw Error('Stale inspection: read the stored page again')
-        const matches = JSON.parse(bytes).story.filter(i=>i.id==='2222222222222222')
-        if (matches.length!==1 || matches[0].type!=='code') throw Error('Code target is not unique')
+        const matches = JSON.parse(bytes).story.filter(i=>i.id===requested)
+        if (matches.length!==1 || matches[0].type!==type) throw Error('Item target is not unique')
         // Reuse the original page/bootstrap at its normal origin/path. Only this
         // frame response gains the bounded adapter; all JS assets stay original.
-        const original = await fetch(`http://127.0.0.1:${port}/view/original-editor-test`)
+        const original = await fetch(`http://127.0.0.1:${port}/view/${slug}`)
         if (!original.ok) throw Error('Original Wiki bootstrap unavailable')
-        const config = JSON.stringify({site:'fedwiki:original-editor-test.invalid',slug:'original-editor-test',id:'2222222222222222'})
+        const config = JSON.stringify({site:'fedwiki:original-editor-test.invalid',slug,id:requested})
         const extension = `<style>
 body > :not(.main):not(#hyperdoc-code-toolbar){display:none!important}
 body .main{position:static!important;margin:0!important;padding:8px!important;overflow:visible!important}
@@ -43,9 +51,9 @@ body .main{position:static!important;margin:0!important;padding:8px!important;ov
 .hyperdoc-selected-page{position:static!important;width:auto!important;margin:0!important;min-height:0!important;box-shadow:none!important}
 .hyperdoc-selected-page > :not(.paper){display:none!important}
 .hyperdoc-selected-page > .paper > :not(.story){display:none!important}
-.story > :not(.hyperdoc-selected-code){display:none!important}
+.story > :not(.hyperdoc-selected-item){display:none!important}
 #hyperdoc-code-toolbar{display:block!important;padding:8px;font:14px sans-serif}
-.hyperdoc-selected-code textarea{width:95%;min-height:120px}
+.hyperdoc-selected-item textarea{width:95%;min-height:120px}
 </style><script id="hyperdoc-code-target" type="application/json">${config}</script><script src="/hyperdoc/code-editor.js" defer></script>`
         res.writeHead(200,{'Content-Type':'text/html','Cache-Control':'no-store','Content-Security-Policy':`frame-ancestors ${parentOrigin}`})
         return res.end((await original.text()).replace('</body>',extension+'</body>'))

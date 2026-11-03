@@ -255,7 +255,11 @@ try {
   assert((await last().innerText()).includes(sha()))
   await hyperdoc.screenshot({path:path.join(work,'hyperdoc-reread.png'),fullPage:true})
   assert(fs.readFileSync(path.join(work,'catalog.log'),'utf8').includes('PARSE-TREE-REFERENCE'))
-  assert.deepEqual(report.externalRequests,[])
+  // The existing Story view asks for the page origin's favicon. The test site's origin is the reserved, never resolvable
+  // original-editor-test.invalid, and the context route aborts the request: it is recorded, and nothing else may leave.
+  const faviconUrl = 'https://original-editor-test.invalid/favicon.png'
+  report.abortedFaviconRequests = report.externalRequests.filter(u=>u===faviconUrl).length
+  assert.deepEqual(report.externalRequests.filter(u=>u!==faviconUrl),[])
   if (inspectorCase) assert.equal(context.pages().length,1)
   report.steps.push('Node writer stopped; HyperDoc independently reread the same file, matching JSON, journal, SHA-256 and generic rendering; explicit P coordinate checked in Lisp parse tree')
   // Default legacy security has no browser security plugin. Do not hide it with a shim.

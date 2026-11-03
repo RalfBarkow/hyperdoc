@@ -117,6 +117,29 @@ test('the frame adapter serves the one Code item to the exact loopback parent, a
   } finally { await server.stop() }
 })
 
+test('the frame adapter serves the Paragraph Item of the same page by its id, and no other pairing', async () => {
+  const {work, site} = freshSite(), before = snapshot(site)
+  const server = await start({site, work, legacy:true, parentOrigin:'http://127.0.0.1:41234'})
+  try {
+    const revision = sha(site)
+    const view = (query, page=slug) => fetch(`${server.origin}/view/${page}?${query}`)
+    const served = await view(`hyperdocItem=${paragraphId}&revision=${revision}`)
+    assert.equal(served.status, 200)
+    const config = JSON.parse((await served.text()).match(/<script id="hyperdoc-code-target" type="application\/json">(.*?)<\/script>/)[1])
+    assert.deepEqual(config, {site:'fedwiki:original-editor-test.invalid', slug, id:paragraphId})
+    assert.equal((await view(`hyperdocItem=${codeId}&revision=${revision}`)).status, 200) // the generic parameter serves Code too
+    for (const query of [`hyperdocItem=${paragraphId}&revision=stale`,
+                         `hyperdocItem=${paragraphId}`,                             // no revision
+                         `hyperdocItem=9999999999999999&revision=${revision}`,      // not an Item of the page
+                         `hyperdocCodeItem=${paragraphId}&revision=${revision}`]) { // the legacy parameter is Code only
+      assert.equal((await view(query)).status, 409, query)
+    }
+    assert.equal((await view(`hyperdocItem=${paragraphId}&revision=${revision}`, 'welcome-visitors')).status, 409)
+    assert.equal((await fetch(`${server.origin}/view/${slug}?hyperdocItem=${paragraphId}&revision=${revision}`, {method:'POST'})).status, 409)
+    assert.deepEqual(snapshot(site), before)
+  } finally { await server.stop() }
+})
+
 test('the frame adapter refuses a parent that is not a loopback origin', async () => {
   const {work, site} = freshSite()
   for (const parentOrigin of ['https://dreyeck.ch', 'http://localhost:41234', undefined]) {

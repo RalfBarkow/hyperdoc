@@ -10,3 +10,4 @@ export function initialPage() {
       {type:'add', id:paragraphId, item:paragraph, date:1700000000001},
       {type:'add', id:codeId, item:code, after:paragraphId, date:1700000000002}]})
 }
+

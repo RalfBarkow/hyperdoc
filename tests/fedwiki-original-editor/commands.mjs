@@ -204,8 +204,8 @@ async function main() {
     const browser = detectBrowser()
     console.log(`Browser verified: ${browser.executable}\n${browser.version}`)
     const output = args[0] || fs.mkdtempSync(path.join(process.env.HYPERDOC_FEDWIKI_TMPDIR || '/tmp','hyperdoc-wiki-e2e-'))
-    for (const mode of [[],['--inspector']]) {
-      const child = spawn(process.execPath,[path.join(here,'run.mjs'),sbcl,browser.executable,output,...mode],
+    for (const [script,...mode] of [['run.mjs'],['run.mjs','--inspector'],['run-paragraph.mjs']]) {
+      const child = spawn(process.execPath,[path.join(here,script),sbcl,browser.executable,output,...mode],
         {cwd:repo,stdio:'inherit',env:lispEnvironment(path.resolve(output))})
       const forward = () => child.kill('SIGINT')
       process.on('SIGINT',forward);process.on('SIGTERM',forward)
