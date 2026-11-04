@@ -1,0 +1,319 @@
+{
+  "browser": "Chromium 153.0.8010.12",
+  "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/153.0.8010.12 Safari/537.36",
+  "console": [
+    "error: Failed to load resource: net::ERR_TUNNEL_CONNECTION_FAILED",
+    "error: Failed to load resource: net::ERR_TUNNEL_CONNECTION_FAILED",
+    "error: Failed to load resource: net::ERR_TUNNEL_CONNECTION_FAILED",
+    "error: Failed to load resource: net::ERR_TUNNEL_CONNECTION_FAILED",
+    "error: Failed to load resource: net::ERR_TUNNEL_CONNECTION_FAILED",
+    "error: Failed to load resource: net::ERR_TUNNEL_CONNECTION_FAILED",
+    "error: Failed to load resource: net::ERR_TUNNEL_CONNECTION_FAILED",
+    "error: Failed to load resource: net::ERR_TUNNEL_CONNECTION_FAILED",
+    "error: Failed to load resource: net::ERR_TUNNEL_CONNECTION_FAILED"
+  ],
+  "pageErrors": [],
+  "failed": [
+    "GET https://ccnx-example.invalid/favicon.png net::ERR_TUNNEL_CONNECTION_FAILED",
+    "GET https://ccnx-example.invalid/favicon.png net::ERR_TUNNEL_CONNECTION_FAILED",
+    "GET https://ccnx-example.invalid/favicon.png net::ERR_TUNNEL_CONNECTION_FAILED",
+    "GET https://ccnx-example.invalid/favicon.png net::ERR_TUNNEL_CONNECTION_FAILED",
+    "GET https://ccnx-example.invalid/favicon.png net::ERR_TUNNEL_CONNECTION_FAILED",
+    "GET https://ccnx-example.invalid/favicon.png net::ERR_TUNNEL_CONNECTION_FAILED",
+    "GET https://ccnx-example.invalid/favicon.png net::ERR_TUNNEL_CONNECTION_FAILED",
+    "GET https://ccnx-example.invalid/favicon.png net::ERR_TUNNEL_CONNECTION_FAILED",
+    "GET https://ccnx-example.invalid/favicon.png net::ERR_TUNNEL_CONNECTION_FAILED"
+  ],
+  "badStatus": [],
+  "externalRequests": [
+    "https://ccnx-example.invalid/favicon.png",
+    "https://ccnx-example.invalid/favicon.png",
+    "https://ccnx-example.invalid/favicon.png",
+    "https://ccnx-example.invalid/favicon.png",
+    "https://ccnx-example.invalid/favicon.png",
+    "https://ccnx-example.invalid/favicon.png",
+    "https://ccnx-example.invalid/favicon.png",
+    "https://ccnx-example.invalid/favicon.png",
+    "https://ccnx-example.invalid/favicon.png",
+    "https://ccnx-example.invalid/favicon.png"
+  ],
+  "steps": [
+    {
+      "step": "Catalog -> The CCNx Federated Wiki",
+      "panes": 2,
+      "bookPaneText": ""
+    },
+    {
+      "step": "Text pages -> Reading the CCNx Federated Wiki",
+      "panes": 3
+    },
+    {
+      "followed": "One Page From Browser to NDN and Back",
+      "kind": "page",
+      "opened": "One Page From Browser to NDN and Back",
+      "panesBefore": 3,
+      "panesAfter": 4
+    },
+    {
+      "followed": "Identity, Versions and Signatures",
+      "kind": "page",
+      "opened": "Identity, Versions and Signatures",
+      "panesBefore": 4,
+      "panesAfter": 5
+    },
+    {
+      "followed": "Plain Text After CCNx",
+      "kind": "page",
+      "opened": "Plain Text After CCNx",
+      "panesBefore": 5,
+      "panesAfter": 6
+    },
+    {
+      "followed": "Reading the CCNx Federated Wiki",
+      "kind": "page",
+      "opened": "Reading the CCNx Federated Wiki",
+      "panesBefore": 6,
+      "panesAfter": 7
+    },
+    {
+      "backToMain": true
+    },
+    {
+      "followed": "the page as a Federated Wiki server stores it",
+      "kind": "expr",
+      "opened": "(object)",
+      "panesBefore": 7,
+      "panesAfter": 8
+    },
+    {
+      "followed": "the same page as the Main code leaves it in IndexedDB",
+      "kind": "expr (from a non-last pane)",
+      "panesBefore": 8,
+      "panesAfter": 8
+    }
+  ],
+  "reference": {
+    "catalogEntries": 1,
+    "mainPageTabHeading": [
+      "Reading the CCNx Federated Wiki",
+      "What this reading is, and is not",
+      "Three kinds of statement",
+      "The sources",
+      "The seven questions, answered briefly",
+      "Look at the example page",
+      "Reading order"
+    ],
+    "textPages": [
+      "Plain Text After CCNx",
+      "One Page From Browser to NDN and Back",
+      "Identity, Versions and Signatures",
+      "Plain Text After CCNx",
+      "the page as a Federated Wiki server stores it",
+      "the same page as the Main code leaves it in IndexedDB",
+      "One Page From Browser to NDN and Back",
+      "Identity, Versions and Signatures",
+      "Plain Text After CCNx"
+    ],
+    "linksFrom: Reading the CCNx Federated Wiki": {
+      "all": [
+        "Plain Text After CCNx",
+        "One Page From Browser to NDN and Back",
+        "Identity, Versions and Signatures",
+        "the page as a Federated Wiki server stores it",
+        "the same page as the Main code leaves it in IndexedDB"
+      ],
+      "followedTargets": [
+        "Plain Text After CCNx",
+        "One Page From Browser to NDN and Back",
+        "Identity, Versions and Signatures"
+      ]
+    },
+    "linksFrom: One Page From Browser to NDN and Back": {
+      "all": [
+        "Open page A",
+        "Open page B",
+        "Identity, Versions and Signatures"
+      ],
+      "followedTargets": [
+        "Identity, Versions and Signatures"
+      ]
+    },
+    "linksFrom: Identity, Versions and Signatures": {
+      "all": [
+        "Plain Text After CCNx"
+      ],
+      "followedTargets": [
+        "Plain Text After CCNx"
+      ]
+    },
+    "linksFrom: Plain Text After CCNx": {
+      "all": [
+        "open it",
+        "Identity, Versions and Signatures",
+        "form A",
+        "form B",
+        "Reading the CCNx Federated Wiki"
+      ],
+      "followedTargets": [
+        "Identity, Versions and Signatures",
+        "Reading the CCNx Federated Wiki"
+      ]
+    },
+    "allLinks": [
+      {
+        "from": "Reading the CCNx Federated Wiki",
+        "paneIndex": 6,
+        "link": "Plain Text After CCNx",
+        "panesAfter": 9,
+        "targetHeadings": [],
+        "targetStart": "html-pagePlain Text After CCNx Content Source Links Parse tree Backlinks URL Slots Print O"
+      },
+      {
+        "from": "Reading the CCNx Federated Wiki",
+        "paneIndex": 6,
+        "link": "One Page From Browser to NDN and Back",
+        "panesAfter": 9,
+        "targetHeadings": [],
+        "targetStart": "html-pageOne Page From Browser to NDN and Back Content Source Links Parse tree Backlinks U"
+      },
+      {
+        "from": "Reading the CCNx Federated Wiki",
+        "paneIndex": 6,
+        "link": "Identity, Versions and Signatures",
+        "panesAfter": 8,
+        "targetHeadings": [],
+        "targetStart": "html-pageIdentity, Versions and Signatures Content Source Links Parse tree Backlinks URL S"
+      },
+      {
+        "from": "Reading the CCNx Federated Wiki",
+        "paneIndex": 6,
+        "link": "the page as a Federated Wiki server stores it",
+        "panesAfter": 9,
+        "targetHeadings": [],
+        "targetStart": "local-fedwiki-pagePlain Text Example Story Page source Journal Links Backlinks URL Slots P"
+      },
+      {
+        "from": "Reading the CCNx Federated Wiki",
+        "paneIndex": 6,
+        "link": "the same page as the Main code leaves it in IndexedDB",
+        "panesAfter": 9,
+        "targetHeadings": [],
+        "targetStart": "local-fedwiki-pagePlain Text Example Story Page source Journal Links Backlinks URL Slots P"
+      },
+      {
+        "from": "Plain Text After CCNx",
+        "paneIndex": 5,
+        "link": "open it",
+        "panesAfter": 7,
+        "targetHeadings": [],
+        "targetStart": "local-fedwiki-pagePlain Text Example Story Page source Journal Links Backlinks URL Slots P"
+      },
+      {
+        "from": "Plain Text After CCNx",
+        "paneIndex": 5,
+        "link": "Identity, Versions and Signatures",
+        "panesAfter": 7,
+        "targetHeadings": [],
+        "targetStart": "html-pageIdentity, Versions and Signatures Content Source Links Parse tree Backlinks URL S"
+      },
+      {
+        "from": "Plain Text After CCNx",
+        "paneIndex": 5,
+        "link": "form A",
+        "panesAfter": 8,
+        "targetHeadings": [],
+        "targetStart": "local-fedwiki-pagePlain Text Example Story Page source Journal Links Backlinks URL Slots P"
+      },
+      {
+        "from": "Plain Text After CCNx",
+        "paneIndex": 5,
+        "link": "form B",
+        "panesAfter": 7,
+        "targetHeadings": [],
+        "targetStart": "local-fedwiki-pagePlain Text Example Story Page source Journal Links Backlinks URL Slots P"
+      },
+      {
+        "from": "Plain Text After CCNx",
+        "paneIndex": 5,
+        "link": "Reading the CCNx Federated Wiki",
+        "panesAfter": 8,
+        "targetHeadings": [],
+        "targetStart": "html-pageReading the CCNx Federated Wiki Content Source Links Parse tree Backlinks URL Slo"
+      },
+      {
+        "from": "Identity, Versions and Signatures",
+        "paneIndex": 4,
+        "link": "Plain Text After CCNx",
+        "panesAfter": 7,
+        "targetHeadings": [],
+        "targetStart": "html-pagePlain Text After CCNx Content Source Links Parse tree Backlinks URL Slots Print O"
+      },
+      {
+        "from": "One Page From Browser to NDN and Back",
+        "paneIndex": 3,
+        "link": "Open page A",
+        "panesAfter": 7,
+        "targetHeadings": [],
+        "targetStart": "local-fedwiki-pagePlain Text Example Story Page source Journal Links Backlinks URL Slots P"
+      },
+      {
+        "from": "One Page From Browser to NDN and Back",
+        "paneIndex": 3,
+        "link": "Open page B",
+        "panesAfter": 6,
+        "targetHeadings": [],
+        "targetStart": "local-fedwiki-pagePlain Text Example Story Page source Journal Links Backlinks URL Slots P"
+      },
+      {
+        "from": "One Page From Browser to NDN and Back",
+        "paneIndex": 3,
+        "link": "Identity, Versions and Signatures",
+        "panesAfter": 7,
+        "targetHeadings": [],
+        "targetStart": "html-pageIdentity, Versions and Signatures Content Source Links Parse tree Backlinks URL S"
+      },
+      {
+        "from": "Reading the CCNx Federated Wiki",
+        "paneIndex": 2,
+        "link": "Plain Text After CCNx",
+        "panesAfter": 6,
+        "targetHeadings": [],
+        "targetStart": "html-pagePlain Text After CCNx Content Source Links Parse tree Backlinks URL Slots Print O"
+      },
+      {
+        "from": "Reading the CCNx Federated Wiki",
+        "paneIndex": 2,
+        "link": "One Page From Browser to NDN and Back",
+        "panesAfter": 7,
+        "targetHeadings": [],
+        "targetStart": "html-pageOne Page From Browser to NDN and Back Content Source Links Parse tree Backlinks U"
+      },
+      {
+        "from": "Reading the CCNx Federated Wiki",
+        "paneIndex": 2,
+        "link": "Identity, Versions and Signatures",
+        "panesAfter": 6,
+        "targetHeadings": [],
+        "targetStart": "html-pageIdentity, Versions and Signatures Content Source Links Parse tree Backlinks URL S"
+      },
+      {
+        "from": "Reading the CCNx Federated Wiki",
+        "paneIndex": 2,
+        "link": "the page as a Federated Wiki server stores it",
+        "panesAfter": 7,
+        "targetHeadings": [],
+        "targetStart": "local-fedwiki-pagePlain Text Example Story Page source Journal Links Backlinks URL Slots P"
+      },
+      {
+        "from": "Reading the CCNx Federated Wiki",
+        "paneIndex": 2,
+        "link": "the same page as the Main code leaves it in IndexedDB",
+        "panesAfter": 6,
+        "targetHeadings": [],
+        "targetStart": "local-fedwiki-pagePlain Text Example Story Page source Journal Links Backlinks URL Slots P"
+      }
+    ],
+    "finalPanes": 6
+  },
+  "results": {}
+}
