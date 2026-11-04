@@ -243,15 +243,16 @@ The c2 page (data file `PowerOfPlainText`, 2014-11-26) states the assertion: "st
 page files (`dreyeck/ccnx-federated-wiki/example-site/pages/`), hydrated by the existing `dreyeck/local-fedwiki-page` and shown by the existing Story view and Inspector; the pages open them with the
 existing `<a expr>` link. The only Lisp is three small files (package, a 10-line page loader, the registration).
 
-**Not a member of `dreyeck/catalog`.** Admitting a reading to the default Catalog is a separate decision with pinned tests
-(`dreyeck/tests/catalog-startup-smoke.lisp`). Until then the system is loaded additively with `HYPERDOC_CATALOG_SYSTEM=dreyeck/ccnx-federated-wiki`
-(see `dreyeck/CATALOG-OPERATIONS.md`; the variable names systems of the packaged registry, so a package built from this branch is needed).
+**Catalog membership.** `dreyeck/catalog` explicitly depends on `dreyeck/ccnx-federated-wiki`. Its ID is admitted in
+`dreyeck/tests/catalog-startup-smoke.lisp`, whose fresh-process test checks that the complete admitted set is present,
+with no duplicates or extra books, and that the main page opens. No `HYPERDOC_CATALOG_SYSTEM` override is needed.
+This describes the proposed repository revision; deploying it to dreyeck.ch remains an operator decision.
 
 ### Verification run for this branch
 
 * `(asdf:test-system "dreyeck/ccnx-federated-wiki")` in the `fedwiki-original-editor` dev shell (SBCL 2.4.10): passes. It checks that the reading and its four pages load; every `<a page>` target exists; every
   `<a expr>` opens only `example-page`; every reference to either repository is a full-commit blob or tree link **to the reviewed commit of that repository**; no key material is quoted; the two example pages are
-  consistent with the rules cited above (added fields, `version`, `excludes`, including the stop at a fork action) and open as ordinary local pages with the Story view; the reading is not a member of `dreyeck/catalog`.
+  consistent with the rules cited above (added fields, `version`, `excludes`, including the stop at a fork action) and open as ordinary local pages with the Story view; the reading is declared as a member of `dreyeck/catalog` (fresh-process Catalog verification required after this change).
   Two deliberate breakages were run and caught (a `blob/master/` link, a wiki link inside an example).
 * **Navigation in the real Catalog and Inspector** (`dreyeck/ccnx-federated-wiki/browser-check/`, run in the dev shell with Chromium 156): the reading opens; four internal `<a page>` links are followed in
   turn (reading, then *One Page From Browser to NDN and Back*, *Identity, Versions and Signatures*, *Plain Text After CCNx* and back to the reading), each adds exactly one Inspector pane whose heading and a text of
