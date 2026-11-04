@@ -125,6 +125,16 @@ editor exists only in the isolated loopback test. The Wiki-farm analysis, the op
 decisions and the operator steps are in
 [docs/fedwiki-original-editor-farm](../docs/fedwiki-original-editor-farm/README.md).
 
+## CCNx Federated Wiki reading
+
+`dreyeck/catalog` admits `dreyeck/ccnx-federated-wiki` as a read-only four-page
+HyperDoc. Its two example pages are local Federated Wiki JSON files rendered
+by the existing Story view; no historical CCNx/NDN runtime is loaded, and
+`HYPERDOC_CATALOG_SYSTEM` is not needed for this reading. Membership and main-page
+availability are checked by the fresh-process test in
+`dreyeck/tests/catalog-startup-smoke.lisp`. This describes the packaged Catalog
+once the change is integrated; it does not attest to a deployment.
+
 ## Not verified
 
 The successful operator update above does not verify NixOS activation of the
