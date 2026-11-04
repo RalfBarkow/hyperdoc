@@ -1,3 +1,4 @@
+<div class="ccnx-reading">
 <h1>One Page From Browser to NDN and Back</h1>
 
 <in-package>dreyeck/ccnx-federated-wiki</in-package>
@@ -9,63 +10,37 @@ This page follows <em>Plain Text Example</em> through the Main repository at <co
 
 <h2>The path in Main</h2>
 
-<table class="inspector-table">
-<tr><th>#</th><th>Step</th><th>What the source does</th><th>Lines (pinned)</th></tr>
-<tr>
-  <td>1</td><td>Edit</td>
-  <td><code>pageHandler.put</code> stamps the action with the current time and stores it locally. <code>pushToServer</code> exists but is never called.</td>
-  <td><a href="https://github.com/rynomad/CCNx-Federated-Wiki/blob/8426dc5cd326fa0d395d5bef2f73b8be33e34a8e/client/lib/pageHandler.coffee#L76-L163">pageHandler.coffee L76&ndash;L163</a></td>
-</tr>
-<tr>
-  <td>2</td><td>Page to JSON</td>
-  <td><code>pushToLocal</code> appends the action to <code>journal</code>, rebuilds <code>story</code> from the page on screen, and adds <code>page</code>, <code>excludes</code> and <code>favicon</code>.</td>
-  <td><a href="https://github.com/rynomad/CCNx-Federated-Wiki/blob/8426dc5cd326fa0d395d5bef2f73b8be33e34a8e/client/lib/pageHandler.coffee#L76-L95">pageHandler.coffee L76&ndash;L95</a></td>
-</tr>
-<tr>
-  <td>3</td><td>JSON to IndexedDB</td>
-  <td><code>updatePage</code> sets <code>version</code> to the date of the last journal action and writes the record into the store <code>page/&lt;slug&gt;.json</code>, key <code>version</code>.</td>
-  <td><a href="https://github.com/rynomad/CCNx-Federated-Wiki/blob/8426dc5cd326fa0d395d5bef2f73b8be33e34a8e/client/lib/repository.coffee#L141-L176">repository.coffee L141&ndash;L176</a></td>
-</tr>
-<tr>
-  <td>4</td><td>Announce</td>
-  <td>If the browser is online, an Interest <code>&lt;prefix&gt;/page/update/&lt;page&gt;/&lt;version&gt;</code> goes out on every active face.</td>
-  <td><a href="https://github.com/rynomad/CCNx-Federated-Wiki/blob/8426dc5cd326fa0d395d5bef2f73b8be33e34a8e/client/lib/repository.coffee#L127-L139">repository.coffee L127&ndash;L139</a></td>
-</tr>
-<tr>
-  <td>5</td><td>Serve: NDN Content Object</td>
-  <td>A peer answers an Interest for a page: the record, as <code>JSON.stringify</code> text, becomes the content of an object named <code>&lt;interest&gt;/&lt;version&gt;</code>, with a freshness of 604800 seconds, and the object is signed.</td>
-  <td><a href="https://github.com/rynomad/CCNx-Federated-Wiki/blob/8426dc5cd326fa0d395d5bef2f73b8be33e34a8e/client/lib/interfaces.coffee#L9-L53">interfaces.coffee L9&ndash;L53</a></td>
-</tr>
-<tr>
-  <td>6</td><td>NDN retrieval</td>
-  <td>The closure takes the content of the first object, parses it as JSON and hands it on. Pages are asked for when a face opens (<code>welcome-visitors</code>) and for every <code>[[link]]</code> that is drawn.</td>
-  <td><a href="https://github.com/rynomad/CCNx-Federated-Wiki/blob/8426dc5cd326fa0d395d5bef2f73b8be33e34a8e/client/js/ndn-closures.js#L43-L149">ndn-closures.js L43&ndash;L149</a>,
-      <a href="https://github.com/rynomad/CCNx-Federated-Wiki/blob/8426dc5cd326fa0d395d5bef2f73b8be33e34a8e/client/lib/wiki.coffee#L70-L91">wiki.coffee L70&ndash;L91</a></td>
-</tr>
-<tr>
-  <td>7</td><td>Back into IndexedDB</td>
-  <td><code>updatePageFromPeer</code> removes the records named in the incoming <code>excludes</code> and stores the page.</td>
-  <td><a href="https://github.com/rynomad/CCNx-Federated-Wiki/blob/8426dc5cd326fa0d395d5bef2f73b8be33e34a8e/client/lib/repository.coffee#L94-L124">repository.coffee L94&ndash;L124</a></td>
-</tr>
-<tr>
-  <td>8</td><td>Wiki page</td>
-  <td>Pages are rendered from IndexedDB only. The former Ajax read from a server is commented out.</td>
-  <td><a href="https://github.com/rynomad/CCNx-Federated-Wiki/blob/8426dc5cd326fa0d395d5bef2f73b8be33e34a8e/client/lib/pageHandler.coffee#L18-L72">pageHandler.coffee L18&ndash;L72</a></td>
-</tr>
-</table>
+<ol class="steps" id="path-in-main">
+<li><span class="step-name">Edit.</span> <code>pageHandler.put</code> stamps the action with the current time and stores it locally. <code>pushToServer</code> exists but is never called.
+  <span class="lines">Lines: <a href="https://github.com/rynomad/CCNx-Federated-Wiki/blob/8426dc5cd326fa0d395d5bef2f73b8be33e34a8e/client/lib/pageHandler.coffee#L76-L163">pageHandler.coffee L76&ndash;L163</a></span></li>
+<li><span class="step-name">Page to JSON.</span> <code>pushToLocal</code> appends the action to <code>journal</code>, rebuilds <code>story</code> from the page on screen, and adds <code>page</code>, <code>excludes</code> and <code>favicon</code>.
+  <span class="lines">Lines: <a href="https://github.com/rynomad/CCNx-Federated-Wiki/blob/8426dc5cd326fa0d395d5bef2f73b8be33e34a8e/client/lib/pageHandler.coffee#L76-L95">pageHandler.coffee L76&ndash;L95</a></span></li>
+<li><span class="step-name">JSON to IndexedDB.</span> <code>updatePage</code> sets <code>version</code> to the date of the last journal action and writes the record into the store <code>page/&lt;slug&gt;.json</code>, key <code>version</code>.
+  <span class="lines">Lines: <a href="https://github.com/rynomad/CCNx-Federated-Wiki/blob/8426dc5cd326fa0d395d5bef2f73b8be33e34a8e/client/lib/repository.coffee#L141-L176">repository.coffee L141&ndash;L176</a></span></li>
+<li><span class="step-name">Announce.</span> If the browser is online, an Interest <code class="wrap">&lt;prefix&gt;/page/update/&lt;page&gt;/&lt;version&gt;</code> goes out on every active face.
+  <span class="lines">Lines: <a href="https://github.com/rynomad/CCNx-Federated-Wiki/blob/8426dc5cd326fa0d395d5bef2f73b8be33e34a8e/client/lib/repository.coffee#L127-L139">repository.coffee L127&ndash;L139</a></span></li>
+<li><span class="step-name">Serve: NDN Content Object.</span> A peer answers an Interest for a page: the record, as <code>JSON.stringify</code> text, becomes the content of an object named <code>&lt;interest&gt;/&lt;version&gt;</code>, with a freshness of 604800 seconds, and the object is signed.
+  <span class="lines">Lines: <a href="https://github.com/rynomad/CCNx-Federated-Wiki/blob/8426dc5cd326fa0d395d5bef2f73b8be33e34a8e/client/lib/interfaces.coffee#L9-L53">interfaces.coffee L9&ndash;L53</a></span></li>
+<li><span class="step-name">NDN retrieval.</span> The closure takes the content of the first object, parses it as JSON and hands it on. Pages are asked for when a face opens (<code>welcome-visitors</code>) and for every <code>[[link]]</code> that is drawn.
+  <span class="lines">Lines: <a href="https://github.com/rynomad/CCNx-Federated-Wiki/blob/8426dc5cd326fa0d395d5bef2f73b8be33e34a8e/client/js/ndn-closures.js#L43-L149">ndn-closures.js L43&ndash;L149</a>, <a href="https://github.com/rynomad/CCNx-Federated-Wiki/blob/8426dc5cd326fa0d395d5bef2f73b8be33e34a8e/client/lib/wiki.coffee#L70-L91">wiki.coffee L70&ndash;L91</a></span></li>
+<li><span class="step-name">Back into IndexedDB.</span> <code>updatePageFromPeer</code> removes the records named in the incoming <code>excludes</code> and stores the page.
+  <span class="lines">Lines: <a href="https://github.com/rynomad/CCNx-Federated-Wiki/blob/8426dc5cd326fa0d395d5bef2f73b8be33e34a8e/client/lib/repository.coffee#L94-L124">repository.coffee L94&ndash;L124</a></span></li>
+<li><span class="step-name">Wiki page.</span> Pages are rendered from IndexedDB only. The former Ajax read from a server is commented out.
+  <span class="lines">Lines: <a href="https://github.com/rynomad/CCNx-Federated-Wiki/blob/8426dc5cd326fa0d395d5bef2f73b8be33e34a8e/client/lib/pageHandler.coffee#L18-L72">pageHandler.coffee L18&ndash;L72</a></span></li>
+</ol>
 
 <p>
-<strong>Documented.</strong> The Main ReadMe describes the same design: pages &ldquo;are stored locally in the clients IndexedDB &hellip; and synced on page update action&rdquo;
+<span class="ev ev-documented">Documented</span> The Main ReadMe describes the same design: pages &ldquo;are stored locally in the clients IndexedDB &hellip; and synced on page update action&rdquo;
 (<a href="https://github.com/rynomad/CCNx-Federated-Wiki/blob/8426dc5cd326fa0d395d5bef2f73b8be33e34a8e/ReadMe.md#L4">ReadMe.md L4</a>). Source and ReadMe agree.
 </p>
 
 <p>
-The express server of the repository still stores pages as flat JSON files (<code>server/express/lib/page.coffee</code>), but the client path above does not use them.
+The express server of the repository still stores pages as flat JSON files (<code class="wrap">server/express/lib/page.coffee</code>), but the client path above does not use them.
 </p>
 
 <h2>The example, in each form</h2>
 
-<p>
+<p id="example-ids">
 <em>Plain Text Example</em> has two items (<code>a1b2c3d4e5f60001</code>, <code>a1b2c3d4e5f60002</code>) and five journal actions: <code>create</code>, two <code>add</code>, two <code>edit</code>,
 dated <code>1700000000000</code> to <code>1700000000004</code>. The ids and dates are illustrative.
 </p>
@@ -82,13 +57,15 @@ dated <code>1700000000000</code> to <code>1700000000004</code>. The ids and date
 <a expr="(example-page :ccnx-record)">Open page B</a>. A, plus four fields:
 </p>
 
-<table class="inspector-table">
+<div class="table-scroll">
+<table class="inspector-table" id="added-fields">
 <tr><th>Field</th><th>Value</th><th>Where it comes from</th></tr>
 <tr><td><code>page</code></td><td><code>"plain-text-example.json"</code></td><td>slug plus <code>.json</code> (<code>pushToLocal</code>)</td></tr>
-<tr><td><code>excludes</code></td><td><code>[1700000000004, 1700000000003, 1700000000002, 1700000000001, 1700000000000]</code></td><td>every journal date, newest first, until a <code>fork</code> action; there is none here</td></tr>
+<tr><td><code>excludes</code></td><td><code class="wrap">[1700000000004, 1700000000003, 1700000000002, 1700000000001, 1700000000000]</code></td><td>every journal date, newest first, until a <code>fork</code> action; there is none here</td></tr>
 <tr><td><code>favicon</code></td><td>a data URL</td><td>this browser's random 32&times;32 favicon. The example holds a 1&times;1 placeholder.</td></tr>
 <tr><td><code>version</code></td><td><code>1700000000004</code></td><td>date of the last journal action (<code>updatePage</code>)</td></tr>
 </table>
+</div>
 
 <h3>C &mdash; the NDN Content Object in Main</h3>
 
@@ -96,32 +73,38 @@ dated <code>1700000000000</code> to <code>1700000000004</code>. The ids and date
 Described, not decoded: the wire form is a binary <code>ccnb</code> element, and no CCNx code was run to produce it.
 </p>
 
-<pre>
-name            /wiki/page/plain-text-example.json/1700000000004
-content         JSON.stringify(B)                    (UTF-8 text of the record above)
-signed info     publisher   SHA-256 of the public key in KeyManager.js
-                            (b5506b1aba3da7761b0f8d61a4aa7e3b6d15b426feb5bda82389aca765a3b81c)
-                timestamp   the time the object is made - not a date of the page
-                type        DATA
-                key locator the public key itself, carried in the object
-                freshness   604800 seconds
-signature       RSA with SHA-256 over: encoded name + encoded signed info + encoded content
-</pre>
+<dl class="fields" id="content-object-main">
+<dt>name</dt><dd><code class="wrap">/wiki/page/plain-text-example.json/1700000000004</code></dd>
+<dt>content</dt><dd><code>JSON.stringify(B)</code> (UTF-8 text of the record above)</dd>
+<dt>signed info</dt><dd>
+  <dl class="fields">
+  <dt>publisher</dt><dd>SHA-256 of the public key in <code>KeyManager.js</code> (<code class="wrap">b5506b1aba3da7761b0f8d61a4aa7e3b6d15b426feb5bda82389aca765a3b81c</code>)</dd>
+  <dt>timestamp</dt><dd>the time the object is made - not a date of the page</dd>
+  <dt>type</dt><dd><code>DATA</code></dd>
+  <dt>key locator</dt><dd>the public key itself, carried in the object</dd>
+  <dt>freshness</dt><dd>604800 seconds</dd>
+  </dl></dd>
+<dt>signature</dt><dd>RSA with SHA-256 over: encoded name + encoded signed info + encoded content</dd>
+</dl>
 
 <h3>D &mdash; the same page in the Prototype</h3>
 
-<pre>
-IndexedDB       database NeighborNetDB, store pageContentObjects, key "name" (one record per slug)
-  name          /sfw/plain-text-example
-  fullName      /sfw/plain-text-example/&lt;timestamp&gt;
-  signedInfo    freshness 5 seconds; timestamp in milliseconds
-  page          A, plus
-                  version    &lt;timestamp&gt;          (when published; not a journal date)
-                  publisher  { id: 1, name: "anonymous", favicon: &lt;data URL&gt; }
-                  slug       /sfw/plain-text-example
-                  isLocal    true
-NDN name        /sfw/plain-text-example/&lt;timestamp&gt;
-</pre>
+<dl class="fields" id="content-object-prototype">
+<dt>IndexedDB</dt><dd>database <code>NeighborNetDB</code>, store <code>pageContentObjects</code>, key <code>"name"</code> (one record per slug)
+  <dl class="fields">
+  <dt>name</dt><dd><code>/sfw/plain-text-example</code></dd>
+  <dt>fullName</dt><dd><code class="wrap">/sfw/plain-text-example/&lt;timestamp&gt;</code></dd>
+  <dt>signedInfo</dt><dd>freshness 5 seconds; timestamp in milliseconds</dd>
+  <dt>page</dt><dd>A, plus
+    <dl class="fields">
+    <dt>version</dt><dd><code>&lt;timestamp&gt;</code> (when published; not a journal date)</dd>
+    <dt>publisher</dt><dd><code class="wrap">{ id: 1, name: "anonymous", favicon: &lt;data URL&gt; }</code></dd>
+    <dt>slug</dt><dd><code>/sfw/plain-text-example</code></dd>
+    <dt>isLocal</dt><dd><code>true</code></dd>
+    </dl></dd>
+  </dl></dd>
+<dt>NDN name</dt><dd><code class="wrap">/sfw/plain-text-example/&lt;timestamp&gt;</code></dd>
+</dl>
 
 <p>
 Sources for D: <a href="https://github.com/rynomad/CCNx-Federated-Wiki-Prototype/blob/c5b1b93c632ef9834a598406a25c20ad47bab26e/client/lib/pageHandler.coffee#L115-L201">pageHandler.coffee L115&ndash;L201</a>,
@@ -130,7 +113,7 @@ Sources for D: <a href="https://github.com/rynomad/CCNx-Federated-Wiki-Prototype
 
 <h2>How the Prototype differs</h2>
 
-<ul>
+<ul id="prototype-differences">
 <li><strong>It reads differently.</strong> A page not found locally is asked for as <code>/sfw/&lt;slug&gt;</code>; once it arrives it is shown and <strong>immediately republished locally as a fork</strong>
 (<a href="https://github.com/rynomad/CCNx-Federated-Wiki-Prototype/blob/c5b1b93c632ef9834a598406a25c20ad47bab26e/client/lib/pageHandler.coffee#L22-L78">pageHandler.coffee L22&ndash;L78</a>).</li>
 <li><strong>It names differently.</strong> The version is a publication timestamp, not the last journal date.</li>
@@ -140,10 +123,11 @@ Sources for D: <a href="https://github.com/rynomad/CCNx-Federated-Wiki-Prototype
 </ul>
 
 <p>
-<strong>Documented.</strong> The Prototype's ReadMe calls the concept &ldquo;workable, though it will be some time before it is useable.&rdquo; It names a thin server with a websocket proxy
+<span class="ev ev-documented">Documented</span> The Prototype's ReadMe calls the concept &ldquo;workable, though it will be some time before it is useable.&rdquo; It names a thin server with a websocket proxy
 and a client that renders, saves and serves pages in IndexedDB. The source matches that division.
 </p>
 
 <p>
 Next: <a page="Identity, Versions and Signatures">Identity, Versions and Signatures</a>.
 </p>
+</div>

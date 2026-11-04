@@ -3557,13 +3557,15 @@
   ;; Source review only. It installs no CCNx or NDN runtime and makes no network connection. The example pages are plain
   ;; local Federated Wiki files, read by dreyeck/local-fedwiki-page. Admitted to the default dreyeck/catalog;
   ;; no extra startup variable or historical CCNx runtime is required.
-  :depends-on ("dreyeck/hyperdoc" "dreyeck/local-fedwiki-page" "uiop")
+  :depends-on ("dreyeck/hyperdoc" "dreyeck/local-fedwiki-page" "html-inspector-views" "plump" "uiop")
   :serial t
   :pathname "dreyeck/src/"
   :components ((:module "dreyeck/pages/ccnx-federated-wiki" :pathname "../pages/ccnx-federated-wiki/")
                (:file "ccnx-federated-wiki-package")
                (:file "ccnx-federated-wiki")
-               (:file "ccnx-federated-wiki-hyperdoc"))
+               (:file "ccnx-federated-wiki-hyperdoc")
+               (:file "ccnx-typography")
+               (:file "ccnx-typography-views"))
   :in-order-to ((test-op (test-op "dreyeck/ccnx-federated-wiki/tests"))))
 
 (asdf:defsystem "dreyeck/ccnx-federated-wiki/tests"

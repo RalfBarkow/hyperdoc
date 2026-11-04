@@ -1,0 +1,91 @@
+{
+  "label": "mutant",
+  "browser": "Chromium 153.0.8010.12",
+  "origin": "http://127.0.0.1:48851",
+  "pages": {},
+  "assertions": [
+    {
+      "page": "reading-the-ccnx-federated-wiki@wide",
+      "name": "CONTENT-FIRST",
+      "ok": false,
+      "detail": "the page opened on [\"Typography\"], its Content is not shown"
+    },
+    {
+      "page": "one-page-from-browser-to-ndn-and-back@wide",
+      "name": "CONTENT-FIRST",
+      "ok": false,
+      "detail": "the page opened on [\"Typography\"], its Content is not shown"
+    },
+    {
+      "page": "identity-versions-and-signatures@wide",
+      "name": "CONTENT-FIRST",
+      "ok": false,
+      "detail": "the page opened on [\"Typography\"], its Content is not shown"
+    },
+    {
+      "page": "plain-text-after-ccnx@wide",
+      "name": "CONTENT-FIRST",
+      "ok": false,
+      "detail": "the page opened on [\"Typography\"], its Content is not shown"
+    },
+    {
+      "page": "reading-the-ccnx-federated-wiki@narrow",
+      "name": "CONTENT-FIRST",
+      "ok": false,
+      "detail": "the page opened on [\"Typography\"], its Content is not shown"
+    },
+    {
+      "page": "one-page-from-browser-to-ndn-and-back@narrow",
+      "name": "CONTENT-FIRST",
+      "ok": false,
+      "detail": "the page opened on [\"Typography\"], its Content is not shown"
+    },
+    {
+      "page": "identity-versions-and-signatures@narrow",
+      "name": "CONTENT-FIRST",
+      "ok": false,
+      "detail": "the page opened on [\"Typography\"], its Content is not shown"
+    },
+    {
+      "page": "plain-text-after-ccnx@narrow",
+      "name": "CONTENT-FIRST",
+      "ok": false,
+      "detail": "the page opened on [\"Typography\"], its Content is not shown"
+    },
+    {
+      "page": "navigation",
+      "name": "NAVIGATION",
+      "ok": false,
+      "detail": "TimeoutError: locator.waitFor: Timeout 45000ms exceeded."
+    },
+    {
+      "page": "all",
+      "name": "NO-PAGE-ERRORS",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "page": "all",
+      "name": "NO-FAILED-INTERNAL-REQUESTS",
+      "ok": true,
+      "detail": ""
+    }
+  ],
+  "pageErrors": [],
+  "failedRequests": [],
+  "navigation": [],
+  "summary": {
+    "assertions": 11,
+    "failed": [
+      "reading-the-ccnx-federated-wiki@wide: CONTENT-FIRST",
+      "one-page-from-browser-to-ndn-and-back@wide: CONTENT-FIRST",
+      "identity-versions-and-signatures@wide: CONTENT-FIRST",
+      "plain-text-after-ccnx@wide: CONTENT-FIRST",
+      "reading-the-ccnx-federated-wiki@narrow: CONTENT-FIRST",
+      "one-page-from-browser-to-ndn-and-back@narrow: CONTENT-FIRST",
+      "identity-versions-and-signatures@narrow: CONTENT-FIRST",
+      "plain-text-after-ccnx@narrow: CONTENT-FIRST",
+      "navigation: NAVIGATION"
+    ]
+  }
+}

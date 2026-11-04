@@ -1,0 +1,1070 @@
+{
+  "label": "before",
+  "browser": "Chromium 153.0.8010.12",
+  "origin": "http://127.0.0.1:48852",
+  "pages": {
+    "reading-the-ccnx-federated-wiki@wide": {
+      "bodyClientWidth": 698,
+      "bodyScrollWidth": 1649,
+      "bodyFont": 16,
+      "tables": [
+        {
+          "width": 1644,
+          "escapes": true
+        }
+      ],
+      "splitIdentifiers": [
+        "docs/ccnx-federated-wiki/SOURCE-REPORT.md",
+        "ccnx-example.invalid"
+      ],
+      "splitReferences": [],
+      "pre": 0,
+      "widestTextEm": 43,
+      "codeRatio": 0.8125,
+      "headings": {
+        "h1": 20.8,
+        "h2": 19.2,
+        "h3": 17.6
+      },
+      "labels": [],
+      "refStyles": [
+        {
+          "underline": false,
+          "differs": false
+        },
+        {
+          "underline": false,
+          "differs": false
+        },
+        {
+          "underline": false,
+          "differs": false
+        },
+        {
+          "underline": false,
+          "differs": false
+        },
+        {
+          "underline": false,
+          "differs": false
+        },
+        {
+          "underline": false,
+          "differs": false
+        },
+        {
+          "underline": false,
+          "differs": false
+        },
+        {
+          "underline": false,
+          "differs": false
+        },
+        {
+          "underline": false,
+          "differs": false
+        }
+      ],
+      "paragraphChars": 85
+    },
+    "one-page-from-browser-to-ndn-and-back@wide": {
+      "bodyClientWidth": 698,
+      "bodyScrollWidth": 2051,
+      "bodyFont": 16,
+      "tables": [
+        {
+          "width": 2046,
+          "escapes": true
+        },
+        {
+          "width": 1228,
+          "escapes": true
+        }
+      ],
+      "splitIdentifiers": [],
+      "splitReferences": [
+        "pageHandler.coffee L22–L78"
+      ],
+      "pre": 2,
+      "widestTextEm": 43,
+      "codeRatio": 0.8125,
+      "headings": {
+        "h1": 20.8,
+        "h2": 19.2,
+        "h3": 17.6
+      },
+      "labels": [],
+      "refStyles": [
+        {
+          "underline": false,
+          "differs": false
+        },
+        {
+          "underline": false,
+          "differs": false
+        },
+        {
+          "underline": false,
+          "differs": false
+        }
+      ],
+      "paragraphChars": 88
+    },
+    "identity-versions-and-signatures@wide": {
+      "bodyClientWidth": 698,
+      "bodyScrollWidth": 2479,
+      "bodyFont": 16,
+      "tables": [
+        {
+          "width": 797,
+          "escapes": true
+        },
+        {
+          "width": 2474,
+          "escapes": true
+        },
+        {
+          "width": 948,
+          "escapes": true
+        }
+      ],
+      "splitIdentifiers": [],
+      "splitReferences": [
+        "refresh.coffee L112–L141",
+        "repository.coffee L152–L157"
+      ],
+      "pre": 0,
+      "widestTextEm": 43,
+      "codeRatio": 0.8125,
+      "headings": {
+        "h1": 20.8,
+        "h2": 19.2,
+        "h3": 17.6
+      },
+      "labels": [],
+      "refStyles": [
+        {
+          "underline": false,
+          "differs": false
+        }
+      ],
+      "paragraphChars": 82
+    },
+    "plain-text-after-ccnx@wide": {
+      "bodyClientWidth": 698,
+      "bodyScrollWidth": 1707,
+      "bodyFont": 16,
+      "tables": [
+        {
+          "width": 1665,
+          "escapes": true
+        },
+        {
+          "width": 1197,
+          "escapes": true
+        },
+        {
+          "width": 1249,
+          "escapes": true
+        },
+        {
+          "width": 1702,
+          "escapes": true
+        }
+      ],
+      "splitIdentifiers": [
+        "how-to-wiki"
+      ],
+      "splitReferences": [],
+      "pre": 0,
+      "widestTextEm": 43,
+      "codeRatio": 0.8125,
+      "headings": {
+        "h1": 20.8,
+        "h2": 19.2,
+        "h3": 17.6
+      },
+      "labels": [],
+      "refStyles": [
+        {
+          "underline": false,
+          "differs": false
+        },
+        {
+          "underline": false,
+          "differs": false
+        },
+        {
+          "underline": false,
+          "differs": false
+        },
+        {
+          "underline": false,
+          "differs": false
+        },
+        {
+          "underline": false,
+          "differs": false
+        }
+      ],
+      "paragraphChars": 89
+    },
+    "reading-the-ccnx-federated-wiki@narrow": {
+      "bodyClientWidth": 477,
+      "bodyScrollWidth": 1649,
+      "bodyFont": 16,
+      "tables": [
+        {
+          "width": 1644,
+          "escapes": true
+        }
+      ],
+      "splitIdentifiers": [
+        "docs/ccnx-federated-wiki/SOURCE-REPORT.md",
+        "ccnx-example.invalid"
+      ],
+      "splitReferences": [],
+      "pre": 0,
+      "widestTextEm": 29.1748046875,
+      "codeRatio": 0.8125,
+      "headings": {
+        "h1": 20.8,
+        "h2": 19.2,
+        "h3": 17.6
+      },
+      "labels": [],
+      "refStyles": [
+        {
+          "underline": false,
+          "differs": false
+        },
+        {
+          "underline": false,
+          "differs": false
+        },
+        {
+          "underline": false,
+          "differs": false
+        },
+        {
+          "underline": false,
+          "differs": false
+        },
+        {
+          "underline": false,
+          "differs": false
+        },
+        {
+          "underline": false,
+          "differs": false
+        },
+        {
+          "underline": false,
+          "differs": false
+        },
+        {
+          "underline": false,
+          "differs": false
+        },
+        {
+          "underline": false,
+          "differs": false
+        }
+      ],
+      "paragraphChars": 60
+    },
+    "one-page-from-browser-to-ndn-and-back@narrow": {
+      "bodyClientWidth": 477,
+      "bodyScrollWidth": 2051,
+      "bodyFont": 16,
+      "tables": [
+        {
+          "width": 2046,
+          "escapes": true
+        },
+        {
+          "width": 1228,
+          "escapes": true
+        }
+      ],
+      "splitIdentifiers": [],
+      "splitReferences": [
+        "SDB.js L284–L312",
+        "pageHandler.coffee L22–L78",
+        "ndn-closures.js L255–L277"
+      ],
+      "pre": 2,
+      "widestTextEm": 29.1748046875,
+      "codeRatio": 0.8125,
+      "headings": {
+        "h1": 20.8,
+        "h2": 19.2,
+        "h3": 17.6
+      },
+      "labels": [],
+      "refStyles": [
+        {
+          "underline": false,
+          "differs": false
+        },
+        {
+          "underline": false,
+          "differs": false
+        },
+        {
+          "underline": false,
+          "differs": false
+        }
+      ],
+      "paragraphChars": 66
+    },
+    "identity-versions-and-signatures@narrow": {
+      "bodyClientWidth": 477,
+      "bodyScrollWidth": 2479,
+      "bodyFont": 16,
+      "tables": [
+        {
+          "width": 797,
+          "escapes": true
+        },
+        {
+          "width": 2474,
+          "escapes": true
+        },
+        {
+          "width": 948,
+          "escapes": true
+        }
+      ],
+      "splitIdentifiers": [
+        "{type: \"fork\", site: …, date}"
+      ],
+      "splitReferences": [
+        "pageHandler.coffee L143",
+        "repository.coffee L191–L239",
+        "ContentObject.js L281–L335",
+        "ContentObject.js L36–L80"
+      ],
+      "pre": 0,
+      "widestTextEm": 29.1748046875,
+      "codeRatio": 0.8125,
+      "headings": {
+        "h1": 20.8,
+        "h2": 19.2,
+        "h3": 17.6
+      },
+      "labels": [],
+      "refStyles": [
+        {
+          "underline": false,
+          "differs": false
+        }
+      ],
+      "paragraphChars": 58
+    },
+    "plain-text-after-ccnx@narrow": {
+      "bodyClientWidth": 477,
+      "bodyScrollWidth": 1707,
+      "bodyFont": 16,
+      "tables": [
+        {
+          "width": 1665,
+          "escapes": true
+        },
+        {
+          "width": 1197,
+          "escapes": true
+        },
+        {
+          "width": 1249,
+          "escapes": true
+        },
+        {
+          "width": 1702,
+          "escapes": true
+        }
+      ],
+      "splitIdentifiers": [
+        "default-data/pages/welcome-visitors"
+      ],
+      "splitReferences": [],
+      "pre": 0,
+      "widestTextEm": 29.1748046875,
+      "codeRatio": 0.8125,
+      "headings": {
+        "h1": 20.8,
+        "h2": 19.2,
+        "h3": 17.6
+      },
+      "labels": [],
+      "refStyles": [
+        {
+          "underline": false,
+          "differs": false
+        },
+        {
+          "underline": false,
+          "differs": false
+        },
+        {
+          "underline": false,
+          "differs": false
+        },
+        {
+          "underline": false,
+          "differs": false
+        },
+        {
+          "underline": false,
+          "differs": false
+        }
+      ],
+      "paragraphChars": 62
+    }
+  },
+  "assertions": [
+    {
+      "page": "reading-the-ccnx-federated-wiki@wide",
+      "name": "NO-SIDEWAYS-SCROLL",
+      "ok": false,
+      "detail": "scrollWidth 1649, clientWidth 698"
+    },
+    {
+      "page": "reading-the-ccnx-federated-wiki@wide",
+      "name": "TABLES-CONTAINED",
+      "ok": false,
+      "detail": "[{\"width\":1644,\"escapes\":true}]"
+    },
+    {
+      "page": "reading-the-ccnx-federated-wiki@wide",
+      "name": "NO-SPLIT-IDENTIFIER",
+      "ok": false,
+      "detail": "docs/ccnx-federated-wiki/SOURCE-REPORT.md | ccnx-example.invalid"
+    },
+    {
+      "page": "reading-the-ccnx-federated-wiki@wide",
+      "name": "NO-SPLIT-REFERENCE",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "page": "reading-the-ccnx-federated-wiki@wide",
+      "name": "NO-PRE",
+      "ok": true,
+      "detail": "0"
+    },
+    {
+      "page": "reading-the-ccnx-federated-wiki@wide",
+      "name": "MEASURE-LIMIT",
+      "ok": false,
+      "detail": "widest 43.0 em"
+    },
+    {
+      "page": "reading-the-ccnx-federated-wiki@wide",
+      "name": "IDENTIFIER-SIZE",
+      "ok": false,
+      "detail": "smallest code / body = 0.8125"
+    },
+    {
+      "page": "reading-the-ccnx-federated-wiki@wide",
+      "name": "HEADING-STEPS",
+      "ok": false,
+      "detail": "h1 20.8, h2 19.2, h3 17.6, body 16"
+    },
+    {
+      "page": "reading-the-ccnx-federated-wiki@wide",
+      "name": "HEADING-STEPS",
+      "ok": false,
+      "detail": "h2 19.2, h3 17.6, body 16"
+    },
+    {
+      "page": "reading-the-ccnx-federated-wiki@wide",
+      "name": "EVIDENCE-LABELS",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "page": "reading-the-ccnx-federated-wiki@wide",
+      "name": "REFERENCES-VISIBLE",
+      "ok": false,
+      "detail": "[{\"underline\":false,\"differs\":false},{\"underline\":false,\"differs\":false},{\"underline\":false,\"differs\":false}]"
+    },
+    {
+      "page": "one-page-from-browser-to-ndn-and-back@wide",
+      "name": "NO-SIDEWAYS-SCROLL",
+      "ok": false,
+      "detail": "scrollWidth 2051, clientWidth 698"
+    },
+    {
+      "page": "one-page-from-browser-to-ndn-and-back@wide",
+      "name": "TABLES-CONTAINED",
+      "ok": false,
+      "detail": "[{\"width\":2046,\"escapes\":true},{\"width\":1228,\"escapes\":true}]"
+    },
+    {
+      "page": "one-page-from-browser-to-ndn-and-back@wide",
+      "name": "NO-SPLIT-IDENTIFIER",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "page": "one-page-from-browser-to-ndn-and-back@wide",
+      "name": "NO-SPLIT-REFERENCE",
+      "ok": false,
+      "detail": "pageHandler.coffee L22–L78"
+    },
+    {
+      "page": "one-page-from-browser-to-ndn-and-back@wide",
+      "name": "NO-PRE",
+      "ok": false,
+      "detail": "2"
+    },
+    {
+      "page": "one-page-from-browser-to-ndn-and-back@wide",
+      "name": "MEASURE-LIMIT",
+      "ok": false,
+      "detail": "widest 43.0 em"
+    },
+    {
+      "page": "one-page-from-browser-to-ndn-and-back@wide",
+      "name": "IDENTIFIER-SIZE",
+      "ok": false,
+      "detail": "smallest code / body = 0.8125"
+    },
+    {
+      "page": "one-page-from-browser-to-ndn-and-back@wide",
+      "name": "HEADING-STEPS",
+      "ok": false,
+      "detail": "h1 20.8, h2 19.2, h3 17.6, body 16"
+    },
+    {
+      "page": "one-page-from-browser-to-ndn-and-back@wide",
+      "name": "HEADING-STEPS",
+      "ok": false,
+      "detail": "h2 19.2, h3 17.6, body 16"
+    },
+    {
+      "page": "one-page-from-browser-to-ndn-and-back@wide",
+      "name": "EVIDENCE-LABELS",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "page": "one-page-from-browser-to-ndn-and-back@wide",
+      "name": "REFERENCES-VISIBLE",
+      "ok": false,
+      "detail": "[{\"underline\":false,\"differs\":false},{\"underline\":false,\"differs\":false},{\"underline\":false,\"differs\":false}]"
+    },
+    {
+      "page": "identity-versions-and-signatures@wide",
+      "name": "NO-SIDEWAYS-SCROLL",
+      "ok": false,
+      "detail": "scrollWidth 2479, clientWidth 698"
+    },
+    {
+      "page": "identity-versions-and-signatures@wide",
+      "name": "TABLES-CONTAINED",
+      "ok": false,
+      "detail": "[{\"width\":797,\"escapes\":true},{\"width\":2474,\"escapes\":true},{\"width\":948,\"escapes\":true}]"
+    },
+    {
+      "page": "identity-versions-and-signatures@wide",
+      "name": "NO-SPLIT-IDENTIFIER",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "page": "identity-versions-and-signatures@wide",
+      "name": "NO-SPLIT-REFERENCE",
+      "ok": false,
+      "detail": "refresh.coffee L112–L141 | repository.coffee L152–L157"
+    },
+    {
+      "page": "identity-versions-and-signatures@wide",
+      "name": "NO-PRE",
+      "ok": true,
+      "detail": "0"
+    },
+    {
+      "page": "identity-versions-and-signatures@wide",
+      "name": "MEASURE-LIMIT",
+      "ok": false,
+      "detail": "widest 43.0 em"
+    },
+    {
+      "page": "identity-versions-and-signatures@wide",
+      "name": "IDENTIFIER-SIZE",
+      "ok": false,
+      "detail": "smallest code / body = 0.8125"
+    },
+    {
+      "page": "identity-versions-and-signatures@wide",
+      "name": "HEADING-STEPS",
+      "ok": false,
+      "detail": "h1 20.8, h2 19.2, h3 17.6, body 16"
+    },
+    {
+      "page": "identity-versions-and-signatures@wide",
+      "name": "HEADING-STEPS",
+      "ok": false,
+      "detail": "h2 19.2, h3 17.6, body 16"
+    },
+    {
+      "page": "identity-versions-and-signatures@wide",
+      "name": "EVIDENCE-LABELS",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "page": "identity-versions-and-signatures@wide",
+      "name": "REFERENCES-VISIBLE",
+      "ok": false,
+      "detail": "[{\"underline\":false,\"differs\":false}]"
+    },
+    {
+      "page": "plain-text-after-ccnx@wide",
+      "name": "NO-SIDEWAYS-SCROLL",
+      "ok": false,
+      "detail": "scrollWidth 1707, clientWidth 698"
+    },
+    {
+      "page": "plain-text-after-ccnx@wide",
+      "name": "TABLES-CONTAINED",
+      "ok": false,
+      "detail": "[{\"width\":1665,\"escapes\":true},{\"width\":1197,\"escapes\":true},{\"width\":1249,\"escapes\":true},{\"width\":1702,\"escapes\":true}]"
+    },
+    {
+      "page": "plain-text-after-ccnx@wide",
+      "name": "NO-SPLIT-IDENTIFIER",
+      "ok": false,
+      "detail": "how-to-wiki"
+    },
+    {
+      "page": "plain-text-after-ccnx@wide",
+      "name": "NO-SPLIT-REFERENCE",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "page": "plain-text-after-ccnx@wide",
+      "name": "NO-PRE",
+      "ok": true,
+      "detail": "0"
+    },
+    {
+      "page": "plain-text-after-ccnx@wide",
+      "name": "MEASURE-LIMIT",
+      "ok": false,
+      "detail": "widest 43.0 em"
+    },
+    {
+      "page": "plain-text-after-ccnx@wide",
+      "name": "IDENTIFIER-SIZE",
+      "ok": false,
+      "detail": "smallest code / body = 0.8125"
+    },
+    {
+      "page": "plain-text-after-ccnx@wide",
+      "name": "HEADING-STEPS",
+      "ok": false,
+      "detail": "h1 20.8, h2 19.2, h3 17.6, body 16"
+    },
+    {
+      "page": "plain-text-after-ccnx@wide",
+      "name": "HEADING-STEPS",
+      "ok": false,
+      "detail": "h2 19.2, h3 17.6, body 16"
+    },
+    {
+      "page": "plain-text-after-ccnx@wide",
+      "name": "EVIDENCE-LABELS",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "page": "plain-text-after-ccnx@wide",
+      "name": "REFERENCES-VISIBLE",
+      "ok": false,
+      "detail": "[{\"underline\":false,\"differs\":false},{\"underline\":false,\"differs\":false},{\"underline\":false,\"differs\":false}]"
+    },
+    {
+      "page": "reading-the-ccnx-federated-wiki@narrow",
+      "name": "NO-SIDEWAYS-SCROLL",
+      "ok": false,
+      "detail": "scrollWidth 1649, clientWidth 477"
+    },
+    {
+      "page": "reading-the-ccnx-federated-wiki@narrow",
+      "name": "TABLES-CONTAINED",
+      "ok": false,
+      "detail": "[{\"width\":1644,\"escapes\":true}]"
+    },
+    {
+      "page": "reading-the-ccnx-federated-wiki@narrow",
+      "name": "NO-SPLIT-IDENTIFIER",
+      "ok": false,
+      "detail": "docs/ccnx-federated-wiki/SOURCE-REPORT.md | ccnx-example.invalid"
+    },
+    {
+      "page": "reading-the-ccnx-federated-wiki@narrow",
+      "name": "NO-SPLIT-REFERENCE",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "page": "reading-the-ccnx-federated-wiki@narrow",
+      "name": "NO-PRE",
+      "ok": true,
+      "detail": "0"
+    },
+    {
+      "page": "reading-the-ccnx-federated-wiki@narrow",
+      "name": "MEASURE-LIMIT",
+      "ok": true,
+      "detail": "widest 29.2 em"
+    },
+    {
+      "page": "reading-the-ccnx-federated-wiki@narrow",
+      "name": "IDENTIFIER-SIZE",
+      "ok": false,
+      "detail": "smallest code / body = 0.8125"
+    },
+    {
+      "page": "reading-the-ccnx-federated-wiki@narrow",
+      "name": "HEADING-STEPS",
+      "ok": false,
+      "detail": "h1 20.8, h2 19.2, h3 17.6, body 16"
+    },
+    {
+      "page": "reading-the-ccnx-federated-wiki@narrow",
+      "name": "HEADING-STEPS",
+      "ok": false,
+      "detail": "h2 19.2, h3 17.6, body 16"
+    },
+    {
+      "page": "reading-the-ccnx-federated-wiki@narrow",
+      "name": "EVIDENCE-LABELS",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "page": "reading-the-ccnx-federated-wiki@narrow",
+      "name": "REFERENCES-VISIBLE",
+      "ok": false,
+      "detail": "[{\"underline\":false,\"differs\":false},{\"underline\":false,\"differs\":false},{\"underline\":false,\"differs\":false}]"
+    },
+    {
+      "page": "one-page-from-browser-to-ndn-and-back@narrow",
+      "name": "NO-SIDEWAYS-SCROLL",
+      "ok": false,
+      "detail": "scrollWidth 2051, clientWidth 477"
+    },
+    {
+      "page": "one-page-from-browser-to-ndn-and-back@narrow",
+      "name": "TABLES-CONTAINED",
+      "ok": false,
+      "detail": "[{\"width\":2046,\"escapes\":true},{\"width\":1228,\"escapes\":true}]"
+    },
+    {
+      "page": "one-page-from-browser-to-ndn-and-back@narrow",
+      "name": "NO-SPLIT-IDENTIFIER",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "page": "one-page-from-browser-to-ndn-and-back@narrow",
+      "name": "NO-SPLIT-REFERENCE",
+      "ok": false,
+      "detail": "SDB.js L284–L312 | pageHandler.coffee L22–L78 | ndn-closures.js L255–L277"
+    },
+    {
+      "page": "one-page-from-browser-to-ndn-and-back@narrow",
+      "name": "NO-PRE",
+      "ok": false,
+      "detail": "2"
+    },
+    {
+      "page": "one-page-from-browser-to-ndn-and-back@narrow",
+      "name": "MEASURE-LIMIT",
+      "ok": true,
+      "detail": "widest 29.2 em"
+    },
+    {
+      "page": "one-page-from-browser-to-ndn-and-back@narrow",
+      "name": "IDENTIFIER-SIZE",
+      "ok": false,
+      "detail": "smallest code / body = 0.8125"
+    },
+    {
+      "page": "one-page-from-browser-to-ndn-and-back@narrow",
+      "name": "HEADING-STEPS",
+      "ok": false,
+      "detail": "h1 20.8, h2 19.2, h3 17.6, body 16"
+    },
+    {
+      "page": "one-page-from-browser-to-ndn-and-back@narrow",
+      "name": "HEADING-STEPS",
+      "ok": false,
+      "detail": "h2 19.2, h3 17.6, body 16"
+    },
+    {
+      "page": "one-page-from-browser-to-ndn-and-back@narrow",
+      "name": "EVIDENCE-LABELS",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "page": "one-page-from-browser-to-ndn-and-back@narrow",
+      "name": "REFERENCES-VISIBLE",
+      "ok": false,
+      "detail": "[{\"underline\":false,\"differs\":false},{\"underline\":false,\"differs\":false},{\"underline\":false,\"differs\":false}]"
+    },
+    {
+      "page": "identity-versions-and-signatures@narrow",
+      "name": "NO-SIDEWAYS-SCROLL",
+      "ok": false,
+      "detail": "scrollWidth 2479, clientWidth 477"
+    },
+    {
+      "page": "identity-versions-and-signatures@narrow",
+      "name": "TABLES-CONTAINED",
+      "ok": false,
+      "detail": "[{\"width\":797,\"escapes\":true},{\"width\":2474,\"escapes\":true},{\"width\":948,\"escapes\":true}]"
+    },
+    {
+      "page": "identity-versions-and-signatures@narrow",
+      "name": "NO-SPLIT-IDENTIFIER",
+      "ok": false,
+      "detail": "{type: \"fork\", site: …, date}"
+    },
+    {
+      "page": "identity-versions-and-signatures@narrow",
+      "name": "NO-SPLIT-REFERENCE",
+      "ok": false,
+      "detail": "pageHandler.coffee L143 | repository.coffee L191–L239 | ContentObject.js L281–L335 | ContentObject.js L36–L80"
+    },
+    {
+      "page": "identity-versions-and-signatures@narrow",
+      "name": "NO-PRE",
+      "ok": true,
+      "detail": "0"
+    },
+    {
+      "page": "identity-versions-and-signatures@narrow",
+      "name": "MEASURE-LIMIT",
+      "ok": true,
+      "detail": "widest 29.2 em"
+    },
+    {
+      "page": "identity-versions-and-signatures@narrow",
+      "name": "IDENTIFIER-SIZE",
+      "ok": false,
+      "detail": "smallest code / body = 0.8125"
+    },
+    {
+      "page": "identity-versions-and-signatures@narrow",
+      "name": "HEADING-STEPS",
+      "ok": false,
+      "detail": "h1 20.8, h2 19.2, h3 17.6, body 16"
+    },
+    {
+      "page": "identity-versions-and-signatures@narrow",
+      "name": "HEADING-STEPS",
+      "ok": false,
+      "detail": "h2 19.2, h3 17.6, body 16"
+    },
+    {
+      "page": "identity-versions-and-signatures@narrow",
+      "name": "EVIDENCE-LABELS",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "page": "identity-versions-and-signatures@narrow",
+      "name": "REFERENCES-VISIBLE",
+      "ok": false,
+      "detail": "[{\"underline\":false,\"differs\":false}]"
+    },
+    {
+      "page": "plain-text-after-ccnx@narrow",
+      "name": "NO-SIDEWAYS-SCROLL",
+      "ok": false,
+      "detail": "scrollWidth 1707, clientWidth 477"
+    },
+    {
+      "page": "plain-text-after-ccnx@narrow",
+      "name": "TABLES-CONTAINED",
+      "ok": false,
+      "detail": "[{\"width\":1665,\"escapes\":true},{\"width\":1197,\"escapes\":true},{\"width\":1249,\"escapes\":true},{\"width\":1702,\"escapes\":true}]"
+    },
+    {
+      "page": "plain-text-after-ccnx@narrow",
+      "name": "NO-SPLIT-IDENTIFIER",
+      "ok": false,
+      "detail": "default-data/pages/welcome-visitors"
+    },
+    {
+      "page": "plain-text-after-ccnx@narrow",
+      "name": "NO-SPLIT-REFERENCE",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "page": "plain-text-after-ccnx@narrow",
+      "name": "NO-PRE",
+      "ok": true,
+      "detail": "0"
+    },
+    {
+      "page": "plain-text-after-ccnx@narrow",
+      "name": "MEASURE-LIMIT",
+      "ok": true,
+      "detail": "widest 29.2 em"
+    },
+    {
+      "page": "plain-text-after-ccnx@narrow",
+      "name": "IDENTIFIER-SIZE",
+      "ok": false,
+      "detail": "smallest code / body = 0.8125"
+    },
+    {
+      "page": "plain-text-after-ccnx@narrow",
+      "name": "HEADING-STEPS",
+      "ok": false,
+      "detail": "h1 20.8, h2 19.2, h3 17.6, body 16"
+    },
+    {
+      "page": "plain-text-after-ccnx@narrow",
+      "name": "HEADING-STEPS",
+      "ok": false,
+      "detail": "h2 19.2, h3 17.6, body 16"
+    },
+    {
+      "page": "plain-text-after-ccnx@narrow",
+      "name": "EVIDENCE-LABELS",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "page": "plain-text-after-ccnx@narrow",
+      "name": "REFERENCES-VISIBLE",
+      "ok": false,
+      "detail": "[{\"underline\":false,\"differs\":false},{\"underline\":false,\"differs\":false},{\"underline\":false,\"differs\":false}]"
+    },
+    {
+      "page": "navigation",
+      "name": "LINKS-OPEN-TARGETS",
+      "ok": true,
+      "detail": "[{\"followed\":\"One Page From Browser to NDN and Back\",\"opened\":\"One Page From Browser to NDN and Back\",\"paneAdded\":true},{\"followed\":\"Identity, Versions and Signatures\",\"opened\":\"Identity, Versions and Signatures\",\"paneAdded\":true},{\"followed\":\"Plain Text After CCNx\",\"opened\":\"Plain Text After CCNx\",\"paneAdded\":true},{\"followed\":\"Reading the CCNx Federated Wiki\",\"opened\":\"Reading the CCNx Federated Wiki\",\"paneAdded\":true},{\"followed\":\"the page as a Federated Wiki server stores it\",\"opened\":\"Plain Text Example (Story view)\",\"paneAdded\":true}]"
+    },
+    {
+      "page": "all",
+      "name": "NO-PAGE-ERRORS",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "page": "all",
+      "name": "NO-FAILED-INTERNAL-REQUESTS",
+      "ok": true,
+      "detail": ""
+    }
+  ],
+  "pageErrors": [],
+  "failedRequests": [],
+  "navigation": [
+    {
+      "followed": "One Page From Browser to NDN and Back",
+      "opened": "One Page From Browser to NDN and Back",
+      "paneAdded": true
+    },
+    {
+      "followed": "Identity, Versions and Signatures",
+      "opened": "Identity, Versions and Signatures",
+      "paneAdded": true
+    },
+    {
+      "followed": "Plain Text After CCNx",
+      "opened": "Plain Text After CCNx",
+      "paneAdded": true
+    },
+    {
+      "followed": "Reading the CCNx Federated Wiki",
+      "opened": "Reading the CCNx Federated Wiki",
+      "paneAdded": true
+    },
+    {
+      "followed": "the page as a Federated Wiki server stores it",
+      "opened": "Plain Text Example (Story view)",
+      "paneAdded": true
+    }
+  ],
+  "summary": {
+    "assertions": 91,
+    "failed": [
+      "reading-the-ccnx-federated-wiki@wide: NO-SIDEWAYS-SCROLL",
+      "reading-the-ccnx-federated-wiki@wide: TABLES-CONTAINED",
+      "reading-the-ccnx-federated-wiki@wide: NO-SPLIT-IDENTIFIER",
+      "reading-the-ccnx-federated-wiki@wide: MEASURE-LIMIT",
+      "reading-the-ccnx-federated-wiki@wide: IDENTIFIER-SIZE",
+      "reading-the-ccnx-federated-wiki@wide: HEADING-STEPS",
+      "reading-the-ccnx-federated-wiki@wide: HEADING-STEPS",
+      "reading-the-ccnx-federated-wiki@wide: REFERENCES-VISIBLE",
+      "one-page-from-browser-to-ndn-and-back@wide: NO-SIDEWAYS-SCROLL",
+      "one-page-from-browser-to-ndn-and-back@wide: TABLES-CONTAINED",
+      "one-page-from-browser-to-ndn-and-back@wide: NO-SPLIT-REFERENCE",
+      "one-page-from-browser-to-ndn-and-back@wide: NO-PRE",
+      "one-page-from-browser-to-ndn-and-back@wide: MEASURE-LIMIT",
+      "one-page-from-browser-to-ndn-and-back@wide: IDENTIFIER-SIZE",
+      "one-page-from-browser-to-ndn-and-back@wide: HEADING-STEPS",
+      "one-page-from-browser-to-ndn-and-back@wide: HEADING-STEPS",
+      "one-page-from-browser-to-ndn-and-back@wide: REFERENCES-VISIBLE",
+      "identity-versions-and-signatures@wide: NO-SIDEWAYS-SCROLL",
+      "identity-versions-and-signatures@wide: TABLES-CONTAINED",
+      "identity-versions-and-signatures@wide: NO-SPLIT-REFERENCE",
+      "identity-versions-and-signatures@wide: MEASURE-LIMIT",
+      "identity-versions-and-signatures@wide: IDENTIFIER-SIZE",
+      "identity-versions-and-signatures@wide: HEADING-STEPS",
+      "identity-versions-and-signatures@wide: HEADING-STEPS",
+      "identity-versions-and-signatures@wide: REFERENCES-VISIBLE",
+      "plain-text-after-ccnx@wide: NO-SIDEWAYS-SCROLL",
+      "plain-text-after-ccnx@wide: TABLES-CONTAINED",
+      "plain-text-after-ccnx@wide: NO-SPLIT-IDENTIFIER",
+      "plain-text-after-ccnx@wide: MEASURE-LIMIT",
+      "plain-text-after-ccnx@wide: IDENTIFIER-SIZE",
+      "plain-text-after-ccnx@wide: HEADING-STEPS",
+      "plain-text-after-ccnx@wide: HEADING-STEPS",
+      "plain-text-after-ccnx@wide: REFERENCES-VISIBLE",
+      "reading-the-ccnx-federated-wiki@narrow: NO-SIDEWAYS-SCROLL",
+      "reading-the-ccnx-federated-wiki@narrow: TABLES-CONTAINED",
+      "reading-the-ccnx-federated-wiki@narrow: NO-SPLIT-IDENTIFIER",
+      "reading-the-ccnx-federated-wiki@narrow: IDENTIFIER-SIZE",
+      "reading-the-ccnx-federated-wiki@narrow: HEADING-STEPS",
+      "reading-the-ccnx-federated-wiki@narrow: HEADING-STEPS",
+      "reading-the-ccnx-federated-wiki@narrow: REFERENCES-VISIBLE",
+      "one-page-from-browser-to-ndn-and-back@narrow: NO-SIDEWAYS-SCROLL",
+      "one-page-from-browser-to-ndn-and-back@narrow: TABLES-CONTAINED",
+      "one-page-from-browser-to-ndn-and-back@narrow: NO-SPLIT-REFERENCE",
+      "one-page-from-browser-to-ndn-and-back@narrow: NO-PRE",
+      "one-page-from-browser-to-ndn-and-back@narrow: IDENTIFIER-SIZE",
+      "one-page-from-browser-to-ndn-and-back@narrow: HEADING-STEPS",
+      "one-page-from-browser-to-ndn-and-back@narrow: HEADING-STEPS",
+      "one-page-from-browser-to-ndn-and-back@narrow: REFERENCES-VISIBLE",
+      "identity-versions-and-signatures@narrow: NO-SIDEWAYS-SCROLL",
+      "identity-versions-and-signatures@narrow: TABLES-CONTAINED",
+      "identity-versions-and-signatures@narrow: NO-SPLIT-IDENTIFIER",
+      "identity-versions-and-signatures@narrow: NO-SPLIT-REFERENCE",
+      "identity-versions-and-signatures@narrow: IDENTIFIER-SIZE",
+      "identity-versions-and-signatures@narrow: HEADING-STEPS",
+      "identity-versions-and-signatures@narrow: HEADING-STEPS",
+      "identity-versions-and-signatures@narrow: REFERENCES-VISIBLE",
+      "plain-text-after-ccnx@narrow: NO-SIDEWAYS-SCROLL",
+      "plain-text-after-ccnx@narrow: TABLES-CONTAINED",
+      "plain-text-after-ccnx@narrow: NO-SPLIT-IDENTIFIER",
+      "plain-text-after-ccnx@narrow: IDENTIFIER-SIZE",
+      "plain-text-after-ccnx@narrow: HEADING-STEPS",
+      "plain-text-after-ccnx@narrow: HEADING-STEPS",
+      "plain-text-after-ccnx@narrow: REFERENCES-VISIBLE"
+    ]
+  }
+}

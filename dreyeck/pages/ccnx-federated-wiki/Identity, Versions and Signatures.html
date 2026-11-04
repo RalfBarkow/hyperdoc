@@ -1,3 +1,4 @@
+<div class="ccnx-reading">
 <h1>Identity, Versions and Signatures</h1>
 
 <in-package>dreyeck/ccnx-federated-wiki</in-package>
@@ -10,11 +11,13 @@ and can I trust it. This page reads what the two repositories do about each. As 
 
 <h2>The name</h2>
 
-<table class="inspector-table">
+<div class="table-scroll">
+<table class="inspector-table" id="name-table">
 <tr><th></th><th>Name</th><th>The version in it</th></tr>
-<tr><td>Main</td><td><code>/wiki/page/&lt;slug&gt;.json/&lt;version&gt;</code></td><td>the date of the page's last journal action, in milliseconds</td></tr>
-<tr><td>Prototype</td><td><code>/sfw/&lt;slug&gt;/&lt;timestamp&gt;</code></td><td>the time of publication, from the signed info; <strong>not</strong> a journal date</td></tr>
+<tr><td>Main</td><td><code class="wrap">/<wbr/>wiki/<wbr/>page/<wbr/>&lt;slug&gt;.json/<wbr/>&lt;version&gt;</code></td><td>the date of the page's last journal action, in milliseconds</td></tr>
+<tr><td>Prototype</td><td><code class="wrap">/<wbr/>sfw/<wbr/>&lt;slug&gt;/<wbr/>&lt;timestamp&gt;</code></td><td>the time of publication, from the signed info; <strong>not</strong> a journal date</td></tr>
 </table>
+</div>
 
 <p>
 <strong>The host is not in the Main name.</strong> <code>registerFace</code> first computes a name prefix from the host name, and then assigns the constant <code>"wiki"</code>
@@ -42,15 +45,15 @@ Pages with the same slug and different versions live side by side in the store. 
 </p>
 
 <ul>
-<li><strong>Implemented.</strong> The date is the editing browser's own clock, taken when the action is made
+<li><span class="ev ev-implemented">Implemented</span> The date is the editing browser's own clock, taken when the action is made
 (<a href="https://github.com/rynomad/CCNx-Federated-Wiki/blob/8426dc5cd326fa0d395d5bef2f73b8be33e34a8e/client/lib/pageHandler.coffee#L143">pageHandler.coffee L143</a>). It is unauthenticated and need not be unique or increasing.</li>
-<li><strong>Implemented.</strong> <code>version</code> is the <em>key</em> of the store <code>page/&lt;slug&gt;.json</code>
+<li><span class="ev ev-implemented">Implemented</span> <code>version</code> is the <em>key</em> of the store <code>page/&lt;slug&gt;.json</code>
 (<a href="https://github.com/rynomad/CCNx-Federated-Wiki/blob/8426dc5cd326fa0d395d5bef2f73b8be33e34a8e/client/lib/repository.coffee#L152-L157">repository.coffee L152&ndash;L157</a>), so a record with the same slug and the same version replaces the stored one.</li>
-<li><strong>Derived, not run.</strong> Two different pages with the same slug whose last action carries the same date have the same version and the same NDN name, and the later write replaces the earlier. Two copies with identical content can carry different versions.
+<li><span class="ev ev-derived">Derived, not run</span> Two different pages with the same slug whose last action carries the same date have the same version and the same NDN name, and the later write replaces the earlier. Two copies with identical content can carry different versions.
 The number orders copies by their claimed time; it does not say whether two copies are equal.</li>
-<li><strong>Implemented.</strong> The only check against content on this path is an optional digest component of a name. It is compared only when present, only logged, and after the page has been handed on
+<li><span class="ev ev-implemented">Implemented</span> The only check against content on this path is an optional digest component of a name. It is compared only when present, only logged, and after the page has been handed on
 (<a href="https://github.com/rynomad/CCNx-Federated-Wiki/blob/8426dc5cd326fa0d395d5bef2f73b8be33e34a8e/client/js/ndn-closures.js#L133-L149">ndn-closures.js L133&ndash;L149</a>); the names these clients make carry none.</li>
-<li><strong>Implemented.</strong> A signature does cover the content, but under one shared key and without a decisive check (below). It does not turn the version into a content identity either.</li>
+<li><span class="ev ev-implemented">Implemented</span> A signature does cover the content, but under one shared key and without a decisive check (below). It does not turn the version into a content identity either.</li>
 </ul>
 
 <p>
@@ -61,7 +64,7 @@ In the Prototype the version is the publication timestamp, equally a clock readi
 
 <p>
 In Main a fork is detected when the page's <code>favicon</code> is not this browser's. It is recorded as a journal action
-<code>{type: "fork", site: &hellip;, date}</code>, and <strong><code>site</code> is the favicon data URL of the page being forked</strong>, not a host name
+<code class="wrap">{type: "fork", site: &hellip;, date}</code>, and <strong><code>site</code> is the favicon data URL of the page being forked</strong>, not a host name
 (<a href="https://github.com/rynomad/CCNx-Federated-Wiki/blob/8426dc5cd326fa0d395d5bef2f73b8be33e34a8e/client/lib/pageHandler.coffee#L112-L163">pageHandler.coffee L112&ndash;L163</a>).
 </p>
 
@@ -70,7 +73,7 @@ The field <code>excludes</code> is built by walking the journal from the newest 
 (<a href="https://github.com/rynomad/CCNx-Federated-Wiki/blob/8426dc5cd326fa0d395d5bef2f73b8be33e34a8e/client/lib/pageHandler.coffee#L86-L93">pageHandler.coffee L86&ndash;L93</a>).
 When a page arrives from a peer, the stored records whose key is in its <code>excludes</code> are removed
 (<a href="https://github.com/rynomad/CCNx-Federated-Wiki/blob/8426dc5cd326fa0d395d5bef2f73b8be33e34a8e/client/lib/repository.coffee#L94-L124">repository.coffee L94&ndash;L124</a>).
-<em>Derived, not run:</em> a peer's earlier versions of its own line since its last fork are replaced; versions from before that fork stay, as separate twins.
+<span class="ev ev-derived">Derived, not run</span> a peer's earlier versions of its own line since its last fork are replaced; versions from before that fork stay, as separate twins.
 </p>
 
 <h2>Site identity</h2>
@@ -79,22 +82,22 @@ When a page arrives from a peer, the stored records whose key is in its <code>ex
 In both repositories the &ldquo;site&rdquo; is an image. A plugin draws a 32&times;32 gradient on a canvas with random colours and keeps it in the browser's database. In Main it is copied
 into every page as <code>favicon</code>, decides whether a page is &ldquo;mine&rdquo;
 (<a href="https://github.com/rynomad/CCNx-Federated-Wiki/blob/8426dc5cd326fa0d395d5bef2f73b8be33e34a8e/client/lib/repository.coffee#L191-L239">repository.coffee L191&ndash;L239</a>),
-and marks forks. In the Prototype it is part of a local identity record <code>{id: 1, name: "anonymous", favicon}</code>, which becomes <code>page.publisher</code>
+and marks forks. In the Prototype it is part of a local identity record <code class="wrap">{id: 1, name: "anonymous", favicon}</code>, which becomes <code>page.publisher</code>
 (<a href="https://github.com/rynomad/CCNx-Federated-Wiki-Prototype/blob/c5b1b93c632ef9834a598406a25c20ad47bab26e/client/plugins/favicon/favicon.coffee#L52-L57">favicon.coffee L52&ndash;L57</a>).
 </p>
 
 <p>
-The express server of Main still has an owner and a Persona login (<code>server/express/lib/server.coffee</code>). The CCNx client path does not consult it.
+The express server of Main still has an owner and a Persona login (<code class="wrap">server/express/lib/server.coffee</code>). The CCNx client path does not consult it.
 </p>
 
 <h2>Publisher identity</h2>
 
-<p>
+<p id="publisher-digest">
 Every NDN object carries a publisher: the SHA-256 digest of a public key, and a key locator that is that key
 (<a href="https://github.com/rynomad/CCNx-Federated-Wiki/blob/8426dc5cd326fa0d395d5bef2f73b8be33e34a8e/client/js/js/ContentObject.js#L281-L335">ContentObject.js L281&ndash;L335</a>).
 The key is <strong>one RSA key pair written into the source of the library</strong>
 (<a href="https://github.com/rynomad/CCNx-Federated-Wiki/blob/8426dc5cd326fa0d395d5bef2f73b8be33e34a8e/client/js/js/security/KeyManager.js#L31-L34">KeyManager.js L31&ndash;L34</a>).
-The digest of its public half is <code>b5506b1aba3da7761b0f8d61a4aa7e3b6d15b426feb5bda82389aca765a3b81c</code>, <strong>the same in both repositories</strong>. Beside it stands an X.509 certificate
+The digest of its public half is <code class="wrap">b5506b1aba3da7761b0f8d61a4aa7e3b6d15b426feb5bda82389aca765a3b81c</code>, <strong>the same in both repositories</strong>. Beside it stands an X.509 certificate
 with the subject <code>axelcdv</code>, valid from 2012-04-28 to 2012-05-28; no call site in the client sources uses it. Nothing in the source read maps this key to a person, a site or a name.
 </p>
 
@@ -110,21 +113,20 @@ A function that also signs a page, <code>pageToContentObject</code>, is defined 
 
 <h2>Signatures: checked</h2>
 
-<table class="inspector-table">
-<tr><th>#</th><th>What the source does</th><th>Lines</th></tr>
-<tr><td>1</td><td>The library verifies every incoming object unless told not to; the default is to verify. Nothing in the client sources turns it off.</td>
-    <td><a href="https://github.com/rynomad/CCNx-Federated-Wiki/blob/8426dc5cd326fa0d395d5bef2f73b8be33e34a8e/client/js/js/NDN.js#L37">NDN.js L37</a></td></tr>
-<tr><td>2</td><td>For a key locator that <em>is</em> a public key, which is what the signed info always writes, the code takes the key <strong>from the object itself</strong>, verifies, computes a verdict &mdash; and then reports &ldquo;verified content&rdquo; whatever the verdict was.
-    The minified <code>ndn-js.js</code> that the page loads has the same statement order in both repositories.</td>
-    <td><a href="https://github.com/rynomad/CCNx-Federated-Wiki/blob/8426dc5cd326fa0d395d5bef2f73b8be33e34a8e/client/js/js/NDN.js#L492-L500">NDN.js L492&ndash;L500</a></td></tr>
-<tr><td>3</td><td>The consumer accepts &ldquo;verified&rdquo; and &ldquo;unverified&rdquo; content alike.</td>
-    <td><a href="https://github.com/rynomad/CCNx-Federated-Wiki/blob/8426dc5cd326fa0d395d5bef2f73b8be33e34a8e/client/js/ndn-closures.js#L62-L65">ndn-closures.js L62&ndash;L65</a></td></tr>
-<tr><td>4</td><td>A digest in the name is compared only if the name has one, the mismatch is only logged, and the page has already been handed on.</td>
-    <td><a href="https://github.com/rynomad/CCNx-Federated-Wiki/blob/8426dc5cd326fa0d395d5bef2f73b8be33e34a8e/client/js/ndn-closures.js#L133-L149">ndn-closures.js L133&ndash;L149</a></td></tr>
-</table>
+<ol class="steps" id="signatures-checked">
+<li>The library verifies every incoming object unless told not to; the default is to verify. Nothing in the client sources turns it off.
+  <span class="lines">Lines: <a href="https://github.com/rynomad/CCNx-Federated-Wiki/blob/8426dc5cd326fa0d395d5bef2f73b8be33e34a8e/client/js/js/NDN.js#L37">NDN.js L37</a></span></li>
+<li>For a key locator that <em>is</em> a public key, which is what the signed info always writes, the code takes the key <strong>from the object itself</strong>, verifies, computes a verdict &mdash; and then reports &ldquo;verified content&rdquo; whatever the verdict was.
+    The minified <code>ndn-js.js</code> that the page loads has the same statement order in both repositories.
+  <span class="lines">Lines: <a href="https://github.com/rynomad/CCNx-Federated-Wiki/blob/8426dc5cd326fa0d395d5bef2f73b8be33e34a8e/client/js/js/NDN.js#L492-L500">NDN.js L492&ndash;L500</a></span></li>
+<li>The consumer accepts &ldquo;verified&rdquo; and &ldquo;unverified&rdquo; content alike.
+  <span class="lines">Lines: <a href="https://github.com/rynomad/CCNx-Federated-Wiki/blob/8426dc5cd326fa0d395d5bef2f73b8be33e34a8e/client/js/ndn-closures.js#L62-L65">ndn-closures.js L62&ndash;L65</a></span></li>
+<li>A digest in the name is compared only if the name has one, the mismatch is only logged, and the page has already been handed on.
+  <span class="lines">Lines: <a href="https://github.com/rynomad/CCNx-Federated-Wiki/blob/8426dc5cd326fa0d395d5bef2f73b8be33e34a8e/client/js/ndn-closures.js#L133-L149">ndn-closures.js L133&ndash;L149</a></span></li>
+</ol>
 
 <p>
-<strong>What follows (derived from 1&ndash;3, not run).</strong> On this path the result of the signature check does not decide whether a page is accepted. And a correct check would show
+<span class="ev ev-derived">Derived, not run</span> <strong>What follows</strong> (from 1&ndash;3). On this path the result of the signature check does not decide whether a page is accepted. And a correct check would show
 only that the object agrees with the key it carries. With one shared key there is no trust anchor, and a signature cannot say who published a page.
 </p>
 
@@ -134,15 +136,18 @@ only that the object agrees with the key it carries. With one shared key there i
 
 <h2>In one table</h2>
 
-<table class="inspector-table">
+<div class="table-scroll">
+<table class="inspector-table" id="one-table">
 <tr><th></th><th>Smallest Federated Wiki server</th><th>Main</th><th>Prototype</th></tr>
-<tr><td>Name</td><td><code>https://&lt;host&gt;/&lt;slug&gt;.json</code></td><td><code>/wiki/page/&lt;slug&gt;.json/&lt;version&gt;</code></td><td><code>/sfw/&lt;slug&gt;/&lt;timestamp&gt;</code></td></tr>
+<tr><td>Name</td><td><code class="wrap">https:/<wbr/>/<wbr/>&lt;host&gt;/<wbr/>&lt;slug&gt;.json</code></td><td><code class="wrap">/<wbr/>wiki/<wbr/>page/<wbr/>&lt;slug&gt;.json/<wbr/>&lt;version&gt;</code></td><td><code class="wrap">/<wbr/>sfw/<wbr/>&lt;slug&gt;/<wbr/>&lt;timestamp&gt;</code></td></tr>
 <tr><td>Site</td><td>the host name</td><td>a random favicon</td><td>a random favicon (&ldquo;anonymous&rdquo;)</td></tr>
 <tr><td>Version</td><td>the journal</td><td>last journal date</td><td>time of publication</td></tr>
 <tr><td>Fork record</td><td><code>site</code>: a host</td><td><code>site</code>: a data URL</td><td>the source page's <code>site</code></td></tr>
 <tr><td>Who vouches</td><td>the server's authorization</td><td>one shared RSA key; the verdict is not decisive</td><td>the same</td></tr>
 </table>
+</div>
 
 <p>
 Next: <a page="Plain Text After CCNx">Plain Text After CCNx</a>.
 </p>
+</div>

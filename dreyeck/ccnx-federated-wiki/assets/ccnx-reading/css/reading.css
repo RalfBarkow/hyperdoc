@@ -1,0 +1,84 @@
+/* Reading typography of the CCNx Federated Wiki HyperBook.
+ *
+ * Scope: everything is under .ccnx-reading, the wrapper element of the four pages. Nothing here applies to any other HyperBook page
+ * that happens to be shown in the same Inspector. The Inspector's own CSS (body font, .inspector-table with white-space: nowrap) is not
+ * changed; these rules override it for these pages only.
+ *
+ * Each block is tied to a finding in dreyeck/src/ccnx-typography-findings.lisp (the comment names it). A rule without a finding is
+ * a rule without a reason.
+ */
+
+/* F-MEASURE, F-LEADING: running text had "normal" leading (about 1.15) and lines up to 80 characters in a 700 px pane. */
+.ccnx-reading { line-height: 1.5; }
+.ccnx-reading p, .ccnx-reading ul, .ccnx-reading ol, .ccnx-reading dl { max-width: 38em; box-sizing: border-box; }
+.ccnx-reading li + li { margin-top: .35em; }
+
+/* F-HIERARCHY: h1, h2, h3 were 20.8, 19.2 and 17.6 px: a 1.2 px difference between levels. */
+.hyperbook-page .ccnx-reading h1 { font-size: 1.55em; line-height: 1.2; margin: .5em 0 .6em; }
+.hyperbook-page .ccnx-reading h2 { font-size: 1.28em; line-height: 1.25; margin: 1.7em 0 .5em; padding-top: .35em; border-top: 1px solid #ccc; }
+.hyperbook-page .ccnx-reading h3 { font-size: 1.05em; line-height: 1.3; margin: 1.3em 0 .4em; }
+.ccnx-reading h2 + p, .ccnx-reading h3 + p { margin-top: .4em; }
+
+/* F-IDENTIFIERS: identifiers are set in a monospace face in which I, l, 1 and O, 0 differ, at a size close to the running text
+ * (the generic "monospace" was 13 px against 16 px). A short identifier is never split across lines (it also used to break after a hyphen,
+ * ndn-/js). Only code marked class="wrap" (longer than 28 characters, or holding spaces) may break; the 64-character digest breaks inside
+ * when it must, and breaking never changes the text. */
+.ccnx-reading code, .ccnx-reading pre, .ccnx-reading dl.fields dt {
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, "DejaVu Sans Mono", "Liberation Mono", monospace;
+  font-variant-numeric: slashed-zero;
+}
+.ccnx-reading code { font-size: .9em; background: #f1f1f1; padding: 0 .25em; border-radius: 2px; white-space: nowrap; }
+.ccnx-reading code.wrap { white-space: normal; overflow-wrap: break-word; }
+.ccnx-reading h3 code { background: none; padding: 0; font-size: 1em; }
+
+/* F-SOURCE-REFERENCES: "pageHandler.coffee L22-L78" broke after the dash. A source reference is looked up as a whole, and its file name and
+ * line numbers are identifiers, so it is set like one. */
+.ccnx-reading a[href*="github.com"] {
+  white-space: nowrap; font-family: ui-monospace, "SF Mono", Menlo, Consolas, "DejaVu Sans Mono", "Liberation Mono", monospace; font-size: .9em;
+}
+.ccnx-reading a code { font-size: 1em; background: none; padding: 0; }
+
+/* F-REFERENCES: Inspector references to pages and examples are underlined but looked like running text. */
+.ccnx-reading .hyperbook-reference .inspector-inspect {
+  font: inherit; color: #12408f; text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: .15em;
+}
+
+/* F-EVIDENCE: the kinds of statement, as a label that says what it is in words and differs in outline in monochrome. */
+.ccnx-reading .ev {
+  display: inline-block; font-size: .78em; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; line-height: 1.3;
+  padding: 0 .4em; margin-right: .3em; border: 1px solid #333; border-radius: 2px; background: #fff; white-space: nowrap; vertical-align: .08em;
+}
+.ccnx-reading .ev-documented { border-style: dashed; }
+.ccnx-reading .ev-derived { border-style: dotted; border-width: 2px; font-style: italic; }
+.ccnx-reading .ev-open { border-style: double; border-width: 3px; }
+
+/* F-TABLES: tables were set with white-space: nowrap, so a 4-column table ran 2474 px wide in a 477 px pane and the pane scrolled
+ * sideways. A comparison table wraps; if it still does not fit it scrolls by itself, not the whole pane. */
+.ccnx-reading .table-scroll { max-width: 100%; overflow-x: auto; margin: 1em 0; }
+.ccnx-reading table.inspector-table { white-space: normal; border-collapse: collapse; width: 100%; font-size: .95em; line-height: 1.4; }
+.ccnx-reading table.inspector-table th {
+  text-align: left; color: #222; font-weight: 700; vertical-align: bottom; padding: .3em .7em .3em 0; border-bottom: 2px solid #666;
+}
+.ccnx-reading table.inspector-table td { vertical-align: top; padding: .4em .7em .4em 0; border-bottom: 1px solid #ddd; }
+.ccnx-reading table.inspector-table td:first-child { font-weight: 600; }
+
+/* F-STEPS: a sequence is a numbered list, not a table whose last column was the one that fell outside the pane. */
+.ccnx-reading ol.steps { list-style: none; padding: 0; margin: 1em 0; counter-reset: step; }
+.ccnx-reading ol.steps > li { counter-increment: step; position: relative; padding-left: 2.1em; margin: .8em 0; }
+.ccnx-reading ol.steps > li::before {
+  content: counter(step); position: absolute; left: 0; top: .1em; width: 1.5em; font-size: .9em; line-height: 1.6; text-align: center;
+  font-weight: 700; border: 1px solid #333; border-radius: 50%;
+}
+.ccnx-reading .step-name { font-weight: 700; }
+.ccnx-reading .lines { display: block; font-size: .92em; color: #333; }
+
+/* F-FIELD-LISTS: aligned columns in <pre> ran past the pane (one line carried a 64-character digest). A field list wraps. */
+.ccnx-reading dl.fields { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: .2em 1.2em; margin: 1em 0; font-size: .88em; line-height: 1.45;
+  padding: .6em .8em; background: #f7f7f7; border-left: 3px solid #bbb; max-width: 100%; }
+.ccnx-reading dl.fields dt { font-weight: 700; }
+.ccnx-reading dl.fields dd { margin: 0; overflow-wrap: anywhere; }
+.ccnx-reading dl.fields dl.fields { background: none; border-left: 0; padding: 0; margin: .2em 0 0; font-size: 1em; }
+/* Nested field lists stack (name above value, value indented) so that three levels of names do not leave the values a few characters. */
+.ccnx-reading dl.fields dl.fields { grid-template-columns: minmax(0, 1fr); gap: .15em 0; }
+.ccnx-reading dl.fields dl.fields > dd { margin-left: 1.1em; }
+.ccnx-reading dl.fields code { background: none; padding: 0; font-size: 1em; white-space: normal; overflow-wrap: break-word; }

@@ -163,6 +163,99 @@
       (assert (not (search "class='internal'" html)))))
   t)
 
+;;; Reading typography: the pages are structured for reading, and the model that explains why is consistent with them.
+
+(defun %reading-css ()
+  (uiop:read-file-string (merge-pathnames "dreyeck/ccnx-federated-wiki/assets/ccnx-reading/css/reading.css" (%root))))
+
+(defun check-typography-structure ()
+  "Structural properties of the four pages that the stylesheet relies on. Not pixel values: the properties a change to a page must not lose."
+  (dolist (title +titles+)
+    (let ((text (%page-text title)))
+      ;; every page is inside the wrapper the stylesheet is scoped to; the stylesheet names no selector outside it
+      (assert (search "<div class=\"ccnx-reading\">" text) () "~S lacks the .ccnx-reading wrapper" title)
+      ;; no aligned <pre> block (it cannot wrap) and no table outside a box that scrolls by itself
+      (assert (not (search "<pre" text)) () "~S holds a <pre> block" title)
+      (let ((tables (length (ppcre:all-matches-as-strings "<table" text)))
+            (boxed (length (ppcre:all-matches-as-strings "<div class=\"table-scroll\">\\s*<table" text))))
+        (assert (= tables boxed) () "~S: ~D tables, ~D in a scrolling box" title tables boxed))
+      ;; ids are unique, because a text unit names an element by its id
+      (let ((ids (ppcre:all-matches-as-strings " id=\"[^\"]+\"" text)))
+        (assert (= (length ids) (length (remove-duplicates ids :test #'string=))) () "~S: an element id occurs twice" title))))
+  (let ((css (%reading-css)))
+    (dolist (line (ppcre:split "\\n" css))
+      (when (and (plusp (length line)) (not (member (char line 0) '(#\Space #\/ #\* #\}))))
+        ;; a rule's first line starts with its selector; none may be outside the wrapper's scope
+        (assert (or (search ".ccnx-reading" line) (search "/*" line)) () "Selector outside .ccnx-reading: ~A" line))))
+  t)
+
+(defun check-evidence-kinds-defined ()
+  "Every kind of statement a page uses is defined where the kinds are listed (the main page), once, in the same mark."
+  (let* ((main (%page-text "Reading the CCNx Federated Wiki"))
+         (start (search "id=\"kinds-of-statement\"" main))
+         (end (search "<h2>The sources</h2>" main))
+         (definition (subseq main start end))
+         (used '()))
+    (assert (and start end (< start end)))
+    (dolist (title +titles+)
+      (ppcre:do-register-groups (kind) ("class=\"ev ev-([a-z]+)\"" (%page-text title))
+        (pushnew kind used :test #'string=)))
+    (assert used)
+    (dolist (kind used)
+      (assert (search (format nil "class=\"ev ev-~A\"" kind) definition) () "The kind ~A is used but not defined in the list of kinds" kind))
+    ;; the answer about signatures says what is implemented and no longer says that the verification code "does run"
+    (assert (not (search "does run" main)))
+    (assert (not (search "(Implemented, by the source; not run.)" main))))
+  t)
+
+(defun check-typography-model ()
+  "Page -> finding -> variant, through the existing Inspector views, and every text unit resolves in the page it names."
+  (cw:reset-typography-model)
+  (let* ((book (hyperbook:find-hyperbook +id+ :signal-error? t))
+         (css (%reading-css)))
+    (assert (cw:typography-findings))
+    (dolist (unit (cw:text-units))
+      (assert (plusp (length (cw:text-unit-text-of unit))) () "text unit ~A is empty" (cw:text-unit-id-of unit)))
+    (dolist (case (cw:legibility-cases))
+      (assert (cw:legibility-case-findings-of case) () "legibility case ~A leads to no finding" (cw:legibility-case-id-of case))
+      (assert (member (cw:legibility-case-status-of case) '(:browser-observed :conjectured))))
+    (dolist (finding (cw:typography-findings))
+      (assert (member (cw:typography-finding-status-of finding) '(:browser-observed :conjectured)))
+      (assert (cw:typography-finding-variants-of finding) () "finding ~A has no presentation variant" (cw:typography-finding-id-of finding))
+      (dolist (variant (cw:typography-finding-variants-of finding))
+        (assert (eq finding (cw:presentation-variant-finding-of variant)))
+        ;; the change is tied to a labelled block of the style sheet
+        (dolist (label (ppcre:split ", " (cw:presentation-variant-css-label-of variant)))
+          (assert (search label css) () "~A: the style sheet has no block ~A" (cw:presentation-variant-id-of variant) label)))
+      ;; grounds are never presented as Willberg's own statements
+      (assert (not (search "Willberg" (cw:typography-finding-rationale-of finding)))))
+    ;; navigation: page -> its Typography view -> finding -> variant, as object references
+    (dolist (title +titles+)
+      (let* ((page (hyperbook:find-page book title :signal-error? t))
+             (findings (cw:typography-findings page))
+             (view (find "Typography" (hv:all-views page) :key #'hv:view-title :test #'equal)))
+        ;; The reading comes first: Content is the first view of every page of the book, and Typography comes after it.
+        (let ((views (hv:all-views page)))
+          (assert (equal "Content" (hv:view-title (first views))) () "~S: the first view is ~S, not Content" title (hv:view-title (first views)))
+          (when view
+            (assert (< (hv:view-priority (first views)) (hv:view-priority view)) () "~S: Typography does not come after Content" title)))
+        (when findings
+          (assert view () "~S has findings and no Typography view" title)
+          (hv:view-html view)
+          (let ((references (mapcar #'cdr (hv:view-references view))))
+            (dolist (finding findings)
+              (assert (member finding references :test #'eq) () "~S: finding ~A is not a reference of its view" title (cw:typography-finding-id-of finding))
+              (let* ((fview (find "Typography finding" (hv:all-views finding) :key #'hv:view-title :test #'equal))
+                     (frefs (progn (hv:view-html fview) (mapcar #'cdr (hv:view-references fview)))))
+                (assert (member (cw:typography-finding-unit-of finding) frefs :test #'eq))
+                (dolist (variant (cw:typography-finding-variants-of finding))
+                  (assert (member variant frefs :test #'eq)))))))
+        (unless findings (assert (null view)))))
+    ;; the style sheet belongs to this book only
+    (assert (member "/ccnx-reading/css/reading.css" (hyperbook::css-of (hyperbook:html-page-assets-of book)) :test #'equal))
+    (assert (not (member "/ccnx-reading/css/reading.css" (hyperbook::css-of hyperdoc::*hyperdoc-html-page-assets*) :test #'equal))))
+  t)
+
 (defun run-tests ()
   (check-loads)
   (check-links)
@@ -170,5 +263,9 @@
   (check-claims-kept-apart)
   (check-example-pages)
   (check-pages-open-as-ordinary-local-pages)
+  (check-typography-structure)
+  (check-evidence-kinds-defined)
+  (check-typography-model)
+  (format t "~&CCNX-FEDERATED-WIKI-TYPOGRAPHY-PASS: every page is inside the .ccnx-reading scope, holds no <pre> and no table outside a scrolling box; every kind of statement used is defined once on the main page; every finding resolves to an element of its page, has a variant tied to a block of the style sheet, and is reached from its page through the existing Inspector views.~%")
   (format t "~&CCNX-FEDERATED-WIKI-PASS: the reading and its four pages load; links resolve and expressions open only the example pages; every reference to the two repositories is pinned to the reviewed commit; no key material is quoted; the example pages are consistent with the cited rules (version, excludes, added fields) and open as ordinary local pages with the existing Story view; it is not a member of dreyeck/catalog.~%")
   t)
