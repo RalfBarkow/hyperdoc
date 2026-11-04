@@ -1008,7 +1008,7 @@ true of a historical authorship node with no tree of its own."
 runs is Beane's adapted distribution.")))
     ;; And the distinction must not be achieved by calling everything
     ;; unexecutable: where the engine is here, Beane's node says so.
-    (when (reading:engine-available-p)
+    (when (eq :executable (reading::runtime-evidence-status))
       (let ((beane (find :beane-asdf-adaptation live
                          :key (lambda (s) (getf s :station)))))
         (check (getf beane :executable-here)
@@ -1433,6 +1433,7 @@ The real CAR-CDR run is not here. It needs an engine and belongs to the engine i
    )
   (check-historical-claim-views)
   (check-policy-boundary-with-a-present-station)
+  (check-complete-files-are-not-an-executable-engine)
   (format t "~&CATALOG-LISP-CRITIC-READING-PASS: pages render, examples evaluate, the absent engine is reported as absent, recorded critiques read without it, a present station is refused where code may not arrive with a page. The real CAR-CDR run is the engine integration test (it fails when it has no station).~%")
   t)
 
@@ -1554,6 +1555,68 @@ be evaluated and nothing may be added. Permitted: it must be, or the refusal abo
     (assert (and (boundp 'cl-user::*canary*) (symbol-value 'cl-user::*canary*)) ()
             \"A permitting runtime did not evaluate the page's definition: the refusal measured above was blind.\")
     (format t \"~&CANARY-BOUNDARY-PASS: refused evaluates nothing and adds nothing; permitted evaluates the page's definition.~%\"))")
+
+(defun non-functional-engine-script ()
+  "Run in a clean child image whose station is complete as files and whose engine does nothing. The runtime permits page-attached code,
+so the only thing that can keep the status from :EXECUTABLE is that no run completed."
+  "(let ((parameters (find-symbol \"*SERVER-PARAMETERS*\" :hyperbook/server)))
+    (setf (symbol-value parameters) nil)
+    (assert (dreyeck/lisp-critic/reading:execution-permitted-p))
+    ;; Complete as files: the book's own measure of an available engine is satisfied.
+    (assert (dreyeck/lisp-critic/reading:engine-available-p) () \"The station is not complete as files; the control measures nothing.\")
+    (let ((status (dreyeck/lisp-critic/reading::runtime-evidence-status))
+          (match (dreyeck/lisp-critic/reading:critic-match-example))
+          (beane (find :beane-asdf-adaptation (dreyeck/lisp-critic/reading:genealogy-in-this-runtime)
+                       :key (lambda (station) (getf station :station)))))
+      (assert (eq :source-observed status) () \"Complete files and an engine that does not work have the status ~S.\" status)
+      (assert (eq :source-observed (getf match :evidence-status)) () \"The CAR-CDR example claims ~S for an engine that does not work.\" (getf match :evidence-status))
+      (assert (not (getf beane :executable-here)) () \"The genealogy says the adaptation is executable here; its engine does not work.\"))
+    (format t \"~&NON-FUNCTIONAL-ENGINE-PASS: complete files, permitted, no completed run: source-observed, not executable.~%\"))")
+
+(defun check-complete-files-are-not-an-executable-engine ()
+  "Present sources, permitted execution and a completed engine run are three different things, and only the last is :EXECUTABLE.
+
+A station whose files are all there and whose engine does nothing (the vendored system is empty and the rules file holds no rule) is
+shown as :SOURCE-OBSERVED. The real engine with the same permission is :EXECUTABLE, which is the integration tier's CHECK-THE-REAL-CAR-CDR-RUN: together
+they discriminate. The check is run in a clean image, because a permitting runtime loads the station."
+  (let ((station (uiop:ensure-directory-pathname
+                  (merge-pathnames (format nil "dreyeck-silent-station-~36R/" (random (expt 36 8) (make-random-state t)))
+                                   (uiop:temporary-directory)))))
+    (flet ((write-file (relative text)
+             (let ((pathname (merge-pathnames relative station)))
+               (ensure-directories-exist pathname)
+               (with-open-file (out pathname :direction :output :if-exists :supersede :external-format :utf-8)
+                 (write-string text out)))))
+      (unwind-protect
+           (progn
+             (write-file "a-critic-for-lisp.asd" "(asdf:defsystem \"a-critic-for-lisp\" :components ((:file \"wrapper\")))")
+             (write-file "wrapper.lisp"
+                         "(defpackage :a-critic-for-lisp (:use :cl) (:export #:load-lisp-critic))
+(in-package :a-critic-for-lisp)
+(defun load-lisp-critic ()
+  (pushnew (merge-pathnames \"vendor/lisp-critic/\" (asdf:system-source-directory \"a-critic-for-lisp\")) asdf:*central-registry* :test #'equal)
+  (asdf:load-system \"lisp-critic\"))")
+             (write-file "vendor/lisp-critic/lisp-critic.asd" "(asdf:defsystem :lisp-critic)")
+             (dolist (name (rest reading::+engine-runtime-files+))
+               (write-file (format nil "vendor/lisp-critic/~A" name) ""))
+             (let ((output
+                     (with-output-to-string (stream)
+                       (uiop:run-program
+                        (list (namestring sb-ext:*runtime-pathname*) "--no-userinit" "--non-interactive"
+                              "--eval" "(require :asdf)"
+                              "--eval" (format nil "(asdf:load-asd ~S)" (asdf:system-source-file "dreyeck"))
+                              "--eval" "(asdf:load-system \"dreyeck/lisp-critic/reading\")"
+                              "--eval" "(asdf:load-system \"hyperbook/server\")"
+                              "--eval" (non-functional-engine-script))
+                        :environment (cons (format nil "DREYECK_LISP_CRITIC_ROOT=~A" (uiop:native-namestring station))
+                                           (remove-if (lambda (entry) (uiop:string-prefix-p "DREYECK_LISP_CRITIC_ROOT=" entry))
+                                                      (sb-ext:posix-environ)))
+                        :output stream :error-output stream))))
+               (check (search "NON-FUNCTIONAL-ENGINE-PASS" output)
+                      "Complete files with an engine that does not work were not kept below :EXECUTABLE:~%~A" output)))
+        (uiop:delete-directory-tree station :validate t :if-does-not-exist :ignore))))
+  (format t "~&COMPLETE-FILES-ARE-NOT-AN-EXECUTABLE-ENGINE-PASS~%")
+  t)
 
 (defun check-policy-boundary-with-a-present-station ()
   "A station is present and a runtime that refuses page-attached code must not evaluate it; one that permits it does.
@@ -2249,6 +2312,7 @@ the page-station layout tier (dreyeck/lisp-critic/page-station/tests) hold it, a
    :output *standard-output* :error-output *error-output*)
   (format t "~&FRESH-PROCESS-READING-PASS~%")
   (check-policy-boundary-with-a-present-station)
+  (check-complete-files-are-not-an-executable-engine)
   (check-the-engine-integration-test-can-fail)
   t)
 
@@ -2305,6 +2369,11 @@ blind."
               (dolist (example examples) (ignore-errors (funcall example)))
               (assert (null (funcall present)))
               (assert (= systems (length (asdf:registered-systems)))))
+            ;; A complete station that this runtime refuses to run is source, not an engine that runs.
+            (assert (dreyeck/lisp-critic/reading:engine-available-p))
+            (assert (eq :source-observed (dreyeck/lisp-critic/reading::runtime-evidence-status)) ()
+                    \"A refused engine has the status ~S.\" (dreyeck/lisp-critic/reading::runtime-evidence-status))
+            (assert (null (funcall present)))
             ;; The recorded finding stays readable exactly here.
             (let ((target (dreyeck/lisp-critic/reading:current-critique-example)))
               (assert (typep target 'dreyeck/lisp-critic:critic-target))

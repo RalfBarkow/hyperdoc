@@ -82,13 +82,15 @@ critique, and it is the engine's recommendation CADR. Nothing here reads a recor
   (let* ((match (reading:critic-match-example))
          (record (getf match :record)))
     (check (getf match :engine-available-p) "The book does not report the engine as reachable.")
-    (check (eq :executable (getf match :evidence-status)) "The status is ~S, not :EXECUTABLE." (getf match :evidence-status))
     (check (eq :completed (er:evaluation-status-of record))
            "The CAR-CDR run did not complete: ~A" (er:evaluation-failure-of record))
     (check (= 1 (length (er:evaluation-result-of record)))
            "The CAR-CDR run produced ~D critiques instead of one." (length (er:evaluation-result-of record)))
     (check (search "CADR" (critic:critique-explanation-of (first (er:evaluation-result-of record))))
-           "The engine's critique does not recommend CADR."))
+           "The engine's critique does not recommend CADR.")
+    ;; :EXECUTABLE is what a completed run shows; it is checked after the run, which is what justifies it.
+    (check (eq :executable (getf match :evidence-status)) "The status is ~S, not :EXECUTABLE." (getf match :evidence-status))
+    (check (eq :executable (reading::runtime-evidence-status)) "The runtime's status is ~S, not :EXECUTABLE." (reading::runtime-evidence-status)))
   t)
 
 (defun check-the-recorded-run-is-what-the-engine-says ()
