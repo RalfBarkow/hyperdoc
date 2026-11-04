@@ -70,8 +70,8 @@
     (dolist (title +titles+)
       (assert (hyperbook:find-page book title :signal-error? t) () "page ~S does not load" title)
       (assert (search "<in-package>dreyeck/ccnx-federated-wiki</in-package>" (%page-text title)) () "~S has no package context" title)))
-  ;; Additive: the reading is loaded by HYPERDOC_CATALOG_SYSTEM, not made a member of dreyeck/catalog by this change.
-  (assert (not (member +id+ (asdf:system-depends-on (asdf:find-system "dreyeck/catalog")) :test #'equal)))
+  ;; Direct admission to the default Catalog is explicit in the ASDF system dependency.
+  (assert (member +id+ (asdf:system-depends-on (asdf:find-system "dreyeck/catalog")) :test #'equal))
   t)
 
 (defun check-links ()
