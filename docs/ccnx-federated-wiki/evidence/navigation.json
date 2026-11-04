@@ -1,0 +1,39 @@
+{
+  "passed": true,
+  "browser": "156.0.8078.79",
+  "steps": [
+    {
+      "opened": "Reading the CCNx Federated Wiki",
+      "panes": 3
+    },
+    {
+      "followed": "One Page From Browser to NDN and Back",
+      "opened": "One Page From Browser to NDN and Back",
+      "panes": 4
+    },
+    {
+      "followed": "Identity, Versions and Signatures",
+      "opened": "Identity, Versions and Signatures",
+      "panes": 5
+    },
+    {
+      "followed": "Plain Text After CCNx",
+      "opened": "Plain Text After CCNx",
+      "panes": 6
+    },
+    {
+      "followed": "Reading the CCNx Federated Wiki",
+      "opened": "Reading the CCNx Federated Wiki",
+      "panes": 7
+    },
+    {
+      "followed": "example page A (expression link)",
+      "opened": "Plain Text Example",
+      "panes": 8
+    }
+  ],
+  "abortedExternal": [
+    "https://ccnx-example.invalid/favicon.png"
+  ],
+  "pageErrors": []
+}

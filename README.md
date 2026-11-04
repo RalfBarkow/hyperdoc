@@ -36,6 +36,12 @@ load `dreyeck/catalog-application` and call
 [Catalog operations note](dreyeck/CATALOG-OPERATIONS.md) for the startup flow,
 service integration, the limits of the packaged runtime and the checks.
 
+## Development shell orientation
+
+`nix develop` greets an interactive terminal with repository, worktree, branch and commit; `hyperdoc-dev help` lists the commands
+(read-only branch review, `asdf:test-system` runs, Nix checks), what each changes and which tests need external material. See
+[docs/hyperdoc-dev.md](docs/hyperdoc-dev.md).
+
 ## Fresh interactive Lisp image
 
 Run `nix develop`, then `hyperdoc-sly` from this repository (or a subdirectory).

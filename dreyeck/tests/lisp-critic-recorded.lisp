@@ -1,4 +1,5 @@
-;;;; Recorded Critic evaluations: read without the engine, and reproduced with it.
+;;;; Recorded Critic evaluations: read without the engine (this system's regular test), and reproduced with it (CHECK-RECORDS-REPRODUCE, which
+;;;; needs the engine and is run by the engine integration tier, dreyeck/lisp-critic/engine-integration/tests, where a missing station fails it).
 
 (defpackage #:dreyeck/lisp-critic/recorded/tests
   (:use #:cl)
@@ -7,7 +8,7 @@
                     (#:er #:dreyeck/evaluation-record)
                     (#:r #:dreyeck/gesture/operation-request)
                     (#:views #:html-inspector-views))
-  (:export #:run-tests))
+  (:export #:run-tests #:check-reading-recorded-evaluations #:check-records-reproduce))
 
 (in-package #:dreyeck/lisp-critic/recorded/tests)
 
@@ -104,9 +105,8 @@ sources must fail this real-engine proof, never skip it."
   t)
 
 (defun run-tests ()
+  "The regular test: both records read from their files in an image that never loads the engine. Reproducing them needs the engine."
   (destructuring-bind (constructive questionable) (check-reading-recorded-evaluations)
-    (check-records-reproduce)
-    (format t "~&LISP-CRITIC-RECORDED-PASS: ~A and ~A read from their records without the engine; ~
-the X-PLUS-1 match is quoted data; run again, the 2004 engine reproduces both records.~%"
+    (format t "~&LISP-CRITIC-RECORDED-PASS: ~A and ~A read from their records without the engine; the X-PLUS-1 match is quoted data. (That the engine reproduces both records is CHECK-RECORDS-REPRODUCE, in the engine integration tier.)~%"
             constructive questionable))
   t)

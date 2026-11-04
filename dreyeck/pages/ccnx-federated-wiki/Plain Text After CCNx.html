@@ -1,0 +1,136 @@
+<h1>Plain Text After CCNx</h1>
+
+<in-package>dreyeck/ccnx-federated-wiki</in-package>
+
+<p>
+Two things are asked of the CCNx prototypes here. Can what they held be read without them? And if a page were taken over by today's Federated Wiki, or shown in HyperDoc, what would
+come with it? Then the answers are held against the old wiki page about the Power Of Plain Text. Everything below rests on the source as read, not on a run.
+</p>
+
+<h2>Can it be read without the historical runtime?</h2>
+
+<ul>
+<li><strong>The repositories' own data files: yes.</strong> <code>default-data/pages/welcome-visitors</code> and <code>how-to-wiki</code> are plain Smallest Federated Wiki JSON files, byte-identical in both repositories.
+<code>welcome-visitors</code> has 7 story items and 30 journal actions, and any JSON parser reads it. These files carry none of the CCNx fields.</li>
+<li><strong>The CCNx forms: in principle.</strong> The content of an NDN object is JSON text, but it sits in a binary <code>ccnb</code> element beside name, signed info and signature, so a decoder for that encoding is needed.
+The IndexedDB records are objects inside a browser profile, not files. <strong>Neither client can export a page to a file</strong>: the <code>.coffee</code> sources contain no <code>Blob</code>, download or save call.
+Taking pages out of a stored browser profile was not tried.</li>
+<li><strong>The server of the repository</strong> stores pages as flat JSON files (<code>server/express/lib/page.coffee</code>), but the CCNx client does not use it.</li>
+</ul>
+
+<h2>What would survive adoption: three questions, kept apart</h2>
+
+<p>
+&ldquo;Survives&rdquo; says three different things, and a yes to one is not a yes to the next. The example is derived from the cited rules; neither historical runtime was run, so none of this is
+an observation of how a CCNx browser behaved.
+</p>
+
+<h3>1. JSON readability and the Story Item structure</h3>
+
+<p>
+<em>Is the data still JSON, and is the page's structure still there?</em> <strong>Yes, for the page.</strong> The record is the Smallest Federated Wiki page plus four fields. Title, items in order with their
+<code>id</code>, <code>type</code> and <code>text</code>, and the journal with its actions are all present and unchanged, including the item ids. The record opens as an ordinary local page with the existing reader:
+<a expr="(example-page :ccnx-record)">open it</a>. The four added fields (<code>page</code>, <code>excludes</code>, <code>favicon</code>, <code>version</code>) are not needed to read the page.
+This says nothing yet about what the fields mean.
+</p>
+
+<h3>2. Semantic compatibility</h3>
+
+<p>
+<em>Does the record mean today what it meant then?</em> <strong>Partly, and only the page content.</strong> The original Federated Wiki client and server were not given the record, so acceptance by them is not tested.
+</p>
+
+<table class="inspector-table">
+<tr><th>Aspect</th><th>Same meaning today?</th></tr>
+<tr><td>story items and their types; journal action types, <code>id</code>, <code>after</code></td><td><strong>Same.</strong> The vocabulary is unchanged, and the example's story is checked to equal the replay of its journal.</td></tr>
+<tr><td>journal <code>date</code></td><td>The same field, but a <strong>claim</strong>: the editing browser's own clock, unauthenticated, as in any Federated Wiki page.</td></tr>
+<tr><td><code>version</code></td><td><strong>Different.</strong> In the CCNx code it is a store key and part of the NDN name; it is not a field of today's page. It is also <strong>not a content identity</strong>: see
+<a page="Identity, Versions and Signatures">Identity, Versions and Signatures</a>.</td></tr>
+<tr><td><code>excludes</code></td><td>Meaningful only inside the CCNx store, where it lists the keys to delete. It can be derived from the journal; it has no use elsewhere.</td></tr>
+<tr><td><code>fork</code> action, <code>site</code></td><td><strong>Different.</strong> Today it names a host. Here it holds an image, and a reader that follows it as a host finds nothing.</td></tr>
+<tr><td><code>favicon</code></td><td><strong>Different.</strong> A site's favicon belongs to a host; here it is a per-browser random image standing for an identity.</td></tr>
+</table>
+
+<h3>3. Preserved and lost provenance</h3>
+
+<p>
+<em>Who made this, where did it come from, and how can one tell?</em> <strong>Mostly lost.</strong>
+</p>
+
+<table class="inspector-table">
+<tr><th>Provenance information</th><th>In the CCNx data</th><th>After adoption</th></tr>
+<tr><td>item ids; journal actions with their dates</td><td>in the page</td><td><strong>preserved</strong>, as claims</td></tr>
+<tr><td>which line a copy forked from</td><td><code>fork</code> action, <code>site</code> = a favicon data URL</td><td><strong>value preserved, meaning lost</strong>: comparable only by image; no host to go to</td></tr>
+<tr><td>who edited</td><td>nothing but the browser's favicon image</td><td><strong>no identity</strong>: the image is random and has no registry</td></tr>
+<tr><td>the NDN name</td><td><code>/wiki/page/&lt;slug&gt;.json/&lt;version&gt;</code>, no site in it</td><td><strong>derivable, but it never named a site</strong></td></tr>
+<tr><td>publisher digest, key locator</td><td>in each NDN object, the same for every page</td><td><strong>in no stored record</strong>, and it carried no identity (one shared key)</td></tr>
+<tr><td>signature</td><td>on the wire only</td><td><strong>gone</strong>, and its verdict was not decisive</td></tr>
+<tr><td>NDN timestamp</td><td>in the object, the time it was made</td><td><strong>gone</strong>; not a date of the page</td></tr>
+</table>
+
+<p>
+The page's <em>content</em> history survives completely, in its journal. Its <em>provenance</em>, who and from where, was thin to begin with and does not survive in a usable form. The example page of each form shows the same two paragraphs in the
+Story view: <a expr="(example-page :sfw)">form A</a>, <a expr="(example-page :ccnx-record)">form B</a>.
+</p>
+
+<h2>Historical and present side by side</h2>
+
+<table class="inspector-table">
+<tr><th></th><th>Smallest Federated Wiki / today's server</th><th>Main (<code>8426dc5</code>)</th><th>Prototype (<code>c5b1b93</code>)</th></tr>
+<tr><td>Where the page lives</td><td>a JSON file <code>pages/&lt;slug&gt;</code> on a server</td><td>a record in the browser's IndexedDB</td><td>a record in the browser's IndexedDB</td></tr>
+<tr><td>Readable without the program</td><td>yes: a file</td><td>needs a browser profile, or a <code>ccnb</code> decoder for the wire form</td><td>the same</td></tr>
+<tr><td>Authentication</td><td>the server's own authorization</td><td>RSA with one shared key; the verdict is not decisive</td><td>the same library</td></tr>
+</table>
+
+<h2>The Power Of Plain Text, assessed</h2>
+
+<p>
+The c2 page states the assertion: &ldquo;storing resources as plain text makes them easier to view, maintain, increases their longevity, and/or makes it easier to share information with multiple languages and systems.&rdquo;
+Its list of benefits includes that no special editor is required, that the format is readable by common tools, that it is relatively robust against corruption, that it works with version control,
+and that &ldquo;Every person, pipe, and computer sees the same stream of bytes.&rdquo; Among the disadvantages it names parsing overhead, hard random access, and security: it has to sit on the file, not on the editor.
+Among its examples are &ldquo;Some wiki-like systems&rdquo;. (Read on 2026-11-04 from the JSON file <code>c2.com/wiki/remodel/pages/PowerOfPlainText</code>, dated November 26, 2014, and from
+the kidneybone copy.)
+</p>
+
+<table class="inspector-table">
+<tr><th>The page says</th><th>The CCNx prototypes</th></tr>
+<tr><td>Readable with common tools, &ldquo;parsed &hellip; by eye&rdquo;</td><td><strong>Partly.</strong> The record and the content are JSON text and the journal reads as a history. At rest it is inside a browser store; on the wire it is a signed binary envelope.</td></tr>
+<tr><td>Longevity, survives the application</td><td><strong>Not shown by these sources.</strong> The only files that outlive the runtime are the Smallest Federated Wiki data files, and there is no export.</td></tr>
+<tr><td>Fits version control</td><td><strong>The journal, yes; a file, no.</strong> The journal is a complete plain-text history, but there is no file to commit.</td></tr>
+<tr><td>Different systems can read it</td><td><strong>The vocabulary, yes; the container, no.</strong> Today's reader opens the record.</td></tr>
+<tr><td>Security belongs on the file, not the editor</td><td><strong>This is where the CCNx design is tested.</strong> Signing exists, but its verdict is not decisive, the key is shared and signatures are not kept. The protection of the plain text is not in the plain text.</td></tr>
+<tr><td>A format that tries to do too much degrades</td><td><strong>Not observed.</strong> The four added fields are small and derivable.</td></tr>
+</table>
+
+<p>
+<strong>Assessment.</strong> The content model is plain text in the sense of the c2 page, and it survives intact. What the CCNx prototypes added around it &mdash; name, identity, signature &mdash;
+does not survive as plain text: it is constant, derivable, binary, or not stored.
+</p>
+
+<h2>Where is Ward's pointer to local JSON files?</h2>
+
+<p>
+<strong>Open.</strong> A statement by Ward Cunningham about local JSON files was <strong>not found in any of the four sources</strong>. The kidneybone text does not contain the words &ldquo;Ward&rdquo;, &ldquo;Cunningham&rdquo;,
+&ldquo;JSON&rdquo;, &ldquo;federated&rdquo; or &ldquo;CCN&rdquo;. What can be observed in the c2 sources: the c2 application loads every page as a JSON file, <code>{date, text}</code>, from <code>c2.com/wiki/remodel/pages/&lt;Title&gt;</code>,
+and has an &ldquo;export to fedwiki&rdquo; function that turns each page into Federated Wiki JSON, paragraph items with hashed ids and one <code>create</code> action, and downloads it. The files read do not say who wrote that
+application. The text of Zettel 11483 that holds the pointer was not available to this review.
+</p>
+
+<h2>Open questions</h2>
+
+<ol>
+<li>Where exactly is Ward's pointer to local JSON files: Zettel 11483, a page, a message? It is not in the four sources.</li>
+<li><strong>Runtime behaviour was not observed.</strong> Does the unconditional &ldquo;verified&rdquo; in <code>NDN.js</code> behave as read? Is a tampered object accepted by a browser?</li>
+<li>The store for the favicon is declared with lowercase option names (<code>keypath</code>, <code>autoincrement</code>) where the other stores use <code>keyPath</code> and <code>autoIncrement</code>
+(<a href="https://github.com/rynomad/CCNx-Federated-Wiki/blob/8426dc5cd326fa0d395d5bef2f73b8be33e34a8e/client/lib/repository.coffee#L33-L40">repository.coffee L33&ndash;L40</a>).
+Whether the bundled <code>idbstore.js</code> honours them, and so what key the favicon record has, was not tested.</li>
+<li>How do two nodes that forked different lines settle <code>excludes</code> and <code>version</code>? The account above is a reading, not a run.</li>
+<li>How would a fork action whose <code>site</code> is an image be mapped to a host in today's Federated Wiki? Is the favicon a usable fingerprint at all?</li>
+<li>The test deployment named in the Prototype's ReadMe was not examined. Was a key other than the shipped one ever used?</li>
+<li>Is there any export of an IndexedDB page to a JSON file in the history of either repository? Only one commit of each was read.</li>
+<li>When and by whom was the c2 <code>remodel</code> data and application made?</li>
+</ol>
+
+<p>
+Back to <a page="Reading the CCNx Federated Wiki">Reading the CCNx Federated Wiki</a>.
+</p>

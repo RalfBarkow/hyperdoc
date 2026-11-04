@@ -216,6 +216,20 @@
                 builtins.readFile
                   ./scripts/hyperdoc-sly.sh;
             };
+
+          hyperdocDev =
+            pkgs.writeShellApplication {
+              name = "hyperdoc-dev";
+
+              runtimeInputs = [
+                pkgs.git
+                sbcl
+              ];
+
+              text =
+                builtins.readFile
+                  ./scripts/hyperdoc-dev.sh;
+            };
         in {
           fedwiki-original-editor = let
             demoPkgs = import inputs.fedwiki-nixpkgs { inherit system; };
@@ -227,6 +241,7 @@
               pkgs.git sbcl demoPkgs.nodejs_24
               (command "fedwiki-original-editor-demo")
               (command "fedwiki-original-editor-e2e")
+              hyperdocDev
             ] ++ pkgs.lib.optionals pkgs.stdenv.isLinux [ demoPkgs.chromium ];
             shellHook = ''
               export CL_SOURCE_REGISTRY="$PWD//:${runtime.sourceRegistry}"
@@ -257,12 +272,15 @@
               sbcl
               hyperdocEmacs
               hyperdocSly
+              hyperdocDev
               self.packages.${system}.hyperdoc-catalog
             ];
 
             shellHook = ''
               export CL_SOURCE_REGISTRY="${runtime.sourceRegistry}:$PWD//"
               export HYPERDOC_HYPERSPEC_ROOT="${runtime.hyperspecRoot}"
+              # Orientation only for an interactive terminal: nix develop --command and scripts stay silent.
+              if [[ $- == *i* && -t 1 ]]; then hyperdoc-dev greeting; fi
             '';
           };
         }

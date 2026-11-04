@@ -1059,6 +1059,7 @@
                                  "dreyeck/work/reading"
                                  "dreyeck/authority/reading"
                                  "dreyeck/clog-tutorial/reading"
+                                 "dreyeck/ccnx-federated-wiki"
                                  "dreyeck/traverse/reading"
                                  ;; Read-only unless its own configuration embeds the loopback test editor.
                                  "dreyeck/fedwiki-original-editor-demo")
@@ -1128,7 +1129,7 @@
   :SERIAL
   T
   :DEPENDS-ON
-  (#:UIOP #:DREYECK/CATALOG)
+  (#:UIOP #:DREYECK/CATALOG #:DREYECK/CATALOG/MEMBERSHIP/TESTS)
   :COMPONENTS
   ((:FILE "catalog-startup-smoke"))
   :PERFORM
@@ -2441,8 +2442,8 @@
   :in-order-to ((asdf:test-op (asdf:test-op "dreyeck/lisp-critic/reading/tests"))))
 
 (asdf:defsystem "dreyeck/lisp-critic/reading/tests"
-  :description "Contracts for the Lisp Critic genealogy reading"
-  :depends-on ("dreyeck/lisp-critic/reading")
+  :description "Regular contracts for the Lisp Critic genealogy reading: no source station and no engine needed"
+  :depends-on ("dreyeck/lisp-critic/reading" "dreyeck/lisp-critic/recorded/tests")
   :components ((:file "dreyeck/tests/lisp-critic-reading"))
   :perform (asdf:test-op (op component)
              (declare (ignore op component))
@@ -3550,3 +3551,60 @@
   :serial t
   :pathname "dreyeck/src/"
   :components ((:file "upstream-assessment-inspector-package") (:file "upstream-assessment-views")))
+
+(asdf:defsystem "dreyeck/ccnx-federated-wiki"
+  :description "Reading: the historical CCNx Federated Wiki prototypes, source review and the Power of Plain Text"
+  ;; Source review only. It installs no CCNx or NDN runtime and makes no network connection. The example pages are plain
+  ;; local Federated Wiki files, read by dreyeck/local-fedwiki-page. Admitted to the default dreyeck/catalog;
+  ;; no extra startup variable or historical CCNx runtime is required.
+  :depends-on ("dreyeck/hyperdoc" "dreyeck/local-fedwiki-page" "uiop")
+  :serial t
+  :pathname "dreyeck/src/"
+  :components ((:module "dreyeck/pages/ccnx-federated-wiki" :pathname "../pages/ccnx-federated-wiki/")
+               (:file "ccnx-federated-wiki-package")
+               (:file "ccnx-federated-wiki")
+               (:file "ccnx-federated-wiki-hyperdoc"))
+  :in-order-to ((test-op (test-op "dreyeck/ccnx-federated-wiki/tests"))))
+
+(asdf:defsystem "dreyeck/ccnx-federated-wiki/tests"
+  :description "The reading loads, its example pages are consistent, its links resolve and its source references are commit-pinned"
+  :depends-on ("dreyeck/ccnx-federated-wiki" "hyperbook/server" "shasht" "cl-ppcre")
+  :serial t
+  :pathname "dreyeck/tests/"
+  :components ((:file "ccnx-federated-wiki-smoke"))
+  :perform (test-op (op component)
+             (declare (ignore op component))
+             (uiop:symbol-call :dreyeck/ccnx-federated-wiki/tests :run-tests)))
+
+(asdf:defsystem "dreyeck/catalog/membership"
+  :description "Properties of the Catalog's membership, derived from the ASDF closure of dreyeck/catalog and the sources of its systems"
+  ;; The membership of the default Catalog is declared by DREYECK/CATALOG's :DEPENDS-ON and by each system's own DEFHYPERDOC.
+  ;; This library compares the materialized Catalog with that declaration; it holds no list of ids and no count.
+  :depends-on ("hyperbook" "hyperdoc" "cl-ppcre" "uiop")
+  :pathname "dreyeck/src/"
+  :components ((:file "catalog-membership")))
+
+(asdf:defsystem "dreyeck/catalog/membership/tests"
+  :description "Self-tests of the membership checkers with faulty input, and the properties of the real Catalog"
+  :depends-on ("dreyeck/catalog/membership" "dreyeck/catalog")
+  :pathname "dreyeck/tests/"
+  :components ((:file "catalog-membership"))
+  :perform (test-op (op component)
+             (declare (ignore op component))
+             (uiop:symbol-call :dreyeck/catalog/membership/tests :run-tests)))
+
+;; The tiers that need a source station. They are not part of any default test: each refuses to start without one (it fails, it does not skip).
+(asdf:defsystem "dreyeck/lisp-critic/engine-integration/tests"
+  :description "Trusted integration test of the real Riesbeck/Beane engine: needs a source station holding the 2004 engine; fails without one"
+  :depends-on ("dreyeck/lisp-critic/reading/tests" "dreyeck/lisp-critic/recorded/tests")
+  :components ((:file "dreyeck/tests/lisp-critic-engine-integration"))
+  :perform (test-op (op component)
+             (declare (ignore op component))
+             (uiop:symbol-call :dreyeck/lisp-critic/engine-integration/tests :run-tests)))
+
+(asdf:defsystem "dreyeck/lisp-critic/page-station/tests"
+  :description "Checks of the wiki page's own station layout (its wrapper and definition): need that page's source station; fail without it"
+  :depends-on ("dreyeck/lisp-critic/engine-integration/tests")
+  :perform (test-op (op component)
+             (declare (ignore op component))
+             (uiop:symbol-call :dreyeck/lisp-critic/engine-integration/tests :run-page-station-layout-tests)))

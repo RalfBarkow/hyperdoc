@@ -15,7 +15,11 @@
                     (#:lp #:dreyeck/local-fedwiki-page))
   (:export #:run-tests #:run-current-tests #:check-under-catalog-runtime
            #:check-degraded-runtime #:check-trusted-examples-review
-           #:check-code-rendering-decision))
+           #:check-code-rendering-decision
+           ;; Tiers that need a source station: see dreyeck/tests/lisp-critic-engine-integration.lisp
+           #:check-outcomes #:check-source-backing #:check-policy-in-a-clean-image #:check-workspace-section
+           #:check-source-declaration #:check-execution-policy #:check-source-structure-projection
+           #:car-cdr-fixture-text #:call-with-absent-station #:call-with-environment #:expect-failure))
 
 (in-package #:dreyeck/lisp-critic/reading/tests)
 
@@ -37,6 +41,61 @@
   (unless value
     (error (apply #'format nil control arguments)))
   value)
+
+;;
+;; The runtime a check runs in.
+;;
+;; The engine is not part of this repository. It lives in a source station: the assets of a wiki page, on a machine that has it. Which
+;; station a runtime finds is a property of that machine (DREYECK_LISP_CRITIC_ROOT, HYPERDOC_FEDWIKI_SITE_ROOT, HOME). The regular
+;; checks must not depend on it, so they run with no station at all, and CALL-WITH-ABSENT-STATION makes that true instead of hoping:
+;; it names empty places for all three and refuses to go on if the runtime still finds an engine. What needs a station is tested by
+;; the integration tiers, which refuse to start without one.
+;;
+
+(defun call-with-environment (bindings thunk)
+  "Call THUNK with the environment variables in BINDINGS, ((name . value) ...), set, restoring each afterwards. NIL means empty."
+  (let ((saved (mapcar (lambda (entry) (cons (car entry) (uiop:getenv (car entry)))) bindings)))
+    (unwind-protect
+         (progn (dolist (entry bindings) (setf (uiop:getenv (car entry)) (or (cdr entry) "")))
+                (funcall thunk))
+      (dolist (entry saved) (setf (uiop:getenv (car entry)) (or (cdr entry) ""))))))
+
+(defun call-with-absent-station (thunk)
+  "Call THUNK in a runtime that finds no source station: HOME and the Wiki site root are empty directories and no explicit root is set."
+  (let* ((base (uiop:ensure-directory-pathname
+                (merge-pathnames (format nil "dreyeck-absent-station-~36R/" (random (expt 36 8) (make-random-state t)))
+                                 (uiop:temporary-directory))))
+         (home (merge-pathnames "home/" base))
+         (site (merge-pathnames "site/" base)))
+    (ensure-directories-exist home)
+    (ensure-directories-exist site)
+    (unwind-protect
+         (call-with-environment
+          (list (cons "HOME" (uiop:native-namestring home))
+                (cons "HYPERDOC_FEDWIKI_SITE_ROOT" (uiop:native-namestring site))
+                (cons "DREYECK_LISP_CRITIC_ROOT" nil))
+          (lambda ()
+            (check (not (reading:engine-available-p))
+                   "The absent-station runtime could not be established: the engine is still reachable (~S)."
+                   (multiple-value-list (reading::resolve-engine-asset-root)))
+            (check (null (reading::resolve-engine-asset-root))
+                   "The absent-station runtime still resolves an asset root.")
+            (funcall thunk)))
+      (uiop:delete-directory-tree base :validate t :if-does-not-exist :ignore))))
+
+(defun expect-failure (label thunk &optional fragment)
+  "THUNK must signal an error (whose message contains FRAGMENT): a check that cannot fail proves nothing. Returns the message."
+  (let ((message (handler-case (progn (funcall thunk) nil) (error (condition) (princ-to-string condition)))))
+    (unless message (error "The check did not fail for: ~A" label))
+    (when (and fragment (not (search fragment message :test #'char-equal)))
+      (error "The check failed for ~A, but by another message: ~A" label message))
+    message))
+
+(defun car-cdr-fixture-text ()
+  "The recorded run of the CAR-CDR rule on (CAR (CDR ITEMS)): the 2004 engine's own output, written by the engine in a runtime that
+could run it (dreyeck/tests/fixtures/lisp-critic/README.md). Read, never produced, by the regular checks."
+  (uiop:read-file-string (asdf:system-relative-pathname "dreyeck" "dreyeck/tests/fixtures/lisp-critic/car-cdr-run-snapshot.json")
+                         :external-format :utf-8))
 
 (defun page-of (title)
   (hyperbook:find-page reading:*lisp-critic-reading* title :signal-error? t))
@@ -568,12 +627,13 @@ means the file is absent."
 
 This example used to run the critic while the page was being drawn,
 which loaded the engine out of the page's own assets. It now reads a
-record that a runtime allowed to run the critic wrote. There is no
+record that a runtime allowed to run the critic wrote (the committed
+fixture; that the fixture is still what the engine says is the integration
+tier's check). There is no
 fallback on purpose: a fallback is how an absent result becomes an
 execution."
-  ;; A recorded evaluation is shown.
-  (let ((snapshot
-          (critic:critic-run-snapshot-string (critic:car-cdr-critique-example))))
+  ;; A recorded evaluation is shown. The record is the engine's own, committed; this check never runs the engine.
+  (let ((snapshot (car-cdr-fixture-text)))
     (with-evaluation-snapshot
         snapshot
       (lambda ()
@@ -736,14 +796,17 @@ code." name added))
 page-attached code." name
                    (- (length (asdf:registered-systems)) systems-before))))
         ;; And the recorded finding is still there to be read.
-        (let ((target (reading:current-critique-example)))
-          (check (typep target 'critic:critic-target)
-                 "The recorded evaluation is unreadable under a refusing ~
+        (with-evaluation-snapshot
+            (car-cdr-fixture-text)
+          (lambda ()
+            (let ((target (reading:current-critique-example)))
+              (check (typep target 'critic:critic-target)
+                     "The recorded evaluation is unreadable under a refusing ~
 policy; it returned ~S." (and (listp target) (getf target :kind)))
-          (let ((record (first (critic:target-runs-of target))))
-            (check record "The recorded evaluation carries no run.")
-            (check (= 1 (length (critic:critiques-of record)))
-                   "The recorded evaluation lost its critique."))))))
+              (let ((record (first (critic:target-runs-of target))))
+                (check record "The recorded evaluation carries no run.")
+                (check (= 1 (length (critic:critiques-of record)))
+                       "The recorded evaluation lost its critique."))))))))
   t)
 
 (defun check-execution-policy ()
@@ -945,7 +1008,7 @@ true of a historical authorship node with no tree of its own."
 runs is Beane's adapted distribution.")))
     ;; And the distinction must not be achieved by calling everything
     ;; unexecutable: where the engine is here, Beane's node says so.
-    (when (reading:engine-available-p)
+    (when (eq :executable (reading::runtime-evidence-status))
       (let ((beane (find :beane-asdf-adaptation live
                          :key (lambda (s) (getf s :station)))))
         (check (getf beane :executable-here)
@@ -1333,49 +1396,263 @@ the two fields have collapsed into one.")
 ;;
 
 (defun check-under-catalog-runtime ()
-  "Exercise this book the way the normal Catalog launcher reaches it.
+  "Exercise this book the way the normal Catalog launcher reaches it, where there is no engine.
 
-Called from the Catalog startup proof, in its fresh process, so the book
-cannot pass on a development image's leftover state."
-  (let ((book (hyperbook:find-hyperbook "dreyeck/lisp-critic/reading"
-                                        :signal-error? t)))
-    (hyperdoc::ensure-pages-loaded book)
-    (check (= (length +pages+) (hash-table-count (hyperdoc:pages-of book)))
-           "The Catalog sees ~D reading pages instead of ~D."
-           (hash-table-count (hyperdoc:pages-of book)) (length +pages+))
-    ;; Every page must render, and none may present a load failure as content.
-    (dolist (title +pages+)
-      (let* ((page (hyperbook:find-page book title :signal-error? t))
-             (view (find "Content" (views:all-views page)
-                         :key #'views:view-title :test #'string=))
-             (html (progn (check view "Page ~S has no Content view." title)
-                          (views:view-html view))))
-        (check (plusp (length html)) "Page ~S rendered nothing." title)
-        (check (not (search "is not loaded" html))
-               "Page ~S renders an engine load failure as content." title)
-        ;; Structural, not a fixed count: whatever the page addresses, the
-        ;; Catalog must be able to evaluate all of it.
-        (let ((*package* (page-package page)))
-          (dolist (expression (page-expressions page))
-            (check-example-result (hyperdoc::parse-and-eval expression)
-                                  expression title "Catalog runtime")))))
-    ;; And the critic must genuinely run: a real CAR-CDR match.
-    (let* ((match (reading:critic-match-example))
-           (record (getf match :record)))
-      (check (getf match :engine-available-p)
-             "The Catalog runtime cannot reach the Riesbeck engine.")
-      (check (eq :completed (er:evaluation-status-of record))
-             "The Catalog runtime failed the CAR-CDR run: ~A"
-             (er:evaluation-failure-of record))
-      (check (= 1 (length (er:evaluation-result-of record)))
-             "The Catalog runtime produced ~D critiques instead of one."
-             (length (er:evaluation-result-of record)))
-      (check (search "CADR" (critic:critique-explanation-of
-                             (first (er:evaluation-result-of record))))
-             "The Catalog runtime lost the engine's recommendation.")))
+Called from the Catalog startup proof, in its fresh process, so the book cannot pass on a development image's leftover state. The
+engine is a source station that this repository does not carry, so the regular Catalog must work without it, and this check is run
+in a runtime that finds none (CALL-WITH-ABSENT-STATION), whatever machine it runs on. What is held to account here:
+
+ * every page renders and every expression the pages address evaluates, and none presents a load failure as content;
+ * the book says honestly that the engine is not reachable, and does not call it executable;
+ * the recorded critiques, which are the engine's own output written where it could run, are readable without it;
+ * the runtime refuses to load code that arrived with a page, while a present station would be loaded where it is allowed.
+
+The real CAR-CDR run is not here. It needs an engine and belongs to the engine integration test, which fails when it has none."
+  (call-with-absent-station
+   (lambda ()
+     (let ((book (hyperbook:find-hyperbook "dreyeck/lisp-critic/reading" :signal-error? t)))
+       (hyperdoc::ensure-pages-loaded book)
+       (check (= (length +pages+) (hash-table-count (hyperdoc:pages-of book)))
+              "The Catalog sees ~D reading pages instead of ~D."
+              (hash-table-count (hyperdoc:pages-of book)) (length +pages+))
+       ;; Every page must render, and none may present a load failure as content.
+       (dolist (title +pages+)
+         (let* ((page (hyperbook:find-page book title :signal-error? t))
+                (view (find "Content" (views:all-views page) :key #'views:view-title :test #'string=))
+                (html (progn (check view "Page ~S has no Content view." title) (views:view-html view))))
+           (check (plusp (length html)) "Page ~S rendered nothing." title)
+           (check (not (search "is not loaded" html)) "Page ~S renders an engine load failure as content." title)
+           ;; Structural, not a fixed count: whatever the page addresses, the Catalog must be able to evaluate all of it.
+           (let ((*package* (page-package page)))
+             (dolist (expression (page-expressions page))
+               (check-example-result (hyperdoc::parse-and-eval expression) expression title "Catalog runtime")))))
+       ;; The engine is honestly absent.
+       (check-the-absent-engine-is-reported-as-absent)
+       ;; The recorded critiques are readable without it, and reading them loads nothing.
+       (check-recorded-critiques-are-readable)))
+   )
   (check-historical-claim-views)
-  (format t "~&CATALOG-LISP-CRITIC-READING-PASS: pages render, examples ~
-evaluate, real CAR-CDR match.~%")
+  (check-policy-boundary-with-a-present-station)
+  (check-complete-files-are-not-an-executable-engine)
+  (format t "~&CATALOG-LISP-CRITIC-READING-PASS: pages render, examples evaluate, the absent engine is reported as absent, recorded critiques read without it, a present station is refused where code may not arrive with a page. The real CAR-CDR run is the engine integration test (it fails when it has no station).~%")
+  t)
+
+(defun check-the-absent-engine-is-reported-as-absent ()
+  "No engine: the book says so everywhere it speaks about it, and what it cannot run is not presented as run."
+  (check (not (reading:engine-available-p)) "An absent station is reported as available.")
+  (check (eq :not-available-in-this-runtime (reading::runtime-evidence-status))
+         "An absent station has the status ~S." (reading::runtime-evidence-status))
+  (let* ((match (reading:critic-match-example))
+         (record (getf match :record)))
+    (check (null (getf match :engine-available-p)) "The CAR-CDR example claims an engine that is not there.")
+    (check (eq :not-available-in-this-runtime (getf match :evidence-status))
+           "The CAR-CDR example has the status ~S without an engine." (getf match :evidence-status))
+    (check (not (eq :completed (er:evaluation-status-of record)))
+           "A run without an engine is recorded as completed.")
+    (check (null (er:evaluation-result-of record)) "A run without an engine carries critiques."))
+  ;; A station that was announced and not delivered is not an engine either: the directory exists, the engine does not.
+  (let ((directory (uiop:ensure-directory-pathname (merge-pathnames (format nil "dreyeck-empty-station-~36R/" (random (expt 36 8) (make-random-state t)))
+                                                                     (uiop:temporary-directory)))))
+    (ensure-directories-exist directory)
+    (unwind-protect
+         (progn
+           (call-with-environment
+            (list (cons "DREYECK_LISP_CRITIC_ROOT" (uiop:native-namestring directory)))
+            (lambda ()
+              (check (equal (truename directory) (truename (reading::resolve-engine-asset-root)))
+                     "The explicit station directory was not the one resolved.")
+              (check (not (reading:engine-available-p)) "An empty station directory is reported as an available engine.")
+              (check (eq :not-available-in-this-runtime (reading::runtime-evidence-status))
+                     "An empty station directory has the status ~S." (reading::runtime-evidence-status))
+              (check (reading::engine-station-files-missing) "An empty station does not name what it lacks.")))
+           ;; The wrapper definition alone, with no engine behind it, is not an engine either.
+           (with-open-file (out (merge-pathnames "a-critic-for-lisp.asd" directory) :direction :output :if-exists :supersede)
+             (write-string "(asdf:defsystem \"a-critic-for-lisp\")" out))
+           (call-with-environment
+            (list (cons "DREYECK_LISP_CRITIC_ROOT" (uiop:native-namestring directory)))
+            (lambda ()
+              (check (not (reading:engine-available-p)) "A wrapper definition without the vendored engine is reported as available.")
+              (check (equal (reading::engine-station-files-missing) reading::+engine-runtime-files+)
+                     "The vendored files that are missing are not all named: ~S." (reading::engine-station-files-missing)))))
+      (uiop:delete-directory-tree directory :validate t :if-does-not-exist :ignore)))
+  t)
+
+(defun check-recorded-critiques-are-readable ()
+  "The engine's recorded output is read here, without the engine, and a record that cannot be read is reported, not worked around.
+
+Three committed recordings: the CAR-CDR run (the reading's own recorded evaluation) and the two example evaluations of
+dreyeck/lisp-critic/recorded. Each check is also shown to fail on a damaged copy, so that passing means the record was read."
+  (let ((systems (length (asdf:registered-systems)))
+        (packages '(:lisp-critic :lisp-critic-user :extend-match :a-critic-for-lisp)))
+    ;; 1. CAR-CDR: one critique, the engine's own recommendation, shown in the Inspector.
+    (flet ((read-car-cdr (contents)
+             (with-evaluation-snapshot
+                 contents
+               (lambda ()
+                 (let* ((target (reading:current-critique-example))
+                        (record (and (typep target 'critic:critic-target) (first (critic:target-runs-of target)))))
+                   (check record "The recorded CAR-CDR run is unreadable: ~S." (and (listp target) (getf target :why)))
+                   (check (equal "COMPLETED" (er:evaluation-status-of record)) "The recorded run is ~A." (er:evaluation-status-of record))
+                   (check (= 1 (length (critic:critiques-of record)))
+                          "The recorded run has ~D critiques instead of one." (length (critic:critiques-of record)))
+                   (check (search "CADR" (critic:critique-explanation-of (first (critic:critiques-of record))))
+                          "The recorded critique lost the engine's recommendation CADR.")
+                   (let ((html (views:view-html (first (views:all-views target)))))
+                     (check (search "CAR (CDR ITEMS)" html) "The Inspector does not show the evaluated input."))
+                   ;; The recommendation is on the critique's own Inspector view, not on the target's.
+                   (let ((html (views:view-html (first (views:all-views (first (critic:critiques-of record)))))))
+                     (check (search "CADR" html) "The Inspector does not show the recommendation."))
+                   t)))))
+      (check (read-car-cdr (car-cdr-fixture-text)) "The CAR-CDR record was not read.")
+      ;; Damaged copies are detected: unreadable, a critique lost, the recommendation lost.
+      (expect-failure "an unreadable record" (lambda () (read-car-cdr "{ this is not valid json")) "unreadable")
+      (expect-failure "a record that lost its critique"
+                      (lambda () (read-car-cdr (let* ((text (car-cdr-fixture-text)) (at (search "\"critiques\"" text)))
+                                                 (check at "The fixture has no critiques member.")
+                                                 (concatenate 'string (subseq text 0 at) "\"critiques\": []}"))))
+                      "critique")
+      (expect-failure "a record that lost the recommendation"
+                      (lambda () (read-car-cdr (let ((text (car-cdr-fixture-text)))
+                                                 (loop for at = (search "CADR" text) while at
+                                                       do (setf text (concatenate 'string (subseq text 0 at) "XXXX" (subseq text (+ at 4)))))
+                                                 text)))
+                      "CADR"))
+    ;; 2. The two recorded example evaluations, in an image that never loads the engine.
+    (check (every (lambda (name) (null (find-package name))) packages)
+           "The engine is already loaded; the recorded evaluations cannot be shown to be read without it.")
+    (uiop:symbol-call :dreyeck/lisp-critic/recorded/tests :check-reading-recorded-evaluations)
+    (check (every (lambda (name) (null (find-package name))) packages) "Reading the recordings loaded the engine.")
+    (check (= systems (length (asdf:registered-systems))) "Reading the recordings registered an ASDF system."))
+  t)
+
+(defun canary-station-script ()
+  "Run in a clean child image: a station directory that holds a canary definition and the recorded evaluation, and no engine.
+The canary is evaluated only by something that loads the page-attached system, so it measures loading itself. Refused: it must not
+be evaluated and nothing may be added. Permitted: it must be, or the refusal above would have been measured blind."
+  "(let* ((root (uiop:ensure-directory-pathname (uiop:getenv \"CANARY_STATION\")))
+         (packages '(:lisp-critic :lisp-critic-user :extend-match :a-critic-for-lisp))
+         (parameters (find-symbol \"*SERVER-PARAMETERS*\" :hyperbook/server))
+         (examples (list #'dreyeck/lisp-critic/reading:critique-anatomy-example
+                         #'dreyeck/lisp-critic/reading:riesbeck-car-cdr-rule-example
+                         #'dreyeck/lisp-critic/reading:evidence-ladder-example)))
+    (declare (special cl-user::*canary*))
+    (assert (null (remove-if-not #'find-package packages)))
+    (assert (not (boundp 'cl-user::*canary*)))
+    ;; Refusing: the reading examples and the direct run all meet the boundary; none evaluates the page's definition.
+    (setf (symbol-value parameters) (list \"700px\" nil))
+    (assert (not (dreyeck/lisp-critic/reading:execution-permitted-p)))
+    (let ((systems (length (asdf:registered-systems))))
+      (dolist (example examples) (ignore-errors (funcall example)))
+      (ignore-errors (dreyeck/lisp-critic:car-cdr-critique-example (namestring root)))
+      (assert (not (boundp 'cl-user::*canary*)) () \"A refusing runtime evaluated the page's definition.\")
+      (assert (null (remove-if-not #'find-package packages)))
+      (assert (null (asdf:registered-system \"a-critic-for-lisp\")) () \"A refusing runtime registered the page-attached system.\")
+      (assert (= systems (length (asdf:registered-systems)))))
+    ;; Permitted: the same call evaluates it.
+    (setf (symbol-value parameters) nil)
+    (assert (dreyeck/lisp-critic/reading:execution-permitted-p))
+    (ignore-errors (dreyeck/lisp-critic:car-cdr-critique-example (namestring root)))
+    (assert (and (boundp 'cl-user::*canary*) (symbol-value 'cl-user::*canary*)) ()
+            \"A permitting runtime did not evaluate the page's definition: the refusal measured above was blind.\")
+    (format t \"~&CANARY-BOUNDARY-PASS: refused evaluates nothing and adds nothing; permitted evaluates the page's definition.~%\"))")
+
+(defun non-functional-engine-script ()
+  "Run in a clean child image whose station is complete as files and whose engine does nothing. The runtime permits page-attached code,
+so the only thing that can keep the status from :EXECUTABLE is that no run completed."
+  "(let ((parameters (find-symbol \"*SERVER-PARAMETERS*\" :hyperbook/server)))
+    (setf (symbol-value parameters) nil)
+    (assert (dreyeck/lisp-critic/reading:execution-permitted-p))
+    ;; Complete as files: the book's own measure of an available engine is satisfied.
+    (assert (dreyeck/lisp-critic/reading:engine-available-p) () \"The station is not complete as files; the control measures nothing.\")
+    (let ((status (dreyeck/lisp-critic/reading::runtime-evidence-status))
+          (match (dreyeck/lisp-critic/reading:critic-match-example))
+          (beane (find :beane-asdf-adaptation (dreyeck/lisp-critic/reading:genealogy-in-this-runtime)
+                       :key (lambda (station) (getf station :station)))))
+      (assert (eq :source-observed status) () \"Complete files and an engine that does not work have the status ~S.\" status)
+      (assert (eq :source-observed (getf match :evidence-status)) () \"The CAR-CDR example claims ~S for an engine that does not work.\" (getf match :evidence-status))
+      (assert (not (getf beane :executable-here)) () \"The genealogy says the adaptation is executable here; its engine does not work.\"))
+    (format t \"~&NON-FUNCTIONAL-ENGINE-PASS: complete files, permitted, no completed run: source-observed, not executable.~%\"))")
+
+(defun check-complete-files-are-not-an-executable-engine ()
+  "Present sources, permitted execution and a completed engine run are three different things, and only the last is :EXECUTABLE.
+
+A station whose files are all there and whose engine does nothing (the vendored system is empty and the rules file holds no rule) is
+shown as :SOURCE-OBSERVED. The real engine with the same permission is :EXECUTABLE, which is the integration tier's CHECK-THE-REAL-CAR-CDR-RUN: together
+they discriminate. The check is run in a clean image, because a permitting runtime loads the station."
+  (let ((station (uiop:ensure-directory-pathname
+                  (merge-pathnames (format nil "dreyeck-silent-station-~36R/" (random (expt 36 8) (make-random-state t)))
+                                   (uiop:temporary-directory)))))
+    (flet ((write-file (relative text)
+             (let ((pathname (merge-pathnames relative station)))
+               (ensure-directories-exist pathname)
+               (with-open-file (out pathname :direction :output :if-exists :supersede :external-format :utf-8)
+                 (write-string text out)))))
+      (unwind-protect
+           (progn
+             (write-file "a-critic-for-lisp.asd" "(asdf:defsystem \"a-critic-for-lisp\" :components ((:file \"wrapper\")))")
+             (write-file "wrapper.lisp"
+                         "(defpackage :a-critic-for-lisp (:use :cl) (:export #:load-lisp-critic))
+(in-package :a-critic-for-lisp)
+(defun load-lisp-critic ()
+  (pushnew (merge-pathnames \"vendor/lisp-critic/\" (asdf:system-source-directory \"a-critic-for-lisp\")) asdf:*central-registry* :test #'equal)
+  (asdf:load-system \"lisp-critic\"))")
+             (write-file "vendor/lisp-critic/lisp-critic.asd" "(asdf:defsystem :lisp-critic)")
+             (dolist (name (rest reading::+engine-runtime-files+))
+               (write-file (format nil "vendor/lisp-critic/~A" name) ""))
+             (let ((output
+                     (with-output-to-string (stream)
+                       (uiop:run-program
+                        (list (namestring sb-ext:*runtime-pathname*) "--no-userinit" "--non-interactive"
+                              "--eval" "(require :asdf)"
+                              "--eval" (format nil "(asdf:load-asd ~S)" (asdf:system-source-file "dreyeck"))
+                              "--eval" "(asdf:load-system \"dreyeck/lisp-critic/reading\")"
+                              "--eval" "(asdf:load-system \"hyperbook/server\")"
+                              "--eval" (non-functional-engine-script))
+                        :environment (cons (format nil "DREYECK_LISP_CRITIC_ROOT=~A" (uiop:native-namestring station))
+                                           (remove-if (lambda (entry) (uiop:string-prefix-p "DREYECK_LISP_CRITIC_ROOT=" entry))
+                                                      (sb-ext:posix-environ)))
+                        :output stream :error-output stream))))
+               (check (search "NON-FUNCTIONAL-ENGINE-PASS" output)
+                      "Complete files with an engine that does not work were not kept below :EXECUTABLE:~%~A" output)))
+        (uiop:delete-directory-tree station :validate t :if-does-not-exist :ignore))))
+  (format t "~&COMPLETE-FILES-ARE-NOT-AN-EXECUTABLE-ENGINE-PASS~%")
+  t)
+
+(defun check-policy-boundary-with-a-present-station ()
+  "A station is present and a runtime that refuses page-attached code must not evaluate it; one that permits it does.
+
+Differential, in a clean image, with no engine involved: the station is a directory holding a canary definition. This is the refusal
+the Catalog needs and the regular tests can measure; the same boundary with the real engine behind it is CHECK-POLICY-IN-A-CLEAN-IMAGE
+in the integration tier. A guard removed from the one place that loads the page-attached system fails here."
+  (let ((station (uiop:ensure-directory-pathname
+                  (merge-pathnames (format nil "dreyeck-canary-station-~36R/" (random (expt 36 8) (make-random-state t)))
+                                   (uiop:temporary-directory)))))
+    (ensure-directories-exist (merge-pathnames "evaluations/" station))
+    (unwind-protect
+         (progn
+           (with-open-file (out (merge-pathnames "a-critic-for-lisp.asd" station) :direction :output :if-exists :supersede)
+             (write-string "(setf cl-user::*canary* t)
+(asdf:defsystem \"a-critic-for-lisp\")" out))
+           (with-open-file (out (merge-pathnames "evaluations/car-cdr.json" station) :direction :output :if-exists :supersede :external-format :utf-8)
+             (write-string (car-cdr-fixture-text) out))
+           (let ((output
+                   (with-output-to-string (stream)
+                     (uiop:run-program
+                      (list (namestring sb-ext:*runtime-pathname*) "--no-userinit" "--non-interactive"
+                            "--eval" "(require :asdf)"
+                            "--eval" (format nil "(asdf:load-asd ~S)" (asdf:system-source-file "dreyeck"))
+                            "--eval" "(asdf:load-system \"dreyeck/lisp-critic/reading\")"
+                            "--eval" "(asdf:load-system \"hyperbook/server\")"
+                            "--eval" (canary-station-script))
+                      :environment (cons (format nil "CANARY_STATION=~A" (uiop:native-namestring station))
+                                         (cons (format nil "DREYECK_LISP_CRITIC_ROOT=~A" (uiop:native-namestring station))
+                                               (remove-if (lambda (entry) (or (uiop:string-prefix-p "CANARY_STATION=" entry)
+                                                                              (uiop:string-prefix-p "DREYECK_LISP_CRITIC_ROOT=" entry)))
+                                                          (sb-ext:posix-environ))))
+                      :output stream :error-output stream))))
+             (check (search "CANARY-BOUNDARY-PASS" output) "The canary boundary check did not pass:~%~A" output)))
+      (uiop:delete-directory-tree station :validate t :if-does-not-exist :ignore)))
+  (format t "~&POLICY-BOUNDARY-WITH-A-PRESENT-STATION-PASS: refused evaluates nothing, permitted does.~%")
   t)
 
 ;;
@@ -1990,36 +2267,36 @@ no decision taken.~%")
   t)
 
 (defun run-current-tests ()
+  "The regular checks. They need no source station and no engine, and are run in a runtime that finds none, on any machine.
+
+What needs a station is not in this list and is not skipped: the engine integration tier (dreyeck/lisp-critic/engine-integration/tests) and
+the page-station layout tier (dreyeck/lisp-critic/page-station/tests) hold it, and each refuses to start without one."
   (hyperdoc::ensure-pages-loaded reading:*lisp-critic-reading*)
-  (check-pages-present)
-  (check-navigation)
-  (check-genealogy-separation)
-  (check-genealogy-projection)
-  (check-discourse-projection)
-  (check-reading-page-is-readable)
-  (check-historical-claims)
-  (check-source-passage-navigation)
-  (check-node-view-shows-the-graph)
-  (check-page-attached-system-view)
-  (check-source-representations)
-  (check-workspace-section)
-  (check-source-declaration)
-  (check-critique-from-snapshot)
-  (check-execution-policy)
-  (check-asset-root-resolution)
-  (check-genealogy-reads-as-domain-language)
-  (check-station-claim-links)
-  (check-historical-claim-views)
-  (check-outcomes)
-  (check-source-backing)
-  (check-transclusions-and-examples)
-  (check-source-structure-projection)
-  (check-reading-examples-honour-the-policy)
-  (check-trusted-examples-review)
-  (check-code-rendering-decision)
-  (format t "~&LISP-CRITIC-READING-PASS: six pages, two lines kept apart, ~
-three outcomes, source-backed transclusion, source structure across three ~
-kinds of ownership.~%")
+  (call-with-absent-station
+   (lambda ()
+     (check-pages-present)
+     (check-navigation)
+     (check-genealogy-separation)
+     (check-genealogy-projection)
+     (check-discourse-projection)
+     (check-reading-page-is-readable)
+     (check-historical-claims)
+     (check-source-passage-navigation)
+     (check-node-view-shows-the-graph)
+     (check-page-attached-system-view)
+     (check-source-representations)
+     (check-critique-from-snapshot)
+     (check-recorded-critiques-are-readable)
+     (check-the-absent-engine-is-reported-as-absent)
+     (check-asset-root-resolution)
+     (check-genealogy-reads-as-domain-language)
+     (check-station-claim-links)
+     (check-historical-claim-views)
+     (check-transclusions-and-examples)
+     (check-reading-examples-honour-the-policy)
+     (check-trusted-examples-review)
+     (check-code-rendering-decision)))
+  (format t "~&LISP-CRITIC-READING-PASS: six pages, two lines kept apart, source-backed transclusion, the absent engine reported as absent, recorded critiques read without it. (No station was needed or used.)~%")
   t)
 
 (defun run-tests ()
@@ -2034,7 +2311,25 @@ kinds of ownership.~%")
          "--eval" "(dreyeck/lisp-critic/reading/tests:run-current-tests)")
    :output *standard-output* :error-output *error-output*)
   (format t "~&FRESH-PROCESS-READING-PASS~%")
-  (check-policy-in-a-clean-image)
+  (check-policy-boundary-with-a-present-station)
+  (check-complete-files-are-not-an-executable-engine)
+  (check-the-engine-integration-test-can-fail)
+  t)
+
+(defun check-the-engine-integration-test-can-fail ()
+  "The integration test that this suite does not run is shown to be able to fail: in fresh images it must fail with no station, with an empty
+station, and with an engine that runs and says nothing. Without this, a missing station could be a pass nobody notices."
+  (let ((output (with-output-to-string (stream)
+                  (uiop:run-program
+                   (list (namestring sb-ext:*runtime-pathname*) "--no-userinit" "--non-interactive"
+                         "--eval" "(require :asdf)"
+                         "--eval" (format nil "(asdf:load-asd ~S)" (asdf:system-source-file "dreyeck"))
+                         "--eval" "(asdf:load-system \"dreyeck/lisp-critic/engine-integration/tests\")"
+                         "--eval" "(dreyeck/lisp-critic/engine-integration/tests:run-negative-controls)")
+                   :output stream :error-output stream))))
+    (check (search "ENGINE-INTEGRATION-NEGATIVE-CONTROLS-PASS" output)
+           "The engine integration test's negative controls did not pass:~%~A" output))
+  (format t "~&ENGINE-INTEGRATION-CAN-FAIL-PASS~%")
   t)
 
 (defun check-policy-in-a-clean-image ()
@@ -2074,6 +2369,11 @@ blind."
               (dolist (example examples) (ignore-errors (funcall example)))
               (assert (null (funcall present)))
               (assert (= systems (length (asdf:registered-systems)))))
+            ;; A complete station that this runtime refuses to run is source, not an engine that runs.
+            (assert (dreyeck/lisp-critic/reading:engine-available-p))
+            (assert (eq :source-observed (dreyeck/lisp-critic/reading::runtime-evidence-status)) ()
+                    \"A refused engine has the status ~S.\" (dreyeck/lisp-critic/reading::runtime-evidence-status))
+            (assert (null (funcall present)))
             ;; The recorded finding stays readable exactly here.
             (let ((target (dreyeck/lisp-critic/reading:current-critique-example)))
               (assert (typep target 'dreyeck/lisp-critic:critic-target))

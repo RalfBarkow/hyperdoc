@@ -978,7 +978,7 @@ the claim detail reaches, rather than a second copy of the wording."
 A stored :RUNTIME-DEPENDENT is a contract, not an answer."
   (let ((stored (getf claim :executable-here-p)))
     (if (eq :runtime-dependent stored)
-        (engine-available-p)
+        (eq :executable (runtime-evidence-status))
         stored)))
 
 (defun genealogy-node-relations (id)
@@ -1038,7 +1038,7 @@ properties of the one adaptation that happens to carry it.")
 The frozen records describe the stations. Whether their code can run is a
 property of the runtime, and a served HyperDoc without the source station
 must not inherit a yes that was true only on a development machine."
-  (let ((available (engine-available-p)))
+  (let ((available (eq :executable (runtime-evidence-status))))
     (mapcar (lambda (station)
               (if (member (getf station :station) +engine-dependent-stations+)
                   (let ((copy (copy-list station)))
@@ -1232,23 +1232,60 @@ genealogy."
 ;; The Riesbeck/Beane source station
 ;;
 
+(defparameter +engine-runtime-files+
+  '("lisp-critic.asd" "tables.lisp" "write-wrap.lisp" "extend-match.lisp" "lisp-critic.lisp" "lisp-rules.lisp")
+  "The vendored files the engine is loaded from. Their presence, as files, is what \"available\" means here; the README is not needed to run it.")
+
+(defun engine-station-files-missing ()
+  "What a station directory lacks of what running the engine needs: the page's wrapper definition and the vendored engine files.
+Read as files only. Asking ASDF would evaluate a definition that arrived with a page, which is exactly what a refusing runtime must not do."
+  (let* ((station (engine-source-binding))
+         (root (uiop:ensure-directory-pathname (critic:lisp-critic-source-station-asset-root-of station)))
+         (wrapper (merge-pathnames (format nil "~A.asd" (critic:lisp-critic-source-station-wrapper-system-of station)) root)))
+    (append (unless (probe-file wrapper) (list (file-namestring wrapper)))
+            (loop for name in +engine-runtime-files+ unless (vendored-engine-file name) collect name))))
+
 (defun engine-available-p ()
   "Whether this runtime can reach the vendored engine at all.
 
 The engine is not an ordinary dependency of this repository. It is loaded
 out of a local source station that is deliberately not deployed, so whether
-it is reachable is a property of the runtime, not of the reading."
-  (and (critic:lisp-critic-source-station-present-p
-        (engine-source-binding))
+it is reachable is a property of the runtime, not of the reading.
+
+Reachable means the station directory exists AND holds the wrapper definition and the vendored engine files. A directory that
+exists but holds nothing is a station that was announced and not delivered: it used to answer T here, and so presented an engine
+that cannot run as :EXECUTABLE."
+  (and (critic:lisp-critic-source-station-present-p (engine-source-binding))
+       (null (engine-station-files-missing))
        t))
+
+(defun engine-run-completed-p ()
+  "Whether the engine has, just now, completed a run in this image and found something to say.
+
+Three different things are kept apart. Files that are there (ENGINE-AVAILABLE-P) are :SOURCE-OBSERVED. A runtime that may run page-attached
+code is permission, and not a run. :EXECUTABLE is the vocabulary's \"the code runs in this image\", so it is only what a completed run
+shows: CAR-CDR applied to (CAR (CDR ITEMS)), a record that says COMPLETED, and the critique the rule exists to give.
+
+The run goes through RUN-CRITIC-RULE and so through the one guarded place that loads page-attached code: a refusing runtime
+produces a failed record here and loads nothing. A complete station whose engine does not load, or loads without its rules,
+produces a failed record or no critique, and is not shown as executable either."
+  (let ((record (ignore-errors (run-one-rule "CAR-CDR" '(car (cdr items))))))
+    (and record
+         (eq :completed (er:evaluation-status-of record))
+         (plusp (length (er:evaluation-result-of record)))
+         t)))
 
 (defun runtime-evidence-status ()
   "The strongest status this runtime can honestly claim for the engine.
 
 Where the station is absent — a served HyperDoc, for instance — the engine
 is neither source-observed nor executable here, and the reading says so
-instead of showing an error where content belongs."
-  (if (engine-available-p) :executable :not-available-in-this-runtime))
+instead of showing an error where content belongs. Where its files are
+there but no run has completed (the policy refuses, or the engine does not
+work) the engine is :SOURCE-OBSERVED, which is all that was shown."
+  (cond ((not (engine-available-p)) :not-available-in-this-runtime)
+        ((engine-run-completed-p) :executable)
+        (t :source-observed)))
 
 (defun ensure-riesbeck-engine-loaded ()
   "Load the vendored engine so its own definitions can be transcluded.
