@@ -2442,8 +2442,8 @@
   :in-order-to ((asdf:test-op (asdf:test-op "dreyeck/lisp-critic/reading/tests"))))
 
 (asdf:defsystem "dreyeck/lisp-critic/reading/tests"
-  :description "Contracts for the Lisp Critic genealogy reading"
-  :depends-on ("dreyeck/lisp-critic/reading")
+  :description "Regular contracts for the Lisp Critic genealogy reading: no source station and no engine needed"
+  :depends-on ("dreyeck/lisp-critic/reading" "dreyeck/lisp-critic/recorded/tests")
   :components ((:file "dreyeck/tests/lisp-critic-reading"))
   :perform (asdf:test-op (op component)
              (declare (ignore op component))
@@ -3592,3 +3592,19 @@
   :perform (test-op (op component)
              (declare (ignore op component))
              (uiop:symbol-call :dreyeck/catalog/membership/tests :run-tests)))
+
+;; The tiers that need a source station. They are not part of any default test: each refuses to start without one (it fails, it does not skip).
+(asdf:defsystem "dreyeck/lisp-critic/engine-integration/tests"
+  :description "Trusted integration test of the real Riesbeck/Beane engine: needs a source station holding the 2004 engine; fails without one"
+  :depends-on ("dreyeck/lisp-critic/reading/tests" "dreyeck/lisp-critic/recorded/tests")
+  :components ((:file "dreyeck/tests/lisp-critic-engine-integration"))
+  :perform (test-op (op component)
+             (declare (ignore op component))
+             (uiop:symbol-call :dreyeck/lisp-critic/engine-integration/tests :run-tests)))
+
+(asdf:defsystem "dreyeck/lisp-critic/page-station/tests"
+  :description "Checks of the wiki page's own station layout (its wrapper and definition): need that page's source station; fail without it"
+  :depends-on ("dreyeck/lisp-critic/engine-integration/tests")
+  :perform (test-op (op component)
+             (declare (ignore op component))
+             (uiop:symbol-call :dreyeck/lisp-critic/engine-integration/tests :run-page-station-layout-tests)))

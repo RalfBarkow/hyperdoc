@@ -1,0 +1,49 @@
+{
+  "snapshot-version": 1,
+  "evaluation": {
+    "run-label": "critic-rule-run-343",
+    "label-scope": "the image that produced this snapshot",
+    "status": "COMPLETED",
+    "started-at": 4002771818,
+    "finished-at": 4002771818,
+    "input": "(CAR (CDR ITEMS))",
+    "invocation": "(FUNCTION lisp-critic:apply-critique-rule RULE CAR-CDR FORM (CAR (CDR ITEMS)))",
+    "notes": [
+      "STRUCTURED-ENGINE-FINDINGS",
+      "TARGET-NOT-EVALUATED"
+    ],
+    "raw-output": "----------------------------------------------------------------------\nUse CADR (or CADDR or ...) or SECOND (or THIRD or ...), not (CAR (CDR\n...)).\n----------------------------------------------------------------------\n",
+    "error-output": "",
+    "condition": null
+  },
+  "rule": {
+    "name": "CAR-CDR",
+    "pattern": "(CAR (CDR (?)))",
+    "response": [
+      "Use CADR (or CADDR or ...) or SECOND (or THIRD or ...), not (CAR (CDR ...)).",
+      false
+    ],
+    "system": "lisp-critic"
+  },
+  "rule-source": {
+    "path": "vendor/lisp-critic/lisp-rules.lisp",
+    "relative-to": "the page's asset root",
+    "byte-size": 20474,
+    "digest": null
+  },
+  "provenance": {
+    "engine": "Riesbeck/Beane",
+    "source-binding": "riesbeck-beane-lisp-critic"
+  },
+  "runtime": {
+    "implementation": "SBCL",
+    "version": "2.4.10",
+    "written-at": 4002771818
+  },
+  "critiques": [
+    {
+      "explanation": "Use CADR (or CADDR or ...) or SECOND (or THIRD or ...), not (CAR (CDR ...)).",
+      "evidence": "(CAR-CDR NIL (CAR (CDR ITEMS)))"
+    }
+  ]
+}

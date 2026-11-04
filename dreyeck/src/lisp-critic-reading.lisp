@@ -1232,14 +1232,31 @@ genealogy."
 ;; The Riesbeck/Beane source station
 ;;
 
+(defparameter +engine-runtime-files+
+  '("lisp-critic.asd" "tables.lisp" "write-wrap.lisp" "extend-match.lisp" "lisp-critic.lisp" "lisp-rules.lisp")
+  "The vendored files the engine is loaded from. Their presence, as files, is what \"available\" means here; the README is not needed to run it.")
+
+(defun engine-station-files-missing ()
+  "What a station directory lacks of what running the engine needs: the page's wrapper definition and the vendored engine files.
+Read as files only. Asking ASDF would evaluate a definition that arrived with a page, which is exactly what a refusing runtime must not do."
+  (let* ((station (engine-source-binding))
+         (root (uiop:ensure-directory-pathname (critic:lisp-critic-source-station-asset-root-of station)))
+         (wrapper (merge-pathnames (format nil "~A.asd" (critic:lisp-critic-source-station-wrapper-system-of station)) root)))
+    (append (unless (probe-file wrapper) (list (file-namestring wrapper)))
+            (loop for name in +engine-runtime-files+ unless (vendored-engine-file name) collect name))))
+
 (defun engine-available-p ()
   "Whether this runtime can reach the vendored engine at all.
 
 The engine is not an ordinary dependency of this repository. It is loaded
 out of a local source station that is deliberately not deployed, so whether
-it is reachable is a property of the runtime, not of the reading."
-  (and (critic:lisp-critic-source-station-present-p
-        (engine-source-binding))
+it is reachable is a property of the runtime, not of the reading.
+
+Reachable means the station directory exists AND holds the wrapper definition and the vendored engine files. A directory that
+exists but holds nothing is a station that was announced and not delivered: it used to answer T here, and so presented an engine
+that cannot run as :EXECUTABLE."
+  (and (critic:lisp-critic-source-station-present-p (engine-source-binding))
+       (null (engine-station-files-missing))
        t))
 
 (defun runtime-evidence-status ()
