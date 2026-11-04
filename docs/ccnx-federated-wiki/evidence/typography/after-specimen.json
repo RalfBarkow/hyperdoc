@@ -1,0 +1,15 @@
+{
+ "browser": "Chromium 153.0.8010.12",
+ "css": {
+  "p": "\"Noto Sans\", Tahoma, Verdana, Arial, sans-serif 16px",
+  "code": "ui-monospace, \"SF Mono\", Menlo, Consolas, \"DejaVu Sans Mono\", \"Liberation Mono\", monospace 14.4px"
+ },
+ "platformFonts": {
+  "#specimen p": [
+   "Liberation Sans (system, 11 glyphs)"
+  ],
+  "#specimen code": [
+   "DejaVu Sans Mono (system, 11 glyphs)"
+  ]
+ }
+}
