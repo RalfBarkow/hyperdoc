@@ -1059,6 +1059,7 @@
                                  "dreyeck/work/reading"
                                  "dreyeck/authority/reading"
                                  "dreyeck/clog-tutorial/reading"
+                                 "dreyeck/ccnx-federated-wiki"
                                  "dreyeck/traverse/reading"
                                  ;; Read-only unless its own configuration embeds the loopback test editor.
                                  "dreyeck/fedwiki-original-editor-demo")
@@ -3554,8 +3555,8 @@
 (asdf:defsystem "dreyeck/ccnx-federated-wiki"
   :description "Reading: the historical CCNx Federated Wiki prototypes, source review and the Power of Plain Text"
   ;; Source review only. It installs no CCNx or NDN runtime and makes no network connection. The example pages are plain
-  ;; local Federated Wiki files, read by dreyeck/local-fedwiki-page. Not a member of dreyeck/catalog: load it additively with
-  ;; HYPERDOC_CATALOG_SYSTEM=dreyeck/ccnx-federated-wiki (dreyeck/CATALOG-OPERATIONS.md).
+  ;; local Federated Wiki files, read by dreyeck/local-fedwiki-page. Admitted to the default dreyeck/catalog;
+  ;; no extra startup variable or historical CCNx runtime is required.
   :depends-on ("dreyeck/hyperdoc" "dreyeck/local-fedwiki-page" "uiop")
   :serial t
   :pathname "dreyeck/src/"
