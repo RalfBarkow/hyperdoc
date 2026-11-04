@@ -234,6 +234,11 @@
       (let* ((page (hyperbook:find-page book title :signal-error? t))
              (findings (cw:typography-findings page))
              (view (find "Typography" (hv:all-views page) :key #'hv:view-title :test #'equal)))
+        ;; The reading comes first: Content is the first view of every page of the book, and Typography comes after it.
+        (let ((views (hv:all-views page)))
+          (assert (equal "Content" (hv:view-title (first views))) () "~S: the first view is ~S, not Content" title (hv:view-title (first views)))
+          (when view
+            (assert (< (hv:view-priority (first views)) (hv:view-priority view)) () "~S: Typography does not come after Content" title)))
         (when findings
           (assert view () "~S has findings and no Typography view" title)
           (hv:view-html view)

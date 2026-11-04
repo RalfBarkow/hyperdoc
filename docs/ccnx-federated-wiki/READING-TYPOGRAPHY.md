@@ -61,10 +61,12 @@ html-page --"Typography" view--> typography-finding --> text-unit --> html-page,
                                       \---------> presentation-variant --> typography-finding
 ```
 
-In the Inspector: open any of the four pages; its **Typography** tab lists the findings of that page; a finding's view leads to its text unit (and from
+In the Inspector: open any of the four pages; it opens on **Content**, the reading. Its **Typography** tab (an additional, analytical view) lists the findings of that page; a finding's view leads to its text unit (and from
 there to the page, the element and the text as it is now), its reading task, its legibility cases and its presentation variants.
 The code is `dreyeck/src/ccnx-typography.lisp` (objects and data) and `dreyeck/src/ccnx-typography-views.lisp` (views). The data are Lisp lists; the objects are
 built from them on first use and rebuilt with `(dreyeck/ccnx-federated-wiki:reset-typography-model)`.
+
+**Content comes first.** Views are ordered by ascending priority and Content has priority 1; the Typography view has priority 20 (`+typography-view-priority+`), so it sits after the core views of a page (Content, Source, Links, Parse tree, Backlinks) and a page never opens on it. A first version gave it priority 1 as well, which made the page open on Typography; that is the fault this note records. The reading has precedence over its analysis, as a rule for HyperDoc pages of this kind.
 
 No second layout framework and no second story-item editor: the style sheet is one file, scoped to the pages (section 5), and nothing is stored about a page that
 the page does not already hold, except the ids added to some elements so that a text unit can name them.
@@ -122,7 +124,7 @@ rows and was kept as a table. The two that were **sequences, not comparisons** (
 ## 7. Before and after
 
 Same script, same browser, same widths (`evidence/typography/before-metrics.json`, `after-metrics.json`; screenshots in `before/` and `after/`; the specimen in
-`before-specimen.png` and `after-specimen.png`). Ninety-one assertions; 63 fail before, none after. Each describes a property and the reading task it protects.
+`before-specimen.png` and `after-specimen.png`). The 91 assertions of the first run: 63 fail before, none after. Nine more were added afterwards (CONTENT-FIRST for eight page/width pairs, TYPOGRAPHY-NAVIGATION); `after-metrics.json` holds the 100 assertions run on the corrected state, none failing, and `content-first-counterproof-metrics.json` the same script run on the state with the Typography view at priority 1: CONTENT-FIRST fails for all eight pairs ("the page opened on Typography") and the navigation fails too. Each describes a property and the reading task it protects.
 
 | Property (assertion) | Reading task | Before | After |
 |---|---|---|---|
@@ -136,6 +138,8 @@ Same script, same browser, same widths (`evidence/typography/before-metrics.json
 | EVIDENCE-LABELS: every label is one of the four kinds | orienting | no labels | all four, defined on the main page |
 | REFERENCES-VISIBLE: references are underlined and not the colour of the text | orienting | same colour as text | underlined, dark blue |
 | LINKS-OPEN-TARGETS: every followed `<a page>` and `<a expr>` opens its target | all | opens | opens (not changed; regression) |
+| CONTENT-FIRST: Content is the first and the active view of every page when it opens, with no user action; Typography is another view | continuous | (no Typography view) | Content first and active; tabs: Content, Source, Links, Parse tree, Backlinks, Typography, URL, ... |
+| TYPOGRAPHY-NAVIGATION: Typography tab -> finding -> presentation variant -> finding -> text unit, by following references | orienting | (none) | each step opens its object |
 
 The existing navigation check (`browser-check/check.mjs`) passes unchanged. A change is not an improvement because a screenshot differs; each row above names the property that was
 failing and the reading task it was failing for. **Not tested:** whether any reader reads faster or more accurately. The grounds in the findings are design hypotheses.
@@ -143,10 +147,10 @@ failing and the reading task it was failing for. **Not tested:** whether any rea
 ## 8. Tests
 
 * `dreyeck/ccnx-federated-wiki/tests` (part of `dreyeck/catalog`): structure (wrapper, no `<pre>`, every table boxed, ids unique, style-sheet selectors scoped), every kind of statement used is defined on the
-  main page, every text unit resolves in its page, every finding has a variant tied to a block of the style sheet, the Typography view and the finding views reach the objects, the
+  main page, every text unit resolves in its page, every finding has a variant tied to a block of the style sheet, the Typography view and the finding views reach the objects, Content is the first view of every page and Typography comes after it (counter-proof: priority 1 fails it), the
   grounds never carry the name Willberg, and the style sheet belongs to this book only. Counter-proofs run: removing the "Derived, not run" definition, and removing an element id, each fail the test.
 * `dreyeck/ccnx-federated-wiki/browser-check/typography-check.mjs ORIGIN OUT LABEL [--measure-only]`: the assertions of section 7 and the navigation; `typography-specimen.mjs` the specimen.
-  Run against the state before the change it fails 63 assertions, after it none.
+  Run against the state before the change it fails 63 assertions, after it none; run against the priority-1 mistake it fails CONTENT-FIRST.
 
 ```sh
 sbcl --load dreyeck/ccnx-federated-wiki/browser-check/serve.lisp          # a loopback Catalog with the reading, in nix develop

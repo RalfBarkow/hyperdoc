@@ -18,6 +18,8 @@
 //   HEADING-STEPS         h1 > h2 > h3 > body size, each step at least 2 px (it was 1.2 px)
 //   EVIDENCE-LABELS       every .ev label says one of the four kinds
 //   REFERENCES-VISIBLE    an Inspector reference is underlined and not the colour of the running text
+//   CONTENT-FIRST         Content is the first and the active view of each page when it opens, with no user action; Typography is one of the other views
+//   TYPOGRAPHY-NAVIGATION page -> Typography view -> finding -> text unit and presentation variant, by following references
 import fs from 'node:fs'
 import {createRequire} from 'node:module'
 const require = createRequire(process.cwd() + '/')
@@ -49,7 +51,14 @@ for (const [vname, vp] of Object.entries(viewports)) {
     await page.locator('tr.inspector-inspect:visible').filter({hasText: title}).last().click()
     await page.waitForFunction(n => document.querySelectorAll('.inspector-pane').length > n, n1)
     const pane = page.locator('.inspector-pane').last()
-    await pane.getByRole('heading', {name: title, exact: true}).waitFor()
+    // Content must be what opens, with no user action: if the page's own heading is not there, the page opened on another view.
+    await pane.locator('button.active').first().waitFor()
+    const contentShown = await pane.getByRole('heading', {name: title, exact: true}).waitFor({timeout: 8000}).then(() => true, () => false)
+    if (!contentShown) {
+      const active = await pane.locator('button.active').allInnerTexts()
+      result.assertions.push({page: `${slug(title)}@${vname}`, name: 'CONTENT-FIRST', ok: false, detail: `the page opened on ${JSON.stringify(active)}, its Content is not shown`})
+      continue
+    }
     // the style sheet is loaded asynchronously: measure only once it is in effect
     await page.waitForFunction(() => [...document.styleSheets].some(s => (s.href || '').includes('/ccnx-reading/css/reading.css') && (() => { try { return s.cssRules.length > 0 } catch (e) { return false } })()), null, {timeout: 4000}).catch(() => {}) // a state without the style sheet is measured as it is
     const m = await pane.evaluate(pane => {
@@ -92,6 +101,8 @@ for (const [vname, vp] of Object.entries(viewports)) {
     if (h2 && h3) check('HEADING-STEPS', h2 - h3 >= 2 && h3 > m.bodyFont, `h2 ${h2}, h3 ${h3}, body ${m.bodyFont}`)
     check('EVIDENCE-LABELS', m.labels.every(l => KINDS.includes(l)), m.labels.join(' | '))
     check('REFERENCES-VISIBLE', m.refStyles.every(r => r.underline && r.differs), JSON.stringify(m.refStyles.slice(0, 3)))
+    const tabs = await pane.evaluate(p => { const bar = [...p.querySelectorAll('button')].filter(b => !b.className.includes('inspector-title') && !b.className.includes('inspector-button') && !b.className.includes('inspector-action')); return {names: bar.map(b => b.textContent.trim()), active: bar.filter(b => b.classList.contains('active')).map(b => b.textContent.trim())} })
+    check('CONTENT-FIRST', tabs.names[0] === 'Content' && tabs.active.length === 1 && tabs.active[0] === 'Content' && tabs.names.indexOf('Typography') > 0, JSON.stringify(tabs))
     await page.setViewportSize({width: vp.width, height: 4600}); await page.waitForTimeout(400)
     await page.locator('.inspector-pane').last().screenshot({path: `${out}/${label}-${slug(title)}-${vname}.png`})
     await page.setViewportSize(vp)
@@ -99,7 +110,7 @@ for (const [vname, vp] of Object.entries(viewports)) {
   await context.close()
 }
 // Navigation: every page link and expression link of the four pages opens the object it names (title of an html-page, or the example page).
-{
+try {
   const context = await browser.newContext({viewport: viewports.wide, serviceWorkers: 'block'})
   const page = await context.newPage(); page.setDefaultTimeout(45000)
   page.on('pageerror', e => result.pageErrors.push(e.message))
@@ -115,14 +126,15 @@ for (const [vname, vp] of Object.entries(viewports)) {
   result.navigation = []
   let owner = panes().nth((await panes().count()) - 1)
   await owner.getByRole('heading', {name: titles[0], exact: true}).waitFor()
-  const follow = async (from, text, expectTitle) => {
+  const follow = async (from, text, expectTitle, expectText) => {
     const before = await panes().count()
-    await from.locator('.hyperbook-reference').filter({hasText: text}).first().locator('.inspector-inspect').click()
+    await from.locator('.inspector-inspect').filter({hasText: text}).first().click()
     await page.waitForFunction(n => document.querySelectorAll('.inspector-pane').length > n, before)
     const next = panes().nth((await panes().count()) - 1)
-    if (expectTitle) await next.getByRole('heading', {name: expectTitle, exact: true}).waitFor()
+    if (expectText) await next.getByText(expectText, {exact: false}).first().waitFor()
+    else if (expectTitle) await next.getByRole('heading', {name: expectTitle, exact: true}).waitFor()
     else await next.getByText('Plain text outlives the program that wrote it.', {exact: false}).first().waitFor()
-    result.navigation.push({followed: text, opened: expectTitle || 'Plain Text Example (Story view)', paneAdded: (await panes().count()) === before + 1})
+    result.navigation.push({followed: text, opened: expectTitle || expectText || 'Plain Text Example (Story view)', paneAdded: (await panes().count()) === before + 1})
     return next
   }
   const pipeline = await follow(owner, titles[1], titles[1])
@@ -130,8 +142,31 @@ for (const [vname, vp] of Object.entries(viewports)) {
   const plain = await follow(identity, titles[3], titles[3])
   const back = await follow(plain, titles[0], titles[0])
   await follow(back, 'the page as a Federated Wiki server stores it', null)
+  // The analytical view is reachable and leads on: Typography -> finding -> text unit and presentation variant.
+  const typo = []
+  const owner2 = pipeline
+  await owner2.getByRole('button', {name: 'Typography', exact: true}).click()
+  await owner2.locator('.inspector-inspect').filter({hasText: 'F-STEPS'}).first().waitFor().catch(async e => { console.log('PANE TEXT:', (await owner2.innerText()).slice(0, 600)); throw e })
+  // A click in a pane that is not the last one replaces the panes after it, so the new pane is the last one, and is recognised by its own content.
+  const followIn = async (from, text, expectText) => {
+    await from.locator('.inspector-inspect').filter({hasText: text}).first().click()
+    const next = page.locator('.inspector-pane').last()
+    await next.getByText(expectText, {exact: false}).first().waitFor()
+    return next
+  }
+  const finding = await followIn(owner2, 'F-STEPS', 'Grounds (design hypothesis)')
+  typo.push({opened: 'finding F-STEPS', hasTask: (await finding.innerText()).includes('Reading task'), hasVariant: (await finding.innerText()).includes('Presentation variant')})
+  const variantPane = await followIn(finding, 'V-F-STEPS', 'CSS block')
+  typo.push({opened: 'variant V-F-STEPS', hasCssBlock: (await variantPane.innerText()).includes('CSS block')})
+  const back2 = await followIn(variantPane, 'F-STEPS', 'Grounds (design hypothesis)')
+  const unit = await followIn(back2, 'One Page From Browser to NDN and Back#path-in-main', 'Text now')
+  typo.push({opened: 'text unit', hasText: (await unit.innerText()).includes('Text now')})
+  result.typographyNavigation = typo
+  result.assertions.push({page: 'navigation', name: 'TYPOGRAPHY-NAVIGATION', ok: typo.every(t => Object.values(t).every(v => v !== false)), detail: JSON.stringify(typo)})
   result.assertions.push({page: 'navigation', name: 'LINKS-OPEN-TARGETS', ok: result.navigation.every(n => n.paneAdded), detail: JSON.stringify(result.navigation)})
   await context.close()
+} catch (e) {
+  result.assertions.push({page: 'navigation', name: 'NAVIGATION', ok: false, detail: String(e).split('\n')[0]})
 }
 result.assertions.push({page: 'all', name: 'NO-PAGE-ERRORS', ok: result.pageErrors.length === 0, detail: result.pageErrors.join(' | ')})
 result.assertions.push({page: 'all', name: 'NO-FAILED-INTERNAL-REQUESTS', ok: result.failedRequests.length === 0, detail: result.failedRequests.join(' | ')})

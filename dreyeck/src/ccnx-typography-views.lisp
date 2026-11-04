@@ -1,15 +1,29 @@
 ;;;; Inspector views of the reading typography objects. Relations are references to objects, not strings that name them.
 (in-package #:dreyeck/ccnx-federated-wiki)
 
-(defun %relations-view (title pairs)
-  (hv:html-view :title title :priority 1
+(defparameter +typography-view-priority+ 20
+  "Content (priority 1) comes first; the Typography view of a page is a perspective on the reading, not its replacement.")
+
+(defun %label (object)
+  "What an object of this model is called where it is referenced: its id, not its address."
+  (flet ((short (text) (if (> (length text) 70) (concatenate 'string (subseq text 0 67) "...") text)))
+    (typecase object
+      (typography-finding (format nil "~A: ~A" (typography-finding-id-of object) (short (typography-finding-problem-of object))))
+      (presentation-variant (format nil "~A: ~A" (presentation-variant-id-of object) (short (presentation-variant-change-of object))))
+      (legibility-case (format nil "~A  ~A" (legibility-case-id-of object) (or (legibility-case-string-of object) "")))
+      (text-unit (text-unit-id-of object))
+      (reading-task (reading-task-name-of object))
+      (t object))))
+
+(defun %relations-view (title pairs &key (priority 1))
+  (hv:html-view :title title :priority priority
     (hv:html
       (:table
        (dolist (pair pairs)
          (hv:html
            (:tr (:th (hv:esc (car pair)))
                 (:td (let ((value (cdr pair)))
-                       (if (stringp value) (hv:esc value) (hv:object-ref value)))))))))))
+                       (if (stringp value) (hv:esc value) (hv:object-ref value :display (lambda (o) (%label o)))))))))))))
 
 (hv:defview reading-task-view (task reading-task)
   (%relations-view "Reading task"
@@ -63,5 +77,7 @@
     (when (and book (equal (hyperbook:id-of book) +book-id+))
       (let ((findings (typography-findings page)))
         (when findings
+          ;; An analytical view of the page, after the reading: Content has priority 1 and views are ordered by ascending priority.
           (%relations-view "Typography"
-            (mapcar (lambda (f) (cons (typography-finding-id-of f) f)) findings)))))))
+            (mapcar (lambda (f) (cons (typography-finding-id-of f) f)) findings)
+            :priority +typography-view-priority+))))))

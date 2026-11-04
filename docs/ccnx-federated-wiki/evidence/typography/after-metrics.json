@@ -504,6 +504,12 @@
       "detail": "[{\"underline\":true,\"differs\":true},{\"underline\":true,\"differs\":true},{\"underline\":true,\"differs\":true}]"
     },
     {
+      "page": "reading-the-ccnx-federated-wiki@wide",
+      "name": "CONTENT-FIRST",
+      "ok": true,
+      "detail": "{\"names\":[\"Content\",\"Source\",\"Links\",\"Parse tree\",\"Backlinks\",\"Typography\",\"URL\",\"Slots\",\"Print\",\"Operations\",\"Playground\"],\"active\":[\"Content\"]}"
+    },
+    {
       "page": "one-page-from-browser-to-ndn-and-back@wide",
       "name": "NO-SIDEWAYS-SCROLL",
       "ok": true,
@@ -568,6 +574,12 @@
       "name": "REFERENCES-VISIBLE",
       "ok": true,
       "detail": "[{\"underline\":true,\"differs\":true},{\"underline\":true,\"differs\":true},{\"underline\":true,\"differs\":true}]"
+    },
+    {
+      "page": "one-page-from-browser-to-ndn-and-back@wide",
+      "name": "CONTENT-FIRST",
+      "ok": true,
+      "detail": "{\"names\":[\"Content\",\"Source\",\"Links\",\"Parse tree\",\"Backlinks\",\"Typography\",\"URL\",\"Slots\",\"Print\",\"Operations\",\"Playground\"],\"active\":[\"Content\"]}"
     },
     {
       "page": "identity-versions-and-signatures@wide",
@@ -636,6 +648,12 @@
       "detail": "[{\"underline\":true,\"differs\":true}]"
     },
     {
+      "page": "identity-versions-and-signatures@wide",
+      "name": "CONTENT-FIRST",
+      "ok": true,
+      "detail": "{\"names\":[\"Content\",\"Source\",\"Links\",\"Parse tree\",\"Backlinks\",\"Typography\",\"URL\",\"Slots\",\"Print\",\"Operations\",\"Playground\"],\"active\":[\"Content\"]}"
+    },
+    {
       "page": "plain-text-after-ccnx@wide",
       "name": "NO-SIDEWAYS-SCROLL",
       "ok": true,
@@ -700,6 +718,12 @@
       "name": "REFERENCES-VISIBLE",
       "ok": true,
       "detail": "[{\"underline\":true,\"differs\":true},{\"underline\":true,\"differs\":true},{\"underline\":true,\"differs\":true}]"
+    },
+    {
+      "page": "plain-text-after-ccnx@wide",
+      "name": "CONTENT-FIRST",
+      "ok": true,
+      "detail": "{\"names\":[\"Content\",\"Source\",\"Links\",\"Parse tree\",\"Backlinks\",\"Typography\",\"URL\",\"Slots\",\"Print\",\"Operations\",\"Playground\"],\"active\":[\"Content\"]}"
     },
     {
       "page": "reading-the-ccnx-federated-wiki@narrow",
@@ -768,6 +792,12 @@
       "detail": "[{\"underline\":true,\"differs\":true},{\"underline\":true,\"differs\":true},{\"underline\":true,\"differs\":true}]"
     },
     {
+      "page": "reading-the-ccnx-federated-wiki@narrow",
+      "name": "CONTENT-FIRST",
+      "ok": true,
+      "detail": "{\"names\":[\"Content\",\"Source\",\"Links\",\"Parse tree\",\"Backlinks\",\"Typography\",\"URL\",\"Slots\",\"Print\",\"Operations\",\"Playground\"],\"active\":[\"Content\"]}"
+    },
+    {
       "page": "one-page-from-browser-to-ndn-and-back@narrow",
       "name": "NO-SIDEWAYS-SCROLL",
       "ok": true,
@@ -832,6 +862,12 @@
       "name": "REFERENCES-VISIBLE",
       "ok": true,
       "detail": "[{\"underline\":true,\"differs\":true},{\"underline\":true,\"differs\":true},{\"underline\":true,\"differs\":true}]"
+    },
+    {
+      "page": "one-page-from-browser-to-ndn-and-back@narrow",
+      "name": "CONTENT-FIRST",
+      "ok": true,
+      "detail": "{\"names\":[\"Content\",\"Source\",\"Links\",\"Parse tree\",\"Backlinks\",\"Typography\",\"URL\",\"Slots\",\"Print\",\"Operations\",\"Playground\"],\"active\":[\"Content\"]}"
     },
     {
       "page": "identity-versions-and-signatures@narrow",
@@ -900,6 +936,12 @@
       "detail": "[{\"underline\":true,\"differs\":true}]"
     },
     {
+      "page": "identity-versions-and-signatures@narrow",
+      "name": "CONTENT-FIRST",
+      "ok": true,
+      "detail": "{\"names\":[\"Content\",\"Source\",\"Links\",\"Parse tree\",\"Backlinks\",\"Typography\",\"URL\",\"Slots\",\"Print\",\"Operations\",\"Playground\"],\"active\":[\"Content\"]}"
+    },
+    {
       "page": "plain-text-after-ccnx@narrow",
       "name": "NO-SIDEWAYS-SCROLL",
       "ok": true,
@@ -966,6 +1008,18 @@
       "detail": "[{\"underline\":true,\"differs\":true},{\"underline\":true,\"differs\":true},{\"underline\":true,\"differs\":true}]"
     },
     {
+      "page": "plain-text-after-ccnx@narrow",
+      "name": "CONTENT-FIRST",
+      "ok": true,
+      "detail": "{\"names\":[\"Content\",\"Source\",\"Links\",\"Parse tree\",\"Backlinks\",\"Typography\",\"URL\",\"Slots\",\"Print\",\"Operations\",\"Playground\"],\"active\":[\"Content\"]}"
+    },
+    {
+      "page": "navigation",
+      "name": "TYPOGRAPHY-NAVIGATION",
+      "ok": true,
+      "detail": "[{\"opened\":\"finding F-STEPS\",\"hasTask\":true,\"hasVariant\":true},{\"opened\":\"variant V-F-STEPS\",\"hasCssBlock\":true},{\"opened\":\"text unit\",\"hasText\":true}]"
+    },
+    {
       "page": "navigation",
       "name": "LINKS-OPEN-TARGETS",
       "ok": true,
@@ -1013,8 +1067,23 @@
       "paneAdded": true
     }
   ],
+  "typographyNavigation": [
+    {
+      "opened": "finding F-STEPS",
+      "hasTask": true,
+      "hasVariant": true
+    },
+    {
+      "opened": "variant V-F-STEPS",
+      "hasCssBlock": true
+    },
+    {
+      "opened": "text unit",
+      "hasText": true
+    }
+  ],
   "summary": {
-    "assertions": 91,
+    "assertions": 100,
     "failed": []
   }
 }
