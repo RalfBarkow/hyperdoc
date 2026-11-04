@@ -3550,3 +3550,27 @@
   :serial t
   :pathname "dreyeck/src/"
   :components ((:file "upstream-assessment-inspector-package") (:file "upstream-assessment-views")))
+
+(asdf:defsystem "dreyeck/ccnx-federated-wiki"
+  :description "Reading: the historical CCNx Federated Wiki prototypes, source review and the Power of Plain Text"
+  ;; Source review only. It installs no CCNx or NDN runtime and makes no network connection. The example pages are plain
+  ;; local Federated Wiki files, read by dreyeck/local-fedwiki-page. Not a member of dreyeck/catalog: load it additively with
+  ;; HYPERDOC_CATALOG_SYSTEM=dreyeck/ccnx-federated-wiki (dreyeck/CATALOG-OPERATIONS.md).
+  :depends-on ("dreyeck/hyperdoc" "dreyeck/local-fedwiki-page" "uiop")
+  :serial t
+  :pathname "dreyeck/src/"
+  :components ((:module "dreyeck/pages/ccnx-federated-wiki" :pathname "../pages/ccnx-federated-wiki/")
+               (:file "ccnx-federated-wiki-package")
+               (:file "ccnx-federated-wiki")
+               (:file "ccnx-federated-wiki-hyperdoc"))
+  :in-order-to ((test-op (test-op "dreyeck/ccnx-federated-wiki/tests"))))
+
+(asdf:defsystem "dreyeck/ccnx-federated-wiki/tests"
+  :description "The reading loads, its example pages are consistent, its links resolve and its source references are commit-pinned"
+  :depends-on ("dreyeck/ccnx-federated-wiki" "hyperbook/server" "shasht" "cl-ppcre")
+  :serial t
+  :pathname "dreyeck/tests/"
+  :components ((:file "ccnx-federated-wiki-smoke"))
+  :perform (test-op (op component)
+             (declare (ignore op component))
+             (uiop:symbol-call :dreyeck/ccnx-federated-wiki/tests :run-tests)))

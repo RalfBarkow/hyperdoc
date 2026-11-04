@@ -1,0 +1,114 @@
+<h1>Reading the CCNx Federated Wiki</h1>
+
+<in-package>dreyeck/ccnx-federated-wiki</in-package>
+
+<p>
+In 2013 two repositories by <code>rynomad</code> ported the browser editor of Ward Cunningham's Smallest Federated Wiki to Content Centric Networking:
+pages were kept in the browser's IndexedDB and moved between browsers as NDN Content Objects, with no DNS name in between. This reading follows one
+wiki page along that path and asks what, of that page, is still plain text.
+</p>
+
+<p>
+It belongs to Zettel 11483, <em>Federated Wiki without DNS: Identity, Reachability, and Local Continuity</em>. The path it reconstructs is:
+</p>
+
+<p>
+<strong>wiki page</strong> &rarr; <strong>JSON</strong> &rarr; <strong>IndexedDB</strong> &rarr; <strong>NDN Content Object</strong> &rarr;
+<strong>NDN retrieval</strong> &rarr; <strong>wiki page</strong>
+</p>
+
+<h2>What this reading is, and is not</h2>
+
+<p>
+It is a <strong>source review</strong>. Two historical repositories were fetched at fixed revisions and read. <strong>No code of either repository was run</strong>, no
+CCNx or NDN runtime was installed, and nothing here connects to a network or writes a Wiki page. A statement that begins &ldquo;the source does&rdquo; is a
+statement about the lines cited, not about something observed running.
+</p>
+
+<p>
+It says nothing about why either repository stopped changing, or whether it did. Each was read as a single commit; no history, issue or deployment was read.
+</p>
+
+<h3>Three kinds of statement</h3>
+
+<ul>
+<li><strong>Implemented.</strong> The cited source does this. Every such statement carries a link to the lines, pinned to a commit.</li>
+<li><strong>Documented.</strong> A README or comment says it. The source may or may not agree; where it was checked, the page says so.</li>
+<li><strong>Open.</strong> Not established by what was read. These are collected on <a page="Plain Text After CCNx">Plain Text After CCNx</a>.</li>
+</ul>
+
+<h2>The sources</h2>
+
+<table class="inspector-table">
+<tr><th>Short name</th><th>What</th><th>Pinned to</th></tr>
+<tr>
+  <td><strong>Prototype</strong></td>
+  <td>The first build, May 2013. A copy of the Smallest Federated Wiki client, <code>ndn-js</code> and test pages.</td>
+  <td><a href="https://github.com/rynomad/CCNx-Federated-Wiki-Prototype/tree/c5b1b93c632ef9834a598406a25c20ad47bab26e">CCNx-Federated-Wiki-Prototype at <code>c5b1b93</code></a></td>
+</tr>
+<tr>
+  <td><strong>Main</strong></td>
+  <td>The later repository, November 2013, commit &ldquo;break grunt but fix page ownership&rdquo;.</td>
+  <td><a href="https://github.com/rynomad/CCNx-Federated-Wiki/tree/8426dc5cd326fa0d395d5bef2f73b8be33e34a8e">CCNx-Federated-Wiki at <code>8426dc5</code></a></td>
+</tr>
+<tr>
+  <td><strong>c2 page</strong></td>
+  <td>&ldquo;Power Of Plain Text&rdquo;. The page at <code>wiki.c2.com</code> is a JavaScript shell; its text is the JSON file <code>PowerOfPlainText</code> under <code>c2.com/wiki/remodel/pages/</code> (read on 2026-11-04).</td>
+  <td><a href="https://wiki.c2.com/?PowerOfPlainText">wiki.c2.com</a>, <a href="https://kidneybone.com/c2/wiki/PowerOfPlainText">kidneybone.com</a></td>
+</tr>
+</table>
+
+<p>
+The line-by-line account, with every file, line range and digest of what was fetched, is <code>docs/ccnx-federated-wiki/SOURCE-REPORT.md</code> in this
+repository. The pages here are derived from it.
+</p>
+
+<h2>The seven questions, answered briefly</h2>
+
+<ol>
+<li><strong>What is stored as JSON?</strong> The ordinary Federated Wiki page (<code>title</code>, <code>story</code>, <code>journal</code>) plus four fields: <code>page</code>,
+<code>excludes</code>, <code>favicon</code>, <code>version</code>. The same record, as JSON text, is the content of the NDN object.
+<em>(Implemented in Main; see <a page="One Page From Browser to NDN and Back">One Page From Browser to NDN and Back</a>.)</em></li>
+<li><strong>How does the NDN name arise?</strong> Main: <code>/wiki/page/&lt;slug&gt;.json/&lt;version&gt;</code>. The code computes a prefix from the host name and then overwrites it with the
+constant <code>wiki</code>, so <strong>no site is in the name</strong>. Prototype: <code>/sfw/&lt;slug&gt;/&lt;timestamp&gt;</code>.
+<em>(Implemented; see <a page="Identity, Versions and Signatures">Identity, Versions and Signatures</a>.)</em></li>
+<li><strong>How are versions and forks represented?</strong> The version is the date of the last journal action. A fork is a journal action whose <code>site</code> is a
+<strong>favicon image</strong>, not a host name. <code>excludes</code> lists the journal dates since the last fork. <em>(Implemented.)</em></li>
+<li><strong>Where are site and publisher identity?</strong> The site is a random favicon, drawn in the browser. The publisher in every NDN object is the digest of
+<strong>one RSA key written into the source of the library</strong>, the same in both repositories. <em>(Implemented.)</em></li>
+<li><strong>Which signatures are made, and which are checked?</strong> Every object is signed with that one key. The verification code does run, but for a key carried in the object it
+raises &ldquo;verified&rdquo; whatever the result. Signatures are not stored. <em>(Implemented, by the source; not run.)</em></li>
+<li><strong>Can the content be read as a JSON file without the historical runtime?</strong> The repositories' own data files, yes. The CCNx forms, only with a browser profile or a
+<code>ccnb</code> decoder; neither client can export a page to a file. <em>(Implemented; extraction not tried.)</em></li>
+<li><strong>What would survive adoption today?</strong> The page itself, completely: title, items with ids, journal. The name, the publisher, the signature and the origin of a fork would not.
+See <a page="Plain Text After CCNx">Plain Text After CCNx</a>.</li>
+</ol>
+
+<h2>Look at the example page</h2>
+
+<p>
+The reading follows one illustrative page, <em>Plain Text Example</em>: two items and five journal actions. It is built for this reading, not taken from either repository. Its two forms that
+are Wiki pages open as ordinary Inspector objects, with the existing Story view:
+</p>
+
+<ul>
+<li>
+  <a expr="(example-page :sfw)">the page as a Federated Wiki server stores it</a>
+</li>
+<li>
+  <a expr="(example-page :ccnx-record)">the same page as the Main code leaves it in IndexedDB</a>
+</li>
+</ul>
+
+<p>
+The Story view shows the same two paragraphs for both: the four added fields are not part of the story. Open the page object and look at its data to see them.
+The example holds no link to another page, so showing it triggers no page lookup. The small icon beside the title is the favicon of the page's origin; the example's logical site is the reserved, never resolvable name <code>ccnx-example.invalid</code>, so the icon stays broken.
+</p>
+
+<h2>Reading order</h2>
+
+<ol>
+<li><a page="One Page From Browser to NDN and Back">One Page From Browser to NDN and Back</a>: the path, step by step, with the example.</li>
+<li><a page="Identity, Versions and Signatures">Identity, Versions and Signatures</a>: names, versions, forks, keys, and what is checked.</li>
+<li><a page="Plain Text After CCNx">Plain Text After CCNx</a>: readability, what survives, the Power Of Plain Text assessed, and the open questions.</li>
+</ol>
