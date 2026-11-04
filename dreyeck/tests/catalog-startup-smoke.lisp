@@ -18,7 +18,7 @@
 
 (defparameter +admitted-hyperbook-ids+
   '("asdf-systems" "dreyeck/authority/reading" "dreyeck/clog-tutorial/reading"
-    "dreyeck/fedwiki-config/reading" "dreyeck/fedwiki-original-editor-demo" "dreyeck/fedwiki-source-relations"
+    "dreyeck/ccnx-federated-wiki" "dreyeck/fedwiki-config/reading" "dreyeck/fedwiki-original-editor-demo" "dreyeck/fedwiki-source-relations"
     "dreyeck/gesture/reading"
     "dreyeck/lisp-critic/reading" "dreyeck/lisp-image" "dreyeck/mech-intake/reading"
     "dreyeck/nested-actions/reading" "dreyeck/topicmap/tala/reading" "dreyeck/traverse/reading"
@@ -251,6 +251,7 @@ that were not admitted. All three are NIL for the admitted Catalog."
                              "(uiop:symbol-call :dreyeck/lisp-critic/reading/tests :check-under-catalog-runtime)"
                              "(format t \"Fresh Dreyeck catalog startup tests passed.~%\")"
                              (closed-membership-evaluation)
+                             "(let ((book (hyperbook:find-hyperbook \"dreyeck/ccnx-federated-wiki\" :signal-error? t))) (hyperdoc::ensure-pages-loaded book) (assert (string= \"Reading the CCNx Federated Wiki\" (hyperbook:main-page-id-of book))) (assert (hyperbook:find-page book \"Reading the CCNx Federated Wiki\" :signal-error? t)))"
                              "(PROGN
  (ASSERT (NULL (FIND-PACKAGE :DREYECK/WORKFLOW/AUTHORING)))
  (ASSERT (NULL (FIND-PACKAGE :DREYECK/WORK/AUTHORING)))
