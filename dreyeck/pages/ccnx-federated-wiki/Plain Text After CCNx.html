@@ -18,28 +18,59 @@ Taking pages out of a stored browser profile was not tried.</li>
 <li><strong>The server of the repository</strong> stores pages as flat JSON files (<code>server/express/lib/page.coffee</code>), but the CCNx client does not use it.</li>
 </ul>
 
-<h2>What would survive adoption</h2>
+<h2>What would survive adoption: three questions, kept apart</h2>
 
 <p>
-The table compares the CCNx record of the example page (form B) with a page of today's Federated Wiki and with what HyperDoc reads.
+&ldquo;Survives&rdquo; says three different things, and a yes to one is not a yes to the next. The example is derived from the cited rules; neither historical runtime was run, so none of this is
+an observation of how a CCNx browser behaved.
+</p>
+
+<h3>1. JSON readability and the Story Item structure</h3>
+
+<p>
+<em>Is the data still JSON, and is the page's structure still there?</em> <strong>Yes, for the page.</strong> The record is the Smallest Federated Wiki page plus four fields. Title, items in order with their
+<code>id</code>, <code>type</code> and <code>text</code>, and the journal with its actions are all present and unchanged, including the item ids. The record opens as an ordinary local page with the existing reader:
+<a expr="(example-page :ccnx-record)">open it</a>. The four added fields (<code>page</code>, <code>excludes</code>, <code>favicon</code>, <code>version</code>) are not needed to read the page.
+This says nothing yet about what the fields mean.
+</p>
+
+<h3>2. Semantic compatibility</h3>
+
+<p>
+<em>Does the record mean today what it meant then?</em> <strong>Partly, and only the page content.</strong> The original Federated Wiki client and server were not given the record, so acceptance by them is not tested.
 </p>
 
 <table class="inspector-table">
-<tr><th>Information</th><th>In the CCNx record</th><th>Today / in HyperDoc</th></tr>
-<tr><td>title, items (id, type, text), journal (type, id, date, item, after)</td><td>present, in the unchanged Smallest Federated Wiki vocabulary</td><td><strong>kept.</strong> The record opens as an ordinary local page with the existing reader: <a expr="(example-page :ccnx-record)">open it</a>.</td></tr>
-<tr><td><code>version</code></td><td>date of the last journal action</td><td>derivable from the journal; not needed</td></tr>
-<tr><td><code>excludes</code></td><td>journal dates since the last fork</td><td>derivable from the journal by the rule on <a page="Identity, Versions and Signatures">Identity, Versions and Signatures</a>; not needed</td></tr>
-<tr><td><code>page</code></td><td>slug plus <code>.json</code></td><td>derivable from the title</td></tr>
-<tr><td><code>favicon</code></td><td>a data URL, random per browser</td><td>kept as an extra field and ignored by the readers used here. <strong>It is not a site name.</strong></td></tr>
-<tr><td><code>fork</code> actions</td><td><code>site</code> is a favicon data URL</td><td>today <code>site</code> is a host name: <strong>the origin cannot be located</strong>, only compared by image</td></tr>
-<tr><td>NDN name</td><td><code>/wiki/page/&lt;slug&gt;.json/&lt;version&gt;</code></td><td><strong>no counterpart.</strong> It can be derived from slug and version, but it never named a site.</td></tr>
-<tr><td>publisher digest, key locator</td><td>the same for every page</td><td><strong>no information</strong></td></tr>
-<tr><td>signature</td><td>never stored</td><td><strong>absent</strong></td></tr>
+<tr><th>Aspect</th><th>Same meaning today?</th></tr>
+<tr><td>story items and their types; journal action types, <code>id</code>, <code>after</code></td><td><strong>Same.</strong> The vocabulary is unchanged, and the example's story is checked to equal the replay of its journal.</td></tr>
+<tr><td>journal <code>date</code></td><td>The same field, but a <strong>claim</strong>: the editing browser's own clock, unauthenticated, as in any Federated Wiki page.</td></tr>
+<tr><td><code>version</code></td><td><strong>Different.</strong> In the CCNx code it is a store key and part of the NDN name; it is not a field of today's page. It is also <strong>not a content identity</strong>: see
+<a page="Identity, Versions and Signatures">Identity, Versions and Signatures</a>.</td></tr>
+<tr><td><code>excludes</code></td><td>Meaningful only inside the CCNx store, where it lists the keys to delete. It can be derived from the journal; it has no use elsewhere.</td></tr>
+<tr><td><code>fork</code> action, <code>site</code></td><td><strong>Different.</strong> Today it names a host. Here it holds an image, and a reader that follows it as a host finds nothing.</td></tr>
+<tr><td><code>favicon</code></td><td><strong>Different.</strong> A site's favicon belongs to a host; here it is a per-browser random image standing for an identity.</td></tr>
+</table>
+
+<h3>3. Preserved and lost provenance</h3>
+
+<p>
+<em>Who made this, where did it come from, and how can one tell?</em> <strong>Mostly lost.</strong>
+</p>
+
+<table class="inspector-table">
+<tr><th>Provenance information</th><th>In the CCNx data</th><th>After adoption</th></tr>
+<tr><td>item ids; journal actions with their dates</td><td>in the page</td><td><strong>preserved</strong>, as claims</td></tr>
+<tr><td>which line a copy forked from</td><td><code>fork</code> action, <code>site</code> = a favicon data URL</td><td><strong>value preserved, meaning lost</strong>: comparable only by image; no host to go to</td></tr>
+<tr><td>who edited</td><td>nothing but the browser's favicon image</td><td><strong>no identity</strong>: the image is random and has no registry</td></tr>
+<tr><td>the NDN name</td><td><code>/wiki/page/&lt;slug&gt;.json/&lt;version&gt;</code>, no site in it</td><td><strong>derivable, but it never named a site</strong></td></tr>
+<tr><td>publisher digest, key locator</td><td>in each NDN object, the same for every page</td><td><strong>in no stored record</strong>, and it carried no identity (one shared key)</td></tr>
+<tr><td>signature</td><td>on the wire only</td><td><strong>gone</strong>, and its verdict was not decisive</td></tr>
+<tr><td>NDN timestamp</td><td>in the object, the time it was made</td><td><strong>gone</strong>; not a date of the page</td></tr>
 </table>
 
 <p>
-Taking the example from form A to form B and back loses nothing of the page, and the example page of each form shows the same two paragraphs in the Story view:
-<a expr="(example-page :sfw)">form A</a>, <a expr="(example-page :ccnx-record)">form B</a>.
+The page's <em>content</em> history survives completely, in its journal. Its <em>provenance</em>, who and from where, was thin to begin with and does not survive in a usable form. The example page of each form shows the same two paragraphs in the
+Story view: <a expr="(example-page :sfw)">form A</a>, <a expr="(example-page :ccnx-record)">form B</a>.
 </p>
 
 <h2>Historical and present side by side</h2>

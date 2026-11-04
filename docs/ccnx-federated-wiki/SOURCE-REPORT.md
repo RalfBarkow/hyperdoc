@@ -10,6 +10,8 @@ Result of a read-only source review. The HyperDoc reading `dreyeck/ccnx-federate
   is a statement about what the cited lines say, not about observed runtime behaviour.
 * **Status labels.** **[I] implemented**: the cited source does this. **[D] documented**: a README or comment says it; the
   source may or may not agree. **[H] hypothesis / open**: not established by what was read.
+* **A reading of source is not an execution of the historical runtime.** That stays true wherever this report says "implemented". The browser checks listed at the end exercise HyperDoc's reading of
+  this material in the Catalog and the Inspector; they never exercise CCNx or NDN.
 * **Nothing about the project's later fate is claimed.** Each repository was fetched as a single commit (`--depth=1`
   of the cited revision). No history, issue, release or deployment was read, so nothing here says why either repository
   stopped changing, or whether it did.
@@ -72,7 +74,7 @@ and the **Prototype** as `P`: `https://github.com/rynomad/CCNx-Federated-Wiki-Pr
 | **Main** [I] | `/wiki/page/<slug>.json/<version>`; the Interest is `/wiki/page/<slug>.json`, optionally with a version component; `<version>` is the page's last journal date in milliseconds | `interfaces.coffee` L19, L28-L50; `repository.coffee` L198 |
 | **Prototype** [I] | `/sfw/<slug>/<timestamp>`; `<timestamp>` is the millisecond field of the `SignedInfo` created at publication, **not** a journal date | `pageHandler.coffee` L126-L133 |
 
-**The host is not in the Main name.** `registerFace` computes a prefix from the host name (L57-L61) and then **assigns the constant `"wiki"`** to `hostPrefix` ([`interfaces.coffee` L62](https://github.com/rynomad/CCNx-Federated-Wiki/blob/8426dc5cd326fa0d395d5bef2f73b8be33e34a8e/client/lib/interfaces.coffee#L62)). Every site registers the same prefix. [I]
+**A name is a slug and a claimed date, not a content identity** (section 4, "`version` is not a content identity"). **The host is not in the Main name.** `registerFace` computes a prefix from the host name (L57-L61) and then **assigns the constant `"wiki"`** to `hostPrefix` ([`interfaces.coffee` L62](https://github.com/rynomad/CCNx-Federated-Wiki/blob/8426dc5cd326fa0d395d5bef2f73b8be33e34a8e/client/lib/interfaces.coffee#L62)). Every site registers the same prefix. [I]
 
 ## 4. Versions and forks
 
@@ -84,6 +86,18 @@ and the **Prototype** as `P`: `https://github.com/rynomad/CCNx-Federated-Wiki-Pr
 * **Twins.** `emitTwins` reads all records of a slug and sorts them as newer, same or older than the version being viewed by `version`, and shows each twin by its `favicon` (`refresh.coffee` L112-L141). The [`revision.coffee`](https://github.com/rynomad/CCNx-Federated-Wiki/blob/8426dc5cd326fa0d395d5bef2f73b8be33e34a8e/client/lib/revision.coffee) module can rebuild an earlier page state from the journal alone. [I]
 
 **Prototype [I].** `version` is the publication timestamp. The store keeps one record per slug (overwritten). `fork` is added to the journal by `pushToLocal` and `put` (`pageHandler.coffee` L105-L107, L253-L266); twins are stored apart (above).
+
+### `version` is not a content identity
+
+`version = date of the last journal action` is a **claimed time, not an identity of the content**. Nothing in the code derives it from the content or checks it against the content.
+
+* **[I]** The date is the editing browser's own clock, taken when the action is made (`action.date = (new Date()).getTime()`, [`pageHandler.coffee` L143](https://github.com/rynomad/CCNx-Federated-Wiki/blob/8426dc5cd326fa0d395d5bef2f73b8be33e34a8e/client/lib/pageHandler.coffee#L143)). It is unauthenticated and need not be unique or increasing.
+* **[I]** `version` is the **key** of the store `page/<slug>.json` (key path `version`, [`repository.coffee` L152-L157](https://github.com/rynomad/CCNx-Federated-Wiki/blob/8426dc5cd326fa0d395d5bef2f73b8be33e34a8e/client/lib/repository.coffee#L152-L157)). A record with the same slug and the same `version` therefore *replaces* the stored one.
+* **[A, derived; not run]** Two different pages of the same slug whose last action carries the same date have the same version and the same NDN name; the later write replaces the earlier in the store. Two copies with identical content can carry different versions (for example after a different final `fork` action). The number orders copies by their claimed time; it does not say whether two copies are equal.
+* **[I]** The only check against content that exists in the path is the optional digest component of a name, which `ContentClosure` compares only when present, logs on mismatch, and does after the page has been handed on ([`ndn-closures.js` L133-L149](https://github.com/rynomad/CCNx-Federated-Wiki/blob/8426dc5cd326fa0d395d5bef2f73b8be33e34a8e/client/js/ndn-closures.js#L133-L149)); the names these clients make carry no such digest.
+* **[I]** A signature does cover the content (section 6), but under one shared key and without a decisive check; it therefore does not turn `version` into a content identity either.
+
+In the Prototype `version` is the publication timestamp of the signed info (`pageHandler.coffee` L126, L139): equally a clock reading, equally no content identity.
 
 ## 5. Where are site identity and publisher identity kept?
 
@@ -117,21 +131,53 @@ and the **Prototype** as `P`: `https://github.com/rynomad/CCNx-Federated-Wiki-Pr
 * **Data files in the repositories. Yes [observed].** `default-data/pages/welcome-visitors` and `how-to-wiki` are plain Smallest Federated Wiki JSON files in both repositories, byte-identical between them (`welcome-visitors` SHA-256 prefix `78c5087a9e4bd1ac`), 7 story items and 30 journal actions for `welcome-visitors`; they read with any JSON parser. They carry none of the CCNx fields.
 * **The CCNx representation. In principle [I/H].** The payload of a Content Object is JSON text, but it sits in a binary `ccnb` element together with signature, name and signed info; reading it needs a `ccnb` decoder. The IndexedDB records are JSON-like objects inside the browser profile, not files. **Neither client has an export to a file** (no `Blob`, `createObjectURL`, `saveAs` or download call in the `.coffee` sources of `client/lib`, `client/` and the plugins). [H] Extraction from a stored browser profile was not tried.
 
-## 8. What would survive adoption by today's Federated Wiki or HyperDoc?
+## 8. What would survive adoption? Three questions, kept apart
 
-The example below is **derived** by applying the cited rules; neither runtime was run.
+"Survives" says three different things. They are separate here, and a yes to one is not a yes to the next. The example is **derived** by applying the cited rules; neither runtime was run.
 
-| Information | In the CCNx record | Today's page JSON / HyperDoc |
+### 8.1 JSON readability and preserved Story Item structure
+
+*Is the data still JSON, and is the page's structure still there?* **Yes, for the page. [I for the record; checked by the tests for HyperDoc's reader.]**
+
+| Information | In the CCNx record | Preserved? |
 |---|---|---|
-| title, story items (id, type, text), journal (type, id, date, item, after) | present, unchanged SFW vocabulary | **kept**: the CCNx record reads as an ordinary local page with the existing `dreyeck/local-fedwiki-page` (checked by the tests of this reading) |
-| `version` | last journal date | derivable from the journal; not needed |
-| `excludes` | journal dates since the last fork | derivable from the journal by the rule in section 4 [A]; not needed |
-| `page` | slug + `.json` | derivable from the title |
-| `favicon` | data URL, random per browser | an extra field; ignored by the readers used here; **not a site name** |
-| `fork` actions | `site` = a favicon data URL | today `site` is a host name: **the origin cannot be located**, only compared by image |
-| NDN name | `/wiki/page/<slug>.json/<version>` (no site) | **no counterpart**; derivable from slug and version, but it never named a site |
-| publisher digest, key locator | constant, same for all pages | **no information** |
-| signature | never stored | **absent** |
+| `title` | present | yes |
+| `story`: items with `id`, `type`, `text` in order | present, unchanged | **yes**, including the item ids |
+| `journal`: actions with `type`, `id`, `date`, `item`, `after` | present, unchanged | **yes** |
+| `page`, `excludes`, `favicon`, `version` | four extra fields | present as JSON; **not needed to read the page** |
+
+A parser that reads the Smallest Federated Wiki page format reads the record, and `dreyeck/local-fedwiki-page` does (test). This says nothing yet about what the fields *mean*.
+
+### 8.2 Semantic compatibility
+
+*Does the record mean today what it meant then?* **Partly, and only the page content. [A, derived; the original Federated Wiki client and server were not given the record.]**
+
+| Aspect | Same meaning today? |
+|---|---|
+| story items and their types | **Same**, the vocabulary is unchanged; the example is checked to equal the replay of its journal (`revision.coffee` replays the same action types) |
+| journal action types and `after`/`id` | **Same** |
+| journal `date` | the same field, but as a **claim**: it is the editing browser's clock (`pageHandler.coffee` L143, `action.date = (new Date()).getTime()`), unauthenticated, as in any Federated Wiki page |
+| `version` | **Different.** In the CCNx code it is a *store key and part of the NDN name*; it is not a field of today's page. See "`version` is not a content identity" in section 4. |
+| `excludes` | **Meaningful only inside the CCNx store** (it lists keys to delete); derivable from the journal [A] but has no use elsewhere |
+| `fork` action `site` | **Different.** Today it names a host; here it holds an image. A reader that tries to follow it as a host gets nothing meaningful. |
+| `favicon` | **Different.** Today a favicon belongs to a site served at a host; here it is a per-browser random image that stands for an identity. |
+| acceptance of the record by the original client/server | **Not tested [H]** |
+
+### 8.3 Preserved and lost provenance
+
+*Who made this, where did it come from, and how do I know?* **Mostly lost. [I]**
+
+| Provenance information | In the CCNx data | After adoption |
+|---|---|---|
+| item ids and journal actions with their dates | in the page | **preserved** (as claims) |
+| which line a copy forked from | `fork` action, `site` = favicon data URL | **value preserved, meaning lost**: only comparable by image; no host to go to |
+| who edited | nothing but the browser's favicon image | **no identity**; the image is random and has no registry |
+| the NDN name | `/wiki/page/<slug>.json/<version>`, no site | **derivable, never named a site** |
+| the publisher digest, the key locator | in each Content Object, the same for all pages | **in no stored record**; and it carried no identity (one shared key) |
+| the signature | on the wire only | **gone**; and its verdict was not decisive (section 6) |
+| the NDN timestamp | in the Content Object, the time it was made | **gone**; not a date of the page |
+
+The page's *content* history survives completely in its journal. Its *provenance*, who and from where, was thin to begin with and does not survive in a usable form.
 
 ## 9. The running example
 
@@ -207,7 +253,8 @@ existing `<a expr>` link. The only Lisp is three small files (package, a 10-line
   `<a expr>` opens only `example-page`; every reference to either repository is a full-commit blob or tree link **to the reviewed commit of that repository**; no key material is quoted; the two example pages are
   consistent with the rules cited above (added fields, `version`, `excludes`, including the stop at a fork action) and open as ordinary local pages with the Story view; the reading is not a member of `dreyeck/catalog`.
   Two deliberate breakages were run and caught (a `blob/master/` link, a wiki link inside an example).
-* An ad-hoc browser check in a loopback Catalog (`HYPERDOC_CATALOG_SYSTEM`): the reading opens, the `<a expr>` link opens the example page object with its Story view ([screenshot](evidence/reading-in-catalog.png)),
-  no page error. The only external request was the Story view's favicon request for `ccnx-example.invalid`, which the test browser aborted. **Following an internal `<a page>` link was not exercised in the browser**
-  (the check script's selector failed); the link targets are covered by the test above.
-* The same reasons as for the review apply: nothing historical was run.
+* **Navigation in the real Catalog and Inspector** (`dreyeck/ccnx-federated-wiki/browser-check/`, run in the dev shell with Chromium 156): the reading opens; four internal `<a page>` links are followed in
+  turn (reading, then *One Page From Browser to NDN and Back*, *Identity, Versions and Signatures*, *Plain Text After CCNx* and back to the reading), each adds exactly one Inspector pane whose heading and a text of
+  the target page are asserted; an `<a expr>` link then opens the example page object with its Story view. No page error. The only external request was the Story view's favicon request for
+  `ccnx-example.invalid`, which the test browser aborted. Evidence: [navigation.json](evidence/navigation.json), [navigation.png](evidence/navigation.png). This checks HyperDoc's runtime, not CCNx.
+* Nothing historical was run. The unit test also checks that the example's story equals the replay of its journal under the rules of `revision.coffee`.

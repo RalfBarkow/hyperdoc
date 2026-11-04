@@ -40,6 +40,24 @@
           do (push (%get "date" action) dates))
     (nreverse dates)))
 
+(defun %replay (journal)
+  "The story the journal builds, by the rules of revision.coffee at the reviewed commit, for the action types the example uses: create, add (after an item id, else at the end), edit, remove."
+  (let ((story '()))
+    (loop for action across journal
+          for type = (%get "type" action)
+          do (cond ((equal type "create") (setf story (coerce (or (%get "story" (%get "item" action)) #()) 'list)))
+                   ((equal type "add")
+                    (let ((at (position (%get "after" action) story :key (lambda (item) (%get "id" item)) :test #'equal)))
+                      (if at
+                          (setf story (append (subseq story 0 (1+ at)) (list (%get "item" action)) (nthcdr (1+ at) story)))
+                          (setf story (append story (list (%get "item" action)))))))
+                   ((equal type "edit")
+                    (let ((at (position (%get "id" action) story :key (lambda (item) (%get "id" item)) :test #'equal)))
+                      (if at (setf (nth at story) (%get "item" action)) (setf story (append story (list (%get "item" action)))))))
+                   ((equal type "remove")
+                    (setf story (remove (%get "id" action) story :key (lambda (item) (%get "id" item)) :test #'equal)))))
+    (coerce story 'vector)))
+
 (defun %story-view-html (page)
   (let ((view (find "Story" (hv:all-views page) :key #'hv:view-title :test #'string=)))
     (assert view () "no Story view")
@@ -78,6 +96,24 @@
         (assert (<= (parse-integer from) (parse-integer to)) () "~S: reversed line range L~A-L~A" title from to))))
   t)
 
+(defun check-claims-kept-apart ()
+  "What the review of the reading asked for stays in the pages: the three kinds of survival are separate sections, and the version is said not to be a content identity."
+  (let ((after (%page-text "Plain Text After CCNx"))
+        (identity (%page-text "Identity, Versions and Signatures"))
+        (report (uiop:read-file-string (merge-pathnames "docs/ccnx-federated-wiki/SOURCE-REPORT.md" (%root)))))
+    (dolist (heading '("1. JSON readability and the Story Item structure" "2. Semantic compatibility" "3. Preserved and lost provenance"))
+      (assert (search (format nil "<h3>~A</h3>" heading) after) () "Plain Text After CCNx lacks the section ~S" heading))
+    (assert (search "not a content identity" identity))
+    (assert (search "claimed time" identity))
+    (assert (search "### `version` is not a content identity" report))
+    (assert (and (search "### 8.1 JSON readability" report) (search "### 8.2 Semantic compatibility" report)
+                 (search "### 8.3 Preserved and lost provenance" report)))
+    ;; a source reading is not a run: the pages and the report say so
+    (assert (search "Nothing was run" (%page-text "One Page From Browser to NDN and Back")))
+    (assert (search "No code of either repository was run" (%page-text "Reading the CCNx Federated Wiki")))
+    (assert (search "A reading of source is not an execution" report)))
+  t)
+
 (defun check-no-key-material ()
   "The embedded private key is not quoted anywhere in the reading or the report (a base64 private-key header, a PEM marker)."
   (dolist (file (append (mapcar (lambda (title) (merge-pathnames (format nil "~A.html" title) (%pages-directory))) +titles+)
@@ -96,6 +132,8 @@
       (loop for item across (%get "story" page)
             do (assert (not (search "[[" (%get "text" item))) () "an example item holds a wiki link")))
     (assert (= 2 (length (%get "story" sfw))))
+    ;; the story is what the journal says it is (the semantic claim the reading makes for the page content)
+    (assert (%json-equal (%get "story" sfw) (%replay journal)) () "the story is not the replay of the journal")
     (assert (= 5 (length journal)))
     (assert (equal '("create" "add" "add" "edit" "edit") (map 'list (lambda (a) (%get "type" a)) journal)))
     ;; the CCNx record is the same page plus exactly the four fields, with the values the cited rules give
@@ -129,6 +167,7 @@
   (check-loads)
   (check-links)
   (check-no-key-material)
+  (check-claims-kept-apart)
   (check-example-pages)
   (check-pages-open-as-ordinary-local-pages)
   (format t "~&CCNX-FEDERATED-WIKI-PASS: the reading and its four pages load; links resolve and expressions open only the example pages; every reference to the two repositories is pinned to the reviewed commit; no key material is quoted; the example pages are consistent with the cited rules (version, excludes, added fields) and open as ordinary local pages with the existing Story view; it is not a member of dreyeck/catalog.~%")

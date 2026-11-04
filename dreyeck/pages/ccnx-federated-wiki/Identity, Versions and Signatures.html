@@ -35,6 +35,28 @@ Pages with the same slug and different versions live side by side in the store. 
 (<a href="https://github.com/rynomad/CCNx-Federated-Wiki-Prototype/blob/c5b1b93c632ef9834a598406a25c20ad47bab26e/client/js/SDB.js#L284-L312">SDB.js L284&ndash;L312</a>).</li>
 </ul>
 
+<h3><code>version</code> is not a content identity</h3>
+
+<p>
+<code>version</code> is the date of the last journal action. That is a <strong>claimed time</strong>, not an identity of the content. Nothing in the code derives it from the content or checks it against the content.
+</p>
+
+<ul>
+<li><strong>Implemented.</strong> The date is the editing browser's own clock, taken when the action is made
+(<a href="https://github.com/rynomad/CCNx-Federated-Wiki/blob/8426dc5cd326fa0d395d5bef2f73b8be33e34a8e/client/lib/pageHandler.coffee#L143">pageHandler.coffee L143</a>). It is unauthenticated and need not be unique or increasing.</li>
+<li><strong>Implemented.</strong> <code>version</code> is the <em>key</em> of the store <code>page/&lt;slug&gt;.json</code>
+(<a href="https://github.com/rynomad/CCNx-Federated-Wiki/blob/8426dc5cd326fa0d395d5bef2f73b8be33e34a8e/client/lib/repository.coffee#L152-L157">repository.coffee L152&ndash;L157</a>), so a record with the same slug and the same version replaces the stored one.</li>
+<li><strong>Derived, not run.</strong> Two different pages with the same slug whose last action carries the same date have the same version and the same NDN name, and the later write replaces the earlier. Two copies with identical content can carry different versions.
+The number orders copies by their claimed time; it does not say whether two copies are equal.</li>
+<li><strong>Implemented.</strong> The only check against content on this path is an optional digest component of a name. It is compared only when present, only logged, and after the page has been handed on
+(<a href="https://github.com/rynomad/CCNx-Federated-Wiki/blob/8426dc5cd326fa0d395d5bef2f73b8be33e34a8e/client/js/ndn-closures.js#L133-L149">ndn-closures.js L133&ndash;L149</a>); the names these clients make carry none.</li>
+<li><strong>Implemented.</strong> A signature does cover the content, but under one shared key and without a decisive check (below). It does not turn the version into a content identity either.</li>
+</ul>
+
+<p>
+In the Prototype the version is the publication timestamp, equally a clock reading and equally no content identity.
+</p>
+
 <h2>Forks</h2>
 
 <p>

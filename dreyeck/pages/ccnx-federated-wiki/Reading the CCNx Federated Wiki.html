@@ -72,16 +72,17 @@ repository. The pages here are derived from it.
 <li><strong>How does the NDN name arise?</strong> Main: <code>/wiki/page/&lt;slug&gt;.json/&lt;version&gt;</code>. The code computes a prefix from the host name and then overwrites it with the
 constant <code>wiki</code>, so <strong>no site is in the name</strong>. Prototype: <code>/sfw/&lt;slug&gt;/&lt;timestamp&gt;</code>.
 <em>(Implemented; see <a page="Identity, Versions and Signatures">Identity, Versions and Signatures</a>.)</em></li>
-<li><strong>How are versions and forks represented?</strong> The version is the date of the last journal action. A fork is a journal action whose <code>site</code> is a
-<strong>favicon image</strong>, not a host name. <code>excludes</code> lists the journal dates since the last fork. <em>(Implemented.)</em></li>
+<li><strong>How are versions and forks represented?</strong> The version is the date of the last journal action: a <strong>claimed time, not a content identity</strong>, and it is the store key, so equal
+slug and version replace each other. A fork is a journal action whose <code>site</code> is a <strong>favicon image</strong>, not a host name. <code>excludes</code> lists the journal dates since the last fork. <em>(Implemented.)</em></li>
 <li><strong>Where are site and publisher identity?</strong> The site is a random favicon, drawn in the browser. The publisher in every NDN object is the digest of
 <strong>one RSA key written into the source of the library</strong>, the same in both repositories. <em>(Implemented.)</em></li>
 <li><strong>Which signatures are made, and which are checked?</strong> Every object is signed with that one key. The verification code does run, but for a key carried in the object it
 raises &ldquo;verified&rdquo; whatever the result. Signatures are not stored. <em>(Implemented, by the source; not run.)</em></li>
 <li><strong>Can the content be read as a JSON file without the historical runtime?</strong> The repositories' own data files, yes. The CCNx forms, only with a browser profile or a
 <code>ccnb</code> decoder; neither client can export a page to a file. <em>(Implemented; extraction not tried.)</em></li>
-<li><strong>What would survive adoption today?</strong> The page itself, completely: title, items with ids, journal. The name, the publisher, the signature and the origin of a fork would not.
-See <a page="Plain Text After CCNx">Plain Text After CCNx</a>.</li>
+<li><strong>What would survive adoption today?</strong> Three different things, kept apart on <a page="Plain Text After CCNx">Plain Text After CCNx</a>. <em>JSON and Story Item structure:</em> kept completely, including item ids.
+<em>Semantic compatibility:</em> partly; the page content means the same, but <code>version</code>, <code>excludes</code>, the <code>site</code> of a fork and the favicon do not. <em>Provenance:</em> mostly lost; the name,
+the publisher, the signature and the origin of a fork do not survive in a usable form.</li>
 </ol>
 
 <h2>Look at the example page</h2>
