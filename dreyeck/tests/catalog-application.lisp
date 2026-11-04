@@ -47,13 +47,15 @@
   (assert (hyperbook:find-hyperbook "dreyeck/authority/reading"))
   (assert (hyperbook:find-hyperbook "dreyeck/clog-tutorial/reading"))
   (assert (hyperbook:find-hyperbook "dreyeck/nested-actions/reading"))
-  ;; Function, not admission: every admitted HyperBook is materialized, each
-  ;; once. Which books are admitted is checked as a closed set by the fresh
-  ;; Catalog startup test; here a further registered book is no failure.
-  (let ((problems (dreyeck/catalog/tests:admitted-membership-problems
-                   (dreyeck/catalog/tests:catalog-hyperbook-ids))))
+  ;; Function, not admission: every declared HyperBook is materialized, each
+  ;; once. What is declared is derived from dreyeck/catalog's ASDF closure and
+  ;; the sources of its systems (dreyeck/catalog/membership); the closed
+  ;; comparison is made by the Catalog startup test, and a further registered
+  ;; book is no failure here.
+  (let ((problems (dreyeck/catalog/membership:membership-report)))
     (assert (null (getf problems :missing)))
-    (assert (null (getf problems :duplicated))))
+    (assert (null (getf problems :duplicated)))
+    (assert (null (getf problems :wrong-system))))
   (assert (null (find-package :dreyeck/workflow/authoring)))
   (let* ((hyperbook:*catalog* (make-instance 'hyperbook:catalog))
          (observed
@@ -129,25 +131,30 @@
 
 (defun check-start-with-another-hyperbook ()
   "A further, properly registered HyperBook extends the Catalog; it does not
-make the checks of what the Catalog does fail. The admission check, given
-the same ids, names exactly that book: the extension is visible, only
-judged elsewhere."
+make the checks of what the Catalog does fail. Every member that was there
+stays, once, as the same object; the membership report names the extension
+as the one book that no source declares, and nothing else."
   ;; An id without a scheme: FIND-HYPERBOOK would hand an absent "fedwiki:" id
   ;; to that scheme's factory, which registers a remote wiki for it.
   (let ((before (copy-list (hyperbook:hyperbooks-of hyperbook:*catalog*)))
         (id "dreyeck/catalog-extension-test"))
     (assert (not (member id (dreyeck/catalog/tests:catalog-hyperbook-ids) :test #'string=)))
     (unwind-protect
-         (let ((book (dreyeck/local-fedwiki-page:register-local-fedwiki
-                      (dreyeck/local-fedwiki-view/tests::fixture-site-root) id)))
+         (let ((book nil))
+           (let ((added (dreyeck/catalog/membership:assert-additive
+                         :loader (lambda ()
+                                   (setf book (dreyeck/local-fedwiki-page:register-local-fedwiki
+                                               (dreyeck/local-fedwiki-view/tests::fixture-site-root) id))))))
+             (assert (member id added :test #'string=)))
            (assert (eq book (hyperbook:find-hyperbook id)))
            ;; Other registered books may already be present (starting the
-           ;; Catalog registers its local wiki); this one is now among the extras.
-           (let ((problems (dreyeck/catalog/tests:admitted-membership-problems
-                            (dreyeck/catalog/tests:catalog-hyperbook-ids))))
-             (assert (member id (getf problems :extra) :test #'string=))
+           ;; Catalog registers its local wiki); this one is now among those
+           ;; that no source declares.
+           (let ((problems (dreyeck/catalog/membership:membership-report)))
+             (assert (member id (getf problems :unattributed) :test #'string=))
              (assert (null (getf problems :missing)))
-             (assert (null (getf problems :duplicated))))
+             (assert (null (getf problems :duplicated)))
+             (assert (null (getf problems :wrong-system))))
            (check-start))
       (setf (hyperbook:hyperbooks-of hyperbook:*catalog*) before))
     (assert (equal before (hyperbook:hyperbooks-of hyperbook:*catalog*)))))

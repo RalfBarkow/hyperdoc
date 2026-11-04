@@ -101,6 +101,10 @@ is an operator decision (D2, D3) and none is made here.
 - `tests/fedwiki-original-editor/{run,commands}.mjs` set `HYPERDOC_FEDWIKI_EDITOR_TEST_MODE=isolated-loopback`;
   `serve.lisp` asserts the demo is in the Catalog once, before and after the additive `:catalog-system`, and that the
   mode is the editor mode (so a browser run cannot silently test the read-only page).
+> **Later change (PR #25):** the script described here was renamed `scripts/check-catalog-membership.lisp` and no longer compares with the
+> 23 ids of `19e824d`; membership is derived from the product's declaration (`dreyeck/CATALOG-OPERATIONS.md`). The paragraph below records what
+> the script did when this evidence was made.
+
 - `nix/catalog-check.nix` runs the demo's test system and `scripts/check-editor-demo-membership.lisp` twice: with no further
   system, and with `HYPERDOC_CATALOG_SYSTEM=dreyeck/work/topic-maps-ctm-review`. The script compares against the 23 ids
   admitted at `19e824d`, frozen in the script, and requires each once, the demo once, nothing else by default, nothing

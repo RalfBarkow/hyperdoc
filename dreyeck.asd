@@ -1129,7 +1129,7 @@
   :SERIAL
   T
   :DEPENDS-ON
-  (#:UIOP #:DREYECK/CATALOG)
+  (#:UIOP #:DREYECK/CATALOG #:DREYECK/CATALOG/MEMBERSHIP/TESTS)
   :COMPONENTS
   ((:FILE "catalog-startup-smoke"))
   :PERFORM
@@ -3575,3 +3575,20 @@
   :perform (test-op (op component)
              (declare (ignore op component))
              (uiop:symbol-call :dreyeck/ccnx-federated-wiki/tests :run-tests)))
+
+(asdf:defsystem "dreyeck/catalog/membership"
+  :description "Properties of the Catalog's membership, derived from the ASDF closure of dreyeck/catalog and the sources of its systems"
+  ;; The membership of the default Catalog is declared by DREYECK/CATALOG's :DEPENDS-ON and by each system's own DEFHYPERDOC.
+  ;; This library compares the materialized Catalog with that declaration; it holds no list of ids and no count.
+  :depends-on ("hyperbook" "hyperdoc" "cl-ppcre" "uiop")
+  :pathname "dreyeck/src/"
+  :components ((:file "catalog-membership")))
+
+(asdf:defsystem "dreyeck/catalog/membership/tests"
+  :description "Self-tests of the membership checkers with faulty input, and the properties of the real Catalog"
+  :depends-on ("dreyeck/catalog/membership" "dreyeck/catalog")
+  :pathname "dreyeck/tests/"
+  :components ((:file "catalog-membership"))
+  :perform (test-op (op component)
+             (declare (ignore op component))
+             (uiop:symbol-call :dreyeck/catalog/membership/tests :run-tests)))

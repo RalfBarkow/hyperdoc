@@ -243,9 +243,10 @@ The c2 page (data file `PowerOfPlainText`, 2014-11-26) states the assertion: "st
 page files (`dreyeck/ccnx-federated-wiki/example-site/pages/`), hydrated by the existing `dreyeck/local-fedwiki-page` and shown by the existing Story view and Inspector; the pages open them with the
 existing `<a expr>` link. The only Lisp is three small files (package, a 10-line page loader, the registration).
 
-**Catalog membership.** `dreyeck/catalog` explicitly depends on `dreyeck/ccnx-federated-wiki`. Its ID is admitted in
-`dreyeck/tests/catalog-startup-smoke.lisp`, whose fresh-process test checks that the complete admitted set is present,
-with no duplicates or extra books, and that the main page opens. No `HYPERDOC_CATALOG_SYSTEM` override is needed.
+**Catalog membership.** `dreyeck/catalog` explicitly depends on `dreyeck/ccnx-federated-wiki`; that `:depends-on` entry and the system's own `defhyperdoc`
+are the declaration. No test keeps a list of ids or a count: `dreyeck/catalog/membership` derives what is declared from the ASDF closure of
+`dreyeck/catalog` and from the `defhyperdoc` forms in the sources of its systems, and checks that the Catalog has each declared book once with its main page, that no
+HyperDoc is present that no declaration names, that loading more only adds and loading again changes nothing. No `HYPERDOC_CATALOG_SYSTEM` override is needed.
 This describes the proposed repository revision; deploying it to dreyeck.ch remains an operator decision.
 
 ### Verification run for this branch

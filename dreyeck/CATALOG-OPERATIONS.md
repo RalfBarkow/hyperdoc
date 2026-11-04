@@ -125,15 +125,32 @@ editor exists only in the isolated loopback test. The Wiki-farm analysis, the op
 decisions and the operator steps are in
 [docs/fedwiki-original-editor-farm](../docs/fedwiki-original-editor-farm/README.md).
 
+## What declares Catalog membership
+
+The default Catalog is what loading `dreyeck/catalog` registers. Its `:depends-on` in `dreyeck.asd` names the systems; each system
+that carries a HyperBook defines it with `defhyperdoc` (`:id`, `:asdf-system-name`, `:main-page-id` in its own source), and loading the
+system registers it. Admitting or withdrawing a reading is one edit of that `:depends-on` list. No test holds a list of ids or a count.
+
+`dreyeck/catalog/membership` derives the expectation from ASDF and from those sources, and `dreyeck/catalog/membership/tests`,
+the Nix check (`scripts/check-catalog-membership.lisp`) and the Catalog startup smoke hold the materialized Catalog to it:
+every declared HyperDoc is present once, under its declared system and with its declared main page; no HyperDoc is present
+whose system is outside the closure or that no source declares; a book that is not a HyperDoc must have an `:id` that some source of
+the closure gives. Loading further systems only adds (every member stays, once, as the same object), loading again changes nothing,
+and registering a second book under an existing id keeps the first. The checkers are first given faulty input and must name it.
+
+Limits: a book added in the source of a closure system with a literal `:id` is a declaration, by this definition, and is accepted;
+a HyperDoc declared with a non-literal `:id` is reported as unscanned. Whether a book *should* be a member is the review of the
+`:depends-on` change, not a test.
+
 ## CCNx Federated Wiki reading
 
 `dreyeck/catalog` admits `dreyeck/ccnx-federated-wiki` as a read-only four-page
 HyperDoc. Its two example pages are local Federated Wiki JSON files rendered
 by the existing Story view; no historical CCNx/NDN runtime is loaded, and
-`HYPERDOC_CATALOG_SYSTEM` is not needed for this reading. Membership and main-page
-availability are checked by the fresh-process test in
-`dreyeck/tests/catalog-startup-smoke.lisp`. This describes the packaged Catalog
-once the change is integrated; it does not attest to a deployment.
+`HYPERDOC_CATALOG_SYSTEM` is not needed for this reading. That it is present once
+with its declared main page is a property checked by the membership tests
+above. This describes the packaged Catalog once the change is integrated; it
+does not attest to a deployment.
 
 ## Not verified
 

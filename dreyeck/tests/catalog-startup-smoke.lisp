@@ -1,8 +1,7 @@
 
 (DEFPACKAGE #:DREYECK/CATALOG/TESTS
   (:USE #:CL)
-  (:EXPORT #:RUN-CATALOG-STARTUP-SMOKE-TESTS
-           #:+ADMITTED-HYPERBOOK-IDS+ #:CATALOG-HYPERBOOK-IDS #:ADMITTED-MEMBERSHIP-PROBLEMS))
+  (:EXPORT #:RUN-CATALOG-STARTUP-SMOKE-TESTS #:CATALOG-HYPERBOOK-IDS))
 
 (IN-PACKAGE #:DREYECK/CATALOG/TESTS)
 
@@ -10,39 +9,13 @@
   (UNLESS CONDITION
     (ERROR (APPLY #'FORMAT NIL FORMAT-CONTROL FORMAT-ARGUMENTS))))
 
-;;; Catalog membership is a decision, and these are its terms. Loading
-;;; dreyeck/catalog admits exactly these HyperBooks; admitting or withdrawing
-;;; one changes this list and nothing else. Only the fresh-process check below
-;;; holds the Catalog to it as a closed set. Tests of what the Catalog does
-;;; ask whether these books are present, once each, and tolerate others.
-
-(defparameter +admitted-hyperbook-ids+
-  '("asdf-systems" "dreyeck/authority/reading" "dreyeck/clog-tutorial/reading"
-    "dreyeck/ccnx-federated-wiki" "dreyeck/fedwiki-config/reading" "dreyeck/fedwiki-original-editor-demo" "dreyeck/fedwiki-source-relations"
-    "dreyeck/gesture/reading"
-    "dreyeck/lisp-critic/reading" "dreyeck/lisp-image" "dreyeck/mech-intake/reading"
-    "dreyeck/nested-actions/reading" "dreyeck/topicmap/tala/reading" "dreyeck/traverse/reading"
-    "dreyeck/upstream-intake" "dreyeck/upstream-intake/temporal" "dreyeck/wiki-link"
-    "dreyeck/work/reading" "dreyeck/workflow/reading" "hyperbook" "hyperdoc" "hyperdoc/explorer"
-    "lisp-classes" "lisp-functions" "moldable-inspector"))
+;;; Catalog membership is a product decision, declared where the product is: DREYECK/CATALOG's :DEPENDS-ON in dreyeck.asd, and each
+;;; system's own DEFHYPERDOC. No list of ids and no count is kept here. dreyeck/catalog/membership derives what is declared from ASDF and
+;;; from those sources and holds the materialized Catalog to it (all of it present, once, with its main page; nothing in it that no declaration
+;;; names); its self-tests show that the checkers detect missing, doubled and foreign books and loads that remove or replace members.
 
 (defun catalog-hyperbook-ids (&optional (catalog hyperbook:*catalog*))
   (mapcar #'hyperbook:id-of (hyperbook:hyperbooks-of catalog)))
-
-(defun admitted-membership-problems (ids)
-  "How IDS, a Catalog's HyperBook ids, differ from the admitted set: a plist of
-:MISSING admitted ids, :DUPLICATED ids that occur more than once and :EXTRA ids
-that were not admitted. All three are NIL for the admitted Catalog."
-  (list :missing (remove-if (lambda (id) (member id ids :test #'string=)) +admitted-hyperbook-ids+)
-        :duplicated (remove-duplicates (remove-if (lambda (id) (= 1 (count id ids :test #'string=))) ids)
-                                       :test #'string=)
-        :extra (remove-if (lambda (id) (member id +admitted-hyperbook-ids+ :test #'string=)) ids)))
-
-(defun closed-membership-evaluation ()
-  "A fresh-process form: the loaded Catalog is the admitted set, each book once."
-  (let ((*print-pretty* nil))
-    (format nil "(let* ((ids (mapcar #'hyperbook:id-of (hyperbook:hyperbooks-of hyperbook:*catalog*))) (expected '~S)) (unless (and (= (length ids) (length (remove-duplicates ids :test #'string=))) (equal (sort (copy-list ids) #'string<) expected)) (error \"Catalog membership is not the admitted set: missing ~~S, extra ~~S\" (set-difference expected ids :test #'string=) (set-difference ids expected :test #'string=))) (format t \"ADMITTED-CATALOG-PROOF: ~~D admitted HyperBooks, each once, no other.~~%\" (length ids)))"
-            (sort (copy-list +admitted-hyperbook-ids+) #'string<))))
 
 (DEFUN DREYECK-ASD-PATHNAME ()
   (TRUENAME
@@ -250,8 +223,8 @@ that were not admitted. All three are NIL for the admitted Catalog."
                              "(asdf:load-system \"dreyeck/lisp-critic/reading/tests\")"
                              "(uiop:symbol-call :dreyeck/lisp-critic/reading/tests :check-under-catalog-runtime)"
                              "(format t \"Fresh Dreyeck catalog startup tests passed.~%\")"
-                             (closed-membership-evaluation)
-                             "(let ((book (hyperbook:find-hyperbook \"dreyeck/ccnx-federated-wiki\" :signal-error? t))) (hyperdoc::ensure-pages-loaded book) (assert (string= \"Reading the CCNx Federated Wiki\" (hyperbook:main-page-id-of book))) (assert (hyperbook:find-page book \"Reading the CCNx Federated Wiki\" :signal-error? t)))"
+                             "(progn (asdf:load-system \"dreyeck/catalog/membership\") (uiop:symbol-call :dreyeck/catalog/membership :assert-membership :check-pages t) (format t \"CATALOG-MEMBERSHIP: what dreyeck/catalog and the sources of its systems declare is the Catalog, each book once with its main page.~%\"))"
+                             "(progn (assert (zerop (length (or (uiop:getenv \"HYPERDOC_CATALOG_SYSTEM\") \"\")))) (uiop:symbol-call :dreyeck/catalog/membership :assert-hyperbook-present \"dreyeck/ccnx-federated-wiki\") (format t \"CCNX-FEDERATED-WIKI-CATALOG-MEMBER: present once with its declared main page, without HYPERDOC_CATALOG_SYSTEM.~%\"))"
                              "(PROGN
  (ASSERT (NULL (FIND-PACKAGE :DREYECK/WORKFLOW/AUTHORING)))
  (ASSERT (NULL (FIND-PACKAGE :DREYECK/WORK/AUTHORING)))
@@ -295,8 +268,8 @@ that were not admitted. All three are NIL for the admitted Catalog."
        (HTML-INSPECTOR-VIEWS:VIEW-HTML VIEW)
        (ASSERT (NOTANY (LAMBDA (REF) (TYPEP (CDR REF) 'CONDITION))
                        (HTML-INSPECTOR-VIEWS:VIEW-REFERENCES VIEW))))))
- ;; Catalog membership stays a decision through +ADMITTED-HYPERBOOK-IDS+,
- ;; checked as a closed set just before this form, not through a total.
+ ;; Catalog membership is what dreyeck/catalog and its systems declare,
+ ;; checked as derived properties just before this form, not through a total.
  (ASSERT (HYPERBOOK:FIND-PAGE
           (HYPERBOOK:FIND-HYPERBOOK \"dreyeck/work/reading\" :SIGNAL-ERROR? T)
           \"Work Breakdown\" :SIGNAL-ERROR? T))
@@ -473,6 +446,7 @@ that were not admitted. All three are NIL for the admitted Catalog."
 
 (DEFUN RUN-CATALOG-STARTUP-SMOKE-TESTS ()
   (CHECK-RETIRED-DEMO-LAUNCHERS)
+  (UIOP/PACKAGE:SYMBOL-CALL :DREYECK/CATALOG/MEMBERSHIP/TESTS :RUN-TESTS)
   (VERIFY-FRESH-CATALOG-RECONSTRUCTION-SEQUENCE)
   (UIOP/RUN-PROGRAM:RUN-PROGRAM (FRESH-CATALOG-COMMAND) :DIRECTORY
                                 (REPOSITORY-DIRECTORY) :OUTPUT

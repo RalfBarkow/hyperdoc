@@ -78,7 +78,8 @@
 (defun check-membership ()
   "Admitted once, from the same tree as dreyeck and hyperbook; loading it again, as HYPERDOC_CATALOG_SYSTEM would, adds nothing."
   (flet ((count-in-catalog () (count +id+ (dreyeck/catalog/tests:catalog-hyperbook-ids) :test #'string=)))
-    (assert (member +id+ dreyeck/catalog/tests:+admitted-hyperbook-ids+ :test #'string=))
+    ;; Declared where the product declares membership: a DEFHYPERDOC of a system in dreyeck/catalog's ASDF closure.
+    (assert (find +id+ (dreyeck/catalog/membership:source-hyperdocs) :key (lambda (entry) (getf entry :id)) :test #'equal))
     (assert (= 1 (count-in-catalog)))
     (asdf:load-system +id+)
     (assert (= 1 (count-in-catalog)))
@@ -86,8 +87,7 @@
                     :test #'equal))
     (assert (equal (truename (asdf:system-source-directory "dreyeck"))
                    (truename (asdf:system-source-directory +id+))))
-    (assert (null (getf (dreyeck/catalog/tests:admitted-membership-problems (dreyeck/catalog/tests:catalog-hyperbook-ids))
-                        :duplicated))))
+    (assert (null (getf (dreyeck/catalog/membership:membership-report) :duplicated))))
   t)
 
 (defun check-unconfigured-page ()
