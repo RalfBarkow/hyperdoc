@@ -3610,3 +3610,21 @@
   :perform (test-op (op component)
              (declare (ignore op component))
              (uiop:symbol-call :dreyeck/lisp-critic/engine-integration/tests :run-page-station-layout-tests)))
+
+
+(defsystem "dreyeck/work/remote-control-planning"
+  :description "Optional plan-only mobile-control architecture experiment; no executor"
+  :depends-on ("dreyeck/shop3")
+  :components ((:file "dreyeck/work/remote-control-planning")))
+
+(defsystem "dreyeck/work/remote-control-planning/tests"
+  :depends-on ("dreyeck/work/remote-control-planning")
+  :components ((:file "dreyeck/tests/remote-control-planning"))
+  :perform (test-op (op component)
+             (declare (ignore op component))
+             (uiop:symbol-call :dreyeck/work/remote-control-planning :run-tests)))
+
+(defsystem "dreyeck/work/remote-control-planning/reading"
+  :description "Optional local Catalog reading; never part of production startup"
+  :depends-on ("dreyeck/work/remote-control-planning")
+  :components ((:file "dreyeck/work/remote-control-reading")))
