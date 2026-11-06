@@ -6,6 +6,7 @@
     {
       "key": "1-wide",
       "title": "Planning Remote Control for the Zettelkasten App with SHOP3",
+      "language": "en",
       "bodyWidth": 700,
       "scrollWidth": 700,
       "font": 16,
@@ -23,6 +24,7 @@
     {
       "key": "2-wide",
       "title": "Model Authority and the Control Surface",
+      "language": "en",
       "bodyWidth": 700,
       "scrollWidth": 700,
       "font": 16,
@@ -42,6 +44,7 @@
     {
       "key": "3-wide",
       "title": "How SHOP3 Reads the Architecture Task",
+      "language": "en",
       "bodyWidth": 700,
       "scrollWidth": 700,
       "font": 16,
@@ -59,6 +62,7 @@
     {
       "key": "4-wide",
       "title": "Case C - Two Alternative Plan Trees",
+      "language": "en",
       "bodyWidth": 700,
       "scrollWidth": 700,
       "font": 16,
@@ -76,6 +80,7 @@
     {
       "key": "5-wide",
       "title": "Cases D and E - When Planning Refuses",
+      "language": "en",
       "bodyWidth": 700,
       "scrollWidth": 700,
       "font": 16,
@@ -93,6 +98,7 @@
     {
       "key": "6-wide",
       "title": "Evidence and Open Acceptance",
+      "language": "en",
       "bodyWidth": 700,
       "scrollWidth": 700,
       "font": 16,
@@ -112,6 +118,7 @@
     {
       "key": "1-narrow",
       "title": "Planning Remote Control for the Zettelkasten App with SHOP3",
+      "language": "en",
       "bodyWidth": 360,
       "scrollWidth": 360,
       "font": 16,
@@ -129,6 +136,7 @@
     {
       "key": "2-narrow",
       "title": "Model Authority and the Control Surface",
+      "language": "en",
       "bodyWidth": 360,
       "scrollWidth": 360,
       "font": 16,
@@ -148,6 +156,7 @@
     {
       "key": "3-narrow",
       "title": "How SHOP3 Reads the Architecture Task",
+      "language": "en",
       "bodyWidth": 360,
       "scrollWidth": 360,
       "font": 16,
@@ -165,6 +174,7 @@
     {
       "key": "4-narrow",
       "title": "Case C - Two Alternative Plan Trees",
+      "language": "en",
       "bodyWidth": 360,
       "scrollWidth": 360,
       "font": 16,
@@ -182,6 +192,7 @@
     {
       "key": "5-narrow",
       "title": "Cases D and E - When Planning Refuses",
+      "language": "en",
       "bodyWidth": 360,
       "scrollWidth": 360,
       "font": 16,
@@ -199,6 +210,7 @@
     {
       "key": "6-narrow",
       "title": "Evidence and Open Acceptance",
+      "language": "en",
       "bodyWidth": 360,
       "scrollWidth": 360,
       "font": 16,
@@ -218,6 +230,11 @@
   ],
   "assertions": [
     {
+      "name": "reading language is English",
+      "ok": true,
+      "page": "1-wide"
+    },
+    {
       "name": "column has no horizontal overflow",
       "ok": true,
       "page": "1-wide"
@@ -251,6 +268,11 @@
       "name": "object/page references visibly marked",
       "ok": true,
       "page": "1-wide"
+    },
+    {
+      "name": "reading language is English",
+      "ok": true,
+      "page": "2-wide"
     },
     {
       "name": "column has no horizontal overflow",
@@ -288,6 +310,11 @@
       "page": "2-wide"
     },
     {
+      "name": "reading language is English",
+      "ok": true,
+      "page": "3-wide"
+    },
+    {
       "name": "column has no horizontal overflow",
       "ok": true,
       "page": "3-wide"
@@ -321,6 +348,11 @@
       "name": "object/page references visibly marked",
       "ok": true,
       "page": "3-wide"
+    },
+    {
+      "name": "reading language is English",
+      "ok": true,
+      "page": "4-wide"
     },
     {
       "name": "column has no horizontal overflow",
@@ -358,6 +390,11 @@
       "page": "4-wide"
     },
     {
+      "name": "reading language is English",
+      "ok": true,
+      "page": "5-wide"
+    },
+    {
       "name": "column has no horizontal overflow",
       "ok": true,
       "page": "5-wide"
@@ -391,6 +428,11 @@
       "name": "object/page references visibly marked",
       "ok": true,
       "page": "5-wide"
+    },
+    {
+      "name": "reading language is English",
+      "ok": true,
+      "page": "6-wide"
     },
     {
       "name": "column has no horizontal overflow",
@@ -428,6 +470,11 @@
       "page": "6-wide"
     },
     {
+      "name": "reading language is English",
+      "ok": true,
+      "page": "1-narrow"
+    },
+    {
       "name": "column has no horizontal overflow",
       "ok": true,
       "page": "1-narrow"
@@ -463,6 +510,11 @@
       "page": "1-narrow"
     },
     {
+      "name": "reading language is English",
+      "ok": true,
+      "page": "2-narrow"
+    },
+    {
       "name": "column has no horizontal overflow",
       "ok": true,
       "page": "2-narrow"
@@ -498,6 +550,11 @@
       "page": "2-narrow"
     },
     {
+      "name": "reading language is English",
+      "ok": true,
+      "page": "3-narrow"
+    },
+    {
       "name": "column has no horizontal overflow",
       "ok": true,
       "page": "3-narrow"
@@ -533,6 +590,11 @@
       "page": "3-narrow"
     },
     {
+      "name": "reading language is English",
+      "ok": true,
+      "page": "4-narrow"
+    },
+    {
       "name": "column has no horizontal overflow",
       "ok": true,
       "page": "4-narrow"
@@ -568,6 +630,11 @@
       "page": "4-narrow"
     },
     {
+      "name": "reading language is English",
+      "ok": true,
+      "page": "5-narrow"
+    },
+    {
       "name": "column has no horizontal overflow",
       "ok": true,
       "page": "5-narrow"
@@ -601,6 +668,11 @@
       "name": "object/page references visibly marked",
       "ok": true,
       "page": "5-narrow"
+    },
+    {
+      "name": "reading language is English",
+      "ok": true,
+      "page": "6-narrow"
     },
     {
       "name": "column has no horizontal overflow",

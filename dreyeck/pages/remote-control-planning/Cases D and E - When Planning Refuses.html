@@ -1,19 +1,19 @@
 <in-package>dreyeck/work/remote-control-planning</in-package>
-<div class="remote-control-reading">
+<div class="remote-control-reading" lang="en">
 
-<p class="kicker">5 von 6 · Verweigerung bei fehlenden Voraussetzungen</p>
+<p class="kicker">5 of 6 · Refusal when prerequisites are missing</p>
 <h1>Cases D and E - When Planning Refuses</h1>
-<p>Zwei verfügbare Transporte reichen für einen gültigen Plan nicht aus. Gerade die Fälle ohne Lösung zeigen, welche Grenze beide Methoden gemeinsam voraussetzen. Ein ausbleibender Plan ist hier ein erwartetes Resultat der modellierten Bedingungen, kein Netzwerkfehler.</p>
-<h2>Fall D: ohne hypothetische Autorisierung</h2>
-<p>In D sind API und beide Zugangswege vorhanden, aber das Autorisierungsfaktum fehlt. Beide Methoden verlangen es. SHOP3 kann deshalb keine der beiden Zerlegungen verwenden und liefert keine Lösung. Es darf die fehlende Voraussetzung nicht durch einen anderen Transport ersetzen.</p>
-<p>Vergleiche die <a expr="(getf (reading-case :d) :initial-state)">Ausgangsfakten von D</a> mit dem <a expr="(reading-case :d)">Fall D als Untersuchungsobjekt</a> und seinem <a expr="(reading-result :d)">Resultat ohne Plan</a>. Pläne, Planbäume und Endzustände sind leer; das Ausgangsproblem bleibt untersuchbar.</p>
-<p class="evidence assumption"><span class="kind">Modellierte Annahme.</span> Diese Verweigerung gilt für die modellierte Aufgabe. Sie beweist nicht, dass eine reale Anwendung unberechtigte Zugriffe abweist. Es gibt in diesem Slice weder eine reale Authentifizierung noch einen Zugriffstest.</p>
-<h2>Fall E: ohne Application API</h2>
-<p>In E liegt die hypothetische Autorisierung vor und beide Zugänge sind verfügbar. Dennoch fehlt die gemeinsame fachliche Schnittstelle zur lokalen Runtime. Kein Transport kann diese Schnittstelle ersetzen: Beide Methoden benötigen die Application API und sind ohne sie unanwendbar.</p>
-<p>Die <a expr="(getf (reading-case :e) :initial-state)">Ausgangsfakten von E</a>, der <a expr="(reading-case :e)">Fall E</a> und das <a expr="(reading-result :e)">Resultat ohne Plan</a> zeigen diese andere Ursache desselben Lösungsausgangs. SHOP3 sagt damit nicht, dass eine API nie gebaut werden könnte; es plant keine Lösung unter den gegebenen Fakten.</p>
-<h2>Die positiven Kontrollen</h2>
-<p>In <a expr="(reading-case :a)">Fall A</a> fehlt nur der direkte Zugang: Die Agentenmethode bleibt möglich. In <a expr="(reading-case :b)">Fall B</a> fehlt nur die Agentensitzung: Die direkte Methode bleibt möglich. Zusammen mit C, D und E unterscheiden diese Kontrollen eine fehlende Alternative von einer fehlenden gemeinsamen Voraussetzung.</p>
-<p>Diese kleinen Fälle begrenzen den Nutzen des Planers präzise: Er zählt im Modell mögliche Wege auf und verweigert unmögliche. Welche Beobachtungen dafür vorliegen und welche Abnahmen noch fehlen, klärt die letzte Seite.</p>
+<p>Two available transports are not enough for a valid plan. The cases with no solution reveal the boundary that both methods require. Here, the absence of a plan is an expected consequence of the modeled conditions, not a network failure.</p>
+<h2>Case D: no hypothetical authorization</h2>
+<p>In D, the API and both access routes are present, but the authorization fact is missing. Both methods require it. SHOP3 can therefore use neither decomposition and returns no solution. A different transport cannot substitute for the missing prerequisite.</p>
+<p>Compare the <a expr="(getf (reading-case :d) :initial-state)">initial facts of D</a> with <a expr="(reading-case :d)">Case D as an inspection object</a> and its <a expr="(reading-result :d)">result with no plan</a>. Plans, plan trees, and final states are empty; the initial problem remains inspectable.</p>
+<p class="evidence assumption"><span class="kind">Modeled assumption.</span> This refusal applies to the modeled task. It does not prove that a real application rejects unauthorized access. This slice includes neither real authentication nor an access-control test.</p>
+<h2>Case E: no Application API</h2>
+<p>In E, hypothetical authorization is given and both access routes are available. Yet the shared domain interface to the local runtime is missing. No transport can replace that interface: both methods require the Application API and are inapplicable without it.</p>
+<p>The <a expr="(getf (reading-case :e) :initial-state)">initial facts of E</a>, <a expr="(reading-case :e)">Case E</a>, and its <a expr="(reading-result :e)">result with no plan</a> show a different cause of the same planning outcome. SHOP3 is not saying that an API could never be built; it finds no solution under the supplied facts.</p>
+<h2>The positive controls</h2>
+<p>In <a expr="(reading-case :a)">Case A</a>, only direct access is missing: the agent method remains applicable. In <a expr="(reading-case :b)">Case B</a>, only the agent session is missing: the direct method remains applicable. Together with C, D, and E, these controls distinguish a missing alternative from a missing shared prerequisite.</p>
+<p>These small cases bound the planner's contribution precisely: it enumerates possible approaches in the model and refuses impossible ones. The final page explains the evidence for these claims and the acceptance checks that remain open.</p>
 
-<p class="reading-next"><a page="Case C - Two Alternative Plan Trees">Zurück: Case C - Two Alternative Plan Trees</a> · <a page="Evidence and Open Acceptance">Weiter: Evidence and Open Acceptance</a> · <a page="Planning Remote Control for the Zettelkasten App with SHOP3">Zum Einstieg</a></p>
+<p class="reading-next"><a page="Case C - Two Alternative Plan Trees">Previous: Case C - Two Alternative Plan Trees</a> · <a page="Evidence and Open Acceptance">Next: Evidence and Open Acceptance</a> · <a page="Planning Remote Control for the Zettelkasten App with SHOP3">Back to the start</a></p>
 </div>

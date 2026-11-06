@@ -1,8 +1,9 @@
-# Assignment 1b: a readable remote-control planning HyperBook
+# Remote-control planning HyperBook: reading and language checks
 
 Base: `b886ec3dfa8c2d3b725b1873e2a641bcfd2d669d`, branch
 `codex/zettelkasten-remote-control-shop3`, PR #27. The original experiment report
-is historical evidence; this note records the reading extension of 6 November 2026.
+is historical evidence; this note records the reading extension (1b) and English-language correction
+(1c, based on `b59f8f7`) of 6 November 2026.
 
 ## Reader's path
 
@@ -70,9 +71,9 @@ still needs the browser acceptance below.
 
 ## Executed checks and measured observations
 
-- Four Python structure checks passed: exactly six balanced pages, a connected
+- Five Python structure checks passed: exactly six balanced pages, a connected
   native reading path and valid page targets, scoped CSS, computed Case C
-  component links, and no view overriding Content.
+  component links, English language/navigation, and no view overriding Content.
 - `asdf:test-system "dreyeck/work/remote-control-planning/reading/tests"` passed:
   six pages, 22 evaluated object links, shared plan/tree/state identities,
   no-plan D/E, `:plan-only`, Catalog registration and book-local asset isolation.
@@ -100,8 +101,8 @@ No claim of full Inspector browser acceptance is made.
 | Comparison-table width, pages 2 and 6 | 676 px | 336 px |
 | Escaping tables | 0 | 0 |
 
-All **85 browser assertions passed** across twelve page/width pairs. With only
-this book's CSS omitted, **46 of the same 85 assertions failed** (the deliberate
+All **97 browser assertions passed** across twelve page/width pairs. With only
+this book's CSS omitted, **46 of the same 97 assertions failed** (the deliberate
 counterproof exits 1). This shows the checks detect measure, leading, hierarchy,
 overflow and reference-treatment regressions; it is not a historical screenshot
 comparison. Full measurements: [reading-metrics.json](reading-metrics.json) and
@@ -168,8 +169,8 @@ refresh the registered ASDF definition if needed, then load only this reading:
 The human evaluator performs these forms; no running image was modified by
 Codex. No server restart or production change is needed. The optional reading
 appears in the existing local Catalog. From there the reader uses only links:
-open the book's main page, follow **Weiter** through all six pages, use **Zurück**
-or **Zum Einstieg**, then follow the route-specific plan/tree/state links in C
+open the book's main page, follow **Next** through all six pages, use **Previous**
+or **Back to the start**, then follow the route-specific plan/tree/state links in C
 and the D/E links. A/B controls and source/test references remain reachable.
 At every page opening, Content should be active first. Compare wide and narrow
 Inspector columns; inspect table containment, Lisp identifiers, long headings,
@@ -198,3 +199,55 @@ No automated pixel test answers the human comprehension question on its own.
 - FedWiki, WBS, AC-06, permissions, Java and productive services: no changes.
 - Replay: actual object targets and model tests pass; static-browser typography
   passes; full local Inspector reader journey and human comprehension are open.
+
+
+## Assignment 1c: English default and target preservation
+
+All six page bodies now use idiomatic technical English, including headings,
+tables, evidence qualifications and navigation. The existing reading wrapper
+carries `lang="en"`. The explicitly identified source title
+*Zettel 11551 – Remote Control für die Zettelkasten-App* retains its German
+wording in `cite lang="de"` and is explained in English. No page identity,
+HyperBook id, code example, source URL or executable reference was translated.
+The existing README's development guidance now records English as the default
+for dreyeck technical documentation and readings; there is no new policy or
+localization framework.
+
+A comparison against `b59f8f7` checked all six filenames, package declarations
+and **47 ordered link targets**, including all **22 exact SHOP3/object expressions**.
+They are unchanged. The live-Catalog browser check now follows **Next** rather
+than its former German label, while keeping the same page target.
+
+The actual reading ASDF tests evaluated all 22 expression links after translation.
+The unchanged A–E tests passed again with **1 / 1 / 2 / 0 / 0** plans. Five static
+structure/language tests pass. The updated Chromium fixtures pass **97** checks
+at 700px and 360px, including twelve new inherited-English-language checks.
+The earlier 1b run had 85 checks; this correction adds the language checks and
+reruns the existing typography checks against the translated text. Its CSS
+counterproof still fails 46 checks as expected. Current committed metrics are
+from this English rerun, not the earlier German text.
+
+Visual inspection of the English entry page (wide) and Case C page (narrow)
+confirmed translated prose, evidence labels and navigation with wrapping text
+and no clipped right edge. Only the identified German source title remains on
+the entry page. This inspection uses static browser fixtures, not live Inspector
+callbacks. The language correction changes no CSS, planner domain, A–E test
+source, Lisp object accessor, ASDF system definition or Java source.
+
+Actual commands for this correction:
+
+```sh
+python3 dreyeck/remote-control-planning/browser-check/structure.py
+node --check dreyeck/remote-control-planning/browser-check/check.mjs
+CHROMIUM=/usr/bin/chromium node dreyeck/remote-control-planning/browser-check/check.mjs --fixture /workspace/tooling/remote-control-english-browser
+# Expected exit 1: deliberate CSS omission
+CHROMIUM=/usr/bin/chromium node dreyeck/remote-control-planning/browser-check/check.mjs --fixture /workspace/tooling/remote-control-english-counterproof --without-css
+XDG_CACHE_HOME=/workspace/tooling/lisp-cache SBCL_HOME=/workspace/tooling/lisp/usr/lib/sbcl /workspace/tooling/lisp/usr/bin/sbcl --no-userinit --non-interactive --load /workspace/tooling/remote-control-reading-tests.lisp
+```
+
+Lisp output for this rerun: `/workspace/tooling/remote-control-english-tests.log`.
+Screenshots: `/workspace/tooling/remote-control-english-browser/`. The complete
+old ASDF regression and real local Inspector acceptance were not rerun for this
+language-only correction. Their previously recorded limitations remain; verdict
+C is unchanged. The `--catalog` mode remains supplied for human-run local
+acceptance and is not represented as executed by these fixture tests.

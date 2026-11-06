@@ -18,12 +18,15 @@ class Page(HTMLParser):
         super().__init__(convert_charrefs=True)
         self.links, self.stack, self.tables, self.headings = [], [], [], []
         self.wrappers = 0
+        self.reading_languages = []
         self.feed(text)
         self.close()
     def handle_starttag(self, tag, attrs):
         attrs = dict(attrs)
         if tag == 'a': self.links.append(attrs)
-        if tag == 'div' and attrs.get('class') == 'remote-control-reading': self.wrappers += 1
+        if tag == 'div' and attrs.get('class') == 'remote-control-reading':
+            self.wrappers += 1
+            self.reading_languages.append(attrs.get('lang'))
         if tag == 'h1': self.headings.append(tag)
         if tag == 'table': self.tables.append(any(t == 'div' and 'table-scroll' in a.get('class', '').split() for t, a in self.stack))
         if tag not in ('br', 'hr', 'img', 'meta', 'link', 'input', 'wbr'): self.stack.append((tag, attrs))
@@ -45,6 +48,21 @@ class ReadingStructure(unittest.TestCase):
             if i < 5: self.assertIn(TITLES[i+1], targets)
             if i > 0: self.assertIn(TITLES[i-1], targets)
             self.assertGreater(len([a for a in page.links if 'expr' in a]), 0)
+    def test_english_reading_and_navigation(self):
+        for i, title in enumerate(TITLES):
+            text = (PAGES / (title + '.html')).read_text()
+            page = Page(text)
+            self.assertEqual(page.reading_languages, ['en'])
+            self.assertIn(f'{i+1} of 6', text)
+            self.assertNotRegex(text, r'Weiter|Zurück|Zum Einstieg|Beobachtete Evidenz|Modellierte Annahme|Offene Abnahme')
+            if i < 5: self.assertIn('Next: ', text)
+            if i > 0:
+                self.assertIn('Previous: ', text)
+                self.assertIn('Back to the start', text)
+        entry = (PAGES / (TITLES[0] + '.html')).read_text()
+        self.assertIn('<cite lang="de">Zettel 11551 – Remote Control für die Zettelkasten-App</cite>', entry)
+        self.assertIn('Remote Control for the Zettelkasten App', entry)
+
     def test_css_is_scoped(self):
         css = re.sub(r'/\*.*?\*/', '', CSS.read_text(), flags=re.S)
         selectors = re.findall(r'([^{}]+)\{[^{}]*\}', css)

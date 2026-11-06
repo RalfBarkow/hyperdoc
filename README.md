@@ -42,6 +42,15 @@ service integration, the limits of the packaged runtime and the checks.
 (read-only branch review, `asdf:test-system` runs, Nix checks), what each changes and which tests need external material. See
 [docs/hyperdoc-dev.md](docs/hyperdoc-dev.md).
 
+### Documentation language
+
+English is the default authoring language for dreyeck HyperDoc technical
+documentation and HyperBook readings. Use English for explanatory prose,
+headings, tables, evidence labels, and navigation. Preserve original source
+titles and quotations, identify their language where appropriate, and explain
+them in English when needed. Mark English HTML reading content with `lang="en"`
+on its existing content wrapper; this does not require a localization framework.
+
 ## Fresh interactive Lisp image
 
 Run `nix develop`, then `hyperdoc-sly` from this repository (or a subdirectory).

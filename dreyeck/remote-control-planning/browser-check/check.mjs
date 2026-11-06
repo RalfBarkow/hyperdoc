@@ -56,7 +56,7 @@ try {
       const m = await pane.evaluate(p => {
         const body=p.querySelector('.inspector-body'), root=p.querySelector('.remote-control-reading')
         const size=e=>parseFloat(getComputedStyle(e).fontSize), font=size(root)
-        return {bodyWidth:body.clientWidth, scrollWidth:body.scrollWidth, font,
+        return {language:root.lang,bodyWidth:body.clientWidth, scrollWidth:body.scrollWidth, font,
           leading:parseFloat(getComputedStyle(root).lineHeight)/font,
           maxTextEm:Math.max(...[...root.querySelectorAll('p,ul,ol')].filter(e=>!e.closest('table')).map(e=>e.getBoundingClientRect().width/font)),
           tableEscapes:[...root.querySelectorAll('table')].filter(t=>t.getBoundingClientRect().right>body.getBoundingClientRect().right+1 && !t.closest('.table-scroll')).length,
@@ -66,6 +66,7 @@ try {
           refVisible:[...root.querySelectorAll('.hyperbook-reference .inspector-inspect')].every(e=>getComputedStyle(e).textDecorationLine.includes('underline') && getComputedStyle(e).color!==getComputedStyle(root).color)}
       })
       result.pages.push({key,title,...m})
+      check('reading language is English',m.language==='en',key)
       check('column has no horizontal overflow',m.scrollWidth<=m.bodyWidth+1,key)
       check('text measure at most 38em',m.maxTextEm<=38.1,key)
       check('leading at least 1.5',m.leading>=1.5,key)
@@ -85,7 +86,7 @@ try {
           check('object reference opens a pane',true,key)
         }
         if(index<titles.length-1) {
-          await pane.locator('.hyperbook-reference').filter({hasText:`Weiter: ${titles[index+1]}`}).locator('.inspector-inspect').click()
+          await pane.locator('.hyperbook-reference').filter({hasText:`Next: ${titles[index+1]}`}).locator('.inspector-inspect').click()
         }
       }
     }
