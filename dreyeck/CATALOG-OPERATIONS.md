@@ -152,6 +152,28 @@ with its declared main page is a property checked by the membership tests
 above. This describes the packaged Catalog once the change is integrated; it
 does not attest to a deployment.
 
+## Zettelkasten remote-control planning HyperBook
+
+`dreyeck/catalog` admits `dreyeck/work/remote-control-planning/reading`
+as a read-only, six-page English HyperDoc. The main page is
+*Planning Remote Control for the Zettelkasten App with SHOP3*; the
+HyperBook ID remains `dreyeck/work/remote-control-planning`.
+The public Catalog's normal dependency closure loads this book without
+setting or replacing `HYPERDOC_CATALOG_SYSTEM`.
+
+Its SHOP3 operators change only hypothetical planning state. All results
+remain `:plan-only`; the Catalog offers no remote-control executor,
+network transport, Application API or authorization capability through
+this reading. Follow its page and object links in the actual Inspector
+before calling the publication accepted. The Catalog membership suite
+derives the expected entry from ASDF and the original `defhyperdoc`
+declaration; no additional fixed membership count is required.
+
+This describes the source-level admission. A merged commit, Nix build or
+service restart alone does not prove that the book is reachable on
+`dreyeck.ch`; deployed revision, runtime membership, all six pages,
+navigation and CSS must be checked separately.
+
 ## Not verified
 
 The successful operator update above does not verify NixOS activation of the
