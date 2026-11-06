@@ -1,0 +1,719 @@
+{
+  "surface": "static typography fixture; references not executed",
+  "browser": "155.0.8059.79",
+  "cssIncluded": false,
+  "pages": [
+    {
+      "key": "1-wide",
+      "title": "Planning Remote Control for the Zettelkasten App with SHOP3",
+      "language": "en",
+      "bodyWidth": 700,
+      "scrollWidth": 700,
+      "font": 16,
+      "leading": null,
+      "maxTextEm": 42.25,
+      "tableEscapes": 0,
+      "tableWidths": [],
+      "headings": [
+        20.8,
+        19.2
+      ],
+      "codeRatio": 1,
+      "refVisible": false
+    },
+    {
+      "key": "2-wide",
+      "title": "Model Authority and the Control Surface",
+      "language": "en",
+      "bodyWidth": 700,
+      "scrollWidth": 770,
+      "font": 16,
+      "leading": null,
+      "maxTextEm": 42.25,
+      "tableEscapes": 0,
+      "tableWidths": [
+        758
+      ],
+      "headings": [
+        20.8,
+        19.2
+      ],
+      "codeRatio": 1,
+      "refVisible": false
+    },
+    {
+      "key": "3-wide",
+      "title": "How SHOP3 Reads the Architecture Task",
+      "language": "en",
+      "bodyWidth": 700,
+      "scrollWidth": 700,
+      "font": 16,
+      "leading": null,
+      "maxTextEm": 42.25,
+      "tableEscapes": 0,
+      "tableWidths": [],
+      "headings": [
+        20.8,
+        19.2
+      ],
+      "codeRatio": 1,
+      "refVisible": false
+    },
+    {
+      "key": "4-wide",
+      "title": "Case C - Two Alternative Plan Trees",
+      "language": "en",
+      "bodyWidth": 700,
+      "scrollWidth": 700,
+      "font": 16,
+      "leading": null,
+      "maxTextEm": 42.25,
+      "tableEscapes": 0,
+      "tableWidths": [],
+      "headings": [
+        20.8,
+        19.2
+      ],
+      "codeRatio": 1,
+      "refVisible": false
+    },
+    {
+      "key": "5-wide",
+      "title": "Cases D and E - When Planning Refuses",
+      "language": "en",
+      "bodyWidth": 700,
+      "scrollWidth": 700,
+      "font": 16,
+      "leading": null,
+      "maxTextEm": 42.25,
+      "tableEscapes": 0,
+      "tableWidths": [],
+      "headings": [
+        20.8,
+        19.2
+      ],
+      "codeRatio": 1,
+      "refVisible": false
+    },
+    {
+      "key": "6-wide",
+      "title": "Evidence and Open Acceptance",
+      "language": "en",
+      "bodyWidth": 700,
+      "scrollWidth": 700,
+      "font": 16,
+      "leading": null,
+      "maxTextEm": 42.25,
+      "tableEscapes": 0,
+      "tableWidths": [
+        432
+      ],
+      "headings": [
+        20.8,
+        19.2
+      ],
+      "codeRatio": 1,
+      "refVisible": false
+    },
+    {
+      "key": "1-narrow",
+      "title": "Planning Remote Control for the Zettelkasten App with SHOP3",
+      "language": "en",
+      "bodyWidth": 360,
+      "scrollWidth": 360,
+      "font": 16,
+      "leading": null,
+      "maxTextEm": 21,
+      "tableEscapes": 0,
+      "tableWidths": [],
+      "headings": [
+        20.8,
+        19.2
+      ],
+      "codeRatio": 1,
+      "refVisible": false
+    },
+    {
+      "key": "2-narrow",
+      "title": "Model Authority and the Control Surface",
+      "language": "en",
+      "bodyWidth": 360,
+      "scrollWidth": 770,
+      "font": 16,
+      "leading": null,
+      "maxTextEm": 21,
+      "tableEscapes": 0,
+      "tableWidths": [
+        758
+      ],
+      "headings": [
+        20.8,
+        19.2
+      ],
+      "codeRatio": 1,
+      "refVisible": false
+    },
+    {
+      "key": "3-narrow",
+      "title": "How SHOP3 Reads the Architecture Task",
+      "language": "en",
+      "bodyWidth": 360,
+      "scrollWidth": 532,
+      "font": 16,
+      "leading": null,
+      "maxTextEm": 21,
+      "tableEscapes": 0,
+      "tableWidths": [],
+      "headings": [
+        20.8,
+        19.2
+      ],
+      "codeRatio": 1,
+      "refVisible": false
+    },
+    {
+      "key": "4-narrow",
+      "title": "Case C - Two Alternative Plan Trees",
+      "language": "en",
+      "bodyWidth": 360,
+      "scrollWidth": 360,
+      "font": 16,
+      "leading": null,
+      "maxTextEm": 21,
+      "tableEscapes": 0,
+      "tableWidths": [],
+      "headings": [
+        20.8,
+        19.2
+      ],
+      "codeRatio": 1,
+      "refVisible": false
+    },
+    {
+      "key": "5-narrow",
+      "title": "Cases D and E - When Planning Refuses",
+      "language": "en",
+      "bodyWidth": 360,
+      "scrollWidth": 360,
+      "font": 16,
+      "leading": null,
+      "maxTextEm": 21,
+      "tableEscapes": 0,
+      "tableWidths": [],
+      "headings": [
+        20.8,
+        19.2
+      ],
+      "codeRatio": 1,
+      "refVisible": false
+    },
+    {
+      "key": "6-narrow",
+      "title": "Evidence and Open Acceptance",
+      "language": "en",
+      "bodyWidth": 360,
+      "scrollWidth": 444,
+      "font": 16,
+      "leading": null,
+      "maxTextEm": 21,
+      "tableEscapes": 0,
+      "tableWidths": [
+        432
+      ],
+      "headings": [
+        20.8,
+        19.2
+      ],
+      "codeRatio": 1,
+      "refVisible": false
+    }
+  ],
+  "assertions": [
+    {
+      "name": "reading language is English",
+      "ok": true,
+      "page": "1-wide"
+    },
+    {
+      "name": "column has no horizontal overflow",
+      "ok": true,
+      "page": "1-wide"
+    },
+    {
+      "name": "text measure at most 38em",
+      "ok": false,
+      "page": "1-wide"
+    },
+    {
+      "name": "leading at least 1.5",
+      "ok": false,
+      "page": "1-wide"
+    },
+    {
+      "name": "heading hierarchy",
+      "ok": false,
+      "page": "1-wide"
+    },
+    {
+      "name": "inline code at least 85% body size",
+      "ok": true,
+      "page": "1-wide"
+    },
+    {
+      "name": "tables contained",
+      "ok": true,
+      "page": "1-wide"
+    },
+    {
+      "name": "object/page references visibly marked",
+      "ok": false,
+      "page": "1-wide"
+    },
+    {
+      "name": "reading language is English",
+      "ok": true,
+      "page": "2-wide"
+    },
+    {
+      "name": "column has no horizontal overflow",
+      "ok": false,
+      "page": "2-wide"
+    },
+    {
+      "name": "text measure at most 38em",
+      "ok": false,
+      "page": "2-wide"
+    },
+    {
+      "name": "leading at least 1.5",
+      "ok": false,
+      "page": "2-wide"
+    },
+    {
+      "name": "heading hierarchy",
+      "ok": false,
+      "page": "2-wide"
+    },
+    {
+      "name": "inline code at least 85% body size",
+      "ok": true,
+      "page": "2-wide"
+    },
+    {
+      "name": "tables contained",
+      "ok": true,
+      "page": "2-wide"
+    },
+    {
+      "name": "object/page references visibly marked",
+      "ok": false,
+      "page": "2-wide"
+    },
+    {
+      "name": "reading language is English",
+      "ok": true,
+      "page": "3-wide"
+    },
+    {
+      "name": "column has no horizontal overflow",
+      "ok": true,
+      "page": "3-wide"
+    },
+    {
+      "name": "text measure at most 38em",
+      "ok": false,
+      "page": "3-wide"
+    },
+    {
+      "name": "leading at least 1.5",
+      "ok": false,
+      "page": "3-wide"
+    },
+    {
+      "name": "heading hierarchy",
+      "ok": false,
+      "page": "3-wide"
+    },
+    {
+      "name": "inline code at least 85% body size",
+      "ok": true,
+      "page": "3-wide"
+    },
+    {
+      "name": "tables contained",
+      "ok": true,
+      "page": "3-wide"
+    },
+    {
+      "name": "object/page references visibly marked",
+      "ok": false,
+      "page": "3-wide"
+    },
+    {
+      "name": "reading language is English",
+      "ok": true,
+      "page": "4-wide"
+    },
+    {
+      "name": "column has no horizontal overflow",
+      "ok": true,
+      "page": "4-wide"
+    },
+    {
+      "name": "text measure at most 38em",
+      "ok": false,
+      "page": "4-wide"
+    },
+    {
+      "name": "leading at least 1.5",
+      "ok": false,
+      "page": "4-wide"
+    },
+    {
+      "name": "heading hierarchy",
+      "ok": false,
+      "page": "4-wide"
+    },
+    {
+      "name": "inline code at least 85% body size",
+      "ok": true,
+      "page": "4-wide"
+    },
+    {
+      "name": "tables contained",
+      "ok": true,
+      "page": "4-wide"
+    },
+    {
+      "name": "object/page references visibly marked",
+      "ok": false,
+      "page": "4-wide"
+    },
+    {
+      "name": "reading language is English",
+      "ok": true,
+      "page": "5-wide"
+    },
+    {
+      "name": "column has no horizontal overflow",
+      "ok": true,
+      "page": "5-wide"
+    },
+    {
+      "name": "text measure at most 38em",
+      "ok": false,
+      "page": "5-wide"
+    },
+    {
+      "name": "leading at least 1.5",
+      "ok": false,
+      "page": "5-wide"
+    },
+    {
+      "name": "heading hierarchy",
+      "ok": false,
+      "page": "5-wide"
+    },
+    {
+      "name": "inline code at least 85% body size",
+      "ok": true,
+      "page": "5-wide"
+    },
+    {
+      "name": "tables contained",
+      "ok": true,
+      "page": "5-wide"
+    },
+    {
+      "name": "object/page references visibly marked",
+      "ok": false,
+      "page": "5-wide"
+    },
+    {
+      "name": "reading language is English",
+      "ok": true,
+      "page": "6-wide"
+    },
+    {
+      "name": "column has no horizontal overflow",
+      "ok": true,
+      "page": "6-wide"
+    },
+    {
+      "name": "text measure at most 38em",
+      "ok": false,
+      "page": "6-wide"
+    },
+    {
+      "name": "leading at least 1.5",
+      "ok": false,
+      "page": "6-wide"
+    },
+    {
+      "name": "heading hierarchy",
+      "ok": false,
+      "page": "6-wide"
+    },
+    {
+      "name": "inline code at least 85% body size",
+      "ok": true,
+      "page": "6-wide"
+    },
+    {
+      "name": "tables contained",
+      "ok": true,
+      "page": "6-wide"
+    },
+    {
+      "name": "object/page references visibly marked",
+      "ok": false,
+      "page": "6-wide"
+    },
+    {
+      "name": "reading language is English",
+      "ok": true,
+      "page": "1-narrow"
+    },
+    {
+      "name": "column has no horizontal overflow",
+      "ok": true,
+      "page": "1-narrow"
+    },
+    {
+      "name": "text measure at most 38em",
+      "ok": true,
+      "page": "1-narrow"
+    },
+    {
+      "name": "leading at least 1.5",
+      "ok": false,
+      "page": "1-narrow"
+    },
+    {
+      "name": "heading hierarchy",
+      "ok": false,
+      "page": "1-narrow"
+    },
+    {
+      "name": "inline code at least 85% body size",
+      "ok": true,
+      "page": "1-narrow"
+    },
+    {
+      "name": "tables contained",
+      "ok": true,
+      "page": "1-narrow"
+    },
+    {
+      "name": "object/page references visibly marked",
+      "ok": false,
+      "page": "1-narrow"
+    },
+    {
+      "name": "reading language is English",
+      "ok": true,
+      "page": "2-narrow"
+    },
+    {
+      "name": "column has no horizontal overflow",
+      "ok": false,
+      "page": "2-narrow"
+    },
+    {
+      "name": "text measure at most 38em",
+      "ok": true,
+      "page": "2-narrow"
+    },
+    {
+      "name": "leading at least 1.5",
+      "ok": false,
+      "page": "2-narrow"
+    },
+    {
+      "name": "heading hierarchy",
+      "ok": false,
+      "page": "2-narrow"
+    },
+    {
+      "name": "inline code at least 85% body size",
+      "ok": true,
+      "page": "2-narrow"
+    },
+    {
+      "name": "tables contained",
+      "ok": true,
+      "page": "2-narrow"
+    },
+    {
+      "name": "object/page references visibly marked",
+      "ok": false,
+      "page": "2-narrow"
+    },
+    {
+      "name": "reading language is English",
+      "ok": true,
+      "page": "3-narrow"
+    },
+    {
+      "name": "column has no horizontal overflow",
+      "ok": false,
+      "page": "3-narrow"
+    },
+    {
+      "name": "text measure at most 38em",
+      "ok": true,
+      "page": "3-narrow"
+    },
+    {
+      "name": "leading at least 1.5",
+      "ok": false,
+      "page": "3-narrow"
+    },
+    {
+      "name": "heading hierarchy",
+      "ok": false,
+      "page": "3-narrow"
+    },
+    {
+      "name": "inline code at least 85% body size",
+      "ok": true,
+      "page": "3-narrow"
+    },
+    {
+      "name": "tables contained",
+      "ok": true,
+      "page": "3-narrow"
+    },
+    {
+      "name": "object/page references visibly marked",
+      "ok": false,
+      "page": "3-narrow"
+    },
+    {
+      "name": "reading language is English",
+      "ok": true,
+      "page": "4-narrow"
+    },
+    {
+      "name": "column has no horizontal overflow",
+      "ok": true,
+      "page": "4-narrow"
+    },
+    {
+      "name": "text measure at most 38em",
+      "ok": true,
+      "page": "4-narrow"
+    },
+    {
+      "name": "leading at least 1.5",
+      "ok": false,
+      "page": "4-narrow"
+    },
+    {
+      "name": "heading hierarchy",
+      "ok": false,
+      "page": "4-narrow"
+    },
+    {
+      "name": "inline code at least 85% body size",
+      "ok": true,
+      "page": "4-narrow"
+    },
+    {
+      "name": "tables contained",
+      "ok": true,
+      "page": "4-narrow"
+    },
+    {
+      "name": "object/page references visibly marked",
+      "ok": false,
+      "page": "4-narrow"
+    },
+    {
+      "name": "reading language is English",
+      "ok": true,
+      "page": "5-narrow"
+    },
+    {
+      "name": "column has no horizontal overflow",
+      "ok": true,
+      "page": "5-narrow"
+    },
+    {
+      "name": "text measure at most 38em",
+      "ok": true,
+      "page": "5-narrow"
+    },
+    {
+      "name": "leading at least 1.5",
+      "ok": false,
+      "page": "5-narrow"
+    },
+    {
+      "name": "heading hierarchy",
+      "ok": false,
+      "page": "5-narrow"
+    },
+    {
+      "name": "inline code at least 85% body size",
+      "ok": true,
+      "page": "5-narrow"
+    },
+    {
+      "name": "tables contained",
+      "ok": true,
+      "page": "5-narrow"
+    },
+    {
+      "name": "object/page references visibly marked",
+      "ok": false,
+      "page": "5-narrow"
+    },
+    {
+      "name": "reading language is English",
+      "ok": true,
+      "page": "6-narrow"
+    },
+    {
+      "name": "column has no horizontal overflow",
+      "ok": false,
+      "page": "6-narrow"
+    },
+    {
+      "name": "text measure at most 38em",
+      "ok": true,
+      "page": "6-narrow"
+    },
+    {
+      "name": "leading at least 1.5",
+      "ok": false,
+      "page": "6-narrow"
+    },
+    {
+      "name": "heading hierarchy",
+      "ok": false,
+      "page": "6-narrow"
+    },
+    {
+      "name": "inline code at least 85% body size",
+      "ok": true,
+      "page": "6-narrow"
+    },
+    {
+      "name": "tables contained",
+      "ok": true,
+      "page": "6-narrow"
+    },
+    {
+      "name": "object/page references visibly marked",
+      "ok": false,
+      "page": "6-narrow"
+    },
+    {
+      "name": "no browser page errors",
+      "ok": true,
+      "page": "all"
+    }
+  ],
+  "pageErrors": []
+}

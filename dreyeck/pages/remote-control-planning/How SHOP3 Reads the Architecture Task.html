@@ -1,0 +1,20 @@
+<in-package>dreyeck/work/remote-control-planning</in-package>
+<div class="remote-control-reading" lang="en">
+
+<p class="kicker">3 of 6 · Tasks, methods, operators, and states</p>
+<h1>How SHOP3 Reads the Architecture Task</h1>
+<p>SHOP3 is a hierarchical task planner. Its inputs are a task, facts about the assumed situation, and rules for decomposing tasks. It works through a task in the order specified by its decomposition. An applicable decomposition yields a plan of primitive steps; if a necessary condition is missing, that approach is inapplicable.</p>
+<h2>Four concepts in one example</h2>
+<p>The <em>task</em> states what should be achieved without selecting an access route:</p>
+<pre><code>(enable-mobile-control zettelkasten macbook-a android)</code></pre>
+<p>A <em>method</em> explains how to decompose this abstract task into smaller tasks. Here, two separate method definitions address the same task. The agent method requires an agent session; the direct method requires a direct transport. Both require an Application API, hypothetical authorization, and local authority.</p>
+<p>An <em>operator</em> is a primitive step that is not decomposed further. In this experiment, it adds facts only to the simulated state. For example, <code>!model-agent-route</code> records the modeled selection of the agent route. It does not establish a session.</p>
+<p>The <em>state</em> is the set of facts with which SHOP3 reasons. A statement such as <code class="wrap">(authorized android zettelkasten)</code> is a hypothetical fact here. It is neither an access token nor a person's consent. The planner can reason only about conditions that the domain describes.</p>
+<h2>Two methods, without inventing a third solution</h2>
+<p>The earlier documentation experiment decomposed a task into a single fixed sequence. It therefore received verdict B. The present domain contains two predefined alternatives. SHOP3 does not invent them: its additional contribution is to check their applicability for different inputs and enumerate both valid decompositions.</p>
+<p>The runner uses <code>:which :all</code> and <code>:plan-tree t</code>. It retains plans, CPU time, plan trees, and final states in the existing HyperDoc plan result. An empty set of solutions means “no plan” here. That differs from a valid plan requiring no further steps.</p>
+<p>The <a expr="(getf (reading-case :c) :problem)">SHOP3 problem instance</a>, the <a expr="(getf (reading-case :c) :methods)">actual methods</a>, and the <a expr="(reading-result :c)">computed result</a> connect this explanation to the implementation. These objects remain the authority for the computed plans.</p>
+<p class="evidence open"><span class="kind">Open question.</span> This does not yet establish whether either access route is viable for a real application. The planner checks the model; it does not establish that the model completely describes a real installation.</p>
+
+<p class="reading-next"><a page="Model Authority and the Control Surface">Previous: Model Authority and the Control Surface</a> · <a page="Case C - Two Alternative Plan Trees">Next: Case C - Two Alternative Plan Trees</a> · <a page="Planning Remote Control for the Zettelkasten App with SHOP3">Back to the start</a></p>
+</div>

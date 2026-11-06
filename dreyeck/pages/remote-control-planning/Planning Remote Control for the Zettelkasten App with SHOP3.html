@@ -1,0 +1,18 @@
+<in-package>dreyeck/work/remote-control-planning</in-package>
+<div class="remote-control-reading" lang="en">
+
+<p class="kicker">1 of 6 · The architecture question</p>
+<h1>Planning Remote Control for the Zettelkasten App with SHOP3</h1>
+<p>Zettelkasten runs on the MacBook. Someone using an Android device wants to select a note or request a change. What must connect these two places so that control becomes mobile while responsibility for data and execution stays with the local application? This question from Zettel 11551 guides the reading.</p>
+<p>A network connection alone does not answer the architecture question. An interface can send a request; the local application must understand it, determine whether it is permitted, and execute it against its domain model. A second copy of the model on the phone would introduce further questions about synchronization and conflicting changes. This experiment specifically examines the separation of local execution from mobile control.</p>
+<p class="evidence assumption"><span class="kind">Modeled assumption.</span> Two approaches could support this separation: a remote agent session with local access to an Application API, or a direct HTTP/WebSocket adapter for a browser/PWA interface. Their availability is an input to the experiment, not an observation about installed services.</p>
+<h2>One question, two possible approaches</h2>
+<p>On the agent route, a session connects Android to a local agent or MCP client. On the direct route, the mobile interface communicates with an application adapter. In both cases, the Application API remains a local domain boundary. The methods differ in how they provide access, while preserving model ownership.</p>
+<p>SHOP3 acts as the planner: it checks assumed prerequisites and decomposes a shared task into possible steps. It starts no agent and opens no connection. We first explain why both approaches must respect the same boundary, then examine why the planner sometimes produces two answers and sometimes none.</p>
+<p class="evidence"><span class="kind">Observed evidence.</span> The first slice's Cloud tests produced two plans for Case C. The assignment for this reading also reports that Case C is accessible in the local CLOG Inspector and shows <code>:plan-only</code>. This does not establish successful mobile control.</p>
+<h2>The reading path</h2>
+<ol><li>The architecture question establishes the goal.</li><li><a page="Model Authority and the Control Surface">The model and the control surface</a> establish where authority belongs.</li><li><a page="How SHOP3 Reads the Architecture Task">The language of SHOP3</a> explains the planning process.</li><li><a page="Case C - Two Alternative Plan Trees">Case C</a> follows both decompositions.</li><li><a page="Cases D and E - When Planning Refuses">Cases D and E</a> explain why no plan is found.</li><li><a page="Evidence and Open Acceptance">Evidence and open acceptance</a> bound the conclusions.</li></ol>
+<p>Readers who want to examine the object now can open <a expr="(reading-case :c)">the actual Case C</a>. This is not yet necessary to understand the two alternatives. The reference to <cite lang="de">Zettel 11551 – Remote Control für die Zettelkasten-App</cite> (“Remote Control for the Zettelkasten App”) uses the source title and architecture goal supplied in the assignment; the production ZKN3 data source was not opened.</p>
+
+<p class="reading-next"><a page="Model Authority and the Control Surface">Next: Model Authority and the Control Surface</a></p>
+</div>

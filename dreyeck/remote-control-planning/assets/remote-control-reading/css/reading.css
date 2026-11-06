@@ -1,0 +1,33 @@
+/* Book-local reading hypotheses, adapted from the CCNx reading. Every selector
+   requires this book's wrapper; no Inspector or other HyperBook rule is changed. */
+.remote-control-reading { line-height: 1.6; overflow-wrap: break-word; }
+.remote-control-reading p, .remote-control-reading ul,
+.remote-control-reading ol, .remote-control-reading dl { max-width: 38em; box-sizing: border-box; }
+.remote-control-reading li + li { margin-top: .45em; }
+.hyperbook-page .remote-control-reading h1 { font-size: 1.65em; line-height: 1.2; margin: .5em 0 .8em; }
+.hyperbook-page .remote-control-reading h2 { font-size: 1.35em; line-height: 1.3; margin: 1.6em 0 .6em; }
+.hyperbook-page .remote-control-reading h3 { font-size: 1.1em; line-height: 1.35; margin: 1.2em 0 .5em; }
+.remote-control-reading code, .remote-control-reading pre {
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, "DejaVu Sans Mono", monospace;
+  font-size: .92em; font-variant-numeric: slashed-zero;
+}
+.remote-control-reading code { padding: .05em .2em; background: #f2f2f2; white-space: nowrap; }
+.remote-control-reading code.wrap { white-space: normal; overflow-wrap: anywhere; }
+.remote-control-reading pre { max-width: 100%; box-sizing: border-box; white-space: pre-wrap; overflow-wrap: anywhere; padding: .8em; background: #f6f6f6; line-height: 1.5; }
+.remote-control-reading pre code { font-size: 1em; padding: 0; white-space: inherit; background: none; }
+.remote-control-reading .hyperbook-reference .inspector-inspect {
+  font: inherit; color: #12408f; text-decoration: underline; text-underline-offset: .15em;
+}
+.remote-control-reading a[href] { color: #12408f; text-underline-offset: .15em; overflow-wrap: anywhere; }
+.remote-control-reading .evidence { border-left: 3px solid #666; padding-left: .8em; }
+.remote-control-reading .assumption { border-left-style: dashed; }
+.remote-control-reading .open { border-left-style: double; border-left-width: 5px; }
+.remote-control-reading .kind { font-weight: 700; }
+.remote-control-reading .table-scroll { max-width: 100%; overflow-x: auto; margin: 1em 0; }
+.remote-control-reading table.inspector-table { width: 100%; border-collapse: collapse; white-space: normal; line-height: 1.45; font-size: .95em; }
+.remote-control-reading table.inspector-table th,
+.remote-control-reading table.inspector-table td { white-space: normal; overflow-wrap: anywhere; text-align: left; vertical-align: top; padding: .45em .6em; border-bottom: 1px solid #bbb; }
+.remote-control-reading table.inspector-table th { color: #222; border-bottom: 2px solid #666; }
+.remote-control-reading .reading-next { margin-top: 2em; padding-top: .8em; border-top: 1px solid #bbb; }
+.remote-control-reading table.inspector-table th:first-child,
+.remote-control-reading table.inspector-table td:first-child { min-width: 6em; overflow-wrap: normal; }

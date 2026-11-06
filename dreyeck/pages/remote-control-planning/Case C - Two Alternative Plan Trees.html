@@ -1,0 +1,20 @@
+<in-package>dreyeck/work/remote-control-planning</in-package>
+<div class="remote-control-reading" lang="en">
+
+<p class="kicker">4 of 6 · Case C: two alternative plan trees</p>
+<h1>Case C - Two Alternative Plan Trees</h1>
+<p>Case C assumes that both access routes are available. The Application API is present, hypothetical authorization is given, and execution and model authority remain local. Two methods therefore satisfy their prerequisites. Asked to search for all solutions, SHOP3 produces two plans.</p>
+<h2>First decomposition: through an agent session</h2>
+<p>The agent method decomposes the shared task into three steps. First, the model records the agent route. It then assigns Android the role of a control surface for that route. Finally, it checks the modeled conditions for the route and records simulated verification.</p>
+<ol><li><code>!model-agent-route</code>: the route is recorded in the state.</li><li><code class="wrap">!model-control-surface … agent</code>: Android remains a control surface.</li><li><code class="wrap">!verify-modeled-control … agent</code>: the symbolic conditions are satisfied.</li></ol>
+<p>Open the <a expr="(reading-alternative :agent :plan)">computed agent plan</a>, its <a expr="(reading-alternative :agent :tree)">agent plan tree</a>, or the <a expr="(reading-alternative :agent :state)">simulated agent final state</a>. These are components of the same computed Case C result, not plans reconstructed for this page.</p>
+<h2>Second decomposition: directly to the Application API</h2>
+<p>On the direct route, an assumed HTTP/WebSocket adapter replaces the agent session as the means of access. The other responsibilities remain the same. The first primitive plan element is therefore <code>!model-direct-route</code>; the next two steps carry the route label <code>direct</code>.</p>
+<p>The <a expr="(reading-alternative :direct :plan)">computed direct plan</a>, the <a expr="(reading-alternative :direct :tree)">direct plan tree</a>, and the <a expr="(reading-alternative :direct :state)">simulated direct final state</a> make this second decomposition inspectable. Solution order does not rank their quality; the links identify an alternative by its actual first operator.</p>
+<h2>What the tree reveals</h2>
+<p>A plan lists the primitive steps. Its plan tree also shows which method decomposed the shared task into precisely those steps. Both trees therefore start from the same architecture task but differ in method and route. Both final states preserve the MacBook's authority.</p>
+<p class="evidence"><span class="kind">Observed evidence.</span> The executed A–E tests in the first slice and its review found two distinct plans and trees for C. The assignment also reports that C is locally visible with <code>:plan-only</code>. This is not treated here as completed acceptance of the entire Inspector experience.</p>
+<p>The <a expr="(reading-result :c)">shared Case C plan result</a> holds both alternatives. The reading retains this observation when first opened in the current image so that subsequent links refer to the same run. Reloading the optional reading starts a new set of observations. None of these links executes a plan.</p>
+
+<p class="reading-next"><a page="How SHOP3 Reads the Architecture Task">Previous: How SHOP3 Reads the Architecture Task</a> · <a page="Cases D and E - When Planning Refuses">Next: Cases D and E - When Planning Refuses</a> · <a page="Planning Remote Control for the Zettelkasten App with SHOP3">Back to the start</a></p>
+</div>

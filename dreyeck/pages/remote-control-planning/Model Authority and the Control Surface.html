@@ -1,0 +1,17 @@
+<in-package>dreyeck/work/remote-control-planning</in-package>
+<div class="remote-control-reading" lang="en">
+
+<p class="kicker">2 of 6 · The boundary between model and control surface</p>
+<h1>Model Authority and the Control Surface</h1>
+<p>A user action and its effect on the domain model are distinct. The phone can display the selected note and formulate a request to change it. The local runtime decides whether that request becomes a valid change and how to persist it. Both planning alternatives share this assignment of authority.</p>
+<h2>What should remain local</h2>
+<p><em>Execution authority</em> means that the MacBook application performs domain operations. <em>Model authority</em> means that its local Zettelkasten model is the authoritative instance for those operations. The mobile <em>control surface</em> presents commands and results. This separation does not by itself make remote access secure; it identifies where permission checks and consistency guarantees would have to be enforced.</p>
+<div class="table-scroll"><table class="inspector-table"><thead><tr><th>Location</th><th>Responsibility in the architecture goal</th><th>What this does not establish</th></tr></thead><tbody><tr><td>MacBook</td><td>Local execution and model authority</td><td>That a complete Application API exists.</td></tr><tr><td>Android</td><td>Control surface, requests, and display</td><td>That the phone may assume data authority.</td></tr><tr><td>Access route</td><td>Connects the interface to the local API</td><td>That a transport is already authenticated or secure.</td></tr></tbody></table></div>
+<h2>Why existing ports are not yet a remote API</h2>
+<p>In the inspected ZettelkastenFX revision, <code>zk-core</code> excludes UI and storage implementations from its core. Repository ports describe domain access; SQLite implements the storage adapters. The ZKN3 source adapter reads interchange data into an import batch. These boundaries suggest an architectural direction. They define neither a remote command nor an agent session.</p>
+<p>The <a href="https://github.com/RalfBarkow/ZettelkastenFX/blob/d841883782cf38c1bc8da6405b83f4bfa35385a2/zk-core/src/test/java/zk/core/architecture/CoreBoundaryTest.java">core boundary test</a> and the <a href="https://github.com/RalfBarkow/ZettelkastenFX/blob/d841883782cf38c1bc8da6405b83f4bfa35385a2/zk-core/src/main/java/zk/core/ports/Zkn3SourceReader.java">ZKN3 reader port</a> are sources for this account. The documented boundaries are not evidence of implemented mobile control.</p>
+<p class="evidence assumption"><span class="kind">Modeled assumption.</span> The planning state contains <code class="wrap">(execution-authority zettelkasten macbook-a)</code> and <code class="wrap">(model-authority zettelkasten macbook-a)</code>. Both methods require these facts; no operator removes them or transfers authority to Android.</p>
+<p>The <a expr="(getf (reading-case :c) :initial-state)">initial facts of Case C</a> make this decision explicit. A future implementation would have to enforce the boundary in practice. Here, the planner checks only that its symbolic description preserves it.</p>
+
+<p class="reading-next"><a page="Planning Remote Control for the Zettelkasten App with SHOP3">Previous: Planning Remote Control for the Zettelkasten App with SHOP3</a> · <a page="How SHOP3 Reads the Architecture Task">Next: How SHOP3 Reads the Architecture Task</a> · <a page="Planning Remote Control for the Zettelkasten App with SHOP3">Back to the start</a></p>
+</div>

@@ -1,0 +1,19 @@
+<in-package>dreyeck/work/remote-control-planning</in-package>
+<div class="remote-control-reading" lang="en">
+
+<p class="kicker">5 of 6 · Refusal when prerequisites are missing</p>
+<h1>Cases D and E - When Planning Refuses</h1>
+<p>Two available transports are not enough for a valid plan. The cases with no solution reveal the boundary that both methods require. Here, the absence of a plan is an expected consequence of the modeled conditions, not a network failure.</p>
+<h2>Case D: no hypothetical authorization</h2>
+<p>In D, the API and both access routes are present, but the authorization fact is missing. Both methods require it. SHOP3 can therefore use neither decomposition and returns no solution. A different transport cannot substitute for the missing prerequisite.</p>
+<p>Compare the <a expr="(getf (reading-case :d) :initial-state)">initial facts of D</a> with <a expr="(reading-case :d)">Case D as an inspection object</a> and its <a expr="(reading-result :d)">result with no plan</a>. Plans, plan trees, and final states are empty; the initial problem remains inspectable.</p>
+<p class="evidence assumption"><span class="kind">Modeled assumption.</span> This refusal applies to the modeled task. It does not prove that a real application rejects unauthorized access. This slice includes neither real authentication nor an access-control test.</p>
+<h2>Case E: no Application API</h2>
+<p>In E, hypothetical authorization is given and both access routes are available. Yet the shared domain interface to the local runtime is missing. No transport can replace that interface: both methods require the Application API and are inapplicable without it.</p>
+<p>The <a expr="(getf (reading-case :e) :initial-state)">initial facts of E</a>, <a expr="(reading-case :e)">Case E</a>, and its <a expr="(reading-result :e)">result with no plan</a> show a different cause of the same planning outcome. SHOP3 is not saying that an API could never be built; it finds no solution under the supplied facts.</p>
+<h2>The positive controls</h2>
+<p>In <a expr="(reading-case :a)">Case A</a>, only direct access is missing: the agent method remains applicable. In <a expr="(reading-case :b)">Case B</a>, only the agent session is missing: the direct method remains applicable. Together with C, D, and E, these controls distinguish a missing alternative from a missing shared prerequisite.</p>
+<p>These small cases bound the planner's contribution precisely: it enumerates possible approaches in the model and refuses impossible ones. The final page explains the evidence for these claims and the acceptance checks that remain open.</p>
+
+<p class="reading-next"><a page="Case C - Two Alternative Plan Trees">Previous: Case C - Two Alternative Plan Trees</a> · <a page="Evidence and Open Acceptance">Next: Evidence and Open Acceptance</a> · <a page="Planning Remote Control for the Zettelkasten App with SHOP3">Back to the start</a></p>
+</div>
