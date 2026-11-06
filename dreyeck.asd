@@ -1060,6 +1060,7 @@
                                  "dreyeck/authority/reading"
                                  "dreyeck/clog-tutorial/reading"
                                  "dreyeck/ccnx-federated-wiki"
+                                 "dreyeck/work/remote-control-planning/reading"
                                  "dreyeck/traverse/reading"
                                  ;; Read-only unless its own configuration embeds the loopback test editor.
                                  "dreyeck/fedwiki-original-editor-demo")
@@ -3625,7 +3626,7 @@
              (uiop:symbol-call :dreyeck/work/remote-control-planning :run-tests)))
 
 (defsystem "dreyeck/work/remote-control-planning/reading"
-  :description "Optional local Catalog reading; never part of production startup"
+  :description "Read-only SHOP3 remote-control planning HyperBook; plan-only Catalog member"
   :depends-on ("dreyeck/work/remote-control-planning")
   :components ((:file "dreyeck/work/remote-control-reading")))
 
