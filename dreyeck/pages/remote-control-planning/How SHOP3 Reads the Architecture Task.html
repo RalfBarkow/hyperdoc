@@ -1,0 +1,20 @@
+<in-package>dreyeck/work/remote-control-planning</in-package>
+<div class="remote-control-reading">
+
+<p class="kicker">3 von 6 · Aufgaben, Methoden, Operatoren und Zustände</p>
+<h1>How SHOP3 Reads the Architecture Task</h1>
+<p>SHOP3 ist ein hierarchischer Aufgabenplaner. Man gibt ihm eine Aufgabe, Wissen über die angenommene Situation und Regeln, wie Aufgaben zerlegt werden dürfen. Er arbeitet die Aufgabe in der Reihenfolge ihrer Zerlegung ab. Eine passende Zerlegung liefert einen Plan aus primitiven Schritten; fehlt eine notwendige Bedingung, ist dieser Weg nicht anwendbar.</p>
+<h2>Die vier Begriffe an einem Beispiel</h2>
+<p>Die <em>Aufgabe</em> sagt, was erreicht werden soll, ohne den Zugangsweg festzulegen:</p>
+<pre><code>(enable-mobile-control zettelkasten macbook-a android)</code></pre>
+<p>Eine <em>Methode</em> erklärt, wie diese abstrakte Aufgabe in kleinere Aufgaben zerlegt wird. Hier gibt es zwei getrennte Methodendefinitionen für dieselbe Aufgabe. Die Agentenmethode benötigt eine Agentensitzung; die direkte Methode benötigt einen direkten Transport. Beide verlangen Application API, hypothetische Autorisierung und lokale Zuständigkeit.</p>
+<p>Ein <em>Operator</em> ist ein primitiver Schritt, der nicht weiter zerlegt wird. In diesem Experiment fügt er ausschließlich dem simulierten Zustand Fakten hinzu. Der Operator <code>!model-agent-route</code> hält beispielsweise fest, dass der Agentenweg modelliert gewählt wurde. Er richtet keine Sitzung ein.</p>
+<p>Der <em>Zustand</em> ist die Menge der Fakten, mit denen SHOP3 rechnet. Eine Aussage wie <code class="wrap">(authorized android zettelkasten)</code> ist hier ein hypothetisches Faktum. Sie ist kein Zugriffstoken und keine Zustimmung einer Person. Der Planer kann nur mit den Bedingungen rechnen, die die Domain überhaupt beschreibt.</p>
+<h2>Zwei Methoden, keine erfundene dritte Lösung</h2>
+<p>Das frühere Dokumentationsexperiment zerlegte eine Aufgabe in eine einzige feste Schrittfolge. Es erhielt deshalb Bewertung B. Die jetzige Domain enthält zwei vorgegebene Alternativen. SHOP3 erfindet sie nicht: Sein zusätzlicher Beitrag ist, ihre Anwendbarkeit für verschiedene Eingaben zu prüfen und beide gültigen Zerlegungen aufzuzählen.</p>
+<p>Der Runner verwendet <code>:which :all</code> und <code>:plan-tree t</code>. Er behält Pläne, Rechenzeit, Planbäume und Endzustände im vorhandenen HyperDoc-Planresultat. Eine leere Menge von Lösungen bedeutet hier „kein Plan“. Das wäre etwas anderes als ein gültiger Plan ohne weitere Schritte.</p>
+<p>Der <a expr="(getf (reading-case :c) :problem)">SHOP3-Aufgabenfall</a>, die <a expr="(getf (reading-case :c) :methods)">tatsächlichen Methoden</a> und das <a expr="(reading-result :c)">berechnete Resultat</a> erlauben den Übergang von dieser Erklärung zur Implementierung. Diese Objekte bleiben die Autorität für die berechneten Pläne.</p>
+<p class="evidence open"><span class="kind">Offene Frage.</span> Ob diese beiden Zugangswege für eine reale Anwendung tragfähig sind, ist damit noch nicht entschieden. Der Planer prüft das Modell, nicht dessen Vollständigkeit gegenüber einer realen Installation.</p>
+
+<p class="reading-next"><a page="Model Authority and the Control Surface">Zurück: Model Authority and the Control Surface</a> · <a page="Case C - Two Alternative Plan Trees">Weiter: Case C - Two Alternative Plan Trees</a> · <a page="Planning Remote Control for the Zettelkasten App with SHOP3">Zum Einstieg</a></p>
+</div>

@@ -1,0 +1,20 @@
+<in-package>dreyeck/work/remote-control-planning</in-package>
+<div class="remote-control-reading">
+
+<p class="kicker">4 von 6 · Fall C: zwei alternative Planbäume</p>
+<h1>Case C - Two Alternative Plan Trees</h1>
+<p>In Fall C sind beide Zugangswege als verfügbar angenommen. Die Application API ist vorhanden, die hypothetische Autorisierung liegt vor, und die lokale Ausführungs- und Modellzuständigkeit bleibt gesetzt. Damit erfüllen zwei Methoden ihre Voraussetzungen. Mit der Anweisung, alle Lösungen zu suchen, liefert SHOP3 zwei Pläne.</p>
+<h2>Erste Zerlegung: über eine Agentensitzung</h2>
+<p>Die Agentenmethode zerlegt die gemeinsame Aufgabe in drei Schritte. Zuerst hält das Modell den Agentenweg fest. Danach ordnet es Android die Rolle einer Control Surface dieses Weges zu. Abschließend prüft es die modellierten Bedingungen für diesen Weg und vermerkt die simulierte Verifikation.</p>
+<ol><li><code>!model-agent-route</code>: Der Weg ist im Zustand festgehalten.</li><li><code class="wrap">!model-control-surface … agent</code>: Android bleibt Bedienoberfläche.</li><li><code class="wrap">!verify-modeled-control … agent</code>: Die symbolischen Bedingungen sind erfüllt.</li></ol>
+<p>Öffne den <a expr="(reading-alternative :agent :plan)">berechneten Agentenplan</a>, seinen <a expr="(reading-alternative :agent :tree)">Agenten-Planbaum</a> oder den <a expr="(reading-alternative :agent :state)">simulierten Agenten-Endzustand</a>. Das sind Komponenten desselben berechneten Fall-C-Resultats, keine für die Seite nachgezeichneten Pläne.</p>
+<h2>Zweite Zerlegung: direkt zur Application API</h2>
+<p>Beim direkten Weg ersetzt ein angenommener HTTP-/WebSocket-Adapter die Agentensitzung als Zugang. Die übrigen Verantwortlichkeiten bleiben gleich. Das erste primitive Plan-Element lautet deshalb <code>!model-direct-route</code>; die beiden folgenden Schritte tragen das Routenmerkmal <code>direct</code>.</p>
+<p>Der <a expr="(reading-alternative :direct :plan)">berechnete Direct-Plan</a>, der <a expr="(reading-alternative :direct :tree)">Direct-Planbaum</a> und der <a expr="(reading-alternative :direct :state)">simulierte Direct-Endzustand</a> machen diese zweite Zerlegung untersuchbar. Die Reihenfolge der Lösungen ist keine Rangfolge ihrer Qualität; die Links suchen die Alternative anhand ihres tatsächlichen ersten Operators.</p>
+<h2>Was im Baum sichtbar wird</h2>
+<p>Ein Plan nennt die primitiven Schritte. Der Planbaum zeigt zusätzlich, welche Methode die gemeinsame Aufgabe in genau diese Schritte zerlegt hat. Beide Bäume beginnen also bei derselben Architekturaufgabe und unterscheiden sich in ihrer Methode und Route. Beide Endzustände behalten die MacBook-Zuständigkeiten.</p>
+<p class="evidence"><span class="kind">Beobachtete Evidenz.</span> Die ausgeführten A–E-Tests des ersten Slices und des Reviews fanden für C zwei unterschiedliche Pläne und Bäume. Der Auftrag berichtet zusätzlich die lokale Sichtbarkeit von C mit <code>:plan-only</code>. Hier wird daraus keine abgeschlossene Inspector-Gesamtabnahme abgeleitet.</p>
+<p>Das <a expr="(reading-result :c)">gemeinsame Fall-C-Planresultat</a> hält beide Alternativen zusammen. Die Lektüre speichert diese Beobachtung beim ersten Öffnen im aktuellen Image, damit spätere Links auf denselben Lauf zeigen. Ein Neuladen der optionalen Lektüre beginnt neue Beobachtungen. Keiner der Links führt einen Plan aus.</p>
+
+<p class="reading-next"><a page="How SHOP3 Reads the Architecture Task">Zurück: How SHOP3 Reads the Architecture Task</a> · <a page="Cases D and E - When Planning Refuses">Weiter: Cases D and E - When Planning Refuses</a> · <a page="Planning Remote Control for the Zettelkasten App with SHOP3">Zum Einstieg</a></p>
+</div>

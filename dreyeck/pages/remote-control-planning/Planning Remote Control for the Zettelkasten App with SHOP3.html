@@ -1,20 +1,18 @@
-<h1>Planning Remote Control for the Zettelkasten App with SHOP3</h1>
 <in-package>dreyeck/work/remote-control-planning</in-package>
-<p>Optional, plan-only architecture experiment for Zettel 11551: Remote Control für die Zettelkasten-App. Execution authority stays on the MacBook, model authority in the local Zettelkasten runtime; Android is a control surface. This is neither an implemented remote-control feature nor an approved project baseline.</p>
-<p>The existing documentation experiment received verdict B: one fixed decomposition. Here two separately defined HTN methods share the task <code>(enable-mobile-control zettelkasten macbook-a android)</code>. SHOP3 selects applicable decompositions from hypothetical input facts; it does not discover architectures.</p>
-<h2>Two methods</h2>
-<ul><li>Agent session: local agent/MCP client accesses an assumed UI-independent Application API, reached through a remote agent session.</li><li>Direct API: an assumed HTTP/WebSocket adapter exposes that API to an authenticated mobile browser/PWA.</li></ul>
-<p>Both require modeled Application API availability, authorization, local execution authority and local model authority. Agent requires an agent-session fact; Direct requires a direct-transport fact. Their first primitive operators differ. Every primitive only adds facts to SHOP3's simulated state. No callback, file write, application start, permission grant or network operation belongs to the domain.</p>
-<h2>Inspect the planning evidence</h2>
-<p><a expr="(remote-control-experiment :a)">A: Agent only</a> · <a expr="(remote-control-experiment :b)">B: Direct only</a> · <a expr="(remote-control-experiment :c)">C: Both methods</a> · <a expr="(remote-control-experiment :d)">D: No authorization</a> · <a expr="(remote-control-experiment :e)">E: No Application API</a></p>
-<p>Each context contains the actual SHOP3 problem and domain/method objects, initial facts, an existing <code>hyperdoc-htn-plan-result</code>, outcome and limitations. Inspect the result slots for shorter and raw plans, plan trees, final states and CPU time. The runner preserves all four <code>find-plans</code> return values with <code>:which :all :plan-tree t</code>. No-plan failure is distinct from a successful empty plan. The generic source-edit checklist classifier is intentionally not used for these simulated operators.</p>
-<pre>(asdf:load-system "dreyeck/work/remote-control-planning/reading")
-(defparameter *remote-control-experiment*
-  (dreyeck/work/remote-control-planning:remote-control-experiment :c))
-(clog-moldable-inspector:clog-inspect :object *remote-control-experiment*)</pre>
-<p>Load the inspector through the established local environment if it is not already loaded. This page registers a separate reading in the current Catalog only when explicitly loaded. It changes no production Catalog configuration.</p>
-<h2>Tests and limits</h2>
-<pre>(asdf:test-system "dreyeck/work/remote-control-planning/tests")
-(asdf:test-system "dreyeck/work/planning/tests")</pre>
-<p>Expected counts A–E: 1, 1, 2, 0, 0. Tests check distinct plans, route identity, aligned nonempty plan trees and final states, preserved initial facts and local authorities, and the modeled mobile-control-verified predicate. This predicate is not real end-to-end evidence. Authorization facts are hypothetical planning inputs, never real access approval. See <code>docs/remote-control-planning.md</code> for recorded execution evidence and unresolved Inspector acceptance.</p>
-<p>The result tests conditional selection and enumeration beyond the prior fixed sequence. It does not establish transport security, model/API completeness, mobile usability, optimality or repair planning. Project-plan/WBS proposals of 5 November 2026 remain drafts. No productive source data, existing AC-06 artifacts or acceptance records are changed.</p>
+<div class="remote-control-reading">
+
+<p class="kicker">1 von 6 · Die Architekturfrage</p>
+<h1>Planning Remote Control for the Zettelkasten App with SHOP3</h1>
+<p>Auf dem MacBook läuft der Zettelkasten. Auf dem Android-Gerät möchte jemand einen Zettel auswählen oder eine Änderung anstoßen. Was muss zwischen diesen beiden Orten liegen, damit die Bedienung mobil wird, die Verantwortung für Daten und Ausführung aber bei der lokalen Anwendung bleibt? Diese Frage aus Zettel 11551 führt durch dieses Buch.</p>
+<p>Die naheliegende Verbindung über ein Netz löst die Architekturfrage noch nicht. Eine Oberfläche kann einen Wunsch senden; die lokale Anwendung muss ihn verstehen, seine Zulässigkeit beurteilen und ihn gegen ihr fachliches Modell ausführen. Eine zweite Modellkopie auf dem Telefon würde dagegen zusätzliche Fragen nach Synchronisation und widersprüchlichen Änderungen eröffnen. Dieses Experiment untersucht bewusst die Trennung von lokaler Ausführung und mobiler Bedienung.</p>
+<p class="evidence assumption"><span class="kind">Modellierte Annahme.</span> Zwei Wege könnten diese Trennung tragen: eine entfernte Agentensitzung mit lokalem Zugriff auf eine Application API oder ein direkter HTTP-/WebSocket-Adapter für eine Browser-/PWA-Oberfläche. Ihre Verfügbarkeit ist eine Eingabe des Experiments, kein Befund über installierte Dienste.</p>
+<h2>Eine Frage, zwei mögliche Wege</h2>
+<p>Beim Agentenweg vermittelt eine Sitzung zwischen Android und einem lokalen Agenten beziehungsweise MCP-Client. Beim direkten Weg spricht die mobile Oberfläche mit einem Adapter der Anwendung. In beiden Fällen bleibt die Application API eine lokale fachliche Grenze. Die Methoden unterscheiden den Zugang, nicht den Besitzer des Modells.</p>
+<p>SHOP3 wird hier als Planer eingesetzt: Es prüft angenommene Voraussetzungen und zerlegt eine gemeinsame Aufgabe in mögliche Schritte. Es startet keinen Agenten und öffnet keine Verbindung. Erst wird erklärt, warum beide Wege dieselbe Grenze respektieren müssen; dann lässt sich verstehen, warum der Planer manchmal zwei Antworten und manchmal keine liefert.</p>
+<p class="evidence"><span class="kind">Beobachtete Evidenz.</span> Die Cloud-Tests des ersten Slices lieferten für Fall C zwei Pläne. Der Auftrag zu dieser Lektüre berichtet zusätzlich, dass Fall C lokal im CLOG Inspector erreichbar ist und <code>:plan-only</code> zeigt. Daraus folgt keine erfolgreiche mobile Bedienung.</p>
+<h2>Der Lesepfad</h2>
+<ol><li>Diese Architekturfrage stellt das Ziel.</li><li><a page="Model Authority and the Control Surface">Modell und Control Surface</a> klärt die Zuständigkeit.</li><li><a page="How SHOP3 Reads the Architecture Task">Die Sprache von SHOP3</a> erklärt das Planen.</li><li><a page="Case C - Two Alternative Plan Trees">Fall C</a> verfolgt die beiden Zerlegungen.</li><li><a page="Cases D and E - When Planning Refuses">Fälle D und E</a> erklären ausbleibende Pläne.</li><li><a page="Evidence and Open Acceptance">Evidenz und offene Abnahme</a> begrenzt die Aussage.</li></ol>
+<p>Wer schon jetzt das Untersuchungsobjekt sehen möchte, kann <a expr="(reading-case :c)">den tatsächlichen Fall C</a> öffnen. Für das Verständnis der beiden Alternativen ist dieser Schritt noch nicht nötig. Der Bezug auf Zettel 11551 übernimmt Titel und Architekturziel aus dem Auftrag; die produktive ZKN3-Datenquelle wurde nicht geöffnet.</p>
+
+<p class="reading-next"><a page="Model Authority and the Control Surface">Weiter: Model Authority and the Control Surface</a></p>
+</div>

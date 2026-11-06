@@ -3628,3 +3628,11 @@
   :description "Optional local Catalog reading; never part of production startup"
   :depends-on ("dreyeck/work/remote-control-planning")
   :components ((:file "dreyeck/work/remote-control-reading")))
+
+(defsystem "dreyeck/work/remote-control-planning/reading/tests"
+  :description "Reading links, shared planner observations and book-local assets"
+  :depends-on ("dreyeck/work/remote-control-planning/reading")
+  :components ((:file "dreyeck/tests/remote-control-reading"))
+  :perform (test-op (op component)
+             (declare (ignore op component))
+             (uiop:symbol-call :dreyeck/work/remote-control-planning :run-reading-tests)))
