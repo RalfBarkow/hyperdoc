@@ -1,0 +1,1684 @@
+baseline BEGIN dreyeck/work/defederation-planning/tests
+; compiling file "/workspace/scratch/hyperdoc-link-baseline/hyperbook/package.lisp" (written 07 NOV 2026 10:12:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-link-baseline/hyperbook/package-tmpGHU3ALSV.fasl
+; compilation finished in 0:00:00.000
+; compiling file "/workspace/scratch/hyperdoc-link-baseline/hyperbook/hyperbooks.lisp" (written 07 NOV 2026 10:12:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-link-baseline/hyperbook/hyperbooks-tmpAAURSO1.fasl
+; compilation finished in 0:00:00.063
+; compiling file "/workspace/scratch/hyperdoc-link-baseline/hyperbook/catalog.lisp" (written 07 NOV 2026 10:12:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-link-baseline/hyperbook/catalog-tmp5GEXGEG5.fasl
+; compilation finished in 0:00:00.019
+; compiling file "/workspace/scratch/hyperdoc-link-baseline/hyperbook/html-books.lisp" (written 07 NOV 2026 10:12:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-link-baseline/hyperbook/html-books-tmpAR3FSGEY.fasl
+; compilation finished in 0:00:00.004
+; compiling file "/workspace/scratch/hyperdoc-link-baseline/hyperbook/html-rendering-support.lisp" (written 07 NOV 2026 10:12:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-link-baseline/hyperbook/html-rendering-support-tmpJAIDFZTC.fasl
+; compilation finished in 0:00:00.007
+; compiling file "/workspace/scratch/hyperdoc-link-baseline/hyperdoc/package.lisp" (written 07 NOV 2026 10:12:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-link-baseline/hyperdoc/package-tmp8V3J6PE9.fasl
+; compilation finished in 0:00:00.004
+; compiling file "/workspace/scratch/hyperdoc-link-baseline/hyperdoc/core.lisp" (written 07 NOV 2026 10:12:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-link-baseline/hyperdoc/core-tmp9V47YWQF.fasl
+; compilation finished in 0:00:00.051
+; compiling file "/workspace/scratch/hyperdoc-link-baseline/hyperdoc/links-in-code.lisp" (written 07 NOV 2026 10:12:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-link-baseline/hyperdoc/links-in-code-tmp9BN22RMA.fasl
+; compilation finished in 0:00:00.004
+; compiling file "/workspace/scratch/hyperdoc-link-baseline/hyperdoc/defining.lisp" (written 07 NOV 2026 10:12:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-link-baseline/hyperdoc/defining-tmp1CXFJSK9.fasl
+; compilation finished in 0:00:00.008
+; compiling file "/workspace/scratch/hyperdoc-link-baseline/hyperdoc/examples.lisp" (written 07 NOV 2026 10:12:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-link-baseline/hyperdoc/examples-tmpX4BRKI0R.fasl
+; compilation finished in 0:00:00.015
+; compiling file "/workspace/scratch/hyperdoc-link-baseline/hyperdoc/tools.lisp" (written 07 NOV 2026 10:12:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-link-baseline/hyperdoc/tools-tmpQ371UGST.fasl
+; compilation finished in 0:00:00.015
+; compiling file "/workspace/scratch/hyperdoc-link-baseline/hyperdoc/hyperdoc.lisp" (written 07 NOV 2026 10:12:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-link-baseline/hyperdoc/hyperdoc-tmp2OWI3Q7U.fasl
+; compilation finished in 0:00:00.004
+
+
+SHOP3 version 4.3.1
+Copyright (C) 2004-2026 SIFT, LLC.
+
+Original SHOP2 code Copyright (C) 2002  University of Maryland.
+
+This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+KIND, either express or implied.  This software is distributed under an
+MPL/GPL/LGPL triple license.  For details, see the software source file.
+; compiling file "/workspace/scratch/hyperdoc-link-baseline/dreyeck/shop3/package.lisp" (written 07 NOV 2026 10:12:21 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-link-baseline/dreyeck/shop3/package-tmp9KKTJMYV.fasl
+; compilation finished in 0:00:00.003
+; compiling file "/workspace/scratch/hyperdoc-link-baseline/dreyeck/shop3/manual-topics.lisp" (written 07 NOV 2026 10:12:21 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-link-baseline/dreyeck/shop3/manual-topics-tmpJU0JWO19.fasl
+; compilation finished in 0:00:00.083
+; compiling file "/workspace/scratch/hyperdoc-link-baseline/dreyeck/shop3/plan-objects.lisp" (written 07 NOV 2026 10:12:21 AM):
+
+; file: /workspace/scratch/hyperdoc-link-baseline/dreyeck/shop3/plan-objects.lisp
+; in: DEFUN %SOURCE->PLAN
+;     'NIL
+;
+; note: deleting unreachable code
+
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-link-baseline/dreyeck/shop3/plan-objects-tmpZX2WN8N4.fasl
+; compilation finished in 0:00:00.019
+; compiling file "/workspace/scratch/hyperdoc-link-baseline/dreyeck/shop3/examples.lisp" (written 07 NOV 2026 10:12:21 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-link-baseline/dreyeck/shop3/examples-tmpOU81XRV0.fasl
+; compilation finished in 0:00:00.012
+; compiling file "/workspace/scratch/hyperdoc-link-baseline/dreyeck/shop3/views.lisp" (written 07 NOV 2026 10:12:21 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-link-baseline/dreyeck/shop3/views-tmpY2ML9CFA.fasl
+; compilation finished in 0:00:00.003
+; compiling file "/workspace/scratch/hyperdoc-link-baseline/dreyeck/work/defederation-planning.lisp" (written 07 NOV 2026 10:12:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-link-baseline/dreyeck/work/defederation-planning-tmpX2JYJDQE.fasl
+; compilation finished in 0:00:00.051
+
+Defining domain DEFEDERATION-PREPARATION...
+; compiling file "/workspace/scratch/hyperdoc-link-baseline/dreyeck/tests/defederation-planning.lisp" (written 07 NOV 2026 10:12:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-link-baseline/dreyeck/tests/defederation-planning-tmpOPCILR65.fasl
+; compilation finished in 0:00:00.019
+DEFEDERATION A PASS: :PLANNED; 1 plans/trees/states; :PLAN-ONLY; :NOT-EXECUTED
+  (((!PREPARE-LOCAL-LINKS :LOCAL-WIKI :TARGET-PAGE)
+    (!PREPARE-PARAGRAPH-RENDERING :LOCAL-WIKI)))
+DEFEDERATION B PASS: :PLANNED; 1 plans/trees/states; :PLAN-ONLY; :NOT-EXECUTED
+  (((!SIMULATE-FORK :LOCAL-WIKI :TARGET-PAGE :REMOTE-WIKI :SNAPSHOT-1)
+    (!PREPARE-LOCAL-LINKS :LOCAL-WIKI :TARGET-PAGE)
+    (!PREPARE-PARAGRAPH-RENDERING :LOCAL-WIKI)))
+DEFEDERATION C PASS: :NO-PLAN; 0 plans/trees/states; :PLAN-ONLY; :NOT-EXECUTED
+  NIL
+DEFEDERATION (MISSING FORK-PERMITTED) PASS: :NO-PLAN; 0 plans/trees/states; :PLAN-ONLY; :NOT-EXECUTED
+  NIL
+DEFEDERATION (MISSING REMOTE-SNAPSHOT) PASS: :NO-PLAN; 0 plans/trees/states; :PLAN-ONLY; :NOT-EXECUTED
+  NIL
+DEFEDERATION (MISSING LOCAL-PAGE-ABSENT) PASS: :NO-PLAN; 0 plans/trees/states; :PLAN-ONLY; :NOT-EXECUTED
+  NIL
+DEFEDERATION EXPLICITLY-FORBIDDEN PASS: :NO-PLAN; 0 plans/trees/states; :PLAN-ONLY; :NOT-EXECUTED
+  NIL
+DEFEDERATION SNAPSHOT-OBSERVED-UNAVAILABLE PASS: :NO-PLAN; 0 plans/trees/states; :PLAN-ONLY; :NOT-EXECUTED
+  NIL
+DEFEDERATION LOCAL-INSTEAD-OF-ABSENT PASS: :PLANNED; 1 plans/trees/states; :PLAN-ONLY; :NOT-EXECUTED
+  (((!PREPARE-LOCAL-LINKS :LOCAL-WIKI :TARGET-PAGE)
+    (!PREPARE-PARAGRAPH-RENDERING :LOCAL-WIKI)))
+DEFEDERATION LOCAL-EVEN-IF-FORK-FORBIDDEN PASS: :PLANNED; 1 plans/trees/states; :PLAN-ONLY; :NOT-EXECUTED
+  (((!PREPARE-LOCAL-LINKS :LOCAL-WIKI :TARGET-PAGE)
+    (!PREPARE-PARAGRAPH-RENDERING :LOCAL-WIKI)))
+DEFEDERATION (CONTRADICTION LOCAL-PAGE) PASS: :NO-PLAN; 0 plans/trees/states; :PLAN-ONLY; :NOT-EXECUTED
+  NIL
+DEFEDERATION (CONTRADICTION SNAPSHOT-UNAVAILABLE) PASS: :NO-PLAN; 0 plans/trees/states; :PLAN-ONLY; :NOT-EXECUTED
+  NIL
+DEFEDERATION (CONTRADICTION FORK-FORBIDDEN) PASS: :NO-PLAN; 0 plans/trees/states; :PLAN-ONLY; :NOT-EXECUTED
+  NIL
+DEFEDERATION CHANGED-FORK-METHOD-NO-ALTERNATIVE PASS: :NO-PLAN; 0 plans/trees/states; :PLAN-ONLY; :NOT-EXECUTED
+  NIL
+DEFEDERATION CHANGED-FORK-METHOD-LOCAL-STILL-WORKS PASS: :PLANNED; 1 plans/trees/states; :PLAN-ONLY; :NOT-EXECUTED
+  (((!PREPARE-LOCAL-LINKS :LOCAL-WIKI :TARGET-PAGE)
+    (!PREPARE-PARAGRAPH-RENDERING :LOCAL-WIKI)))
+DEFEDERATION CHANGED-FORK-METHOD-EVIDENCE-RESTORED PASS: :PLANNED; 1 plans/trees/states; :PLAN-ONLY; :NOT-EXECUTED
+  (((!SIMULATE-FORK :LOCAL-WIKI :TARGET-PAGE :REMOTE-WIKI :SNAPSHOT-1)
+    (!PREPARE-LOCAL-LINKS :LOCAL-WIKI :TARGET-PAGE)
+    (!PREPARE-PARAGRAPH-RENDERING :LOCAL-WIKI)))
+DEFEDERATION CHANGED-LOCAL-METHOD-FORK-CANNOT-BYPASS PASS: :NO-PLAN; 0 plans/trees/states; :PLAN-ONLY; :NOT-EXECUTED
+  NIL
+DEFEDERATION ORIGINAL-DOMAIN-INTACT PASS: :PLANNED; 1 plans/trees/states; :PLAN-ONLY; :NOT-EXECUTED
+  (((!SIMULATE-FORK :LOCAL-WIKI :TARGET-PAGE :REMOTE-WIKI :SNAPSHOT-1)
+    (!PREPARE-LOCAL-LINKS :LOCAL-WIKI :TARGET-PAGE)
+    (!PREPARE-PARAGRAPH-RENDERING :LOCAL-WIKI)))
+DEFEDERATION-PLANNING-PASS: state-dependent methods; exhaustive alternatives; no execution.
+;
+; compilation unit finished
+;   printed 1 note
+baseline PASS dreyeck/work/defederation-planning/tests EXIT 0
+baseline BEGIN dreyeck/work/planning/tests
+WARNING: System definition file #P"/workspace/tools/nix-portable-data/.nix-portable/nix/store/fdrq5ji4dvm7jj0wzfvxcyr0rwiq2c24-sbcl-cl-who-20241012-git/cl-who.asd" contains definition for system "cl-who-test". Please only define "cl-who" and secondary systems with a name starting with "cl-who/" (e.g. "cl-who/test") in that file.
+WARNING: System definition file #P"/workspace/tools/nix-portable-data/.nix-portable/nix/store/rn29yxasws4x3wvcf6d0738zxbcrvmin-sbcl-parse-float-20200218-git/parse-float.asd" contains definition for system "parse-float-tests". Please only define "parse-float" and secondary systems with a name starting with "parse-float/" (e.g. "parse-float/test") in that file.
+WARNING: System definition file #P"/workspace/tools/nix-portable-data/.nix-portable/nix/store/bzssaly51znz21jychrjrjg22cbimv2h-sbcl-cl-template-20130615-git/cl-template.asd" contains definition for system "cl-template-tests". Please only define "cl-template" and secondary systems with a name starting with "cl-template/" (e.g. "cl-template/test") in that file.
+; compiling file "/workspace/scratch/hyperdoc-link-baseline/dreyeck/src/topicmap-package.lisp" (written 07 NOV 2026 10:12:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-link-baseline/dreyeck/src/topicmap-package-tmpGHU3ALSV.fasl
+; compilation finished in 0:00:00.000
+; compiling file "/workspace/scratch/hyperdoc-link-baseline/dreyeck/src/topicmap.lisp" (written 07 NOV 2026 10:12:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-link-baseline/dreyeck/src/topicmap-tmpAAURSO1.fasl
+; compilation finished in 0:00:00.043
+; compiling file "/workspace/scratch/hyperdoc-link-baseline/dreyeck/src/topicmap-curation-package.lisp" (written 07 NOV 2026 10:12:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-link-baseline/dreyeck/src/topicmap-curation-package-tmp5GEXGEG5.fasl
+; compilation finished in 0:00:00.004
+; compiling file "/workspace/scratch/hyperdoc-link-baseline/dreyeck/src/topicmap-curation.lisp" (written 07 NOV 2026 10:12:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-link-baseline/dreyeck/src/topicmap-curation-tmpAR3FSGEY.fasl
+; compilation finished in 0:00:00.011
+;;; Computing Hangul syllable namesSTYLE-WARNING:
+   The new FTYPE proclamation for FSET::VECTOR-SET-BINARY-SEARCH-LO
+     (FUNCTION (SIMPLE-VECTOR T) FIXNUM)
+   does not match the derived return type
+     (FUNCTION (SIMPLE-VECTOR T)
+      (VALUES (INTEGER -4611686018427387904 4611686018427387904) &OPTIONAL))
+STYLE-WARNING:
+   The new FTYPE proclamation for FSET::WB-BAG-TREE-TOTAL-COUNT
+     (FUNCTION (FSET::WB-BAG-TREE) INTEGER)
+   does not match the derived return type
+     (FUNCTION ((OR LIST FSET::WB-BAG-TREE-NODE)) *)
+STYLE-WARNING:
+   The new FTYPE proclamation for FSET::HASH-VALUE-FIXNUM
+     (FUNCTION (T) FIXNUM)
+   does not match the derived return type
+     (FUNCTION (T) (VALUES INTEGER &OPTIONAL))
+STYLE-WARNING:
+   The new FTYPE proclamation for FSET::CH-SET-NODE-ENTRY-MASK
+     (FUNCTION (T) FIXNUM)
+   does not match the derived return type
+     (FUNCTION (SIMPLE-VECTOR) (VALUES T &OPTIONAL))
+STYLE-WARNING:
+   The new FTYPE proclamation for FSET::CH-SET-NODE-SUBNODE-MASK
+     (FUNCTION (T) FIXNUM)
+   does not match the derived return type
+     (FUNCTION (SIMPLE-VECTOR) (VALUES T &OPTIONAL))
+STYLE-WARNING:
+   The new FTYPE proclamation for FSET::CH-SET-NODE-SIZE
+     (FUNCTION (T) FIXNUM)
+   does not match the derived return type
+     (FUNCTION (SIMPLE-VECTOR) (VALUES T &OPTIONAL))
+STYLE-WARNING:
+   The new FTYPE proclamation for FSET::CH-SET-NODE-HASH-VALUE
+     (FUNCTION (T) FIXNUM)
+   does not match the derived return type
+     (FUNCTION (SIMPLE-VECTOR) (VALUES T &OPTIONAL))
+STYLE-WARNING:
+   The new FTYPE proclamation for FSET::CH-MAP-NODE-ENTRY-MASK
+     (FUNCTION (T) FIXNUM)
+   does not match the derived return type
+     (FUNCTION (SIMPLE-VECTOR) (VALUES T &OPTIONAL))
+STYLE-WARNING:
+   The new FTYPE proclamation for FSET::CH-MAP-NODE-SUBNODE-MASK
+     (FUNCTION (T) FIXNUM)
+   does not match the derived return type
+     (FUNCTION (SIMPLE-VECTOR) (VALUES T &OPTIONAL))
+STYLE-WARNING:
+   The new FTYPE proclamation for FSET::CH-MAP-NODE-SIZE
+     (FUNCTION (T) FIXNUM)
+   does not match the derived return type
+     (FUNCTION (SIMPLE-VECTOR) (VALUES T &OPTIONAL))
+STYLE-WARNING:
+   The new FTYPE proclamation for FSET::CH-MAP-NODE-HASH-VALUE
+     (FUNCTION (T) FIXNUM)
+   does not match the derived return type
+     (FUNCTION (SIMPLE-VECTOR) (VALUES T &OPTIONAL))
+STYLE-WARNING:
+   Generic function FSET:ITERATOR clobbers an earlier FTYPE proclamation
+   (FUNCTION (T &KEY &ALLOW-OTHER-KEYS) (VALUES FUNCTION &REST T)) for the same
+   name with (FUNCTION (T &KEY &ALLOW-OTHER-KEYS) *).
+STYLE-WARNING:
+   The new FTYPE proclamation for SWANK/BACKEND:GETPID
+     (FUNCTION NIL (VALUES (SIGNED-BYTE 32) &OPTIONAL))
+   does not match the derived return type
+     (FUNCTION NIL *)
+WARNING:
+   redefining EMACS-INSPECT (#<SB-PCL:SYSTEM-CLASS COMMON-LISP:T>) in DEFMETHOD
+WARNING:
+   redefining 👀PRINT-STRING (#<SB-PCL:SYSTEM-CLASS COMMON-LISP:T>) in DEFMETHOD
+WARNING:
+   The new FTYPE proclamation for CLSS:MATCH-SELECTOR
+     (FUNCTION (LIST (OR PLUMP-DOM:NODE VECTOR LIST) KEYWORD)
+      (VALUES (AND (VECTOR PLUMP-DOM:NODE) (NOT SIMPLE-ARRAY))))
+   does not match the old FTYPE proclamation
+     (FUNCTION (LIST (OR LIST PLUMP-DOM:NODE VECTOR) &OPTIONAL KEYWORD)
+      (VALUES (AND (VECTOR PLUMP-DOM:NODE) (NOT SIMPLE-ARRAY)) &REST T))
+
+; compiling file "/workspace/scratch/hyperdoc-link-baseline/hyperbook-explorer/package.lisp" (written 07 NOV 2026 10:12:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-link-baseline/hyperbook-explorer/package-tmpJAIDFZTC.fasl
+; compilation finished in 0:00:00.004
+; compiling file "/workspace/scratch/hyperdoc-link-baseline/hyperbook-explorer/links.lisp" (written 07 NOV 2026 10:12:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-link-baseline/hyperbook-explorer/links-tmp8V3J6PE9.fasl
+; compilation finished in 0:00:00.027
+; compiling file "/workspace/scratch/hyperdoc-link-baseline/hyperbook-explorer/link-views.lisp" (written 07 NOV 2026 10:12:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-link-baseline/hyperbook-explorer/link-views-tmp9V47YWQF.fasl
+; compilation finished in 0:00:00.159
+; compiling file "/workspace/scratch/hyperdoc-link-baseline/hyperbook-explorer/link-redirection.lisp" (written 07 NOV 2026 10:12:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-link-baseline/hyperbook-explorer/link-redirection-tmp9BN22RMA.fasl
+; compilation finished in 0:00:00.003
+; compiling file "/workspace/scratch/hyperdoc-link-baseline/hyperbook-explorer/explorer.lisp" (written 07 NOV 2026 10:12:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-link-baseline/hyperbook-explorer/explorer-tmp1CXFJSK9.fasl
+; compilation finished in 0:00:00.035
+; compiling file "/workspace/scratch/hyperdoc-link-baseline/hyperbook-explorer/catalog.lisp" (written 07 NOV 2026 10:12:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-link-baseline/hyperbook-explorer/catalog-tmpX4BRKI0R.fasl
+; compilation finished in 0:00:00.008
+; compiling file "/workspace/scratch/hyperdoc-link-baseline/hyperbook-explorer/rendering.lisp" (written 07 NOV 2026 10:12:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-link-baseline/hyperbook-explorer/rendering-tmpQ371UGST.fasl
+; compilation finished in 0:00:00.095
+; compiling file "/workspace/scratch/hyperdoc-link-baseline/hyperbook-explorer/html-books.lisp" (written 07 NOV 2026 10:12:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-link-baseline/hyperbook-explorer/html-books-tmp2OWI3Q7U.fasl
+; compilation finished in 0:00:00.047
+; compiling file "/workspace/scratch/hyperdoc-link-baseline/hyperbook-explorer/hyperbook-the-book.lisp" (written 07 NOV 2026 10:12:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-link-baseline/hyperbook-explorer/hyperbook-the-book-tmp9KKTJMYV.fasl
+; compilation finished in 0:00:00.004
+; compiling file "/workspace/scratch/hyperdoc-link-baseline/hyperbook-explorer/asdf-systems.lisp" (written 07 NOV 2026 10:12:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-link-baseline/hyperbook-explorer/asdf-systems-tmpJU0JWO19.fasl
+; compilation finished in 0:00:00.028
+; compiling file "/workspace/scratch/hyperdoc-link-baseline/hyperbook-explorer/lisp-functions.lisp" (written 07 NOV 2026 10:12:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-link-baseline/hyperbook-explorer/lisp-functions-tmpZX2WN8N4.fasl
+; compilation finished in 0:00:00.051
+; compiling file "/workspace/scratch/hyperdoc-link-baseline/hyperbook-explorer/lisp-classes.lisp" (written 07 NOV 2026 10:12:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-link-baseline/hyperbook-explorer/lisp-classes-tmpOU81XRV0.fasl
+; compilation finished in 0:00:00.039
+WARNING: redefining CL-ISAAC:RAND32 in DEFUN
+WARNING: redefining CL-ISAAC:RAND64 in DEFUN
+WARNING:
+   bare references to struct types are deprecated. Please use (:POINTER
+                                                               (:STRUCT
+                                                                SQLITE3)) or (:STRUCT
+                                                                              SQLITE3) instead.
+WARNING:
+   bare references to struct types are deprecated. Please use (:POINTER
+                                                               (:STRUCT
+                                                                SQLITE3-STMT)) or (:STRUCT
+                                                                                   SQLITE3-STMT) instead.
+WARNING: redefining DEFTYPE type to be a class: DBI.ERROR:<DBI-ERROR>
+WARNING: redefining DEFTYPE type to be a class: DBI.ERROR:<DBI-WARNING>
+WARNING: redefining DEFTYPE type to be a class: DBI.ERROR:<DBI-INTERFACE-ERROR>
+WARNING:
+   redefining DEFTYPE type to be a class: DBI.ERROR:<DBI-UNIMPLEMENTED-ERROR>
+WARNING: redefining DEFTYPE type to be a class: DBI.ERROR:<DBI-DATABASE-ERROR>
+WARNING: redefining DEFTYPE type to be a class: DBI.ERROR:<DBI-DATA-ERROR>
+WARNING:
+   redefining DEFTYPE type to be a class: DBI.ERROR:<DBI-OPERATIONAL-ERROR>
+WARNING: redefining DEFTYPE type to be a class: DBI.ERROR:<DBI-INTEGRITY-ERROR>
+WARNING: redefining DEFTYPE type to be a class: DBI.ERROR:<DBI-INTERNAL-ERROR>
+WARNING:
+   redefining DEFTYPE type to be a class: DBI.ERROR:<DBI-PROGRAMMING-ERROR>
+WARNING:
+   redefining DEFTYPE type to be a class: DBI.ERROR:<DBI-NOTSUPPORTED-ERROR>
+WARNING:
+   redefining DEFTYPE type to be a class: DBI.ERROR:<DBI-ALREADY-COMMITED-ERROR>
+WARNING:
+   redefining DEFTYPE type to be a class: DBI.ERROR:<DBI-ALREADY-ROLLED-BACK-ERROR>
+WARNING: redefining DEFTYPE type to be a class: DBI.DRIVER:<DBI-DRIVER>
+WARNING: redefining DEFTYPE type to be a class: DBI.DRIVER:<DBI-CONNECTION>
+WARNING: redefining DEFTYPE type to be a class: DBI.DRIVER:<DBI-QUERY>
+WARNING: redefining IRONCLAD:BLOCK-LENGTH in DEFGENERIC
+WARNING: redefining CLOG:PARENT in DEFGENERIC
+WARNING: redefining CLOG::CONNECTION-ID in DEFGENERIC
+WARNING: redefining CLOG:HTML-ID in DEFGENERIC
+WARNING: redefining CLOG:WINDOW in DEFGENERIC
+WARNING: redefining CLOG:HTML-DOCUMENT in DEFGENERIC
+WARNING: redefining CLOG:LOCATION in DEFGENERIC
+WARNING: redefining CLOG:NAVIGATOR in DEFGENERIC
+WARNING: redefining CLOG:DOCUMENT-ELEMENT in DEFGENERIC
+WARNING: redefining CLOG:HEAD-ELEMENT in DEFGENERIC
+WARNING: redefining CLOG:DISABLEDP in DEFGENERIC
+WARNING: redefining (COMMON-LISP:SETF CLOG:DISABLEDP) in DEFGENERIC
+WARNING: redefining CLOG:VALUE in DEFGENERIC
+WARNING: redefining (COMMON-LISP:SETF CLOG:VALUE) in DEFGENERIC
+WARNING: redefining CLOG:MINIMUM in DEFGENERIC
+WARNING: redefining (COMMON-LISP:SETF CLOG:MINIMUM) in DEFGENERIC
+WARNING: redefining CLOG:MAXIMUM in DEFGENERIC
+WARNING: redefining (COMMON-LISP:SETF CLOG:MAXIMUM) in DEFGENERIC
+WARNING: redefining CLOG:URL-SRC in DEFGENERIC
+WARNING: redefining (COMMON-LISP:SETF CLOG:URL-SRC) in DEFGENERIC
+WARNING: redefining CLOG:ALT-TEXT in DEFGENERIC
+WARNING: redefining (COMMON-LISP:SETF CLOG:ALT-TEXT) in DEFGENERIC
+WARNING: redefining CLOG:CENTER-PANEL in DEFGENERIC
+WARNING: redefining CLOG:TOP-PANEL in DEFGENERIC
+WARNING: redefining CLOG:LEFT-PANEL in DEFGENERIC
+WARNING: redefining CLOG:BOTTOM-PANEL in DEFGENERIC
+WARNING: redefining CLOG:PANEL-BOX in DEFGENERIC
+WARNING: redefining CLOG:TREE-ROOT in DEFGENERIC
+WARNING: redefining CLOG:INDENT-LEVEL in DEFGENERIC
+WARNING: redefining CLOG:TOGGLE-STATE in DEFGENERIC
+WARNING: redefining CLOG:TREE-ITEM in DEFGENERIC
+WARNING: redefining CLOG:DATABASE-CONNECTION in DEFGENERIC
+; compiling file "/workspace/scratch/hyperdoc-link-baseline/hyperbook-wikipedia/package.lisp" (written 07 NOV 2026 10:12:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-link-baseline/hyperbook-wikipedia/package-tmpX2JYJDQE.fasl
+; compilation finished in 0:00:00.000
+; compiling file "/workspace/scratch/hyperdoc-link-baseline/hyperbook-wikipedia/wikipedia-editions.lisp" (written 07 NOV 2026 10:12:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-link-baseline/hyperbook-wikipedia/wikipedia-editions-tmpOPCILR65.fasl
+; compilation finished in 0:00:00.000
+; compiling file "/workspace/scratch/hyperdoc-link-baseline/hyperbook-wikipedia/wikipedia.lisp" (written 07 NOV 2026 10:12:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-link-baseline/hyperbook-wikipedia/wikipedia-tmpRV9F8A9A.fasl
+; compilation finished in 0:00:00.059
+WARNING: redefining CLOG:READ-ONLY-P in DEFGENERIC
+WARNING: redefining (COMMON-LISP:SETF CLOG:READ-ONLY-P) in DEFGENERIC
+WARNING:
+   redefining HV:👀PLAYGROUND (#<SB-PCL:SYSTEM-CLASS COMMON-LISP:T>) in DEFMETHOD
+; compiling file "/workspace/scratch/hyperdoc-link-baseline/inspector-hyperdoc/package.lisp" (written 07 NOV 2026 10:12:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-link-baseline/inspector-hyperdoc/package-tmpK2ZAJT4I.fasl
+; compilation finished in 0:00:00.004
+; compiling file "/workspace/scratch/hyperdoc-link-baseline/inspector-hyperdoc/hyperdoc.lisp" (written 07 NOV 2026 10:12:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-link-baseline/inspector-hyperdoc/hyperdoc-tmpUX5S4ADN.fasl
+; compilation finished in 0:00:00.003
+WARNING:
+   redefining ENCODE-TO-STRING (#<SB-PCL:SYSTEM-CLASS COMMON-LISP:T>) in DEFMETHOD
+; compiling file "/workspace/scratch/hyperdoc-link-baseline/hyperdoc-explorer/package.lisp" (written 07 NOV 2026 10:12:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-link-baseline/hyperdoc-explorer/package-tmp10401X32.fasl
+; compilation finished in 0:00:00.004
+; compiling file "/workspace/scratch/hyperdoc-link-baseline/hyperdoc-explorer/links.lisp" (written 07 NOV 2026 10:12:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-link-baseline/hyperdoc-explorer/links-tmpZ7CBRM0G.fasl
+; compilation finished in 0:00:00.015
+; compiling file "/workspace/scratch/hyperdoc-link-baseline/hyperdoc-explorer/explorer.lisp" (written 07 NOV 2026 10:12:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-link-baseline/hyperdoc-explorer/explorer-tmp9OZEQ0G2.fasl
+; compilation finished in 0:00:00.055
+; compiling file "/workspace/scratch/hyperdoc-link-baseline/hyperdoc-explorer/packages.lisp" (written 07 NOV 2026 10:12:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-link-baseline/hyperdoc-explorer/packages-tmpB2JTL1W9.fasl
+; compilation finished in 0:00:00.008
+; compiling file "/workspace/scratch/hyperdoc-link-baseline/hyperdoc-explorer/parse-expr.lisp" (written 07 NOV 2026 10:12:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-link-baseline/hyperdoc-explorer/parse-expr-tmpP3BI68WQ.fasl
+; compilation finished in 0:00:00.004
+; compiling file "/workspace/scratch/hyperdoc-link-baseline/hyperdoc-explorer/html-pages.lisp" (written 07 NOV 2026 10:12:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-link-baseline/hyperdoc-explorer/html-pages-tmpQDARA81Z.fasl
+; compilation finished in 0:00:00.043
+; compiling file "/workspace/scratch/hyperdoc-link-baseline/hyperdoc-explorer/markdown-pages.lisp" (written 07 NOV 2026 10:12:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-link-baseline/hyperdoc-explorer/markdown-pages-tmpYEMMM7SE.fasl
+; compilation finished in 0:00:00.003
+; compiling file "/workspace/scratch/hyperdoc-link-baseline/hyperdoc-explorer/code-pages.lisp" (written 07 NOV 2026 10:12:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-link-baseline/hyperdoc-explorer/code-pages-tmp73HU0RPK.fasl
+; compilation finished in 0:00:00.019
+; compiling file "/workspace/scratch/hyperdoc-link-baseline/hyperdoc-explorer/links-in-code.lisp" (written 07 NOV 2026 10:12:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-link-baseline/hyperdoc-explorer/links-in-code-tmpIO5N7K88.fasl
+; compilation finished in 0:00:00.012
+; compiling file "/workspace/scratch/hyperdoc-link-baseline/hyperdoc-explorer/tools.lisp" (written 07 NOV 2026 10:12:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-link-baseline/hyperdoc-explorer/tools-tmpCM21U60Z.fasl
+; compilation finished in 0:00:00.031
+; compiling file "/workspace/scratch/hyperdoc-link-baseline/hyperdoc-explorer/codemeta.lisp" (written 07 NOV 2026 10:12:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-link-baseline/hyperdoc-explorer/codemeta-tmp9DT7SEFG.fasl
+; compilation finished in 0:00:00.019
+; compiling file "/workspace/scratch/hyperdoc-link-baseline/hyperdoc-explorer/examples.lisp" (written 07 NOV 2026 10:12:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-link-baseline/hyperdoc-explorer/examples-tmp8065ESJT.fasl
+; compilation finished in 0:00:00.004
+; compiling file "/workspace/scratch/hyperdoc-link-baseline/hyperdoc-explorer/hyperdoc.lisp" (written 07 NOV 2026 10:12:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-link-baseline/hyperdoc-explorer/hyperdoc-tmp7S8Z6FGF.fasl
+; compilation finished in 0:00:00.000
+; compiling file "/workspace/scratch/hyperdoc-link-baseline/dreyeck/src/hyperdoc-curation-package.lisp" (written 07 NOV 2026 10:12:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-link-baseline/dreyeck/src/hyperdoc-curation-package-tmpSIT3QPKP.fasl
+; compilation finished in 0:00:00.004
+; compiling file "/workspace/scratch/hyperdoc-link-baseline/dreyeck/src/hyperdoc-curation.lisp" (written 07 NOV 2026 10:12:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-link-baseline/dreyeck/src/hyperdoc-curation-tmpE0PA0714.fasl
+; compilation finished in 0:00:00.079
+; compiling file "/workspace/scratch/hyperdoc-link-baseline/dreyeck/src/workflow-model.lisp" (written 07 NOV 2026 10:12:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-link-baseline/dreyeck/src/workflow-model-tmpJRWHHVG0.fasl
+; compilation finished in 0:00:00.031
+; compiling file "/workspace/scratch/hyperdoc-link-baseline/dreyeck/src/asdf-source-package.lisp" (written 07 NOV 2026 10:12:21 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-link-baseline/dreyeck/src/asdf-source-package-tmp4WZVROCX.fasl
+; compilation finished in 0:00:00.000
+; compiling file "/workspace/scratch/hyperdoc-link-baseline/dreyeck/src/asdf-source.lisp" (written 07 NOV 2026 10:12:21 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-link-baseline/dreyeck/src/asdf-source-tmpA0I3UKX8.fasl
+; compilation finished in 0:00:00.043
+; compiling file "/workspace/scratch/hyperdoc-link-baseline/dreyeck/src/git-package.lisp" (written 07 NOV 2026 10:12:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-link-baseline/dreyeck/src/git-package-tmp267Y2N80.fasl
+; compilation finished in 0:00:00.000
+; compiling file "/workspace/scratch/hyperdoc-link-baseline/dreyeck/src/git-repository-checkout.lisp" (written 07 NOV 2026 10:12:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-link-baseline/dreyeck/src/git-repository-checkout-tmpOUPE5FSJ.fasl
+; compilation finished in 0:00:00.007
+; compiling file "/workspace/scratch/hyperdoc-link-baseline/dreyeck/src/git-commit-inspection.lisp" (written 07 NOV 2026 10:12:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-link-baseline/dreyeck/src/git-commit-inspection-tmpIGHCU6ZA.fasl
+; compilation finished in 0:00:00.035
+; compiling file "/workspace/scratch/hyperdoc-link-baseline/dreyeck/src/git-local-availability.lisp" (written 07 NOV 2026 10:12:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-link-baseline/dreyeck/src/git-local-availability-tmpBO0TUGLK.fasl
+; compilation finished in 0:00:00.012
+; compiling file "/workspace/scratch/hyperdoc-link-baseline/dreyeck/src/git-revision-reference.lisp" (written 07 NOV 2026 10:12:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-link-baseline/dreyeck/src/git-revision-reference-tmpIIXPIQNW.fasl
+; compilation finished in 0:00:00.011
+; compiling file "/workspace/scratch/hyperdoc-link-baseline/dreyeck/src/git-source-slice.lisp" (written 07 NOV 2026 10:12:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-link-baseline/dreyeck/src/git-source-slice-tmpOHM494YR.fasl
+; compilation finished in 0:00:00.012
+; compiling file "/workspace/scratch/hyperdoc-link-baseline/dreyeck/src/git-repository-topicmap.lisp" (written 07 NOV 2026 10:12:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-link-baseline/dreyeck/src/git-repository-topicmap-tmpOVFB07XF.fasl
+; compilation finished in 0:00:00.007
+; compiling file "/workspace/scratch/hyperdoc-link-baseline/dreyeck/src/git-asdf-references.lisp" (written 07 NOV 2026 10:12:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-link-baseline/dreyeck/src/git-asdf-references-tmpG6VFGMYP.fasl
+; compilation finished in 0:00:00.019
+; compiling file "/workspace/scratch/hyperdoc-link-baseline/dreyeck/src/git-asdf-reference-topicmap.lisp" (written 07 NOV 2026 10:12:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-link-baseline/dreyeck/src/git-asdf-reference-topicmap-tmp4QIPRMOF.fasl
+; compilation finished in 0:00:00.027
+; compiling file "/workspace/scratch/hyperdoc-link-baseline/dreyeck/src/upstream-intake-package.lisp" (written 07 NOV 2026 10:12:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-link-baseline/dreyeck/src/upstream-intake-package-tmpGW0QV22K.fasl
+; compilation finished in 0:00:00.004
+; compiling file "/workspace/scratch/hyperdoc-link-baseline/dreyeck/src/upstream-intake.lisp" (written 07 NOV 2026 10:12:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-link-baseline/dreyeck/src/upstream-intake-tmp2K9J0HSR.fasl
+; compilation finished in 0:00:00.127
+; compiling file "/workspace/scratch/hyperdoc-link-baseline/dreyeck/src/upstream-assessment-package.lisp" (written 07 NOV 2026 10:12:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-link-baseline/dreyeck/src/upstream-assessment-package-tmpP44I4E0Y.fasl
+; compilation finished in 0:00:00.000
+; compiling file "/workspace/scratch/hyperdoc-link-baseline/dreyeck/src/upstream-assessment.lisp" (written 07 NOV 2026 10:12:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-link-baseline/dreyeck/src/upstream-assessment-tmp63LQ7EX6.fasl
+; compilation finished in 0:00:00.367
+; compiling file "/workspace/scratch/hyperdoc-link-baseline/dreyeck/src/state-machine-package.lisp" (written 07 NOV 2026 10:12:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-link-baseline/dreyeck/src/state-machine-package-tmp86F1A8FB.fasl
+; compilation finished in 0:00:00.000
+; compiling file "/workspace/scratch/hyperdoc-link-baseline/dreyeck/src/state-machine.lisp" (written 07 NOV 2026 10:12:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-link-baseline/dreyeck/src/state-machine-tmpH7D4HL98.fasl
+; compilation finished in 0:00:00.059
+; compiling file "/workspace/scratch/hyperdoc-link-baseline/dreyeck/src/gesture-binding-witness.lisp" (written 07 NOV 2026 10:12:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-link-baseline/dreyeck/src/gesture-binding-witness-tmpCDM7YXYI.fasl
+; compilation finished in 0:00:00.063
+; compiling file "/workspace/scratch/hyperdoc-link-baseline/dreyeck/src/gesture-clog-transport.lisp" (written 07 NOV 2026 10:12:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-link-baseline/dreyeck/src/gesture-clog-transport-tmpLM57P5P.fasl
+; compilation finished in 0:00:00.059
+; compiling file "/workspace/scratch/hyperdoc-link-baseline/dreyeck/src/gesture-clog-binder.lisp" (written 07 NOV 2026 10:12:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-link-baseline/dreyeck/src/gesture-clog-binder-tmpZE69DN33.fasl
+; compilation finished in 0:00:00.039
+; compiling file "/workspace/scratch/hyperdoc-link-baseline/hyperbook-fedwiki/package.lisp" (written 07 NOV 2026 10:12:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-link-baseline/hyperbook-fedwiki/package-tmpG8099TO3.fasl
+; compilation finished in 0:00:00.000
+; compiling file "/workspace/scratch/hyperdoc-link-baseline/hyperbook-fedwiki/utilities.lisp" (written 07 NOV 2026 10:12:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-link-baseline/hyperbook-fedwiki/utilities-tmpTASQCYAW.fasl
+; compilation finished in 0:00:00.000
+; compiling file "/workspace/scratch/hyperdoc-link-baseline/hyperbook-fedwiki/pages.lisp" (written 07 NOV 2026 10:12:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-link-baseline/hyperbook-fedwiki/pages-tmp35U57IV6.fasl
+; compilation finished in 0:00:00.335
+; compiling file "/workspace/scratch/hyperdoc-link-baseline/hyperbook-fedwiki/fedwiki.lisp" (written 07 NOV 2026 10:12:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-link-baseline/hyperbook-fedwiki/fedwiki-tmpTZOONXRW.fasl
+; compilation finished in 0:00:00.051
+; compiling file "/workspace/scratch/hyperdoc-link-baseline/hyperbook-fedwiki/story-items.lisp" (written 07 NOV 2026 10:12:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-link-baseline/hyperbook-fedwiki/story-items-tmpWN0UKDSV.fasl
+; compilation finished in 0:00:00.111
+; compiling file "/workspace/scratch/hyperdoc-link-baseline/hyperbook-fedwiki/wiki-links.lisp" (written 07 NOV 2026 10:12:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-link-baseline/hyperbook-fedwiki/wiki-links-tmpBF3HHBTQ.fasl
+; compilation finished in 0:00:00.047
+; compiling file "/workspace/scratch/hyperdoc-link-baseline/hyperbook-fedwiki/plugins.lisp" (written 07 NOV 2026 10:12:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-link-baseline/hyperbook-fedwiki/plugins-tmpGYUNPZCY.fasl
+; compilation finished in 0:00:00.011
+; compiling file "/workspace/scratch/hyperdoc-link-baseline/hyperbook-fedwiki/views.lisp" (written 07 NOV 2026 10:12:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-link-baseline/hyperbook-fedwiki/views-tmpD68Q8WCA.fasl
+; compilation finished in 0:00:00.047
+; compiling file "/workspace/scratch/hyperdoc-link-baseline/dreyeck/src/authority-policy.lisp" (written 07 NOV 2026 10:12:21 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-link-baseline/dreyeck/src/authority-policy-tmp7MK9KM9C.fasl
+; compilation finished in 0:00:00.219
+WARNING:
+   redefining HVS::👀OPERATIONS (#<SB-PCL:SYSTEM-CLASS COMMON-LISP:T>) in DEFMETHOD
+WARNING:
+   redefining HVS:RENDER-TOPLEVEL-CST :AROUND (#<SB-MOP:EQL-SPECIALIZER HYPERDOC:DEFEXAMPLE>
+                                               #<SB-PCL:SYSTEM-CLASS COMMON-LISP:T>
+                                               #<SB-PCL:SYSTEM-CLASS COMMON-LISP:T>
+                                               #<SB-PCL:SYSTEM-CLASS COMMON-LISP:T>) in DEFMETHOD
+; compiling file "/workspace/scratch/hyperdoc-link-baseline/dreyeck/src/topicmap-inspector-package.lisp" (written 07 NOV 2026 10:12:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-link-baseline/dreyeck/src/topicmap-inspector-package-tmpJJ71X849.fasl
+; compilation finished in 0:00:00.004
+; compiling file "/workspace/scratch/hyperdoc-link-baseline/dreyeck/src/topicmap-gesture.lisp" (written 07 NOV 2026 10:12:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-link-baseline/dreyeck/src/topicmap-gesture-tmp1VUK6SR2.fasl
+; compilation finished in 0:00:00.059
+; compiling file "/workspace/scratch/hyperdoc-link-baseline/dreyeck/src/topicmap-inspector.lisp" (written 07 NOV 2026 10:12:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-link-baseline/dreyeck/src/topicmap-inspector-tmpR2FIHSUG.fasl
+; compilation finished in 0:00:00.115
+; compiling file "/workspace/scratch/hyperdoc-link-baseline/dreyeck/src/upstream-assessment-inspector-package.lisp" (written 07 NOV 2026 10:12:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-link-baseline/dreyeck/src/upstream-assessment-inspector-package-tmp8PYELRKX.fasl
+; compilation finished in 0:00:00.000
+; compiling file "/workspace/scratch/hyperdoc-link-baseline/dreyeck/src/upstream-assessment-views.lisp" (written 07 NOV 2026 10:12:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-link-baseline/dreyeck/src/upstream-assessment-views-tmpEHTOKYT0.fasl
+; compilation finished in 0:00:00.863
+; compiling file "/workspace/scratch/hyperdoc-link-baseline/dreyeck/src/hyperdoc-pages.lisp" (written 07 NOV 2026 10:12:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-link-baseline/dreyeck/src/hyperdoc-pages-tmpS6U1VHI9.fasl
+; compilation finished in 0:00:00.016
+; compiling file "/workspace/scratch/hyperdoc-link-baseline/dreyeck/src/upstream-intake-hyperdoc.lisp" (written 07 NOV 2026 10:12:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-link-baseline/dreyeck/src/upstream-intake-hyperdoc-tmpVTFK6ZJW.fasl
+; compilation finished in 0:00:00.063
+; compiling file "/workspace/scratch/hyperdoc-link-baseline/dreyeck/src/upstream-page-loading-history.lisp" (written 07 NOV 2026 10:12:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-link-baseline/dreyeck/src/upstream-page-loading-history-tmp75WVSJEW.fasl
+; compilation finished in 0:00:00.059
+; compiling file "/workspace/scratch/hyperdoc-link-baseline/dreyeck/src/upstream-assessment-hyperdoc.lisp" (written 07 NOV 2026 10:12:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-link-baseline/dreyeck/src/upstream-assessment-hyperdoc-tmpBU5UM3S4.fasl
+; compilation finished in 0:00:00.004
+; compiling file "/workspace/scratch/hyperdoc-link-baseline/dreyeck/src/topicmap-tala.lisp" (written 07 NOV 2026 10:12:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-link-baseline/dreyeck/src/topicmap-tala-tmpOBHVA3CD.fasl
+; compilation finished in 0:00:00.059
+; compiling file "/workspace/scratch/hyperdoc-link-baseline/dreyeck/src/topicmap-tala-inspector.lisp" (written 07 NOV 2026 10:12:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-link-baseline/dreyeck/src/topicmap-tala-inspector-tmpJ6ELVFLF.fasl
+; compilation finished in 0:00:00.091
+; compiling file "/workspace/scratch/hyperdoc-link-baseline/dreyeck/src/git-inspector-package.lisp" (written 07 NOV 2026 10:12:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-link-baseline/dreyeck/src/git-inspector-package-tmpULDB0RG.fasl
+; compilation finished in 0:00:00.004
+; compiling file "/workspace/scratch/hyperdoc-link-baseline/dreyeck/src/git-commit-inspection-views.lisp" (written 07 NOV 2026 10:12:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-link-baseline/dreyeck/src/git-commit-inspection-views-tmpUTZ0UUTE.fasl
+; compilation finished in 0:00:00.151
+; compiling file "/workspace/scratch/hyperdoc-link-baseline/dreyeck/src/git-asdf-reference-views.lisp" (written 07 NOV 2026 10:12:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-link-baseline/dreyeck/src/git-asdf-reference-views-tmpOOSRA8PZ.fasl
+; compilation finished in 0:00:00.135
+; compiling file "/workspace/scratch/hyperdoc-link-baseline/dreyeck/src/git-revision-reference-views.lisp" (written 07 NOV 2026 10:12:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-link-baseline/dreyeck/src/git-revision-reference-views-tmpDMIL0RVK.fasl
+; compilation finished in 0:00:00.055
+; compiling file "/workspace/scratch/hyperdoc-link-baseline/dreyeck/nested-actions/action-tree.lisp" (written 07 NOV 2026 10:12:21 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-link-baseline/dreyeck/nested-actions/action-tree-tmp8MR9IMIO.fasl
+; compilation finished in 0:00:00.027
+; compiling file "/workspace/scratch/hyperdoc-link-baseline/dreyeck/nested-actions/probes.lisp" (written 07 NOV 2026 10:12:21 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-link-baseline/dreyeck/nested-actions/probes-tmpJQDKAVAY.fasl
+; compilation finished in 0:00:00.000
+; compiling file "/workspace/scratch/hyperdoc-link-baseline/dreyeck/nested-actions/message-path.lisp" (written 07 NOV 2026 10:12:21 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-link-baseline/dreyeck/nested-actions/message-path-tmp3I8CEEQY.fasl
+; compilation finished in 0:00:00.059
+; compiling file "/workspace/scratch/hyperdoc-link-baseline/dreyeck/nested-actions/source-revisions.lisp" (written 07 NOV 2026 10:12:21 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-link-baseline/dreyeck/nested-actions/source-revisions-tmpA3RHFLWZ.fasl
+; compilation finished in 0:00:00.008
+; compiling file "/workspace/scratch/hyperdoc-link-baseline/dreyeck/nested-actions/input-path.lisp" (written 07 NOV 2026 10:12:21 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-link-baseline/dreyeck/nested-actions/input-path-tmpYZIB7VXO.fasl
+; compilation finished in 0:00:00.023
+; compiling file "/workspace/scratch/hyperdoc-link-baseline/dreyeck/nested-actions/solo-history.lisp" (written 07 NOV 2026 10:12:21 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-link-baseline/dreyeck/nested-actions/solo-history-tmpR8PK79V8.fasl
+; compilation finished in 0:00:00.055
+; compiling file "/workspace/scratch/hyperdoc-link-baseline/dreyeck/nested-actions/reading.lisp" (written 07 NOV 2026 10:12:21 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-link-baseline/dreyeck/nested-actions/reading-tmpN1ZVB1HZ.fasl
+; compilation finished in 0:00:00.016
+; compiling file "/workspace/scratch/hyperdoc-link-baseline/dreyeck/mech-intake/catalog.lisp" (written 07 NOV 2026 10:12:21 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-link-baseline/dreyeck/mech-intake/catalog-tmpZGRRPISB.fasl
+; compilation finished in 0:00:00.139
+; compiling file "/workspace/scratch/hyperdoc-link-baseline/dreyeck/mech-intake/execution.lisp" (written 07 NOV 2026 10:12:21 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-link-baseline/dreyeck/mech-intake/execution-tmpFNKDE5XP.fasl
+; compilation finished in 0:00:00.027
+; compiling file "/workspace/scratch/hyperdoc-link-baseline/dreyeck/mech-intake/acceptance.lisp" (written 07 NOV 2026 10:12:21 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-link-baseline/dreyeck/mech-intake/acceptance-tmpRJTU435C.fasl
+; compilation finished in 0:00:00.008
+; compiling file "/workspace/scratch/hyperdoc-link-baseline/dreyeck/mech-intake/reading.lisp" (written 07 NOV 2026 10:12:21 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-link-baseline/dreyeck/mech-intake/reading-tmpI9WG87JK.fasl
+; compilation finished in 0:00:00.019
+; compiling file "/workspace/scratch/hyperdoc-link-baseline/dreyeck/fedwiki-config/configuration.lisp" (written 07 NOV 2026 10:12:21 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-link-baseline/dreyeck/fedwiki-config/configuration-tmpYDE6I9E6.fasl
+; compilation finished in 0:00:00.123
+; compiling file "/workspace/scratch/hyperdoc-link-baseline/dreyeck/fedwiki-config/composition.lisp" (written 07 NOV 2026 10:12:21 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-link-baseline/dreyeck/fedwiki-config/composition-tmp319UV2V8.fasl
+; compilation finished in 0:00:00.063
+; compiling file "/workspace/scratch/hyperdoc-link-baseline/dreyeck/fedwiki-config/fork.lisp" (written 07 NOV 2026 10:12:21 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-link-baseline/dreyeck/fedwiki-config/fork-tmpLYQINFYS.fasl
+; compilation finished in 0:00:00.031
+; compiling file "/workspace/scratch/hyperdoc-link-baseline/dreyeck/fedwiki-config/workspace.lisp" (written 07 NOV 2026 10:12:21 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-link-baseline/dreyeck/fedwiki-config/workspace-tmpGA31XWNO.fasl
+; compilation finished in 0:00:00.043
+; compiling file "/workspace/scratch/hyperdoc-link-baseline/dreyeck/src/lisp-image-package.lisp" (written 07 NOV 2026 10:12:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-link-baseline/dreyeck/src/lisp-image-package-tmp5HT23M6C.fasl
+; compilation finished in 0:00:00.004
+; compiling file "/workspace/scratch/hyperdoc-link-baseline/dreyeck/src/lisp-image-inventory.lisp" (written 07 NOV 2026 10:12:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-link-baseline/dreyeck/src/lisp-image-inventory-tmpA60KLDKY.fasl
+; compilation finished in 0:00:00.019
+; compiling file "/workspace/scratch/hyperdoc-link-baseline/dreyeck/src/lisp-image-definition-sources.lisp" (written 07 NOV 2026 10:12:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-link-baseline/dreyeck/src/lisp-image-definition-sources-tmpD801X3GJ.fasl
+; compilation finished in 0:00:00.003
+; compiling file "/workspace/scratch/hyperdoc-link-baseline/dreyeck/src/lisp-image-observations.lisp" (written 07 NOV 2026 10:12:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-link-baseline/dreyeck/src/lisp-image-observations-tmpGOW1GC70.fasl
+; compilation finished in 0:00:00.055
+; compiling file "/workspace/scratch/hyperdoc-link-baseline/dreyeck/src/lisp-image-views.lisp" (written 07 NOV 2026 10:12:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-link-baseline/dreyeck/src/lisp-image-views-tmpPQ1X28TL.fasl
+; compilation finished in 0:00:00.012
+; compiling file "/workspace/scratch/hyperdoc-link-baseline/dreyeck/src/lisp-image-hyperdoc.lisp" (written 07 NOV 2026 10:12:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-link-baseline/dreyeck/src/lisp-image-hyperdoc-tmpE92ECU7O.fasl
+; compilation finished in 0:00:00.000
+; compiling file "/workspace/scratch/hyperdoc-link-baseline/dreyeck/src/lisp-image-topicmap.lisp" (written 07 NOV 2026 10:12:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-link-baseline/dreyeck/src/lisp-image-topicmap-tmp8S0II570.fasl
+; compilation finished in 0:00:00.011
+; compiling file "/workspace/scratch/hyperdoc-link-baseline/dreyeck/src/topicmap-tala-reading.lisp" (written 07 NOV 2026 10:12:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-link-baseline/dreyeck/src/topicmap-tala-reading-tmpJE88A12F.fasl
+; compilation finished in 0:00:00.035
+; compiling file "/workspace/scratch/hyperdoc-link-baseline/dreyeck/src/topicmap-tala-authored.lisp" (written 07 NOV 2026 10:12:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-link-baseline/dreyeck/src/topicmap-tala-authored-tmpA5FNLPLT.fasl
+; compilation finished in 0:00:00.047
+; compiling file "/workspace/scratch/hyperdoc-link-baseline/dreyeck/src/topicmap-tala-dispatch-reading.lisp" (written 07 NOV 2026 10:12:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-link-baseline/dreyeck/src/topicmap-tala-dispatch-reading-tmpHKCV9TP8.fasl
+; compilation finished in 0:00:00.003
+; compiling file "/workspace/scratch/hyperdoc-link-baseline/dreyeck/src/topicmap-tala-reference-reading.lisp" (written 07 NOV 2026 10:12:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-link-baseline/dreyeck/src/topicmap-tala-reference-reading-tmpZ18MA7XE.fasl
+; compilation finished in 0:00:00.004
+; compiling file "/workspace/scratch/hyperdoc-link-baseline/dreyeck/src/gesture-operation-request.lisp" (written 07 NOV 2026 10:12:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-link-baseline/dreyeck/src/gesture-operation-request-tmp6LQJ9T0C.fasl
+; compilation finished in 0:00:00.095
+; compiling file "/workspace/scratch/hyperdoc-link-baseline/dreyeck/work/reading.lisp" (written 07 NOV 2026 10:12:22 AM):
+
+; file: /workspace/scratch/hyperdoc-link-baseline/dreyeck/work/reading.lisp
+; in: DEFUN %FEDWIKI-STORY
+;     'NIL
+;
+; note: deleting unreachable code
+
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-link-baseline/dreyeck/work/reading-tmpTX7OA81T.fasl
+; compilation finished in 0:00:00.303
+; compiling file "/workspace/scratch/hyperdoc-link-baseline/dreyeck/work/operation-requests.lisp" (written 07 NOV 2026 10:12:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-link-baseline/dreyeck/work/operation-requests-tmpWOTC3PB7.fasl
+; compilation finished in 0:00:00.011
+; compiling file "/workspace/scratch/hyperdoc-link-baseline/dreyeck/work/deployment-reading.lisp" (written 07 NOV 2026 10:12:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-link-baseline/dreyeck/work/deployment-reading-tmpHQE95SAC.fasl
+; compilation finished in 0:00:00.008
+; compiling file "/workspace/scratch/hyperdoc-link-baseline/dreyeck/work/authoring-architecture.lisp" (written 07 NOV 2026 10:12:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-link-baseline/dreyeck/work/authoring-architecture-tmpO87FP9NR.fasl
+; compilation finished in 0:00:00.131
+; compiling file "/workspace/scratch/hyperdoc-link-baseline/dreyeck/work/addresses.lisp" (written 07 NOV 2026 10:12:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-link-baseline/dreyeck/work/addresses-tmpP6A3E92I.fasl
+; compilation finished in 0:00:00.159
+; compiling file "/workspace/scratch/hyperdoc-link-baseline/dreyeck/work/trails-rendered-reading.lisp" (written 07 NOV 2026 10:12:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-link-baseline/dreyeck/work/trails-rendered-reading-tmpUSHT8RIL.fasl
+; compilation finished in 0:00:00.039
+; compiling file "/workspace/scratch/hyperdoc-link-baseline/dreyeck/work/trails-rendered-federated-context.lisp" (written 07 NOV 2026 10:12:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-link-baseline/dreyeck/work/trails-rendered-federated-context-tmp7YCPD44Y.fasl
+; compilation finished in 0:00:00.627
+; compiling file "/workspace/scratch/hyperdoc-link-baseline/dreyeck/work/trails-rendered-following.lisp" (written 07 NOV 2026 10:12:22 AM):
+
+; file: /workspace/scratch/hyperdoc-link-baseline/dreyeck/work/trails-rendered-following.lisp
+; in: DEFUN TRAIL-LEARNING-PROJECTION
+;     (DREYECK/WORK/TRAILS-RENDERED-READING::CONTEXT
+;      (DREYECK/WORK/TRAILS-RENDERED-READING::FOLLOWING-CONTEXT
+;       DREYECK/WORK/TRAILS-RENDERED-READING::FOLLOWING))
+;
+; caught STYLE-WARNING:
+;   The variable CONTEXT is defined but never used.
+
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-link-baseline/dreyeck/work/trails-rendered-following-tmpQXR7SNXD.fasl
+; compilation finished in 0:00:00.223
+WARNING:
+   Lisp compilation had style-warnings while compiling
+   #<CL-SOURCE-FILE "dreyeck/work/reading" "dreyeck/work" "trails-rendered-following">
+; compiling file "/workspace/scratch/hyperdoc-link-baseline/dreyeck/work/how-trails-sources.lisp" (written 07 NOV 2026 10:12:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-link-baseline/dreyeck/work/how-trails-sources-tmp6FLI1OC3.fasl
+; compilation finished in 0:00:00.263
+; compiling file "/workspace/scratch/hyperdoc-link-baseline/dreyeck/work/javascript-definitions.lisp" (written 07 NOV 2026 10:12:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-link-baseline/dreyeck/work/javascript-definitions-tmpWBK8JTS9.fasl
+; compilation finished in 0:00:00.107
+; compiling file "/workspace/scratch/hyperdoc-link-baseline/dreyeck/work/reading-mech-hubs.lisp" (written 07 NOV 2026 10:12:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-link-baseline/dreyeck/work/reading-mech-hubs-tmpUVEUD2ZN.fasl
+; compilation finished in 0:00:00.024
+; compiling file "/workspace/scratch/hyperdoc-link-baseline/dreyeck/work/inspecting-hub-selection.lisp" (written 07 NOV 2026 10:12:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-link-baseline/dreyeck/work/inspecting-hub-selection-tmpOWNJOEU.fasl
+; compilation finished in 0:00:00.139
+; compiling file "/workspace/scratch/hyperdoc-link-baseline/dreyeck/work/investigating-ward-hub-selection.lisp" (written 07 NOV 2026 10:12:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-link-baseline/dreyeck/work/investigating-ward-hub-selection-tmpVT5BMTA5.fasl
+; compilation finished in 0:00:00.127
+; compiling file "/workspace/scratch/hyperdoc-link-baseline/dreyeck/work/collaborative-planning-reading.lisp" (written 07 NOV 2026 10:12:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-link-baseline/dreyeck/work/collaborative-planning-reading-tmpN3CFVWZF.fasl
+; compilation finished in 0:00:00.243
+; compiling file "/workspace/scratch/hyperdoc-link-baseline/dreyeck/work/ctm-plan-page-authoring.lisp" (written 07 NOV 2026 10:12:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-link-baseline/dreyeck/work/ctm-plan-page-authoring-tmpNK27C0R1.fasl
+; compilation finished in 0:00:00.427
+; compiling file "/workspace/scratch/hyperdoc-link-baseline/dreyeck/work/conversation-coordinates-reading.lisp" (written 07 NOV 2026 10:12:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-link-baseline/dreyeck/work/conversation-coordinates-reading-tmp3BPE71HR.fasl
+; compilation finished in 0:00:00.323
+; compiling file "/workspace/scratch/hyperdoc-link-baseline/dreyeck/work/item-edit-view-diagnosis.lisp" (written 07 NOV 2026 10:12:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-link-baseline/dreyeck/work/item-edit-view-diagnosis-tmp758YUXMV.fasl
+; compilation finished in 0:00:00.463
+; compiling file "/workspace/scratch/hyperdoc-link-baseline/dreyeck/work/trails-rendered-browser-check.lisp" (written 07 NOV 2026 10:12:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-link-baseline/dreyeck/work/trails-rendered-browser-check-tmpGMQXK1HK.fasl
+; compilation finished in 0:00:00.047
+; compiling file "/workspace/scratch/hyperdoc-link-baseline/dreyeck/work/shift-click.lisp" (written 07 NOV 2026 10:12:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-link-baseline/dreyeck/work/shift-click-tmp49Q238TW.fasl
+; compilation finished in 0:00:00.027
+; compiling file "/workspace/scratch/hyperdoc-link-baseline/dreyeck/work/deployment-inspection.lisp" (written 07 NOV 2026 10:12:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-link-baseline/dreyeck/work/deployment-inspection-tmpMXPMJ5KG.fasl
+; compilation finished in 0:00:00.155
+; compiling file "/workspace/scratch/hyperdoc-link-baseline/dreyeck/work/source-text-view.lisp" (written 07 NOV 2026 10:12:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-link-baseline/dreyeck/work/source-text-view-tmpB69313KI.fasl
+; compilation finished in 0:00:00.004
+
+
+SHOP3 version 4.3.1
+Copyright (C) 2004-2026 SIFT, LLC.
+
+Original SHOP2 code Copyright (C) 2002  University of Maryland.
+
+This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+KIND, either express or implied.  This software is distributed under an
+MPL/GPL/LGPL triple license.  For details, see the software source file.
+; compiling file "/workspace/scratch/hyperdoc-link-baseline/dreyeck/work/planning.lisp" (written 07 NOV 2026 10:12:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-link-baseline/dreyeck/work/planning-tmp9ZT99EEA.fasl
+; compilation finished in 0:00:00.003
+
+Defining domain DOCUMENT-D2-CONCEPT...
+
+Defining problem CONNECTIONS-DOCUMENTATION ...
+
+Defining problem CONNECTIONS-WITHOUT-SOURCE ...
+; compiling file "/workspace/scratch/hyperdoc-link-baseline/dreyeck/tests/work-planning.lisp" (written 07 NOV 2026 10:12:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-link-baseline/dreyeck/tests/work-planning-tmpW045U8V2.fasl
+; compilation finished in 0:00:00.004
+DOCUMENTATION-PLAN-PASS: eight modeled stages; no-source refused; verdict B, fixed sequence only.
+;
+; compilation unit finished
+;   caught 1 STYLE-WARNING condition
+;   printed 1 note
+baseline PASS dreyeck/work/planning/tests EXIT 0
+baseline BEGIN dreyeck/work/remote-control-planning/tests
+
+
+SHOP3 version 4.3.1
+Copyright (C) 2004-2026 SIFT, LLC.
+
+Original SHOP2 code Copyright (C) 2002  University of Maryland.
+
+This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+KIND, either express or implied.  This software is distributed under an
+MPL/GPL/LGPL triple license.  For details, see the software source file.
+; compiling file "/workspace/scratch/hyperdoc-link-baseline/dreyeck/work/remote-control-planning.lisp" (written 07 NOV 2026 10:12:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-link-baseline/dreyeck/work/remote-control-planning-tmpGHU3ALSV.fasl
+; compilation finished in 0:00:00.011
+
+Defining domain ZETTELKASTEN-MOBILE-CONTROL...
+
+Defining problem REMOTE-CONTROL-A ...
+
+Defining problem REMOTE-CONTROL-B ...
+
+Defining problem REMOTE-CONTROL-C ...
+
+Defining problem REMOTE-CONTROL-D ...
+
+Defining problem REMOTE-CONTROL-E ...
+; compiling file "/workspace/scratch/hyperdoc-link-baseline/dreyeck/tests/remote-control-planning.lisp" (written 07 NOV 2026 10:12:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-link-baseline/dreyeck/tests/remote-control-planning-tmpAAURSO1.fasl
+; compilation finished in 0:00:00.016
+REMOTE-CONTROL A PASS: 1 plans, 1 trees, 1 states
+(((DREYECK/WORK/REMOTE-CONTROL-PLANNING::!MODEL-AGENT-ROUTE
+   DREYECK/WORK/REMOTE-CONTROL-PLANNING::ZETTELKASTEN
+   DREYECK/WORK/REMOTE-CONTROL-PLANNING::MACBOOK-A
+   DREYECK/WORK/REMOTE-CONTROL-PLANNING::ANDROID)
+  (DREYECK/WORK/REMOTE-CONTROL-PLANNING::!MODEL-CONTROL-SURFACE
+   DREYECK/WORK/REMOTE-CONTROL-PLANNING::ZETTELKASTEN
+   DREYECK/WORK/REMOTE-CONTROL-PLANNING::MACBOOK-A
+   DREYECK/WORK/REMOTE-CONTROL-PLANNING::ANDROID
+   DREYECK/WORK/REMOTE-CONTROL-PLANNING::AGENT)
+  (DREYECK/WORK/REMOTE-CONTROL-PLANNING::!VERIFY-MODELED-CONTROL
+   DREYECK/WORK/REMOTE-CONTROL-PLANNING::ZETTELKASTEN
+   DREYECK/WORK/REMOTE-CONTROL-PLANNING::MACBOOK-A
+   DREYECK/WORK/REMOTE-CONTROL-PLANNING::ANDROID
+   DREYECK/WORK/REMOTE-CONTROL-PLANNING::AGENT)))
+REMOTE-CONTROL B PASS: 1 plans, 1 trees, 1 states
+(((DREYECK/WORK/REMOTE-CONTROL-PLANNING::!MODEL-DIRECT-ROUTE
+   DREYECK/WORK/REMOTE-CONTROL-PLANNING::ZETTELKASTEN
+   DREYECK/WORK/REMOTE-CONTROL-PLANNING::MACBOOK-A
+   DREYECK/WORK/REMOTE-CONTROL-PLANNING::ANDROID)
+  (DREYECK/WORK/REMOTE-CONTROL-PLANNING::!MODEL-CONTROL-SURFACE
+   DREYECK/WORK/REMOTE-CONTROL-PLANNING::ZETTELKASTEN
+   DREYECK/WORK/REMOTE-CONTROL-PLANNING::MACBOOK-A
+   DREYECK/WORK/REMOTE-CONTROL-PLANNING::ANDROID
+   DREYECK/WORK/REMOTE-CONTROL-PLANNING::DIRECT)
+  (DREYECK/WORK/REMOTE-CONTROL-PLANNING::!VERIFY-MODELED-CONTROL
+   DREYECK/WORK/REMOTE-CONTROL-PLANNING::ZETTELKASTEN
+   DREYECK/WORK/REMOTE-CONTROL-PLANNING::MACBOOK-A
+   DREYECK/WORK/REMOTE-CONTROL-PLANNING::ANDROID
+   DREYECK/WORK/REMOTE-CONTROL-PLANNING::DIRECT)))
+REMOTE-CONTROL C PASS: 2 plans, 2 trees, 2 states
+(((DREYECK/WORK/REMOTE-CONTROL-PLANNING::!MODEL-AGENT-ROUTE
+   DREYECK/WORK/REMOTE-CONTROL-PLANNING::ZETTELKASTEN
+   DREYECK/WORK/REMOTE-CONTROL-PLANNING::MACBOOK-A
+   DREYECK/WORK/REMOTE-CONTROL-PLANNING::ANDROID)
+  (DREYECK/WORK/REMOTE-CONTROL-PLANNING::!MODEL-CONTROL-SURFACE
+   DREYECK/WORK/REMOTE-CONTROL-PLANNING::ZETTELKASTEN
+   DREYECK/WORK/REMOTE-CONTROL-PLANNING::MACBOOK-A
+   DREYECK/WORK/REMOTE-CONTROL-PLANNING::ANDROID
+   DREYECK/WORK/REMOTE-CONTROL-PLANNING::AGENT)
+  (DREYECK/WORK/REMOTE-CONTROL-PLANNING::!VERIFY-MODELED-CONTROL
+   DREYECK/WORK/REMOTE-CONTROL-PLANNING::ZETTELKASTEN
+   DREYECK/WORK/REMOTE-CONTROL-PLANNING::MACBOOK-A
+   DREYECK/WORK/REMOTE-CONTROL-PLANNING::ANDROID
+   DREYECK/WORK/REMOTE-CONTROL-PLANNING::AGENT))
+ ((DREYECK/WORK/REMOTE-CONTROL-PLANNING::!MODEL-DIRECT-ROUTE
+   DREYECK/WORK/REMOTE-CONTROL-PLANNING::ZETTELKASTEN
+   DREYECK/WORK/REMOTE-CONTROL-PLANNING::MACBOOK-A
+   DREYECK/WORK/REMOTE-CONTROL-PLANNING::ANDROID)
+  (DREYECK/WORK/REMOTE-CONTROL-PLANNING::!MODEL-CONTROL-SURFACE
+   DREYECK/WORK/REMOTE-CONTROL-PLANNING::ZETTELKASTEN
+   DREYECK/WORK/REMOTE-CONTROL-PLANNING::MACBOOK-A
+   DREYECK/WORK/REMOTE-CONTROL-PLANNING::ANDROID
+   DREYECK/WORK/REMOTE-CONTROL-PLANNING::DIRECT)
+  (DREYECK/WORK/REMOTE-CONTROL-PLANNING::!VERIFY-MODELED-CONTROL
+   DREYECK/WORK/REMOTE-CONTROL-PLANNING::ZETTELKASTEN
+   DREYECK/WORK/REMOTE-CONTROL-PLANNING::MACBOOK-A
+   DREYECK/WORK/REMOTE-CONTROL-PLANNING::ANDROID
+   DREYECK/WORK/REMOTE-CONTROL-PLANNING::DIRECT)))
+REMOTE-CONTROL D PASS: 0 plans, 0 trees, 0 states
+NIL
+REMOTE-CONTROL E PASS: 0 plans, 0 trees, 0 states
+NIL
+baseline PASS dreyeck/work/remote-control-planning/tests EXIT 0
+baseline BEGIN hyperbook/fedwiki/tests
+WARNING: System definition file #P"/workspace/tools/nix-portable-data/.nix-portable/nix/store/fdrq5ji4dvm7jj0wzfvxcyr0rwiq2c24-sbcl-cl-who-20241012-git/cl-who.asd" contains definition for system "cl-who-test". Please only define "cl-who" and secondary systems with a name starting with "cl-who/" (e.g. "cl-who/test") in that file.
+WARNING: System definition file #P"/workspace/tools/nix-portable-data/.nix-portable/nix/store/rn29yxasws4x3wvcf6d0738zxbcrvmin-sbcl-parse-float-20200218-git/parse-float.asd" contains definition for system "parse-float-tests". Please only define "parse-float" and secondary systems with a name starting with "parse-float/" (e.g. "parse-float/test") in that file.
+WARNING: System definition file #P"/workspace/tools/nix-portable-data/.nix-portable/nix/store/bzssaly51znz21jychrjrjg22cbimv2h-sbcl-cl-template-20130615-git/cl-template.asd" contains definition for system "cl-template-tests". Please only define "cl-template" and secondary systems with a name starting with "cl-template/" (e.g. "cl-template/test") in that file.
+;;; Computing Hangul syllable namesSTYLE-WARNING:
+   The new FTYPE proclamation for FSET::VECTOR-SET-BINARY-SEARCH-LO
+     (FUNCTION (SIMPLE-VECTOR T) FIXNUM)
+   does not match the derived return type
+     (FUNCTION (SIMPLE-VECTOR T)
+      (VALUES (INTEGER -4611686018427387904 4611686018427387904) &OPTIONAL))
+STYLE-WARNING:
+   The new FTYPE proclamation for FSET::WB-BAG-TREE-TOTAL-COUNT
+     (FUNCTION (FSET::WB-BAG-TREE) INTEGER)
+   does not match the derived return type
+     (FUNCTION ((OR LIST FSET::WB-BAG-TREE-NODE)) *)
+STYLE-WARNING:
+   The new FTYPE proclamation for FSET::HASH-VALUE-FIXNUM
+     (FUNCTION (T) FIXNUM)
+   does not match the derived return type
+     (FUNCTION (T) (VALUES INTEGER &OPTIONAL))
+STYLE-WARNING:
+   The new FTYPE proclamation for FSET::CH-SET-NODE-ENTRY-MASK
+     (FUNCTION (T) FIXNUM)
+   does not match the derived return type
+     (FUNCTION (SIMPLE-VECTOR) (VALUES T &OPTIONAL))
+STYLE-WARNING:
+   The new FTYPE proclamation for FSET::CH-SET-NODE-SUBNODE-MASK
+     (FUNCTION (T) FIXNUM)
+   does not match the derived return type
+     (FUNCTION (SIMPLE-VECTOR) (VALUES T &OPTIONAL))
+STYLE-WARNING:
+   The new FTYPE proclamation for FSET::CH-SET-NODE-SIZE
+     (FUNCTION (T) FIXNUM)
+   does not match the derived return type
+     (FUNCTION (SIMPLE-VECTOR) (VALUES T &OPTIONAL))
+STYLE-WARNING:
+   The new FTYPE proclamation for FSET::CH-SET-NODE-HASH-VALUE
+     (FUNCTION (T) FIXNUM)
+   does not match the derived return type
+     (FUNCTION (SIMPLE-VECTOR) (VALUES T &OPTIONAL))
+STYLE-WARNING:
+   The new FTYPE proclamation for FSET::CH-MAP-NODE-ENTRY-MASK
+     (FUNCTION (T) FIXNUM)
+   does not match the derived return type
+     (FUNCTION (SIMPLE-VECTOR) (VALUES T &OPTIONAL))
+STYLE-WARNING:
+   The new FTYPE proclamation for FSET::CH-MAP-NODE-SUBNODE-MASK
+     (FUNCTION (T) FIXNUM)
+   does not match the derived return type
+     (FUNCTION (SIMPLE-VECTOR) (VALUES T &OPTIONAL))
+STYLE-WARNING:
+   The new FTYPE proclamation for FSET::CH-MAP-NODE-SIZE
+     (FUNCTION (T) FIXNUM)
+   does not match the derived return type
+     (FUNCTION (SIMPLE-VECTOR) (VALUES T &OPTIONAL))
+STYLE-WARNING:
+   The new FTYPE proclamation for FSET::CH-MAP-NODE-HASH-VALUE
+     (FUNCTION (T) FIXNUM)
+   does not match the derived return type
+     (FUNCTION (SIMPLE-VECTOR) (VALUES T &OPTIONAL))
+STYLE-WARNING:
+   Generic function FSET:ITERATOR clobbers an earlier FTYPE proclamation
+   (FUNCTION (T &KEY &ALLOW-OTHER-KEYS) (VALUES FUNCTION &REST T)) for the same
+   name with (FUNCTION (T &KEY &ALLOW-OTHER-KEYS) *).
+STYLE-WARNING:
+   The new FTYPE proclamation for SWANK/BACKEND:GETPID
+     (FUNCTION NIL (VALUES (SIGNED-BYTE 32) &OPTIONAL))
+   does not match the derived return type
+     (FUNCTION NIL *)
+WARNING:
+   redefining EMACS-INSPECT (#<SB-PCL:SYSTEM-CLASS COMMON-LISP:T>) in DEFMETHOD
+WARNING:
+   redefining 👀PRINT-STRING (#<SB-PCL:SYSTEM-CLASS COMMON-LISP:T>) in DEFMETHOD
+WARNING:
+   The new FTYPE proclamation for CLSS:MATCH-SELECTOR
+     (FUNCTION (LIST (OR PLUMP-DOM:NODE VECTOR LIST) KEYWORD)
+      (VALUES (AND (VECTOR PLUMP-DOM:NODE) (NOT SIMPLE-ARRAY))))
+   does not match the old FTYPE proclamation
+     (FUNCTION (LIST (OR LIST PLUMP-DOM:NODE VECTOR) &OPTIONAL KEYWORD)
+      (VALUES (AND (VECTOR PLUMP-DOM:NODE) (NOT SIMPLE-ARRAY)) &REST T))
+WARNING: redefining CL-ISAAC:RAND32 in DEFUN
+WARNING: redefining CL-ISAAC:RAND64 in DEFUN
+WARNING:
+   bare references to struct types are deprecated. Please use (:POINTER
+                                                               (:STRUCT
+                                                                SQLITE3)) or (:STRUCT
+                                                                              SQLITE3) instead.
+WARNING:
+   bare references to struct types are deprecated. Please use (:POINTER
+                                                               (:STRUCT
+                                                                SQLITE3-STMT)) or (:STRUCT
+                                                                                   SQLITE3-STMT) instead.
+WARNING: redefining DEFTYPE type to be a class: DBI.ERROR:<DBI-ERROR>
+WARNING: redefining DEFTYPE type to be a class: DBI.ERROR:<DBI-WARNING>
+WARNING: redefining DEFTYPE type to be a class: DBI.ERROR:<DBI-INTERFACE-ERROR>
+WARNING:
+   redefining DEFTYPE type to be a class: DBI.ERROR:<DBI-UNIMPLEMENTED-ERROR>
+WARNING: redefining DEFTYPE type to be a class: DBI.ERROR:<DBI-DATABASE-ERROR>
+WARNING: redefining DEFTYPE type to be a class: DBI.ERROR:<DBI-DATA-ERROR>
+WARNING:
+   redefining DEFTYPE type to be a class: DBI.ERROR:<DBI-OPERATIONAL-ERROR>
+WARNING: redefining DEFTYPE type to be a class: DBI.ERROR:<DBI-INTEGRITY-ERROR>
+WARNING: redefining DEFTYPE type to be a class: DBI.ERROR:<DBI-INTERNAL-ERROR>
+WARNING:
+   redefining DEFTYPE type to be a class: DBI.ERROR:<DBI-PROGRAMMING-ERROR>
+WARNING:
+   redefining DEFTYPE type to be a class: DBI.ERROR:<DBI-NOTSUPPORTED-ERROR>
+WARNING:
+   redefining DEFTYPE type to be a class: DBI.ERROR:<DBI-ALREADY-COMMITED-ERROR>
+WARNING:
+   redefining DEFTYPE type to be a class: DBI.ERROR:<DBI-ALREADY-ROLLED-BACK-ERROR>
+WARNING: redefining DEFTYPE type to be a class: DBI.DRIVER:<DBI-DRIVER>
+WARNING: redefining DEFTYPE type to be a class: DBI.DRIVER:<DBI-CONNECTION>
+WARNING: redefining DEFTYPE type to be a class: DBI.DRIVER:<DBI-QUERY>
+WARNING: redefining IRONCLAD:BLOCK-LENGTH in DEFGENERIC
+WARNING: redefining CLOG:PARENT in DEFGENERIC
+WARNING: redefining CLOG::CONNECTION-ID in DEFGENERIC
+WARNING: redefining CLOG:HTML-ID in DEFGENERIC
+WARNING: redefining CLOG:WINDOW in DEFGENERIC
+WARNING: redefining CLOG:HTML-DOCUMENT in DEFGENERIC
+WARNING: redefining CLOG:LOCATION in DEFGENERIC
+WARNING: redefining CLOG:NAVIGATOR in DEFGENERIC
+WARNING: redefining CLOG:DOCUMENT-ELEMENT in DEFGENERIC
+WARNING: redefining CLOG:HEAD-ELEMENT in DEFGENERIC
+WARNING: redefining CLOG:DISABLEDP in DEFGENERIC
+WARNING: redefining (COMMON-LISP:SETF CLOG:DISABLEDP) in DEFGENERIC
+WARNING: redefining CLOG:VALUE in DEFGENERIC
+WARNING: redefining (COMMON-LISP:SETF CLOG:VALUE) in DEFGENERIC
+WARNING: redefining CLOG:MINIMUM in DEFGENERIC
+WARNING: redefining (COMMON-LISP:SETF CLOG:MINIMUM) in DEFGENERIC
+WARNING: redefining CLOG:MAXIMUM in DEFGENERIC
+WARNING: redefining (COMMON-LISP:SETF CLOG:MAXIMUM) in DEFGENERIC
+WARNING: redefining CLOG:URL-SRC in DEFGENERIC
+WARNING: redefining (COMMON-LISP:SETF CLOG:URL-SRC) in DEFGENERIC
+WARNING: redefining CLOG:ALT-TEXT in DEFGENERIC
+WARNING: redefining (COMMON-LISP:SETF CLOG:ALT-TEXT) in DEFGENERIC
+WARNING: redefining CLOG:CENTER-PANEL in DEFGENERIC
+WARNING: redefining CLOG:TOP-PANEL in DEFGENERIC
+WARNING: redefining CLOG:LEFT-PANEL in DEFGENERIC
+WARNING: redefining CLOG:BOTTOM-PANEL in DEFGENERIC
+WARNING: redefining CLOG:PANEL-BOX in DEFGENERIC
+WARNING: redefining CLOG:TREE-ROOT in DEFGENERIC
+WARNING: redefining CLOG:INDENT-LEVEL in DEFGENERIC
+WARNING: redefining CLOG:TOGGLE-STATE in DEFGENERIC
+WARNING: redefining CLOG:TREE-ITEM in DEFGENERIC
+WARNING: redefining CLOG:DATABASE-CONNECTION in DEFGENERIC
+WARNING: redefining CLOG:READ-ONLY-P in DEFGENERIC
+WARNING: redefining (COMMON-LISP:SETF CLOG:READ-ONLY-P) in DEFGENERIC
+WARNING:
+   redefining HV:👀PLAYGROUND (#<SB-PCL:SYSTEM-CLASS COMMON-LISP:T>) in DEFMETHOD
+
+; compiling file "/workspace/scratch/hyperdoc-link-baseline/tests/fedwiki-mech-story.lisp" (written 07 NOV 2026 10:12:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-link-baseline/tests/fedwiki-mech-story-tmpAAURSO1.fasl
+; compilation finished in 0:00:00.019
+; compiling file "/workspace/scratch/hyperdoc-link-baseline/tests/fedwiki-mech-sitemaps.lisp" (written 07 NOV 2026 10:12:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-link-baseline/tests/fedwiki-mech-sitemaps-tmp5GEXGEG5.fasl
+; compilation finished in 0:00:00.027
+; compiling file "/workspace/scratch/hyperdoc-link-baseline/tests/fedwiki-mech-topics.lisp" (written 07 NOV 2026 10:12:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-link-baseline/tests/fedwiki-mech-topics-tmpAR3FSGEY.fasl
+; compilation finished in 0:00:00.012
+; compiling file "/workspace/scratch/hyperdoc-link-baseline/tests/fedwiki-mech-dialog.lisp" (written 07 NOV 2026 10:12:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-link-baseline/tests/fedwiki-mech-dialog-tmpJAIDFZTC.fasl
+; compilation finished in 0:00:00.007
+FEDWIKI-MECH-DIALOG-PASS: original item and explicit-initiation Story boundary retained.
+FEDWIKI-MECH-TOPICS-PASS: original page/ID unchanged, explicit loaded-site control and unavailable historical context.
+PAGE-SELECTION-CONTRACT-PASS: raw retention is independent; loaded global/session sites excluded; explicit HyperDoc order and attribution membership differ from source-qualified Wiki-client registrations.
+FEDWIKI-MECH-SITEMAPS-PASS: raw fields, provenance, order, scope, loading/failure/empty, actual Story boundary.
+FEDWIKI-MECH-STORY-PASS: original page/IDs/Code preserved, pure actual Story view, host bridge contract.
+baseline PASS hyperbook/fedwiki/tests EXIT 0
+baseline BEGIN dreyeck/local-fedwiki-page/tests
+WARNING: System definition file #P"/workspace/tools/nix-portable-data/.nix-portable/nix/store/fdrq5ji4dvm7jj0wzfvxcyr0rwiq2c24-sbcl-cl-who-20241012-git/cl-who.asd" contains definition for system "cl-who-test". Please only define "cl-who" and secondary systems with a name starting with "cl-who/" (e.g. "cl-who/test") in that file.
+WARNING: System definition file #P"/workspace/tools/nix-portable-data/.nix-portable/nix/store/rn29yxasws4x3wvcf6d0738zxbcrvmin-sbcl-parse-float-20200218-git/parse-float.asd" contains definition for system "parse-float-tests". Please only define "parse-float" and secondary systems with a name starting with "parse-float/" (e.g. "parse-float/test") in that file.
+WARNING: System definition file #P"/workspace/tools/nix-portable-data/.nix-portable/nix/store/bzssaly51znz21jychrjrjg22cbimv2h-sbcl-cl-template-20130615-git/cl-template.asd" contains definition for system "cl-template-tests". Please only define "cl-template" and secondary systems with a name starting with "cl-template/" (e.g. "cl-template/test") in that file.
+;;; Computing Hangul syllable namesSTYLE-WARNING:
+   The new FTYPE proclamation for FSET::VECTOR-SET-BINARY-SEARCH-LO
+     (FUNCTION (SIMPLE-VECTOR T) FIXNUM)
+   does not match the derived return type
+     (FUNCTION (SIMPLE-VECTOR T)
+      (VALUES (INTEGER -4611686018427387904 4611686018427387904) &OPTIONAL))
+STYLE-WARNING:
+   The new FTYPE proclamation for FSET::WB-BAG-TREE-TOTAL-COUNT
+     (FUNCTION (FSET::WB-BAG-TREE) INTEGER)
+   does not match the derived return type
+     (FUNCTION ((OR LIST FSET::WB-BAG-TREE-NODE)) *)
+STYLE-WARNING:
+   The new FTYPE proclamation for FSET::HASH-VALUE-FIXNUM
+     (FUNCTION (T) FIXNUM)
+   does not match the derived return type
+     (FUNCTION (T) (VALUES INTEGER &OPTIONAL))
+STYLE-WARNING:
+   The new FTYPE proclamation for FSET::CH-SET-NODE-ENTRY-MASK
+     (FUNCTION (T) FIXNUM)
+   does not match the derived return type
+     (FUNCTION (SIMPLE-VECTOR) (VALUES T &OPTIONAL))
+STYLE-WARNING:
+   The new FTYPE proclamation for FSET::CH-SET-NODE-SUBNODE-MASK
+     (FUNCTION (T) FIXNUM)
+   does not match the derived return type
+     (FUNCTION (SIMPLE-VECTOR) (VALUES T &OPTIONAL))
+STYLE-WARNING:
+   The new FTYPE proclamation for FSET::CH-SET-NODE-SIZE
+     (FUNCTION (T) FIXNUM)
+   does not match the derived return type
+     (FUNCTION (SIMPLE-VECTOR) (VALUES T &OPTIONAL))
+STYLE-WARNING:
+   The new FTYPE proclamation for FSET::CH-SET-NODE-HASH-VALUE
+     (FUNCTION (T) FIXNUM)
+   does not match the derived return type
+     (FUNCTION (SIMPLE-VECTOR) (VALUES T &OPTIONAL))
+STYLE-WARNING:
+   The new FTYPE proclamation for FSET::CH-MAP-NODE-ENTRY-MASK
+     (FUNCTION (T) FIXNUM)
+   does not match the derived return type
+     (FUNCTION (SIMPLE-VECTOR) (VALUES T &OPTIONAL))
+STYLE-WARNING:
+   The new FTYPE proclamation for FSET::CH-MAP-NODE-SUBNODE-MASK
+     (FUNCTION (T) FIXNUM)
+   does not match the derived return type
+     (FUNCTION (SIMPLE-VECTOR) (VALUES T &OPTIONAL))
+STYLE-WARNING:
+   The new FTYPE proclamation for FSET::CH-MAP-NODE-SIZE
+     (FUNCTION (T) FIXNUM)
+   does not match the derived return type
+     (FUNCTION (SIMPLE-VECTOR) (VALUES T &OPTIONAL))
+STYLE-WARNING:
+   The new FTYPE proclamation for FSET::CH-MAP-NODE-HASH-VALUE
+     (FUNCTION (T) FIXNUM)
+   does not match the derived return type
+     (FUNCTION (SIMPLE-VECTOR) (VALUES T &OPTIONAL))
+STYLE-WARNING:
+   Generic function FSET:ITERATOR clobbers an earlier FTYPE proclamation
+   (FUNCTION (T &KEY &ALLOW-OTHER-KEYS) (VALUES FUNCTION &REST T)) for the same
+   name with (FUNCTION (T &KEY &ALLOW-OTHER-KEYS) *).
+STYLE-WARNING:
+   The new FTYPE proclamation for SWANK/BACKEND:GETPID
+     (FUNCTION NIL (VALUES (SIGNED-BYTE 32) &OPTIONAL))
+   does not match the derived return type
+     (FUNCTION NIL *)
+WARNING:
+   redefining EMACS-INSPECT (#<SB-PCL:SYSTEM-CLASS COMMON-LISP:T>) in DEFMETHOD
+WARNING:
+   redefining 👀PRINT-STRING (#<SB-PCL:SYSTEM-CLASS COMMON-LISP:T>) in DEFMETHOD
+WARNING:
+   The new FTYPE proclamation for CLSS:MATCH-SELECTOR
+     (FUNCTION (LIST (OR PLUMP-DOM:NODE VECTOR LIST) KEYWORD)
+      (VALUES (AND (VECTOR PLUMP-DOM:NODE) (NOT SIMPLE-ARRAY))))
+   does not match the old FTYPE proclamation
+     (FUNCTION (LIST (OR LIST PLUMP-DOM:NODE VECTOR) &OPTIONAL KEYWORD)
+      (VALUES (AND (VECTOR PLUMP-DOM:NODE) (NOT SIMPLE-ARRAY)) &REST T))
+WARNING: redefining CL-ISAAC:RAND32 in DEFUN
+WARNING: redefining CL-ISAAC:RAND64 in DEFUN
+WARNING:
+   bare references to struct types are deprecated. Please use (:POINTER
+                                                               (:STRUCT
+                                                                SQLITE3)) or (:STRUCT
+                                                                              SQLITE3) instead.
+WARNING:
+   bare references to struct types are deprecated. Please use (:POINTER
+                                                               (:STRUCT
+                                                                SQLITE3-STMT)) or (:STRUCT
+                                                                                   SQLITE3-STMT) instead.
+WARNING: redefining DEFTYPE type to be a class: DBI.ERROR:<DBI-ERROR>
+WARNING: redefining DEFTYPE type to be a class: DBI.ERROR:<DBI-WARNING>
+WARNING: redefining DEFTYPE type to be a class: DBI.ERROR:<DBI-INTERFACE-ERROR>
+WARNING:
+   redefining DEFTYPE type to be a class: DBI.ERROR:<DBI-UNIMPLEMENTED-ERROR>
+WARNING: redefining DEFTYPE type to be a class: DBI.ERROR:<DBI-DATABASE-ERROR>
+WARNING: redefining DEFTYPE type to be a class: DBI.ERROR:<DBI-DATA-ERROR>
+WARNING:
+   redefining DEFTYPE type to be a class: DBI.ERROR:<DBI-OPERATIONAL-ERROR>
+WARNING: redefining DEFTYPE type to be a class: DBI.ERROR:<DBI-INTEGRITY-ERROR>
+WARNING: redefining DEFTYPE type to be a class: DBI.ERROR:<DBI-INTERNAL-ERROR>
+WARNING:
+   redefining DEFTYPE type to be a class: DBI.ERROR:<DBI-PROGRAMMING-ERROR>
+WARNING:
+   redefining DEFTYPE type to be a class: DBI.ERROR:<DBI-NOTSUPPORTED-ERROR>
+WARNING:
+   redefining DEFTYPE type to be a class: DBI.ERROR:<DBI-ALREADY-COMMITED-ERROR>
+WARNING:
+   redefining DEFTYPE type to be a class: DBI.ERROR:<DBI-ALREADY-ROLLED-BACK-ERROR>
+WARNING: redefining DEFTYPE type to be a class: DBI.DRIVER:<DBI-DRIVER>
+WARNING: redefining DEFTYPE type to be a class: DBI.DRIVER:<DBI-CONNECTION>
+WARNING: redefining DEFTYPE type to be a class: DBI.DRIVER:<DBI-QUERY>
+WARNING: redefining IRONCLAD:BLOCK-LENGTH in DEFGENERIC
+WARNING: redefining CLOG:PARENT in DEFGENERIC
+WARNING: redefining CLOG::CONNECTION-ID in DEFGENERIC
+WARNING: redefining CLOG:HTML-ID in DEFGENERIC
+WARNING: redefining CLOG:WINDOW in DEFGENERIC
+WARNING: redefining CLOG:HTML-DOCUMENT in DEFGENERIC
+WARNING: redefining CLOG:LOCATION in DEFGENERIC
+WARNING: redefining CLOG:NAVIGATOR in DEFGENERIC
+WARNING: redefining CLOG:DOCUMENT-ELEMENT in DEFGENERIC
+WARNING: redefining CLOG:HEAD-ELEMENT in DEFGENERIC
+WARNING: redefining CLOG:DISABLEDP in DEFGENERIC
+WARNING: redefining (COMMON-LISP:SETF CLOG:DISABLEDP) in DEFGENERIC
+WARNING: redefining CLOG:VALUE in DEFGENERIC
+WARNING: redefining (COMMON-LISP:SETF CLOG:VALUE) in DEFGENERIC
+WARNING: redefining CLOG:MINIMUM in DEFGENERIC
+WARNING: redefining (COMMON-LISP:SETF CLOG:MINIMUM) in DEFGENERIC
+WARNING: redefining CLOG:MAXIMUM in DEFGENERIC
+WARNING: redefining (COMMON-LISP:SETF CLOG:MAXIMUM) in DEFGENERIC
+WARNING: redefining CLOG:URL-SRC in DEFGENERIC
+WARNING: redefining (COMMON-LISP:SETF CLOG:URL-SRC) in DEFGENERIC
+WARNING: redefining CLOG:ALT-TEXT in DEFGENERIC
+WARNING: redefining (COMMON-LISP:SETF CLOG:ALT-TEXT) in DEFGENERIC
+WARNING: redefining CLOG:CENTER-PANEL in DEFGENERIC
+WARNING: redefining CLOG:TOP-PANEL in DEFGENERIC
+WARNING: redefining CLOG:LEFT-PANEL in DEFGENERIC
+WARNING: redefining CLOG:BOTTOM-PANEL in DEFGENERIC
+WARNING: redefining CLOG:PANEL-BOX in DEFGENERIC
+WARNING: redefining CLOG:TREE-ROOT in DEFGENERIC
+WARNING: redefining CLOG:INDENT-LEVEL in DEFGENERIC
+WARNING: redefining CLOG:TOGGLE-STATE in DEFGENERIC
+WARNING: redefining CLOG:TREE-ITEM in DEFGENERIC
+WARNING: redefining CLOG:DATABASE-CONNECTION in DEFGENERIC
+
+; compiling file "/workspace/scratch/hyperdoc-link-baseline/dreyeck/src/fedwiki-assets-package.lisp" (written 07 NOV 2026 10:12:21 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-link-baseline/dreyeck/src/fedwiki-assets-package-tmpAAURSO1.fasl
+; compilation finished in 0:00:00.003
+; compiling file "/workspace/scratch/hyperdoc-link-baseline/dreyeck/src/fedwiki-page-slug.lisp" (written 07 NOV 2026 10:12:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-link-baseline/dreyeck/src/fedwiki-page-slug-tmp5GEXGEG5.fasl
+; compilation finished in 0:00:00.004
+; compiling file "/workspace/scratch/hyperdoc-link-baseline/dreyeck/src/fedwiki-assets.lisp" (written 07 NOV 2026 10:12:21 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-link-baseline/dreyeck/src/fedwiki-assets-tmpAR3FSGEY.fasl
+; compilation finished in 0:00:00.015
+; compiling file "/workspace/scratch/hyperdoc-link-baseline/dreyeck/src/local-fedwiki-page-package.lisp" (written 07 NOV 2026 10:12:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-link-baseline/dreyeck/src/local-fedwiki-page-package-tmpJAIDFZTC.fasl
+; compilation finished in 0:00:00.000
+; compiling file "/workspace/scratch/hyperdoc-link-baseline/dreyeck/src/local-fedwiki-page.lisp" (written 07 NOV 2026 10:12:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-link-baseline/dreyeck/src/local-fedwiki-page-tmp8V3J6PE9.fasl
+; compilation finished in 0:00:00.011
+; compiling file "/workspace/scratch/hyperdoc-link-baseline/dreyeck/src/local-fedwiki-page-source.lisp" (written 07 NOV 2026 10:12:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-link-baseline/dreyeck/src/local-fedwiki-page-source-tmp9V47YWQF.fasl
+; compilation finished in 0:00:00.015
+; compiling file "/workspace/scratch/hyperdoc-link-baseline/dreyeck/src/local-fedwiki-page-inspector-package.lisp" (written 07 NOV 2026 10:12:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-link-baseline/dreyeck/src/local-fedwiki-page-inspector-package-tmp9BN22RMA.fasl
+; compilation finished in 0:00:00.000
+; compiling file "/workspace/scratch/hyperdoc-link-baseline/dreyeck/src/local-fedwiki-page-inspector.lisp" (written 07 NOV 2026 10:12:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-link-baseline/dreyeck/src/local-fedwiki-page-inspector-tmp1CXFJSK9.fasl
+; compilation finished in 0:00:00.031
+; compiling file "/workspace/scratch/hyperdoc-link-baseline/dreyeck/tests/local-fedwiki-page-test-package.lisp" (written 07 NOV 2026 10:12:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-link-baseline/dreyeck/tests/local-fedwiki-page-test-package-tmpX4BRKI0R.fasl
+; compilation finished in 0:00:00.004
+; compiling file "/workspace/scratch/hyperdoc-link-baseline/dreyeck/tests/local-fedwiki-page-smoke.lisp" (written 07 NOV 2026 10:12:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-link-baseline/dreyeck/tests/local-fedwiki-page-smoke-tmpQ371UGST.fasl
+; compilation finished in 0:00:00.012
+WARNING: System definition file #P"/workspace/tools/nix-portable-data/.nix-portable/nix/store/fdrq5ji4dvm7jj0wzfvxcyr0rwiq2c24-sbcl-cl-who-20241012-git/cl-who.asd" contains definition for system "cl-who-test". Please only define "cl-who" and secondary systems with a name starting with "cl-who/" (e.g. "cl-who/test") in that file.
+WARNING: System definition file #P"/workspace/tools/nix-portable-data/.nix-portable/nix/store/rn29yxasws4x3wvcf6d0738zxbcrvmin-sbcl-parse-float-20200218-git/parse-float.asd" contains definition for system "parse-float-tests". Please only define "parse-float" and secondary systems with a name starting with "parse-float/" (e.g. "parse-float/test") in that file.
+WARNING: System definition file #P"/workspace/tools/nix-portable-data/.nix-portable/nix/store/bzssaly51znz21jychrjrjg22cbimv2h-sbcl-cl-template-20130615-git/cl-template.asd" contains definition for system "cl-template-tests". Please only define "cl-template" and secondary systems with a name starting with "cl-template/" (e.g. "cl-template/test") in that file.
+;;; Computing Hangul syllable namesSTYLE-WARNING:
+   The new FTYPE proclamation for FSET::VECTOR-SET-BINARY-SEARCH-LO
+     (FUNCTION (SIMPLE-VECTOR T) FIXNUM)
+   does not match the derived return type
+     (FUNCTION (SIMPLE-VECTOR T)
+      (VALUES (INTEGER -4611686018427387904 4611686018427387904) &OPTIONAL))
+STYLE-WARNING:
+   The new FTYPE proclamation for FSET::WB-BAG-TREE-TOTAL-COUNT
+     (FUNCTION (FSET::WB-BAG-TREE) INTEGER)
+   does not match the derived return type
+     (FUNCTION ((OR LIST FSET::WB-BAG-TREE-NODE)) *)
+STYLE-WARNING:
+   The new FTYPE proclamation for FSET::HASH-VALUE-FIXNUM
+     (FUNCTION (T) FIXNUM)
+   does not match the derived return type
+     (FUNCTION (T) (VALUES INTEGER &OPTIONAL))
+STYLE-WARNING:
+   The new FTYPE proclamation for FSET::CH-SET-NODE-ENTRY-MASK
+     (FUNCTION (T) FIXNUM)
+   does not match the derived return type
+     (FUNCTION (SIMPLE-VECTOR) (VALUES T &OPTIONAL))
+STYLE-WARNING:
+   The new FTYPE proclamation for FSET::CH-SET-NODE-SUBNODE-MASK
+     (FUNCTION (T) FIXNUM)
+   does not match the derived return type
+     (FUNCTION (SIMPLE-VECTOR) (VALUES T &OPTIONAL))
+STYLE-WARNING:
+   The new FTYPE proclamation for FSET::CH-SET-NODE-SIZE
+     (FUNCTION (T) FIXNUM)
+   does not match the derived return type
+     (FUNCTION (SIMPLE-VECTOR) (VALUES T &OPTIONAL))
+STYLE-WARNING:
+   The new FTYPE proclamation for FSET::CH-SET-NODE-HASH-VALUE
+     (FUNCTION (T) FIXNUM)
+   does not match the derived return type
+     (FUNCTION (SIMPLE-VECTOR) (VALUES T &OPTIONAL))
+STYLE-WARNING:
+   The new FTYPE proclamation for FSET::CH-MAP-NODE-ENTRY-MASK
+     (FUNCTION (T) FIXNUM)
+   does not match the derived return type
+     (FUNCTION (SIMPLE-VECTOR) (VALUES T &OPTIONAL))
+STYLE-WARNING:
+   The new FTYPE proclamation for FSET::CH-MAP-NODE-SUBNODE-MASK
+     (FUNCTION (T) FIXNUM)
+   does not match the derived return type
+     (FUNCTION (SIMPLE-VECTOR) (VALUES T &OPTIONAL))
+STYLE-WARNING:
+   The new FTYPE proclamation for FSET::CH-MAP-NODE-SIZE
+     (FUNCTION (T) FIXNUM)
+   does not match the derived return type
+     (FUNCTION (SIMPLE-VECTOR) (VALUES T &OPTIONAL))
+STYLE-WARNING:
+   The new FTYPE proclamation for FSET::CH-MAP-NODE-HASH-VALUE
+     (FUNCTION (T) FIXNUM)
+   does not match the derived return type
+     (FUNCTION (SIMPLE-VECTOR) (VALUES T &OPTIONAL))
+STYLE-WARNING:
+   Generic function FSET:ITERATOR clobbers an earlier FTYPE proclamation
+   (FUNCTION (T &KEY &ALLOW-OTHER-KEYS) (VALUES FUNCTION &REST T)) for the same
+   name with (FUNCTION (T &KEY &ALLOW-OTHER-KEYS) *).
+STYLE-WARNING:
+   The new FTYPE proclamation for SWANK/BACKEND:GETPID
+     (FUNCTION NIL (VALUES (SIGNED-BYTE 32) &OPTIONAL))
+   does not match the derived return type
+     (FUNCTION NIL *)
+WARNING:
+   redefining EMACS-INSPECT (#<SB-PCL:SYSTEM-CLASS COMMON-LISP:T>) in DEFMETHOD
+WARNING:
+   redefining 👀PRINT-STRING (#<SB-PCL:SYSTEM-CLASS COMMON-LISP:T>) in DEFMETHOD
+WARNING:
+   The new FTYPE proclamation for CLSS:MATCH-SELECTOR
+     (FUNCTION (LIST (OR PLUMP-DOM:NODE VECTOR LIST) KEYWORD)
+      (VALUES (AND (VECTOR PLUMP-DOM:NODE) (NOT SIMPLE-ARRAY))))
+   does not match the old FTYPE proclamation
+     (FUNCTION (LIST (OR LIST PLUMP-DOM:NODE VECTOR) &OPTIONAL KEYWORD)
+      (VALUES (AND (VECTOR PLUMP-DOM:NODE) (NOT SIMPLE-ARRAY)) &REST T))
+WARNING: redefining CL-ISAAC:RAND32 in DEFUN
+WARNING: redefining CL-ISAAC:RAND64 in DEFUN
+WARNING:
+   bare references to struct types are deprecated. Please use (:POINTER
+                                                               (:STRUCT
+                                                                SQLITE3)) or (:STRUCT
+                                                                              SQLITE3) instead.
+WARNING:
+   bare references to struct types are deprecated. Please use (:POINTER
+                                                               (:STRUCT
+                                                                SQLITE3-STMT)) or (:STRUCT
+                                                                                   SQLITE3-STMT) instead.
+WARNING: redefining DEFTYPE type to be a class: DBI.ERROR:<DBI-ERROR>
+WARNING: redefining DEFTYPE type to be a class: DBI.ERROR:<DBI-WARNING>
+WARNING: redefining DEFTYPE type to be a class: DBI.ERROR:<DBI-INTERFACE-ERROR>
+WARNING:
+   redefining DEFTYPE type to be a class: DBI.ERROR:<DBI-UNIMPLEMENTED-ERROR>
+WARNING: redefining DEFTYPE type to be a class: DBI.ERROR:<DBI-DATABASE-ERROR>
+WARNING: redefining DEFTYPE type to be a class: DBI.ERROR:<DBI-DATA-ERROR>
+WARNING:
+   redefining DEFTYPE type to be a class: DBI.ERROR:<DBI-OPERATIONAL-ERROR>
+WARNING: redefining DEFTYPE type to be a class: DBI.ERROR:<DBI-INTEGRITY-ERROR>
+WARNING: redefining DEFTYPE type to be a class: DBI.ERROR:<DBI-INTERNAL-ERROR>
+WARNING:
+   redefining DEFTYPE type to be a class: DBI.ERROR:<DBI-PROGRAMMING-ERROR>
+WARNING:
+   redefining DEFTYPE type to be a class: DBI.ERROR:<DBI-NOTSUPPORTED-ERROR>
+WARNING:
+   redefining DEFTYPE type to be a class: DBI.ERROR:<DBI-ALREADY-COMMITED-ERROR>
+WARNING:
+   redefining DEFTYPE type to be a class: DBI.ERROR:<DBI-ALREADY-ROLLED-BACK-ERROR>
+WARNING: redefining DEFTYPE type to be a class: DBI.DRIVER:<DBI-DRIVER>
+WARNING: redefining DEFTYPE type to be a class: DBI.DRIVER:<DBI-CONNECTION>
+WARNING: redefining DEFTYPE type to be a class: DBI.DRIVER:<DBI-QUERY>
+WARNING: redefining IRONCLAD:BLOCK-LENGTH in DEFGENERIC
+WARNING: redefining CLOG:PARENT in DEFGENERIC
+WARNING: redefining CLOG::CONNECTION-ID in DEFGENERIC
+WARNING: redefining CLOG:HTML-ID in DEFGENERIC
+WARNING: redefining CLOG:WINDOW in DEFGENERIC
+WARNING: redefining CLOG:HTML-DOCUMENT in DEFGENERIC
+WARNING: redefining CLOG:LOCATION in DEFGENERIC
+WARNING: redefining CLOG:NAVIGATOR in DEFGENERIC
+WARNING: redefining CLOG:DOCUMENT-ELEMENT in DEFGENERIC
+WARNING: redefining CLOG:HEAD-ELEMENT in DEFGENERIC
+WARNING: redefining CLOG:DISABLEDP in DEFGENERIC
+WARNING: redefining (COMMON-LISP:SETF CLOG:DISABLEDP) in DEFGENERIC
+WARNING: redefining CLOG:VALUE in DEFGENERIC
+WARNING: redefining (COMMON-LISP:SETF CLOG:VALUE) in DEFGENERIC
+WARNING: redefining CLOG:MINIMUM in DEFGENERIC
+WARNING: redefining (COMMON-LISP:SETF CLOG:MINIMUM) in DEFGENERIC
+WARNING: redefining CLOG:MAXIMUM in DEFGENERIC
+WARNING: redefining (COMMON-LISP:SETF CLOG:MAXIMUM) in DEFGENERIC
+WARNING: redefining CLOG:URL-SRC in DEFGENERIC
+WARNING: redefining (COMMON-LISP:SETF CLOG:URL-SRC) in DEFGENERIC
+WARNING: redefining CLOG:ALT-TEXT in DEFGENERIC
+WARNING: redefining (COMMON-LISP:SETF CLOG:ALT-TEXT) in DEFGENERIC
+WARNING: redefining CLOG:CENTER-PANEL in DEFGENERIC
+WARNING: redefining CLOG:TOP-PANEL in DEFGENERIC
+WARNING: redefining CLOG:LEFT-PANEL in DEFGENERIC
+WARNING: redefining CLOG:BOTTOM-PANEL in DEFGENERIC
+WARNING: redefining CLOG:PANEL-BOX in DEFGENERIC
+WARNING: redefining CLOG:TREE-ROOT in DEFGENERIC
+WARNING: redefining CLOG:INDENT-LEVEL in DEFGENERIC
+WARNING: redefining CLOG:TOGGLE-STATE in DEFGENERIC
+WARNING: redefining CLOG:TREE-ITEM in DEFGENERIC
+WARNING: redefining CLOG:DATABASE-CONNECTION in DEFGENERIC
+baseline PASS dreyeck/local-fedwiki-page/tests EXIT 0
+baseline BEGIN dreyeck/lisp-critic/recorded/tests
+WARNING: System definition file #P"/workspace/tools/nix-portable-data/.nix-portable/nix/store/fdrq5ji4dvm7jj0wzfvxcyr0rwiq2c24-sbcl-cl-who-20241012-git/cl-who.asd" contains definition for system "cl-who-test". Please only define "cl-who" and secondary systems with a name starting with "cl-who/" (e.g. "cl-who/test") in that file.
+WARNING: System definition file #P"/workspace/tools/nix-portable-data/.nix-portable/nix/store/rn29yxasws4x3wvcf6d0738zxbcrvmin-sbcl-parse-float-20200218-git/parse-float.asd" contains definition for system "parse-float-tests". Please only define "parse-float" and secondary systems with a name starting with "parse-float/" (e.g. "parse-float/test") in that file.
+WARNING: System definition file #P"/workspace/tools/nix-portable-data/.nix-portable/nix/store/bzssaly51znz21jychrjrjg22cbimv2h-sbcl-cl-template-20130615-git/cl-template.asd" contains definition for system "cl-template-tests". Please only define "cl-template" and secondary systems with a name starting with "cl-template/" (e.g. "cl-template/test") in that file.
+; compiling file "/workspace/scratch/hyperdoc-link-baseline/dreyeck/src/evaluation-record-package.lisp" (written 07 NOV 2026 10:12:21 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-link-baseline/dreyeck/src/evaluation-record-package-tmpGHU3ALSV.fasl
+; compilation finished in 0:00:00.000
+; compiling file "/workspace/scratch/hyperdoc-link-baseline/dreyeck/src/evaluation-record.lisp" (written 07 NOV 2026 10:12:21 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-link-baseline/dreyeck/src/evaluation-record-tmpAAURSO1.fasl
+; compilation finished in 0:00:00.004
+; compiling file "/workspace/scratch/hyperdoc-link-baseline/dreyeck/src/lisp-critic-package.lisp" (written 07 NOV 2026 10:12:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-link-baseline/dreyeck/src/lisp-critic-package-tmp5GEXGEG5.fasl
+; compilation finished in 0:00:00.000
+; compiling file "/workspace/scratch/hyperdoc-link-baseline/dreyeck/src/lisp-critic.lisp" (written 07 NOV 2026 10:12:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-link-baseline/dreyeck/src/lisp-critic-tmpAR3FSGEY.fasl
+; compilation finished in 0:00:00.047
+; compiling file "/workspace/scratch/hyperdoc-link-baseline/dreyeck/src/evaluation-record-lisp-critic.lisp" (written 07 NOV 2026 10:12:21 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-link-baseline/dreyeck/src/evaluation-record-lisp-critic-tmpJAIDFZTC.fasl
+; compilation finished in 0:00:00.008
+; compiling file "/workspace/scratch/hyperdoc-link-baseline/dreyeck/src/lisp-critic-critique.lisp" (written 07 NOV 2026 10:12:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-link-baseline/dreyeck/src/lisp-critic-critique-tmp8V3J6PE9.fasl
+; compilation finished in 0:00:00.012
+; compiling file "/workspace/scratch/hyperdoc-link-baseline/dreyeck/src/lisp-critic-snapshot.lisp" (written 07 NOV 2026 10:12:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-link-baseline/dreyeck/src/lisp-critic-snapshot-tmp9V47YWQF.fasl
+; compilation finished in 0:00:00.015
+;;; Computing Hangul syllable names
+; compiling file "/workspace/scratch/hyperdoc-link-baseline/dreyeck/src/lisp-critic-critique-views.lisp" (written 07 NOV 2026 10:12:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-link-baseline/dreyeck/src/lisp-critic-critique-views-tmp9BN22RMA.fasl
+; compilation finished in 0:00:00.035
+STYLE-WARNING:
+   The new FTYPE proclamation for FSET::VECTOR-SET-BINARY-SEARCH-LO
+     (FUNCTION (SIMPLE-VECTOR T) FIXNUM)
+   does not match the derived return type
+     (FUNCTION (SIMPLE-VECTOR T)
+      (VALUES (INTEGER -4611686018427387904 4611686018427387904) &OPTIONAL))
+STYLE-WARNING:
+   The new FTYPE proclamation for FSET::WB-BAG-TREE-TOTAL-COUNT
+     (FUNCTION (FSET::WB-BAG-TREE) INTEGER)
+   does not match the derived return type
+     (FUNCTION ((OR LIST FSET::WB-BAG-TREE-NODE)) *)
+STYLE-WARNING:
+   The new FTYPE proclamation for FSET::HASH-VALUE-FIXNUM
+     (FUNCTION (T) FIXNUM)
+   does not match the derived return type
+     (FUNCTION (T) (VALUES INTEGER &OPTIONAL))
+STYLE-WARNING:
+   The new FTYPE proclamation for FSET::CH-SET-NODE-ENTRY-MASK
+     (FUNCTION (T) FIXNUM)
+   does not match the derived return type
+     (FUNCTION (SIMPLE-VECTOR) (VALUES T &OPTIONAL))
+STYLE-WARNING:
+   The new FTYPE proclamation for FSET::CH-SET-NODE-SUBNODE-MASK
+     (FUNCTION (T) FIXNUM)
+   does not match the derived return type
+     (FUNCTION (SIMPLE-VECTOR) (VALUES T &OPTIONAL))
+STYLE-WARNING:
+   The new FTYPE proclamation for FSET::CH-SET-NODE-SIZE
+     (FUNCTION (T) FIXNUM)
+   does not match the derived return type
+     (FUNCTION (SIMPLE-VECTOR) (VALUES T &OPTIONAL))
+STYLE-WARNING:
+   The new FTYPE proclamation for FSET::CH-SET-NODE-HASH-VALUE
+     (FUNCTION (T) FIXNUM)
+   does not match the derived return type
+     (FUNCTION (SIMPLE-VECTOR) (VALUES T &OPTIONAL))
+STYLE-WARNING:
+   The new FTYPE proclamation for FSET::CH-MAP-NODE-ENTRY-MASK
+     (FUNCTION (T) FIXNUM)
+   does not match the derived return type
+     (FUNCTION (SIMPLE-VECTOR) (VALUES T &OPTIONAL))
+STYLE-WARNING:
+   The new FTYPE proclamation for FSET::CH-MAP-NODE-SUBNODE-MASK
+     (FUNCTION (T) FIXNUM)
+   does not match the derived return type
+     (FUNCTION (SIMPLE-VECTOR) (VALUES T &OPTIONAL))
+STYLE-WARNING:
+   The new FTYPE proclamation for FSET::CH-MAP-NODE-SIZE
+     (FUNCTION (T) FIXNUM)
+   does not match the derived return type
+     (FUNCTION (SIMPLE-VECTOR) (VALUES T &OPTIONAL))
+STYLE-WARNING:
+   The new FTYPE proclamation for FSET::CH-MAP-NODE-HASH-VALUE
+     (FUNCTION (T) FIXNUM)
+   does not match the derived return type
+     (FUNCTION (SIMPLE-VECTOR) (VALUES T &OPTIONAL))
+STYLE-WARNING:
+   Generic function FSET:ITERATOR clobbers an earlier FTYPE proclamation
+   (FUNCTION (T &KEY &ALLOW-OTHER-KEYS) (VALUES FUNCTION &REST T)) for the same
+   name with (FUNCTION (T &KEY &ALLOW-OTHER-KEYS) *).
+STYLE-WARNING:
+   The new FTYPE proclamation for SWANK/BACKEND:GETPID
+     (FUNCTION NIL (VALUES (SIGNED-BYTE 32) &OPTIONAL))
+   does not match the derived return type
+     (FUNCTION NIL *)
+WARNING:
+   redefining EMACS-INSPECT (#<SB-PCL:SYSTEM-CLASS COMMON-LISP:T>) in DEFMETHOD
+WARNING:
+   redefining 👀PRINT-STRING (#<SB-PCL:SYSTEM-CLASS COMMON-LISP:T>) in DEFMETHOD
+WARNING:
+   The new FTYPE proclamation for CLSS:MATCH-SELECTOR
+     (FUNCTION (LIST (OR PLUMP-DOM:NODE VECTOR LIST) KEYWORD)
+      (VALUES (AND (VECTOR PLUMP-DOM:NODE) (NOT SIMPLE-ARRAY))))
+   does not match the old FTYPE proclamation
+     (FUNCTION (LIST (OR LIST PLUMP-DOM:NODE VECTOR) &OPTIONAL KEYWORD)
+      (VALUES (AND (VECTOR PLUMP-DOM:NODE) (NOT SIMPLE-ARRAY)) &REST T))
+WARNING: redefining CL-ISAAC:RAND32 in DEFUN
+WARNING: redefining CL-ISAAC:RAND64 in DEFUN
+WARNING:
+   bare references to struct types are deprecated. Please use (:POINTER
+                                                               (:STRUCT
+                                                                SQLITE3)) or (:STRUCT
+                                                                              SQLITE3) instead.
+WARNING:
+   bare references to struct types are deprecated. Please use (:POINTER
+                                                               (:STRUCT
+                                                                SQLITE3-STMT)) or (:STRUCT
+                                                                                   SQLITE3-STMT) instead.
+WARNING: redefining DEFTYPE type to be a class: DBI.ERROR:<DBI-ERROR>
+WARNING: redefining DEFTYPE type to be a class: DBI.ERROR:<DBI-WARNING>
+WARNING: redefining DEFTYPE type to be a class: DBI.ERROR:<DBI-INTERFACE-ERROR>
+WARNING:
+   redefining DEFTYPE type to be a class: DBI.ERROR:<DBI-UNIMPLEMENTED-ERROR>
+WARNING: redefining DEFTYPE type to be a class: DBI.ERROR:<DBI-DATABASE-ERROR>
+WARNING: redefining DEFTYPE type to be a class: DBI.ERROR:<DBI-DATA-ERROR>
+WARNING:
+   redefining DEFTYPE type to be a class: DBI.ERROR:<DBI-OPERATIONAL-ERROR>
+WARNING: redefining DEFTYPE type to be a class: DBI.ERROR:<DBI-INTEGRITY-ERROR>
+WARNING: redefining DEFTYPE type to be a class: DBI.ERROR:<DBI-INTERNAL-ERROR>
+WARNING:
+   redefining DEFTYPE type to be a class: DBI.ERROR:<DBI-PROGRAMMING-ERROR>
+WARNING:
+   redefining DEFTYPE type to be a class: DBI.ERROR:<DBI-NOTSUPPORTED-ERROR>
+WARNING:
+   redefining DEFTYPE type to be a class: DBI.ERROR:<DBI-ALREADY-COMMITED-ERROR>
+WARNING:
+   redefining DEFTYPE type to be a class: DBI.ERROR:<DBI-ALREADY-ROLLED-BACK-ERROR>
+WARNING: redefining DEFTYPE type to be a class: DBI.DRIVER:<DBI-DRIVER>
+WARNING: redefining DEFTYPE type to be a class: DBI.DRIVER:<DBI-CONNECTION>
+WARNING: redefining DEFTYPE type to be a class: DBI.DRIVER:<DBI-QUERY>
+WARNING: redefining IRONCLAD:BLOCK-LENGTH in DEFGENERIC
+WARNING: redefining CLOG:PARENT in DEFGENERIC
+WARNING: redefining CLOG::CONNECTION-ID in DEFGENERIC
+WARNING: redefining CLOG:HTML-ID in DEFGENERIC
+WARNING: redefining CLOG:WINDOW in DEFGENERIC
+WARNING: redefining CLOG:HTML-DOCUMENT in DEFGENERIC
+WARNING: redefining CLOG:LOCATION in DEFGENERIC
+WARNING: redefining CLOG:NAVIGATOR in DEFGENERIC
+WARNING: redefining CLOG:DOCUMENT-ELEMENT in DEFGENERIC
+WARNING: redefining CLOG:HEAD-ELEMENT in DEFGENERIC
+WARNING: redefining CLOG:DISABLEDP in DEFGENERIC
+WARNING: redefining (COMMON-LISP:SETF CLOG:DISABLEDP) in DEFGENERIC
+WARNING: redefining CLOG:VALUE in DEFGENERIC
+WARNING: redefining (COMMON-LISP:SETF CLOG:VALUE) in DEFGENERIC
+WARNING: redefining CLOG:MINIMUM in DEFGENERIC
+WARNING: redefining (COMMON-LISP:SETF CLOG:MINIMUM) in DEFGENERIC
+WARNING: redefining CLOG:MAXIMUM in DEFGENERIC
+WARNING: redefining (COMMON-LISP:SETF CLOG:MAXIMUM) in DEFGENERIC
+WARNING: redefining CLOG:URL-SRC in DEFGENERIC
+WARNING: redefining (COMMON-LISP:SETF CLOG:URL-SRC) in DEFGENERIC
+WARNING: redefining CLOG:ALT-TEXT in DEFGENERIC
+WARNING: redefining (COMMON-LISP:SETF CLOG:ALT-TEXT) in DEFGENERIC
+WARNING: redefining CLOG:CENTER-PANEL in DEFGENERIC
+WARNING: redefining CLOG:TOP-PANEL in DEFGENERIC
+WARNING: redefining CLOG:LEFT-PANEL in DEFGENERIC
+WARNING: redefining CLOG:BOTTOM-PANEL in DEFGENERIC
+WARNING: redefining CLOG:PANEL-BOX in DEFGENERIC
+WARNING: redefining CLOG:TREE-ROOT in DEFGENERIC
+WARNING: redefining CLOG:INDENT-LEVEL in DEFGENERIC
+WARNING: redefining CLOG:TOGGLE-STATE in DEFGENERIC
+WARNING: redefining CLOG:TREE-ITEM in DEFGENERIC
+WARNING: redefining CLOG:DATABASE-CONNECTION in DEFGENERIC
+WARNING: redefining CLOG:READ-ONLY-P in DEFGENERIC
+WARNING: redefining (COMMON-LISP:SETF CLOG:READ-ONLY-P) in DEFGENERIC
+WARNING:
+   redefining HV:👀PLAYGROUND (#<SB-PCL:SYSTEM-CLASS COMMON-LISP:T>) in DEFMETHOD
+WARNING:
+   redefining ENCODE-TO-STRING (#<SB-PCL:SYSTEM-CLASS COMMON-LISP:T>) in DEFMETHOD
+WARNING:
+   redefining HVS::👀OPERATIONS (#<SB-PCL:SYSTEM-CLASS COMMON-LISP:T>) in DEFMETHOD
+WARNING:
+   redefining HVS:RENDER-TOPLEVEL-CST :AROUND (#<SB-MOP:EQL-SPECIALIZER HYPERDOC:DEFEXAMPLE>
+                                               #<SB-PCL:SYSTEM-CLASS COMMON-LISP:T>
+                                               #<SB-PCL:SYSTEM-CLASS COMMON-LISP:T>
+                                               #<SB-PCL:SYSTEM-CLASS COMMON-LISP:T>) in DEFMETHOD
+; compiling file "/workspace/scratch/hyperdoc-link-baseline/dreyeck/src/lisp-critic-examples.lisp" (written 07 NOV 2026 10:12:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-link-baseline/dreyeck/src/lisp-critic-examples-tmpX4BRKI0R.fasl
+; compilation finished in 0:00:00.019
+; compiling file "/workspace/scratch/hyperdoc-link-baseline/dreyeck/src/workflow-reading.lisp" (written 07 NOV 2026 10:12:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-link-baseline/dreyeck/src/workflow-reading-tmpQ371UGST.fasl
+; compilation finished in 0:00:00.027
+; compiling file "/workspace/scratch/hyperdoc-link-baseline/dreyeck/src/lisp-critic-recorded.lisp" (written 07 NOV 2026 10:12:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-link-baseline/dreyeck/src/lisp-critic-recorded-tmp2OWI3Q7U.fasl
+; compilation finished in 0:00:00.071
+; compiling file "/workspace/scratch/hyperdoc-link-baseline/dreyeck/tests/lisp-critic-recorded.lisp" (written 07 NOV 2026 10:12:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-link-baseline/dreyeck/tests/lisp-critic-recorded-tmp9KKTJMYV.fasl
+; compilation finished in 0:00:00.015
+LISP-CRITIC-RECORDED-PASS: #<RECORDED-EXAMPLE-EVALUATION (:EXAMPLE READING-PLAN) FORM-UNCHANGED> and #<RECORDED-EXAMPLE-EVALUATION (:EXAMPLE READING-OUTSTANDING-CHANGES) FORM-UNCHANGED> read from their records without the engine; the X-PLUS-1 match is quoted data. (That the engine reproduces both records is CHECK-RECORDS-REPRODUCE, in the engine integration tier.)
+baseline PASS dreyeck/lisp-critic/recorded/tests EXIT 0

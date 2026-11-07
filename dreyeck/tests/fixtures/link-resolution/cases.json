@@ -1,0 +1,434 @@
+{
+  "cases": [
+    {
+      "id": "local-first",
+      "panel": "panel",
+      "itemSite": "b",
+      "journal": [
+        "a",
+        "b"
+      ],
+      "responses": [
+        {
+          "site": "origin",
+          "kind": "page"
+        },
+        {
+          "site": "panel",
+          "kind": "page"
+        },
+        {
+          "site": "a",
+          "kind": "page"
+        },
+        {
+          "site": "b",
+          "kind": "page"
+        }
+      ],
+      "expectedSite": "origin",
+      "expectedCandidates": [
+        "origin",
+        "b",
+        "panel",
+        "a"
+      ],
+      "expectedTrace": [
+        "origin"
+      ]
+    },
+    {
+      "id": "context-order",
+      "panel": "origin",
+      "itemSite": null,
+      "journal": [
+        "a",
+        "b"
+      ],
+      "responses": [
+        {
+          "site": "origin",
+          "kind": "absent"
+        },
+        {
+          "site": "a",
+          "kind": "page"
+        },
+        {
+          "site": "b",
+          "kind": "page"
+        }
+      ],
+      "expectedSite": "b",
+      "expectedCandidates": [
+        "origin",
+        "b",
+        "a"
+      ],
+      "expectedTrace": [
+        "origin",
+        "b"
+      ]
+    },
+    {
+      "id": "item-order",
+      "panel": "origin",
+      "itemSite": "a",
+      "journal": [
+        "a",
+        "b"
+      ],
+      "responses": [
+        {
+          "site": "origin",
+          "kind": "absent"
+        },
+        {
+          "site": "a",
+          "kind": "page"
+        },
+        {
+          "site": "b",
+          "kind": "page"
+        }
+      ],
+      "expectedSite": "a",
+      "expectedCandidates": [
+        "origin",
+        "a",
+        "b"
+      ],
+      "expectedTrace": [
+        "origin",
+        "a"
+      ]
+    },
+    {
+      "id": "journal-order",
+      "panel": "origin",
+      "itemSite": null,
+      "journal": [
+        "b",
+        "a"
+      ],
+      "responses": [
+        {
+          "site": "origin",
+          "kind": "absent"
+        },
+        {
+          "site": "a",
+          "kind": "page"
+        },
+        {
+          "site": "b",
+          "kind": "page"
+        }
+      ],
+      "expectedSite": "a",
+      "expectedCandidates": [
+        "origin",
+        "a",
+        "b"
+      ],
+      "expectedTrace": [
+        "origin",
+        "a"
+      ]
+    },
+    {
+      "id": "panel-first",
+      "panel": "panel",
+      "itemSite": null,
+      "journal": [
+        "a",
+        "b",
+        "a"
+      ],
+      "responses": [
+        {
+          "site": "origin",
+          "kind": "absent"
+        },
+        {
+          "site": "panel",
+          "kind": "page"
+        },
+        {
+          "site": "a",
+          "kind": "page"
+        },
+        {
+          "site": "b",
+          "kind": "page"
+        }
+      ],
+      "expectedSite": "panel",
+      "expectedCandidates": [
+        "origin",
+        "panel",
+        "a",
+        "b"
+      ],
+      "expectedTrace": [
+        "origin",
+        "panel"
+      ]
+    },
+    {
+      "id": "exhausted",
+      "panel": "origin",
+      "itemSite": null,
+      "journal": [
+        "a",
+        "b"
+      ],
+      "responses": [
+        {
+          "site": "origin",
+          "kind": "absent"
+        },
+        {
+          "site": "a",
+          "kind": "absent"
+        },
+        {
+          "site": "b",
+          "kind": "absent"
+        }
+      ],
+      "expectedSite": null,
+      "expectedCandidates": [
+        "origin",
+        "b",
+        "a"
+      ],
+      "expectedTrace": [
+        "origin",
+        "b",
+        "a"
+      ]
+    },
+    {
+      "id": "unknown-before-hit",
+      "panel": "origin",
+      "itemSite": null,
+      "journal": [
+        "a",
+        "b"
+      ],
+      "responses": [
+        {
+          "site": "origin",
+          "kind": "absent"
+        },
+        {
+          "site": "a",
+          "kind": "page"
+        }
+      ],
+      "expectedSite": null,
+      "java": false,
+      "expectedCandidates": [
+        "origin",
+        "b",
+        "a"
+      ]
+    },
+    {
+      "id": "http-500-fallback",
+      "panel": "origin",
+      "itemSite": null,
+      "journal": [
+        "a"
+      ],
+      "responses": [
+        {
+          "site": "origin",
+          "kind": "http-error",
+          "status": 500
+        },
+        {
+          "site": "a",
+          "kind": "page"
+        }
+      ],
+      "expectedSite": "a",
+      "expectedCandidates": [
+        "origin",
+        "a"
+      ],
+      "expectedTrace": [
+        "origin",
+        "a"
+      ]
+    },
+    {
+      "id": "network-aborts",
+      "panel": "origin",
+      "itemSite": null,
+      "journal": [
+        "a"
+      ],
+      "responses": [
+        {
+          "site": "origin",
+          "kind": "network-error"
+        },
+        {
+          "site": "a",
+          "kind": "page"
+        }
+      ],
+      "expectedSite": null,
+      "expectedCandidates": [
+        "origin",
+        "a"
+      ],
+      "expectedTrace": [
+        "origin"
+      ]
+    },
+    {
+      "id": "neighborhood",
+      "panel": "origin",
+      "itemSite": null,
+      "journal": [
+        "a"
+      ],
+      "responses": [
+        {
+          "site": "origin",
+          "kind": "absent"
+        },
+        {
+          "site": "a",
+          "kind": "page",
+          "journal": [
+            "b",
+            "c",
+            "b"
+          ]
+        }
+      ],
+      "expectedSite": "a",
+      "expectedCandidates": [
+        "origin",
+        "a"
+      ],
+      "expectedNeighborhood": [
+        "a",
+        "b",
+        "c"
+      ],
+      "repeat": 2,
+      "expectedTrace": [
+        "origin",
+        "a"
+      ]
+    },
+    {
+      "id": "origin-repeated",
+      "panel": "origin",
+      "itemSite": "origin",
+      "journal": [
+        "a"
+      ],
+      "responses": [
+        {
+          "site": "origin",
+          "kind": "absent"
+        },
+        {
+          "site": "a",
+          "kind": "page"
+        }
+      ],
+      "expectedSite": "a",
+      "expectedCandidates": [
+        "origin",
+        "origin",
+        "a"
+      ],
+      "expectedTrace": [
+        "origin",
+        "origin",
+        "a"
+      ]
+    },
+    {
+      "id": "selected-item",
+      "panel": "origin",
+      "itemSite": "a",
+      "journal": [
+        "a",
+        "b"
+      ],
+      "responses": [
+        {
+          "site": "origin",
+          "kind": "absent"
+        },
+        {
+          "site": "a",
+          "kind": "page"
+        },
+        {
+          "site": "b",
+          "kind": "page"
+        }
+      ],
+      "expectedSite": "a",
+      "expectedCandidates": [
+        "origin",
+        "a",
+        "b"
+      ],
+      "expectedTrace": [
+        "origin",
+        "a"
+      ],
+      "sourceItemno": 1,
+      "firstItemSite": "b"
+    },
+    {
+      "id": "sitemap-miss-cached",
+      "panel": "origin",
+      "itemSite": null,
+      "journal": [
+        "a"
+      ],
+      "responses": [
+        {
+          "site": "origin",
+          "kind": "absent"
+        },
+        {
+          "site": "a",
+          "kind": "page",
+          "journal": [
+            "b",
+            "c",
+            "b"
+          ]
+        }
+      ],
+      "expectedSite": "a",
+      "expectedCandidates": [
+        "origin",
+        "a"
+      ],
+      "expectedNeighborhood": [
+        "a",
+        "b",
+        "c"
+      ],
+      "repeat": 2,
+      "expectedTrace": [
+        "origin",
+        "a"
+      ],
+      "sitemapStatus": 404
+    }
+  ]
+}
