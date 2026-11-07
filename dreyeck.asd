@@ -3305,6 +3305,19 @@
              (declare (ignore op component))
              (uiop:symbol-call :dreyeck/work/planning :check-plan)))
 
+(defsystem "dreyeck/work/defederation-planning"
+  :description "Opt-in SHOP3 preparation of Wiki defederation; simulated effects only"
+  :depends-on ("dreyeck/shop3")
+  :components ((:file "dreyeck/work/defederation-planning"))
+  :in-order-to ((test-op (test-op "dreyeck/work/defederation-planning/tests"))))
+
+(defsystem "dreyeck/work/defederation-planning/tests"
+  :depends-on ("dreyeck/work/defederation-planning")
+  :components ((:file "dreyeck/tests/defederation-planning"))
+  :perform (test-op (op component)
+             (declare (ignore op component))
+             (uiop:symbol-call :dreyeck/work/defederation-planning/tests :run-tests)))
+
 (defsystem "dreyeck/catalog-application"
   :description "Catalog application startup and executable lifecycle"
   :depends-on ("dreyeck/local-fedwiki-view" "clack-handler-hunchentoot" "hunchentoot" "uiop")
