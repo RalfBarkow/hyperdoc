@@ -3618,6 +3618,19 @@
   :depends-on ("dreyeck/shop3")
   :components ((:file "dreyeck/work/remote-control-planning")))
 
+(defsystem "dreyeck/work/defederation-planning"
+  :description "Opt-in SHOP3 defederation preparation; simulated effects, no executor"
+  :depends-on ("dreyeck/shop3")
+  :components ((:file "dreyeck/work/defederation-planning"))
+  :in-order-to ((test-op (test-op "dreyeck/work/defederation-planning/tests"))))
+
+(defsystem "dreyeck/work/defederation-planning/tests"
+  :depends-on ("dreyeck/work/defederation-planning")
+  :components ((:file "dreyeck/tests/defederation-planning"))
+  :perform (test-op (op component)
+             (declare (ignore op component))
+             (uiop:symbol-call :dreyeck/work/defederation-planning :run-tests)))
+
 (defsystem "dreyeck/work/remote-control-planning/tests"
   :depends-on ("dreyeck/work/remote-control-planning")
   :components ((:file "dreyeck/tests/remote-control-planning"))
