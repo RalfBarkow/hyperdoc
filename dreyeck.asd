@@ -3618,6 +3618,21 @@
   :depends-on ("dreyeck/shop3")
   :components ((:file "dreyeck/work/remote-control-planning")))
 
+(defsystem "dreyeck/work/fedwiki-link-resolution"
+  :description "Opt-in SHOP3 model of fedwiki-java b58fb43 link resolution: collaborative and local-only; plans only"
+  :depends-on ("dreyeck/shop3" "shasht")
+  :components ((:file "dreyeck/work/fedwiki-link-resolution")
+               (:static-file "tests/fedwiki-java-reference/scenarios.json")
+               (:static-file "tests/fedwiki-java-reference/observed.json"))
+  :in-order-to ((test-op (test-op "dreyeck/work/fedwiki-link-resolution/tests"))))
+
+(defsystem "dreyeck/work/fedwiki-link-resolution/tests"
+  :depends-on ("dreyeck/work/fedwiki-link-resolution")
+  :components ((:file "dreyeck/tests/fedwiki-link-resolution"))
+  :perform (test-op (op component)
+             (declare (ignore op component))
+             (uiop:symbol-call :dreyeck/work/fedwiki-link-resolution/tests :run-tests)))
+
 (defsystem "dreyeck/work/defederation-planning"
   :description "Opt-in SHOP3 defederation preparation; simulated effects, no executor"
   :depends-on ("dreyeck/shop3")

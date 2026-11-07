@@ -1,0 +1,14 @@
+Tested on 2026-11-07, fresh SBCL 2.4.10 processes (Nix project runtime), SHOP3 ce53f9b651acde8c44dc21eddb1a1c5b97f10536,
+own network namespace without outside connectivity, empty HOME, separate FASL cache. Base: ecb2b8b576bd1cdfd080899b3946651f22dfe345.
+fedwiki-java: b58fb43e7ffbbbda66685363dcda1facbd2a46a1, OpenJDK 21.0.12.1.
+
+sha256 of the tested files:
+7eedc75d11d33ccc0d1c5ca6a20ee3f7c3c32d654383429ad7833a90546d74d1  dreyeck/work/fedwiki-link-resolution.lisp
+49d5692063898a48ea5dcaac4ef0be97354ebd14593fe573077d7094224a6c51  dreyeck/tests/fedwiki-link-resolution.lisp
+63533d1da2ee38facfa558de49a298ec223cd5ebc947cd7c3701f3ea51319513  scripts/test-fedwiki-link-resolution.lisp
+f0c532aa2c91c414a24b3031df064dbfdd514d8088fc38fe07fb2bca79fc0bb7  tests/fedwiki-java-reference/scenarios.json
+dfd3d9feef58c0e4190b6b4a9898d6b7202d3d487d0632e72bbf68f042d6ba1c  tests/fedwiki-java-reference/observed.json
+36cae92c822926739834cca6caae3e669e92f172d4720d3a8d94a12c0f2e6134  tests/fedwiki-java-reference/run-reference.py
+b86c05b9169e05a0f84d4289753bfbece22d26f21c1cd28d036ec44009272851  docs/fedwiki-link-resolution/evidence/hyperdoc-comparison.lisp
+
+dreyeck.asd systems added: dreyeck/work/fedwiki-link-resolution, dreyeck/work/fedwiki-link-resolution/tests
