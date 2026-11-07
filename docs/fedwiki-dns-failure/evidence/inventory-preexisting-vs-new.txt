@@ -1,0 +1,30 @@
+# PRE-EXISTING (present at the base 0a7d4de, not caused by or accepted by this change)
+## A. The four files held equal to +PREVIOUS+ 401953522: forms at the base that differ from it
+hyperbook-fedwiki/fedwiki.lisp
+  at the base, not at +PREVIOUS+ (added or changed): DEFCLASS FEDWIKI; DEFUN FETCH-SITEMAP; DEFUN SITEMAP-SNAPSHOT
+  at +PREVIOUS+, not at the base (removed or changed): DEFCLASS FEDWIKI; DEFUN FETCH-SITEMAP
+hyperbook-fedwiki/pages.lisp
+  at the base, not at +PREVIOUS+ (added or changed): DEFCLASS FEDWIKI-PAGE; DEFUN COPY-PAGE-JSON; DEFUN SET-PAGE-DATA
+  at +PREVIOUS+, not at the base (removed or changed): DEFCLASS FEDWIKI-PAGE; DEFUN SET-PAGE-DATA
+hyperbook-fedwiki/story-items.lisp
+  at the base, not at +PREVIOUS+ (added or changed): DEFVAR *MECH-PLUGIN-HOST-URL*; DEFUN MECH-NEIGHBORHOOD-SNAPSHOT; DEFUN MECH-JSON-BASE64; DEFMETHOD RENDER-STORY-ITEM
+  at +PREVIOUS+, not at the base (removed or changed): 
+hyperbook-fedwiki/wiki-links.lisp
+  at the base, not at +PREVIOUS+ (added or changed): DEFUN MAKE-REMOTE
+  at +PREVIOUS+, not at the base (removed or changed): DEFUN MAKE-REMOTE
+## B. initialize-fedwiki: the same at +PREVIOUS+ and at the base? equal (+PREVIOUS+ present, base present)
+## C. hyperbook.asd at the base against upstream 8a1149197 (the second assertion that fails)
+  only at the base: DEFSYSTEM HYPERBOOK/FEDWIKI/TESTS; DEFSYSTEM HYPERBOOK/FEDWIKI
+  only upstream: DEFSYSTEM HYPERBOOK/FEDWIKI
+
+# The whole inventory test (dreyeck/hyperdoc/library-tests): at the base, and with this change
+## at the base 0a7d4de
+LIBRARY-TESTS-FAILED: The assertion(SOURCE-EQUAL LOCAL (FORMS-AT ROOT +PREVIOUS+ PATH))failed with LOCAL =((IN-PACKAGE :HYPERBOOK/FEDWIKI) (DEFPARAMETER HYPERBOOK/FEDWIKI::*URI-SCHEME* "fedwiki:") (DEFCLASS HYPERBOOK/FEDWIKI::FEDW
+## with this change
+INITIALIZE-FEDWIKI-DNS-CHANGE: INITIALIZE-FEDWIKI equals its form at +PREVIOUS+ (401953522) plus exactly ns-try-again-error and ns-no-recovery-error.
+LIBRARY-TESTS-FAILED: The assertion(SOURCE-EQUAL LOCAL (FORMS-AT ROOT +PREVIOUS+ PATH))failed with LOCAL =((IN-PACKAGE :HYPERBOOK/FEDWIKI) (DEFPARAMETER HYPERBOOK/FEDWIKI::*URI-SCHEME* "fedwiki:") (DEFCLASS HYPERBOOK/FEDWIKI::FEDW
+
+# Attribution of the differences of fedwiki.lisp from +PREVIOUS+
+forms of fedwiki.lisp that differ from +PREVIOUS+:
+  with the DNS change:        DEFCLASS FEDWIKI; DEFUN INITIALIZE-FEDWIKI; DEFUN FETCH-SITEMAP; DEFUN SITEMAP-SNAPSHOT
+  with it taken out again:    DEFCLASS FEDWIKI; DEFUN FETCH-SITEMAP; DEFUN SITEMAP-SNAPSHOT

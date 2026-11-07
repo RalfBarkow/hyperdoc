@@ -1,0 +1,8 @@
+REAL: CONTRACT-HOLDS
+MOVED-TO-PROGN: CONTRACT-VIOLATED: The two name-resolution conditions are not in the type list of the handler clause that names USOCKET:NS-HOST-NOT-FOUND-ERROR.
+MOVED-TO-QUOTE: CONTRACT-VIOLATED: INITIALIZE-FEDWIKI differs from its form at +PREVIOUS+ in more than the two name-resolution conditions.
+OWN-CLAUSE: CONTRACT-VIOLATED: INITIALIZE-FEDWIKI differs from its form at +PREVIOUS+ in more than the two name-resolution conditions.
+EXTRA-CLAUSE: CONTRACT-VIOLATED: INITIALIZE-FEDWIKI differs from its form at +PREVIOUS+ in more than the two name-resolution conditions.
+ENTRY-MISSING: CONTRACT-VIOLATED: INITIALIZE-FEDWIKI must name USOCKET:NS-NO-RECOVERY-ERROR exactly once, in its handler; it names it 0 times.
+OTHER-CHANGE: CONTRACT-VIOLATED: INITIALIZE-FEDWIKI differs from its form at +PREVIOUS+ in more than the two name-resolution conditions.
+TWICE: CONTRACT-VIOLATED: INITIALIZE-FEDWIKI must name USOCKET:NS-TRY-AGAIN-ERROR exactly once, in its handler; it names it 2 times.
