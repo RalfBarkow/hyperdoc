@@ -3650,3 +3650,27 @@
   :perform (test-op (op component)
              (declare (ignore op component))
              (uiop:symbol-call :dreyeck/work/remote-control-planning :run-reading-tests)))
+
+(defsystem "dreyeck/work/link-resolution"
+  :description "Opt-in source-derived SHOP3 collaborative/local-only resolution; no executor"
+  :depends-on ("dreyeck/shop3" "shasht")
+  :components ((:file "dreyeck/work/link-resolution")))
+(defsystem "dreyeck/work/link-resolution/tests"
+  :depends-on ("dreyeck/work/link-resolution")
+  :components ((:file "dreyeck/tests/link-resolution"))
+  :perform (test-op (op component)
+             (declare (ignore op component))
+             (uiop:symbol-call :dreyeck/work/link-resolution/tests :run-tests)))
+
+(defsystem "dreyeck/work/link-resolution/reading"
+  :description "Opt-in Inspector/HyperBook evidence for Java-derived link planning"
+  :depends-on ("dreyeck/work/link-resolution" "dreyeck/evaluation-record"
+               "html-inspector-views" "hyperdoc/explorer" "dreyeck/lisp-critic/recorded")
+  :components ((:file "dreyeck/work/link-resolution-evidence")))
+
+(defsystem "dreyeck/work/link-resolution/reading/tests"
+  :depends-on ("dreyeck/work/link-resolution/reading" "hyperbook/fedwiki")
+  :components ((:file "dreyeck/tests/link-resolution-evidence"))
+  :perform (test-op (op component)
+             (declare (ignore op component))
+             (uiop:symbol-call :dreyeck/work/link-resolution/evidence/tests :run-tests)))

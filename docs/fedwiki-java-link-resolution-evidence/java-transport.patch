@@ -1,0 +1,24 @@
+--- pinned/Main.java
++++ offline-test/Main.java
+@@ -149,9 +149,7 @@
+         .version(HttpClient.Version.HTTP_1_1)
+         .GET()
+         .build();
+-      HttpResponse<String> response = HttpClient
+-        .newBuilder()
+-        .build()
++      HttpResponse<String> response = OfflineReferenceProbe.client()
+         .send(request, HttpResponse.BodyHandlers.ofString());
+       var code = response.statusCode();
+       if (code == 200) {
+@@ -173,9 +171,7 @@
+         .version(HttpClient.Version.HTTP_1_1)
+         .GET()
+         .build();
+-      HttpResponse<String> response = HttpClient
+-        .newBuilder()
+-        .build()
++      HttpResponse<String> response = OfflineReferenceProbe.client()
+         .send(request, HttpResponse.BodyHandlers.ofString());
+       var code = response.statusCode();
+       if (code == 200) {
