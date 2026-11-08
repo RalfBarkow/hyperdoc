@@ -92,21 +92,66 @@ autorisierter Ausführung war in diesem Schritt dennoch nicht eingehalten.
 Kleinste Korrektur (nicht umgesetzt): die Beobachtung liest die `.asd` mit `*read-eval* nil` als Daten (wie die
 Domain-Mutanten der Tests) und überlässt `find-system` der ausdrücklich autorisierten Materialisierung.
 
-## 6. Was für den echten Lisp-Critic-Test fehlt, und wie er laufen soll
+## 6. Die fehlende Verbindung zwischen ASDF-Referenz und ausgelieferten Assets
 
-Fehlend: Lesezugriff auf das vollständige Verzeichnis der Seiten-Assets (`a-critic-for-lisp.asd`, `package.lisp`,
-`src/loader.lisp`, `src/hyperdoc-page.lisp`, `vendor/lisp-critic/` mit den sieben aufgezeichneten Dateien). Der Nutzer
-stellt es in einem nicht versteckten Verzeichnis bereit (`~/.wiki` selbst ist als verstecktes Verzeichnis direkt unter dem
-Home-Verzeichnis nicht freigebbar). Ablauf danach, in dieser Reihenfolge:
+Drei Dinge mit demselben Namen, die nicht verbunden sind:
 
-1. **Rein lesend:** Dateiliste; die `.asd` mit `*read-eval* nil` als Daten lesen und jede genannte Komponente als Datei
-   nachweisen; keine `.asd` auswerten.
-2. **Digests unabhängig bestätigen:** SHA-256 der sieben Engine-Dateien mit `sha256sum` und Python `hashlib`, gegen beide
-   gespeicherten Evaluationen.
-3. **Erst dann autorisierte Ausführung** in einer isolierten Runtime (eigener Prozess, kein Netz, Kopie der Dateien):
-   `dreyeck/lisp-critic/engine-integration/tests` (`run-tests`, `run-page-station-layout-tests`), danach die Regeln der
-   Riesbeck/Beane-Implementierung auf die Quelltextformen von PR #32.
-4. **Evaluation Records und Critiques** mit Provenienz (Datei, Commit, Formposition, Quell-Digest, Engine-Digests) für den
-   HyperDoc Inspector erhalten.
+| Ebene | Was dort `a-critic-for-lisp` ist | HTTP? |
+|---|---|---|
+| **HyperDoc-Catalog-Route** `https://dreyeck.ch/view/a-critic-for-lisp` | Eine CLOG-Route. Für jeden Pfad wird dieselbe Startseite ausgeliefert; erst in der WebSocket-Sitzung liest der Catalog-Prozess die Seite aus seiner lokalen Site-Root (`install-local-fedwiki-view-route`, `dreyeck/src/local-fedwiki-view.lisp`) [abg], laut Aufzeichnung `/home/rgb/.wiki/dreyeck.ch/` [rec]. Findet die dateibasierte Discovery genau eine `.asd` mit dem Namen der Seite, nimmt `dreyeck/catalog::admit` ein Angebot in den Catalog auf. | Nein: Der Catalog liefert keine Asset-Dateien aus (`/assets/pages/…` → 404) [obs]. |
+| **Inspector-Zeile „ASDF artifact“** | `page-attached-relative-asd` setzt `assets/pages/<slug>/<slug>.asd` aus der Subjekt-ID `workspace:a-critic-for-lisp` zusammen, laut Quelltext „No ASDF, no probing, no reconstruction“ [abg]. Ein Pfad relativ zu *einer* Site-Root, keine Adresse. | Nein |
+| **Federated-Wiki-Seite und Seiten-Assets** | Die Farm-Site `dreyeck.ch` liegt unter `/home/rgb/.wiki/dreyeck.ch/`, aber nginx leitet keine Anfrage für `dreyeck.ch` an die Farm [rec]. Erreichbar ist dieselbe Seite auf der Farm-Site `hyperdoc.dreyeck.ch`, deren Asset-Verzeichnis (`/home/rgb/.wiki/hyperdoc.dreyeck.ch/assets/pages/a-critic-for-lisp/`) ein anderes ist. | Ja, aber nur ein Teil (Abschnitt 2) |
+
+Die fehlende Verbindung ist damit: **Die Seiten-Assets der Site-Root, aus der der Catalog die Seite und das Angebot liest,
+haben keine HTTP-Adresse.** Was unter einer HTTP-Adresse ausgeliefert wird, ist die Kopie einer *anderen* Farm-Site, und
+diese ist unvollständig. Ob unter `/home/rgb/.wiki/dreyeck.ch/assets/pages/a-critic-for-lisp/` auf dem Server `src/` und
+`vendor/lisp-critic/` liegen, ist von außen nicht beobachtbar: Für das Angebot genügt dem Catalog die `.asd`.
+
+## 7. Das bestehende Repository `RalfBarkow/assets`
+
+Die Aufzeichnung der Bereitstellung bezieht die Asset-Kopie unter `/home/rgb/.wiki/dreyeck.ch/assets/` für eine andere Seite
+(`reading-java-source-as-data`) inhaltsgleich auf einen Commit von `RalfBarkow/assets`; die Herkunft der Kopie ist dort als
+nicht festgestellt vermerkt [rec]. Dieses bestehende, **private** Repository enthält bei `856cf07` (21.09.2026, „Record one
+Critic run so it can be read without running it“) das **vollständige** Asset-Verzeichnis `pages/a-critic-for-lisp/` [obs]:
+die Systemdefinition, `package.lisp`, `src/loader.lisp`, `src/hyperdoc-page.lisp`, `vendor/lisp-critic/` (die sieben
+aufgezeichneten Dateien und `README-upstream.txt`), `scripts/import-upstream.sh`, `evaluations/car-cdr.json` und
+`hyperdoc/A Critic for Lisp.html`. Es wurde nur gelesen (flache, baumlose Klonung, nur dieses Verzeichnis ausgecheckt).
+
+- **Die sieben Engine-Digests**, unabhängig mit `sha256sum` und Python `hashlib` berechnet, stimmen mit **beiden**
+  gespeicherten Evaluationen überein [obs] ([evidence/assets-repository-2026-11-08.txt](evidence/assets-repository-2026-11-08.txt)).
+  Das bestätigt die Angabe des Nutzers für seinen lokalen Bestand.
+- **Die von `hyperdoc.dreyeck.ch` ausgelieferte Kopie** ist ein älterer Teilstand desselben Verzeichnisses: `.asd`,
+  `package.lisp` und `README.md` sind byte-gleich, `PATCH-NOTES.md` ist die frühere Fassung ohne die Abschnitte „Wrapper“
+  und „Vendored source“; `src/`, `vendor/`, `scripts/`, `evaluations/`, `hyperdoc/` fehlen [obs].
+- `PATCH-NOTES.md` im Repository dokumentiert die eine lokale Änderung der Riesbeck/Beane-Implementierung: In
+  `extend-match.lisp` ist `var-prefix` mit `defparameter` statt `defconstant` deklariert.
+
+**Prüfung ohne Auswertung** [obs]: Beide `.asd`-Dateien wurden mit `*read-eval* nil` als Daten gelesen (kein `#.`, keine
+Reader-Bedingungen); danach war keines der Systeme bei ASDF registriert. Das page-attached ASDF-System `a-critic-for-lisp`:
+`:depends-on (#:uiop)`, `:serial t`, Komponenten `package.lisp`, `src/loader.lisp`, `src/hyperdoc-page.lisp` — alle
+vorhanden. Die Riesbeck/Beane-Implementierung `lisp-critic`: Komponenten `tables`, `write-wrap`, `extend-match`,
+`lisp-critic`, `lisp-rules`, keine externen Abhängigkeiten; beim *Auswerten* legt die Datei ein Paket
+`lisp-critic-system` an. Als Text gelesen: `src/loader.lisp` greift nicht auf das Netz zu und ruft
+`scripts/import-upstream.sh` (das von xach.com lädt) nicht auf; `load-lisp-critic` trägt `vendor/lisp-critic/` in die
+ASDF-Registry ein und lädt `:lisp-critic`. `src/hyperdoc-page.lisp` definiert nur `install-hyperdoc-page`.
+
+Nicht geklärt: ob sich eine unveränderliche Kopie als Archiv direkt in Claude Code Cloud bereitstellen lässt — die
+Dokumentation der Umgebung nennt dafür keinen Weg; das wurde nicht weiter untersucht, weil der Zugriff über das bestehende
+Repository möglich ist.
+
+## 8. Stand und nächster Schritt
+
+Schritte 1–3 sind ohne Auswertung erledigt (Abschnitt 7): Das page-attached ASDF-System ist im bestehenden Repository
+vollständig, die sieben Digests stimmen mit beiden gespeicherten Evaluationen überein, beide ASDF-Definitionen und ihre
+Abhängigkeiten sind als Daten gelesen. Öffentlich über die Seite erreichbar ist die Riesbeck/Beane-Implementierung nicht
+(Abschnitte 2 und 6).
+
+Schritt 4, die Ausführung, wartet auf eine ausdrückliche Freigabe der Quelle: einer Kopie von
+`RalfBarkow/assets@856cf07:pages/a-critic-for-lisp/` in einem eigenen SBCL-Prozess dieser Cloud-Umgebung, ohne Netz
+(eigener Netzwerk-Namespace), leeres HOME, eigener FASL-Cache. Dann `dreyeck/lisp-critic/engine-integration/tests`
+(`run-tests`, `run-page-station-layout-tests`) und die Regeln der Riesbeck/Beane-Implementierung auf die Quelltextformen
+von PR #32; Evaluation Records und Critiques mit Provenienz (Datei, Commit, Formposition, Quell-Digest, Engine-Digests) für
+den HyperDoc Inspector. Eine Evaluation ohne Befund ist ein gültiges Ergebnis; die Riesbeck/Beane-Implementierung hat keine
+Regeln, die SHOP3-Code als solchen beurteilen.
 
 Bis dahin: keine Engine Critiques.

@@ -1,0 +1,34 @@
+RalfBarkow/assets (private) at 856cf07da89c09cad311de82188f49d99a47a1c7, pages/a-critic-for-lisp/, read 2026-11-08.
+SHA-256 of the seven engine files (coreutils sha256sum) and the digests both stored evaluations record:
+7961ca3383ecafa5206f1d92fa12a7fb5fba0b3068e31d48875f8047635633f0  vendor/lisp-critic/README  setf-push-reading-plan:match  x-plus-1-reading-outstanding-changes:match
+fef5d126603ce1fdc992941dbd8fd103e1dd0b2a21f79bef7dcb24fbc5a5768a  vendor/lisp-critic/lisp-critic.asd  setf-push-reading-plan:match  x-plus-1-reading-outstanding-changes:match
+7b153d761a7ac5dd6004cbe4bec681a185a797d39d6ea814d65efc9cd51c4035  vendor/lisp-critic/tables.lisp  setf-push-reading-plan:match  x-plus-1-reading-outstanding-changes:match
+ef6bdbd4d0d536897663777598b43f37eca37d9283846fc79b3a93778202b388  vendor/lisp-critic/write-wrap.lisp  setf-push-reading-plan:match  x-plus-1-reading-outstanding-changes:match
+5072e90450602c53e648cd87c8f2c6578998c7f35dbc93c08909e2ec4b1722e1  vendor/lisp-critic/extend-match.lisp  setf-push-reading-plan:match  x-plus-1-reading-outstanding-changes:match
+2fe59ca5a1a223940d3e875439e17b1e962ad5ad6cc9a049c52378d0afbbed1c  vendor/lisp-critic/lisp-critic.lisp  setf-push-reading-plan:match  x-plus-1-reading-outstanding-changes:match
+ca19b5129743c2f9fc10ab99d7f17a542ff10ae8896fb653f34c626fa8310411  vendor/lisp-critic/lisp-rules.lisp  setf-push-reading-plan:match  x-plus-1-reading-outstanding-changes:match
+
+Served by hyperdoc.dreyeck.ch versus the repository copy (SHA-256):
+a-critic-for-lisp.asd  repository:a10ba4d354e09d242911499b8bebb0afb17eb8aea62aae764a5887421db3fa80  served:a10ba4d354e09d242911499b8bebb0afb17eb8aea62aae764a5887421db3fa80  same
+package.lisp  repository:b930e9959b67502a517bb8f2bb3a01d753b11157762551cf8703e5fb752c4ed0  served:b930e9959b67502a517bb8f2bb3a01d753b11157762551cf8703e5fb752c4ed0  same
+README.md  repository:a4a8942113cb569af7c3291cbf625052d8fc0b9fcf54c3c2cb8a193fba5c8f78  served:a4a8942113cb569af7c3291cbf625052d8fc0b9fcf54c3c2cb8a193fba5c8f78  same
+PATCH-NOTES.md  repository:8ffacd274ee4e590f7a892ed5bd1fcf21df53cb4a27880b35b0f05eb926e4527  served:d8db6cbd354ca7d45339d1057e4ce9b17d9e16e10b7ac3ab8e66d7606d432098  different
+
+Files of the repository copy:
+8ffacd274ee4e590f7a892ed5bd1fcf21df53cb4a27880b35b0f05eb926e4527  PATCH-NOTES.md
+a4a8942113cb569af7c3291cbf625052d8fc0b9fcf54c3c2cb8a193fba5c8f78  README.md
+a10ba4d354e09d242911499b8bebb0afb17eb8aea62aae764a5887421db3fa80  a-critic-for-lisp.asd
+0b890295df266f91d138ac238d1eb908672be29fa2960d5402ad5288bd8766ea  evaluations/car-cdr.json
+52630cf95747849487f05fcd36e070a9bd4dc61a31ee65cc2c9311a82d57277a  hyperdoc/A Critic for Lisp.html
+b930e9959b67502a517bb8f2bb3a01d753b11157762551cf8703e5fb752c4ed0  package.lisp
+815128c24b0eaba09eddfd562d569e4eea977172102512ad740156a65747434d  scripts/import-upstream.sh
+ffef244d31c53f3f1df9a4633fe54a9edd7449238c7fba8a21e8b2478c3ed444  src/hyperdoc-page.lisp
+ca9527cead925df1b73ca42730ac831050a9b7d3f515272ac0723b5e5db0208b  src/loader.lisp
+7961ca3383ecafa5206f1d92fa12a7fb5fba0b3068e31d48875f8047635633f0  vendor/lisp-critic/README
+2998087c4e63680b11f62bded2fab28c6cc1c459670251942c7afd550afed938  vendor/lisp-critic/README-upstream.txt
+5072e90450602c53e648cd87c8f2c6578998c7f35dbc93c08909e2ec4b1722e1  vendor/lisp-critic/extend-match.lisp
+fef5d126603ce1fdc992941dbd8fd103e1dd0b2a21f79bef7dcb24fbc5a5768a  vendor/lisp-critic/lisp-critic.asd
+2fe59ca5a1a223940d3e875439e17b1e962ad5ad6cc9a049c52378d0afbbed1c  vendor/lisp-critic/lisp-critic.lisp
+ca19b5129743c2f9fc10ab99d7f17a542ff10ae8896fb653f34c626fa8310411  vendor/lisp-critic/lisp-rules.lisp
+7b153d761a7ac5dd6004cbe4bec681a185a797d39d6ea814d65efc9cd51c4035  vendor/lisp-critic/tables.lisp
+ef6bdbd4d0d536897663777598b43f37eca37d9283846fc79b3a93778202b388  vendor/lisp-critic/write-wrap.lisp
