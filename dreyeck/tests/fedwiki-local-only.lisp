@@ -21,6 +21,35 @@
   (let ((view (if (equal title "Slots") (html-inspector-views/standard:👀slots object)
                   (find title (v:all-views object) :key #'v:view-title :test #'equal))))
     (assert view) (v:view-html view) (mapcar #'cdr (v:view-references view))))
+(defun check-evidence-view (obs expected absent)
+  (let* ((view (find "Local-only evidence" (v:all-views obs) :key #'v:view-title :test #'equal))
+         (html (v:view-html view))
+         (references (mapcar #'cdr (v:view-references view)))
+         (results (remove-duplicates
+                   (remove nil (append (list (i:preparation-result obs) (i:resolution-result obs))
+                                       (i::history-of obs))) :test #'eq)))
+    (dolist (text (append '("<h3>Observation</h3>" "<h3>External evidence</h3>"
+                           "<h3>Planning — not executed</h3>" "max-width: 78ch" "width: 14rem") expected))
+      (assert (search text html) () "Missing view text: ~A" text))
+    (dolist (text absent) (assert (not (search text html)) () "Unexpected view text: ~A" text))
+    (dolist (object (list (i::own-site-of obs) (i:observed-page obs) (i:observed-item obs)
+                          (i:target-link obs) (i:target-page obs) (i::failure-of obs)
+                          (i::source-of (i:observed-page obs)) (i::local-evidence-of obs)
+                          (i::evidence-of obs) (getf (i::evidence-of obs) :copies)
+                          (i::facts-of obs) (i::candidates-of obs)))
+      (assert (member object references :test #'eq)))
+    (assert (= (length results) (length (cl-ppcre:all-matches-as-strings "<details" html))))
+    (dolist (result results)
+      ;; No duplicate overview/history links for the same planning result.
+      (assert (= 1 (count result references :test #'eq)))
+      (dolist (object (list (shop3:find-problem (h:problem-name-of result))
+                            (h:plans-of result) (h:final-states-of result)))
+        (assert (member object references :test #'eq))))
+    ;; Keep long representations behind links, including the complete verified digest.
+    (dolist (copy (getf (i::evidence-of obs) :copies))
+      (assert (not (search (getf copy :sha256) html))))
+    (assert (not (search "!SIMULATE-FORK" html)))
+    html))
 (defun run-tests ()
   (let* ((root (asdf:system-relative-pathname "dreyeck/work/fedwiki-local-only"
                   "dreyeck/tests/fixtures/fedwiki-local-only/"))
@@ -50,6 +79,15 @@
                   (missing (i:observe-link site "source" 1 :evidence-file evidence))
                   (remote (i:observe-link site "source" 2 :evidence-file evidence
                                           :reader-origin "fedwiki:local" :panel-site "fedwiki:local")))
+             (check-evidence-view local
+               '(":OBSERVED-LOCAL" "found a real page" "Observed local page" "No external evidence supplied" "Not planned" "No planning results")
+               '(":CONFIRMED-LOCAL-ABSENCE" ":HYPOTHETICAL-LOCAL" ":PLAN-ONLY" "Externally claimed:"))
+             (check-evidence-view missing
+               '(":CONFIRMED-LOCAL-ABSENCE" "NIL" "Externally claimed:" "1 verified cached" "Digest integrity does not prove historical remote origin" ":NOT-PLANNED")
+               '(":HYPOTHETICAL-LOCAL" ":PLAN-ONLY"))
+             (check-evidence-view (i:observe-link site "source" 3)
+               '(":UNKNOWN" "availability remains unknown" "Inspect read failure" "No external evidence supplied" "No planning results")
+               '(":CONFIRMED-LOCAL-ABSENCE" "confirmed absence" ":HYPOTHETICAL-LOCAL" ":PLAN-ONLY"))
              (assert (eq :observed-local (i:finding local)))
              (assert (typep (i:observed-page local) 'dreyeck/local-fedwiki-page:local-fedwiki-page))
              (assert (typep (i:observed-item local) 'fw::story-item))
@@ -58,6 +96,9 @@
              (assert (equal "remote-item" (gethash "site" (fw::data-of (i:observed-item local)))))
              (assert (has-step (check-plan (i:resolve-link local)) 'r::!open-panel))
              (assert (not (has-step (check-plan (i:prepare-link local)) 'd::!simulate-fork)))
+             (check-evidence-view local
+               '(":OBSERVED-LOCAL" ":OBSERVED-AVAILABILITY" ":PLAN-ONLY" "Observed local page")
+               '(":HYPOTHETICAL-LOCAL" ":CONFIRMED-LOCAL-ABSENCE" "NIL — no target page object"))
              (assert (eq :confirmed-local-absence (i:finding missing)))
              (assert (has-step (check-plan (i:resolve-link missing)) 'r::!conclude-unresolved))
              ;; Exercise the real HyperBook wiki-link thunk, not just the planner.
@@ -85,6 +126,10 @@
                     (continued (check-plan (i:continue-preparation missing prepared)))
                     (resolution (check-plan (i:resolve-link missing :prepared prepared)))
                     (atoms (shop3:state-atoms (first (h:final-states-of prepared)))))
+               (check-evidence-view missing
+                 '(":CONFIRMED-LOCAL-ABSENCE" "NIL" "Externally claimed:" ":HYPOTHETICAL-LOCAL" ":PLAN-ONLY"
+                   "no Wiki page was materialized by these plans" "SHOP3 problem" "Planned operations" "Simulated final states")
+                 '("No external evidence supplied" "No planning results"))
                (assert (= 1 (count 'd::!simulate-fork (first (h:plans-of prepared)) :key #'first)))
                (assert (not (has-step continued 'd::!simulate-fork)))
                (assert (has-step resolution 'r::!use-modeled-page))
@@ -135,12 +180,15 @@
                  (assert (i::failure-of unknown))
                  (assert (not (find 'd::local-page-absent (i::facts-of unknown) :key #'car)))
                  (assert (null (h:plans-of (i:prepare-link unknown))))
-                 (assert (null (h:plans-of (i:resolve-link unknown))))))
+                 (assert (null (h:plans-of (i:resolve-link unknown))))
+                 (check-evidence-view unknown '(":UNKNOWN" ":NO-PLAN" "0 complete plan(s)" ":PLAN-ONLY")
+                                      '(":CONFIRMED-LOCAL-ABSENCE" ":HYPOTHETICAL-LOCAL"))))
              (let ((facts (i::facts-of local)))
                (unwind-protect
                     (progn (push '(d::modeled-local-page "fedwiki:local" "target") (slot-value local 'i::facts))
                            (assert-condition 'i:invalid-continuation (lambda () (i:prepare-link local))))
                  (setf (slot-value local 'i::facts) facts)))
+             (format t "~&LOCAL-ONLY VIEW-SECTIONS / STATUS-VARIANTS / UNIQUE-RESULTS / REFERENCE-EQ PASS~%")
              (format t "~&LOCAL-ONLY INPUT-GUARD / PROVENANCE / UNKNOWN / INSPECTOR-EQ PASS~%"))
            (assert (zerop socket-count)) (assert (zerop fallback-count))
            (assert (every #'equalp before (mapcar #'dreyeck/local-fedwiki-page::%read-octets files)))

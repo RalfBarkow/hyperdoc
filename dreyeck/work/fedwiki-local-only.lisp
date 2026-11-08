@@ -308,24 +308,75 @@ Local presence/absence comes only from the actual local page lookup. No HTTP sta
 
 (v:defview local-link-view (obs observation)
   (v:html-view :title "Local-only evidence" :priority 0
-    (v:html
-      (:p (v:esc (format nil "Observed finding: ~S. Plans are hypothetical; no fork executed." (finding obs))))
-      (:p (v:esc (format nil "Resolution outcome: ~S" (resolution-outcomes obs))))
-      (:table
-        (loop for (label object) on
-          (list "Explicit own-site" (own-site-of obs) "Source page" (observed-page obs)
-                "Source revision" (source-of (observed-page obs)) "Story item" (observed-item obs)
-                "Link target" (target-link obs) "Observed target page" (target-page obs)
-                "Local observation provenance" (local-evidence-of obs)
-                "External evidence revision" (evidence-of obs) "Observation facts" (facts-of obs)
-                "Candidate provenance" (candidates-of obs) "Read failure (unknown)" (failure-of obs)
-                "Preparation result" (preparation-result obs) "Resolution result" (resolution-result obs)) by #'cddr
-          do (v:html (:tr (:td (v:esc label)) (:td (v:object-ref object))))))
-      (dolist (result (history-of obs))
-        (v:html (:p "Planning result " (v:object-ref result))
-                (:p "SHOP3 problem " (v:object-ref (shop3:find-problem (h:problem-name-of result))))
-                (:p "Simulated final states " (v:object-ref (h:final-states-of result)))
-                (:p "Planned operations (not executed) " (v:object-ref (h:plans-of result))))))))
+    (let* ((evidence (evidence-of obs))
+           (copies (getf evidence :copies))
+           (preparation (preparation-result obs))
+           (resolution (resolution-result obs))
+           (results (remove-duplicates
+                     (remove nil (append (list preparation resolution) (history-of obs))) :test #'eq :from-end t))
+           (modes (remove-duplicates (mapcar #'h:execution-mode-of results)))
+           (outcomes (resolution-outcomes obs)))
+      (labels ((row (label object display)
+                 (v:html
+                   (:tr (:th :scope "row" :style "width: 14rem; text-align: left; vertical-align: top; padding: .4rem .8rem .4rem 0;"
+                             (v:esc label))
+                        (:td :style "vertical-align: top; padding: .4rem 0;"
+                             (v:object-ref object :display display)))))
+               (plan-count (result)
+                 (if result (format nil "~D complete plan(s)" (length (h:plans-of result))) "Not planned")))
+        (v:html
+          (:div :style "max-width: 78ch; line-height: 1.5; overflow-wrap: anywhere;"
+            (:p :style "font-size: 1.15em; padding: .75rem; border-left: .25rem solid #777;"
+                (:strong (v:esc (format nil "Observed: ~S" (finding obs))))
+                (:br)
+                (v:esc (case (finding obs)
+                         (:confirmed-local-absence "The local lookup confirmed absence.")
+                         (:observed-local "The local lookup found a real page.")
+                         (:unknown "The local lookup failed; availability remains unknown.")
+                         (otherwise "Inspect the recorded local finding."))))
+            (:h3 "Observation")
+            (:table :style "width: 100%; table-layout: fixed; border-collapse: collapse;"
+              (row "Finding" (finding obs) (format nil "~S" (finding obs)))
+              (row "Own-site" (own-site-of obs) "Explicit local site")
+              (row "Source page" (observed-page obs) (hb:id-of (observed-page obs)))
+              (row "Revision" (source-of (observed-page obs)) "Local source revision")
+              (row "Story item" (observed-item obs) "Source story item")
+              (row "Link target" (target-link obs) (fw::target-slug-of (target-link obs)))
+              (row "Target page" (target-page obs) (if (target-page obs) "Observed local page" "NIL — no target page object"))
+              (row "Read failure" (failure-of obs) (if (failure-of obs) "Inspect read failure" "None recorded"))
+              (row "Local provenance" (local-evidence-of obs) "Local lookup evidence"))
+            (:h3 "External evidence")
+            (:p (v:esc (if evidence
+                          "Externally claimed: the evidence revision supplies assertions and any verified cached copies. Digest integrity does not prove historical remote origin."
+                          "No external evidence supplied.")))
+            (:table :style "width: 100%; table-layout: fixed; border-collapse: collapse;"
+              (row "Evidence revision" evidence (if evidence "External evidence revision" "None supplied"))
+              (row "Verified copies" copies (format nil "~D verified cached copy/copies" (length copies)))
+              (row "Observation facts" (facts-of obs) "Inspect all facts (local and external)")
+              (row "Candidate provenance" (candidates-of obs) (if (candidates-of obs) "Candidate order and sources" "No candidates recorded")))
+            (:h3 "Planning — not executed")
+            (unless preparation (v:html (:p "Preparation: Not planned")))
+            (:p "Resolution outcome — Modeled: "
+                (v:esc (format nil "~{~S~^, ~}" (if (listp outcomes) outcomes (list outcomes)))))
+            (when (and (listp outcomes) (member :hypothetical-local outcomes))
+              (v:html (:p "Hypothetical local presence is a simulated result, not an observed local page.")))
+            (:p "Execution mode: " (v:esc (if modes (format nil "~{~S~^, ~}" modes) "No planning results")))
+            (when (and results (every (lambda (mode) (eq mode :plan-only)) modes))
+              (v:html (:p "Executed: no Wiki page was materialized by these plans. Operations and final states are simulated.")))
+            ;; Each result appears once, including older preparation/resolution results.
+            (loop for result in results for index from 1 do
+              (v:html
+                (:details :style "margin: .75rem 0;"
+                  (:summary (v:esc (format nil "~A — ~A"
+                                          (cond ((eq result preparation) "Preparation")
+                                                ((eq result resolution) "Resolution")
+                                                (t (format nil "Earlier result ~D" index)))
+                                          (plan-count result))))
+                  (:table :style "width: 100%; table-layout: fixed; border-collapse: collapse;"
+                    (row "Planning result" result "Inspect planning result")
+                    (row "SHOP3 problem" (shop3:find-problem (h:problem-name-of result)) "Inspect problem")
+                    (row "Planned operations" (h:plans-of result) "Operations — not executed")
+                    (row "Simulated final states" (h:final-states-of result) "Inspect simulated states")))))))))))
 (defun demo ()
   (let* ((root (asdf:system-relative-pathname "dreyeck/work/fedwiki-local-only"
                   "dreyeck/tests/fixtures/fedwiki-local-only/"))
