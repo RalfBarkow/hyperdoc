@@ -1,0 +1,900 @@
+{
+ "reference": {
+  "repository": "RalfBarkow/fedwiki-java",
+  "revision": "b58fb43e7ffbbbda66685363dcda1facbd2a46a1",
+  "sha256": {
+   "Main.java": "c53ea762349ba491eb68bbf1b4653f6cde71b800115babc5f5fe72ff59edb9b2",
+   "jackson-core-2.14.2.jar": "b5d37a77c88277b97e3593c8740925216c06df8e4172bbde058528df04ad3e7a",
+   "jackson-annotations-2.14.2.jar": "2c6869d505cf60dc066734b7d50339f975bd3adc635e26a78abb71acb4473c0d",
+   "jackson-databind-2.14.2.jar": "501d3abce4d18dcc381058ec593c5b94477906bba6efbac14dae40a642f77424"
+  },
+  "java": "openjdk version \"21.0.12.1\" 2026-08-18",
+  "network": "empty network namespace; loopback only; example.org did not resolve"
+ },
+ "scenarios": [
+  {
+   "id": "local-first",
+   "exit_code": 0,
+   "requests": [
+    {
+     "site": "origin",
+     "path": "/system/sitemap.json",
+     "status": 200
+    },
+    {
+     "site": "origin",
+     "path": "/welcome-visitors.json",
+     "status": 200
+    },
+    {
+     "site": "origin",
+     "path": "/target.json",
+     "status": 200
+    }
+   ],
+   "page_requests": [
+    [
+     "origin",
+     "welcome-visitors",
+     200
+    ],
+    [
+     "origin",
+     "target",
+     200
+    ]
+   ],
+   "sitemap_requests": [
+    "origin"
+   ],
+   "debug_sites": [],
+   "trouble": [],
+   "lineup": [
+    [
+     "Welcome Visitors",
+     "origin"
+    ],
+    [
+     "Target",
+     "origin"
+    ]
+   ],
+   "stdout": "Reading SiteMap origin\nLINK1 [[Target]]\n << 1 link >>\n\nWelcome Visitors origin\nTarget origin\n==========================================\nhttp://origin/view/welcome-visitors/view/target\norigin copy\n << 2 exit >>\n",
+   "stderr_tail": []
+  },
+  {
+   "id": "context-newest-first",
+   "exit_code": 0,
+   "requests": [
+    {
+     "site": "origin",
+     "path": "/system/sitemap.json",
+     "status": 200
+    },
+    {
+     "site": "origin",
+     "path": "/welcome-visitors.json",
+     "status": 200
+    },
+    {
+     "site": "origin",
+     "path": "/target.json",
+     "status": 404
+    },
+    {
+     "site": "s2",
+     "path": "/target.json",
+     "status": 200
+    },
+    {
+     "site": "s2",
+     "path": "/system/sitemap.json",
+     "status": 200
+    }
+   ],
+   "page_requests": [
+    [
+     "origin",
+     "welcome-visitors",
+     200
+    ],
+    [
+     "origin",
+     "target",
+     404
+    ],
+    [
+     "s2",
+     "target",
+     200
+    ]
+   ],
+   "sitemap_requests": [
+    "origin",
+    "s2"
+   ],
+   "debug_sites": [
+    "s2"
+   ],
+   "trouble": [],
+   "lineup": [
+    [
+     "Welcome Visitors",
+     "origin"
+    ],
+    [
+     "Target",
+     "s2"
+    ]
+   ],
+   "stdout": "Reading SiteMap origin\nLINK1 [[Target]]\n << 1 link >>\n << s2 >>\nReading SiteMap s2\n\nWelcome Visitors origin\nTarget s2\n==========================================\nhttp://origin/view/welcome-visitors/s2/target\ns2 copy\n << 2 exit >>\n",
+   "stderr_tail": []
+  },
+  {
+   "id": "context-fallthrough",
+   "exit_code": 0,
+   "requests": [
+    {
+     "site": "origin",
+     "path": "/system/sitemap.json",
+     "status": 200
+    },
+    {
+     "site": "origin",
+     "path": "/welcome-visitors.json",
+     "status": 200
+    },
+    {
+     "site": "origin",
+     "path": "/target.json",
+     "status": 404
+    },
+    {
+     "site": "s2",
+     "path": "/target.json",
+     "status": 404
+    },
+    {
+     "site": "s1",
+     "path": "/target.json",
+     "status": 200
+    },
+    {
+     "site": "s1",
+     "path": "/system/sitemap.json",
+     "status": 200
+    }
+   ],
+   "page_requests": [
+    [
+     "origin",
+     "welcome-visitors",
+     200
+    ],
+    [
+     "origin",
+     "target",
+     404
+    ],
+    [
+     "s2",
+     "target",
+     404
+    ],
+    [
+     "s1",
+     "target",
+     200
+    ]
+   ],
+   "sitemap_requests": [
+    "origin",
+    "s1"
+   ],
+   "debug_sites": [
+    "s2",
+    "s1"
+   ],
+   "trouble": [],
+   "lineup": [
+    [
+     "Welcome Visitors",
+     "origin"
+    ],
+    [
+     "Target",
+     "s1"
+    ]
+   ],
+   "stdout": "Reading SiteMap origin\nLINK1 [[Target]]\n << 1 link >>\n << s2 >>\n << s1 >>\nReading SiteMap s1\n\nWelcome Visitors origin\nTarget s1\n==========================================\nhttp://origin/view/welcome-visitors/s1/target\ns1 copy\n << 2 exit >>\n",
+   "stderr_tail": []
+  },
+  {
+   "id": "item-site",
+   "exit_code": 0,
+   "requests": [
+    {
+     "site": "origin",
+     "path": "/system/sitemap.json",
+     "status": 200
+    },
+    {
+     "site": "origin",
+     "path": "/welcome-visitors.json",
+     "status": 200
+    },
+    {
+     "site": "origin",
+     "path": "/target.json",
+     "status": 404
+    },
+    {
+     "site": "s1",
+     "path": "/target.json",
+     "status": 200
+    },
+    {
+     "site": "s1",
+     "path": "/system/sitemap.json",
+     "status": 200
+    }
+   ],
+   "page_requests": [
+    [
+     "origin",
+     "welcome-visitors",
+     200
+    ],
+    [
+     "origin",
+     "target",
+     404
+    ],
+    [
+     "s1",
+     "target",
+     200
+    ]
+   ],
+   "sitemap_requests": [
+    "origin",
+    "s1"
+   ],
+   "debug_sites": [
+    "s1"
+   ],
+   "trouble": [],
+   "lineup": [
+    [
+     "Welcome Visitors",
+     "origin"
+    ],
+    [
+     "Target",
+     "s1"
+    ]
+   ],
+   "stdout": "Reading SiteMap origin\nLINK1 [[Target]]\n << 1 link >>\n << s1 >>\nReading SiteMap s1\n\nWelcome Visitors origin\nTarget s1\n==========================================\nhttp://origin/view/welcome-visitors/s1/target\ns1 copy\n << 2 exit >>\n",
+   "stderr_tail": []
+  },
+  {
+   "id": "journal-reorder",
+   "exit_code": 0,
+   "requests": [
+    {
+     "site": "origin",
+     "path": "/system/sitemap.json",
+     "status": 200
+    },
+    {
+     "site": "origin",
+     "path": "/welcome-visitors.json",
+     "status": 200
+    },
+    {
+     "site": "origin",
+     "path": "/target.json",
+     "status": 404
+    },
+    {
+     "site": "s1",
+     "path": "/target.json",
+     "status": 200
+    },
+    {
+     "site": "s1",
+     "path": "/system/sitemap.json",
+     "status": 200
+    }
+   ],
+   "page_requests": [
+    [
+     "origin",
+     "welcome-visitors",
+     200
+    ],
+    [
+     "origin",
+     "target",
+     404
+    ],
+    [
+     "s1",
+     "target",
+     200
+    ]
+   ],
+   "sitemap_requests": [
+    "origin",
+    "s1"
+   ],
+   "debug_sites": [
+    "s1"
+   ],
+   "trouble": [],
+   "lineup": [
+    [
+     "Welcome Visitors",
+     "origin"
+    ],
+    [
+     "Target",
+     "s1"
+    ]
+   ],
+   "stdout": "Reading SiteMap origin\nLINK1 [[Target]]\n << 1 link >>\n << s1 >>\nReading SiteMap s1\n\nWelcome Visitors origin\nTarget s1\n==========================================\nhttp://origin/view/welcome-visitors/s1/target\ns1 copy\n << 2 exit >>\n",
+   "stderr_tail": []
+  },
+  {
+   "id": "not-found",
+   "exit_code": 1,
+   "requests": [
+    {
+     "site": "origin",
+     "path": "/system/sitemap.json",
+     "status": 200
+    },
+    {
+     "site": "origin",
+     "path": "/welcome-visitors.json",
+     "status": 200
+    },
+    {
+     "site": "origin",
+     "path": "/target.json",
+     "status": 404
+    },
+    {
+     "site": "s2",
+     "path": "/target.json",
+     "status": 404
+    },
+    {
+     "site": "s1",
+     "path": "/target.json",
+     "status": 404
+    }
+   ],
+   "page_requests": [
+    [
+     "origin",
+     "welcome-visitors",
+     200
+    ],
+    [
+     "origin",
+     "target",
+     404
+    ],
+    [
+     "s2",
+     "target",
+     404
+    ],
+    [
+     "s1",
+     "target",
+     404
+    ]
+   ],
+   "sitemap_requests": [
+    "origin"
+   ],
+   "debug_sites": [
+    "s2",
+    "s1"
+   ],
+   "trouble": [
+    "can't find page in current context"
+   ],
+   "lineup": [],
+   "stdout": "Reading SiteMap origin\nLINK1 [[Target]]\n << 1 link >>\n << s2 >>\n << s1 >>\n << can't find page in current context >>\n",
+   "stderr_tail": []
+  },
+  {
+   "id": "status-500",
+   "exit_code": 0,
+   "requests": [
+    {
+     "site": "origin",
+     "path": "/system/sitemap.json",
+     "status": 200
+    },
+    {
+     "site": "origin",
+     "path": "/welcome-visitors.json",
+     "status": 200
+    },
+    {
+     "site": "origin",
+     "path": "/target.json",
+     "status": 404
+    },
+    {
+     "site": "s2",
+     "path": "/target.json",
+     "status": 500
+    },
+    {
+     "site": "s1",
+     "path": "/target.json",
+     "status": 200
+    },
+    {
+     "site": "s1",
+     "path": "/system/sitemap.json",
+     "status": 200
+    }
+   ],
+   "page_requests": [
+    [
+     "origin",
+     "welcome-visitors",
+     200
+    ],
+    [
+     "origin",
+     "target",
+     404
+    ],
+    [
+     "s2",
+     "target",
+     500
+    ],
+    [
+     "s1",
+     "target",
+     200
+    ]
+   ],
+   "sitemap_requests": [
+    "origin",
+    "s1"
+   ],
+   "debug_sites": [
+    "s2",
+    "s1"
+   ],
+   "trouble": [],
+   "lineup": [
+    [
+     "Welcome Visitors",
+     "origin"
+    ],
+    [
+     "Target",
+     "s1"
+    ]
+   ],
+   "stdout": "Reading SiteMap origin\nLINK1 [[Target]]\n << 1 link >>\n << s2 >>\n << s1 >>\nReading SiteMap s1\n\nWelcome Visitors origin\nTarget s1\n==========================================\nhttp://origin/view/welcome-visitors/s1/target\ns1 copy\n << 2 exit >>\n",
+   "stderr_tail": []
+  },
+  {
+   "id": "redirect-302",
+   "exit_code": 0,
+   "requests": [
+    {
+     "site": "origin",
+     "path": "/system/sitemap.json",
+     "status": 200
+    },
+    {
+     "site": "origin",
+     "path": "/welcome-visitors.json",
+     "status": 200
+    },
+    {
+     "site": "origin",
+     "path": "/target.json",
+     "status": 404
+    },
+    {
+     "site": "s2",
+     "path": "/target.json",
+     "status": 302
+    },
+    {
+     "site": "s1",
+     "path": "/target.json",
+     "status": 200
+    },
+    {
+     "site": "s1",
+     "path": "/system/sitemap.json",
+     "status": 200
+    }
+   ],
+   "page_requests": [
+    [
+     "origin",
+     "welcome-visitors",
+     200
+    ],
+    [
+     "origin",
+     "target",
+     404
+    ],
+    [
+     "s2",
+     "target",
+     302
+    ],
+    [
+     "s1",
+     "target",
+     200
+    ]
+   ],
+   "sitemap_requests": [
+    "origin",
+    "s1"
+   ],
+   "debug_sites": [
+    "s2",
+    "s1"
+   ],
+   "trouble": [],
+   "lineup": [
+    [
+     "Welcome Visitors",
+     "origin"
+    ],
+    [
+     "Target",
+     "s1"
+    ]
+   ],
+   "stdout": "Reading SiteMap origin\nLINK1 [[Target]]\n << 1 link >>\n << s2 >>\n << s1 >>\nReading SiteMap s1\n\nWelcome Visitors origin\nTarget s1\n==========================================\nhttp://origin/view/welcome-visitors/s1/target\ns1 copy\n << 2 exit >>\n",
+   "stderr_tail": []
+  },
+  {
+   "id": "network-error",
+   "exit_code": 1,
+   "requests": [
+    {
+     "site": "origin",
+     "path": "/system/sitemap.json",
+     "status": 200
+    },
+    {
+     "site": "origin",
+     "path": "/welcome-visitors.json",
+     "status": 200
+    },
+    {
+     "site": "origin",
+     "path": "/target.json",
+     "status": 404
+    }
+   ],
+   "page_requests": [
+    [
+     "origin",
+     "welcome-visitors",
+     200
+    ],
+    [
+     "origin",
+     "target",
+     404
+    ]
+   ],
+   "sitemap_requests": [
+    "origin"
+   ],
+   "debug_sites": [
+    "dead"
+   ],
+   "trouble": [
+    "http error: null"
+   ],
+   "lineup": [],
+   "stdout": "Reading SiteMap origin\nLINK1 [[Target]]\n << 1 link >>\n << dead >>\n << http error: null >>\n",
+   "stderr_tail": []
+  },
+  {
+   "id": "panel-site",
+   "exit_code": 0,
+   "requests": [
+    {
+     "site": "origin",
+     "path": "/system/sitemap.json",
+     "status": 200
+    },
+    {
+     "site": "origin",
+     "path": "/welcome-visitors.json",
+     "status": 200
+    },
+    {
+     "site": "origin",
+     "path": "/remote-page.json",
+     "status": 404
+    },
+    {
+     "site": "s1",
+     "path": "/remote-page.json",
+     "status": 200
+    },
+    {
+     "site": "s1",
+     "path": "/system/sitemap.json",
+     "status": 200
+    },
+    {
+     "site": "s2",
+     "path": "/system/sitemap.json",
+     "status": 200
+    },
+    {
+     "site": "origin",
+     "path": "/target.json",
+     "status": 404
+    },
+    {
+     "site": "s1",
+     "path": "/target.json",
+     "status": 404
+    },
+    {
+     "site": "s2",
+     "path": "/target.json",
+     "status": 200
+    }
+   ],
+   "page_requests": [
+    [
+     "origin",
+     "welcome-visitors",
+     200
+    ],
+    [
+     "origin",
+     "remote-page",
+     404
+    ],
+    [
+     "s1",
+     "remote-page",
+     200
+    ],
+    [
+     "origin",
+     "target",
+     404
+    ],
+    [
+     "s1",
+     "target",
+     404
+    ],
+    [
+     "s2",
+     "target",
+     200
+    ]
+   ],
+   "sitemap_requests": [
+    "origin",
+    "s1",
+    "s2"
+   ],
+   "debug_sites": [
+    "s1",
+    "s1",
+    "s2"
+   ],
+   "trouble": [],
+   "lineup": [
+    [
+     "Welcome Visitors",
+     "origin"
+    ],
+    [
+     "Remote Page",
+     "s1"
+    ],
+    [
+     "Target",
+     "s2"
+    ]
+   ],
+   "stdout": "Reading SiteMap origin\nLINK1 [[Remote Page]]\n << 1 link >>\n << s1 >>\nReading SiteMap s1\nReading SiteMap s2\n\nWelcome Visitors origin\nRemote Page s1\n==========================================\nhttp://origin/view/welcome-visitors/s1/remote-page\nLINK2 [[Target]]\n << 2 link >>\n << s1 >>\n << s2 >>\n\nWelcome Visitors origin\nRemote Page s1\nTarget s2\n==========================================\nhttp://origin/view/welcome-visitors/s1/remote-page/s2/target\ns2 copy\n << 3 exit >>\n",
+   "stderr_tail": []
+  },
+  {
+   "id": "origin-in-context",
+   "exit_code": 0,
+   "requests": [
+    {
+     "site": "origin",
+     "path": "/system/sitemap.json",
+     "status": 200
+    },
+    {
+     "site": "origin",
+     "path": "/welcome-visitors.json",
+     "status": 200
+    },
+    {
+     "site": "origin",
+     "path": "/target.json",
+     "status": 404
+    },
+    {
+     "site": "origin",
+     "path": "/target.json",
+     "status": 404
+    },
+    {
+     "site": "s1",
+     "path": "/target.json",
+     "status": 200
+    },
+    {
+     "site": "s1",
+     "path": "/system/sitemap.json",
+     "status": 200
+    }
+   ],
+   "page_requests": [
+    [
+     "origin",
+     "welcome-visitors",
+     200
+    ],
+    [
+     "origin",
+     "target",
+     404
+    ],
+    [
+     "origin",
+     "target",
+     404
+    ],
+    [
+     "s1",
+     "target",
+     200
+    ]
+   ],
+   "sitemap_requests": [
+    "origin",
+    "s1"
+   ],
+   "debug_sites": [
+    "origin",
+    "s1"
+   ],
+   "trouble": [],
+   "lineup": [
+    [
+     "Welcome Visitors",
+     "origin"
+    ],
+    [
+     "Target",
+     "s1"
+    ]
+   ],
+   "stdout": "Reading SiteMap origin\nLINK1 [[Target]]\n << 1 link >>\n << origin >>\n << s1 >>\nReading SiteMap s1\n\nWelcome Visitors origin\nTarget s1\n==========================================\nhttp://origin/view/welcome-visitors/s1/target\ns1 copy\n << 2 exit >>\n",
+   "stderr_tail": []
+  },
+  {
+   "id": "attribution-site",
+   "exit_code": 1,
+   "requests": [
+    {
+     "site": "origin",
+     "path": "/system/sitemap.json",
+     "status": 200
+    },
+    {
+     "site": "origin",
+     "path": "/welcome-visitors.json",
+     "status": 200
+    },
+    {
+     "site": "origin",
+     "path": "/target.json",
+     "status": 404
+    }
+   ],
+   "page_requests": [
+    [
+     "origin",
+     "welcome-visitors",
+     200
+    ],
+    [
+     "origin",
+     "target",
+     404
+    ]
+   ],
+   "sitemap_requests": [
+    "origin"
+   ],
+   "debug_sites": [],
+   "trouble": [
+    "can't find page in current context"
+   ],
+   "lineup": [],
+   "stdout": "Reading SiteMap origin\nLINK1 [[Target]]\n << 1 link >>\n << can't find page in current context >>\n",
+   "stderr_tail": []
+  },
+  {
+   "id": "slug-normalization",
+   "exit_code": 0,
+   "requests": [
+    {
+     "site": "origin",
+     "path": "/system/sitemap.json",
+     "status": 200
+    },
+    {
+     "site": "origin",
+     "path": "/welcome-visitors.json",
+     "status": 200
+    },
+    {
+     "site": "origin",
+     "path": "/wards-pgina-2.json",
+     "status": 200
+    }
+   ],
+   "page_requests": [
+    [
+     "origin",
+     "welcome-visitors",
+     200
+    ],
+    [
+     "origin",
+     "wards-pgina-2",
+     200
+    ]
+   ],
+   "sitemap_requests": [
+    "origin"
+   ],
+   "debug_sites": [],
+   "trouble": [],
+   "lineup": [
+    [
+     "Welcome Visitors",
+     "origin"
+    ],
+    [
+     "Ward's Página 2",
+     "origin"
+    ]
+   ],
+   "stdout": "Reading SiteMap origin\nLINK1 [[Ward's Página 2]] and [[Second Link]]\n << 1 link >>\n\nWelcome Visitors origin\nWard's Página 2 origin\n==========================================\nhttp://origin/view/welcome-visitors/view/wards-pgina-2\nfound\n << 2 exit >>\n",
+   "stderr_tail": []
+  }
+ ]
+}

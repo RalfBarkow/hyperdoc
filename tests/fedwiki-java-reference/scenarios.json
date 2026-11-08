@@ -1,0 +1,165 @@
+{
+  "comment": "Network-free fixtures for fedwiki-java b58fb43 (Main.java) and the SHOP3 model dreyeck/work/fedwiki-link-resolution. Site names are symbolic; run-reference.py serves each served site on its own 127.0.0.1 port inside an empty network namespace and writes the observations to observed.json. 'dead' sites get a port on which nothing listens. Commands are fed to Main's standard input; after a page loads its first story item is current, so 'link' follows that item's first [[link]] (Main.find advances before matching and would skip a one-item story). Each entry of 'links' names the panel page and story item from which Main.link() follows the first [[link]], in command order.",
+  "scenarios": [
+    {
+      "id": "local-first",
+      "question": "A local hit takes precedence over every context site.",
+      "sites": {
+        "origin": {
+          "welcome-visitors": {"title": "Welcome Visitors", "story": [{"id": "i1", "type": "paragraph", "text": "LINK1 [[Target]]"}],
+                               "journal": [{"type": "create"}, {"type": "fork", "site": "s1"}]},
+          "target": {"title": "Target", "story": [{"id": "t1", "type": "paragraph", "text": "origin copy"}], "journal": [{"type": "create"}]}
+        },
+        "s1": {"target": {"title": "Target", "story": [{"id": "t1", "type": "paragraph", "text": "s1 copy"}], "journal": [{"type": "create"}]}}
+      },
+      "commands": ["link"],
+      "links": [{"panel": ["origin", "welcome-visitors"], "item": 0, "slug": "target"}]
+    },
+    {
+      "id": "context-newest-first",
+      "question": "Without a local hit, the journal context is searched newest first; the first available candidate wins although another also has the page.",
+      "sites": {
+        "origin": {"welcome-visitors": {"title": "Welcome Visitors", "story": [{"id": "i1", "type": "paragraph", "text": "LINK1 [[Target]]"}],
+                                        "journal": [{"type": "create"}, {"type": "fork", "site": "s1"}, {"type": "fork", "site": "s2"}, {"type": "edit", "id": "i1"}]}},
+        "s1": {"target": {"title": "Target", "story": [{"id": "t1", "type": "paragraph", "text": "s1 copy"}], "journal": [{"type": "create"}]}},
+        "s2": {"target": {"title": "Target", "story": [{"id": "t1", "type": "paragraph", "text": "s2 copy"}], "journal": [{"type": "create"}]}}
+      },
+      "commands": ["link"],
+      "links": [{"panel": ["origin", "welcome-visitors"], "item": 0, "slug": "target"}]
+    },
+    {
+      "id": "context-fallthrough",
+      "question": "A 404 at the newest context site falls through to the next one.",
+      "sites": {
+        "origin": {"welcome-visitors": {"title": "Welcome Visitors", "story": [{"id": "i1", "type": "paragraph", "text": "LINK1 [[Target]]"}],
+                                        "journal": [{"type": "create"}, {"type": "fork", "site": "s1"}, {"type": "fork", "site": "s2"}]}},
+        "s1": {"target": {"title": "Target", "story": [{"id": "t1", "type": "paragraph", "text": "s1 copy"}], "journal": [{"type": "create"}]}},
+        "s2": {}
+      },
+      "commands": ["link"],
+      "links": [{"panel": ["origin", "welcome-visitors"], "item": 0, "slug": "target"}]
+    },
+    {
+      "id": "item-site",
+      "question": "The current item's site moves to the front of the context (after the origin).",
+      "sites": {
+        "origin": {"welcome-visitors": {"title": "Welcome Visitors", "story": [{"id": "i1", "type": "reference", "site": "s1", "slug": "target", "text": "LINK1 [[Target]]"}],
+                                        "journal": [{"type": "create"}, {"type": "fork", "site": "s1"}, {"type": "fork", "site": "s2"}]}},
+        "s1": {"target": {"title": "Target", "story": [{"id": "t1", "type": "paragraph", "text": "s1 copy"}], "journal": [{"type": "create"}]}},
+        "s2": {"target": {"title": "Target", "story": [{"id": "t1", "type": "paragraph", "text": "s2 copy"}], "journal": [{"type": "create"}]}}
+      },
+      "commands": ["link"],
+      "links": [{"panel": ["origin", "welcome-visitors"], "item": 0, "slug": "target"}]
+    },
+    {
+      "id": "journal-reorder",
+      "question": "A newer journal action naming s1 moves s1 ahead of s2 (compare context-newest-first).",
+      "sites": {
+        "origin": {"welcome-visitors": {"title": "Welcome Visitors", "story": [{"id": "i1", "type": "paragraph", "text": "LINK1 [[Target]]"}],
+                                        "journal": [{"type": "create"}, {"type": "fork", "site": "s1"}, {"type": "fork", "site": "s2"},
+                                                    {"type": "add", "id": "i2", "site": "s1", "item": {"id": "i2", "type": "paragraph", "text": "dragged"}}]}},
+        "s1": {"target": {"title": "Target", "story": [{"id": "t1", "type": "paragraph", "text": "s1 copy"}], "journal": [{"type": "create"}]}},
+        "s2": {"target": {"title": "Target", "story": [{"id": "t1", "type": "paragraph", "text": "s2 copy"}], "journal": [{"type": "create"}]}}
+      },
+      "commands": ["link"],
+      "links": [{"panel": ["origin", "welcome-visitors"], "item": 0, "slug": "target"}]
+    },
+    {
+      "id": "not-found",
+      "question": "Every candidate answers 404: resolution fails and Main exits with 'can't find page in current context'.",
+      "sites": {
+        "origin": {"welcome-visitors": {"title": "Welcome Visitors", "story": [{"id": "i1", "type": "paragraph", "text": "LINK1 [[Target]]"}],
+                                        "journal": [{"type": "create"}, {"type": "fork", "site": "s1"}, {"type": "fork", "site": "s2"}]}},
+        "s1": {}, "s2": {}
+      },
+      "commands": ["link"],
+      "links": [{"panel": ["origin", "welcome-visitors"], "item": 0, "slug": "target"}]
+    },
+    {
+      "id": "status-500",
+      "question": "Any status other than 200 counts as 'not here' and the search continues.",
+      "sites": {
+        "origin": {"welcome-visitors": {"title": "Welcome Visitors", "story": [{"id": "i1", "type": "paragraph", "text": "LINK1 [[Target]]"}],
+                                        "journal": [{"type": "create"}, {"type": "fork", "site": "s1"}, {"type": "fork", "site": "s2"}]}},
+        "s1": {"target": {"title": "Target", "story": [{"id": "t1", "type": "paragraph", "text": "s1 copy"}], "journal": [{"type": "create"}]}},
+        "s2": {}
+      },
+      "status": {"s2": {"target": 500}},
+      "commands": ["link"],
+      "links": [{"panel": ["origin", "welcome-visitors"], "item": 0, "slug": "target"}]
+    },
+    {
+      "id": "redirect-302",
+      "question": "A redirect is not followed (java.net.http.HttpClient default Redirect.NEVER) and also counts as 'not here'.",
+      "sites": {
+        "origin": {"welcome-visitors": {"title": "Welcome Visitors", "story": [{"id": "i1", "type": "paragraph", "text": "LINK1 [[Target]]"}],
+                                        "journal": [{"type": "create"}, {"type": "fork", "site": "s1"}, {"type": "fork", "site": "s2"}]}},
+        "s1": {"target": {"title": "Target", "story": [{"id": "t1", "type": "paragraph", "text": "s1 copy"}], "journal": [{"type": "create"}]}},
+        "s2": {}
+      },
+      "status": {"s2": {"target": 302}},
+      "commands": ["link"],
+      "links": [{"panel": ["origin", "welcome-visitors"], "item": 0, "slug": "target"}]
+    },
+    {
+      "id": "network-error",
+      "question": "A connection failure is not 'not here': Main stops ('http error') and never tries the remaining candidates, although s1 has the page.",
+      "sites": {
+        "origin": {"welcome-visitors": {"title": "Welcome Visitors", "story": [{"id": "i1", "type": "paragraph", "text": "LINK1 [[Target]]"}],
+                                        "journal": [{"type": "create"}, {"type": "fork", "site": "s1"}, {"type": "fork", "site": "dead"}]}},
+        "s1": {"target": {"title": "Target", "story": [{"id": "t1", "type": "paragraph", "text": "s1 copy"}], "journal": [{"type": "create"}]}}
+      },
+      "dead": ["dead"],
+      "commands": ["link"],
+      "links": [{"panel": ["origin", "welcome-visitors"], "item": 0, "slug": "target"}]
+    },
+    {
+      "id": "panel-site",
+      "question": "From a page shown from a remote site, that site moves to the front of its page's context.",
+      "sites": {
+        "origin": {"welcome-visitors": {"title": "Welcome Visitors", "story": [{"id": "i1", "type": "paragraph", "text": "LINK1 [[Remote Page]]"}],
+                                        "journal": [{"type": "create"}, {"type": "fork", "site": "s1"}]}},
+        "s1": {"remote-page": {"title": "Remote Page", "story": [{"id": "r1", "type": "paragraph", "text": "LINK2 [[Target]]"}],
+                               "journal": [{"type": "create"}, {"type": "fork", "site": "s2"}]}},
+        "s2": {"target": {"title": "Target", "story": [{"id": "t1", "type": "paragraph", "text": "s2 copy"}], "journal": [{"type": "create"}]}}
+      },
+      "commands": ["link", "link"],
+      "links": [{"panel": ["origin", "welcome-visitors"], "item": 0, "slug": "remote-page"},
+                {"panel": ["s1", "remote-page"], "item": 0, "slug": "target"}]
+    },
+    {
+      "id": "origin-in-context",
+      "question": "The origin is not removed from the journal context, so it can be requested twice.",
+      "sites": {
+        "origin": {"welcome-visitors": {"title": "Welcome Visitors", "story": [{"id": "i1", "type": "paragraph", "text": "LINK1 [[Target]]"}],
+                                        "journal": [{"type": "create"}, {"type": "fork", "site": "s1"}, {"type": "fork", "site": "origin"}]}},
+        "s1": {"target": {"title": "Target", "story": [{"id": "t1", "type": "paragraph", "text": "s1 copy"}], "journal": [{"type": "create"}]}}
+      },
+      "commands": ["link"],
+      "links": [{"panel": ["origin", "welcome-visitors"], "item": 0, "slug": "target"}]
+    },
+    {
+      "id": "attribution-site",
+      "question": "A site named only in an action's attribution is not part of Java's context (HyperDoc's site-of reads attribution.site).",
+      "sites": {
+        "origin": {"welcome-visitors": {"title": "Welcome Visitors", "story": [{"id": "i1", "type": "paragraph", "text": "LINK1 [[Target]]"}],
+                                        "journal": [{"type": "create"}, {"type": "add", "id": "i2", "attribution": {"site": "s1", "page": "x"},
+                                                                            "item": {"id": "i2", "type": "paragraph", "text": "copied"}}]}},
+        "s1": {"target": {"title": "Target", "story": [{"id": "t1", "type": "paragraph", "text": "s1 copy"}], "journal": [{"type": "create"}]}}
+      },
+      "commands": ["link"],
+      "links": [{"panel": ["origin", "welcome-visitors"], "item": 0, "slug": "target"}]
+    },
+    {
+      "id": "slug-normalization",
+      "question": "Item.links(): whitespace to '-', everything outside [A-Za-z0-9-] removed, then lower case; only the first [[link]] counts.",
+      "sites": {
+        "origin": {"welcome-visitors": {"title": "Welcome Visitors", "story": [{"id": "i1", "type": "paragraph", "text": "LINK1 [[Ward's Página 2]] and [[Second Link]]"}],
+                                        "journal": [{"type": "create"}]},
+                   "wards-pgina-2": {"title": "Ward's Página 2", "story": [{"id": "t1", "type": "paragraph", "text": "found"}], "journal": [{"type": "create"}]}}
+      },
+      "commands": ["link"],
+      "links": [{"panel": ["origin", "welcome-visitors"], "item": 0, "slug": "wards-pgina-2"}]
+    }
+  ]
+}

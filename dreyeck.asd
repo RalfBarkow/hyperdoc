@@ -3618,6 +3618,36 @@
   :depends-on ("dreyeck/shop3")
   :components ((:file "dreyeck/work/remote-control-planning")))
 
+(defsystem "dreyeck/work/fedwiki-link-resolution"
+  :description "Opt-in SHOP3 model of fedwiki-java b58fb43 link resolution: collaborative and local-only; plans only"
+  :depends-on ("dreyeck/shop3" "shasht")
+  :components ((:file "dreyeck/work/fedwiki-link-resolution")
+               (:static-file "tests/fedwiki-java-reference/scenarios.json")
+               (:static-file "tests/fedwiki-java-reference/observed.json"))
+  :in-order-to ((test-op (test-op "dreyeck/work/fedwiki-link-resolution/tests"))))
+
+(defsystem "dreyeck/work/fedwiki-link-resolution/tests"
+  :depends-on ("dreyeck/work/fedwiki-link-resolution")
+  :components ((:file "dreyeck/tests/fedwiki-link-resolution"))
+  :perform (test-op (op component)
+             (declare (ignore op component))
+             (uiop:symbol-call :dreyeck/work/fedwiki-link-resolution/tests :run-tests)))
+
+(defsystem "dreyeck/work/fedwiki-link-resolution/critic"
+  :description "Read-only reading of what the real Riesbeck/Beane Lisp Critic said about PR #32's Lisp code; runs no engine"
+  :depends-on ("dreyeck/inspector/lisp-critic" "shasht" "ironclad")
+  :components ((:file "dreyeck/work/fedwiki-link-resolution-critic")
+               (:static-file "docs/fedwiki-link-resolution/critic/pr-32-critique.json")
+               (:static-file "docs/fedwiki-link-resolution/critic/judgements.json"))
+  :in-order-to ((test-op (test-op "dreyeck/work/fedwiki-link-resolution/critic/tests"))))
+
+(defsystem "dreyeck/work/fedwiki-link-resolution/critic/tests"
+  :depends-on ("dreyeck/work/fedwiki-link-resolution/critic")
+  :components ((:file "dreyeck/tests/fedwiki-link-resolution-critic"))
+  :perform (test-op (op component)
+             (declare (ignore op component))
+             (uiop:symbol-call :dreyeck/work/fedwiki-link-resolution/critic/tests :run-tests)))
+
 (defsystem "dreyeck/work/defederation-planning"
   :description "Opt-in SHOP3 defederation preparation; simulated effects, no executor"
   :depends-on ("dreyeck/shop3")

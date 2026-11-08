@@ -1,0 +1,16 @@
+Authorized execution 2026-11-08, own SBCL process, own network namespace without network, empty HOME, own FASL cache.
+DREYECK_LISP_CRITIC_ROOT=<scratch>/assets/pages/a-critic-for-lisp/ = RalfBarkow/assets@856cf07:pages/a-critic-for-lisp/ (manifest: assets-repository-2026-11-08.txt)
+
+First run (scratch site without the page file pages/a-critic-for-lisp):
+POLICY-BOUNDARY-PASS: refused adds nothing, permitted loads the engine, recorded finding readable in both.
+ENGINE-INTEGRATION-PASS: the station holds the engine the records were made with; a real CAR-CDR run completed with one critique recommending CADR; the committed record is what the engine says; the three outcomes and the source-backed transclusion hold; the engine reproduced both committed example evaluations; the policy boundary holds with the engine behind it.
+ENGINE-RUN RUN-TESTS PASS
+ENGINE-RUN RUN-PAGE-STATION-LAYOUT-TESTS FAIL: The system is eligible but the view does not say so.
+
+Second run (page JSON from hyperdoc.dreyeck.ch added at <scratch>/pages/a-critic-for-lisp, sha256 b21c53289bbd0eebf242dc13320b7e9a719b2af047fc65930c3c24d8cdd2dcb3):
+POLICY-BOUNDARY-PASS: refused adds nothing, permitted loads the engine, recorded finding readable in both.
+ENGINE-INTEGRATION-PASS: the station holds the engine the records were made with; a real CAR-CDR run completed with one critique recommending CADR; the committed record is what the engine says; the three outcomes and the source-backed transclusion hold; the engine reproduced both committed example evaluations; the policy boundary holds with the engine behind it.
+ENGINE-RUN RUN-TESTS PASS
+PAGE-STATION-LAYOUT-PASS: the reading's account of the page-attached station matches the station.
+ENGINE-RUN RUN-PAGE-STATION-LAYOUT-TESTS PASS
+ENGINE-RUN packages: LISP-CRITIC=T A-CRITIC-FOR-LISP=T rules=78
