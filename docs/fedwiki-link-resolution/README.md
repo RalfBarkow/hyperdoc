@@ -1,8 +1,12 @@
 # Federated-Wiki-Linkauflösung: fedwiki-java, HyperDoc und ein SHOP3-Modell
 
-Zettel 11483 und 11560. Untersuchungsgegenstand ist `RalfBarkow/fedwiki-java` bei
+Zettel 11483 und 11560. Untersucht wird `RalfBarkow/fedwiki-java` bei
 [`b58fb43`](https://github.com/RalfBarkow/fedwiki-java/tree/b58fb43e7ffbbbda66685363dcda1facbd2a46a1)
-(verifiziert: HEAD des Klons, `Main.java` sha256 `c53ea762…`). Die Referenz ist Gegenstand, keine Norm.
+(Klon auf diesen Commit geprüft; `Main.java` SHA-256 `c53ea762…`). Ward bezeichnet fedwiki-java als
+Referenzimplementation. Ihr beobachtetes Verhalten ist deshalb der Maßstab der kollaborativen Politik: Das Modell muss in
+jedem Szenario dieselben Anfragen in derselben Reihenfolge und mit demselben Ergebnis planen. Wo ein Verhalten eher an
+dieser Java-Umsetzung hängen könnte als an der Federated-Wiki-Semantik (Weiterleitungen, Abbruch bei Netzwerkfehlern), ist
+das als offene Frage markiert und trotzdem abgebildet.
 Basis dieses Branches: PR #29 `ecb2b8b` (auf `dreyeck.ch` `00d2a18`). PR #29 und PR #30 bleiben unverändert;
 ihre Quellen werden hier nur gelesen. Kein Merge, kein Deployment, kein Dienst, keine Wiki-Daten.
 
