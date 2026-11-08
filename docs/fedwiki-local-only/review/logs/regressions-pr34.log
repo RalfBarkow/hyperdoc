@@ -1,0 +1,15 @@
+BASELINE-ROOT <WORK>/pr34/
+BASELINE TEST-BEGIN dreyeck/work/defederation-planning/tests
+BASELINE TEST-PASS dreyeck/work/defederation-planning/tests
+BASELINE TEST-BEGIN dreyeck/work/planning/tests
+BASELINE TEST-PASS dreyeck/work/planning/tests
+BASELINE TEST-BEGIN dreyeck/work/remote-control-planning/tests
+BASELINE TEST-PASS dreyeck/work/remote-control-planning/tests
+BASELINE TEST-BEGIN dreyeck/work/remote-control-planning/reading/tests
+BASELINE TEST-PASS dreyeck/work/remote-control-planning/reading/tests
+BASELINE TEST-BEGIN dreyeck/local-fedwiki-page/tests
+BASELINE TEST-PASS dreyeck/local-fedwiki-page/tests
+BASELINE TEST-BEGIN hyperbook/fedwiki/tests
+BASELINE TEST-PASS hyperbook/fedwiki/tests
+BASELINE EMPTY-WITHOUT-TREE PASS: (NIL)
+BASELINE EMPTY-WITH-TREE REPRODUCED: The value

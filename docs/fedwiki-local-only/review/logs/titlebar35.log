@@ -1,0 +1,6 @@
+TB generic-function method-combination: #<SB-PCL::STANDARD-METHOD-COMBINATION STANDARD () {ADDR}>
+TB applicable methods for own-page: ((NIL (OWN-PAGE)) (NIL (FW::FEDWIKI-PAGE)) ((:AROUND) (T)) (NIL (T)))
+TB own-page result type V:HTML-VIEW html
+TB own-site buttons: (:BUTTON T :HTML-LENGTH 1020)
+TB own-site open-external target: https://local/
+TB story html of own-page: <p>Local read-only source. No remote assets or renderer activation.</p><p><span class='inspector-inspect'><span id='inspect-N'>paragraph: [[Target]]</span></span>[[Target]]</p><p><span class='inspector-inspect'><span id='inspect-N'>paragraph: [[Missing]]</span></span>[[Missing]]</p><p><span class='inspector-inspect'><span id='inspect-N'>paragraph: [[Remote Only]]</span></span>[[Remote Only]]</p><p><span class='inspector-inspect'><span id='inspect-N'>paragraph: [[Broken]]</span></span>[[Broken]]</p>

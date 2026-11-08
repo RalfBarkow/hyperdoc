@@ -1,0 +1,23 @@
+REVIEW-RUN pr34=4e76e9aff910e9da45c1fe9252e528669c2683fb pr35=68ca0c587e25459b59c2cc246432207f2258975c network-isolation=unshare --net strace=1
+STEP own-suite35 exit=0 marker=present
+STRACE own-suite35 STRACE-SEGMENT start network-syscalls 0 STRACE-MARKERS-SEEN [] 
+STEP regressions-pr34 exit=0 marker=present
+STEP wiki-link-tests-pr34 exit=0 marker=present
+STEP reading-tests-pr34 exit=0 marker=present
+STEP regressions-pr35 exit=0 marker=present
+STEP wiki-link-tests-pr35 exit=0 marker=present
+STEP reading-tests-pr35 exit=0 marker=present
+COMPARE regressions-pr34 = regressions-pr35 (identical after removing only the BASELINE-ROOT line)
+COMPARE wiki-link-tests-pr34 = wiki-link-tests-pr35 (identical after removing only the BASELINE-ROOT line)
+COMPARE reading-tests-pr34 = reading-tests-pr35 (identical after removing only the BASELINE-ROOT line)
+STEP shared-diff-pr34 exit=0 marker=present
+STEP shared-diff-pr35 exit=0 marker=present
+COMPARE shared-diff: 2 differing lines (see shared-diff.diff)
+STEP probes35 exit=0 marker=present
+STRACE probes35 STRACE-SEGMENT start network-syscalls 0 STRACE-SEGMENT after STRACE-MARKER-BEFORE-CONTROL network-syscalls 8 STRACE-MARKERS-SEEN ['STRACE-MARKER-BEFORE-CONTROL'] 
+STEP ext-views35 exit=0 marker=present
+STRACE ext-views35 STRACE-SEGMENT start network-syscalls 0 STRACE-SEGMENT after EXT-MARKER-A-AFTER-LOAD network-syscalls 0 STRACE-SEGMENT after EXT-MARKER-B-BEFORE-CONTROL network-syscalls 8 STRACE-MARKERS-SEEN ['EXT-MARKER-A-AFTER-LOAD', 'EXT-MARKER-B-BEFORE-CONTROL'] 
+STEP titlebar35 exit=0 marker=present
+STEP manifest exit=0 5 log digests ok
+STEP expectations exit=0 111 pass 0 fail
+REVIEW-RUN-DONE

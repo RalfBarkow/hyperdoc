@@ -1,0 +1,4 @@
+14c14
+< SD set-page-data lambda-list: (FW::PAGE FW::JSON)
+---
+> SD set-page-data lambda-list: (FW::PAGE FW::JSON &KEY (FW::CONTEXT-RESOLVER (FUNCTION FW::EXTRACT-CONTEXT)))
