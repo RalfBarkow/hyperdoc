@@ -1,0 +1,41 @@
+<h1>Reading a Local-only FedWiki Link</h1>
+<in-package>dreyeck/work/reading</in-package>
+<p>This reading follows the opt-in, read-only FedWiki integration at HyperDoc revision <code>5639701c2dc33701d9be15c7a3f2ec90702126d6</code>. Its question is narrow: how can a missing local link target lead to a SHOP3 fork <em>plan</em> without creating a local page?</p>
+<p>The public Catalog serves this text. The optional ASDF system <code>dreyeck/work/fedwiki-local-only</code> is not part of normal Catalog startup. The runnable example below is for an explicitly selected local SLY/CLOG development image; opening this page executes no planner and performs no Wiki writes.</p>
+
+<h2>1. Observe the actual local link</h2>
+<p>The retained fixture page <code>pages/source</code> contains a paragraph story item at index <code>1</code>, with text <code>[[Missing]]</code>. Its link target slug is <code>missing</code>. The example explicitly chooses local site <code>fedwiki:local</code> and reads the page from the local store; it does not infer the own site from the item's remote site field or from its journal.</p>
+<p>In this fixture the target page is absent: <code>finding = :confirmed-local-absence</code> and <code>target-page = NIL</code>. A failed local read would instead mean <code>:unknown</code>, not absence. The observed local state is distinct from any later simulated plan state.</p>
+
+<h2>2. Read the additional evidence with its limits</h2>
+<p>The example's inert JSON evidence file declares a <code>remote-snapshot</code> from <code>remote-item</code> for the target <code>missing</code>, a <code>fork-permitted</code> fact, and <code>fork-source-policy = cached-copy-sufficient</code>. The saved copy is checked for an allowed path, SHA-256 digest, FedWiki page structure and stated site/slug association. The own site cannot appear as its own remote source.</p>
+<p>These checks establish local byte integrity and structural consistency, <em>not</em> authenticated historical provenance or present remote availability. The evidence file is an explicit model input, not a network request.</p>
+
+<h2>3. Inspect SHOP3 preparation and resolution</h2>
+<p><code>prepare-link</code> calls the consolidated PR-#33 defederation planner. For this case it can <em>plan</em> a fork from the verified cached copy. The native plan, plan tree and simulated final states remain available on the preparation result. Repeated preparation of the same target inside a plan has one modeled fork; continuation of an accepted simulated result needs no second fork.</p>
+<p><code>resolve-link</code> receives only a verified planning result for this observation. The resulting <code>modeled-local-page</code> is hypothetical and supports a local-only resolution plan. No remote fallback is performed, no fork is executed, and <code>target-page</code> remains <code>NIL</code> in the actual local store.</p>
+
+<h2>4. Follow the same objects in a local Inspector</h2>
+<p>In a SLY image with the checked-out revision and CLOG Moldable Inspector already running, evaluate the following forms separately:</p>
+<pre>(asdf:load-system "dreyeck/work/fedwiki-local-only")
+(defparameter *local-only-link-reading*
+  (dreyeck/work/fedwiki-local-only:demo))
+(list (dreyeck/work/fedwiki-local-only:finding *local-only-link-reading*)
+      (dreyeck/work/fedwiki-local-only:target-page *local-only-link-reading*))
+(clog-moldable-inspector:clog-inspect
+ :object *local-only-link-reading*)</pre>
+<p>The status form is expected to yield <code>(:CONFIRMED-LOCAL-ABSENCE NIL)</code>. The <strong>Local-only evidence</strong> Inspector view links to the actual own-site object, source page and revision, story item, wiki link, observation evidence, preparation result, resolution result, SHOP3 problem, planned operations and simulated final states. Follow the object references: the page does not re-create those objects as illustrative copies.</p>
+<p><strong>Reader's check:</strong> Can you identify the source of the local absence, the separately supplied cached-copy claim, the planner's hypothetical fork, and the unchanged local store? The code and identity tests have been reviewed; navigation through those links in a live CLOG session remains a separate observation.</p>
+
+<h2>What has and has not happened</h2>
+<ul>
+<li><strong>Observed:</strong> a real local page and link were read; the target was absent at observation time.</li>
+<li><strong>Externally stated and checked:</strong> a stored copy and a selected source policy were validated as local evidence inputs.</li>
+<li><strong>Planned:</strong> SHOP3 computed a possible fork and subsequent modeled local-only resolution.</li>
+<li><strong>Not executed:</strong> no fork, remote retrieval, page materialization or production resolver change occurred.</li>
+</ul>
+<p>Source for this exact reading: <a href="https://github.com/RalfBarkow/hyperdoc/blob/5639701c2dc33701d9be15c7a3f2ec90702126d6/dreyeck/work/fedwiki-local-only.lisp">runtime and demo</a>, <a href="https://github.com/RalfBarkow/hyperdoc/blob/5639701c2dc33701d9be15c7a3f2ec90702126d6/docs/fedwiki-local-only/corrections/r1/README.md">R1 review evidence</a>. The known F4–F7 limits and the missing D2/TALA reading environment remain documented; they are not concealed by this example.</p>
+
+<h2>Related readings</h2>
+<p><a hyperbook="dreyeck/wiki-link" page="Wiki-link title and slug lookup contracts">Wiki-link title and slug lookup contracts</a> examines the actual title, slug and thunk lookup outcomes. <a hyperbook="dreyeck/wiki-link" page="FedWiki journal context as an executable failure trace">FedWiki journal context as an executable failure trace</a> shows why implicit journal-context resolution used to reach a network boundary. <a page="Planning with SHOP3">Planning with SHOP3</a> distinguishes planning from a predetermined checklist; the separate <a hyperbook="dreyeck/work/remote-control-planning" page="Case C - Two Alternative Plan Trees">Case C</a> shows an example with two SHOP3 decompositions.</p>
+<p><a page="Work Breakdown">Return to Work Breakdown</a></p>
