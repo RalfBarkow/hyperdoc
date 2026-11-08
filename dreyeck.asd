@@ -3660,7 +3660,10 @@
                (:file "dreyeck/work/fedwiki-local-only")))
 (defsystem "dreyeck/work/fedwiki-local-only/tests"
   :depends-on ("dreyeck/work/fedwiki-local-only")
-  :components ((:file "dreyeck/tests/fedwiki-local-only"))
+  :serial t
+  :components ((:file "dreyeck/tests/fedwiki-local-only")
+               (:file "dreyeck/tests/fedwiki-local-only-inputs"))
   :perform (test-op (op component)
              (declare (ignore op component))
-             (uiop:symbol-call :dreyeck/work/fedwiki-local-only/tests :run-tests)))
+             (uiop:symbol-call :dreyeck/work/fedwiki-local-only/tests :run-tests)
+             (uiop:symbol-call :dreyeck/work/fedwiki-local-only/tests :run-input-tests)))

@@ -20,7 +20,7 @@
     ],
     [
       "page-unavailable",
-      "fedwiki:local",
+      "remote-item",
       "broken",
       302
     ]

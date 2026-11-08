@@ -135,7 +135,7 @@
                  (assert (i::failure-of unknown))
                  (assert (not (find 'd::local-page-absent (i::facts-of unknown) :key #'car)))
                  (assert (null (h:plans-of (i:prepare-link unknown))))
-                 (check-plan (i:resolve-link unknown))))
+                 (assert (null (h:plans-of (i:resolve-link unknown))))))
              (let ((facts (i::facts-of local)))
                (unwind-protect
                     (progn (push '(d::modeled-local-page "fedwiki:local" "target") (slot-value local 'i::facts))
