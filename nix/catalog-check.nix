@@ -12,6 +12,12 @@ runCommand "catalog-startup-contract" { nativeBuildInputs = [ python3 ]; } ''
     --eval '(asdf:test-system "dreyeck/catalog-application")' >"$out/application.log" 2>&1 \
     || { cat "$out/application.log"; exit 1; }
   python3 ${source}/tests/test_conversation_sources.py
+  # Fixture-backed Local-only observation: linked from the public reading, no server or Wiki writes.
+  ${runtime.sbcl}/bin/sbcl --noinform --no-sysinit --no-userinit --non-interactive \\
+    --eval '(require :asdf)' \\
+    --eval '(asdf:test-system "dreyeck/work/fedwiki-local-only/tests")' >"$out/local-only.log" 2>&1 \\
+    || { cat "$out/local-only.log"; exit 1; }
+  grep -q '^LOCAL-ONLY VIEW-SECTIONS / STATUS-VARIANTS / UNIQUE-RESULTS / REFERENCE-EQ PASS' "$out/local-only.log"
   # The Original Wiki Editor demonstration, a Catalog member: its configuration, and read-only without that configuration.
   ${runtime.sbcl}/bin/sbcl --noinform --no-sysinit --no-userinit --non-interactive \
     --eval '(require :asdf)' \

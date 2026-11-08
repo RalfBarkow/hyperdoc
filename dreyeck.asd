@@ -1061,6 +1061,7 @@
                                  "dreyeck/clog-tutorial/reading"
                                  "dreyeck/ccnx-federated-wiki"
                                  "dreyeck/work/remote-control-planning/reading"
+                                 "dreyeck/work/fedwiki-local-only"
                                  "dreyeck/traverse/reading"
                                  ;; Read-only unless its own configuration embeds the loopback test editor.
                                  "dreyeck/fedwiki-original-editor-demo")

@@ -8,7 +8,7 @@
   (:export #:make-own-site #:observe-link #:prepare-link #:continue-preparation
            #:resolve-link #:invalid-observation #:invalid-continuation #:observation
            #:observed-page #:observed-item #:target-link #:target-page #:finding
-           #:preparation-result #:resolution-result #:demo))
+           #:preparation-result #:resolution-result #:demo #:catalog-observation))
 (in-package #:dreyeck/work/fedwiki-local-only)
 (define-condition invalid-observation (error)
   ((detail :initarg :detail :reader detail))
@@ -385,3 +385,10 @@ Local presence/absence comes only from the actual local page lookup. No HTTP sta
                             :reader-origin "fedwiki:local" :panel-site "fedwiki:local"))
          (plan (prepare-link obs :repeat 2)))
     (resolve-link obs :prepared plan) obs))
+
+;; Retain one fixture-backed observation per Lisp image for the public Catalog.
+;; DEFVAR preserves object identity across ordinary source reloads.
+(defvar *catalog-observation* (demo))
+
+(defun catalog-observation ()
+  *catalog-observation*)

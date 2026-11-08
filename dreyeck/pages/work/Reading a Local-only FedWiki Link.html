@@ -1,7 +1,7 @@
 <h1>Reading a Local-only FedWiki Link</h1>
 <in-package>dreyeck/work/reading</in-package>
 <p>This reading follows the opt-in, read-only FedWiki integration at HyperDoc revision <code>5639701c2dc33701d9be15c7a3f2ec90702126d6</code>. Its question is narrow: how can a missing local link target lead to a SHOP3 fork <em>plan</em> without creating a local page?</p>
-<p>The public Catalog serves this text. The optional ASDF system <code>dreyeck/work/fedwiki-local-only</code> is not part of normal Catalog startup. The runnable example below is for an explicitly selected local SLY/CLOG development image; opening this page executes no planner and performs no Wiki writes.</p>
+<p>The public Catalog loads <code>dreyeck/work/fedwiki-local-only</code> and makes one fixture-backed observation available in the Inspector. The example is computed once per Lisp image during ASDF loading, never from the production Wiki; viewing the page creates no new plan and performs no Wiki writes.</p>
 
 <h2>1. Observe the actual local link</h2>
 <p>The retained fixture page <code>pages/source</code> contains a paragraph story item at index <code>1</code>, with text <code>[[Missing]]</code>. Its link target slug is <code>missing</code>. The example explicitly chooses local site <code>fedwiki:local</code> and reads the page from the local store; it does not infer the own site from the item's remote site field or from its journal.</p>
@@ -15,8 +15,10 @@
 <p><code>prepare-link</code> calls the consolidated PR-#33 defederation planner. For this case it can <em>plan</em> a fork from the verified cached copy. The native plan, plan tree and simulated final states remain available on the preparation result. Repeated preparation of the same target inside a plan has one modeled fork; continuation of an accepted simulated result needs no second fork.</p>
 <p><code>resolve-link</code> receives only a verified planning result for this observation. The resulting <code>modeled-local-page</code> is hypothetical and supports a local-only resolution plan. No remote fallback is performed, no fork is executed, and <code>target-page</code> remains <code>NIL</code> in the actual local store.</p>
 
-<h2>4. Task: inspect the observation in an existing SLY/CLOG image</h2>
-<p><strong>Goal.</strong> Follow the existing observation, verified local evidence and simulated SHOP3 results in the CLOG Moldable Inspector. This task does not start a server, materialize a Wiki page or execute a fork.</p>
+<h2>4. Inspect the fixture observation</h2>
+<p><strong>On dreyeck.ch:</strong> <a expr="(dreyeck/work/fedwiki-local-only:catalog-observation)" view="Local-only evidence">Inspect local-only evidence</a>. The link points directly to the one observation object retained by this Lisp image, not to an executable control or a new computation. Its plans are hypothetical; no page is materialized.</p>
+<h3>Alternative: existing local SLY/CLOG image</h3>
+<p>Follow the same observation, verified local evidence and simulated SHOP3 results using the steps below. This task does not start a server, materialize a Wiki page or execute a fork.</p>
 
 <h3>Prerequisites</h3>
 <ul>

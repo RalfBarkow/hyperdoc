@@ -73,6 +73,16 @@
            ;; Prove the transport hook catches a call before evaluating fixtures.
            (assert-condition 'simple-error (lambda () (usocket:socket-connect "invalid.test" 443)))
            (assert (= 1 socket-count)) (setf socket-count 0)
+           ;; The Catalog's fixture object is stable and already planned once at load.
+           (let ((catalog (i:catalog-observation)))
+             (assert (eq catalog (i:catalog-observation)))
+             (assert (eq :confirmed-local-absence (i:finding catalog)))
+             (assert (null (i:target-page catalog)))
+             (assert (eq :plan-only (h:execution-mode-of (i:preparation-result catalog))))
+             (assert (eq :plan-only (h:execution-mode-of (i:resolution-result catalog))))
+             (check-evidence-view catalog
+               '(":CONFIRMED-LOCAL-ABSENCE" ":HYPOTHETICAL-LOCAL" ":PLAN-ONLY")
+               '("No external evidence supplied" "No planning results")))
            (let* ((site (i:make-own-site root "fedwiki:local"))
                   (evidence (merge-pathnames "evidence.json" root))
                   (local (i:observe-link site "source" 0))
