@@ -1,0 +1,361 @@
+
+
+SHOP3 version 4.3.1
+Copyright (C) 2004-2026 SIFT, LLC.
+
+Original SHOP2 code Copyright (C) 2002  University of Maryland.
+
+This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+KIND, either express or implied.  This software is distributed under an
+MPL/GPL/LGPL triple license.  For details, see the software source file.
+
+Defining domain FEDWIKI-LINK-RESOLUTION...
+LINK-RESOLUTION JAVA local-first PASS: 2 page requests as Java; outcomes (:LOCAL-OBSERVED)
+LINK-RESOLUTION JAVA context-newest-first PASS: 3 page requests as Java; outcomes (:REMOTE-CONTEXT)
+LINK-RESOLUTION JAVA context-fallthrough PASS: 4 page requests as Java; outcomes (:REMOTE-CONTEXT)
+LINK-RESOLUTION JAVA item-site PASS: 3 page requests as Java; outcomes (:REMOTE-CONTEXT)
+LINK-RESOLUTION JAVA journal-reorder PASS: 3 page requests as Java; outcomes (:REMOTE-CONTEXT)
+LINK-RESOLUTION JAVA not-found PASS: 4 page requests as Java; outcomes (:NOT-FOUND)
+LINK-RESOLUTION JAVA status-500 PASS: 4 page requests as Java; outcomes (:REMOTE-CONTEXT)
+LINK-RESOLUTION JAVA redirect-302 PASS: 4 page requests as Java; outcomes (:REMOTE-CONTEXT)
+LINK-RESOLUTION JAVA network-error PASS: 2 page requests as Java; outcomes (:ABORTED-NETWORK-ERROR)
+LINK-RESOLUTION JAVA panel-site PASS: 6 page requests as Java; outcomes (:REMOTE-CONTEXT
+                                                                         :REMOTE-CONTEXT)
+LINK-RESOLUTION JAVA origin-in-context PASS: 4 page requests as Java; outcomes (:REMOTE-CONTEXT)
+LINK-RESOLUTION JAVA attribution-site PASS: 2 page requests as Java; outcomes (:NOT-FOUND)
+LINK-RESOLUTION JAVA slug-normalization PASS: 2 page requests as Java; outcomes (:LOCAL-OBSERVED)
+LINK-RESOLUTION LOCAL-PRECEDENCE PASS: origin first in both policies; no other request
+LINK-RESOLUTION CONTEXT-ORDER PASS: journal newest first; item site, panel site, newer journal entry; origin may recur
+LINK-RESOLUTION LOCAL-ONLY-GATE PASS: 13 scenarios and synthetic states: own site only, no remote fallback, no fork
+LINK-RESOLUTION PLANNED-FORK-NOT-EXECUTED PASS: modeled, not observed; the 404 observation is kept; :PLAN-ONLY
+LINK-RESOLUTION NO-SECOND-FORK PASS: one fork per target; the simulated state needs none
+LINK-RESOLUTION UNKNOWN-NOT-ABSENT PASS: unknown candidate blocks; unknown own page blocks local-only; unknown permission blocks the fork
+LINK-RESOLUTION DISTINCTIONS PASS: first remote candidate wins; fork alternatives; not found vs unknown; contradiction; fork-source policy both ways
+LINK-RESOLUTION ZERO-STEP PASS: empty plan kept as success; tree marked as unavailable (SHOP3 ce53f9b defect)
+LINK-RESOLUTION MUTANT-CONTROL PASS: an unchanged copy of the domain passes all eight domain checks
+Warnings:
+Singleton variable ?OWN in METHOD OWN-SITE-ONLY branch 1
+(:METHOD (DREYECK/WORK/FEDWIKI-LINK-RESOLUTION::RESOLVE
+          DREYECK/WORK/FEDWIKI-LINK-RESOLUTION::?REQUEST
+          DREYECK/WORK/FEDWIKI-LINK-RESOLUTION::?SLUG
+          DREYECK/WORK/FEDWIKI-LINK-RESOLUTION::LOCAL-ONLY)
+ DREYECK/WORK/FEDWIKI-LINK-RESOLUTION::OWN-SITE-ONLY
+ ((DREYECK/WORK/FEDWIKI-LINK-RESOLUTION::ORIGIN
+   DREYECK/WORK/FEDWIKI-LINK-RESOLUTION::?OWN)
+  )
+ ((TRY-CANDIDATE ?REQUEST ?SLUG 0)))
+
+LINK-RESOLUTION MUTANT KILLED: journal context oldest first
+LINK-RESOLUTION MUTANT KILLED: item site not moved to the front
+LINK-RESOLUTION MUTANT KILLED: panel site not moved to the front
+LINK-RESOLUTION MUTANT KILLED: origin removed from the context
+LINK-RESOLUTION MUTANT KILLED: local-only walks the collaborative candidates
+LINK-RESOLUTION MUTANT KILLED: local-only falls back to the context when missing
+LINK-RESOLUTION MUTANT KILLED: local-only forks instead of reporting the miss
+LINK-RESOLUTION MUTANT KILLED: origin skipped
+LINK-RESOLUTION MUTANT KILLED: network error treated as 'not here'
+LINK-RESOLUTION MUTANT KILLED: closed world: unknown counts as unavailable
+LINK-RESOLUTION MUTANT KILLED: fork does not check for a modeled page
+LINK-RESOLUTION MUTANT KILLED: planned fork writes an observation
+LINK-RESOLUTION MUTANT KILLED: fork ignores an explicit prohibition
+LINK-RESOLUTION MUTANT KILLED: verified copy suffices without the explicit policy
+LINK-RESOLUTION REGISTRATIONS PASS: no leftover problems; SHOP3:*DOMAIN* untouched
+FEDWIKI-LINK-RESOLUTION-PASS: Java agreement on 13 scenarios; 8 counter-probes and the distinctions; 14 mutants killed; plans only, nothing executed.
+LINK-RESOLUTION-OPT-IN-PASS: no Catalog member added; SHOP3:*DOMAIN* unchanged.
+
+Defining domain DEFEDERATION-PREPARATION...
+DEFEDERATION A PASS: :PLANNED; 1 plans/trees/states; :PLAN-ONLY; :NOT-EXECUTED
+  (((!PREPARE-LOCAL-LINKS :LOCAL-WIKI :TARGET-PAGE)
+    (!PREPARE-PARAGRAPH-RENDERING :LOCAL-WIKI)))
+DEFEDERATION B PASS: :PLANNED; 1 plans/trees/states; :PLAN-ONLY; :NOT-EXECUTED
+  (((!SIMULATE-FORK :LOCAL-WIKI :TARGET-PAGE :REMOTE-WIKI :SNAPSHOT-1)
+    (!PREPARE-LOCAL-LINKS :LOCAL-WIKI :TARGET-PAGE)
+    (!PREPARE-PARAGRAPH-RENDERING :LOCAL-WIKI)))
+DEFEDERATION C PASS: :NO-PLAN; 0 plans/trees/states; :PLAN-ONLY; :NOT-EXECUTED
+  NIL
+DEFEDERATION (MISSING FORK-PERMITTED) PASS: :NO-PLAN; 0 plans/trees/states; :PLAN-ONLY; :NOT-EXECUTED
+  NIL
+DEFEDERATION (MISSING REMOTE-SNAPSHOT) PASS: :NO-PLAN; 0 plans/trees/states; :PLAN-ONLY; :NOT-EXECUTED
+  NIL
+DEFEDERATION (MISSING LOCAL-PAGE-ABSENT) PASS: :NO-PLAN; 0 plans/trees/states; :PLAN-ONLY; :NOT-EXECUTED
+  NIL
+DEFEDERATION EXPLICITLY-FORBIDDEN PASS: :NO-PLAN; 0 plans/trees/states; :PLAN-ONLY; :NOT-EXECUTED
+  NIL
+DEFEDERATION SNAPSHOT-OBSERVED-UNAVAILABLE PASS: :NO-PLAN; 0 plans/trees/states; :PLAN-ONLY; :NOT-EXECUTED
+  NIL
+DEFEDERATION LOCAL-INSTEAD-OF-ABSENT PASS: :PLANNED; 1 plans/trees/states; :PLAN-ONLY; :NOT-EXECUTED
+  (((!PREPARE-LOCAL-LINKS :LOCAL-WIKI :TARGET-PAGE)
+    (!PREPARE-PARAGRAPH-RENDERING :LOCAL-WIKI)))
+DEFEDERATION LOCAL-EVEN-IF-FORK-FORBIDDEN PASS: :PLANNED; 1 plans/trees/states; :PLAN-ONLY; :NOT-EXECUTED
+  (((!PREPARE-LOCAL-LINKS :LOCAL-WIKI :TARGET-PAGE)
+    (!PREPARE-PARAGRAPH-RENDERING :LOCAL-WIKI)))
+DEFEDERATION (CONTRADICTION LOCAL-PAGE) PASS: :NO-PLAN; 0 plans/trees/states; :PLAN-ONLY; :NOT-EXECUTED
+  NIL
+DEFEDERATION (CONTRADICTION SNAPSHOT-UNAVAILABLE) PASS: :NO-PLAN; 0 plans/trees/states; :PLAN-ONLY; :NOT-EXECUTED
+  NIL
+DEFEDERATION (CONTRADICTION FORK-FORBIDDEN) PASS: :NO-PLAN; 0 plans/trees/states; :PLAN-ONLY; :NOT-EXECUTED
+  NIL
+DEFEDERATION CHANGED-FORK-METHOD-NO-ALTERNATIVE PASS: :NO-PLAN; 0 plans/trees/states; :PLAN-ONLY; :NOT-EXECUTED
+  NIL
+DEFEDERATION CHANGED-FORK-METHOD-LOCAL-STILL-WORKS PASS: :PLANNED; 1 plans/trees/states; :PLAN-ONLY; :NOT-EXECUTED
+  (((!PREPARE-LOCAL-LINKS :LOCAL-WIKI :TARGET-PAGE)
+    (!PREPARE-PARAGRAPH-RENDERING :LOCAL-WIKI)))
+DEFEDERATION CHANGED-FORK-METHOD-EVIDENCE-RESTORED PASS: :PLANNED; 1 plans/trees/states; :PLAN-ONLY; :NOT-EXECUTED
+  (((!SIMULATE-FORK :LOCAL-WIKI :TARGET-PAGE :REMOTE-WIKI :SNAPSHOT-1)
+    (!PREPARE-LOCAL-LINKS :LOCAL-WIKI :TARGET-PAGE)
+    (!PREPARE-PARAGRAPH-RENDERING :LOCAL-WIKI)))
+DEFEDERATION CHANGED-LOCAL-METHOD-FORK-CANNOT-BYPASS PASS: :NO-PLAN; 0 plans/trees/states; :PLAN-ONLY; :NOT-EXECUTED
+  NIL
+DEFEDERATION ORIGINAL-DOMAIN-INTACT PASS: :PLANNED; 1 plans/trees/states; :PLAN-ONLY; :NOT-EXECUTED
+  (((!SIMULATE-FORK :LOCAL-WIKI :TARGET-PAGE :REMOTE-WIKI :SNAPSHOT-1)
+    (!PREPARE-LOCAL-LINKS :LOCAL-WIKI :TARGET-PAGE)
+    (!PREPARE-PARAGRAPH-RENDERING :LOCAL-WIKI)))
+DEFEDERATION-PLANNING-PASS: state-dependent methods; exhaustive alternatives; no execution.
+LINK-RESOLUTION-NEIGHBOUR-PASS: dreyeck/work/defederation-planning/tests
+WARNING: System definition file #P"/workspace/tools/nix-portable-data/.nix-portable/nix/store/fdrq5ji4dvm7jj0wzfvxcyr0rwiq2c24-sbcl-cl-who-20241012-git/cl-who.asd" contains definition for system "cl-who-test". Please only define "cl-who" and secondary systems with a name starting with "cl-who/" (e.g. "cl-who/test") in that file.
+WARNING: System definition file #P"/workspace/tools/nix-portable-data/.nix-portable/nix/store/rn29yxasws4x3wvcf6d0738zxbcrvmin-sbcl-parse-float-20200218-git/parse-float.asd" contains definition for system "parse-float-tests". Please only define "parse-float" and secondary systems with a name starting with "parse-float/" (e.g. "parse-float/test") in that file.
+WARNING: System definition file #P"/workspace/tools/nix-portable-data/.nix-portable/nix/store/bzssaly51znz21jychrjrjg22cbimv2h-sbcl-cl-template-20130615-git/cl-template.asd" contains definition for system "cl-template-tests". Please only define "cl-template" and secondary systems with a name starting with "cl-template/" (e.g. "cl-template/test") in that file.
+;;; Computing Hangul syllable namesSTYLE-WARNING:
+   The new FTYPE proclamation for FSET::VECTOR-SET-BINARY-SEARCH-LO
+     (FUNCTION (SIMPLE-VECTOR T) FIXNUM)
+   does not match the derived return type
+     (FUNCTION (SIMPLE-VECTOR T)
+      (VALUES (INTEGER -4611686018427387904 4611686018427387904) &OPTIONAL))
+STYLE-WARNING:
+   The new FTYPE proclamation for FSET::WB-BAG-TREE-TOTAL-COUNT
+     (FUNCTION (FSET::WB-BAG-TREE) INTEGER)
+   does not match the derived return type
+     (FUNCTION ((OR LIST FSET::WB-BAG-TREE-NODE)) *)
+STYLE-WARNING:
+   The new FTYPE proclamation for FSET::HASH-VALUE-FIXNUM
+     (FUNCTION (T) FIXNUM)
+   does not match the derived return type
+     (FUNCTION (T) (VALUES INTEGER &OPTIONAL))
+STYLE-WARNING:
+   The new FTYPE proclamation for FSET::CH-SET-NODE-ENTRY-MASK
+     (FUNCTION (T) FIXNUM)
+   does not match the derived return type
+     (FUNCTION (SIMPLE-VECTOR) (VALUES T &OPTIONAL))
+STYLE-WARNING:
+   The new FTYPE proclamation for FSET::CH-SET-NODE-SUBNODE-MASK
+     (FUNCTION (T) FIXNUM)
+   does not match the derived return type
+     (FUNCTION (SIMPLE-VECTOR) (VALUES T &OPTIONAL))
+STYLE-WARNING:
+   The new FTYPE proclamation for FSET::CH-SET-NODE-SIZE
+     (FUNCTION (T) FIXNUM)
+   does not match the derived return type
+     (FUNCTION (SIMPLE-VECTOR) (VALUES T &OPTIONAL))
+STYLE-WARNING:
+   The new FTYPE proclamation for FSET::CH-SET-NODE-HASH-VALUE
+     (FUNCTION (T) FIXNUM)
+   does not match the derived return type
+     (FUNCTION (SIMPLE-VECTOR) (VALUES T &OPTIONAL))
+STYLE-WARNING:
+   The new FTYPE proclamation for FSET::CH-MAP-NODE-ENTRY-MASK
+     (FUNCTION (T) FIXNUM)
+   does not match the derived return type
+     (FUNCTION (SIMPLE-VECTOR) (VALUES T &OPTIONAL))
+STYLE-WARNING:
+   The new FTYPE proclamation for FSET::CH-MAP-NODE-SUBNODE-MASK
+     (FUNCTION (T) FIXNUM)
+   does not match the derived return type
+     (FUNCTION (SIMPLE-VECTOR) (VALUES T &OPTIONAL))
+STYLE-WARNING:
+   The new FTYPE proclamation for FSET::CH-MAP-NODE-SIZE
+     (FUNCTION (T) FIXNUM)
+   does not match the derived return type
+     (FUNCTION (SIMPLE-VECTOR) (VALUES T &OPTIONAL))
+STYLE-WARNING:
+   The new FTYPE proclamation for FSET::CH-MAP-NODE-HASH-VALUE
+     (FUNCTION (T) FIXNUM)
+   does not match the derived return type
+     (FUNCTION (SIMPLE-VECTOR) (VALUES T &OPTIONAL))
+STYLE-WARNING:
+   Generic function FSET:ITERATOR clobbers an earlier FTYPE proclamation
+   (FUNCTION (T &KEY &ALLOW-OTHER-KEYS) (VALUES FUNCTION &REST T)) for the same
+   name with (FUNCTION (T &KEY &ALLOW-OTHER-KEYS) *).
+STYLE-WARNING:
+   The new FTYPE proclamation for SWANK/BACKEND:GETPID
+     (FUNCTION NIL (VALUES (SIGNED-BYTE 32) &OPTIONAL))
+   does not match the derived return type
+     (FUNCTION NIL *)
+WARNING:
+   redefining EMACS-INSPECT (#<SB-PCL:SYSTEM-CLASS COMMON-LISP:T>) in DEFMETHOD
+WARNING:
+   redefining 👀PRINT-STRING (#<SB-PCL:SYSTEM-CLASS COMMON-LISP:T>) in DEFMETHOD
+WARNING:
+   The new FTYPE proclamation for CLSS:MATCH-SELECTOR
+     (FUNCTION (LIST (OR PLUMP-DOM:NODE VECTOR LIST) KEYWORD)
+      (VALUES (AND (VECTOR PLUMP-DOM:NODE) (NOT SIMPLE-ARRAY))))
+   does not match the old FTYPE proclamation
+     (FUNCTION (LIST (OR LIST PLUMP-DOM:NODE VECTOR) &OPTIONAL KEYWORD)
+      (VALUES (AND (VECTOR PLUMP-DOM:NODE) (NOT SIMPLE-ARRAY)) &REST T))
+WARNING: redefining CL-ISAAC:RAND32 in DEFUN
+WARNING: redefining CL-ISAAC:RAND64 in DEFUN
+WARNING:
+   bare references to struct types are deprecated. Please use (:POINTER
+                                                               (:STRUCT
+                                                                SQLITE3)) or (:STRUCT
+                                                                              SQLITE3) instead.
+WARNING:
+   bare references to struct types are deprecated. Please use (:POINTER
+                                                               (:STRUCT
+                                                                SQLITE3-STMT)) or (:STRUCT
+                                                                                   SQLITE3-STMT) instead.
+WARNING: redefining DEFTYPE type to be a class: DBI.ERROR:<DBI-ERROR>
+WARNING: redefining DEFTYPE type to be a class: DBI.ERROR:<DBI-WARNING>
+WARNING: redefining DEFTYPE type to be a class: DBI.ERROR:<DBI-INTERFACE-ERROR>
+WARNING:
+   redefining DEFTYPE type to be a class: DBI.ERROR:<DBI-UNIMPLEMENTED-ERROR>
+WARNING: redefining DEFTYPE type to be a class: DBI.ERROR:<DBI-DATABASE-ERROR>
+WARNING: redefining DEFTYPE type to be a class: DBI.ERROR:<DBI-DATA-ERROR>
+WARNING:
+   redefining DEFTYPE type to be a class: DBI.ERROR:<DBI-OPERATIONAL-ERROR>
+WARNING: redefining DEFTYPE type to be a class: DBI.ERROR:<DBI-INTEGRITY-ERROR>
+WARNING: redefining DEFTYPE type to be a class: DBI.ERROR:<DBI-INTERNAL-ERROR>
+WARNING:
+   redefining DEFTYPE type to be a class: DBI.ERROR:<DBI-PROGRAMMING-ERROR>
+WARNING:
+   redefining DEFTYPE type to be a class: DBI.ERROR:<DBI-NOTSUPPORTED-ERROR>
+WARNING:
+   redefining DEFTYPE type to be a class: DBI.ERROR:<DBI-ALREADY-COMMITED-ERROR>
+WARNING:
+   redefining DEFTYPE type to be a class: DBI.ERROR:<DBI-ALREADY-ROLLED-BACK-ERROR>
+WARNING: redefining DEFTYPE type to be a class: DBI.DRIVER:<DBI-DRIVER>
+WARNING: redefining DEFTYPE type to be a class: DBI.DRIVER:<DBI-CONNECTION>
+WARNING: redefining DEFTYPE type to be a class: DBI.DRIVER:<DBI-QUERY>
+WARNING: redefining IRONCLAD:BLOCK-LENGTH in DEFGENERIC
+WARNING: redefining CLOG:PARENT in DEFGENERIC
+WARNING: redefining CLOG::CONNECTION-ID in DEFGENERIC
+WARNING: redefining CLOG:HTML-ID in DEFGENERIC
+WARNING: redefining CLOG:WINDOW in DEFGENERIC
+WARNING: redefining CLOG:HTML-DOCUMENT in DEFGENERIC
+WARNING: redefining CLOG:LOCATION in DEFGENERIC
+WARNING: redefining CLOG:NAVIGATOR in DEFGENERIC
+WARNING: redefining CLOG:DOCUMENT-ELEMENT in DEFGENERIC
+WARNING: redefining CLOG:HEAD-ELEMENT in DEFGENERIC
+WARNING: redefining CLOG:DISABLEDP in DEFGENERIC
+WARNING: redefining (COMMON-LISP:SETF CLOG:DISABLEDP) in DEFGENERIC
+WARNING: redefining CLOG:VALUE in DEFGENERIC
+WARNING: redefining (COMMON-LISP:SETF CLOG:VALUE) in DEFGENERIC
+WARNING: redefining CLOG:MINIMUM in DEFGENERIC
+WARNING: redefining (COMMON-LISP:SETF CLOG:MINIMUM) in DEFGENERIC
+WARNING: redefining CLOG:MAXIMUM in DEFGENERIC
+WARNING: redefining (COMMON-LISP:SETF CLOG:MAXIMUM) in DEFGENERIC
+WARNING: redefining CLOG:URL-SRC in DEFGENERIC
+WARNING: redefining (COMMON-LISP:SETF CLOG:URL-SRC) in DEFGENERIC
+WARNING: redefining CLOG:ALT-TEXT in DEFGENERIC
+WARNING: redefining (COMMON-LISP:SETF CLOG:ALT-TEXT) in DEFGENERIC
+WARNING: redefining CLOG:CENTER-PANEL in DEFGENERIC
+WARNING: redefining CLOG:TOP-PANEL in DEFGENERIC
+WARNING: redefining CLOG:LEFT-PANEL in DEFGENERIC
+WARNING: redefining CLOG:BOTTOM-PANEL in DEFGENERIC
+WARNING: redefining CLOG:PANEL-BOX in DEFGENERIC
+WARNING: redefining CLOG:TREE-ROOT in DEFGENERIC
+WARNING: redefining CLOG:INDENT-LEVEL in DEFGENERIC
+WARNING: redefining CLOG:TOGGLE-STATE in DEFGENERIC
+WARNING: redefining CLOG:TREE-ITEM in DEFGENERIC
+WARNING: redefining CLOG:DATABASE-CONNECTION in DEFGENERIC
+WARNING: redefining CLOG:READ-ONLY-P in DEFGENERIC
+WARNING: redefining (COMMON-LISP:SETF CLOG:READ-ONLY-P) in DEFGENERIC
+WARNING:
+   redefining HV:👀PLAYGROUND (#<SB-PCL:SYSTEM-CLASS COMMON-LISP:T>) in DEFMETHOD
+WARNING:
+   redefining ENCODE-TO-STRING (#<SB-PCL:SYSTEM-CLASS COMMON-LISP:T>) in DEFMETHOD
+WARNING:
+   redefining HVS::👀OPERATIONS (#<SB-PCL:SYSTEM-CLASS COMMON-LISP:T>) in DEFMETHOD
+WARNING:
+   redefining HVS:RENDER-TOPLEVEL-CST :AROUND (#<SB-MOP:EQL-SPECIALIZER HYPERDOC:DEFEXAMPLE>
+                                               #<SB-PCL:SYSTEM-CLASS COMMON-LISP:T>
+                                               #<SB-PCL:SYSTEM-CLASS COMMON-LISP:T>
+                                               #<SB-PCL:SYSTEM-CLASS COMMON-LISP:T>) in DEFMETHOD
+
+Defining domain DOCUMENT-D2-CONCEPT...
+
+Defining problem CONNECTIONS-DOCUMENTATION ...
+
+Defining problem CONNECTIONS-WITHOUT-SOURCE ...
+DOCUMENTATION-PLAN-PASS: eight modeled stages; no-source refused; verdict B, fixed sequence only.
+LINK-RESOLUTION-NEIGHBOUR-PASS: dreyeck/work/planning/tests
+
+Defining domain ZETTELKASTEN-MOBILE-CONTROL...
+
+Defining problem REMOTE-CONTROL-A ...
+
+Defining problem REMOTE-CONTROL-B ...
+
+Defining problem REMOTE-CONTROL-C ...
+
+Defining problem REMOTE-CONTROL-D ...
+
+Defining problem REMOTE-CONTROL-E ...
+REMOTE-CONTROL A PASS: 1 plans, 1 trees, 1 states
+(((DREYECK/WORK/REMOTE-CONTROL-PLANNING::!MODEL-AGENT-ROUTE
+   DREYECK/WORK/REMOTE-CONTROL-PLANNING::ZETTELKASTEN
+   DREYECK/WORK/REMOTE-CONTROL-PLANNING::MACBOOK-A
+   DREYECK/WORK/REMOTE-CONTROL-PLANNING::ANDROID)
+  (DREYECK/WORK/REMOTE-CONTROL-PLANNING::!MODEL-CONTROL-SURFACE
+   DREYECK/WORK/REMOTE-CONTROL-PLANNING::ZETTELKASTEN
+   DREYECK/WORK/REMOTE-CONTROL-PLANNING::MACBOOK-A
+   DREYECK/WORK/REMOTE-CONTROL-PLANNING::ANDROID
+   DREYECK/WORK/REMOTE-CONTROL-PLANNING::AGENT)
+  (DREYECK/WORK/REMOTE-CONTROL-PLANNING::!VERIFY-MODELED-CONTROL
+   DREYECK/WORK/REMOTE-CONTROL-PLANNING::ZETTELKASTEN
+   DREYECK/WORK/REMOTE-CONTROL-PLANNING::MACBOOK-A
+   DREYECK/WORK/REMOTE-CONTROL-PLANNING::ANDROID
+   DREYECK/WORK/REMOTE-CONTROL-PLANNING::AGENT)))
+REMOTE-CONTROL B PASS: 1 plans, 1 trees, 1 states
+(((DREYECK/WORK/REMOTE-CONTROL-PLANNING::!MODEL-DIRECT-ROUTE
+   DREYECK/WORK/REMOTE-CONTROL-PLANNING::ZETTELKASTEN
+   DREYECK/WORK/REMOTE-CONTROL-PLANNING::MACBOOK-A
+   DREYECK/WORK/REMOTE-CONTROL-PLANNING::ANDROID)
+  (DREYECK/WORK/REMOTE-CONTROL-PLANNING::!MODEL-CONTROL-SURFACE
+   DREYECK/WORK/REMOTE-CONTROL-PLANNING::ZETTELKASTEN
+   DREYECK/WORK/REMOTE-CONTROL-PLANNING::MACBOOK-A
+   DREYECK/WORK/REMOTE-CONTROL-PLANNING::ANDROID
+   DREYECK/WORK/REMOTE-CONTROL-PLANNING::DIRECT)
+  (DREYECK/WORK/REMOTE-CONTROL-PLANNING::!VERIFY-MODELED-CONTROL
+   DREYECK/WORK/REMOTE-CONTROL-PLANNING::ZETTELKASTEN
+   DREYECK/WORK/REMOTE-CONTROL-PLANNING::MACBOOK-A
+   DREYECK/WORK/REMOTE-CONTROL-PLANNING::ANDROID
+   DREYECK/WORK/REMOTE-CONTROL-PLANNING::DIRECT)))
+REMOTE-CONTROL C PASS: 2 plans, 2 trees, 2 states
+(((DREYECK/WORK/REMOTE-CONTROL-PLANNING::!MODEL-AGENT-ROUTE
+   DREYECK/WORK/REMOTE-CONTROL-PLANNING::ZETTELKASTEN
+   DREYECK/WORK/REMOTE-CONTROL-PLANNING::MACBOOK-A
+   DREYECK/WORK/REMOTE-CONTROL-PLANNING::ANDROID)
+  (DREYECK/WORK/REMOTE-CONTROL-PLANNING::!MODEL-CONTROL-SURFACE
+   DREYECK/WORK/REMOTE-CONTROL-PLANNING::ZETTELKASTEN
+   DREYECK/WORK/REMOTE-CONTROL-PLANNING::MACBOOK-A
+   DREYECK/WORK/REMOTE-CONTROL-PLANNING::ANDROID
+   DREYECK/WORK/REMOTE-CONTROL-PLANNING::AGENT)
+  (DREYECK/WORK/REMOTE-CONTROL-PLANNING::!VERIFY-MODELED-CONTROL
+   DREYECK/WORK/REMOTE-CONTROL-PLANNING::ZETTELKASTEN
+   DREYECK/WORK/REMOTE-CONTROL-PLANNING::MACBOOK-A
+   DREYECK/WORK/REMOTE-CONTROL-PLANNING::ANDROID
+   DREYECK/WORK/REMOTE-CONTROL-PLANNING::AGENT))
+ ((DREYECK/WORK/REMOTE-CONTROL-PLANNING::!MODEL-DIRECT-ROUTE
+   DREYECK/WORK/REMOTE-CONTROL-PLANNING::ZETTELKASTEN
+   DREYECK/WORK/REMOTE-CONTROL-PLANNING::MACBOOK-A
+   DREYECK/WORK/REMOTE-CONTROL-PLANNING::ANDROID)
+  (DREYECK/WORK/REMOTE-CONTROL-PLANNING::!MODEL-CONTROL-SURFACE
+   DREYECK/WORK/REMOTE-CONTROL-PLANNING::ZETTELKASTEN
+   DREYECK/WORK/REMOTE-CONTROL-PLANNING::MACBOOK-A
+   DREYECK/WORK/REMOTE-CONTROL-PLANNING::ANDROID
+   DREYECK/WORK/REMOTE-CONTROL-PLANNING::DIRECT)
+  (DREYECK/WORK/REMOTE-CONTROL-PLANNING::!VERIFY-MODELED-CONTROL
+   DREYECK/WORK/REMOTE-CONTROL-PLANNING::ZETTELKASTEN
+   DREYECK/WORK/REMOTE-CONTROL-PLANNING::MACBOOK-A
+   DREYECK/WORK/REMOTE-CONTROL-PLANNING::ANDROID
+   DREYECK/WORK/REMOTE-CONTROL-PLANNING::DIRECT)))
+REMOTE-CONTROL D PASS: 0 plans, 0 trees, 0 states
+NIL
+REMOTE-CONTROL E PASS: 0 plans, 0 trees, 0 states
+NIL
+LINK-RESOLUTION-NEIGHBOUR-PASS: dreyeck/work/remote-control-planning/tests
+LINK-RESOLUTION-INSPECTOR-PASS context-newest-first collaborative: (:REMOTE-CONTEXT); result slots and plan/tree/state references; every HTML view of result and context renders.
+LINK-RESOLUTION-INSPECTOR-PASS context-newest-first local-only: (:NOT-FOUND); result slots and plan/tree/state references; every HTML view of result and context renders.
+LINK-RESOLUTION-INSPECTOR-PASS network-error collaborative: (:ABORTED-NETWORK-ERROR); result slots and plan/tree/state references; every HTML view of result and context renders.
+LINK-RESOLUTION-INSPECTOR-PASS panel-site collaborative: (:REMOTE-CONTEXT); result slots and plan/tree/state references; every HTML view of result and context renders.
+LINK-RESOLUTION-ALL-PASS: plans only; no request, fork or write was executed.

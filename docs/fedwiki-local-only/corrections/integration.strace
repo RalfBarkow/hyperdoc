@@ -1,0 +1,46 @@
+12880 --- SIGTRAP {si_signo=SIGTRAP, si_code=SI_KERNEL, si_addr=NULL} ---
+12884 --- SIGUSR2 {si_signo=SIGUSR2, si_code=SI_TKILL, si_pid=12880, si_uid=1000} ---
+12880 --- SIGTRAP {si_signo=SIGTRAP, si_code=SI_KERNEL, si_addr=NULL} ---
+12884 --- SIGUSR2 {si_signo=SIGUSR2, si_code=SI_TKILL, si_pid=12880, si_uid=1000} ---
+12880 --- SIGTRAP {si_signo=SIGTRAP, si_code=SI_KERNEL, si_addr=NULL} ---
+12884 --- SIGUSR2 {si_signo=SIGUSR2, si_code=SI_TKILL, si_pid=12880, si_uid=1000} ---
+12880 --- SIGTRAP {si_signo=SIGTRAP, si_code=SI_KERNEL, si_addr=NULL} ---
+12884 --- SIGUSR2 {si_signo=SIGUSR2, si_code=SI_TKILL, si_pid=12880, si_uid=1000} ---
+12880 --- SIGTRAP {si_signo=SIGTRAP, si_code=SI_KERNEL, si_addr=NULL} ---
+12884 --- SIGUSR2 {si_signo=SIGUSR2, si_code=SI_TKILL, si_pid=12880, si_uid=1000} ---
+12880 --- SIGTRAP {si_signo=SIGTRAP, si_code=SI_KERNEL, si_addr=NULL} ---
+12884 --- SIGUSR2 {si_signo=SIGUSR2, si_code=SI_TKILL, si_pid=12880, si_uid=1000} ---
+12884 --- SIGUSR2 {si_signo=SIGUSR2, si_code=SI_TKILL, si_pid=12880, si_uid=1000} ---
+12884 --- SIGUSR2 {si_signo=SIGUSR2, si_code=SI_TKILL, si_pid=12880, si_uid=1000} ---
+12884 --- SIGUSR2 {si_signo=SIGUSR2, si_code=SI_TKILL, si_pid=12880, si_uid=1000} ---
+12884 --- SIGUSR2 {si_signo=SIGUSR2, si_code=SI_TKILL, si_pid=12880, si_uid=1000} ---
+12884 --- SIGUSR2 {si_signo=SIGUSR2, si_code=SI_TKILL, si_pid=12880, si_uid=1000} ---
+12884 --- SIGUSR2 {si_signo=SIGUSR2, si_code=SI_TKILL, si_pid=12880, si_uid=1000} ---
+12884 --- SIGUSR2 {si_signo=SIGUSR2, si_code=SI_TKILL, si_pid=12880, si_uid=1000} ---
+12884 --- SIGUSR2 {si_signo=SIGUSR2, si_code=SI_TKILL, si_pid=12880, si_uid=1000} ---
+12884 --- SIGUSR2 {si_signo=SIGUSR2, si_code=SI_TKILL, si_pid=12880, si_uid=1000} ---
+12884 --- SIGUSR2 {si_signo=SIGUSR2, si_code=SI_TKILL, si_pid=12880, si_uid=1000} ---
+12884 --- SIGUSR2 {si_signo=SIGUSR2, si_code=SI_TKILL, si_pid=12880, si_uid=1000} ---
+12884 --- SIGUSR2 {si_signo=SIGUSR2, si_code=SI_TKILL, si_pid=12880, si_uid=1000} ---
+12880 --- SIGTRAP {si_signo=SIGTRAP, si_code=SI_KERNEL, si_addr=NULL} ---
+12884 --- SIGUSR2 {si_signo=SIGUSR2, si_code=SI_TKILL, si_pid=12880, si_uid=1000} ---
+12884 --- SIGUSR2 {si_signo=SIGUSR2, si_code=SI_TKILL, si_pid=12880, si_uid=1000} ---
+12884 --- SIGUSR2 {si_signo=SIGUSR2, si_code=SI_TKILL, si_pid=12880, si_uid=1000} ---
+12884 --- SIGUSR2 {si_signo=SIGUSR2, si_code=SI_TKILL, si_pid=12880, si_uid=1000} ---
+12884 --- SIGUSR2 {si_signo=SIGUSR2, si_code=SI_TKILL, si_pid=12880, si_uid=1000} ---
+12884 --- SIGUSR2 {si_signo=SIGUSR2, si_code=SI_TKILL, si_pid=12880, si_uid=1000} ---
+12880 mkdir("/tmp/hyperdoc-inputs-G1199", 0777) = 0
+12880 mkdir("/tmp/hyperdoc-inputs-G1199/pages", 0777) = 0
+12880 mkdir("/tmp/hyperdoc-inputs-G1199/snapshots", 0777) = 0
+12880 --- SIGCHLD {si_signo=SIGCHLD, si_code=CLD_EXITED, si_pid=12915, si_uid=1000, si_status=0, si_utime=0, si_stime=0} ---
+12880 --- SIGCHLD {si_signo=SIGCHLD, si_code=CLD_EXITED, si_pid=12916, si_uid=1000, si_status=0, si_utime=0, si_stime=0} ---
+12880 --- SIGCHLD {si_signo=SIGCHLD, si_code=CLD_EXITED, si_pid=12917, si_uid=1000, si_status=0, si_utime=0, si_stime=0} ---
+12884 --- SIGUSR2 {si_signo=SIGUSR2, si_code=SI_TKILL, si_pid=12880, si_uid=1000} ---
+12884 --- SIGUSR2 {si_signo=SIGUSR2, si_code=SI_TKILL, si_pid=12880, si_uid=1000} ---
+12884 --- SIGUSR2 {si_signo=SIGUSR2, si_code=SI_TKILL, si_pid=12880, si_uid=1000} ---
+12884 --- SIGUSR2 {si_signo=SIGUSR2, si_code=SI_TKILL, si_pid=12880, si_uid=1000} ---
+12884 --- SIGUSR2 {si_signo=SIGUSR2, si_code=SI_TKILL, si_pid=12880, si_uid=1000} ---
+12884 --- SIGUSR2 {si_signo=SIGUSR2, si_code=SI_TKILL, si_pid=12880, si_uid=1000} ---
+12884 --- SIGUSR2 {si_signo=SIGUSR2, si_code=SI_TKILL, si_pid=12880, si_uid=1000} ---
+12884 --- SIGUSR2 {si_signo=SIGUSR2, si_code=SI_TKILL, si_pid=12880, si_uid=1000} ---
+12878 --- SIGCHLD {si_signo=SIGCHLD, si_code=CLD_EXITED, si_pid=12880, si_uid=1000, si_status=0, si_utime=538 /* 5.38 s */, si_stime=244 /* 2.44 s */} ---

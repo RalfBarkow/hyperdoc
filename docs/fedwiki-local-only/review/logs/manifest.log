@@ -1,0 +1,7 @@
+MANIFEST source entries 18 mismatches []
+MANIFEST run integration-tests 4e76e9aff910e9da45c1fe9252e528669c2683fb log-digest ok exit 0 marker True feature_delta_applies True
+MANIFEST run feature-regressions 4e76e9aff910e9da45c1fe9252e528669c2683fb log-digest ok exit 0 marker True feature_delta_applies True
+MANIFEST run pr31-tests befce10dc0055222c33d9736723a05d0122a0c9d log-digest ok exit 0 marker True feature_delta_applies False
+MANIFEST run pr32-tests e1ab2f570ee793e301c5af706cbcf2fc984c02a9 log-digest ok exit 0 marker True feature_delta_applies False
+MANIFEST run pr33-tests 68971d55f68273b77e1d33186bc66e9f019c0902 log-digest ok exit 0 marker True feature_delta_applies False
+MANIFEST changed files outside the manifest and outside docs/: ['scripts/check-fedwiki-local-only-evidence.py']

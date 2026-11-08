@@ -1,0 +1,45 @@
+{
+  "facts": [
+    [
+      "remote-snapshot",
+      "fedwiki:local",
+      "missing",
+      "remote-item",
+      "0000000000000000000000000000000000000000000000000000000000000000"
+    ],
+    [
+      "fork-permitted",
+      "fedwiki:local",
+      "missing"
+    ],
+    [
+      "fork-source-policy",
+      "fedwiki:local",
+      "missing",
+      "cached-copy-sufficient"
+    ],
+    [
+      "page-available",
+      "remote-item",
+      "remote-only"
+    ],
+    [
+      "page-available",
+      "remote-new",
+      "remote-only"
+    ],
+    [
+      "page-available",
+      "remote-old",
+      "remote-only"
+    ]
+  ],
+  "copies": [
+    {
+      "site": "remote-item",
+      "slug": "missing",
+      "path": "snapshots/missing.json",
+      "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+    }
+  ]
+}

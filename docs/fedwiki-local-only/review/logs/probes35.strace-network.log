@@ -1,0 +1,8 @@
+socket(AF_NETLINK, SOCK_RAW|SOCK_CLOEXEC, NETLINK_ROUTE) = 5
+bind(5, …)
+getsockname(5, …)
+sendto(5, …)
+recvmsg(5, …)
+socket(AF_INET, SOCK_STREAM, IPPROTO_TCP) = 5
+setsockopt(5, SOL_TCP, TCP_NODELAY, [1], 4) = 0
+connect(5, {sa_family=AF_INET, sin_port=htons(9), sin_addr=inet_addr("127.0.0.1")}, 16) = -1 ENETUNREACH (Network is unreachable)

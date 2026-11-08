@@ -1,0 +1,25 @@
+{
+  "base_commit": "ba892c8c8f1159b0199e26a568604c49cb062466",
+  "branch": "codex/fedwiki-local-only-integration",
+  "tested_revision": "base_commit plus SHA-256 source entries in source-before.json; identical to source-after.json",
+  "recorded_at_utc": "2026-11-08T12:23:29.512861+00:00",
+  "sbcl": "2.4.10",
+  "shop3_commit": "ce53f9b651acde8c44dc21eddb1a1c5b97f10536",
+  "command": "SBCL=/tmp/pr35-sbcl docs/fedwiki-local-only/corrections/run.sh /tmp/pr35-r1/final",
+  "runtime_wrapper": "#!/usr/bin/env bash\nexport DEFEDERATION_TEST_ROOT=/workspace/scratch/hyperdoc-local-only\nwhile [[ \"${1-}\" = --noinform || \"${1-}\" = --no-sysinit || \"${1-}\" = --no-userinit || \"${1-}\" = --non-interactive ]]; do shift; done\nexec python3 /workspace/scratch/defederation-tools/run.py \"$@\"\n",
+  "runtime_launcher_sha256": "7ea31b150fcdeb5e0f2fd5e21e05c9ee07fb09b62a99e8b72777402d9d45d5a6",
+  "r1_assertions": "10 cases passed; 5 rejections with unchanged observation/result/problem registries",
+  "network_namespace": "unshare --net: Operation not permitted",
+  "log_normalization": "trailing whitespace removed from text logs",
+  "log_sha256": {
+    "checks.log": "0baf13b331ae3e0397f07bab1f2ba009ae986404f12375de3655fd60c1911743",
+    "integration.log": "8c4cc68ae68398ea692fd9c826d8f1cfc017d83fffce0814fd717bc7c18cc49f",
+    "integration.strace": "2d216adb7503105f33cbacca4a44830fdfcb2f818c706f045248cc2fc61f2b98",
+    "probes.log": "395c612ffe3fb22f61f167b3fa61dc539d02a16ebad929c56b2f45a81496661e",
+    "probes.strace": "d4f06f3f17d58129c58380f65cfbb6eca6c5f3d13e3b12b8f5788b366569625e",
+    "reading.log": "bd87c2823d5c49e9a031314141f21b3a3399ea785fc30a9d322ba5e5be27fc95",
+    "regressions.log": "8ca3d80f424821ec1703957851ca8b3957c5536eff0a92caddd40f824f0f71af",
+    "run.log": "d2f86c1366f8b54e50e8827ab18595c5f6b8b15e01a285c26a70a2e41152af83",
+    "wiki-link.log": "79b17b98ea6786479e43c07e84b8145123f05912fe82e3b469aa769198471907"
+  }
+}

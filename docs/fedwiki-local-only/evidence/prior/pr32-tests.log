@@ -1,0 +1,1012 @@
+; compiling file "/workspace/scratch/hyperdoc-pr32-baseline/hyperbook/package.lisp" (written 08 NOV 2026 07:41:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-pr32-baseline/hyperbook/package-tmpGHU3ALSV.fasl
+; compilation finished in 0:00:00.000
+; compiling file "/workspace/scratch/hyperdoc-pr32-baseline/hyperbook/hyperbooks.lisp" (written 08 NOV 2026 07:41:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-pr32-baseline/hyperbook/hyperbooks-tmpAAURSO1.fasl
+; compilation finished in 0:00:00.007
+; compiling file "/workspace/scratch/hyperdoc-pr32-baseline/hyperbook/catalog.lisp" (written 08 NOV 2026 07:41:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-pr32-baseline/hyperbook/catalog-tmp5GEXGEG5.fasl
+; compilation finished in 0:00:00.008
+; compiling file "/workspace/scratch/hyperdoc-pr32-baseline/hyperbook/html-books.lisp" (written 08 NOV 2026 07:41:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-pr32-baseline/hyperbook/html-books-tmpAR3FSGEY.fasl
+; compilation finished in 0:00:00.000
+; compiling file "/workspace/scratch/hyperdoc-pr32-baseline/hyperbook/html-rendering-support.lisp" (written 08 NOV 2026 07:41:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-pr32-baseline/hyperbook/html-rendering-support-tmpJAIDFZTC.fasl
+; compilation finished in 0:00:00.003
+; compiling file "/workspace/scratch/hyperdoc-pr32-baseline/hyperdoc/package.lisp" (written 08 NOV 2026 07:41:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-pr32-baseline/hyperdoc/package-tmp8V3J6PE9.fasl
+; compilation finished in 0:00:00.004
+; compiling file "/workspace/scratch/hyperdoc-pr32-baseline/hyperdoc/core.lisp" (written 08 NOV 2026 07:41:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-pr32-baseline/hyperdoc/core-tmp9V47YWQF.fasl
+; compilation finished in 0:00:00.019
+; compiling file "/workspace/scratch/hyperdoc-pr32-baseline/hyperdoc/links-in-code.lisp" (written 08 NOV 2026 07:41:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-pr32-baseline/hyperdoc/links-in-code-tmp9BN22RMA.fasl
+; compilation finished in 0:00:00.004
+; compiling file "/workspace/scratch/hyperdoc-pr32-baseline/hyperdoc/defining.lisp" (written 08 NOV 2026 07:41:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-pr32-baseline/hyperdoc/defining-tmp1CXFJSK9.fasl
+; compilation finished in 0:00:00.004
+; compiling file "/workspace/scratch/hyperdoc-pr32-baseline/hyperdoc/examples.lisp" (written 08 NOV 2026 07:41:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-pr32-baseline/hyperdoc/examples-tmpX4BRKI0R.fasl
+; compilation finished in 0:00:00.007
+; compiling file "/workspace/scratch/hyperdoc-pr32-baseline/hyperdoc/tools.lisp" (written 08 NOV 2026 07:41:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-pr32-baseline/hyperdoc/tools-tmpQ371UGST.fasl
+; compilation finished in 0:00:00.008
+; compiling file "/workspace/scratch/hyperdoc-pr32-baseline/hyperdoc/hyperdoc.lisp" (written 08 NOV 2026 07:41:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-pr32-baseline/hyperdoc/hyperdoc-tmp2OWI3Q7U.fasl
+; compilation finished in 0:00:00.003
+
+
+SHOP3 version 4.3.1
+Copyright (C) 2004-2026 SIFT, LLC.
+
+Original SHOP2 code Copyright (C) 2002  University of Maryland.
+
+This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+KIND, either express or implied.  This software is distributed under an
+MPL/GPL/LGPL triple license.  For details, see the software source file.
+; compiling file "/workspace/scratch/hyperdoc-pr32-baseline/dreyeck/shop3/package.lisp" (written 08 NOV 2026 07:41:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-pr32-baseline/dreyeck/shop3/package-tmp9KKTJMYV.fasl
+; compilation finished in 0:00:00.000
+; compiling file "/workspace/scratch/hyperdoc-pr32-baseline/dreyeck/shop3/manual-topics.lisp" (written 08 NOV 2026 07:41:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-pr32-baseline/dreyeck/shop3/manual-topics-tmpJU0JWO19.fasl
+; compilation finished in 0:00:00.035
+; compiling file "/workspace/scratch/hyperdoc-pr32-baseline/dreyeck/shop3/plan-objects.lisp" (written 08 NOV 2026 07:41:22 AM):
+
+; file: /workspace/scratch/hyperdoc-pr32-baseline/dreyeck/shop3/plan-objects.lisp
+; in: DEFUN %SOURCE->PLAN
+;     'NIL
+;
+; note: deleting unreachable code
+
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-pr32-baseline/dreyeck/shop3/plan-objects-tmpZX2WN8N4.fasl
+; compilation finished in 0:00:00.015
+; compiling file "/workspace/scratch/hyperdoc-pr32-baseline/dreyeck/shop3/examples.lisp" (written 08 NOV 2026 07:41:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-pr32-baseline/dreyeck/shop3/examples-tmpOU81XRV0.fasl
+; compilation finished in 0:00:00.004
+; compiling file "/workspace/scratch/hyperdoc-pr32-baseline/dreyeck/shop3/views.lisp" (written 08 NOV 2026 07:41:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-pr32-baseline/dreyeck/shop3/views-tmpY2ML9CFA.fasl
+; compilation finished in 0:00:00.000
+;
+; compilation unit finished
+;   printed 1 note
+; compiling file "/workspace/scratch/hyperdoc-pr32-baseline/dreyeck/work/fedwiki-link-resolution.lisp" (written 08 NOV 2026 07:41:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-pr32-baseline/dreyeck/work/fedwiki-link-resolution-tmpX2JYJDQE.fasl
+; compilation finished in 0:00:00.051
+
+Defining domain FEDWIKI-LINK-RESOLUTION...
+; compiling file "/workspace/scratch/hyperdoc-pr32-baseline/dreyeck/tests/fedwiki-link-resolution.lisp" (written 08 NOV 2026 07:41:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-pr32-baseline/dreyeck/tests/fedwiki-link-resolution-tmpOPCILR65.fasl
+; compilation finished in 0:00:00.115
+LINK-RESOLUTION JAVA local-first PASS: 2 page requests as Java; outcomes (:LOCAL-OBSERVED)
+LINK-RESOLUTION JAVA context-newest-first PASS: 3 page requests as Java; outcomes (:REMOTE-CONTEXT)
+LINK-RESOLUTION JAVA context-fallthrough PASS: 4 page requests as Java; outcomes (:REMOTE-CONTEXT)
+LINK-RESOLUTION JAVA item-site PASS: 3 page requests as Java; outcomes (:REMOTE-CONTEXT)
+LINK-RESOLUTION JAVA journal-reorder PASS: 3 page requests as Java; outcomes (:REMOTE-CONTEXT)
+LINK-RESOLUTION JAVA not-found PASS: 4 page requests as Java; outcomes (:NOT-FOUND)
+LINK-RESOLUTION JAVA status-500 PASS: 4 page requests as Java; outcomes (:REMOTE-CONTEXT)
+LINK-RESOLUTION JAVA redirect-302 PASS: 4 page requests as Java; outcomes (:REMOTE-CONTEXT)
+LINK-RESOLUTION JAVA network-error PASS: 2 page requests as Java; outcomes (:ABORTED-NETWORK-ERROR)
+LINK-RESOLUTION JAVA panel-site PASS: 6 page requests as Java; outcomes (:REMOTE-CONTEXT
+                                                                         :REMOTE-CONTEXT)
+LINK-RESOLUTION JAVA origin-in-context PASS: 4 page requests as Java; outcomes (:REMOTE-CONTEXT)
+LINK-RESOLUTION JAVA attribution-site PASS: 2 page requests as Java; outcomes (:NOT-FOUND)
+LINK-RESOLUTION JAVA slug-normalization PASS: 2 page requests as Java; outcomes (:LOCAL-OBSERVED)
+LINK-RESOLUTION LOCAL-PRECEDENCE PASS: origin first in both policies; no other request
+LINK-RESOLUTION CONTEXT-ORDER PASS: journal newest first; item site, panel site, newer journal entry; origin may recur
+LINK-RESOLUTION LOCAL-ONLY-GATE PASS: 13 scenarios and synthetic states: own site only, no remote fallback, no fork
+LINK-RESOLUTION PLANNED-FORK-NOT-EXECUTED PASS: modeled, not observed; the 404 observation is kept; :PLAN-ONLY
+LINK-RESOLUTION NO-SECOND-FORK PASS: one fork per target; the simulated state needs none
+LINK-RESOLUTION UNKNOWN-NOT-ABSENT PASS: unknown candidate blocks; unknown own page blocks local-only; unknown permission blocks the fork
+LINK-RESOLUTION DISTINCTIONS PASS: first remote candidate wins; fork alternatives; not found vs unknown; contradiction; fork-source policy both ways
+LINK-RESOLUTION ZERO-STEP PASS: empty plan kept as success; tree marked as unavailable (SHOP3 ce53f9b defect)
+LINK-RESOLUTION MUTANT-CONTROL PASS: an unchanged copy of the domain passes all eight domain checks
+Warnings:
+Singleton variable ?OWN in METHOD OWN-SITE-ONLY branch 1
+(:METHOD (DREYECK/WORK/FEDWIKI-LINK-RESOLUTION::RESOLVE
+          DREYECK/WORK/FEDWIKI-LINK-RESOLUTION::?REQUEST
+          DREYECK/WORK/FEDWIKI-LINK-RESOLUTION::?SLUG
+          DREYECK/WORK/FEDWIKI-LINK-RESOLUTION::LOCAL-ONLY)
+ DREYECK/WORK/FEDWIKI-LINK-RESOLUTION::OWN-SITE-ONLY
+ ((DREYECK/WORK/FEDWIKI-LINK-RESOLUTION::ORIGIN
+   DREYECK/WORK/FEDWIKI-LINK-RESOLUTION::?OWN)
+  )
+ ((TRY-CANDIDATE ?REQUEST ?SLUG 0)))
+
+LINK-RESOLUTION MUTANT KILLED: journal context oldest first
+LINK-RESOLUTION MUTANT KILLED: item site not moved to the front
+LINK-RESOLUTION MUTANT KILLED: panel site not moved to the front
+LINK-RESOLUTION MUTANT KILLED: origin removed from the context
+LINK-RESOLUTION MUTANT KILLED: local-only walks the collaborative candidates
+LINK-RESOLUTION MUTANT KILLED: local-only falls back to the context when missing
+LINK-RESOLUTION MUTANT KILLED: local-only forks instead of reporting the miss
+LINK-RESOLUTION MUTANT KILLED: origin skipped
+LINK-RESOLUTION MUTANT KILLED: network error treated as 'not here'
+LINK-RESOLUTION MUTANT KILLED: closed world: unknown counts as unavailable
+LINK-RESOLUTION MUTANT KILLED: fork does not check for a modeled page
+LINK-RESOLUTION MUTANT KILLED: planned fork writes an observation
+LINK-RESOLUTION MUTANT KILLED: fork ignores an explicit prohibition
+LINK-RESOLUTION MUTANT KILLED: verified copy suffices without the explicit policy
+LINK-RESOLUTION REGISTRATIONS PASS: no leftover problems; SHOP3:*DOMAIN* untouched
+FEDWIKI-LINK-RESOLUTION-PASS: Java agreement on 13 scenarios; 8 counter-probes and the distinctions; 14 mutants killed; plans only, nothing executed.
+LINK-RESOLUTION-OPT-IN-PASS: no Catalog member added; SHOP3:*DOMAIN* unchanged.
+; compiling file "/workspace/scratch/hyperdoc-pr32-baseline/dreyeck/work/defederation-planning.lisp" (written 08 NOV 2026 07:41:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-pr32-baseline/dreyeck/work/defederation-planning-tmpRV9F8A9A.fasl
+; compilation finished in 0:00:00.011
+
+Defining domain DEFEDERATION-PREPARATION...
+; compiling file "/workspace/scratch/hyperdoc-pr32-baseline/dreyeck/tests/defederation-planning.lisp" (written 08 NOV 2026 07:41:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-pr32-baseline/dreyeck/tests/defederation-planning-tmpK2ZAJT4I.fasl
+; compilation finished in 0:00:00.016
+DEFEDERATION A PASS: :PLANNED; 1 plans/trees/states; :PLAN-ONLY; :NOT-EXECUTED
+  (((!PREPARE-LOCAL-LINKS :LOCAL-WIKI :TARGET-PAGE)
+    (!PREPARE-PARAGRAPH-RENDERING :LOCAL-WIKI)))
+DEFEDERATION B PASS: :PLANNED; 1 plans/trees/states; :PLAN-ONLY; :NOT-EXECUTED
+  (((!SIMULATE-FORK :LOCAL-WIKI :TARGET-PAGE :REMOTE-WIKI :SNAPSHOT-1)
+    (!PREPARE-LOCAL-LINKS :LOCAL-WIKI :TARGET-PAGE)
+    (!PREPARE-PARAGRAPH-RENDERING :LOCAL-WIKI)))
+DEFEDERATION C PASS: :NO-PLAN; 0 plans/trees/states; :PLAN-ONLY; :NOT-EXECUTED
+  NIL
+DEFEDERATION (MISSING FORK-PERMITTED) PASS: :NO-PLAN; 0 plans/trees/states; :PLAN-ONLY; :NOT-EXECUTED
+  NIL
+DEFEDERATION (MISSING REMOTE-SNAPSHOT) PASS: :NO-PLAN; 0 plans/trees/states; :PLAN-ONLY; :NOT-EXECUTED
+  NIL
+DEFEDERATION (MISSING LOCAL-PAGE-ABSENT) PASS: :NO-PLAN; 0 plans/trees/states; :PLAN-ONLY; :NOT-EXECUTED
+  NIL
+DEFEDERATION EXPLICITLY-FORBIDDEN PASS: :NO-PLAN; 0 plans/trees/states; :PLAN-ONLY; :NOT-EXECUTED
+  NIL
+DEFEDERATION SNAPSHOT-OBSERVED-UNAVAILABLE PASS: :NO-PLAN; 0 plans/trees/states; :PLAN-ONLY; :NOT-EXECUTED
+  NIL
+DEFEDERATION LOCAL-INSTEAD-OF-ABSENT PASS: :PLANNED; 1 plans/trees/states; :PLAN-ONLY; :NOT-EXECUTED
+  (((!PREPARE-LOCAL-LINKS :LOCAL-WIKI :TARGET-PAGE)
+    (!PREPARE-PARAGRAPH-RENDERING :LOCAL-WIKI)))
+DEFEDERATION LOCAL-EVEN-IF-FORK-FORBIDDEN PASS: :PLANNED; 1 plans/trees/states; :PLAN-ONLY; :NOT-EXECUTED
+  (((!PREPARE-LOCAL-LINKS :LOCAL-WIKI :TARGET-PAGE)
+    (!PREPARE-PARAGRAPH-RENDERING :LOCAL-WIKI)))
+DEFEDERATION (CONTRADICTION LOCAL-PAGE) PASS: :NO-PLAN; 0 plans/trees/states; :PLAN-ONLY; :NOT-EXECUTED
+  NIL
+DEFEDERATION (CONTRADICTION SNAPSHOT-UNAVAILABLE) PASS: :NO-PLAN; 0 plans/trees/states; :PLAN-ONLY; :NOT-EXECUTED
+  NIL
+DEFEDERATION (CONTRADICTION FORK-FORBIDDEN) PASS: :NO-PLAN; 0 plans/trees/states; :PLAN-ONLY; :NOT-EXECUTED
+  NIL
+DEFEDERATION CHANGED-FORK-METHOD-NO-ALTERNATIVE PASS: :NO-PLAN; 0 plans/trees/states; :PLAN-ONLY; :NOT-EXECUTED
+  NIL
+DEFEDERATION CHANGED-FORK-METHOD-LOCAL-STILL-WORKS PASS: :PLANNED; 1 plans/trees/states; :PLAN-ONLY; :NOT-EXECUTED
+  (((!PREPARE-LOCAL-LINKS :LOCAL-WIKI :TARGET-PAGE)
+    (!PREPARE-PARAGRAPH-RENDERING :LOCAL-WIKI)))
+DEFEDERATION CHANGED-FORK-METHOD-EVIDENCE-RESTORED PASS: :PLANNED; 1 plans/trees/states; :PLAN-ONLY; :NOT-EXECUTED
+  (((!SIMULATE-FORK :LOCAL-WIKI :TARGET-PAGE :REMOTE-WIKI :SNAPSHOT-1)
+    (!PREPARE-LOCAL-LINKS :LOCAL-WIKI :TARGET-PAGE)
+    (!PREPARE-PARAGRAPH-RENDERING :LOCAL-WIKI)))
+DEFEDERATION CHANGED-LOCAL-METHOD-FORK-CANNOT-BYPASS PASS: :NO-PLAN; 0 plans/trees/states; :PLAN-ONLY; :NOT-EXECUTED
+  NIL
+DEFEDERATION ORIGINAL-DOMAIN-INTACT PASS: :PLANNED; 1 plans/trees/states; :PLAN-ONLY; :NOT-EXECUTED
+  (((!SIMULATE-FORK :LOCAL-WIKI :TARGET-PAGE :REMOTE-WIKI :SNAPSHOT-1)
+    (!PREPARE-LOCAL-LINKS :LOCAL-WIKI :TARGET-PAGE)
+    (!PREPARE-PARAGRAPH-RENDERING :LOCAL-WIKI)))
+DEFEDERATION-PLANNING-PASS: state-dependent methods; exhaustive alternatives; no execution.
+LINK-RESOLUTION-NEIGHBOUR-PASS: dreyeck/work/defederation-planning/tests
+WARNING: System definition file #P"/workspace/tools/nix-portable-data/.nix-portable/nix/store/fdrq5ji4dvm7jj0wzfvxcyr0rwiq2c24-sbcl-cl-who-20241012-git/cl-who.asd" contains definition for system "cl-who-test". Please only define "cl-who" and secondary systems with a name starting with "cl-who/" (e.g. "cl-who/test") in that file.
+WARNING: System definition file #P"/workspace/tools/nix-portable-data/.nix-portable/nix/store/rn29yxasws4x3wvcf6d0738zxbcrvmin-sbcl-parse-float-20200218-git/parse-float.asd" contains definition for system "parse-float-tests". Please only define "parse-float" and secondary systems with a name starting with "parse-float/" (e.g. "parse-float/test") in that file.
+WARNING: System definition file #P"/workspace/tools/nix-portable-data/.nix-portable/nix/store/bzssaly51znz21jychrjrjg22cbimv2h-sbcl-cl-template-20130615-git/cl-template.asd" contains definition for system "cl-template-tests". Please only define "cl-template" and secondary systems with a name starting with "cl-template/" (e.g. "cl-template/test") in that file.
+; compiling file "/workspace/scratch/hyperdoc-pr32-baseline/dreyeck/src/topicmap-package.lisp" (written 08 NOV 2026 07:41:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-pr32-baseline/dreyeck/src/topicmap-package-tmpUX5S4ADN.fasl
+; compilation finished in 0:00:00.000
+; compiling file "/workspace/scratch/hyperdoc-pr32-baseline/dreyeck/src/topicmap.lisp" (written 08 NOV 2026 07:41:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-pr32-baseline/dreyeck/src/topicmap-tmp10401X32.fasl
+; compilation finished in 0:00:00.047
+; compiling file "/workspace/scratch/hyperdoc-pr32-baseline/dreyeck/src/topicmap-curation-package.lisp" (written 08 NOV 2026 07:41:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-pr32-baseline/dreyeck/src/topicmap-curation-package-tmpZ7CBRM0G.fasl
+; compilation finished in 0:00:00.000
+; compiling file "/workspace/scratch/hyperdoc-pr32-baseline/dreyeck/src/topicmap-curation.lisp" (written 08 NOV 2026 07:41:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-pr32-baseline/dreyeck/src/topicmap-curation-tmp9OZEQ0G2.fasl
+; compilation finished in 0:00:00.015
+;;; Computing Hangul syllable namesSTYLE-WARNING:
+   The new FTYPE proclamation for FSET::VECTOR-SET-BINARY-SEARCH-LO
+     (FUNCTION (SIMPLE-VECTOR T) FIXNUM)
+   does not match the derived return type
+     (FUNCTION (SIMPLE-VECTOR T)
+      (VALUES (INTEGER -4611686018427387904 4611686018427387904) &OPTIONAL))
+STYLE-WARNING:
+   The new FTYPE proclamation for FSET::WB-BAG-TREE-TOTAL-COUNT
+     (FUNCTION (FSET::WB-BAG-TREE) INTEGER)
+   does not match the derived return type
+     (FUNCTION ((OR LIST FSET::WB-BAG-TREE-NODE)) *)
+STYLE-WARNING:
+   The new FTYPE proclamation for FSET::HASH-VALUE-FIXNUM
+     (FUNCTION (T) FIXNUM)
+   does not match the derived return type
+     (FUNCTION (T) (VALUES INTEGER &OPTIONAL))
+STYLE-WARNING:
+   The new FTYPE proclamation for FSET::CH-SET-NODE-ENTRY-MASK
+     (FUNCTION (T) FIXNUM)
+   does not match the derived return type
+     (FUNCTION (SIMPLE-VECTOR) (VALUES T &OPTIONAL))
+STYLE-WARNING:
+   The new FTYPE proclamation for FSET::CH-SET-NODE-SUBNODE-MASK
+     (FUNCTION (T) FIXNUM)
+   does not match the derived return type
+     (FUNCTION (SIMPLE-VECTOR) (VALUES T &OPTIONAL))
+STYLE-WARNING:
+   The new FTYPE proclamation for FSET::CH-SET-NODE-SIZE
+     (FUNCTION (T) FIXNUM)
+   does not match the derived return type
+     (FUNCTION (SIMPLE-VECTOR) (VALUES T &OPTIONAL))
+STYLE-WARNING:
+   The new FTYPE proclamation for FSET::CH-SET-NODE-HASH-VALUE
+     (FUNCTION (T) FIXNUM)
+   does not match the derived return type
+     (FUNCTION (SIMPLE-VECTOR) (VALUES T &OPTIONAL))
+STYLE-WARNING:
+   The new FTYPE proclamation for FSET::CH-MAP-NODE-ENTRY-MASK
+     (FUNCTION (T) FIXNUM)
+   does not match the derived return type
+     (FUNCTION (SIMPLE-VECTOR) (VALUES T &OPTIONAL))
+STYLE-WARNING:
+   The new FTYPE proclamation for FSET::CH-MAP-NODE-SUBNODE-MASK
+     (FUNCTION (T) FIXNUM)
+   does not match the derived return type
+     (FUNCTION (SIMPLE-VECTOR) (VALUES T &OPTIONAL))
+STYLE-WARNING:
+   The new FTYPE proclamation for FSET::CH-MAP-NODE-SIZE
+     (FUNCTION (T) FIXNUM)
+   does not match the derived return type
+     (FUNCTION (SIMPLE-VECTOR) (VALUES T &OPTIONAL))
+STYLE-WARNING:
+   The new FTYPE proclamation for FSET::CH-MAP-NODE-HASH-VALUE
+     (FUNCTION (T) FIXNUM)
+   does not match the derived return type
+     (FUNCTION (SIMPLE-VECTOR) (VALUES T &OPTIONAL))
+STYLE-WARNING:
+   Generic function FSET:ITERATOR clobbers an earlier FTYPE proclamation
+   (FUNCTION (T &KEY &ALLOW-OTHER-KEYS) (VALUES FUNCTION &REST T)) for the same
+   name with (FUNCTION (T &KEY &ALLOW-OTHER-KEYS) *).
+STYLE-WARNING:
+   The new FTYPE proclamation for SWANK/BACKEND:GETPID
+     (FUNCTION NIL (VALUES (SIGNED-BYTE 32) &OPTIONAL))
+   does not match the derived return type
+     (FUNCTION NIL *)
+WARNING:
+   redefining EMACS-INSPECT (#<SB-PCL:SYSTEM-CLASS COMMON-LISP:T>) in DEFMETHOD
+WARNING:
+   redefining 👀PRINT-STRING (#<SB-PCL:SYSTEM-CLASS COMMON-LISP:T>) in DEFMETHOD
+WARNING:
+   The new FTYPE proclamation for CLSS:MATCH-SELECTOR
+     (FUNCTION (LIST (OR PLUMP-DOM:NODE VECTOR LIST) KEYWORD)
+      (VALUES (AND (VECTOR PLUMP-DOM:NODE) (NOT SIMPLE-ARRAY))))
+   does not match the old FTYPE proclamation
+     (FUNCTION (LIST (OR LIST PLUMP-DOM:NODE VECTOR) &OPTIONAL KEYWORD)
+      (VALUES (AND (VECTOR PLUMP-DOM:NODE) (NOT SIMPLE-ARRAY)) &REST T))
+
+; compiling file "/workspace/scratch/hyperdoc-pr32-baseline/hyperbook-explorer/package.lisp" (written 08 NOV 2026 07:41:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-pr32-baseline/hyperbook-explorer/package-tmpB2JTL1W9.fasl
+; compilation finished in 0:00:00.003
+; compiling file "/workspace/scratch/hyperdoc-pr32-baseline/hyperbook-explorer/links.lisp" (written 08 NOV 2026 07:41:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-pr32-baseline/hyperbook-explorer/links-tmpP3BI68WQ.fasl
+; compilation finished in 0:00:00.027
+; compiling file "/workspace/scratch/hyperdoc-pr32-baseline/hyperbook-explorer/link-views.lisp" (written 08 NOV 2026 07:41:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-pr32-baseline/hyperbook-explorer/link-views-tmpQDARA81Z.fasl
+; compilation finished in 0:00:00.083
+; compiling file "/workspace/scratch/hyperdoc-pr32-baseline/hyperbook-explorer/link-redirection.lisp" (written 08 NOV 2026 07:41:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-pr32-baseline/hyperbook-explorer/link-redirection-tmpYEMMM7SE.fasl
+; compilation finished in 0:00:00.000
+; compiling file "/workspace/scratch/hyperdoc-pr32-baseline/hyperbook-explorer/explorer.lisp" (written 08 NOV 2026 07:41:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-pr32-baseline/hyperbook-explorer/explorer-tmp73HU0RPK.fasl
+; compilation finished in 0:00:00.023
+; compiling file "/workspace/scratch/hyperdoc-pr32-baseline/hyperbook-explorer/catalog.lisp" (written 08 NOV 2026 07:41:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-pr32-baseline/hyperbook-explorer/catalog-tmpIO5N7K88.fasl
+; compilation finished in 0:00:00.016
+; compiling file "/workspace/scratch/hyperdoc-pr32-baseline/hyperbook-explorer/rendering.lisp" (written 08 NOV 2026 07:41:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-pr32-baseline/hyperbook-explorer/rendering-tmpCM21U60Z.fasl
+; compilation finished in 0:00:00.059
+; compiling file "/workspace/scratch/hyperdoc-pr32-baseline/hyperbook-explorer/html-books.lisp" (written 08 NOV 2026 07:41:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-pr32-baseline/hyperbook-explorer/html-books-tmp9DT7SEFG.fasl
+; compilation finished in 0:00:00.027
+; compiling file "/workspace/scratch/hyperdoc-pr32-baseline/hyperbook-explorer/hyperbook-the-book.lisp" (written 08 NOV 2026 07:41:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-pr32-baseline/hyperbook-explorer/hyperbook-the-book-tmp8065ESJT.fasl
+; compilation finished in 0:00:00.004
+; compiling file "/workspace/scratch/hyperdoc-pr32-baseline/hyperbook-explorer/asdf-systems.lisp" (written 08 NOV 2026 07:41:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-pr32-baseline/hyperbook-explorer/asdf-systems-tmp7S8Z6FGF.fasl
+; compilation finished in 0:00:00.019
+; compiling file "/workspace/scratch/hyperdoc-pr32-baseline/hyperbook-explorer/lisp-functions.lisp" (written 08 NOV 2026 07:41:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-pr32-baseline/hyperbook-explorer/lisp-functions-tmpSIT3QPKP.fasl
+; compilation finished in 0:00:00.027
+; compiling file "/workspace/scratch/hyperdoc-pr32-baseline/hyperbook-explorer/lisp-classes.lisp" (written 08 NOV 2026 07:41:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-pr32-baseline/hyperbook-explorer/lisp-classes-tmpE0PA0714.fasl
+; compilation finished in 0:00:00.027
+WARNING: redefining CL-ISAAC:RAND32 in DEFUN
+WARNING: redefining CL-ISAAC:RAND64 in DEFUN
+WARNING:
+   bare references to struct types are deprecated. Please use (:POINTER
+                                                               (:STRUCT
+                                                                SQLITE3)) or (:STRUCT
+                                                                              SQLITE3) instead.
+WARNING:
+   bare references to struct types are deprecated. Please use (:POINTER
+                                                               (:STRUCT
+                                                                SQLITE3-STMT)) or (:STRUCT
+                                                                                   SQLITE3-STMT) instead.
+WARNING: redefining DEFTYPE type to be a class: DBI.ERROR:<DBI-ERROR>
+WARNING: redefining DEFTYPE type to be a class: DBI.ERROR:<DBI-WARNING>
+WARNING: redefining DEFTYPE type to be a class: DBI.ERROR:<DBI-INTERFACE-ERROR>
+WARNING:
+   redefining DEFTYPE type to be a class: DBI.ERROR:<DBI-UNIMPLEMENTED-ERROR>
+WARNING: redefining DEFTYPE type to be a class: DBI.ERROR:<DBI-DATABASE-ERROR>
+WARNING: redefining DEFTYPE type to be a class: DBI.ERROR:<DBI-DATA-ERROR>
+WARNING:
+   redefining DEFTYPE type to be a class: DBI.ERROR:<DBI-OPERATIONAL-ERROR>
+WARNING: redefining DEFTYPE type to be a class: DBI.ERROR:<DBI-INTEGRITY-ERROR>
+WARNING: redefining DEFTYPE type to be a class: DBI.ERROR:<DBI-INTERNAL-ERROR>
+WARNING:
+   redefining DEFTYPE type to be a class: DBI.ERROR:<DBI-PROGRAMMING-ERROR>
+WARNING:
+   redefining DEFTYPE type to be a class: DBI.ERROR:<DBI-NOTSUPPORTED-ERROR>
+WARNING:
+   redefining DEFTYPE type to be a class: DBI.ERROR:<DBI-ALREADY-COMMITED-ERROR>
+WARNING:
+   redefining DEFTYPE type to be a class: DBI.ERROR:<DBI-ALREADY-ROLLED-BACK-ERROR>
+WARNING: redefining DEFTYPE type to be a class: DBI.DRIVER:<DBI-DRIVER>
+WARNING: redefining DEFTYPE type to be a class: DBI.DRIVER:<DBI-CONNECTION>
+WARNING: redefining DEFTYPE type to be a class: DBI.DRIVER:<DBI-QUERY>
+WARNING: redefining IRONCLAD:BLOCK-LENGTH in DEFGENERIC
+WARNING: redefining CLOG:PARENT in DEFGENERIC
+WARNING: redefining CLOG::CONNECTION-ID in DEFGENERIC
+WARNING: redefining CLOG:HTML-ID in DEFGENERIC
+WARNING: redefining CLOG:WINDOW in DEFGENERIC
+WARNING: redefining CLOG:HTML-DOCUMENT in DEFGENERIC
+WARNING: redefining CLOG:LOCATION in DEFGENERIC
+WARNING: redefining CLOG:NAVIGATOR in DEFGENERIC
+WARNING: redefining CLOG:DOCUMENT-ELEMENT in DEFGENERIC
+WARNING: redefining CLOG:HEAD-ELEMENT in DEFGENERIC
+WARNING: redefining CLOG:DISABLEDP in DEFGENERIC
+WARNING: redefining (COMMON-LISP:SETF CLOG:DISABLEDP) in DEFGENERIC
+WARNING: redefining CLOG:VALUE in DEFGENERIC
+WARNING: redefining (COMMON-LISP:SETF CLOG:VALUE) in DEFGENERIC
+WARNING: redefining CLOG:MINIMUM in DEFGENERIC
+WARNING: redefining (COMMON-LISP:SETF CLOG:MINIMUM) in DEFGENERIC
+WARNING: redefining CLOG:MAXIMUM in DEFGENERIC
+WARNING: redefining (COMMON-LISP:SETF CLOG:MAXIMUM) in DEFGENERIC
+WARNING: redefining CLOG:URL-SRC in DEFGENERIC
+WARNING: redefining (COMMON-LISP:SETF CLOG:URL-SRC) in DEFGENERIC
+WARNING: redefining CLOG:ALT-TEXT in DEFGENERIC
+WARNING: redefining (COMMON-LISP:SETF CLOG:ALT-TEXT) in DEFGENERIC
+WARNING: redefining CLOG:CENTER-PANEL in DEFGENERIC
+WARNING: redefining CLOG:TOP-PANEL in DEFGENERIC
+WARNING: redefining CLOG:LEFT-PANEL in DEFGENERIC
+WARNING: redefining CLOG:BOTTOM-PANEL in DEFGENERIC
+WARNING: redefining CLOG:PANEL-BOX in DEFGENERIC
+WARNING: redefining CLOG:TREE-ROOT in DEFGENERIC
+WARNING: redefining CLOG:INDENT-LEVEL in DEFGENERIC
+WARNING: redefining CLOG:TOGGLE-STATE in DEFGENERIC
+WARNING: redefining CLOG:TREE-ITEM in DEFGENERIC
+WARNING: redefining CLOG:DATABASE-CONNECTION in DEFGENERIC
+; compiling file "/workspace/scratch/hyperdoc-pr32-baseline/hyperbook-wikipedia/package.lisp" (written 08 NOV 2026 07:41:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-pr32-baseline/hyperbook-wikipedia/package-tmp4WZVROCX.fasl
+; compilation finished in 0:00:00.000
+; compiling file "/workspace/scratch/hyperdoc-pr32-baseline/hyperbook-wikipedia/wikipedia-editions.lisp" (written 08 NOV 2026 07:41:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-pr32-baseline/hyperbook-wikipedia/wikipedia-editions-tmpA0I3UKX8.fasl
+; compilation finished in 0:00:00.004
+; compiling file "/workspace/scratch/hyperdoc-pr32-baseline/hyperbook-wikipedia/wikipedia.lisp" (written 08 NOV 2026 07:41:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-pr32-baseline/hyperbook-wikipedia/wikipedia-tmp267Y2N80.fasl
+; compilation finished in 0:00:00.055
+WARNING: redefining CLOG:READ-ONLY-P in DEFGENERIC
+WARNING: redefining (COMMON-LISP:SETF CLOG:READ-ONLY-P) in DEFGENERIC
+WARNING:
+   redefining HV:👀PLAYGROUND (#<SB-PCL:SYSTEM-CLASS COMMON-LISP:T>) in DEFMETHOD
+; compiling file "/workspace/scratch/hyperdoc-pr32-baseline/inspector-hyperdoc/package.lisp" (written 08 NOV 2026 07:41:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-pr32-baseline/inspector-hyperdoc/package-tmpOUPE5FSJ.fasl
+; compilation finished in 0:00:00.003
+; compiling file "/workspace/scratch/hyperdoc-pr32-baseline/inspector-hyperdoc/hyperdoc.lisp" (written 08 NOV 2026 07:41:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-pr32-baseline/inspector-hyperdoc/hyperdoc-tmpIGHCU6ZA.fasl
+; compilation finished in 0:00:00.000
+WARNING:
+   redefining ENCODE-TO-STRING (#<SB-PCL:SYSTEM-CLASS COMMON-LISP:T>) in DEFMETHOD
+; compiling file "/workspace/scratch/hyperdoc-pr32-baseline/hyperdoc-explorer/package.lisp" (written 08 NOV 2026 07:41:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-pr32-baseline/hyperdoc-explorer/package-tmpBO0TUGLK.fasl
+; compilation finished in 0:00:00.000
+; compiling file "/workspace/scratch/hyperdoc-pr32-baseline/hyperdoc-explorer/links.lisp" (written 08 NOV 2026 07:41:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-pr32-baseline/hyperdoc-explorer/links-tmpIIXPIQNW.fasl
+; compilation finished in 0:00:00.015
+; compiling file "/workspace/scratch/hyperdoc-pr32-baseline/hyperdoc-explorer/explorer.lisp" (written 08 NOV 2026 07:41:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-pr32-baseline/hyperdoc-explorer/explorer-tmpOHM494YR.fasl
+; compilation finished in 0:00:00.071
+; compiling file "/workspace/scratch/hyperdoc-pr32-baseline/hyperdoc-explorer/packages.lisp" (written 08 NOV 2026 07:41:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-pr32-baseline/hyperdoc-explorer/packages-tmpOVFB07XF.fasl
+; compilation finished in 0:00:00.008
+; compiling file "/workspace/scratch/hyperdoc-pr32-baseline/hyperdoc-explorer/parse-expr.lisp" (written 08 NOV 2026 07:41:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-pr32-baseline/hyperdoc-explorer/parse-expr-tmpG6VFGMYP.fasl
+; compilation finished in 0:00:00.000
+; compiling file "/workspace/scratch/hyperdoc-pr32-baseline/hyperdoc-explorer/html-pages.lisp" (written 08 NOV 2026 07:41:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-pr32-baseline/hyperdoc-explorer/html-pages-tmp4QIPRMOF.fasl
+; compilation finished in 0:00:00.043
+; compiling file "/workspace/scratch/hyperdoc-pr32-baseline/hyperdoc-explorer/markdown-pages.lisp" (written 08 NOV 2026 07:41:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-pr32-baseline/hyperdoc-explorer/markdown-pages-tmpGW0QV22K.fasl
+; compilation finished in 0:00:00.004
+; compiling file "/workspace/scratch/hyperdoc-pr32-baseline/hyperdoc-explorer/code-pages.lisp" (written 08 NOV 2026 07:41:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-pr32-baseline/hyperdoc-explorer/code-pages-tmp2K9J0HSR.fasl
+; compilation finished in 0:00:00.019
+; compiling file "/workspace/scratch/hyperdoc-pr32-baseline/hyperdoc-explorer/links-in-code.lisp" (written 08 NOV 2026 07:41:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-pr32-baseline/hyperdoc-explorer/links-in-code-tmpP44I4E0Y.fasl
+; compilation finished in 0:00:00.007
+; compiling file "/workspace/scratch/hyperdoc-pr32-baseline/hyperdoc-explorer/tools.lisp" (written 08 NOV 2026 07:41:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-pr32-baseline/hyperdoc-explorer/tools-tmp63LQ7EX6.fasl
+; compilation finished in 0:00:00.031
+; compiling file "/workspace/scratch/hyperdoc-pr32-baseline/hyperdoc-explorer/codemeta.lisp" (written 08 NOV 2026 07:41:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-pr32-baseline/hyperdoc-explorer/codemeta-tmp86F1A8FB.fasl
+; compilation finished in 0:00:00.023
+; compiling file "/workspace/scratch/hyperdoc-pr32-baseline/hyperdoc-explorer/examples.lisp" (written 08 NOV 2026 07:41:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-pr32-baseline/hyperdoc-explorer/examples-tmpH7D4HL98.fasl
+; compilation finished in 0:00:00.004
+; compiling file "/workspace/scratch/hyperdoc-pr32-baseline/hyperdoc-explorer/hyperdoc.lisp" (written 08 NOV 2026 07:41:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-pr32-baseline/hyperdoc-explorer/hyperdoc-tmpCDM7YXYI.fasl
+; compilation finished in 0:00:00.000
+; compiling file "/workspace/scratch/hyperdoc-pr32-baseline/dreyeck/src/hyperdoc-curation-package.lisp" (written 08 NOV 2026 07:41:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-pr32-baseline/dreyeck/src/hyperdoc-curation-package-tmpLM57P5P.fasl
+; compilation finished in 0:00:00.004
+; compiling file "/workspace/scratch/hyperdoc-pr32-baseline/dreyeck/src/hyperdoc-curation.lisp" (written 08 NOV 2026 07:41:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-pr32-baseline/dreyeck/src/hyperdoc-curation-tmpZE69DN33.fasl
+; compilation finished in 0:00:00.079
+; compiling file "/workspace/scratch/hyperdoc-pr32-baseline/dreyeck/src/workflow-model.lisp" (written 08 NOV 2026 07:41:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-pr32-baseline/dreyeck/src/workflow-model-tmpG8099TO3.fasl
+; compilation finished in 0:00:00.027
+; compiling file "/workspace/scratch/hyperdoc-pr32-baseline/dreyeck/src/asdf-source-package.lisp" (written 08 NOV 2026 07:41:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-pr32-baseline/dreyeck/src/asdf-source-package-tmpTASQCYAW.fasl
+; compilation finished in 0:00:00.004
+; compiling file "/workspace/scratch/hyperdoc-pr32-baseline/dreyeck/src/asdf-source.lisp" (written 08 NOV 2026 07:41:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-pr32-baseline/dreyeck/src/asdf-source-tmp35U57IV6.fasl
+; compilation finished in 0:00:00.035
+; compiling file "/workspace/scratch/hyperdoc-pr32-baseline/dreyeck/src/git-package.lisp" (written 08 NOV 2026 07:41:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-pr32-baseline/dreyeck/src/git-package-tmpTZOONXRW.fasl
+; compilation finished in 0:00:00.000
+; compiling file "/workspace/scratch/hyperdoc-pr32-baseline/dreyeck/src/git-repository-checkout.lisp" (written 08 NOV 2026 07:41:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-pr32-baseline/dreyeck/src/git-repository-checkout-tmpWN0UKDSV.fasl
+; compilation finished in 0:00:00.007
+; compiling file "/workspace/scratch/hyperdoc-pr32-baseline/dreyeck/src/git-commit-inspection.lisp" (written 08 NOV 2026 07:41:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-pr32-baseline/dreyeck/src/git-commit-inspection-tmpBF3HHBTQ.fasl
+; compilation finished in 0:00:00.031
+; compiling file "/workspace/scratch/hyperdoc-pr32-baseline/dreyeck/src/git-local-availability.lisp" (written 08 NOV 2026 07:41:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-pr32-baseline/dreyeck/src/git-local-availability-tmpGYUNPZCY.fasl
+; compilation finished in 0:00:00.011
+; compiling file "/workspace/scratch/hyperdoc-pr32-baseline/dreyeck/src/git-revision-reference.lisp" (written 08 NOV 2026 07:41:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-pr32-baseline/dreyeck/src/git-revision-reference-tmpD68Q8WCA.fasl
+; compilation finished in 0:00:00.023
+; compiling file "/workspace/scratch/hyperdoc-pr32-baseline/dreyeck/src/git-source-slice.lisp" (written 08 NOV 2026 07:41:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-pr32-baseline/dreyeck/src/git-source-slice-tmp7MK9KM9C.fasl
+; compilation finished in 0:00:00.007
+; compiling file "/workspace/scratch/hyperdoc-pr32-baseline/dreyeck/src/git-repository-topicmap.lisp" (written 08 NOV 2026 07:41:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-pr32-baseline/dreyeck/src/git-repository-topicmap-tmpJJ71X849.fasl
+; compilation finished in 0:00:00.008
+; compiling file "/workspace/scratch/hyperdoc-pr32-baseline/dreyeck/src/git-asdf-references.lisp" (written 08 NOV 2026 07:41:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-pr32-baseline/dreyeck/src/git-asdf-references-tmp1VUK6SR2.fasl
+; compilation finished in 0:00:00.019
+; compiling file "/workspace/scratch/hyperdoc-pr32-baseline/dreyeck/src/git-asdf-reference-topicmap.lisp" (written 08 NOV 2026 07:41:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-pr32-baseline/dreyeck/src/git-asdf-reference-topicmap-tmpR2FIHSUG.fasl
+; compilation finished in 0:00:00.027
+; compiling file "/workspace/scratch/hyperdoc-pr32-baseline/dreyeck/src/upstream-intake-package.lisp" (written 08 NOV 2026 07:41:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-pr32-baseline/dreyeck/src/upstream-intake-package-tmp8PYELRKX.fasl
+; compilation finished in 0:00:00.000
+; compiling file "/workspace/scratch/hyperdoc-pr32-baseline/dreyeck/src/upstream-intake.lisp" (written 08 NOV 2026 07:41:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-pr32-baseline/dreyeck/src/upstream-intake-tmpEHTOKYT0.fasl
+; compilation finished in 0:00:00.131
+; compiling file "/workspace/scratch/hyperdoc-pr32-baseline/dreyeck/src/upstream-assessment-package.lisp" (written 08 NOV 2026 07:41:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-pr32-baseline/dreyeck/src/upstream-assessment-package-tmpS6U1VHI9.fasl
+; compilation finished in 0:00:00.004
+; compiling file "/workspace/scratch/hyperdoc-pr32-baseline/dreyeck/src/upstream-assessment.lisp" (written 08 NOV 2026 07:41:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-pr32-baseline/dreyeck/src/upstream-assessment-tmpVTFK6ZJW.fasl
+; compilation finished in 0:00:00.475
+; compiling file "/workspace/scratch/hyperdoc-pr32-baseline/dreyeck/src/state-machine-package.lisp" (written 08 NOV 2026 07:41:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-pr32-baseline/dreyeck/src/state-machine-package-tmp75WVSJEW.fasl
+; compilation finished in 0:00:00.004
+; compiling file "/workspace/scratch/hyperdoc-pr32-baseline/dreyeck/src/state-machine.lisp" (written 08 NOV 2026 07:41:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-pr32-baseline/dreyeck/src/state-machine-tmpBU5UM3S4.fasl
+; compilation finished in 0:00:00.051
+; compiling file "/workspace/scratch/hyperdoc-pr32-baseline/dreyeck/src/gesture-binding-witness.lisp" (written 08 NOV 2026 07:41:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-pr32-baseline/dreyeck/src/gesture-binding-witness-tmpOBHVA3CD.fasl
+; compilation finished in 0:00:00.067
+; compiling file "/workspace/scratch/hyperdoc-pr32-baseline/dreyeck/src/gesture-clog-transport.lisp" (written 08 NOV 2026 07:41:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-pr32-baseline/dreyeck/src/gesture-clog-transport-tmpJ6ELVFLF.fasl
+; compilation finished in 0:00:00.063
+; compiling file "/workspace/scratch/hyperdoc-pr32-baseline/dreyeck/src/gesture-clog-binder.lisp" (written 08 NOV 2026 07:41:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-pr32-baseline/dreyeck/src/gesture-clog-binder-tmpULDB0RG.fasl
+; compilation finished in 0:00:00.043
+; compiling file "/workspace/scratch/hyperdoc-pr32-baseline/hyperbook-fedwiki/package.lisp" (written 08 NOV 2026 07:41:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-pr32-baseline/hyperbook-fedwiki/package-tmpUTZ0UUTE.fasl
+; compilation finished in 0:00:00.000
+; compiling file "/workspace/scratch/hyperdoc-pr32-baseline/hyperbook-fedwiki/utilities.lisp" (written 08 NOV 2026 07:41:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-pr32-baseline/hyperbook-fedwiki/utilities-tmpOOSRA8PZ.fasl
+; compilation finished in 0:00:00.000
+; compiling file "/workspace/scratch/hyperdoc-pr32-baseline/hyperbook-fedwiki/pages.lisp" (written 08 NOV 2026 07:41:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-pr32-baseline/hyperbook-fedwiki/pages-tmpDMIL0RVK.fasl
+; compilation finished in 0:00:00.095
+; compiling file "/workspace/scratch/hyperdoc-pr32-baseline/hyperbook-fedwiki/fedwiki.lisp" (written 08 NOV 2026 07:41:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-pr32-baseline/hyperbook-fedwiki/fedwiki-tmp8MR9IMIO.fasl
+; compilation finished in 0:00:00.067
+; compiling file "/workspace/scratch/hyperdoc-pr32-baseline/hyperbook-fedwiki/story-items.lisp" (written 08 NOV 2026 07:41:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-pr32-baseline/hyperbook-fedwiki/story-items-tmpJQDKAVAY.fasl
+; compilation finished in 0:00:00.115
+; compiling file "/workspace/scratch/hyperdoc-pr32-baseline/hyperbook-fedwiki/wiki-links.lisp" (written 08 NOV 2026 07:41:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-pr32-baseline/hyperbook-fedwiki/wiki-links-tmp3I8CEEQY.fasl
+; compilation finished in 0:00:00.055
+; compiling file "/workspace/scratch/hyperdoc-pr32-baseline/hyperbook-fedwiki/plugins.lisp" (written 08 NOV 2026 07:41:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-pr32-baseline/hyperbook-fedwiki/plugins-tmpA3RHFLWZ.fasl
+; compilation finished in 0:00:00.011
+; compiling file "/workspace/scratch/hyperdoc-pr32-baseline/hyperbook-fedwiki/views.lisp" (written 08 NOV 2026 07:41:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-pr32-baseline/hyperbook-fedwiki/views-tmpYZIB7VXO.fasl
+; compilation finished in 0:00:00.035
+; compiling file "/workspace/scratch/hyperdoc-pr32-baseline/dreyeck/src/authority-policy.lisp" (written 08 NOV 2026 07:41:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-pr32-baseline/dreyeck/src/authority-policy-tmpR8PK79V8.fasl
+; compilation finished in 0:00:00.159
+WARNING:
+   redefining HVS::👀OPERATIONS (#<SB-PCL:SYSTEM-CLASS COMMON-LISP:T>) in DEFMETHOD
+WARNING:
+   redefining HVS:RENDER-TOPLEVEL-CST :AROUND (#<SB-MOP:EQL-SPECIALIZER HYPERDOC:DEFEXAMPLE>
+                                               #<SB-PCL:SYSTEM-CLASS COMMON-LISP:T>
+                                               #<SB-PCL:SYSTEM-CLASS COMMON-LISP:T>
+                                               #<SB-PCL:SYSTEM-CLASS COMMON-LISP:T>) in DEFMETHOD
+; compiling file "/workspace/scratch/hyperdoc-pr32-baseline/dreyeck/src/topicmap-inspector-package.lisp" (written 08 NOV 2026 07:41:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-pr32-baseline/dreyeck/src/topicmap-inspector-package-tmpN1ZVB1HZ.fasl
+; compilation finished in 0:00:00.003
+; compiling file "/workspace/scratch/hyperdoc-pr32-baseline/dreyeck/src/topicmap-gesture.lisp" (written 08 NOV 2026 07:41:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-pr32-baseline/dreyeck/src/topicmap-gesture-tmpZGRRPISB.fasl
+; compilation finished in 0:00:00.083
+; compiling file "/workspace/scratch/hyperdoc-pr32-baseline/dreyeck/src/topicmap-inspector.lisp" (written 08 NOV 2026 07:41:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-pr32-baseline/dreyeck/src/topicmap-inspector-tmpFNKDE5XP.fasl
+; compilation finished in 0:00:00.123
+; compiling file "/workspace/scratch/hyperdoc-pr32-baseline/dreyeck/src/upstream-assessment-inspector-package.lisp" (written 08 NOV 2026 07:41:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-pr32-baseline/dreyeck/src/upstream-assessment-inspector-package-tmpRJTU435C.fasl
+; compilation finished in 0:00:00.000
+; compiling file "/workspace/scratch/hyperdoc-pr32-baseline/dreyeck/src/upstream-assessment-views.lisp" (written 08 NOV 2026 07:41:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-pr32-baseline/dreyeck/src/upstream-assessment-views-tmpI9WG87JK.fasl
+; compilation finished in 0:00:00.899
+; compiling file "/workspace/scratch/hyperdoc-pr32-baseline/dreyeck/src/hyperdoc-pages.lisp" (written 08 NOV 2026 07:41:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-pr32-baseline/dreyeck/src/hyperdoc-pages-tmpYDE6I9E6.fasl
+; compilation finished in 0:00:00.007
+; compiling file "/workspace/scratch/hyperdoc-pr32-baseline/dreyeck/src/upstream-intake-hyperdoc.lisp" (written 08 NOV 2026 07:41:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-pr32-baseline/dreyeck/src/upstream-intake-hyperdoc-tmp319UV2V8.fasl
+; compilation finished in 0:00:00.008
+; compiling file "/workspace/scratch/hyperdoc-pr32-baseline/dreyeck/src/upstream-page-loading-history.lisp" (written 08 NOV 2026 07:41:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-pr32-baseline/dreyeck/src/upstream-page-loading-history-tmpLYQINFYS.fasl
+; compilation finished in 0:00:00.055
+; compiling file "/workspace/scratch/hyperdoc-pr32-baseline/dreyeck/src/upstream-assessment-hyperdoc.lisp" (written 08 NOV 2026 07:41:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-pr32-baseline/dreyeck/src/upstream-assessment-hyperdoc-tmpGA31XWNO.fasl
+; compilation finished in 0:00:00.004
+; compiling file "/workspace/scratch/hyperdoc-pr32-baseline/dreyeck/src/topicmap-tala.lisp" (written 08 NOV 2026 07:41:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-pr32-baseline/dreyeck/src/topicmap-tala-tmp5HT23M6C.fasl
+; compilation finished in 0:00:00.083
+; compiling file "/workspace/scratch/hyperdoc-pr32-baseline/dreyeck/src/topicmap-tala-inspector.lisp" (written 08 NOV 2026 07:41:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-pr32-baseline/dreyeck/src/topicmap-tala-inspector-tmpA60KLDKY.fasl
+; compilation finished in 0:00:00.099
+; compiling file "/workspace/scratch/hyperdoc-pr32-baseline/dreyeck/src/git-inspector-package.lisp" (written 08 NOV 2026 07:41:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-pr32-baseline/dreyeck/src/git-inspector-package-tmpD801X3GJ.fasl
+; compilation finished in 0:00:00.000
+; compiling file "/workspace/scratch/hyperdoc-pr32-baseline/dreyeck/src/git-commit-inspection-views.lisp" (written 08 NOV 2026 07:41:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-pr32-baseline/dreyeck/src/git-commit-inspection-views-tmpGOW1GC70.fasl
+; compilation finished in 0:00:00.147
+; compiling file "/workspace/scratch/hyperdoc-pr32-baseline/dreyeck/src/git-asdf-reference-views.lisp" (written 08 NOV 2026 07:41:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-pr32-baseline/dreyeck/src/git-asdf-reference-views-tmpPQ1X28TL.fasl
+; compilation finished in 0:00:00.175
+; compiling file "/workspace/scratch/hyperdoc-pr32-baseline/dreyeck/src/git-revision-reference-views.lisp" (written 08 NOV 2026 07:41:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-pr32-baseline/dreyeck/src/git-revision-reference-views-tmpE92ECU7O.fasl
+; compilation finished in 0:00:00.059
+; compiling file "/workspace/scratch/hyperdoc-pr32-baseline/dreyeck/nested-actions/action-tree.lisp" (written 08 NOV 2026 07:41:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-pr32-baseline/dreyeck/nested-actions/action-tree-tmp8S0II570.fasl
+; compilation finished in 0:00:00.031
+; compiling file "/workspace/scratch/hyperdoc-pr32-baseline/dreyeck/nested-actions/probes.lisp" (written 08 NOV 2026 07:41:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-pr32-baseline/dreyeck/nested-actions/probes-tmpJE88A12F.fasl
+; compilation finished in 0:00:00.007
+; compiling file "/workspace/scratch/hyperdoc-pr32-baseline/dreyeck/nested-actions/message-path.lisp" (written 08 NOV 2026 07:41:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-pr32-baseline/dreyeck/nested-actions/message-path-tmpA5FNLPLT.fasl
+; compilation finished in 0:00:00.063
+; compiling file "/workspace/scratch/hyperdoc-pr32-baseline/dreyeck/nested-actions/source-revisions.lisp" (written 08 NOV 2026 07:41:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-pr32-baseline/dreyeck/nested-actions/source-revisions-tmpHKCV9TP8.fasl
+; compilation finished in 0:00:00.012
+; compiling file "/workspace/scratch/hyperdoc-pr32-baseline/dreyeck/nested-actions/input-path.lisp" (written 08 NOV 2026 07:41:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-pr32-baseline/dreyeck/nested-actions/input-path-tmpZ18MA7XE.fasl
+; compilation finished in 0:00:00.031
+; compiling file "/workspace/scratch/hyperdoc-pr32-baseline/dreyeck/nested-actions/solo-history.lisp" (written 08 NOV 2026 07:41:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-pr32-baseline/dreyeck/nested-actions/solo-history-tmp6LQJ9T0C.fasl
+; compilation finished in 0:00:00.031
+; compiling file "/workspace/scratch/hyperdoc-pr32-baseline/dreyeck/nested-actions/reading.lisp" (written 08 NOV 2026 07:41:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-pr32-baseline/dreyeck/nested-actions/reading-tmpTX7OA81T.fasl
+; compilation finished in 0:00:00.015
+; compiling file "/workspace/scratch/hyperdoc-pr32-baseline/dreyeck/mech-intake/catalog.lisp" (written 08 NOV 2026 07:41:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-pr32-baseline/dreyeck/mech-intake/catalog-tmpWOTC3PB7.fasl
+; compilation finished in 0:00:00.091
+; compiling file "/workspace/scratch/hyperdoc-pr32-baseline/dreyeck/mech-intake/execution.lisp" (written 08 NOV 2026 07:41:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-pr32-baseline/dreyeck/mech-intake/execution-tmpHQE95SAC.fasl
+; compilation finished in 0:00:00.039
+; compiling file "/workspace/scratch/hyperdoc-pr32-baseline/dreyeck/mech-intake/acceptance.lisp" (written 08 NOV 2026 07:41:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-pr32-baseline/dreyeck/mech-intake/acceptance-tmpO87FP9NR.fasl
+; compilation finished in 0:00:00.004
+; compiling file "/workspace/scratch/hyperdoc-pr32-baseline/dreyeck/mech-intake/reading.lisp" (written 08 NOV 2026 07:41:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-pr32-baseline/dreyeck/mech-intake/reading-tmpP6A3E92I.fasl
+; compilation finished in 0:00:00.023
+; compiling file "/workspace/scratch/hyperdoc-pr32-baseline/dreyeck/fedwiki-config/configuration.lisp" (written 08 NOV 2026 07:41:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-pr32-baseline/dreyeck/fedwiki-config/configuration-tmpUSHT8RIL.fasl
+; compilation finished in 0:00:00.099
+; compiling file "/workspace/scratch/hyperdoc-pr32-baseline/dreyeck/fedwiki-config/composition.lisp" (written 08 NOV 2026 07:41:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-pr32-baseline/dreyeck/fedwiki-config/composition-tmp7YCPD44Y.fasl
+; compilation finished in 0:00:00.023
+; compiling file "/workspace/scratch/hyperdoc-pr32-baseline/dreyeck/fedwiki-config/fork.lisp" (written 08 NOV 2026 07:41:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-pr32-baseline/dreyeck/fedwiki-config/fork-tmpQXR7SNXD.fasl
+; compilation finished in 0:00:00.031
+; compiling file "/workspace/scratch/hyperdoc-pr32-baseline/dreyeck/fedwiki-config/workspace.lisp" (written 08 NOV 2026 07:41:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-pr32-baseline/dreyeck/fedwiki-config/workspace-tmp6FLI1OC3.fasl
+; compilation finished in 0:00:00.015
+; compiling file "/workspace/scratch/hyperdoc-pr32-baseline/dreyeck/src/lisp-image-package.lisp" (written 08 NOV 2026 07:41:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-pr32-baseline/dreyeck/src/lisp-image-package-tmpWBK8JTS9.fasl
+; compilation finished in 0:00:00.000
+; compiling file "/workspace/scratch/hyperdoc-pr32-baseline/dreyeck/src/lisp-image-inventory.lisp" (written 08 NOV 2026 07:41:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-pr32-baseline/dreyeck/src/lisp-image-inventory-tmpUVEUD2ZN.fasl
+; compilation finished in 0:00:00.019
+; compiling file "/workspace/scratch/hyperdoc-pr32-baseline/dreyeck/src/lisp-image-definition-sources.lisp" (written 08 NOV 2026 07:41:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-pr32-baseline/dreyeck/src/lisp-image-definition-sources-tmpOWNJOEU.fasl
+; compilation finished in 0:00:00.004
+; compiling file "/workspace/scratch/hyperdoc-pr32-baseline/dreyeck/src/lisp-image-observations.lisp" (written 08 NOV 2026 07:41:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-pr32-baseline/dreyeck/src/lisp-image-observations-tmpVT5BMTA5.fasl
+; compilation finished in 0:00:00.023
+; compiling file "/workspace/scratch/hyperdoc-pr32-baseline/dreyeck/src/lisp-image-views.lisp" (written 08 NOV 2026 07:41:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-pr32-baseline/dreyeck/src/lisp-image-views-tmpN3CFVWZF.fasl
+; compilation finished in 0:00:00.007
+; compiling file "/workspace/scratch/hyperdoc-pr32-baseline/dreyeck/src/lisp-image-hyperdoc.lisp" (written 08 NOV 2026 07:41:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-pr32-baseline/dreyeck/src/lisp-image-hyperdoc-tmpNK27C0R1.fasl
+; compilation finished in 0:00:00.004
+; compiling file "/workspace/scratch/hyperdoc-pr32-baseline/dreyeck/src/lisp-image-topicmap.lisp" (written 08 NOV 2026 07:41:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-pr32-baseline/dreyeck/src/lisp-image-topicmap-tmp3BPE71HR.fasl
+; compilation finished in 0:00:00.008
+; compiling file "/workspace/scratch/hyperdoc-pr32-baseline/dreyeck/src/topicmap-tala-reading.lisp" (written 08 NOV 2026 07:41:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-pr32-baseline/dreyeck/src/topicmap-tala-reading-tmp758YUXMV.fasl
+; compilation finished in 0:00:00.023
+; compiling file "/workspace/scratch/hyperdoc-pr32-baseline/dreyeck/src/topicmap-tala-authored.lisp" (written 08 NOV 2026 07:41:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-pr32-baseline/dreyeck/src/topicmap-tala-authored-tmpGMQXK1HK.fasl
+; compilation finished in 0:00:00.023
+; compiling file "/workspace/scratch/hyperdoc-pr32-baseline/dreyeck/src/topicmap-tala-dispatch-reading.lisp" (written 08 NOV 2026 07:41:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-pr32-baseline/dreyeck/src/topicmap-tala-dispatch-reading-tmp49Q238TW.fasl
+; compilation finished in 0:00:00.000
+; compiling file "/workspace/scratch/hyperdoc-pr32-baseline/dreyeck/src/topicmap-tala-reference-reading.lisp" (written 08 NOV 2026 07:41:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-pr32-baseline/dreyeck/src/topicmap-tala-reference-reading-tmpMXPMJ5KG.fasl
+; compilation finished in 0:00:00.008
+; compiling file "/workspace/scratch/hyperdoc-pr32-baseline/dreyeck/src/gesture-operation-request.lisp" (written 08 NOV 2026 07:41:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-pr32-baseline/dreyeck/src/gesture-operation-request-tmpB69313KI.fasl
+; compilation finished in 0:00:00.079
+; compiling file "/workspace/scratch/hyperdoc-pr32-baseline/dreyeck/work/reading.lisp" (written 08 NOV 2026 07:41:22 AM):
+
+; file: /workspace/scratch/hyperdoc-pr32-baseline/dreyeck/work/reading.lisp
+; in: DEFUN %FEDWIKI-STORY
+;     'NIL
+;
+; note: deleting unreachable code
+
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-pr32-baseline/dreyeck/work/reading-tmp9ZT99EEA.fasl
+; compilation finished in 0:00:00.231
+; compiling file "/workspace/scratch/hyperdoc-pr32-baseline/dreyeck/work/operation-requests.lisp" (written 08 NOV 2026 07:41:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-pr32-baseline/dreyeck/work/operation-requests-tmpW045U8V2.fasl
+; compilation finished in 0:00:00.008
+; compiling file "/workspace/scratch/hyperdoc-pr32-baseline/dreyeck/work/deployment-reading.lisp" (written 08 NOV 2026 07:41:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-pr32-baseline/dreyeck/work/deployment-reading-tmp6XOIRI3N.fasl
+; compilation finished in 0:00:00.007
+; compiling file "/workspace/scratch/hyperdoc-pr32-baseline/dreyeck/work/authoring-architecture.lisp" (written 08 NOV 2026 07:41:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-pr32-baseline/dreyeck/work/authoring-architecture-tmp9ZHTLHSG.fasl
+; compilation finished in 0:00:00.039
+; compiling file "/workspace/scratch/hyperdoc-pr32-baseline/dreyeck/work/addresses.lisp" (written 08 NOV 2026 07:41:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-pr32-baseline/dreyeck/work/addresses-tmpRW73Q691.fasl
+; compilation finished in 0:00:00.147
+; compiling file "/workspace/scratch/hyperdoc-pr32-baseline/dreyeck/work/trails-rendered-reading.lisp" (written 08 NOV 2026 07:41:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-pr32-baseline/dreyeck/work/trails-rendered-reading-tmp4TM0ME1F.fasl
+; compilation finished in 0:00:00.015
+; compiling file "/workspace/scratch/hyperdoc-pr32-baseline/dreyeck/work/trails-rendered-federated-context.lisp" (written 08 NOV 2026 07:41:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-pr32-baseline/dreyeck/work/trails-rendered-federated-context-tmpU2IL9N4.fasl
+; compilation finished in 0:00:00.531
+; compiling file "/workspace/scratch/hyperdoc-pr32-baseline/dreyeck/work/trails-rendered-following.lisp" (written 08 NOV 2026 07:41:22 AM):
+
+; file: /workspace/scratch/hyperdoc-pr32-baseline/dreyeck/work/trails-rendered-following.lisp
+; in: DEFUN TRAIL-LEARNING-PROJECTION
+;     (DREYECK/WORK/TRAILS-RENDERED-READING::CONTEXT
+;      (DREYECK/WORK/TRAILS-RENDERED-READING::FOLLOWING-CONTEXT
+;       DREYECK/WORK/TRAILS-RENDERED-READING::FOLLOWING))
+;
+; caught STYLE-WARNING:
+;   The variable CONTEXT is defined but never used.
+
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-pr32-baseline/dreyeck/work/trails-rendered-following-tmpOPW41KDL.fasl
+; compilation finished in 0:00:00.151
+WARNING:
+   Lisp compilation had style-warnings while compiling
+   #<CL-SOURCE-FILE "dreyeck/work/reading" "dreyeck/work" "trails-rendered-following">
+; compiling file "/workspace/scratch/hyperdoc-pr32-baseline/dreyeck/work/how-trails-sources.lisp" (written 08 NOV 2026 07:41:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-pr32-baseline/dreyeck/work/how-trails-sources-tmpIPVWLON2.fasl
+; compilation finished in 0:00:00.199
+; compiling file "/workspace/scratch/hyperdoc-pr32-baseline/dreyeck/work/javascript-definitions.lisp" (written 08 NOV 2026 07:41:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-pr32-baseline/dreyeck/work/javascript-definitions-tmpO0LCOIDS.fasl
+; compilation finished in 0:00:00.075
+; compiling file "/workspace/scratch/hyperdoc-pr32-baseline/dreyeck/work/reading-mech-hubs.lisp" (written 08 NOV 2026 07:41:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-pr32-baseline/dreyeck/work/reading-mech-hubs-tmpP264WQ6O.fasl
+; compilation finished in 0:00:00.023
+; compiling file "/workspace/scratch/hyperdoc-pr32-baseline/dreyeck/work/inspecting-hub-selection.lisp" (written 08 NOV 2026 07:41:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-pr32-baseline/dreyeck/work/inspecting-hub-selection-tmpESC43OCR.fasl
+; compilation finished in 0:00:00.119
+; compiling file "/workspace/scratch/hyperdoc-pr32-baseline/dreyeck/work/investigating-ward-hub-selection.lisp" (written 08 NOV 2026 07:41:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-pr32-baseline/dreyeck/work/investigating-ward-hub-selection-tmpWCAM54ZJ.fasl
+; compilation finished in 0:00:00.095
+; compiling file "/workspace/scratch/hyperdoc-pr32-baseline/dreyeck/work/collaborative-planning-reading.lisp" (written 08 NOV 2026 07:41:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-pr32-baseline/dreyeck/work/collaborative-planning-reading-tmpVTMW561L.fasl
+; compilation finished in 0:00:00.187
+; compiling file "/workspace/scratch/hyperdoc-pr32-baseline/dreyeck/work/ctm-plan-page-authoring.lisp" (written 08 NOV 2026 07:41:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-pr32-baseline/dreyeck/work/ctm-plan-page-authoring-tmpUNNGT9CF.fasl
+; compilation finished in 0:00:00.299
+; compiling file "/workspace/scratch/hyperdoc-pr32-baseline/dreyeck/work/conversation-coordinates-reading.lisp" (written 08 NOV 2026 07:41:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-pr32-baseline/dreyeck/work/conversation-coordinates-reading-tmp4L3W83SU.fasl
+; compilation finished in 0:00:00.279
+; compiling file "/workspace/scratch/hyperdoc-pr32-baseline/dreyeck/work/item-edit-view-diagnosis.lisp" (written 08 NOV 2026 07:41:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-pr32-baseline/dreyeck/work/item-edit-view-diagnosis-tmpGE7QNNEE.fasl
+; compilation finished in 0:00:00.459
+; compiling file "/workspace/scratch/hyperdoc-pr32-baseline/dreyeck/work/trails-rendered-browser-check.lisp" (written 08 NOV 2026 07:41:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-pr32-baseline/dreyeck/work/trails-rendered-browser-check-tmp9B0UZGT4.fasl
+; compilation finished in 0:00:00.051
+; compiling file "/workspace/scratch/hyperdoc-pr32-baseline/dreyeck/work/shift-click.lisp" (written 08 NOV 2026 07:41:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-pr32-baseline/dreyeck/work/shift-click-tmpAJ5U325P.fasl
+; compilation finished in 0:00:00.031
+; compiling file "/workspace/scratch/hyperdoc-pr32-baseline/dreyeck/work/deployment-inspection.lisp" (written 08 NOV 2026 07:41:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-pr32-baseline/dreyeck/work/deployment-inspection-tmpAOF1CYAS.fasl
+; compilation finished in 0:00:00.227
+; compiling file "/workspace/scratch/hyperdoc-pr32-baseline/dreyeck/work/source-text-view.lisp" (written 08 NOV 2026 07:41:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-pr32-baseline/dreyeck/work/source-text-view-tmpIXCQTSHA.fasl
+; compilation finished in 0:00:00.000
+; compiling file "/workspace/scratch/hyperdoc-pr32-baseline/dreyeck/work/planning.lisp" (written 08 NOV 2026 07:41:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-pr32-baseline/dreyeck/work/planning-tmp5E6VIEMS.fasl
+; compilation finished in 0:00:00.004
+
+Defining domain DOCUMENT-D2-CONCEPT...
+
+Defining problem CONNECTIONS-DOCUMENTATION ...
+
+Defining problem CONNECTIONS-WITHOUT-SOURCE ...
+; compiling file "/workspace/scratch/hyperdoc-pr32-baseline/dreyeck/tests/work-planning.lisp" (written 08 NOV 2026 07:41:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-pr32-baseline/dreyeck/tests/work-planning-tmpI0PODGVV.fasl
+; compilation finished in 0:00:00.003
+DOCUMENTATION-PLAN-PASS: eight modeled stages; no-source refused; verdict B, fixed sequence only.
+;
+; compilation unit finished
+;   caught 1 STYLE-WARNING condition
+;   printed 1 note
+LINK-RESOLUTION-NEIGHBOUR-PASS: dreyeck/work/planning/tests
+; compiling file "/workspace/scratch/hyperdoc-pr32-baseline/dreyeck/work/remote-control-planning.lisp" (written 08 NOV 2026 07:41:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-pr32-baseline/dreyeck/work/remote-control-planning-tmp1Z95I17K.fasl
+; compilation finished in 0:00:00.008
+
+Defining domain ZETTELKASTEN-MOBILE-CONTROL...
+
+Defining problem REMOTE-CONTROL-A ...
+
+Defining problem REMOTE-CONTROL-B ...
+
+Defining problem REMOTE-CONTROL-C ...
+
+Defining problem REMOTE-CONTROL-D ...
+
+Defining problem REMOTE-CONTROL-E ...
+; compiling file "/workspace/scratch/hyperdoc-pr32-baseline/dreyeck/tests/remote-control-planning.lisp" (written 08 NOV 2026 07:41:22 AM):
+
+; wrote /workspace/scratch/defederation-tools/fasl/workspace/scratch/hyperdoc-pr32-baseline/dreyeck/tests/remote-control-planning-tmpCFVK1AC1.fasl
+; compilation finished in 0:00:00.015
+REMOTE-CONTROL A PASS: 1 plans, 1 trees, 1 states
+(((DREYECK/WORK/REMOTE-CONTROL-PLANNING::!MODEL-AGENT-ROUTE
+   DREYECK/WORK/REMOTE-CONTROL-PLANNING::ZETTELKASTEN
+   DREYECK/WORK/REMOTE-CONTROL-PLANNING::MACBOOK-A
+   DREYECK/WORK/REMOTE-CONTROL-PLANNING::ANDROID)
+  (DREYECK/WORK/REMOTE-CONTROL-PLANNING::!MODEL-CONTROL-SURFACE
+   DREYECK/WORK/REMOTE-CONTROL-PLANNING::ZETTELKASTEN
+   DREYECK/WORK/REMOTE-CONTROL-PLANNING::MACBOOK-A
+   DREYECK/WORK/REMOTE-CONTROL-PLANNING::ANDROID
+   DREYECK/WORK/REMOTE-CONTROL-PLANNING::AGENT)
+  (DREYECK/WORK/REMOTE-CONTROL-PLANNING::!VERIFY-MODELED-CONTROL
+   DREYECK/WORK/REMOTE-CONTROL-PLANNING::ZETTELKASTEN
+   DREYECK/WORK/REMOTE-CONTROL-PLANNING::MACBOOK-A
+   DREYECK/WORK/REMOTE-CONTROL-PLANNING::ANDROID
+   DREYECK/WORK/REMOTE-CONTROL-PLANNING::AGENT)))
+REMOTE-CONTROL B PASS: 1 plans, 1 trees, 1 states
+(((DREYECK/WORK/REMOTE-CONTROL-PLANNING::!MODEL-DIRECT-ROUTE
+   DREYECK/WORK/REMOTE-CONTROL-PLANNING::ZETTELKASTEN
+   DREYECK/WORK/REMOTE-CONTROL-PLANNING::MACBOOK-A
+   DREYECK/WORK/REMOTE-CONTROL-PLANNING::ANDROID)
+  (DREYECK/WORK/REMOTE-CONTROL-PLANNING::!MODEL-CONTROL-SURFACE
+   DREYECK/WORK/REMOTE-CONTROL-PLANNING::ZETTELKASTEN
+   DREYECK/WORK/REMOTE-CONTROL-PLANNING::MACBOOK-A
+   DREYECK/WORK/REMOTE-CONTROL-PLANNING::ANDROID
+   DREYECK/WORK/REMOTE-CONTROL-PLANNING::DIRECT)
+  (DREYECK/WORK/REMOTE-CONTROL-PLANNING::!VERIFY-MODELED-CONTROL
+   DREYECK/WORK/REMOTE-CONTROL-PLANNING::ZETTELKASTEN
+   DREYECK/WORK/REMOTE-CONTROL-PLANNING::MACBOOK-A
+   DREYECK/WORK/REMOTE-CONTROL-PLANNING::ANDROID
+   DREYECK/WORK/REMOTE-CONTROL-PLANNING::DIRECT)))
+REMOTE-CONTROL C PASS: 2 plans, 2 trees, 2 states
+(((DREYECK/WORK/REMOTE-CONTROL-PLANNING::!MODEL-AGENT-ROUTE
+   DREYECK/WORK/REMOTE-CONTROL-PLANNING::ZETTELKASTEN
+   DREYECK/WORK/REMOTE-CONTROL-PLANNING::MACBOOK-A
+   DREYECK/WORK/REMOTE-CONTROL-PLANNING::ANDROID)
+  (DREYECK/WORK/REMOTE-CONTROL-PLANNING::!MODEL-CONTROL-SURFACE
+   DREYECK/WORK/REMOTE-CONTROL-PLANNING::ZETTELKASTEN
+   DREYECK/WORK/REMOTE-CONTROL-PLANNING::MACBOOK-A
+   DREYECK/WORK/REMOTE-CONTROL-PLANNING::ANDROID
+   DREYECK/WORK/REMOTE-CONTROL-PLANNING::AGENT)
+  (DREYECK/WORK/REMOTE-CONTROL-PLANNING::!VERIFY-MODELED-CONTROL
+   DREYECK/WORK/REMOTE-CONTROL-PLANNING::ZETTELKASTEN
+   DREYECK/WORK/REMOTE-CONTROL-PLANNING::MACBOOK-A
+   DREYECK/WORK/REMOTE-CONTROL-PLANNING::ANDROID
+   DREYECK/WORK/REMOTE-CONTROL-PLANNING::AGENT))
+ ((DREYECK/WORK/REMOTE-CONTROL-PLANNING::!MODEL-DIRECT-ROUTE
+   DREYECK/WORK/REMOTE-CONTROL-PLANNING::ZETTELKASTEN
+   DREYECK/WORK/REMOTE-CONTROL-PLANNING::MACBOOK-A
+   DREYECK/WORK/REMOTE-CONTROL-PLANNING::ANDROID)
+  (DREYECK/WORK/REMOTE-CONTROL-PLANNING::!MODEL-CONTROL-SURFACE
+   DREYECK/WORK/REMOTE-CONTROL-PLANNING::ZETTELKASTEN
+   DREYECK/WORK/REMOTE-CONTROL-PLANNING::MACBOOK-A
+   DREYECK/WORK/REMOTE-CONTROL-PLANNING::ANDROID
+   DREYECK/WORK/REMOTE-CONTROL-PLANNING::DIRECT)
+  (DREYECK/WORK/REMOTE-CONTROL-PLANNING::!VERIFY-MODELED-CONTROL
+   DREYECK/WORK/REMOTE-CONTROL-PLANNING::ZETTELKASTEN
+   DREYECK/WORK/REMOTE-CONTROL-PLANNING::MACBOOK-A
+   DREYECK/WORK/REMOTE-CONTROL-PLANNING::ANDROID
+   DREYECK/WORK/REMOTE-CONTROL-PLANNING::DIRECT)))
+REMOTE-CONTROL D PASS: 0 plans, 0 trees, 0 states
+NIL
+REMOTE-CONTROL E PASS: 0 plans, 0 trees, 0 states
+NIL
+LINK-RESOLUTION-NEIGHBOUR-PASS: dreyeck/work/remote-control-planning/tests
+LINK-RESOLUTION-INSPECTOR-PASS context-newest-first collaborative: (:REMOTE-CONTEXT); result slots and plan/tree/state references; every HTML view of result and context renders.
+LINK-RESOLUTION-INSPECTOR-PASS context-newest-first local-only: (:NOT-FOUND); result slots and plan/tree/state references; every HTML view of result and context renders.
+LINK-RESOLUTION-INSPECTOR-PASS network-error collaborative: (:ABORTED-NETWORK-ERROR); result slots and plan/tree/state references; every HTML view of result and context renders.
+LINK-RESOLUTION-INSPECTOR-PASS panel-site collaborative: (:REMOTE-CONTEXT); result slots and plan/tree/state references; every HTML view of result and context renders.
+LINK-RESOLUTION-ALL-PASS: plans only; no request, fork or write was executed.

@@ -1,0 +1,10 @@
+integration exit=0
+probes exit=0
+regressions exit=0
+wiki-link exit=0
+reading exit=0
+CHECK-PASS integration: 0 network syscalls before control; 0 after control
+CHECK-PASS probes: 0 network syscalls before control; 11 after control
+CHECK-LIMIT reading suite: unavailable D2/TALA (same as historical review; NOT PASS)
+CHECK-PASS F1–F3, 48 invalid inputs, positive snapshot, original probes, continuation, alternatives, Inspector EQ, six planning/local-page suites, wiki-link suite
+CHECK-PASS tested source digests match; historical review unchanged

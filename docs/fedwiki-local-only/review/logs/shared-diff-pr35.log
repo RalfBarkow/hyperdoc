@@ -1,0 +1,16 @@
+SD collaborative/remote-hit slug=target context=("s1" "s2" "s3") result=(FW::REMOTE-FEDWIKI-PAGE "origin" "s1/target" "s1" ("s1")) consulted=((:FIND-PAGE "origin" "target") (:FIND-PAGE "s1" "target")) plugin=((:PLUGIN "origin" "target"))
+SD collaborative/local-hit slug=here context=("s1" "s2" "s3") result=(FW::FEDWIKI-PAGE "origin" "here" NIL NIL) consulted=((:FIND-PAGE "origin" "here")) plugin=NIL
+SD collaborative/miss slug=nowhere context=("s1" "s2" "s3") result=NIL consulted=((:FIND-PAGE "origin" "nowhere") (:FIND-PAGE "s1" "nowhere") (:FIND-PAGE "s2" "nowhere") (:FIND-PAGE "s3" "nowhere")) plugin=((:PLUGIN "origin" "nowhere"))
+SD collaborative/remote-hit-again slug=deep context=("s1" "s2" "s3") result=(FW::REMOTE-FEDWIKI-PAGE "origin" "s1/deep" "s1" ("s1")) consulted=((:FIND-PAGE "origin" "deep") (:FIND-PAGE "s1" "deep")) plugin=((:PLUGIN "origin" "deep"))
+SD from-remote-page slug=target context=("s1") result=(FW::REMOTE-FEDWIKI-PAGE "origin" "s1/target" "s1" ("s1")) consulted=((:FIND-PAGE "origin" "target") (:FIND-PAGE "s1" "target")) plugin=((:PLUGIN "origin" "target"))
+SD attribution-site slug=target context=("s1") result=(FW::REMOTE-FEDWIKI-PAGE "origin" "s1/target" "s1" ("s1")) consulted=((:FIND-PAGE "origin" "target") (:FIND-PAGE "s1" "target")) plugin=((:PLUGIN "origin" "target"))
+SD empty-journal slug=target context=NIL result=NIL consulted=((:FIND-PAGE "origin" "target")) plugin=((:PLUGIN "origin" "target"))
+SD local-fedwiki-page class=DREYECK/LOCAL-FEDWIKI-PAGE:LOCAL-FEDWIKI-PAGE
+SD local-fedwiki-page/remote-hit slug=target context=("s1") result=(FW::REMOTE-FEDWIKI-PAGE "localsite" "s1/target" "s1" ("s1")) consulted=((:FIND-PAGE "localsite" "target") (:FIND-PAGE "s1" "target")) plugin=((:PLUGIN "localsite" "target"))
+SD find-target-by-slug miss: USOCKET:NS-HOST-NOT-FOUND-ERROR
+SD non-fedwiki page object: SB-PCL::NO-APPLICABLE-METHOD-ERROR
+SD nil page: SB-PCL::NO-APPLICABLE-METHOD-ERROR
+SD set-page-data context for (s3 s2 s1): ("s1" "s2" "s3")
+SD set-page-data lambda-list: (FW::PAGE FW::JSON &KEY (FW::CONTEXT-RESOLVER (FUNCTION FW::EXTRACT-CONTEXT)))
+SD socket attempts: ("origin")
+SD-DONE

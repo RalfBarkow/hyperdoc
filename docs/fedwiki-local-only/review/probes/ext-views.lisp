@@ -1,0 +1,38 @@
+;;;; Same chain objects as probes35 section 5, but in an image that also loads the Dreyeck view systems specialised on FedWiki pages.
+(require :asdf)
+(defparameter cl-user::*review-tree*
+  (uiop:ensure-directory-pathname
+   (or (uiop:getenv "PR_TREE")
+       (truename (merge-pathnames "../../../../" (uiop:pathname-directory-pathname *load-truename*))))))
+(defparameter cl-user::*review-work*
+  (uiop:ensure-directory-pathname
+   (or (uiop:getenv "PROBE_DIR") (error "Set PROBE_DIR to an empty scratch directory (run-review.sh does this)."))))
+(asdf:load-asd (merge-pathnames "dreyeck.asd" cl-user::*review-tree*))
+(dolist (s '("dreyeck/work/fedwiki-local-only" "dreyeck/local-fedwiki-view" "dreyeck/local-fedwiki-page/activation-inspector"
+             "dreyeck/local-fedwiki-page/inspector" "dreyeck/inspector/fedwiki-source-relations" "dreyeck/work/reading"))
+  (format t "~&EXT load ~A: ~S~%" s (handler-case (progn (asdf:load-system s) :loaded) (error (c) (list :condition (type-of c))))))
+(defpackage #:ext (:use #:cl) (:local-nicknames (#:i #:dreyeck/work/fedwiki-local-only) (#:h #:dreyeck/shop3) (#:hb #:hyperbook) (#:v #:html-inspector-views) (#:fw #:hyperbook/fedwiki)))
+(in-package #:ext)
+(setf *print-pretty* nil)
+(defun pd (name) (merge-pathnames name cl-user::*review-work*))
+(ensure-directories-exist (pd "EXT-MARKER-A-AFTER-LOAD/"))
+(defun views-of (object)
+  (loop for view in (v:all-views object)
+        collect (list (v:view-title view)
+                      (handler-case (let ((s (princ-to-string (v:view-html view)))) (list :ok :img (and (search "<img" s) t) :src-http (and (search "src=\"http" s) t)))
+                        (error (c) (list :condition (type-of c)))))))
+(let* ((root (asdf:system-relative-pathname "dreyeck/work/fedwiki-local-only" "dreyeck/tests/fixtures/fedwiki-local-only/"))
+       (site (i:make-own-site root "fedwiki:local"))
+       (m (i:observe-link site "source" 1 :evidence-file (merge-pathnames "evidence.json" root)))
+       (l (i:observe-link site "source" 0))
+       (p (i:prepare-link m :repeat 2)) (rr (i:resolve-link m :prepared p)))
+  (format t "~&EXT view functions in image: ~D~%" (length v::*view-functions*))
+  (dolist (pair (list (cons "observation" m) (cons "own-site" site) (cons "source page" (i:observed-page m)) (cons "story item" (i:observed-item m))
+                      (cons "wiki-link" (i:target-link m)) (cons "observed target page" (i:target-page l)) (cons "preparation" p) (cons "resolution" rr)
+                      (cons "problem" (shop3:find-problem (h:problem-name-of p))) (cons "final states" (h:final-states-of p)) (cons "plans" (h:plans-of p))
+                      (cons "plan trees" (h:plan-trees-of p)) (cons "fork step" (first (first (h:plans-of p))))))
+    (format t "~&EXT ~A: ~S~%" (car pair) (views-of (cdr pair))))
+  (format t "~&EXT thunks: ~S~%" (list (type-of (v:eval-thunk (hb:thunk-of (i:target-link l)))) (type-of (v:eval-thunk (hb:thunk-of (i:target-link m)))))))
+(ensure-directories-exist (pd "EXT-MARKER-B-BEFORE-CONTROL/"))
+(format t "~&EXT control: ~S~%" (handler-case (usocket:socket-connect "127.0.0.1" 9) (error (c) (type-of c))))
+(format t "~&EXT-DONE~%")

@@ -1,0 +1,38 @@
+{
+  "title": "Source",
+  "story": [
+    {
+      "type": "paragraph",
+      "id": "local",
+      "text": "[[Target]]",
+      "site": "remote-item"
+    },
+    {
+      "type": "paragraph",
+      "id": "missing",
+      "text": "[[Missing]]",
+      "site": "remote-item"
+    },
+    {
+      "type": "paragraph",
+      "id": "remote",
+      "text": "[[Remote Only]]",
+      "site": "remote-item"
+    },
+    {
+      "type": "paragraph",
+      "id": "broken",
+      "text": "[[Broken]]"
+    }
+  ],
+  "journal": [
+    {
+      "type": "fork",
+      "site": "remote-old"
+    },
+    {
+      "type": "edit",
+      "site": "remote-new"
+    }
+  ]
+}

@@ -1,0 +1,20 @@
+;;;; F5: title-bar buttons of OWN-PAGE and OWN-SITE, the external URL the site button opens, and the Story HTML of OWN-PAGE.
+(require :asdf)
+(defparameter cl-user::*review-tree*
+  (uiop:ensure-directory-pathname
+   (or (uiop:getenv "PR_TREE")
+       (truename (merge-pathnames "../../../../" (uiop:pathname-directory-pathname *load-truename*))))))
+(asdf:load-asd (merge-pathnames "dreyeck.asd" cl-user::*review-tree*))
+(asdf:load-system "dreyeck/work/fedwiki-local-only")
+(in-package #:dreyeck/work/fedwiki-local-only)
+(setf *print-pretty* nil)
+(let* ((root (asdf:system-relative-pathname "dreyeck/work/fedwiki-local-only" "dreyeck/tests/fixtures/fedwiki-local-only/"))
+       (site (make-own-site root "fedwiki:local")) (page (hb:find-page site "source")))
+  (format t "~&TB generic-function method-combination: ~S~%" (sb-mop:generic-function-method-combination #'v:title-bar-action-buttons))
+  (format t "~&TB applicable methods for own-page: ~S~%" (mapcar (lambda (m) (list (method-qualifiers m) (mapcar #'class-name (sb-mop:method-specializers m)))) (compute-applicable-methods #'v:title-bar-action-buttons (list page))))
+  (let ((b (v:title-bar-action-buttons page)))
+    (format t "~&TB own-page result type ~S html ~A~%" (type-of b) (ignore-errors (v:view-html b))))
+  (let ((b (v:title-bar-action-buttons site)))
+    (format t "~&TB own-site buttons: ~S~%" (let ((s (princ-to-string (v:view-html b)))) (list :button (and (search "<button" s) t) :html-length (length s)))))
+  (format t "~&TB own-site open-external target: ~A~%" (fw::wiki-url (fw::domain-name-of site) (fw::protocol-of site) "/"))
+  (format t "~&TB story html of own-page: ~A~%" (v:view-html (fw::👀story page))))

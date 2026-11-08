@@ -1,0 +1,122 @@
+{
+  "base_commit": "4e76e9aff910e9da45c1fe9252e528669c2683fb",
+  "branch": "codex/fedwiki-local-only-integration",
+  "source_sha256": {
+    "dreyeck.asd": "1ec0b68cca50302c8fa6ce050ce65ee1385b40eb79ab64e2711c185b534c78ef",
+    "hyperbook-fedwiki/pages.lisp": "4b1bff0b7e075e3493a42fb8c39f98b4317bd38153b81732a9f317d0456e3c6d",
+    "hyperbook-fedwiki/wiki-links.lisp": "9da1447abc455e0a7cb5a1fcb46e9b72dae6e55c37611edb2fe5f383c64d4469",
+    "dreyeck/work/fedwiki-local-only.lisp": "b5253ee561f6a3880d4aad71b39c724e45472023dee401a687ecee322bb19d2e",
+    "dreyeck/work/local-only-resolution.lisp": "9388e213411d0237526642c38a5e4847a02e69ce89853c3a623304700e465822",
+    "dreyeck/tests/fedwiki-local-only.lisp": "f454afc17be50dd134b44eadd579eb51af1d64c360955eeffda1812072be02b5",
+    "scripts/test-fedwiki-local-only.lisp": "3d63386e0e1b384992cd5f612cc92e2570d72c96ff76bc32b6b5fbcda8ba2a4c",
+    "dreyeck/tests/fixtures/fedwiki-local-only/bad-digest.json": "8e5e655f7649a70dd39c01df3aea00268cf73bafd8fd31cedb15a9271e305b99",
+    "dreyeck/tests/fixtures/fedwiki-local-only/evidence-302.json": "9fdaf3423c64b10d0d097dc68a13506830a4028798ffac3ef6a00b4f2462f6f8",
+    "dreyeck/tests/fixtures/fedwiki-local-only/evidence-500.json": "02fc8a80931d2c799fed1f49392f7943dc6280d8c95bb70debf7016cba8d25a6",
+    "dreyeck/tests/fixtures/fedwiki-local-only/evidence-transport.json": "3ec3af7bf80f07430b77b9e9d470676649476b0dcb3e0e050a0185f674f2bd5a",
+    "dreyeck/tests/fixtures/fedwiki-local-only/evidence.json": "2ffbc6a48c89c30ad7680da6dfa29ed712bd137a17daca18b6694a55ca834ab5",
+    "dreyeck/tests/fixtures/fedwiki-local-only/injected.json": "380084df1733522c52212ed17cff22f0fba2195602bd1bcccac21a6963525652",
+    "dreyeck/tests/fixtures/fedwiki-local-only/pages/broken": "917263215e2c337ab54d00d8622f7d7ba60534f1f857f321657f1865a0dc0739",
+    "dreyeck/tests/fixtures/fedwiki-local-only/pages/source": "614ed60dd2c5a8ddd6db28fe23e58edfce240f837e347e94a251497532629b65",
+    "dreyeck/tests/fixtures/fedwiki-local-only/pages/target": "64496bc9b5f5aa740b3f2d108b17e928a1c45e003050f6075f8a7ca8f562fc66",
+    "dreyeck/tests/fixtures/fedwiki-local-only/snapshots/broken.json": "95915f26895caad7f0df02d7e41919f844380475937b533e0bdaa29a7fb501d2",
+    "dreyeck/tests/fixtures/fedwiki-local-only/snapshots/missing.json": "3106428da16be933084ba9ecb2eed90b3fd37e80d2e843252936dfbfb9f2d3d7"
+  },
+  "shop3_commit": "ce53f9b651acde8c44dc21eddb1a1c5b97f10536",
+  "runs": [
+    {
+      "name": "integration-tests",
+      "checkout": "/workspace/scratch/hyperdoc-local-only",
+      "commit": "4e76e9aff910e9da45c1fe9252e528669c2683fb",
+      "feature_delta_applies": true,
+      "command": [
+        "python3",
+        "/workspace/scratch/defederation-tools/run.py",
+        "--load",
+        "scripts/test-fedwiki-local-only.lisp"
+      ],
+      "environment": {
+        "DEFEDERATION_TEST_ROOT": "/workspace/scratch/hyperdoc-local-only"
+      },
+      "started_utc": "2026-11-08T10:50:35.087849+00:00",
+      "exit_code": 0,
+      "marker": "LOCAL-ONLY-INTEGRATION-PASS",
+      "log_sha256": "0164c32ae01597128ab1ebe84825afec3e1ba1cb318fc923e5e02f0fe878a347"
+    },
+    {
+      "name": "feature-regressions",
+      "checkout": "/workspace/scratch/hyperdoc-local-only",
+      "commit": "4e76e9aff910e9da45c1fe9252e528669c2683fb",
+      "feature_delta_applies": true,
+      "command": [
+        "python3",
+        "/workspace/scratch/defederation-tools/run.py",
+        "--load",
+        "docs/defederation-consolidation/regressions.lisp"
+      ],
+      "environment": {
+        "DEFEDERATION_TEST_ROOT": "/workspace/scratch/hyperdoc-local-only"
+      },
+      "started_utc": "2026-11-08T10:50:35.088323+00:00",
+      "exit_code": 0,
+      "marker": "BASELINE EMPTY-WITH-TREE REPRODUCED",
+      "log_sha256": "8ca3d80f424821ec1703957851ca8b3957c5536eff0a92caddd40f824f0f71af"
+    },
+    {
+      "name": "pr31-tests",
+      "checkout": "/workspace/scratch/hyperdoc-link-resolution",
+      "commit": "befce10dc0055222c33d9736723a05d0122a0c9d",
+      "feature_delta_applies": false,
+      "command": [
+        "python3",
+        "/workspace/scratch/defederation-tools/run.py",
+        "--load",
+        "scripts/test-link-resolution.lisp"
+      ],
+      "environment": {
+        "DEFEDERATION_TEST_ROOT": "/workspace/scratch/hyperdoc-link-resolution"
+      },
+      "started_utc": "2026-11-08T10:50:41.233140+00:00",
+      "exit_code": 0,
+      "marker": "JAVA-DERIVED-LINK-RESOLUTION-ACCEPTANCE-PASS",
+      "log_sha256": "eda9cc8e684ca1750618b6546e2af8a19a167aee3d0cd1eb59125af6fec858c0"
+    },
+    {
+      "name": "pr32-tests",
+      "checkout": "/workspace/scratch/hyperdoc-pr32-baseline",
+      "commit": "e1ab2f570ee793e301c5af706cbcf2fc984c02a9",
+      "feature_delta_applies": false,
+      "command": [
+        "python3",
+        "/workspace/scratch/defederation-tools/run.py",
+        "--load",
+        "scripts/test-fedwiki-link-resolution.lisp"
+      ],
+      "environment": {
+        "DEFEDERATION_TEST_ROOT": "/workspace/scratch/hyperdoc-pr32-baseline"
+      },
+      "started_utc": "2026-11-08T10:50:49.212021+00:00",
+      "exit_code": 0,
+      "marker": "LINK-RESOLUTION-ALL-PASS",
+      "log_sha256": "189d91e717195c7fedd3bb340870728fe22e2eb5fad0004ad7dc04d3888a00fc"
+    },
+    {
+      "name": "pr33-tests",
+      "checkout": "/workspace/scratch/hyperdoc-defederation-consolidated",
+      "commit": "68971d55f68273b77e1d33186bc66e9f019c0902",
+      "feature_delta_applies": false,
+      "command": [
+        "python3",
+        "/workspace/scratch/defederation-tools/run.py",
+        "--load",
+        "docs/defederation-consolidation/regressions.lisp"
+      ],
+      "environment": {
+        "DEFEDERATION_TEST_ROOT": "/workspace/scratch/hyperdoc-defederation-consolidated"
+      },
+      "started_utc": "2026-11-08T10:50:51.469590+00:00",
+      "exit_code": 0,
+      "marker": "BASELINE EMPTY-WITH-TREE REPRODUCED",
+      "log_sha256": "d4c2221f35fb0661054cea8ddd56df2279d4eb9d3766d1b15598fc2dec9edfac"
+    }
+  ]
+}

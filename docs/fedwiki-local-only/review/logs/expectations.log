@@ -1,0 +1,112 @@
+EXPECT-PASS step own-suite35 exit=0 and its end marker present
+EXPECT-PASS step regressions-pr34 exit=0 and its end marker present
+EXPECT-PASS step regressions-pr35 exit=0 and its end marker present
+EXPECT-PASS step wiki-link-tests-pr34 exit=0 and its end marker present
+EXPECT-PASS step wiki-link-tests-pr35 exit=0 and its end marker present
+EXPECT-PASS step shared-diff-pr34 exit=0 and its end marker present
+EXPECT-PASS step shared-diff-pr35 exit=0 and its end marker present
+EXPECT-PASS step probes35 exit=0 and its end marker present
+EXPECT-PASS step ext-views35 exit=0 and its end marker present
+EXPECT-PASS step titlebar35 exit=0 and its end marker present
+EXPECT-PASS reading-tests ran to a SUITE-PASS/ERROR line on both commits
+EXPECT-PASS regressions-pr34 = regressions-pr35 after removing only the BASELINE-ROOT line
+EXPECT-PASS wiki-link-tests-pr34 = wiki-link-tests-pr35 after removing only the BASELINE-ROOT line
+EXPECT-PASS reading-tests-pr34 = reading-tests-pr35 after removing only the BASELINE-ROOT line
+EXPECT-PASS regressions-pr34: six TEST-PASS lines and the empty-tree defect reproduced
+EXPECT-PASS wiki-link-tests-pr34: SUITE-PASS
+EXPECT-PASS reading-tests-pr34: SUITE-ERROR at authored-d2 with :STATUS :UNAVAILABLE (environment limit, NOT a passing test)
+EXPECT-PASS regressions-pr35: six TEST-PASS lines and the empty-tree defect reproduced
+EXPECT-PASS wiki-link-tests-pr35: SUITE-PASS
+EXPECT-PASS reading-tests-pr35: SUITE-ERROR at authored-d2 with :STATUS :UNAVAILABLE (environment limit, NOT a passing test)
+EXPECT-PASS shared-diff: exactly two differing lines, both the set-page-data lambda list
+EXPECT-PASS shared-diff-pr35: no socket attempt beyond the plugin resolver probe
+EXPECT-PASS own-suite35: 0 network system calls
+EXPECT-PASS probes35: 0 network system calls before the control marker
+EXPECT-PASS probes35: control connection after the marker is visible
+EXPECT-PASS ext-views35: 0 network system calls while loading
+EXPECT-PASS ext-views35: 0 network system calls between the markers
+EXPECT-PASS ext-views35: control connection after marker B is visible
+EXPECT-PASS probes35 ran to the end
+EXPECT-PASS probes35.log: N 1 LOCAL: contains (':FINDING :OBSERVED-LOCAL', '(I::OWN-PAGE I::OWN-PAGE I::OWN-PAGE)')
+EXPECT-PASS probes35.log: N 1 MISSING: contains (':FINDING :CONFIRMED-LOCAL-ABSENCE', 'WIKI-LOOKUP-FAILURE')
+EXPECT-PASS probes35.log: N 1 REMOTE: contains (':FINDING :CONFIRMED-LOCAL-ABSENCE', 'WIKI-LOOKUP-FAILURE')
+EXPECT-PASS probes35.log: N 1 BROKEN: contains (':FINDING :UNKNOWN', 'SHASHT-INVALID-CHAR')
+EXPECT-PASS probes35.log: N 2 contains ('(:CONFIRMED-LOCAL-ABSENCE :CONFIRMED-LOCAL-ABSENCE :CONFIRMED-LOCAL-ABSENCE)',)
+EXPECT-PASS probes35.log: N 3 source2 context contains ('(NIL (:PARAGRAPH :REFERENCE :IMAGE))',)
+EXPECT-PASS probes35.log: N 3 thunk target: contains ('I::OWN-PAGE',)
+EXPECT-PASS probes35.log: N 4 contains ('(:OK :LOADED)',)
+EXPECT-PASS probes35.log: G 0 contains ('registered in this image: 0',)
+EXPECT-PASS probes35.log: G 1 contains ('fw::load-page',) and none of ('socket', 'host', 'drakma', 'fetch', 'fedwiki"', 'plugin', 'run-program', 'make-thread', 'extract-context')
+EXPECT-PASS probes35.log: P 1a contains (':FINDING :UNKNOWN', ':LOCAL-ONLY ((R::!REQUEST R::!OPEN-PANEL))', ':FORK 0')
+EXPECT-PASS probes35.log: P 1b contains (':FINDING :CONFIRMED-LOCAL-ABSENCE', ':LOCAL-ONLY NIL')
+EXPECT-PASS probes35.log: P 1c contains (':FINDING :UNKNOWN', ':LOCAL-ONLY ((R::!REQUEST R::!CONCLUDE-UNRESOLVED))')
+EXPECT-PASS probes35.log: P 1d contains (':FINDING :OBSERVED-LOCAL', ':LOCAL-ONLY NIL')
+EXPECT-PASS probes35.log: P 1e contains (':FINDING :UNKNOWN', ':LOCAL-ONLY ((R::!REQUEST R::!CONCLUDE-UNRESOLVED))', ':FORK 0')
+EXPECT-PASS probes35.log: P 2a contains (':OK', ':FORK 1')
+EXPECT-PASS probes35.log: P 2b contains (':OK', ':FORK 1')
+EXPECT-PASS probes35.log: P 2c contains (':OK', ':FORK 1')
+EXPECT-PASS probes35.log: P 2d contains ('SNAPSHOT-COPY-NOT-VERIFIED',)
+EXPECT-PASS probes35.log: P 2e contains ('SNAPSHOT-COPY-NOT-VERIFIED',)
+EXPECT-PASS probes35.log: P 3a contains ('TYPE-ERROR',)
+EXPECT-PASS probes35.log: P 3b contains ('TYPE-ERROR',)
+EXPECT-PASS probes35.log: P 3e contains ('BOUNDING-INDICES-BAD-ERROR',)
+EXPECT-PASS probes35.log: P 3m contains ('SHASHT-INVALID-CHAR',)
+EXPECT-PASS probes35.log: P 3f contains ('(D::FORK-PERMITTED :NULL :NULL)',)
+EXPECT-PASS probes35.log: P 4a contains ('INDEX-TOO-LARGE-ERROR',)
+EXPECT-PASS probes35.log: P 4b contains ('INDEX-TOO-LARGE-ERROR',)
+EXPECT-PASS probes35.log: P 3c contains ('INVALID-OBSERVATION', 'UNAPPROVED-PREDICATE')
+EXPECT-PASS probes35.log: P 3d contains ('INVALID-OBSERVATION', 'UNAPPROVED-PREDICATE')
+EXPECT-PASS probes35.log: P 3g contains ('INVALID-OBSERVATION', 'UNAPPROVED-FACT')
+EXPECT-PASS probes35.log: P 3h contains ('INVALID-OBSERVATION', 'UNAPPROVED-FACT')
+EXPECT-PASS probes35.log: P 3i contains ('INVALID-OBSERVATION', 'UNAPPROVED-FACT')
+EXPECT-PASS probes35.log: P 3n contains ('INVALID-OBSERVATION', 'UNAPPROVED-FACT')
+EXPECT-PASS probes35.log: P 3j contains ('INVALID-OBSERVATION', 'LOCAL-OBSERVATIONS-MUST-COME-FROM-STORE')
+EXPECT-PASS probes35.log: P 3k contains ('INVALID-OBSERVATION', 'UNAPPROVED-PREDICATE MODELED-FORK')
+EXPECT-PASS probes35.log: P 3l contains ('INVALID-OBSERVATION', 'UNKNOWN-POLICY')
+EXPECT-PASS probes35.log: P 4c contains ('(:OK :CONFIRMED-LOCAL-ABSENCE)',)
+EXPECT-PASS probes35.log: P 5a contains ('INVALID-CONTINUATION',)
+EXPECT-PASS probes35.log: P 5b contains ('INVALID-CONTINUATION',)
+EXPECT-PASS probes35.log: P 5c contains ('INVALID-CONTINUATION',)
+EXPECT-PASS probes35.log: P 5d contains ('INVALID-CONTINUATION',)
+EXPECT-PASS probes35.log: P 5e contains ('INVALID-CONTINUATION',)
+EXPECT-PASS probes35.log: P 5h contains ('INVALID-CONTINUATION',)
+EXPECT-PASS probes35.log: P 5f contains (':OK ((D::!SIMULATE-FORK',)
+EXPECT-PASS probes35.log: P 5g contains (':OK ((D::!SIMULATE-FORK',)
+EXPECT-PASS probes35.log: C 0 contains (': (1 1)',)
+EXPECT-PASS probes35.log: C 1a contains ('INVALID-CONTINUATION',)
+EXPECT-PASS probes35.log: C 1b contains ('INVALID-CONTINUATION',)
+EXPECT-PASS probes35.log: C 2 contains ('INVALID-CONTINUATION',)
+EXPECT-PASS probes35.log: C 3b contains ('INVALID-CONTINUATION',)
+EXPECT-PASS probes35.log: C 5c contains ('INVALID-CONTINUATION',)
+EXPECT-PASS probes35.log: C 3c contains (':OK ((D::!PREPARE-LOCAL-LINKS',)
+EXPECT-PASS probes35.log: C 4 index -1: contains ('INVALID-CONTINUATION',)
+EXPECT-PASS probes35.log: C 4 index 1: contains ('INVALID-CONTINUATION',)
+EXPECT-PASS probes35.log: C 4 index 1.0: contains ('INVALID-CONTINUATION',)
+EXPECT-PASS probes35.log: C 4 index "0": contains ('INVALID-CONTINUATION',)
+EXPECT-PASS probes35.log: C 4 index NIL: contains ('INVALID-CONTINUATION',)
+EXPECT-PASS probes35.log: C 4 index 0: contains (':OK ((D::!PREPARE-LOCAL-LINKS',)
+EXPECT-PASS probes35.log: C 5a contains ('"remote-new"', '"remote-item"')
+EXPECT-PASS probes35.log: C 5b index 0 contains ('R::!USE-MODELED-PAGE',)
+EXPECT-PASS probes35.log: C 5b index 1 contains ('R::!USE-MODELED-PAGE',)
+EXPECT-PASS probes35.log: C 6 contains ('(1 1 (:OK ((D::!PREPARE-LOCAL-LINKS',)
+EXPECT-PASS probes35.log: C 6b contains (':OK ((D::!PREPARE-LOCAL-LINKS',)
+EXPECT-PASS probes35.log: C 7 contains ('(0 (:CONDITION I:INVALID-CONTINUATION', 'I:INVALID-CONTINUATION')
+EXPECT-PASS probes35.log: C 8 contains ('((R::!REQUEST R::!OPEN-PANEL))',)
+EXPECT-PASS probes35.log: C 9 contains ('(:CONFIRMED-LOCAL-ABSENCE NIL NIL ((R::MODELED-LOCAL-PAGE "fedwiki:local" "missing")) ((R::!USE-MODELED-PAGE)))',)
+EXPECT-PASS probes35.log: C 10 contains (': 6',)
+EXPECT-PASS probes35.log: I 2 contains ('(T T T T T T T T T)',)
+EXPECT-PASS probes35.log: I 3 contains ('?: NIL',)
+EXPECT-PASS probes35.log: I 4 contains ('(NIL NIL NIL)',)
+EXPECT-PASS probes35.log: I 5 contains ('?: NIL',)
+EXPECT-PASS probes35.log: I 6 contains ('("" :BUTTON)',)
+EXPECT-PASS probes35.log: STRACE-MARKER control connect contains (':CONDITION',)
+EXPECT-PASS titlebar35.log: TB own-site buttons contains (':BUTTON T',)
+EXPECT-PASS titlebar35.log: TB own-site open-external target contains ('https://local/',)
+EXPECT-PASS titlebar35.log: TB story html of own-page contains ('Local read-only source',) and none of ('<img', 'href=')
+EXPECT-PASS ext-views35: all six systems loaded
+EXPECT-PASS ext-views35.log: EXT thunks: contains ('(I::OWN-PAGE FW::WIKI-LOOKUP-FAILURE)',)
+EXPECT-PASS ext-views35: every view renders, except the generic Playground view outside CLOG
+EXPECT-PASS manifest: all 18 source digests match
+EXPECT-PASS manifest: all 5 log digests match
+EXPECT-PASS manifest: the only changed file outside it and outside docs/ is its own check script
+EXPECTATIONS PASS: 0 failing item(s)

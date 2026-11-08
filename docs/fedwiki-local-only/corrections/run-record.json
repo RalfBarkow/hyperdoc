@@ -1,0 +1,29 @@
+{
+  "starting_head": "49ef9afd52539234290e38064847d4589a3be412",
+  "branch": "codex/fedwiki-local-only-integration",
+  "tested_revision": "starting_head plus source-before.json SHA-256 entries (identical to source-after.json)",
+  "sbcl": "2.4.10",
+  "shop3_commit": "ce53f9b651acde8c44dc21eddb1a1c5b97f10536",
+  "recorded_at_utc": "2026-11-08T12:01:21.165898+00:00",
+  "command": "SBCL=/tmp/pr35-sbcl docs/fedwiki-local-only/corrections/run.sh /tmp/pr35-final-evidence",
+  "runtime_wrapper": "#!/usr/bin/env bash\nexport DEFEDERATION_TEST_ROOT=/workspace/scratch/hyperdoc-local-only\nwhile [[ \"${1-}\" = --noinform || \"${1-}\" = --no-sysinit || \"${1-}\" = --no-userinit || \"${1-}\" = --non-interactive ]]; do shift; done\nexec python3 /workspace/scratch/defederation-tools/run.py \"$@\"\n",
+  "runtime_launcher": "/workspace/scratch/defederation-tools/run.py",
+  "runtime_launcher_sha256": "7ea31b150fcdeb5e0f2fd5e21e05c9ee07fb09b62a99e8b72777402d9d45d5a6",
+  "network_namespace": "unavailable: unshare --net: Operation not permitted; unshare -rn: uid_map read-only",
+  "log_sha256": {
+    "checks.log": "0baf13b331ae3e0397f07bab1f2ba009ae986404f12375de3655fd60c1911743",
+    "integration.log": "1edfddcdb5c407384e28763576bc13b2e5fcbad5b62b94d792dac79c6332ced8",
+    "integration.strace": "e1ae9fa7e27df2ca4efd761c7bfac499c344bf04ab69e05124df5c70845adce4",
+    "probes.log": "34d3a1b9834e49cb375a83599ebdc802ea1826b4a0554043a2345380673022e7",
+    "probes.strace": "43059e7398de02194b852a05bf975d00f73edb5f7fe0c0edea8cef88a617d9d1",
+    "reading.log": "669b8f8f692dad164555dae7b317e9c656cb69b55ab9c67a9b54f68a8fddec98",
+    "regressions.log": "8ca3d80f424821ec1703957851ca8b3957c5536eff0a92caddd40f824f0f71af",
+    "run.log": "d2f86c1366f8b54e50e8827ab18595c5f6b8b15e01a285c26a70a2e41152af83",
+    "wiki-link.log": "81435a68b6b944346edc5a8cae3913bb6009e8420db60973f67429b37f501461"
+  },
+  "limits": [
+    "Reading suite fails at missing external D2/TALA, as in the historic review.",
+    "No interactive Inspector session tested."
+  ],
+  "log_normalization": "reading.log: trailing whitespace removed; all other output retained verbatim"
+}
