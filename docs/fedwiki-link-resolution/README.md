@@ -217,13 +217,17 @@ Fälle ohne Server erzeugt [obs] (`scripts/test-fedwiki-link-resolution.lisp`). 
 | Local-only | — (Wards Vorschlag) | — | `own-site-only` … | G5, 3 Gate-Mutanten | J4 |
 | Simulierter Fork | — | — | `fork-planned`, `!plan-fork` | G6, G7, 4 Fork-Mutanten | J5 |
 
-**Engine Critiques: keine.** Die Riesbeck/Beane-Engine braucht die Source Station (Asset-Verzeichnis der Wiki-Seite
-`a-critic-for-lisp`), die in dieser Umgebung fehlt. Auf einer Maschine mit Station (nicht ausgeführt; die Formen stammen aus
-`car-cdr-critique-example`):
+**Engine Critiques: keine.** Die Riesbeck/Beane-Implementierung wird über die Seiten-Assets des page-attached
+ASDF-Systems `a-critic-for-lisp` geladen (Federated-Wiki-Seite `a-critic-for-lisp`). Öffentlich ausgeliefert werden davon
+nur die Systemdefinition und `package.lisp`; `src/` und `vendor/lisp-critic/` fehlen auf dem Server. Befunde, auch zur
+irreführenden Anzeige `:assets-present-p T` und zur ungetrennten Discovery: [../lisp-critic-page-assets/README.md](../lisp-critic-page-assets/README.md).
+Der echte Lauf folgt, sobald die vollständigen Seiten-Assets dieser Entwicklungsumgebung bereitgestellt sind. Die
+API-Bezeichner (`make-critic-source-station` usw.) bleiben unverändert. Aufruf auf einer Maschine mit den vollständigen
+Seiten-Assets (nicht ausgeführt; die Formen stammen aus `car-cdr-critique-example`):
 
 ```lisp
 (asdf:load-system "dreyeck/lisp-critic/critique")
-(let* ((station (dreyeck/lisp-critic::make-critic-source-station "/pfad/zur/a-critic-for-lisp/"))
+(let* ((station (dreyeck/lisp-critic::make-critic-source-station "/pfad/zu/den/seiten-assets/a-critic-for-lisp/"))
        (contract (make-instance 'dreyeck/lisp-critic:lisp-critic-contract
                    :id "fedwiki-link-resolution" :title "Critique of the link-resolution model" :source-station station
                    :input-policy '(:file) :invocation-policy '(:critique-file) :output-policy '(:raw-output-preserved)

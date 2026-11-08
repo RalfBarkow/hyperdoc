@@ -1,0 +1,11 @@
+STATION-PROBE env DREYECK_LISP_CRITIC_ROOT=<scratch-site>/assets/pages/a-critic-for-lisp/
+STATION-PROBE fedwiki-assets discovery: title="A Critic for LISP" references=("pages/a-critic-for-lisp") asdf-files=("a-critic-for-lisp.asd")
+STATION-PROBE resolve-engine-asset-root: root=<scratch-site>/assets/pages/a-critic-for-lisp/ source=:EXPLICIT-ASSET-ROOT candidates=(:EXPLICIT-ASSET-ROOT)
+STATION-PROBE engine-station-files-missing: ("lisp-critic.asd" "tables.lisp" "write-wrap.lisp" "extend-match.lisp" "lisp-critic.lisp" "lisp-rules.lisp")
+STATION-PROBE execution-permitted-p (default policy): T
+STATION-PROBE observation :wrapper-system (:READ-P T :NAME "a-critic-for-lisp" :SOURCE-FILE #P"<scratch-site>/assets/pages/a-critic-for-lisp/a-critic-for-lisp.asd" :DEPENDS-ON ("uiop") :COMPONENTS (("package") ("src" ("loader") ("hyperdoc-page"))))
+STATION-PROBE observation :wrapped-source (:DIRECTORY #P"<scratch-site>/assets/pages/a-critic-for-lisp/vendor/lisp-critic/" :PRESENT-P NIL :FILES NIL :ROLE "Beane's 2004 ASDF-loadable distribution of Riesbeck's Lisp Critic" :RIESBECK-ORIGINAL-OBSERVED-P NIL)
+STATION-PROBE observation :loading :assets-present-p T
+STATION-PROBE observation :page-attachment :resolution-source :EXPLICIT-ASSET-ROOT :discovery-asdf ("a-critic-for-lisp.asd")
+STATION-PROBE packages loaded? A-CRITIC-FOR-LISP=NIL LISP-CRITIC=NIL; registered a-critic-for-lisp: T
+STATION-PROBE require-station: ENGINE-INTEGRATION-REQUIRES-A-SOURCE-STATION: the station <scratch-site>/assets/pages/a-critic-for-lisp/ exists (explicit-asset-root) but lacks lisp-critic.asd, tables.lisp, write-wrap.lisp, extend-match.lisp, lisp-critic.lisp, lisp-rules.lisp; the engine cannot be loaded from it. This test is not skipped.

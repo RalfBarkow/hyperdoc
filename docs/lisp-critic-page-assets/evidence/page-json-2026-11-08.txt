@@ -1,0 +1,2 @@
+hyperdoc.dreyeck.ch page-json-sha256 b21c53289bbd0eebf242dc13320b7e9a719b2af047fc65930c3c24d8cdd2dcb3 story-sha256 61c27cf0fa4920b7963e43465740877a314277723bd7bfb056a5bcdf9b611939 story 55 journal 144 assets ['pages/a-critic-for-lisp']
+wiki.ralfbarkow.ch page-json-sha256 b3f1665a0e47d3d55fcc586d73e41bc860d26ee639ea61c237c934f540496b86 story-sha256 61c27cf0fa4920b7963e43465740877a314277723bd7bfb056a5bcdf9b611939 story 55 journal 145 assets ['pages/a-critic-for-lisp']
