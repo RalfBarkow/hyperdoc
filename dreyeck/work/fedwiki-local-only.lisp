@@ -195,6 +195,16 @@ Local presence/absence comes only from the actual local page lookup. No HTTP sta
     (when (some (lambda (f) (and (member (car f) '(r::page-available r::page-unavailable r::request-error))
                                  (equal own (second f)))) external)
       (refuse :own-site-availability-must-come-from-store))
+    ;; (REMOTE-SNAPSHOT local-site slug remote-site digest):
+    ;; keep the destination legal; compare only the remote source with OWN.
+    (dolist (fact external)
+      (when (case (car fact)
+              ((d::remote-page d::remote-page-absent) (equal own (second fact)))
+              (d::remote-snapshot (equal own (fourth fact))))
+        (refuse (list :own-site-cannot-be-remote-source fact))))
+    (dolist (copy (getf evidence :copies))
+      (when (equal own (getf copy :site))
+        (refuse (list :own-site-cannot-be-remote-copy copy))))
     (when facts
       (checked-facts facts)
       (unless (equal facts external) (refuse :facts-without-matching-source)))
