@@ -36,8 +36,12 @@
 ;; Resolve a Wiki link, i.e. a slug in the context of a page
 ;;
 
-(defun lookup-slug-in-page-context
-    (slug page &key (plugin-page-resolver #'get-plugin-page))
+(defgeneric lookup-page-link (page slug plugin-page-resolver))
+
+(defun lookup-slug-in-page-context (slug page &key (plugin-page-resolver #'get-plugin-page))
+  (lookup-page-link page slug plugin-page-resolver))
+
+(defmethod lookup-page-link ((page fedwiki-page) slug plugin-page-resolver)
   (let ((wiki (hb:hyperbook-of page)))
     (or (hb:find-page wiki slug)
         (funcall plugin-page-resolver wiki slug)

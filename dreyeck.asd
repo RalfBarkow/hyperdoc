@@ -3650,3 +3650,17 @@
   :perform (test-op (op component)
              (declare (ignore op component))
              (uiop:symbol-call :dreyeck/work/remote-control-planning :run-reading-tests)))
+
+(defsystem "dreyeck/work/fedwiki-local-only"
+  :description "Opt-in read-only local runtime, observed provenance and protected SHOP3 handoff"
+  :depends-on ("dreyeck/work/defederation-planning" "dreyeck/local-fedwiki-page"
+               "html-inspector-views/standard")
+  :serial t
+  :components ((:file "dreyeck/work/local-only-resolution")
+               (:file "dreyeck/work/fedwiki-local-only")))
+(defsystem "dreyeck/work/fedwiki-local-only/tests"
+  :depends-on ("dreyeck/work/fedwiki-local-only")
+  :components ((:file "dreyeck/tests/fedwiki-local-only"))
+  :perform (test-op (op component)
+             (declare (ignore op component))
+             (uiop:symbol-call :dreyeck/work/fedwiki-local-only/tests :run-tests)))

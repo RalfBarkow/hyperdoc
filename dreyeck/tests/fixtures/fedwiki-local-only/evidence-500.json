@@ -1,0 +1,36 @@
+{
+  "facts": [
+    [
+      "remote-snapshot",
+      "fedwiki:local",
+      "broken",
+      "remote-item",
+      "95915f26895caad7f0df02d7e41919f844380475937b533e0bdaa29a7fb501d2"
+    ],
+    [
+      "fork-permitted",
+      "fedwiki:local",
+      "broken"
+    ],
+    [
+      "fork-source-policy",
+      "fedwiki:local",
+      "broken",
+      "cached-copy-sufficient"
+    ],
+    [
+      "page-unavailable",
+      "fedwiki:local",
+      "broken",
+      500
+    ]
+  ],
+  "copies": [
+    {
+      "site": "remote-item",
+      "slug": "broken",
+      "path": "snapshots/broken.json",
+      "sha256": "95915f26895caad7f0df02d7e41919f844380475937b533e0bdaa29a7fb501d2"
+    }
+  ]
+}
