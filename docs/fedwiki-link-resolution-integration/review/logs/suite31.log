@@ -1,0 +1,45 @@
+LINK-RESOLUTION PASS local-first COLLABORATIVE: 1 plans, selected (:ORIGIN), execution NOT-EXECUTED
+LINK-RESOLUTION PASS local-first LOCAL-ONLY: 1 plans, selected (:ORIGIN), execution NOT-EXECUTED
+LINK-RESOLUTION PASS context-order COLLABORATIVE: 1 plans, selected (:B), execution NOT-EXECUTED
+LINK-RESOLUTION PASS context-order LOCAL-ONLY: 0 plans, selected NIL, execution NOT-EXECUTED
+LINK-RESOLUTION PASS item-order COLLABORATIVE: 1 plans, selected (:A), execution NOT-EXECUTED
+LINK-RESOLUTION PASS item-order LOCAL-ONLY: 0 plans, selected NIL, execution NOT-EXECUTED
+LINK-RESOLUTION PASS journal-order COLLABORATIVE: 1 plans, selected (:A), execution NOT-EXECUTED
+LINK-RESOLUTION PASS journal-order LOCAL-ONLY: 0 plans, selected NIL, execution NOT-EXECUTED
+LINK-RESOLUTION PASS panel-first COLLABORATIVE: 1 plans, selected (:PANEL), execution NOT-EXECUTED
+LINK-RESOLUTION PASS panel-first LOCAL-ONLY: 0 plans, selected NIL, execution NOT-EXECUTED
+LINK-RESOLUTION PASS exhausted COLLABORATIVE: 0 plans, selected NIL, execution NOT-EXECUTED
+LINK-RESOLUTION PASS exhausted LOCAL-ONLY: 0 plans, selected NIL, execution NOT-EXECUTED
+LINK-RESOLUTION PASS unknown-before-hit COLLABORATIVE: 0 plans, selected NIL, execution NOT-EXECUTED
+LINK-RESOLUTION PASS unknown-before-hit LOCAL-ONLY: 0 plans, selected NIL, execution NOT-EXECUTED
+LINK-RESOLUTION PASS http-500-fallback COLLABORATIVE: 1 plans, selected (:A), execution NOT-EXECUTED
+LINK-RESOLUTION PASS http-500-fallback LOCAL-ONLY: 0 plans, selected NIL, execution NOT-EXECUTED
+LINK-RESOLUTION PASS network-aborts COLLABORATIVE: 0 plans, selected NIL, execution NOT-EXECUTED
+LINK-RESOLUTION PASS network-aborts LOCAL-ONLY: 0 plans, selected NIL, execution NOT-EXECUTED
+LINK-RESOLUTION PASS neighborhood COLLABORATIVE: 1 plans, selected (:A :A), execution NOT-EXECUTED
+LINK-RESOLUTION PASS neighborhood LOCAL-ONLY: 0 plans, selected NIL, execution NOT-EXECUTED
+LINK-RESOLUTION PASS origin-repeated COLLABORATIVE: 1 plans, selected (:A), execution NOT-EXECUTED
+LINK-RESOLUTION PASS origin-repeated LOCAL-ONLY: 0 plans, selected NIL, execution NOT-EXECUTED
+LINK-RESOLUTION PASS selected-item COLLABORATIVE: 1 plans, selected (:A), execution NOT-EXECUTED
+LINK-RESOLUTION PASS selected-item LOCAL-ONLY: 0 plans, selected NIL, execution NOT-EXECUTED
+LINK-RESOLUTION PASS sitemap-miss-cached COLLABORATIVE: 1 plans, selected (:A
+LINK-RESOLUTION PASS sitemap-miss-cached LOCAL-ONLY: 0 plans, selected NIL, execution NOT-EXECUTED
+LINK-RESOLUTION PASS FORK LOCAL-ONLY: 1 plans, selected (:ORIGIN :ORIGIN), execution NOT-EXECUTED
+LINK-RESOLUTION PASS REPLAN-FROM-HYPOTHETICAL-FINAL-STATE LOCAL-ONLY: 1 plans, selected (:ORIGIN), execution NOT-EXECUTED
+LINK-RESOLUTION PASS SAME-REQUEST-FRESH-SEARCH LOCAL-ONLY: 1 plans, selected (:ORIGIN), execution NOT-EXECUTED
+LINK-RESOLUTION PASS (MISSING VERIFIED-COPY) LOCAL-ONLY: 0 plans, selected NIL, execution NOT-EXECUTED
+LINK-RESOLUTION PASS (MISSING FORK-PERMITTED) LOCAL-ONLY: 0 plans, selected NIL, execution NOT-EXECUTED
+LINK-RESOLUTION PASS (MISSING FORK-SOURCE-POLICY) LOCAL-ONLY: 0 plans, selected NIL, execution NOT-EXECUTED
+LINK-RESOLUTION PASS (MISSING PAGE-ABSENT) LOCAL-ONLY: 0 plans, selected NIL, execution NOT-EXECUTED
+LINK-RESOLUTION PASS REQUIRE-REMOTE-UNKNOWN LOCAL-ONLY: 0 plans, selected NIL, execution NOT-EXECUTED
+LINK-RESOLUTION PASS REMOTE-EVIDENCE-SUPPLIED LOCAL-ONLY: 1 plans, selected (:ORIGIN), execution NOT-EXECUTED
+LINK-RESOLUTION PASS CONFLICTING-LOCAL COLLABORATIVE: 0 plans, selected NIL, execution NOT-EXECUTED
+LINK-RESOLUTION PASS HTTP500-NOT-ABSENCE COLLABORATIVE: 0 plans, selected NIL, execution NOT-EXECUTED
+MUTANT-KILLED candidate-order: expected :B, mutant selected :A.
+MUTANT-KILLED local-only-gate: expected refusal, mutant selected remote :B.
+LINK-RESOLUTION PASS UNKNOWN-NOT-ABSENCE COLLABORATIVE: 0 plans, selected NIL, execution NOT-EXECUTED
+LINK-RESOLUTION PASS ABSENCE-EVIDENCE-ADDED COLLABORATIVE: 1 plans, selected (:A), execution NOT-EXECUTED
+LINK-RESOLUTION-TESTS-PASS: real SHOP3, Java trace comparison, two killed mutants; no Wiki effects.
+HYPERDOC-JAVA-CONTEXT-PASS: actual journal helper agrees on 12 direct-site fixtures.
+LINK-RESOLUTION-INSPECTOR-PASS: 26 completed model evaluations, original plan/method/source references; HyperBook; no live Critic.
+JAVA-DERIVED-LINK-RESOLUTION-ACCEPTANCE-PASS

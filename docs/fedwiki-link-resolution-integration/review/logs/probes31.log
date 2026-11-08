@@ -1,0 +1,28 @@
+P31 I1 imported modeled-local-page only, collaborative: plans=1 ops=(((!RECORD-RESOLUTION :TARGET :ORIGIN :MODELED))) added=(((RESOLUTION-PREPARED :TARGET :ORIGIN :MODELED)))
+P31 I2 imported modeled-local-page only, local-only: plans=1 ops=(((!RECORD-RESOLUTION :TARGET :ORIGIN :MODELED))) added=(((RESOLUTION-PREPARED :TARGET :ORIGIN :MODELED)))
+P31 I3 imported modeled-local-page + page-absent + NO permission, prepare: plans=1 ops=(((!RECORD-RESOLUTION :TARGET :ORIGIN :MODELED))) added=(((RESOLUTION-PREPARED :TARGET :ORIGIN :MODELED)))
+P31 I4 imported modeled-local-page at remote :a, origin absent: plans=0 ops=NIL added=NIL
+P31 I5 imported modeled-fork only (no presence) + fork evidence, prepare: plans=1 ops=((!PREPARE-FORK (!RECORD-RESOLUTION :TARGET :ORIGIN :MODELED))) added=(((MODELED-LOCAL-PAGE :ORIGIN :TARGET) (RESOLUTION-PREPARED :TARGET :ORIGIN :MODELED)))
+P31 I6 imported resolution-prepared marker, origin unknown: plans=0 ops=NIL added=NIL
+P31 F1 fork with HTTP 500 at origin instead of page-absent: plans=0 ops=NIL added=NIL
+P31 F2 fork with explicit fork-forbidden as well: plans=1 ops=((!PREPARE-FORK (!RECORD-RESOLUTION :TARGET :ORIGIN :MODELED))) added=(((MODELED-FORK :ORIGIN :A :TARGET :SNAP) (MODELED-LOCAL-PAGE :ORIGIN :TARGET) (RESOLUTION-PREPARED :TARGET :ORIGIN :MODELED)))
+P31 F3 fork, strict policy, remote present: plans=1 ops=((!PREPARE-FORK (!RECORD-RESOLUTION :TARGET :ORIGIN :MODELED))) added=(((MODELED-FORK :ORIGIN :A :TARGET :SNAP) (MODELED-LOCAL-PAGE :ORIGIN :TARGET) (RESOLUTION-PREPARED :TARGET :ORIGIN :MODELED)))
+P31 F4 fork, two verified copies: plans=2 ops=((!PREPARE-FORK (!RECORD-RESOLUTION :TARGET :ORIGIN :MODELED)) (!PREPARE-FORK (!RECORD-RESOLUTION :TARGET :ORIGIN :MODELED))) added=(((MODELED-FORK :ORIGIN :A :TARGET :SNAP) (MODELED-LOCAL-PAGE :ORIGIN :TARGET) (RESOLUTION-PREPARED :TARGET :ORIGIN :MODELED)) ((MODELED-FORK :ORIGIN :B :TARGET :SNAP2) (MODELED-LOCAL-PAGE :ORIGIN :TARGET) (RESOLUTION-PREPARED :TARGET :ORIGIN :MODELED)))
+P31 F5 fork, cached policy, copy from a remote observed absent: plans=1 ops=((!PREPARE-FORK (!RECORD-RESOLUTION :TARGET :ORIGIN :MODELED))) added=(((MODELED-FORK :ORIGIN :A :TARGET :SNAP) (MODELED-LOCAL-PAGE :ORIGIN :TARGET) (RESOLUTION-PREPARED :TARGET :ORIGIN :MODELED)))
+P31 F6 fork + snapshot of copy declared unavailable (no such predicate): plans=1 ops=((!PREPARE-FORK (!RECORD-RESOLUTION :TARGET :ORIGIN :MODELED))) added=(((MODELED-FORK :ORIGIN :A :TARGET :SNAP) (MODELED-LOCAL-PAGE :ORIGIN :TARGET) (RESOLUTION-PREPARED :TARGET :ORIGIN :MODELED)))
+P31 C1 conflict at an unrelated site/slug, local hit: plans=0 ops=NIL added=NIL
+P31 C2 conflict at a later candidate after local hit: plans=0 ops=NIL added=NIL
+P31 C3 page-present + http-miss 200 (consistent): plans=0 ops=NIL added=NIL
+P31 C4 both fork policies: plans=0 ops=NIL added=NIL
+P31 C5 fork-permitted + fork-forbidden: plans=1 ops=((!PREPARE-FORK (!RECORD-RESOLUTION :TARGET :ORIGIN :MODELED))) added=(((MODELED-FORK :ORIGIN :A :TARGET :SNAP) (MODELED-LOCAL-PAGE :ORIGIN :TARGET) (RESOLUTION-PREPARED :TARGET :ORIGIN :MODELED)))
+P31 M1 local-only, origin unknown: plans=0 ops=NIL added=NIL
+P31 M2 local-only, origin absent: plans=0 ops=NIL added=NIL
+P31 M3 collaborative, all absent: plans=0 ops=NIL added=NIL
+P31 M4 collaborative, network failure at a: plans=0 ops=NIL added=NIL
+P31 M5 local-only, remote present but origin absent: plans=0 ops=NIL added=NIL
+P31 X1 !prepare-fork twice directly: ((!PREPARE-FORK !PREPARE-FORK))
+P31 X2 !prepare-fork with page-present at origin (conflict): ((!PREPARE-FORK))
+P31 X3 !record-resolution remote without allowed gate: ((!RECORD-RESOLUTION))
+P31 X4 search-sites local-only directly, no consistency check: ((!RECORD-RESOLUTION))
+P31 R1 *all-problems* grew by 0; shop3:*domain* FEDWIKI-ORDERED-RESOLUTION
+P31-DONE

@@ -1,0 +1,72 @@
+LINK-RESOLUTION JAVA local-first PASS: 2 page requests as Java; outcomes (:LOCAL-OBSERVED)
+LINK-RESOLUTION JAVA context-newest-first PASS: 3 page requests as Java; outcomes (:REMOTE-CONTEXT)
+LINK-RESOLUTION JAVA context-fallthrough PASS: 4 page requests as Java; outcomes (:REMOTE-CONTEXT)
+LINK-RESOLUTION JAVA item-site PASS: 3 page requests as Java; outcomes (:REMOTE-CONTEXT)
+LINK-RESOLUTION JAVA journal-reorder PASS: 3 page requests as Java; outcomes (:REMOTE-CONTEXT)
+LINK-RESOLUTION JAVA not-found PASS: 4 page requests as Java; outcomes (:NOT-FOUND)
+LINK-RESOLUTION JAVA status-500 PASS: 4 page requests as Java; outcomes (:REMOTE-CONTEXT)
+LINK-RESOLUTION JAVA redirect-302 PASS: 4 page requests as Java; outcomes (:REMOTE-CONTEXT)
+LINK-RESOLUTION JAVA network-error PASS: 2 page requests as Java; outcomes (:ABORTED-NETWORK-ERROR)
+LINK-RESOLUTION JAVA panel-site PASS: 6 page requests as Java; outcomes (:REMOTE-CONTEXT
+LINK-RESOLUTION JAVA origin-in-context PASS: 4 page requests as Java; outcomes (:REMOTE-CONTEXT)
+LINK-RESOLUTION JAVA attribution-site PASS: 2 page requests as Java; outcomes (:NOT-FOUND)
+LINK-RESOLUTION JAVA slug-normalization PASS: 2 page requests as Java; outcomes (:LOCAL-OBSERVED)
+LINK-RESOLUTION LOCAL-PRECEDENCE PASS: origin first in both policies; no other request
+LINK-RESOLUTION CONTEXT-ORDER PASS: journal newest first; item site, panel site, newer journal entry; origin may recur
+LINK-RESOLUTION LOCAL-ONLY-GATE PASS: 13 scenarios and synthetic states: own site only, no remote fallback, no fork
+LINK-RESOLUTION PLANNED-FORK-NOT-EXECUTED PASS: modeled, not observed; the 404 observation is kept; :PLAN-ONLY
+LINK-RESOLUTION NO-SECOND-FORK PASS: one fork per target; the simulated state needs none
+LINK-RESOLUTION UNKNOWN-NOT-ABSENT PASS: unknown candidate blocks; unknown own page blocks local-only; unknown permission blocks the fork
+LINK-RESOLUTION DISTINCTIONS PASS: first remote candidate wins; fork alternatives; not found vs unknown; contradiction; fork-source policy both ways
+LINK-RESOLUTION ZERO-STEP PASS: empty plan kept as success; tree marked as unavailable (SHOP3 ce53f9b defect)
+LINK-RESOLUTION MUTANT-CONTROL PASS: an unchanged copy of the domain passes all eight domain checks
+LINK-RESOLUTION MUTANT KILLED: journal context oldest first
+LINK-RESOLUTION MUTANT KILLED: item site not moved to the front
+LINK-RESOLUTION MUTANT KILLED: panel site not moved to the front
+LINK-RESOLUTION MUTANT KILLED: origin removed from the context
+LINK-RESOLUTION MUTANT KILLED: local-only walks the collaborative candidates
+LINK-RESOLUTION MUTANT KILLED: local-only falls back to the context when missing
+LINK-RESOLUTION MUTANT KILLED: local-only forks instead of reporting the miss
+LINK-RESOLUTION MUTANT KILLED: origin skipped
+LINK-RESOLUTION MUTANT KILLED: network error treated as 'not here'
+LINK-RESOLUTION MUTANT KILLED: closed world: unknown counts as unavailable
+LINK-RESOLUTION MUTANT KILLED: fork does not check for a modeled page
+LINK-RESOLUTION MUTANT KILLED: planned fork writes an observation
+LINK-RESOLUTION MUTANT KILLED: fork ignores an explicit prohibition
+LINK-RESOLUTION MUTANT KILLED: verified copy suffices without the explicit policy
+LINK-RESOLUTION REGISTRATIONS PASS: no leftover problems; SHOP3:*DOMAIN* untouched
+FEDWIKI-LINK-RESOLUTION-PASS: Java agreement on 13 scenarios; 8 counter-probes and the distinctions; 14 mutants killed; plans only, nothing executed.
+LINK-RESOLUTION-OPT-IN-PASS: no Catalog member added; SHOP3:*DOMAIN* unchanged.
+DEFEDERATION A PASS: :PLANNED; 1 plans/trees/states; :PLAN-ONLY; :NOT-EXECUTED
+DEFEDERATION B PASS: :PLANNED; 1 plans/trees/states; :PLAN-ONLY; :NOT-EXECUTED
+DEFEDERATION C PASS: :NO-PLAN; 0 plans/trees/states; :PLAN-ONLY; :NOT-EXECUTED
+DEFEDERATION (MISSING FORK-PERMITTED) PASS: :NO-PLAN; 0 plans/trees/states; :PLAN-ONLY; :NOT-EXECUTED
+DEFEDERATION (MISSING REMOTE-SNAPSHOT) PASS: :NO-PLAN; 0 plans/trees/states; :PLAN-ONLY; :NOT-EXECUTED
+DEFEDERATION (MISSING LOCAL-PAGE-ABSENT) PASS: :NO-PLAN; 0 plans/trees/states; :PLAN-ONLY; :NOT-EXECUTED
+DEFEDERATION EXPLICITLY-FORBIDDEN PASS: :NO-PLAN; 0 plans/trees/states; :PLAN-ONLY; :NOT-EXECUTED
+DEFEDERATION SNAPSHOT-OBSERVED-UNAVAILABLE PASS: :NO-PLAN; 0 plans/trees/states; :PLAN-ONLY; :NOT-EXECUTED
+DEFEDERATION LOCAL-INSTEAD-OF-ABSENT PASS: :PLANNED; 1 plans/trees/states; :PLAN-ONLY; :NOT-EXECUTED
+DEFEDERATION LOCAL-EVEN-IF-FORK-FORBIDDEN PASS: :PLANNED; 1 plans/trees/states; :PLAN-ONLY; :NOT-EXECUTED
+DEFEDERATION (CONTRADICTION LOCAL-PAGE) PASS: :NO-PLAN; 0 plans/trees/states; :PLAN-ONLY; :NOT-EXECUTED
+DEFEDERATION (CONTRADICTION SNAPSHOT-UNAVAILABLE) PASS: :NO-PLAN; 0 plans/trees/states; :PLAN-ONLY; :NOT-EXECUTED
+DEFEDERATION (CONTRADICTION FORK-FORBIDDEN) PASS: :NO-PLAN; 0 plans/trees/states; :PLAN-ONLY; :NOT-EXECUTED
+DEFEDERATION CHANGED-FORK-METHOD-NO-ALTERNATIVE PASS: :NO-PLAN; 0 plans/trees/states; :PLAN-ONLY; :NOT-EXECUTED
+DEFEDERATION CHANGED-FORK-METHOD-LOCAL-STILL-WORKS PASS: :PLANNED; 1 plans/trees/states; :PLAN-ONLY; :NOT-EXECUTED
+DEFEDERATION CHANGED-FORK-METHOD-EVIDENCE-RESTORED PASS: :PLANNED; 1 plans/trees/states; :PLAN-ONLY; :NOT-EXECUTED
+DEFEDERATION CHANGED-LOCAL-METHOD-FORK-CANNOT-BYPASS PASS: :NO-PLAN; 0 plans/trees/states; :PLAN-ONLY; :NOT-EXECUTED
+DEFEDERATION ORIGINAL-DOMAIN-INTACT PASS: :PLANNED; 1 plans/trees/states; :PLAN-ONLY; :NOT-EXECUTED
+DEFEDERATION-PLANNING-PASS: state-dependent methods; exhaustive alternatives; no execution.
+LINK-RESOLUTION-NEIGHBOUR-PASS: dreyeck/work/defederation-planning/tests
+DOCUMENTATION-PLAN-PASS: eight modeled stages; no-source refused; verdict B, fixed sequence only.
+LINK-RESOLUTION-NEIGHBOUR-PASS: dreyeck/work/planning/tests
+REMOTE-CONTROL A PASS: 1 plans, 1 trees, 1 states
+REMOTE-CONTROL B PASS: 1 plans, 1 trees, 1 states
+REMOTE-CONTROL C PASS: 2 plans, 2 trees, 2 states
+REMOTE-CONTROL D PASS: 0 plans, 0 trees, 0 states
+REMOTE-CONTROL E PASS: 0 plans, 0 trees, 0 states
+LINK-RESOLUTION-NEIGHBOUR-PASS: dreyeck/work/remote-control-planning/tests
+LINK-RESOLUTION-INSPECTOR-PASS context-newest-first collaborative: (:REMOTE-CONTEXT); result slots and plan/tree/state references; every HTML view of result and context renders.
+LINK-RESOLUTION-INSPECTOR-PASS context-newest-first local-only: (:NOT-FOUND); result slots and plan/tree/state references; every HTML view of result and context renders.
+LINK-RESOLUTION-INSPECTOR-PASS network-error collaborative: (:ABORTED-NETWORK-ERROR); result slots and plan/tree/state references; every HTML view of result and context renders.
+LINK-RESOLUTION-INSPECTOR-PASS panel-site collaborative: (:REMOTE-CONTEXT); result slots and plan/tree/state references; every HTML view of result and context renders.
+LINK-RESOLUTION-ALL-PASS: plans only; no request, fork or write was executed.
