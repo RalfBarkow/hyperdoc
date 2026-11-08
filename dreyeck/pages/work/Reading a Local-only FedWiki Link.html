@@ -15,17 +15,59 @@
 <p><code>prepare-link</code> calls the consolidated PR-#33 defederation planner. For this case it can <em>plan</em> a fork from the verified cached copy. The native plan, plan tree and simulated final states remain available on the preparation result. Repeated preparation of the same target inside a plan has one modeled fork; continuation of an accepted simulated result needs no second fork.</p>
 <p><code>resolve-link</code> receives only a verified planning result for this observation. The resulting <code>modeled-local-page</code> is hypothetical and supports a local-only resolution plan. No remote fallback is performed, no fork is executed, and <code>target-page</code> remains <code>NIL</code> in the actual local store.</p>
 
-<h2>4. Follow the same objects in a local Inspector</h2>
-<p>In a SLY image with the checked-out revision and CLOG Moldable Inspector already running, evaluate the following forms separately:</p>
-<pre>(asdf:load-system "dreyeck/work/fedwiki-local-only")
-(defparameter *local-only-link-reading*
-  (dreyeck/work/fedwiki-local-only:demo))
-(list (dreyeck/work/fedwiki-local-only:finding *local-only-link-reading*)
-      (dreyeck/work/fedwiki-local-only:target-page *local-only-link-reading*))
-(clog-moldable-inspector:clog-inspect
- :object *local-only-link-reading*)</pre>
-<p>The status form is expected to yield <code>(:CONFIRMED-LOCAL-ABSENCE NIL)</code>. The <strong>Local-only evidence</strong> Inspector view links to the actual own-site object, source page and revision, story item, wiki link, observation evidence, preparation result, resolution result, SHOP3 problem, planned operations and simulated final states. Follow the object references: the page does not re-create those objects as illustrative copies.</p>
-<p><strong>Reader's check:</strong> Can you identify the source of the local absence, the separately supplied cached-copy claim, the planner's hypothetical fork, and the unchanged local store? The code and identity tests have been reviewed; navigation through those links in a live CLOG session remains a separate observation.</p>
+<h2>4. Task: inspect the observation in an existing SLY/CLOG image</h2>
+<p><strong>Goal.</strong> Follow the existing observation, verified local evidence and simulated SHOP3 results in the CLOG Moldable Inspector. This task does not start a server, materialize a Wiki page or execute a fork.</p>
+
+<h3>Prerequisites</h3>
+<ul>
+<li>Use a SLY mREPL connected to the intended local development image and the HyperDoc checkout with this optional system. Inspect <code>*default-pathname-defaults*</code> or the ASDF source directory if unsure which checkout the image is using.</li>
+<li>The image's ASDF source registry must include both <code>dreyeck/work/fedwiki-local-only</code> and the separate <code>clog-moldable-inspector</code> system. Loading the former does <strong>not</strong> load the latter.</li>
+<li>For the browser step, CLOG must already be running <em>in this same Lisp image</em>, with an existing connected browser body. A CLOG listener running in another SLY image does not satisfy this prerequisite.</li>
+<li><strong>Evaluate each code block as its own SLY request.</strong> Do not paste all steps as one request: SLY reads the entire request before evaluating the first form. An as-yet unloaded package named later in the input therefore causes a reader-package error even if an earlier form would load it.</li>
+</ul>
+
+<h3>Step 1. Load the observation runtime</h3>
+<pre>(asdf:load-system "dreyeck/work/fedwiki-local-only")</pre>
+<p><strong>Expected.</strong> SHOP3's defederation and link-resolution domains load successfully. This does not imply that the Inspector package is available.</p>
+
+<h3>Step 2. Load and check the separate Inspector system</h3>
+<pre>(asdf:load-system "clog-moldable-inspector")</pre>
+<p>After that request has completed, evaluate:</p>
+<pre>(list (find-package "CLOG-MOLDABLE-INSPECTOR")
+      (fboundp 'clog-moldable-inspector:on-new-inspector))</pre>
+<p><strong>Expected.</strong> A package object and <code>T</code>. If ASDF cannot find the system, inspect the development image's source registry before proceeding; do not substitute a server restart. If the package is absent, stop here.</p>
+
+<h3>Step 3. Create and check one observation</h3>
+<pre>(defparameter *local-only-link-reading*
+  (dreyeck/work/fedwiki-local-only:demo))</pre>
+<pre>(list (dreyeck/work/fedwiki-local-only:finding *local-only-link-reading*)
+      (dreyeck/work/fedwiki-local-only:target-page *local-only-link-reading*))</pre>
+<p><strong>Expected.</strong> <code>(:CONFIRMED-LOCAL-ABSENCE NIL)</code>. <code>demo</code> prepares and resolves plans for the fixed local fixture; it performs no Wiki write or remote request. The result is one observation with references to its planning history.</p>
+
+<h3>Step 4. Verify the existing CLOG connection</h3>
+<pre>(list :running (clog:is-running-p)
+      :body (and (boundp 'clog-user:*body*)
+                 clog-user:*body*
+                 (clog:validp clog-user:*body*)))</pre>
+<p><strong>Expected.</strong> <code>:RUNNING T</code> and <code>:BODY T</code>. A missing body or inactive listener is a prerequisite failure, not evidence that the Local-only example failed. Do not run an implicit start operation against another listener or the production image.</p>
+
+<h3>Step 5. Open the observation in the existing Inspector body</h3>
+<pre>(let ((body (and (boundp 'clog-user:*body*)
+                 clog-user:*body*)))
+  (assert (clog:is-running-p) ()
+          "CLOG is not running in this SLY image.")
+  (assert (and body (clog:validp body)) ()
+          "No connected CLOG body in this SLY image.")
+  (clog-moldable-inspector:on-new-inspector
+   body :object *local-only-link-reading*
+   :pane-width "600px" :playground? nil))</pre>
+<p>This uses the existing <code>on-new-inspector</code> entry point rather than <code>clog-inspect</code>, which may start CLOG when no listener exists. If the body is not available in <code>clog-user:*body*</code>, first establish the actual body binding of this image; do not create another server merely to satisfy the example.</p>
+<p><strong>Expected.</strong> The <strong>Local-only evidence</strong> view links to the actual own-site object, source page and revision, story item, wiki link, observation evidence, preparation result, resolution result, SHOP3 problem, planned operations and simulated final states. These are object references, not illustrative copies.</p>
+
+<h3>Result and troubleshooting</h3>
+<p>The reading succeeds when the Inspector lets the reader distinguish the observed missing local target from the external cached-copy claim and from the simulated fork, while the real store remains unchanged. The CLOG navigation itself has not yet been witnessed in this reading; record the actual result before marking it accepted.</p>
+<p><strong>Reader-package error:</strong> <code>Package CLOG-MOLDABLE-INSPECTOR does not exist</code> means Step 2 has not successfully run <em>before the next input is read</em>. It does not contradict a successful Step 1. Compiler and ASDF warnings during Step 1 do not by themselves establish a failure; check whether the load completed.</p>
+<p><strong>Missing or invalid CLOG body:</strong> Stop at Step 4, then inspect the actual Lisp image and browser connection. Do not restart an unrelated service.</p>
 
 <h2>What has and has not happened</h2>
 <ul>

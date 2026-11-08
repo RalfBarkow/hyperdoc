@@ -183,19 +183,37 @@ Cloud-Läufe verwenden den vorhandenen relocatierten Launcher
 Die Logs enthalten die vollständigen Ausgaben, lediglich nachgestellte Leerzeichen
 sind entfernt. Tests laufen getrennt vom menschlichen SLY-Image.
 
-Im bestehenden lokalen Inspector/SLY zunächst laden:
+Im lokalen SLY jede Form als **separate mREPL-Eingabe** auswerten. Das
+optionale FedWiki-System lädt den separaten Inspector nicht automatisch; bei
+einer zusammen eingereichten Eingabe kann SBCL bereits beim Lesen der späteren
+`clog-moldable-inspector:`-Form scheitern, bevor ASDF die erste Form lädt.
 
 ```lisp
 (asdf:load-system "dreyeck/work/fedwiki-local-only")
 ```
 
-Dann separat auswerten:
+```lisp
+(asdf:load-system "clog-moldable-inspector")
+```
 
 ```lisp
 (defparameter *local-only-study*
   (dreyeck/work/fedwiki-local-only:demo))
-(clog-moldable-inspector:clog-inspect :object *local-only-study*)
 ```
+
+```lisp
+(list (dreyeck/work/fedwiki-local-only:finding *local-only-study*)
+      (dreyeck/work/fedwiki-local-only:target-page *local-only-study*))
+```
+
+Erwartet: `(:CONFIRMED-LOCAL-ABSENCE NIL)`. Für die browserbasierte Lektüre
+müssen CLOG und ein verbundener Browser-Body **in derselben SLY-Image**
+bereits bereitstehen. `clog-inspect` kann bei fehlendem Listener CLOG starten
+und wird deshalb hier nicht als stillschweigende Voraussetzung verwendet.
+Die HyperDoc-Page **Reading a Local-only FedWiki Link**, Abschnitt 4, enthält
+eine Task-Anleitung mit expliziten Voraussetzungen, einem
+`clog:is-running-p`-/Body-Check und einem kontrollierten
+`clog-moldable-inspector:on-new-inspector`-Aufruf ohne Listenerstart.
 
 Die View **Local-only evidence** zeigt bestätigte lokale Abwesenheit und daneben
 `:hypothetical-local` als Planungsresultat. Von dort: Source page → Source revision
