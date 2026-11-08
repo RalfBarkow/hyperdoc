@@ -1,0 +1,10 @@
+# primitive-tasks
+# Command (repository root): sbcl --noinform --no-sysinit --no-userinit --non-interactive --load docs/defederation-consolidation/review/probes/primitive-tasks.lisp
+# Run 2026-11-08 on PR #33 at 7bc2fced4e970e813d870307162ec349380ca0aa: fresh SBCL 2.4.10 process, SHOP3 ce53f9b, project ASDF registry from Nix,
+# own network namespace without network, empty HOME, own FASL cache. Exit status 0.
+# Filter applied to the full process output: lines beginning with PROBE (trailing blanks removed)
+
+PROBE F3.5b primitive paragraph step with a supplied target marker, target not ready, plan-tree NIL: outcome=:PLANNED plans=1 trees=0 states=1 ops=((!PREPARE-PARAGRAPH-RENDERING))
+PROBE S1 valid primitive top-level task (local target), plan-tree T: ERROR TYPE-ERROR The value NIL is not of type CONS
+PROBE S2 same, plan-tree NIL: outcome=:PLANNED plans=1 trees=0 states=1 ops=((!PREPARE-LOCAL-LINKS))
+PROBES-DONE

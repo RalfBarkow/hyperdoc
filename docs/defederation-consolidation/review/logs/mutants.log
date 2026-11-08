@@ -1,0 +1,29 @@
+# mutants
+# Command (repository root): sbcl --noinform --no-sysinit --no-userinit --non-interactive --load docs/defederation-consolidation/review/probes/mutants.lisp
+# Run 2026-11-08 on PR #33 at 7bc2fced4e970e813d870307162ec349380ca0aa: fresh SBCL 2.4.10 process, SHOP3 ce53f9b, project ASDF registry from Nix,
+# own network namespace without network, empty HOME, own FASL cache. Exit status 0.
+# Filter applied to the full process output: lines beginning with MUTANT or CORRECTED (trailing blanks removed)
+
+MUTANT M0 identity: SURVIVED
+MUTANT M1 fork METHOD without (not modeled-local-page): SURVIVED
+MUTANT M2 fork OPERATOR without (not modeled-local-page): KILLED: The value   NIL is not of type   CONS
+MUTANT M3 both without (not modeled-local-page): KILLED: The assertion (= 1 (LENGTH PLANS) (LENGTH (DREYECK/SHOP3:PLAN-TREES-OF REPEATED))    (LENGTH (DREYEC
+MUTANT M4 already-modeled removed: KILLED: There is no applicable method for the generic function   #<STANDARD-GENERIC-FUNCTION SHOP3.COMMON:ST
+MUTANT M5 strict branch without remote-page: KILLED: The assertion (= EXPECTED-COUNT (LENGTH PLANS) (LENGTH (DREYECK/SHOP3:RAW-PLANS-OF RESULT))    (LENG
+MUTANT M6 cached branch without policy: KILLED: The assertion (= EXPECTED-COUNT (LENGTH PLANS) (LENGTH (DREYECK/SHOP3:RAW-PLANS-OF RESULT))    (LENG
+MUTANT M7 policy-conflict branch removed: KILLED: The assertion (= EXPECTED-COUNT (LENGTH PLANS) (LENGTH (DREYECK/SHOP3:RAW-PLANS-OF RESULT))    (LENG
+MUTANT M8 remote-conflict branch removed: KILLED: The assertion (= EXPECTED-COUNT (LENGTH PLANS) (LENGTH (DREYECK/SHOP3:RAW-PLANS-OF RESULT))    (LENG
+MUTANT M9 snapshot-conflict branch removed: KILLED: The assertion (= EXPECTED-COUNT (LENGTH PLANS) (LENGTH (DREYECK/SHOP3:RAW-PLANS-OF RESULT))    (LENG
+MUTANT M10 operator without (not input-conflict): SURVIVED
+MUTANT M11 markers back to site arity: KILLED: The assertion (MEMBER '(LOCAL-LINKS-PREPARED :LOCAL-WIKI :TARGET-PAGE) ATOMS :TEST #'EQUAL) failed w
+MUTANT M12 target-ready without the simulated branch: KILLED: The assertion (= EXPECTED-COUNT (LENGTH PLANS) (LENGTH (DREYECK/SHOP3:RAW-PLANS-OF RESULT))    (LENG
+MUTANT M13 fork method and operator without local-page-absent: KILLED: The assertion (= EXPECTED-COUNT (LENGTH PLANS) (LENGTH (DREYECK/SHOP3:RAW-PLANS-OF RESULT))    (LENG
+MUTANT M14 fork operator ALSO adds (local-page ?site ?slug): KILLED: There is no applicable method for the generic function   #<STANDARD-GENERIC-FUNCTION SHOP3.COMMON:ST
+MUTANT M15 already-modeled accepts modeled presence even when local-page-absent is missing AND fork-forbidden holds (no change: current behaviour): SURVIVED
+MUTANT C1 correction: already-modeled requires the fork that produced the presence: SURVIVED
+MUTANT C2 correction: paragraph step requires target-ready: SURVIVED
+MUTANT C3 correction: ?snapshot renamed ?_snapshot in remote-conflict (no singleton warning): SURVIVED
+CORRECTED X1.1 bare modeled-local-page: 0 plans
+CORRECTED F3.5 primitive paragraph with supplied marker: 0 plans
+CORRECTED continuation from B's final state: 1 plans, forks 0
+MUTANTS-DONE

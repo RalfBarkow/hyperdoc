@@ -1,0 +1,30 @@
+
+
+SHOP3 version 4.3.1
+Copyright (C) 2004-2026 SIFT, LLC.
+
+Original SHOP2 code Copyright (C) 2002  University of Maryland.
+
+This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+KIND, either express or implied.  This software is distributed under an
+MPL/GPL/LGPL triple license.  For details, see the software source file.
+
+Defining domain DEFEDERATION-PREPARATION...
+Warnings:
+Singleton variable ?SNAPSHOT in AXIOM INPUT-CONFLICT branch 4
+(:- (INPUT-CONFLICT ?SITE ?SLUG) LOCAL-CONFLICT
+ ((LOCAL-PAGE ?SITE ?SLUG) (LOCAL-PAGE-ABSENT ?SITE ?SLUG)) SNAPSHOT-CONFLICT
+ ((REMOTE-SNAPSHOT ?SITE ?SLUG ?_REMOTE ?_SNAPSHOT)
+  (SNAPSHOT-UNAVAILABLE ?SITE ?SLUG))
+ PERMISSION-CONFLICT
+ ((FORK-PERMITTED ?SITE ?SLUG) (FORK-FORBIDDEN ?SITE ?SLUG)) REMOTE-CONFLICT
+ ((REMOTE-SNAPSHOT ?SITE ?SLUG ?REMOTE ?SNAPSHOT) (REMOTE-PAGE ?REMOTE ?SLUG)
+  (REMOTE-PAGE-ABSENT ?REMOTE ?SLUG))
+ POLICY-CONFLICT
+ ((FORK-SOURCE-POLICY ?SITE ?SLUG :CACHED-COPY-SUFFICIENT)
+  (FORK-SOURCE-POLICY ?SITE ?SLUG :REQUIRE-REMOTE-EVIDENCE)))
+
+PROBE F3.5b primitive paragraph step with a supplied target marker, target not ready, plan-tree NIL: outcome=:PLANNED plans=1 trees=0 states=1 ops=((!PREPARE-PARAGRAPH-RENDERING))
+PROBE S1 valid primitive top-level task (local target), plan-tree T: ERROR TYPE-ERROR The value NIL is not of type CONS
+PROBE S2 same, plan-tree NIL: outcome=:PLANNED plans=1 trees=0 states=1 ops=((!PREPARE-LOCAL-LINKS))
+PROBES-DONE

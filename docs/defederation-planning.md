@@ -1,3 +1,5 @@
+> Historical Slice-1 report for PR #29. For the consolidated contract, target-scoped effects, explicit source policy and new executed probes, see [the consolidation report](defederation-consolidation/README.md).
+
 # Defederation preparation with SHOP3, slice 1
 
 Zettel 11560, building on Zettel 11483. This implements the task's account of

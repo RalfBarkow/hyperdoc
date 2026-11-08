@@ -1,0 +1,54 @@
+
+
+SHOP3 version 4.3.1
+Copyright (C) 2004-2026 SIFT, LLC.
+
+Original SHOP2 code Copyright (C) 2002  University of Maryland.
+
+This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+KIND, either express or implied.  This software is distributed under an
+MPL/GPL/LGPL triple license.  For details, see the software source file.
+
+Defining domain PREPARE-WIKI-DEFEDERATION...
+Warnings:
+Singleton variable ?REMOTE in METHOD ALREADY-LOCAL
+(:METHOD (ENSURE-LOCAL-TARGET ?SITE ?REMOTE ?PAGE)
+ ALREADY-LOCAL
+ ((LOCAL-PAGE ?SITE ?PAGE))
+ ())
+
+
+Defining problem DEFEDERATION-A ...
+
+Defining problem DEFEDERATION-B ...
+
+Defining problem DEFEDERATION-C ...
+REFERENCE 30 REPEAT: plans=(((!SIMULATE-FORK LOCAL-WIKI REMOTE-WIKI
+                              TARGET-PAGE)
+                             (!PREPARE-LOCAL-RESOLUTION LOCAL-WIKI TARGET-PAGE)
+                             (!PREPARE-PARAGRAPH-RENDERING LOCAL-WIKI)
+                             (!PREPARE-LOCAL-RESOLUTION LOCAL-WIKI TARGET-PAGE)
+                             (!PREPARE-PARAGRAPH-RENDERING LOCAL-WIKI))) trees=1 states=(((RENDERING-PREPARED
+                                                                                           LOCAL-WIKI
+                                                                                           PARAGRAPH-ONLY)
+                                                                                          (RESOLUTION-PREPARED
+                                                                                           LOCAL-WIKI
+                                                                                           LOCAL-ONLY)
+                                                                                          (LOCAL-PAGE
+                                                                                           LOCAL-WIKI
+                                                                                           TARGET-PAGE)
+                                                                                          (FORK-PREPARED
+                                                                                           LOCAL-WIKI
+                                                                                           REMOTE-WIKI
+                                                                                           TARGET-PAGE)
+                                                                                          (FORK-PERMITTED
+                                                                                           LOCAL-WIKI
+                                                                                           REMOTE-WIKI
+                                                                                           TARGET-PAGE)
+                                                                                          (SNAPSHOT-AVAILABLE
+                                                                                           REMOTE-WIKI
+                                                                                           TARGET-PAGE)
+                                                                                          (REMOTE-PAGE
+                                                                                           REMOTE-WIKI
+                                                                                           TARGET-PAGE)))
+REFERENCE 30 UNRELATED-CONFLICT: plans=NIL trees=0 states=NIL

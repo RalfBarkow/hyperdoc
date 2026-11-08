@@ -1,0 +1,9 @@
+# shop3-primitive-tree
+# Command (repository root): sbcl --noinform --no-sysinit --no-userinit --non-interactive --load docs/defederation-consolidation/review/probes/shop3-primitive-tree.lisp
+# Run 2026-11-08 on PR #33 at 7bc2fced4e970e813d870307162ec349380ca0aa: fresh SBCL 2.4.10 process, SHOP3 ce53f9b, project ASDF registry from Nix,
+# own network namespace without network, empty HOME, own FASL cache. Exit status 0.
+# Filter applied to the full process output: lines beginning with PRIMITIVE-TREE
+
+PRIMITIVE-TREE task=(!STEP) plan-tree=T -> ERROR TYPE-ERROR The value   NIL is not of type   CONS
+PRIMITIVE-TREE task=(!STEP) plan-tree=NIL -> raw=(((!STEP) 1.0))
+PRIMITIVE-TREE task=(WRAPPED) plan-tree=T -> raw=(((!STEP) 1.0))
