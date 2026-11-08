@@ -28,10 +28,12 @@
          (results (remove-duplicates
                    (remove nil (append (list (i:preparation-result obs) (i:resolution-result obs))
                                        (i::history-of obs))) :test #'eq)))
-    (dolist (text (append '("<h3>Observation</h3>" "<h3>External evidence</h3>"
-                           "<h3>Planning — not executed</h3>" "max-width: 78ch" "width: 14rem") expected))
+    (dolist (text (append '(">Observation</h3>" ">External evidence</h3>"
+                           ">Planning — not executed</h3>" "max-width: 72ch" "flex-wrap: wrap" "<dl") expected))
       (assert (search text html) () "Missing view text: ~A" text))
     (dolist (text absent) (assert (not (search text html)) () "Unexpected view text: ~A" text))
+    (assert (not (search "table-layout: fixed" html)))
+    (assert (not (search "overflow-wrap: anywhere" html)))
     (dolist (object (list (i::own-site-of obs) (i:observed-page obs) (i:observed-item obs)
                           (i:target-link obs) (i:target-page obs) (i::failure-of obs)
                           (i::source-of (i:observed-page obs)) (i::local-evidence-of obs)
