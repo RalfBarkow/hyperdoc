@@ -17,9 +17,6 @@
 
 ;;; The Judgement view, and what must not have changed around it.
 
-(defun %html-views (object)
-  (remove-if-not (lambda (v) (typep v 'html-inspector-views:html-view)) (html-inspector-views:all-views object)))
-
 (defun %normalized (html)
   "HTML with what differs between images taken out: the running numbers of reference ids (inspect-N, eval-N, action-N)
 and the memory addresses printed in unreadable objects ({10071C5E23}). A digest then depends on the views alone."
@@ -39,12 +36,10 @@ and the memory addresses printed in unreadable objects ({10071C5E23}). A digest 
                      (address-end (write-string "{ADDRESS}" out) (setf i (1+ address-end)))
                      (t (write-char (char html i) out) (incf i)))))))
 
-(defun %views-digest (object)
+(defun %view-digest (view)
   (ironclad:byte-array-to-hex-string
    (ironclad:digest-sequence
-    :sha256 (sb-ext:string-to-octets
-             (%normalized (apply #'concatenate 'string (mapcar #'html-inspector-views:view-html (%html-views object))))
-             :external-format :utf-8))))
+    :sha256 (sb-ext:string-to-octets (%normalized (html-inspector-views:view-html view)) :external-format :utf-8))))
 
 (defun check-judgement-view (review)
   "The specialized Judgement view is registered and renders; J-USE-EQL shows its verdict, its evidence and its 21
@@ -85,22 +80,29 @@ findings as object references made by the Inspector's own OBJECT-REF, and they a
     (:target . "477d9f58c3ebc434df300d95f2661f41aefc7dc49f5a39125796ca19cdca2c25")
     (:record . "727bd8004f49dbab586d7ff7d2bbe4a7cba055de3f37d7cd0d934a425cd21968")
     (:critique . "fbcd2309d07dd06ff26b567035aabbcbc04b8125e7013a3fbca54080381c8b48"))
-  "Normalized SHA-256 of all HTML views of the review's first finding, its reconstituted target, run and Critique,
-computed on an unchanged copy of 82126d5 (before the Judgement view existed) in two fresh images.")
+  "Normalized SHA-256 of the specialized view of the review's first finding (\"Finding\"), and of its reconstituted target,
+run and Critique (\"Critic relations\"), computed on an unchanged copy of 82126d5 (before the Judgement view existed) in two
+fresh images, in which each had only this one view.")
+
+(defun %specialized-view (object title)
+  "OBJECT's one view titled TITLE. Generic views (Slots, Print, Operations, Playground) depend on what else the image has
+loaded, a CLOG Inspector image more than a bare one, and are not what this check is about."
+  (let ((views (remove title (html-inspector-views:all-views object) :key #'html-inspector-views:view-title :test-not #'equal)))
+    (assert (= 1 (length views)) () "~S has ~D views titled ~S" (type-of object) (length views) title)
+    (first views)))
 
 (defun check-existing-views-unchanged (review)
-  "The views of review, Finding, Evaluation Record and Critique are the ones they were before the Judgement view."
+  "The specialized views of review, Finding, Evaluation Record and Critique are the ones they were before the Judgement
+view: present once each, and rendering the same HTML."
   (let* ((finding (first (c:review-findings-of review)))
          (target (c:finding-target-of finding))
          (record (first (critic:target-runs-of target)))
          (critique (first (critic:critiques-of record))))
-    (flet ((titles (object) (mapcar #'html-inspector-views:view-title (html-inspector-views:all-views object))))
-      (assert (equal '("PR critique") (titles review)))
-      (assert (equal '("Finding") (titles finding)))
-      (dolist (object (list target record critique)) (assert (equal '("Critic relations") (titles object)))))
+    (%specialized-view review "PR critique")
     (loop for (key . expected) in +existing-view-digests+
-          for object in (list finding target record critique)
-          do (assert (string= expected (%views-digest object)) () "the ~(~A~) views changed" key))
+          for (object title) in (list (list finding "Finding") (list target "Critic relations")
+                                      (list record "Critic relations") (list critique "Critic relations"))
+          do (assert (string= expected (%view-digest (%specialized-view object title))) () "the ~(~A~) view changed" key))
     t))
 
 (defparameter +record-digests+
@@ -108,28 +110,33 @@ computed on an unchanged copy of 82126d5 (before the Judgement view existed) in 
     ("docs/fedwiki-link-resolution/critic/judgements.json" . "4ab11bc52ad906d9aecd66b7cce9ac2117c46d631b8285d06fa6ed0543f2e6c0"))
   "The recorded evaluations and judgements as committed at 82126d5.")
 
-(defun check-records-inert ()
-  "The records are unchanged, and reading and rendering them loaded neither the engine nor the page-attached system."
+(defun %engine-state ()
+  "What of the engine and the page-attached system this image holds: packages and ASDF registrations, asked as lookups."
+  (list :lisp-critic (and (find-package "LISP-CRITIC") t) :lisp-critic-user (and (find-package "LISP-CRITIC-USER") t)
+        :a-critic-for-lisp (and (find-package "A-CRITIC-FOR-LISP") t)
+        :registered-a-critic-for-lisp (and (asdf:registered-system "a-critic-for-lisp") t)
+        :registered-lisp-critic (and (asdf:registered-system "lisp-critic") t)))
+
+(defun check-records-inert (before)
+  "The records are unchanged, and reading and rendering them added neither the engine nor the page-attached system to
+this image. BEFORE is %ENGINE-STATE taken before the first read: a fresh image has none of them, a long-lived development
+image may already hold them from earlier work, and only a change caused by reading would be a failure here."
   (loop for (file . expected) in +record-digests+
         do (assert (string= expected (ironclad:byte-array-to-hex-string
                                       (ironclad:digest-file :sha256 (asdf:system-relative-pathname
                                                                      "dreyeck/work/fedwiki-link-resolution/critic" file))))
                    () "~A changed" file))
-  (assert (not (find-package "LISP-CRITIC")))
-  (assert (not (find-package "LISP-CRITIC-USER")))
-  (assert (not (find-package "A-CRITIC-FOR-LISP")))
-  (assert (not (asdf:registered-system "a-critic-for-lisp")))
-  (assert (not (asdf:registered-system "lisp-critic")))
+  (assert (equal before (%engine-state)) () "reading or rendering changed the engine state from ~S to ~S" before (%engine-state))
   t)
 
 (defun run-tests ()
-  (let* ((review (c:read-pr-critique-review))
+  (let* ((engine-before (%engine-state))
+         (review (c:read-pr-critique-review))
          (forms (c:review-forms-of review))
          (findings (c:review-findings-of review))
          (rules (length (c:review-rules-of review))))
     ;; Reading ran nothing: neither the engine nor the page-attached system is in this image because of it.
-    (assert (not (find-package "LISP-CRITIC")) () "the engine package exists; reading must not load the engine")
-    (assert (not (find-package "A-CRITIC-FOR-LISP")))
+    (assert (equal engine-before (%engine-state)) () "reading changed the engine state")
     ;; The engine that ran is the one the stored evaluations were made with.
     (assert (equal (%stored-engine-digests)
                    (sort (map 'list (lambda (f) (cons (gethash "file" f) (gethash "sha256" f)))
@@ -191,7 +198,7 @@ computed on an unchanged copy of 82126d5 (before the Judgement view existed) in 
           (dolist (critique (critic:critiques-of record)) (render critique)))))
     (check-judgement-view review)
     (check-existing-views-unchanged review)
-    (check-records-inert)
+    (check-records-inert engine-before)
     (format t "~&FEDWIKI-LINK-RESOLUTION-CRITIC-PASS: ~D forms judged by all ~D rules of the real engine (digests as stored); ~D runs with findings (~D matches), the rest completed without one; every form unchanged here; every Evaluation Record reconstituted; ~D judgements kept apart; no engine loaded by reading.~%"
             (length forms) rules (length findings)
             (reduce #'+ (mapcar (lambda (f) (length (c:finding-matches-of f))) findings))
