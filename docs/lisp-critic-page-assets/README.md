@@ -139,19 +139,21 @@ Nicht geklärt: ob sich eine unveränderliche Kopie als Archiv direkt in Claude 
 Dokumentation der Umgebung nennt dafür keinen Weg; das wurde nicht weiter untersucht, weil der Zugriff über das bestehende
 Repository möglich ist.
 
-## 8. Stand und nächster Schritt
+## 8. Ausführung (nach ausdrücklicher Freigabe)
 
-Schritte 1–3 sind ohne Auswertung erledigt (Abschnitt 7): Das page-attached ASDF-System ist im bestehenden Repository
-vollständig, die sieben Digests stimmen mit beiden gespeicherten Evaluationen überein, beide ASDF-Definitionen und ihre
-Abhängigkeiten sind als Daten gelesen. Öffentlich über die Seite erreichbar ist die Riesbeck/Beane-Implementierung nicht
-(Abschnitte 2 und 6).
+Freigegeben wurde die Ausführung aus einer Kopie von `RalfBarkow/assets@856cf07:pages/a-critic-for-lisp/` in dieser
+Cloud-Umgebung (eigener SBCL-Prozess, eigener Netzwerk-Namespace ohne Netz, leeres HOME, eigener FASL-Cache). Die Kopie ist
+byte-gleich mit dem Manifest in [evidence/assets-repository-2026-11-08.txt](evidence/assets-repository-2026-11-08.txt).
+Log: [evidence/engine-run-2026-11-08.log](evidence/engine-run-2026-11-08.log).
 
-Schritt 4, die Ausführung, wartet auf eine ausdrückliche Freigabe der Quelle: einer Kopie von
-`RalfBarkow/assets@856cf07:pages/a-critic-for-lisp/` in einem eigenen SBCL-Prozess dieser Cloud-Umgebung, ohne Netz
-(eigener Netzwerk-Namespace), leeres HOME, eigener FASL-Cache. Dann `dreyeck/lisp-critic/engine-integration/tests`
-(`run-tests`, `run-page-station-layout-tests`) und die Regeln der Riesbeck/Beane-Implementierung auf die Quelltextformen
-von PR #32; Evaluation Records und Critiques mit Provenienz (Datei, Commit, Formposition, Quell-Digest, Engine-Digests) für
-den HyperDoc Inspector. Eine Evaluation ohne Befund ist ein gültiges Ergebnis; die Riesbeck/Beane-Implementierung hat keine
-Regeln, die SHOP3-Code als solchen beurteilen.
-
-Bis dahin: keine Engine Critiques.
+- `dreyeck/lisp-critic/engine-integration/tests`, `run-tests`: **bestanden** — die Seiten-Assets enthalten die Engine, mit
+  der die gespeicherten Evaluationen gemacht wurden; ein echter `CAR-CDR`-Lauf ergibt eine Critique mit `CADR`; die
+  Engine reproduziert beide gespeicherten Evaluationen; die Policy-Grenze hält. 78 Regeln geladen [obs].
+- `run-page-station-layout-tests`: im ersten Lauf **fehlgeschlagen** („The system is eligible but the view does not say
+  so“), weil die Scratch-Site-Root nur die Seiten-Assets, nicht die Seitendatei `pages/a-critic-for-lisp` enthielt; mit der
+  öffentlichen Seiten-JSON von `hyperdoc.dreyeck.ch` an dieser Stelle **bestanden** [obs]. Nebenbefund: Fehlt die
+  Seitendatei, nennt der Vertrag (`engine-workspace-eligibility`) das System geeignet, die Ansicht dagegen „not asked:
+  nothing here to build one from“ [obs].
+- Danach: jede der 78 Regeln auf jede der 70 Top-Level-Formen des Lisp-Codes von PR #32, mit Evaluation Records,
+  Critiques, Match-Evidenz und Empfehlungen, lesbar im Inspector ohne Engine:
+  [../fedwiki-link-resolution/critic/README.md](../fedwiki-link-resolution/critic/README.md).

@@ -221,26 +221,12 @@ Fälle ohne Server erzeugt [obs] (`scripts/test-fedwiki-link-resolution.lisp`). 
 | Local-only | — (Wards Vorschlag) | — | `own-site-only` … | G5, 3 Gate-Mutanten | J4 |
 | Simulierter Fork | — | — | `fork-planned`, `!plan-fork` | G6, G7, 4 Fork-Mutanten | J5 |
 
-**Engine Critiques: keine.** Die Riesbeck/Beane-Implementierung wird über die Seiten-Assets des page-attached
-ASDF-Systems `a-critic-for-lisp` geladen (Federated-Wiki-Seite `a-critic-for-lisp`). Öffentlich ausgeliefert werden davon
-nur die Systemdefinition und `package.lisp`; `src/` und `vendor/lisp-critic/` fehlen auf dem Server. Befunde, auch zur
-irreführenden Anzeige `:assets-present-p T` und zur ungetrennten Discovery: [../lisp-critic-page-assets/README.md](../lisp-critic-page-assets/README.md).
-Der echte Lauf folgt, sobald die vollständigen Seiten-Assets dieser Entwicklungsumgebung bereitgestellt sind. Die
-API-Bezeichner (`make-critic-source-station` usw.) bleiben unverändert. Aufruf auf einer Maschine mit den vollständigen
-Seiten-Assets (nicht ausgeführt; die Formen stammen aus `car-cdr-critique-example`):
-
-```lisp
-(asdf:load-system "dreyeck/lisp-critic/critique")
-(let* ((station (dreyeck/lisp-critic::make-critic-source-station "/pfad/zu/den/seiten-assets/a-critic-for-lisp/"))
-       (contract (make-instance 'dreyeck/lisp-critic:lisp-critic-contract
-                   :id "fedwiki-link-resolution" :title "Critique of the link-resolution model" :source-station station
-                   :input-policy '(:file) :invocation-policy '(:critique-file) :output-policy '(:raw-output-preserved)
-                   :availability-policy '(:local-source-required) :failure-policy '(:record-condition)
-                   :review-contract-role :critique)))
-  (dreyeck/lisp-critic:run-lisp-critic-contract
-   contract (list (asdf:system-relative-pathname "dreyeck/work/fedwiki-link-resolution"
-                                                 "dreyeck/work/fedwiki-link-resolution.lisp"))))
-```
+**Engine Critiques** liegen seit dem 8. November 2026 vor: Die Riesbeck/Beane-Implementierung aus den Seiten-Assets des
+page-attached ASDF-Systems `a-critic-for-lisp` wurde nach ausdrücklicher Freigabe isoliert ausgeführt; jede ihrer 78 Regeln
+auf jede der 70 Top-Level-Formen des Lisp-Codes dieses PR. Aufzeichnung, Inspector-Lektüre und die getrennten Judgements:
+[critic/README.md](critic/README.md); Zugang und Befunde zu den Seiten-Assets:
+[../lisp-critic-page-assets/README.md](../lisp-critic-page-assets/README.md). Die folgenden J1–J5 sind dagegen Claudes
+Bewertungen des Modells, keine Engine-Ergebnisse.
 
 **Judgements** (Claude, keine Engine-Ergebnisse):
 - **J1** Die Reihenfolge ist in reinen Funktionen statt in SHOP3-Axiomen kodiert; die Listenoperationen (entfernen, vorn

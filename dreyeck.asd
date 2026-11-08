@@ -3633,6 +3633,21 @@
              (declare (ignore op component))
              (uiop:symbol-call :dreyeck/work/fedwiki-link-resolution/tests :run-tests)))
 
+(defsystem "dreyeck/work/fedwiki-link-resolution/critic"
+  :description "Read-only reading of what the real Riesbeck/Beane Lisp Critic said about PR #32's Lisp code; runs no engine"
+  :depends-on ("dreyeck/inspector/lisp-critic" "shasht" "ironclad")
+  :components ((:file "dreyeck/work/fedwiki-link-resolution-critic")
+               (:static-file "docs/fedwiki-link-resolution/critic/pr-32-critique.json")
+               (:static-file "docs/fedwiki-link-resolution/critic/judgements.json"))
+  :in-order-to ((test-op (test-op "dreyeck/work/fedwiki-link-resolution/critic/tests"))))
+
+(defsystem "dreyeck/work/fedwiki-link-resolution/critic/tests"
+  :depends-on ("dreyeck/work/fedwiki-link-resolution/critic")
+  :components ((:file "dreyeck/tests/fedwiki-link-resolution-critic"))
+  :perform (test-op (op component)
+             (declare (ignore op component))
+             (uiop:symbol-call :dreyeck/work/fedwiki-link-resolution/critic/tests :run-tests)))
+
 (defsystem "dreyeck/work/defederation-planning"
   :description "Opt-in SHOP3 defederation preparation; simulated effects, no executor"
   :depends-on ("dreyeck/shop3")

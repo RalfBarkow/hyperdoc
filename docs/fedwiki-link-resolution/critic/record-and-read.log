@@ -1,0 +1,73 @@
+RECORD dreyeck/work/fedwiki-link-resolution.lisp (DEFPACKAGE #:DREYECK/WORK/FEDWIKI-LINK-RESOLUTION): 78 completed, 0 with findings, 0 failed
+RECORD dreyeck/work/fedwiki-link-resolution.lisp (IN-PACKAGE #:DREYECK/WORK/FEDWIKI-LINK-RESOLUTION): 78 completed, 0 with findings, 0 failed
+RECORD dreyeck/work/fedwiki-link-resolution.lisp (DEFPARAMETER +REFERENCE-REVISION+): 78 completed, 0 with findings, 0 failed
+RECORD dreyeck/work/fedwiki-link-resolution.lisp (DEFUN REFERENCE-URL): 78 completed, 0 with findings, 0 failed
+RECORD dreyeck/work/fedwiki-link-resolution.lisp (DEFUN JAVA-PAGE-CONTEXT): 78 completed, 1 with findings, 0 failed
+RECORD dreyeck/work/fedwiki-link-resolution.lisp (DEFUN JAVA-PANEL-CONTEXT): 78 completed, 1 with findings, 0 failed
+RECORD dreyeck/work/fedwiki-link-resolution.lisp (DEFUN JAVA-LINK-CANDIDATES): 78 completed, 1 with findings, 0 failed
+RECORD dreyeck/work/fedwiki-link-resolution.lisp (DEFUN CANDIDATE-FACTS): 78 completed, 0 with findings, 0 failed
+RECORD dreyeck/work/fedwiki-link-resolution.lisp (SHOP3:DEFDOMAIN (FEDWIKI-LINK-RESOLUTION :NOSET T)): 78 completed, 0 with findings, 0 failed
+RECORD dreyeck/work/fedwiki-link-resolution.lisp (DEFUN PLAN-LINK-RESOLUTION): 78 completed, 1 with findings, 0 failed
+RECORD dreyeck/work/fedwiki-link-resolution.lisp (DEFUN %OWN-SITE): 78 completed, 0 with findings, 0 failed
+RECORD dreyeck/work/fedwiki-link-resolution.lisp (DEFUN PLAN-OUTCOMES): 78 completed, 3 with findings, 0 failed
+RECORD dreyeck/work/fedwiki-link-resolution.lisp (DEFUN DIAGNOSE-NO-PLAN): 78 completed, 2 with findings, 0 failed
+RECORD dreyeck/work/fedwiki-link-resolution.lisp (DEFUN %FIXTURE): 78 completed, 0 with findings, 0 failed
+RECORD dreyeck/work/fedwiki-link-resolution.lisp (DEFUN %KEY): 78 completed, 0 with findings, 0 failed
+RECORD dreyeck/work/fedwiki-link-resolution.lisp (DEFUN LOAD-SCENARIOS): 78 completed, 0 with findings, 0 failed
+RECORD dreyeck/work/fedwiki-link-resolution.lisp (DEFUN LOAD-OBSERVATIONS): 78 completed, 0 with findings, 0 failed
+RECORD dreyeck/work/fedwiki-link-resolution.lisp (DEFUN %SCENARIO): 78 completed, 0 with findings, 0 failed
+RECORD dreyeck/work/fedwiki-link-resolution.lisp (DEFUN %PAGE): 78 completed, 0 with findings, 0 failed
+RECORD dreyeck/work/fedwiki-link-resolution.lisp (DEFUN %AVAILABILITY): 78 completed, 1 with findings, 0 failed
+RECORD dreyeck/work/fedwiki-link-resolution.lisp (DEFUN SCENARIO-LINK-STATE): 78 completed, 1 with findings, 0 failed
+RECORD dreyeck/work/fedwiki-link-resolution.lisp (DEFUN SCENARIO-PLAN): 78 completed, 0 with findings, 0 failed
+RECORD dreyeck/work/fedwiki-link-resolution.lisp (DEFPARAMETER +RULE-TRACE+): 78 completed, 0 with findings, 0 failed
+RECORD dreyeck/work/fedwiki-link-resolution.lisp (DEFUN RULE-TRACE): 78 completed, 0 with findings, 0 failed
+RECORD dreyeck/work/fedwiki-link-resolution.lisp (DEFUN LINK-RESOLUTION-EXPERIMENT): 78 completed, 3 with findings, 0 failed
+RECORD dreyeck/tests/fedwiki-link-resolution.lisp (DEFPACKAGE #:DREYECK/WORK/FEDWIKI-LINK-RESOLUTION/TESTS): 78 completed, 0 with findings, 0 failed
+RECORD dreyeck/tests/fedwiki-link-resolution.lisp (IN-PACKAGE #:DREYECK/WORK/FEDWIKI-LINK-RESOLUTION/TESTS): 78 completed, 0 with findings, 0 failed
+RECORD dreyeck/tests/fedwiki-link-resolution.lisp (DEFPARAMETER *DOMAIN*): 78 completed, 0 with findings, 0 failed
+RECORD dreyeck/tests/fedwiki-link-resolution.lisp (DEFUN PASS): 78 completed, 0 with findings, 0 failed
+RECORD dreyeck/tests/fedwiki-link-resolution.lisp (DEFUN PLAN): 78 completed, 1 with findings, 0 failed
+RECORD dreyeck/tests/fedwiki-link-resolution.lisp (DEFUN STATE): 78 completed, 0 with findings, 0 failed
+RECORD dreyeck/tests/fedwiki-link-resolution.lisp (DEFUN AVAILABLE): 78 completed, 0 with findings, 0 failed
+RECORD dreyeck/tests/fedwiki-link-resolution.lisp (DEFUN UNAVAILABLE): 78 completed, 1 with findings, 0 failed
+RECORD dreyeck/tests/fedwiki-link-resolution.lisp (DEFUN COLLABORATIVE): 78 completed, 0 with findings, 0 failed
+RECORD dreyeck/tests/fedwiki-link-resolution.lisp (DEFUN LOCAL-ONLY): 78 completed, 0 with findings, 0 failed
+RECORD dreyeck/tests/fedwiki-link-resolution.lisp (DEFUN PREPARE): 78 completed, 0 with findings, 0 failed
+RECORD dreyeck/tests/fedwiki-link-resolution.lisp (DEFUN ONLY): 78 completed, 1 with findings, 0 failed
+RECORD dreyeck/tests/fedwiki-link-resolution.lisp (DEFUN %K): 78 completed, 0 with findings, 0 failed
+RECORD dreyeck/tests/fedwiki-link-resolution.lisp (DEFUN CHECK-JAVA-AGREEMENT): 78 completed, 4 with findings, 0 failed
+RECORD dreyeck/tests/fedwiki-link-resolution.lisp (DEFUN CHECK-LOCAL-PRECEDENCE): 78 completed, 1 with findings, 0 failed
+RECORD dreyeck/tests/fedwiki-link-resolution.lisp (DEFUN CHECK-CONTEXT-ORDER): 78 completed, 2 with findings, 0 failed
+RECORD dreyeck/tests/fedwiki-link-resolution.lisp (DEFUN CHECK-LOCAL-ONLY-GATE): 78 completed, 2 with findings, 0 failed
+RECORD dreyeck/tests/fedwiki-link-resolution.lisp (DEFPARAMETER +FORK-EVIDENCE+): 78 completed, 0 with findings, 0 failed
+RECORD dreyeck/tests/fedwiki-link-resolution.lisp (DEFUN CHECK-PLANNED-FORK-NOT-EXECUTED): 78 completed, 2 with findings, 0 failed
+RECORD dreyeck/tests/fedwiki-link-resolution.lisp (DEFUN CHECK-NO-SECOND-FORK): 78 completed, 2 with findings, 0 failed
+RECORD dreyeck/tests/fedwiki-link-resolution.lisp (DEFUN CHECK-UNKNOWN-NOT-ABSENT): 78 completed, 2 with findings, 0 failed
+RECORD dreyeck/tests/fedwiki-link-resolution.lisp (DEFUN CHECK-DISTINCTIONS): 78 completed, 4 with findings, 0 failed
+RECORD dreyeck/tests/fedwiki-link-resolution.lisp (DEFUN CHECK-ZERO-STEP-PLANS): 78 completed, 1 with findings, 0 failed
+RECORD dreyeck/tests/fedwiki-link-resolution.lisp (DEFUN CHECK-REGISTRATIONS): 78 completed, 1 with findings, 0 failed
+RECORD dreyeck/tests/fedwiki-link-resolution.lisp (DEFUN DOMAIN-ITEMS): 78 completed, 2 with findings, 0 failed
+RECORD dreyeck/tests/fedwiki-link-resolution.lisp (DEFUN IN-M): 78 completed, 1 with findings, 0 failed
+RECORD dreyeck/tests/fedwiki-link-resolution.lisp (DEFUN METHOD-ITEM): 78 completed, 1 with findings, 0 failed
+RECORD dreyeck/tests/fedwiki-link-resolution.lisp (DEFUN OPERATOR-ITEM): 78 completed, 1 with findings, 0 failed
+RECORD dreyeck/tests/fedwiki-link-resolution.lisp (DEFUN KILLED-P): 78 completed, 0 with findings, 0 failed
+RECORD dreyeck/tests/fedwiki-link-resolution.lisp (DEFUN DOMAIN-MUTANT): 78 completed, 1 with findings, 0 failed
+RECORD dreyeck/tests/fedwiki-link-resolution.lisp (DEFUN FUNCTION-MUTANT): 78 completed, 0 with findings, 0 failed
+RECORD dreyeck/tests/fedwiki-link-resolution.lisp (DEFPARAMETER +MUTANTS+): 78 completed, 0 with findings, 0 failed
+RECORD dreyeck/tests/fedwiki-link-resolution.lisp (DEFUN CHECK-UNCHANGED-COPY-SURVIVES): 78 completed, 0 with findings, 0 failed
+RECORD dreyeck/tests/fedwiki-link-resolution.lisp (DEFUN RUN-MUTANTS): 78 completed, 1 with findings, 0 failed
+RECORD dreyeck/tests/fedwiki-link-resolution.lisp (DEFUN RUN-TESTS): 78 completed, 0 with findings, 0 failed
+RECORD scripts/test-fedwiki-link-resolution.lisp (REQUIRE :ASDF): 78 completed, 0 with findings, 0 failed
+RECORD scripts/test-fedwiki-link-resolution.lisp (ASDF/FIND-SYSTEM:LOAD-ASD (MERGE-PATHNAMES "../dreyeck.asd" (UIOP/PATHNAME:PATHNAME-DIRECTORY-PATHNAME *LOAD-TRUENAME*))): 78 completed, 0 with findings, 0 failed
+RECORD scripts/test-fedwiki-link-resolution.lisp (ASDF/OPERATE:LOAD-SYSTEM "dreyeck/shop3"): 78 completed, 0 with findings, 0 failed
+RECORD scripts/test-fedwiki-link-resolution.lisp (LET ((CATALOG-BEFORE (COPY-LIST (HYPERBOOK:HYPERBOOKS-OF HYPERBOOK:*CATALOG*))) (DEFAULT-DOMAIN SHOP3.THEOREM-PROVER:*DOMAIN*))): 78 completed, 1 with findings, 0 failed
+RECORD scripts/test-fedwiki-link-resolution.lisp (DOLIST (SYSTEM (QUOTE ("dreyeck/work/defederation-planning/tests" "dreyeck/work/planning/tests" "dreyeck/work/remote-control-planning/tests")))): 78 completed, 0 with findings, 0 failed
+RECORD scripts/test-fedwiki-link-resolution.lisp (ASDF/OPERATE:LOAD-SYSTEM "html-inspector-views/standard"): 78 completed, 0 with findings, 0 failed
+RECORD scripts/test-fedwiki-link-resolution.lisp (LOOP FOR): 78 completed, 1 with findings, 0 failed
+RECORD scripts/test-fedwiki-link-resolution.lisp (FORMAT T): 78 completed, 0 with findings, 0 failed
+RECORD dreyeck.asd (DEFSYSTEM "dreyeck/work/fedwiki-link-resolution"): 78 completed, 0 with findings, 0 failed
+RECORD dreyeck.asd (DEFSYSTEM "dreyeck/work/fedwiki-link-resolution/tests"): 78 completed, 0 with findings, 0 failed
+PR-CRITIQUE-RECORDED: 4 files, 70 forms, 78 rules each, commit 5d24d853b7cab38d7d741ecb75a7c7bfc88bd837
+
+FEDWIKI-LINK-RESOLUTION-CRITIC-PASS: 70 forms judged by all 78 rules of the real engine (digests as stored); 47 runs with findings (47 matches), the rest completed without one; every form unchanged here; every Evaluation Record reconstituted; 10 judgements kept apart; no engine loaded by reading.
