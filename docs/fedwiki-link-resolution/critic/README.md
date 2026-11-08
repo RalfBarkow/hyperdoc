@@ -47,7 +47,8 @@ Pfad, ob sie gequotet ist, und den Empfehlungstext der Engine.
 (clog-moldable-inspector:clog-inspect :object *pr-critique*)
 ```
 
-Navigation: Review („PR critique“: Form, Regel, Empfehlung; darunter die Judgements) → Befund (Link auf die Zeilen im Commit,
+Navigation: Review („PR critique“: Form, Regel, Empfehlung; darunter die Judgements) → Judgement (View „Judgement“: ID, Autor,
+Regel, Verdict, Statement, Evidence und alle zugehörigen Befunde als Objektreferenzen) oder direkt → Befund (Link auf die Zeilen im Commit,
 getroffene Teilform, Pfad, Empfehlung) → rekonstituierter Lauf (Evaluation Record, mit den bestehenden Views von
 `dreyeck/inspector/lisp-critic`) → Critique. Beim Lesen wird jede Form erneut in diesem Checkout beobachtet: Weicht der Text
 am aufgezeichneten Ort ab, zeigt der Befund „changed since recorded“ (Negativkontrolle mit einem manipulierten Digest

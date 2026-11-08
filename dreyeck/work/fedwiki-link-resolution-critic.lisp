@@ -153,6 +153,33 @@
                    (:td (views:esc (judgement-verdict-of judgement)))
                    (:td (views:esc (judgement-statement-of judgement)))))))))))
 
+(views:defview pr-judgement-view (judgement pr-judgement)
+  (views:html-view :title "Judgement" :priority 1
+    (let ((findings (judgement-findings-of judgement)))
+      (views:html
+        (:h2 (views:esc (format nil "~A: ~A" (judgement-id-of judgement) (judgement-verdict-of judgement))))
+        (:p (views:esc "A judgement by its author about engine findings. It is not output of the Riesbeck/Beane Lisp Critic and changes none of its Critiques."))
+        (:table :class "inspector-table"
+          (:tr (:th "id") (:td (views:esc (judgement-id-of judgement))))
+          (:tr (:th "author") (:td (views:esc (judgement-author-of judgement))))
+          (:tr (:th "rule") (:td (views:esc (judgement-rule-of judgement))))
+          (:tr (:th "verdict") (:td (views:esc (judgement-verdict-of judgement))))
+          (:tr (:th "statement") (:td (views:esc (judgement-statement-of judgement))))
+          (:tr (:th "evidence") (:td (views:esc (judgement-evidence-of judgement)))))
+        (:h3 (views:esc (format nil "Engine findings this judgement is about: ~D" (length findings))))
+        (if findings
+            (views:html
+              (:table :class "inspector-table"
+                (:tr (:th "finding") (:th "file") (:th "lines"))
+                (dolist (finding findings)
+                  (let ((form (finding-form-of finding)))
+                    (views:html
+                      (:tr (:td (views:object-ref finding :display (format nil "~A in ~A" (finding-rule-of finding) (form-key-of form))))
+                           (:td (views:esc (form-file-of form)))
+                           (:td (:a :href (form-url-of form) :target "_blank"
+                                    (views:esc (format nil "~{~A~^–~}" (form-lines-of form)))))))))))
+            (views:html (:p (views:esc "No engine finding is attached to this judgement."))))))))
+
 (views:defview pr-critique-finding-view (finding pr-critique-finding)
   (views:html-view :title "Finding" :priority 1
     (let ((form (finding-form-of finding)))
