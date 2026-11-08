@@ -318,15 +318,18 @@ Local presence/absence comes only from the actual local page lookup. No HTTP sta
            (outcomes (resolution-outcomes obs)))
       (labels ((row (label object display)
                  (v:html
-                   (:tr (:th :scope "row" :style "width: 14rem; text-align: left; vertical-align: top; padding: .4rem .8rem .4rem 0;"
-                             (v:esc label))
-                        (:td :style "vertical-align: top; padding: .4rem 0;"
-                             (v:object-ref object :display display)))))
+                   (:div :class "local-only-evidence-row"
+                        :style "display: flex; flex-wrap: wrap; align-items: baseline; column-gap: 1.25rem; row-gap: .15rem; padding: .55rem 0; border-bottom: 1px solid rgba(128,128,128,.24);"
+                     (:dt :style "flex: 0 1 10.5rem; min-width: 8.5rem; font-size: .94rem; font-weight: 600; line-height: 1.45; opacity: .86;"
+                          (v:esc label))
+                     (:dd :style "flex: 1 1 18rem; min-width: 0; margin: 0; line-height: 1.55; overflow-wrap: normal;"
+                          (:span :style "text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: .16em;"
+                                 (v:object-ref object :display display))))))
                (plan-count (result)
                  (if result (format nil "~D complete plan(s)" (length (h:plans-of result))) "Not planned")))
         (v:html
-          (:div :style "max-width: 78ch; line-height: 1.5; overflow-wrap: anywhere;"
-            (:p :style "font-size: 1.15em; padding: .75rem; border-left: .25rem solid #777;"
+          (:div :class "local-only-evidence-reading" :style "box-sizing: border-box; width: 100%; max-width: 72ch; margin: 0 auto; padding: 1rem 1.25rem 2.5rem; font-size: 1rem; line-height: 1.55;"
+            (:p :style "margin: 0 0 1.75rem; font-size: 1.05rem; padding: .35rem 0 .35rem 1rem; border-left: .2rem solid #888;"
                 (:strong (v:esc (format nil "Observed: ~S" (finding obs))))
                 (:br)
                 (v:esc (case (finding obs)
@@ -334,8 +337,8 @@ Local presence/absence comes only from the actual local page lookup. No HTTP sta
                          (:observed-local "The local lookup found a real page.")
                          (:unknown "The local lookup failed; availability remains unknown.")
                          (otherwise "Inspect the recorded local finding."))))
-            (:h3 "Observation")
-            (:table :style "width: 100%; table-layout: fixed; border-collapse: collapse;"
+            (:h3 :style "font-size: 1.12rem; line-height: 1.3; margin: 1.75rem 0 .7rem; padding-top: .65rem; border-top: 1px solid rgba(128,128,128,.32);" "Observation")
+            (:dl :style "margin: .4rem 0 1.4rem;"
               (row "Finding" (finding obs) (format nil "~S" (finding obs)))
               (row "Own-site" (own-site-of obs) "Explicit local site")
               (row "Source page" (observed-page obs) (hb:id-of (observed-page obs)))
@@ -345,16 +348,16 @@ Local presence/absence comes only from the actual local page lookup. No HTTP sta
               (row "Target page" (target-page obs) (if (target-page obs) "Observed local page" "NIL — no target page object"))
               (row "Read failure" (failure-of obs) (if (failure-of obs) "Inspect read failure" "None recorded"))
               (row "Local provenance" (local-evidence-of obs) "Local lookup evidence"))
-            (:h3 "External evidence")
+            (:h3 :style "font-size: 1.12rem; line-height: 1.3; margin: 1.75rem 0 .7rem; padding-top: .65rem; border-top: 1px solid rgba(128,128,128,.32);" "External evidence")
             (:p (v:esc (if evidence
                           "Externally claimed: the evidence revision supplies assertions and any verified cached copies. Digest integrity does not prove historical remote origin."
                           "No external evidence supplied.")))
-            (:table :style "width: 100%; table-layout: fixed; border-collapse: collapse;"
+            (:dl :style "margin: .4rem 0 1.4rem;"
               (row "Evidence revision" evidence (if evidence "External evidence revision" "None supplied"))
               (row "Verified copies" copies (format nil "~D verified cached copy/copies" (length copies)))
               (row "Observation facts" (facts-of obs) "Inspect all facts (local and external)")
               (row "Candidate provenance" (candidates-of obs) (if (candidates-of obs) "Candidate order and sources" "No candidates recorded")))
-            (:h3 "Planning — not executed")
+            (:h3 :style "font-size: 1.12rem; line-height: 1.3; margin: 1.75rem 0 .7rem; padding-top: .65rem; border-top: 1px solid rgba(128,128,128,.32);" "Planning — not executed")
             (unless preparation (v:html (:p "Preparation: Not planned")))
             (:p "Resolution outcome — Modeled: "
                 (v:esc (format nil "~{~S~^, ~}" (if (listp outcomes) outcomes (list outcomes)))))
@@ -366,13 +369,13 @@ Local presence/absence comes only from the actual local page lookup. No HTTP sta
             ;; Each result appears once, including older preparation/resolution results.
             (loop for result in results for index from 1 do
               (v:html
-                (:details :style "margin: .75rem 0;"
-                  (:summary (v:esc (format nil "~A — ~A"
+                (:details :style "margin: .75rem 0; padding: .4rem .75rem; border: 1px solid rgba(128,128,128,.4); border-radius: .3rem;"
+                  (:summary :style "cursor: pointer; font-weight: 600; padding: .2rem 0;" (v:esc (format nil "~A — ~A"
                                           (cond ((eq result preparation) "Preparation")
                                                 ((eq result resolution) "Resolution")
                                                 (t (format nil "Earlier result ~D" index)))
                                           (plan-count result))))
-                  (:table :style "width: 100%; table-layout: fixed; border-collapse: collapse;"
+                  (:dl :style "margin: .4rem 0 1.4rem;"
                     (row "Planning result" result "Inspect planning result")
                     (row "SHOP3 problem" (shop3:find-problem (h:problem-name-of result)) "Inspect problem")
                     (row "Planned operations" (h:plans-of result) "Operations — not executed")
