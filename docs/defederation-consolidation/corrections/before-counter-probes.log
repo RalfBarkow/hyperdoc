@@ -1,0 +1,131 @@
+
+
+SHOP3 version 4.3.1
+Copyright (C) 2004-2026 SIFT, LLC.
+
+Original SHOP2 code Copyright (C) 2002  University of Maryland.
+
+This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+KIND, either express or implied.  This software is distributed under an
+MPL/GPL/LGPL triple license.  For details, see the software source file.
+
+Defining domain DEFEDERATION-PREPARATION...
+Warnings:
+Singleton variable ?SNAPSHOT in AXIOM INPUT-CONFLICT branch 4
+(:- (INPUT-CONFLICT ?SITE ?SLUG) LOCAL-CONFLICT
+ ((LOCAL-PAGE ?SITE ?SLUG) (LOCAL-PAGE-ABSENT ?SITE ?SLUG)) SNAPSHOT-CONFLICT
+ ((REMOTE-SNAPSHOT ?SITE ?SLUG ?_REMOTE ?_SNAPSHOT)
+  (SNAPSHOT-UNAVAILABLE ?SITE ?SLUG))
+ PERMISSION-CONFLICT
+ ((FORK-PERMITTED ?SITE ?SLUG) (FORK-FORBIDDEN ?SITE ?SLUG)) REMOTE-CONFLICT
+ ((REMOTE-SNAPSHOT ?SITE ?SLUG ?REMOTE ?SNAPSHOT) (REMOTE-PAGE ?REMOTE ?SLUG)
+  (REMOTE-PAGE-ABSENT ?REMOTE ?SLUG))
+ POLICY-CONFLICT
+ ((FORK-SOURCE-POLICY ?SITE ?SLUG :CACHED-COPY-SUFFICIENT)
+  (FORK-SOURCE-POLICY ?SITE ?SLUG :REQUIRE-REMOTE-EVIDENCE)))
+
+PROBE F2.1 prepare x3, one target: outcome=:PLANNED plans=1 trees=1 states=1 ops=((!SIMULATE-FORK !PREPARE-LOCAL-LINKS !PREPARE-PARAGRAPH-RENDERING !PREPARE-LOCAL-LINKS !PREPARE-PARAGRAPH-RENDERING !PREPARE-LOCAL-LINKS !PREPARE-PARAGRAPH-RENDERING))
+PROBE F2.1   plan 1 labels=(PREPARE-AFTER-CONSISTENCY-CHECK FORK-PROVEN-REMOTE PREPARE-AFTER-CONSISTENCY-CHECK PREPARE-AFTER-CONSISTENCY-CHECK)
+PROBE F2.1   plan 1 added=((MODELED-FORK :S :T :R :SNAP-1) (MODELED-LOCAL-PAGE :S :T) (LOCAL-LINKS-PREPARED :S :T) (PARAGRAPH-RENDERING-PREPARED :S :T))
+PROBE F2.1   plan 1 removed=NIL observations-kept=T
+PROBE F2.2a fresh plan from B: outcome=:PLANNED plans=1 trees=1 states=1 ops=((!SIMULATE-FORK !PREPARE-LOCAL-LINKS !PREPARE-PARAGRAPH-RENDERING))
+PROBE F2.2a   plan 1 labels=(PREPARE-AFTER-CONSISTENCY-CHECK FORK-PROVEN-REMOTE)
+PROBE F2.2a   plan 1 added=((MODELED-FORK :S :T :R :SNAP-1) (MODELED-LOCAL-PAGE :S :T) (LOCAL-LINKS-PREPARED :S :T) (PARAGRAPH-RENDERING-PREPARED :S :T))
+PROBE F2.2a   plan 1 removed=NIL observations-kept=T
+PROBE F2.2b continuation: plan again from B's simulated final state: outcome=:PLANNED plans=1 trees=1 states=1 ops=((!PREPARE-LOCAL-LINKS !PREPARE-PARAGRAPH-RENDERING))
+PROBE F2.2b   plan 1 labels=(PREPARE-AFTER-CONSISTENCY-CHECK)
+PROBE F2.2b   plan 1 added=NIL
+PROBE F2.2b   plan 1 removed=NIL observations-kept=T
+PROBE F2.2c new plan from the unchanged initial B: outcome=:PLANNED plans=1 trees=1 states=1 ops=((!SIMULATE-FORK !PREPARE-LOCAL-LINKS !PREPARE-PARAGRAPH-RENDERING))
+PROBE F2.2c   plan 1 labels=(PREPARE-AFTER-CONSISTENCY-CHECK FORK-PROVEN-REMOTE)
+PROBE F2.2c   plan 1 added=((MODELED-FORK :S :T :R :SNAP-1) (MODELED-LOCAL-PAGE :S :T) (LOCAL-LINKS-PREPARED :S :T) (PARAGRAPH-RENDERING-PREPARED :S :T))
+PROBE F2.2c   plan 1 removed=NIL observations-kept=T
+PROBE F2.3 prepare, then the primitive fork requested directly: outcome=:NO-PLAN plans=0 trees=0 states=0 ops=NIL
+PROBE F2.4 primitive fork twice, two different snapshots: outcome=:NO-PLAN plans=0 trees=0 states=0 ops=NIL
+PROBE F2.5 two snapshots, prepare x2: outcome=:PLANNED plans=2 trees=2 states=2 ops=((!SIMULATE-FORK !PREPARE-LOCAL-LINKS !PREPARE-PARAGRAPH-RENDERING !PREPARE-LOCAL-LINKS !PREPARE-PARAGRAPH-RENDERING) (!SIMULATE-FORK !PREPARE-LOCAL-LINKS !PREPARE-PARAGRAPH-RENDERING !PREPARE-LOCAL-LINKS !PREPARE-PARAGRAPH-RENDERING))
+PROBE F2.5   plan 1 labels=(PREPARE-AFTER-CONSISTENCY-CHECK FORK-PROVEN-REMOTE PREPARE-AFTER-CONSISTENCY-CHECK)
+PROBE F2.5   plan 1 added=((MODELED-FORK :S :T :R :SNAP-1) (MODELED-LOCAL-PAGE :S :T) (LOCAL-LINKS-PREPARED :S :T) (PARAGRAPH-RENDERING-PREPARED :S :T))
+PROBE F2.5   plan 1 removed=NIL observations-kept=T
+PROBE F2.5   plan 2 labels=(PREPARE-AFTER-CONSISTENCY-CHECK FORK-PROVEN-REMOTE PREPARE-AFTER-CONSISTENCY-CHECK)
+PROBE F2.5   plan 2 added=((MODELED-FORK :S :T :R2 :SNAP-2) (MODELED-LOCAL-PAGE :S :T) (LOCAL-LINKS-PREPARED :S :T) (PARAGRAPH-RENDERING-PREPARED :S :T))
+PROBE F2.5   plan 2 removed=NIL observations-kept=T
+PROBE F2.6 prepare, then ensure-local-target directly: outcome=:PLANNED plans=1 trees=1 states=1 ops=((!SIMULATE-FORK !PREPARE-LOCAL-LINKS !PREPARE-PARAGRAPH-RENDERING))
+PROBE F2.6   plan 1 labels=(PREPARE-AFTER-CONSISTENCY-CHECK FORK-PROVEN-REMOTE)
+PROBE F2.6   plan 1 added=((MODELED-FORK :S :T :R :SNAP-1) (MODELED-LOCAL-PAGE :S :T) (LOCAL-LINKS-PREPARED :S :T) (PARAGRAPH-RENDERING-PREPARED :S :T))
+PROBE F2.6   plan 1 removed=NIL observations-kept=T
+PROBE F2.7 input holds modeled-fork but no modeled-local-page (inconsistent continuation): outcome=:PLANNED plans=1 trees=1 states=1 ops=((!SIMULATE-FORK !PREPARE-LOCAL-LINKS !PREPARE-PARAGRAPH-RENDERING))
+PROBE F2.7   plan 1 labels=(PREPARE-AFTER-CONSISTENCY-CHECK FORK-PROVEN-REMOTE)
+PROBE F2.7   plan 1 added=((MODELED-LOCAL-PAGE :S :T) (LOCAL-LINKS-PREPARED :S :T) (PARAGRAPH-RENDERING-PREPARED :S :T))
+PROBE F2.7   plan 1 removed=NIL observations-kept=T
+PROBE X1.1 only (modeled-local-page :s :t), nothing else: outcome=:PLANNED plans=1 trees=1 states=1 ops=((!PREPARE-LOCAL-LINKS !PREPARE-PARAGRAPH-RENDERING))
+PROBE X1.1   plan 1 labels=(PREPARE-AFTER-CONSISTENCY-CHECK)
+PROBE X1.1   plan 1 added=((LOCAL-LINKS-PREPARED :S :T) (PARAGRAPH-RENDERING-PREPARED :S :T))
+PROBE X1.1   plan 1 removed=NIL observations-kept=T
+PROBE X1.2 modeled-local-page + local-page-absent + fork-forbidden, no snapshot, no policy: outcome=:PLANNED plans=1 trees=1 states=1 ops=((!PREPARE-LOCAL-LINKS !PREPARE-PARAGRAPH-RENDERING))
+PROBE X1.2   plan 1 labels=(PREPARE-AFTER-CONSISTENCY-CHECK)
+PROBE X1.2   plan 1 added=((LOCAL-LINKS-PREPARED :S :T) (PARAGRAPH-RENDERING-PREPARED :S :T))
+PROBE X1.2   plan 1 removed=NIL observations-kept=T
+PROBE X1.3 modeled-local-page + snapshot-unavailable + remote-page-absent, no fork evidence: outcome=:PLANNED plans=1 trees=1 states=1 ops=((!PREPARE-LOCAL-LINKS !PREPARE-PARAGRAPH-RENDERING))
+PROBE X1.3   plan 1 labels=(PREPARE-AFTER-CONSISTENCY-CHECK)
+PROBE X1.3   plan 1 added=((LOCAL-LINKS-PREPARED :S :T) (PARAGRAPH-RENDERING-PREPARED :S :T))
+PROBE X1.3   plan 1 removed=NIL observations-kept=T
+PROBE F3.1 contradiction at another slug: outcome=:PLANNED plans=1 trees=1 states=1 ops=((!SIMULATE-FORK !PREPARE-LOCAL-LINKS !PREPARE-PARAGRAPH-RENDERING))
+PROBE F3.1   plan 1 labels=(PREPARE-AFTER-CONSISTENCY-CHECK FORK-PROVEN-REMOTE)
+PROBE F3.1   plan 1 added=((MODELED-FORK :S :T :R :SNAP-1) (MODELED-LOCAL-PAGE :S :T) (LOCAL-LINKS-PREPARED :S :T) (PARAGRAPH-RENDERING-PREPARED :S :T))
+PROBE F3.1   plan 1 removed=NIL observations-kept=T
+PROBE F3.2 two targets of the same site: t local, u forkable: outcome=:PLANNED plans=1 trees=1 states=1 ops=((!PREPARE-LOCAL-LINKS !PREPARE-PARAGRAPH-RENDERING !SIMULATE-FORK !PREPARE-LOCAL-LINKS !PREPARE-PARAGRAPH-RENDERING))
+PROBE F3.2   plan 1 labels=(PREPARE-AFTER-CONSISTENCY-CHECK PREPARE-AFTER-CONSISTENCY-CHECK FORK-PROVEN-REMOTE)
+PROBE F3.2   plan 1 added=((LOCAL-LINKS-PREPARED :S :U0) (LOCAL-LINKS-PREPARED :S :U) (PARAGRAPH-RENDERING-PREPARED :S :U0) (PARAGRAPH-RENDERING-PREPARED :S :U) (MODELED-FORK :S :U :R :SNAP-U) (MODELED-LOCAL-PAGE :S :U))
+PROBE F3.2   plan 1 removed=NIL observations-kept=T
+PROBE F3.3 two targets, second contradictory: whole task list: outcome=:NO-PLAN plans=0 trees=0 states=0 ops=NIL
+PROBE F3.4 pre-existing markers: other slug, old site arity, target marker without readiness: outcome=:NO-PLAN plans=0 trees=0 states=0 ops=NIL
+PROBE F3.5 primitive paragraph step with a supplied target marker, target not ready: ERROR TYPE-ERROR The value NIL is not of type CONS
+PROBE F3.6 B + (LOCAL-PAGE :S :T) at the target: outcome=:NO-PLAN plans=0 trees=0 states=0 ops=NIL
+PROBE F3.6 B + (SNAPSHOT-UNAVAILABLE :S :T) at the target: outcome=:NO-PLAN plans=0 trees=0 states=0 ops=NIL
+PROBE F3.6 B + (FORK-FORBIDDEN :S :T) at the target: outcome=:NO-PLAN plans=0 trees=0 states=0 ops=NIL
+PROBE F3.6 B + (FORK-SOURCE-POLICY :S :T :REQUIRE-REMOTE-EVIDENCE) at the target: outcome=:NO-PLAN plans=0 trees=0 states=0 ops=NIL
+PROBE F3.7 B + remote-page and remote-page-absent for the snapshot's remote: outcome=:NO-PLAN plans=0 trees=0 states=0 ops=NIL
+PROBE F3.8 observed local target + snapshot-unavailable (conflict at an already local target): outcome=:NO-PLAN plans=0 trees=0 states=0 ops=NIL
+PROBE F4.1 cached: remote unknown: outcome=:PLANNED plans=1 trees=1 states=1 ops=((!SIMULATE-FORK !PREPARE-LOCAL-LINKS !PREPARE-PARAGRAPH-RENDERING))
+PROBE F4.1   plan 1 labels=(PREPARE-AFTER-CONSISTENCY-CHECK FORK-PROVEN-REMOTE)
+PROBE F4.1   plan 1 added=((MODELED-FORK :S :T :R :SNAP-1) (MODELED-LOCAL-PAGE :S :T) (LOCAL-LINKS-PREPARED :S :T) (PARAGRAPH-RENDERING-PREPARED :S :T))
+PROBE F4.1   plan 1 removed=NIL observations-kept=T
+PROBE F4.2 cached: remote explicitly absent: outcome=:PLANNED plans=1 trees=1 states=1 ops=((!SIMULATE-FORK !PREPARE-LOCAL-LINKS !PREPARE-PARAGRAPH-RENDERING))
+PROBE F4.2   plan 1 labels=(PREPARE-AFTER-CONSISTENCY-CHECK FORK-PROVEN-REMOTE)
+PROBE F4.2   plan 1 added=((MODELED-FORK :S :T :R :SNAP-1) (MODELED-LOCAL-PAGE :S :T) (LOCAL-LINKS-PREPARED :S :T) (PARAGRAPH-RENDERING-PREPARED :S :T))
+PROBE F4.2   plan 1 removed=NIL observations-kept=T
+PROBE F4.3 strict: remote unknown: outcome=:NO-PLAN plans=0 trees=0 states=0 ops=NIL
+PROBE F4.4 strict: remote explicitly absent: outcome=:NO-PLAN plans=0 trees=0 states=0 ops=NIL
+PROBE F4.5 strict: remote positive: outcome=:PLANNED plans=1 trees=1 states=1 ops=((!SIMULATE-FORK !PREPARE-LOCAL-LINKS !PREPARE-PARAGRAPH-RENDERING))
+PROBE F4.5   plan 1 labels=(PREPARE-AFTER-CONSISTENCY-CHECK FORK-PROVEN-REMOTE)
+PROBE F4.5   plan 1 added=((MODELED-FORK :S :T :R :SNAP-1) (MODELED-LOCAL-PAGE :S :T) (LOCAL-LINKS-PREPARED :S :T) (PARAGRAPH-RENDERING-PREPARED :S :T))
+PROBE F4.5   plan 1 removed=NIL observations-kept=T
+PROBE F4.6 strict: remote-page only for another remote than the snapshot's: outcome=:NO-PLAN plans=0 trees=0 states=0 ops=NIL
+PROBE F4.7 strict: two snapshots, remote evidence only for r2: outcome=:PLANNED plans=1 trees=1 states=1 ops=((!SIMULATE-FORK !PREPARE-LOCAL-LINKS !PREPARE-PARAGRAPH-RENDERING))
+PROBE F4.7   plan 1 labels=(PREPARE-AFTER-CONSISTENCY-CHECK FORK-PROVEN-REMOTE)
+PROBE F4.7   plan 1 added=((MODELED-FORK :S :T :R2 :SNAP-2) (MODELED-LOCAL-PAGE :S :T) (LOCAL-LINKS-PREPARED :S :T) (PARAGRAPH-RENDERING-PREPARED :S :T))
+PROBE F4.7   plan 1 removed=NIL observations-kept=T
+PROBE F4.8 strict: snap from r has positive evidence; r2 (also offered) is contradictory: outcome=:NO-PLAN plans=0 trees=0 states=0 ops=NIL
+PROBE F4.9 cached: contradictory evidence about an unrelated remote (no snapshot from it): outcome=:PLANNED plans=1 trees=1 states=1 ops=((!SIMULATE-FORK !PREPARE-LOCAL-LINKS !PREPARE-PARAGRAPH-RENDERING))
+PROBE F4.9   plan 1 labels=(PREPARE-AFTER-CONSISTENCY-CHECK FORK-PROVEN-REMOTE)
+PROBE F4.9   plan 1 added=((MODELED-FORK :S :T :R :SNAP-1) (MODELED-LOCAL-PAGE :S :T) (LOCAL-LINKS-PREPARED :S :T) (PARAGRAPH-RENDERING-PREPARED :S :T))
+PROBE F4.9   plan 1 removed=NIL observations-kept=T
+PROBE F4.10 cached: same remote, two snapshots: outcome=:PLANNED plans=2 trees=2 states=2 ops=((!SIMULATE-FORK !PREPARE-LOCAL-LINKS !PREPARE-PARAGRAPH-RENDERING) (!SIMULATE-FORK !PREPARE-LOCAL-LINKS !PREPARE-PARAGRAPH-RENDERING))
+PROBE F4.10   plan 1 labels=(PREPARE-AFTER-CONSISTENCY-CHECK FORK-PROVEN-REMOTE)
+PROBE F4.10   plan 1 added=((MODELED-FORK :S :T :R :SNAP-1) (MODELED-LOCAL-PAGE :S :T) (LOCAL-LINKS-PREPARED :S :T) (PARAGRAPH-RENDERING-PREPARED :S :T))
+PROBE F4.10   plan 1 removed=NIL observations-kept=T
+PROBE F4.10   plan 2 labels=(PREPARE-AFTER-CONSISTENCY-CHECK FORK-PROVEN-REMOTE)
+PROBE F4.10   plan 2 added=((MODELED-FORK :S :T :R :SNAP-2) (MODELED-LOCAL-PAGE :S :T) (LOCAL-LINKS-PREPARED :S :T) (PARAGRAPH-RENDERING-PREPARED :S :T))
+PROBE F4.10   plan 2 removed=NIL observations-kept=T
+PROBE F4.11 unknown policy value: outcome=:NO-PLAN plans=0 trees=0 states=0 ops=NIL
+PROBE F4.12 policy for another slug only: outcome=:NO-PLAN plans=0 trees=0 states=0 ops=NIL
+PROBE X2 primitive fork without local-page-absent: outcome=:NO-PLAN plans=0 trees=0 states=0 ops=NIL
+PROBE X2 primitive fork without remote-snapshot: outcome=:NO-PLAN plans=0 trees=0 states=0 ops=NIL
+PROBE X2 primitive fork without fork-permitted: outcome=:NO-PLAN plans=0 trees=0 states=0 ops=NIL
+PROBE X2 primitive fork without fork-source-policy: outcome=:NO-PLAN plans=0 trees=0 states=0 ops=NIL
+PROBE X2 primitive fork, strict policy, remote unknown: outcome=:NO-PLAN plans=0 trees=0 states=0 ops=NIL
+PROBE X6.1 ensure-local-target on a local target, plan-tree T: ERROR TYPE-ERROR The value NIL is not of type CONS
+PROBE X6.2 ensure-local-target on a local target, plan-tree NIL: outcome=:PLANNED plans=1 trees=0 states=1 ops=(NIL)
+PROBE X6.3 scenario C (no permission): no solution: outcome=:NO-PLAN plans=0 trees=0 states=0 ops=NIL
+PROBE R1 plan-defederation x5: *all-problems* grew by 5
+PROBES-DONE

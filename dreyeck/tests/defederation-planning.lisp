@@ -134,6 +134,7 @@ Never mutate the installed production domain or introduce a second evaluator."
       (assert (eq :planned (getf context :outcome)))
       (assert (eq :not-executed (getf context :execution))))
     (run-consolidation-tests)
+    (run-review-regressions)
     (format t "~&DEFEDERATION-PLANNING-PASS: state-dependent methods; exhaustive alternatives; no execution.~%")
     t))
 
@@ -142,7 +143,8 @@ Never mutate the installed production domain or introduce a second evaluator."
          (steps '(!simulate-fork !prepare-local-links !prepare-paragraph-rendering))
          (repeated (plan-defederation b :repeat 2))
          (plans (dreyeck/shop3:plans-of repeated))
-         (atoms (shop3:state-atoms (first (dreyeck/shop3:final-states-of repeated)))))
+         (atoms (when (dreyeck/shop3:final-states-of repeated)
+                  (shop3:state-atoms (first (dreyeck/shop3:final-states-of repeated))))))
     (assert (= 1 (length plans) (length (dreyeck/shop3:plan-trees-of repeated))
                (length (dreyeck/shop3:final-states-of repeated))))
     (assert (= 5 (length (first plans))))
@@ -164,7 +166,7 @@ Never mutate the installed production domain or introduce a second evaluator."
     (shop3:make-problem '(primitive-repeat :domain defederation-preparation :silently t) b
                        '((!simulate-fork :local-wiki :target-page :remote-wiki :snapshot-1)
                          (!simulate-fork :local-wiki :target-page :remote-wiki :snapshot-1)))
-    (assert (null (shop3:find-plans 'primitive-repeat :which :all :verbose 0 :plan-tree t :collect-state t)))
+    (assert (null (shop3:find-plans 'primitive-repeat :which :all :verbose 0 :plan-tree nil :collect-state t)))
     (format t "~&CONSOLIDATION PRIMITIVE-REPEAT PASS: no alternative plan.~%")
     (%check-result :unrelated-contradiction
                    (append b '((local-page :local-wiki :other) (local-page-absent :local-wiki :other))) steps)
@@ -188,4 +190,74 @@ Never mutate the installed production domain or introduce a second evaluator."
                  (length (dreyeck/shop3:final-states-of two))))
       (assert (every (lambda (p) (= 1 (count '!simulate-fork p :key #'first))) alternatives))
       (format t "~&CONSOLIDATION ALL-ALTERNATIVES PASS: ~S~%" alternatives)))
+  t)
+
+(defun %check-direct-preparation (label state tasks expected-count)
+  "Primitive top-level tasks must not request trees (independent SHOP3 defect)."
+  (let ((name (gensym "DIRECT-REVIEW-")) (before (copy-tree state)))
+    (unwind-protect
+         (progn
+           (shop3:make-problem (list name :domain 'defederation-preparation :silently t)
+                              (copy-tree state) tasks)
+           (multiple-value-bind (raw seconds trees states)
+               (shop3:find-plans name :which :all :verbose 0 :plan-tree nil :collect-state t)
+             (declare (ignore seconds trees))
+             (assert (= expected-count (length raw) (length states)))
+             (assert (equal before state))
+             (dolist (final states) (assert (subsetp before (shop3:state-atoms final) :test #'equal)))
+             (format t "~&REVIEW ~A PASS: ~D primitive plans, no tree requested.~%" label (length raw))))
+      (shop3:delete-problem name))))
+
+(defun run-review-regressions ()
+  (loop for id in '(:x1.1 :x1.2 :x1.3)
+        for state in '(((modeled-local-page :local-wiki :target-page))
+                       ((modeled-local-page :local-wiki :target-page)
+                        (local-page-absent :local-wiki :target-page)
+                        (fork-forbidden :local-wiki :target-page))
+                       ((modeled-local-page :local-wiki :target-page)
+                        (local-page-absent :local-wiki :target-page)
+                        (snapshot-unavailable :local-wiki :target-page)
+                        (remote-page-absent :remote-wiki :target-page)))
+        do (%check-result id state nil)
+           (%check-direct-preparation (list id :links) state
+             '((!prepare-local-links :local-wiki :target-page)) 0)
+           (%check-direct-preparation (list id :paragraph)
+             (cons '(local-links-prepared :local-wiki :target-page) state)
+             '((!prepare-paragraph-rendering :local-wiki :target-page)) 0))
+  (let* ((b (scenario-state :b))
+         (fork '(!simulate-fork :local-wiki :target-page :remote-wiki :snapshot-1))
+         (incomplete (cons '(modeled-fork :local-wiki :target-page :remote-wiki :snapshot-1) b)))
+    (%check-result :f2.7 incomplete nil)
+    (%check-direct-preparation :f2.7-direct-fork incomplete (list fork) 0)
+    (%check-direct-preparation :f2.7-links incomplete
+      '((!prepare-local-links :local-wiki :target-page)) 0)
+    (%check-direct-preparation :f2.7-paragraph
+      (cons '(local-links-prepared :local-wiki :target-page) incomplete)
+      '((!prepare-paragraph-rendering :local-wiki :target-page)) 0)
+    (%check-result :incomplete-other-target
+      (cons '(modeled-fork :local-wiki :other :remote-wiki :snapshot-1) b)
+      '(!simulate-fork !prepare-local-links !prepare-paragraph-rendering))
+    (%check-direct-preparation :direct-fork-conflicting-permission
+      (cons '(fork-forbidden :local-wiki :target-page) b) (list fork) 0)
+    (%check-direct-preparation :direct-fork-consistent b (list fork) 1))
+  (%check-direct-preparation :f3.5b
+    '((local-links-prepared :local-wiki :target-page) (local-page-absent :local-wiki :target-page))
+    '((!prepare-paragraph-rendering :local-wiki :target-page)) 0)
+  ;; Matching coordinates, not a claim that this imported pair came from a plan.
+  (dolist (state '(((modeled-local-page :local-wiki :target-page)
+                   (modeled-fork :local-wiki :other :remote-wiki :snapshot-1))
+                  ((modeled-local-page :local-wiki :target-page)
+                   (modeled-fork :other-wiki :target-page :remote-wiki :snapshot-1))))
+    (%check-result :mismatched-modeled-pair state nil))
+  (let* ((b (plan-defederation (scenario-state :b)))
+         (final (shop3:state-atoms (first (dreyeck/shop3:final-states-of b))))
+         (continued (plan-defederation final)))
+    (assert (= 1 (length (dreyeck/shop3:plans-of continued))
+               (length (dreyeck/shop3:plan-trees-of continued))
+               (length (dreyeck/shop3:final-states-of continued))))
+    (assert (zerop (count '!simulate-fork (first (dreyeck/shop3:plans-of continued)) :key #'first)))
+    (%check-direct-preparation :paired-state-direct-preparation final
+      '((!prepare-local-links :local-wiki :target-page)
+        (!prepare-paragraph-rendering :local-wiki :target-page)) 1))
+  (format t "~&REVIEW-REGRESSIONS-PASS: paired simulation, scoped conflict, primitive readiness; no execution.~%")
   t)

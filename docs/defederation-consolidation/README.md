@@ -1,3 +1,5 @@
+> Nachtrag: Der inzwischen eingecheckte [unabhängige Review](review/README.md) und die [begrenzten Korrekturen mit Regressionen](corrections/README.md) ergänzen diesen ursprünglichen Konsolidierungsbericht.
+
 # SHOP3 Defederation – Konsolidierung Slice 1
 
 Zettel 11560 / 11483. Neuer Branch `codex/defederation-consolidated`,

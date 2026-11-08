@@ -15,8 +15,11 @@
      (snapshot-unavailable ?site ?slug))
     permission-conflict
     ((fork-permitted ?site ?slug) (fork-forbidden ?site ?slug))
-    remote-conflict ((remote-snapshot ?site ?slug ?remote ?snapshot)
+    remote-conflict ((remote-snapshot ?site ?slug ?remote ?_snapshot)
                      (remote-page ?remote ?slug) (remote-page-absent ?remote ?slug))
+    incomplete-simulation
+    ((modeled-fork ?site ?slug ?_remote ?_snapshot)
+     (not (modeled-local-page ?site ?slug)))
     policy-conflict ((fork-source-policy ?site ?slug :cached-copy-sufficient)
                      (fork-source-policy ?site ?slug :require-remote-evidence)))
    ;; A stored copy does not imply a currently reachable remote page.
@@ -28,7 +31,8 @@
                      (remote-page ?remote ?slug)))
    (:- (target-ready ?site ?slug)
     observed ((local-page ?site ?slug))
-    simulated ((modeled-local-page ?site ?slug)))
+    simulated ((modeled-local-page ?site ?slug)
+               (modeled-fork ?site ?slug ?_remote ?_snapshot)))
 
    (:operator (!simulate-fork ?site ?slug ?remote ?snapshot)
     ((local-page-absent ?site ?slug)
@@ -44,7 +48,7 @@
     ((target-ready ?site ?slug))
     () ((local-links-prepared ?site ?slug)))
    (:operator (!prepare-paragraph-rendering ?site ?slug)
-    ((local-links-prepared ?site ?slug))
+    ((local-links-prepared ?site ?slug) (target-ready ?site ?slug))
     () ((paragraph-rendering-prepared ?site ?slug)))
 
    (:method (prepare-defederation ?site ?slug)
@@ -60,7 +64,9 @@
     ())
    (:method (ensure-local-target ?site ?slug)
     already-modeled
-    ((modeled-local-page ?site ?slug) (not (local-page ?site ?slug)))
+    ((modeled-local-page ?site ?slug)
+     (modeled-fork ?site ?slug ?_remote ?_snapshot)
+     (not (local-page ?site ?slug)))
     ())
    (:method (ensure-local-target ?site ?slug)
     fork-proven-remote
