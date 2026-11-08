@@ -14,40 +14,60 @@
     ((remote-snapshot ?site ?slug ?_remote ?_snapshot)
      (snapshot-unavailable ?site ?slug))
     permission-conflict
-    ((fork-permitted ?site ?slug) (fork-forbidden ?site ?slug)))
+    ((fork-permitted ?site ?slug) (fork-forbidden ?site ?slug))
+    remote-conflict ((remote-snapshot ?site ?slug ?remote ?snapshot)
+                     (remote-page ?remote ?slug) (remote-page-absent ?remote ?slug))
+    policy-conflict ((fork-source-policy ?site ?slug :cached-copy-sufficient)
+                     (fork-source-policy ?site ?slug :require-remote-evidence)))
+   ;; A stored copy does not imply a currently reachable remote page.
+   (:- (fork-source ?site ?slug ?remote ?snapshot)
+    cached-copy ((fork-source-policy ?site ?slug :cached-copy-sufficient)
+                 (remote-snapshot ?site ?slug ?remote ?snapshot))
+    remote-evidence ((fork-source-policy ?site ?slug :require-remote-evidence)
+                     (remote-snapshot ?site ?slug ?remote ?snapshot)
+                     (remote-page ?remote ?slug)))
    (:- (target-ready ?site ?slug)
     observed ((local-page ?site ?slug))
     simulated ((modeled-local-page ?site ?slug)))
 
    (:operator (!simulate-fork ?site ?slug ?remote ?snapshot)
     ((local-page-absent ?site ?slug)
-     (remote-snapshot ?site ?slug ?remote ?snapshot)
+     (fork-source ?site ?slug ?remote ?snapshot)
+     (not (local-page ?site ?slug))
+     (not (modeled-local-page ?site ?slug))
      (fork-permitted ?site ?slug)
      (not (input-conflict ?site ?slug)))
     () ((modeled-local-page ?site ?slug)
         (modeled-fork ?site ?slug ?remote ?snapshot)))
+   ;; Target-scoped planning obligations, never whole-site readiness or execution.
    (:operator (!prepare-local-links ?site ?slug)
     ((target-ready ?site ?slug))
-    () ((local-links-prepared ?site)))
-   (:operator (!prepare-paragraph-rendering ?site)
-    ((local-links-prepared ?site))
-    () ((paragraph-rendering-prepared ?site)))
+    () ((local-links-prepared ?site ?slug)))
+   (:operator (!prepare-paragraph-rendering ?site ?slug)
+    ((local-links-prepared ?site ?slug))
+    () ((paragraph-rendering-prepared ?site ?slug)))
 
    (:method (prepare-defederation ?site ?slug)
     prepare-after-consistency-check
     ((not (input-conflict ?site ?slug)))
     ((ensure-local-target ?site ?slug)
      (!prepare-local-links ?site ?slug)
-     (!prepare-paragraph-rendering ?site)))
+     (!prepare-paragraph-rendering ?site ?slug)))
    ;; Separate definitions let :WHICH :ALL expose any alternative solution.
    (:method (ensure-local-target ?site ?slug)
     already-local
     ((local-page ?site ?slug))
     ())
    (:method (ensure-local-target ?site ?slug)
+    already-modeled
+    ((modeled-local-page ?site ?slug) (not (local-page ?site ?slug)))
+    ())
+   (:method (ensure-local-target ?site ?slug)
     fork-proven-remote
     ((local-page-absent ?site ?slug)
-     (remote-snapshot ?site ?slug ?remote ?snapshot)
+     (fork-source ?site ?slug ?remote ?snapshot)
+     (not (local-page ?site ?slug))
+     (not (modeled-local-page ?site ?slug))
      (fork-permitted ?site ?slug))
     ((!simulate-fork ?site ?slug ?remote ?snapshot)))))
 
@@ -59,9 +79,11 @@ Missing observations are unknown, never evidence of absence or prohibition."
      (:a '((local-page :local-wiki :target-page)))
      (:b '((local-page-absent :local-wiki :target-page)
            (remote-snapshot :local-wiki :target-page :remote-wiki :snapshot-1)
-           (fork-permitted :local-wiki :target-page)))
+           (fork-permitted :local-wiki :target-page)
+           (fork-source-policy :local-wiki :target-page :cached-copy-sufficient)))
      (:c '((local-page-absent :local-wiki :target-page)
-           (remote-snapshot :local-wiki :target-page :remote-wiki :snapshot-1))))))
+           (remote-snapshot :local-wiki :target-page :remote-wiki :snapshot-1)
+           (fork-source-policy :local-wiki :target-page :cached-copy-sufficient))))))
 
 (defun planning-outcome (result)
   "A successful empty plan is still success; execution is always separate."
@@ -69,14 +91,15 @@ Missing observations are unknown, never evidence of absence or prohibition."
 
 (defun plan-defederation (initial-state
                           &key (site :local-wiki) (slug :target-page)
-                            (problem-name 'defederation-custom)
+                            (repeat 1) (problem-name (gensym "DEFEDERATION-"))
                             (domain 'defederation-preparation))
   "Search with real SHOP3, retaining all four values in the existing result.
 Only hypothetical in-memory facts change. No Wiki I/O or executor is involved."
+  (assert (and (integerp repeat) (plusp repeat)))
   (let ((problem
           (shop3:make-problem
            (list problem-name :domain domain :silently t)
-           (copy-tree initial-state) `((prepare-defederation ,site ,slug)))))
+           (copy-tree initial-state) (loop repeat repeat collect `(prepare-defederation ,site ,slug)))))
     (multiple-value-bind (raw seconds trees states)
         (shop3:find-plans problem :which :all :verbose 0
                          :plan-tree t :collect-state t)
@@ -104,4 +127,4 @@ Only hypothetical in-memory facts change. No Wiki I/O or executor is involved."
           :result result :outcome (planning-outcome result)
           :execution :not-executed
           :limits '(:hypothetical-observations :simulated-transitions
-                    :one-required-target :no-refederation :no-executor))))
+                    :one-required-target :not-site-readiness :no-refederation :no-executor))))

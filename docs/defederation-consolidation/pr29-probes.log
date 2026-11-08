@@ -1,0 +1,77 @@
+
+
+SHOP3 version 4.3.1
+Copyright (C) 2004-2026 SIFT, LLC.
+
+Original SHOP2 code Copyright (C) 2002  University of Maryland.
+
+This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+KIND, either express or implied.  This software is distributed under an
+MPL/GPL/LGPL triple license.  For details, see the software source file.
+
+Defining domain DEFEDERATION-PREPARATION...
+REFERENCE 29 REPEAT: plans=(((!SIMULATE-FORK :LOCAL-WIKI :TARGET-PAGE
+                              :REMOTE-WIKI :SNAPSHOT-1)
+                             (!PREPARE-LOCAL-LINKS :LOCAL-WIKI :TARGET-PAGE)
+                             (!PREPARE-PARAGRAPH-RENDERING :LOCAL-WIKI)
+                             (!SIMULATE-FORK :LOCAL-WIKI :TARGET-PAGE
+                              :REMOTE-WIKI :SNAPSHOT-1)
+                             (!PREPARE-LOCAL-LINKS :LOCAL-WIKI :TARGET-PAGE)
+                             (!PREPARE-PARAGRAPH-RENDERING :LOCAL-WIKI))) trees=1 states=(((PARAGRAPH-RENDERING-PREPARED
+                                                                                            :LOCAL-WIKI)
+                                                                                           (LOCAL-LINKS-PREPARED
+                                                                                            :LOCAL-WIKI)
+                                                                                           (MODELED-LOCAL-PAGE
+                                                                                            :LOCAL-WIKI
+                                                                                            :TARGET-PAGE)
+                                                                                           (MODELED-FORK
+                                                                                            :LOCAL-WIKI
+                                                                                            :TARGET-PAGE
+                                                                                            :REMOTE-WIKI
+                                                                                            :SNAPSHOT-1)
+                                                                                           (FORK-PERMITTED
+                                                                                            :LOCAL-WIKI
+                                                                                            :TARGET-PAGE)
+                                                                                           (REMOTE-SNAPSHOT
+                                                                                            :LOCAL-WIKI
+                                                                                            :TARGET-PAGE
+                                                                                            :REMOTE-WIKI
+                                                                                            :SNAPSHOT-1)
+                                                                                           (LOCAL-PAGE-ABSENT
+                                                                                            :LOCAL-WIKI
+                                                                                            :TARGET-PAGE)))
+REFERENCE 29 UNRELATED-CONFLICT: plans=(((!SIMULATE-FORK :LOCAL-WIKI
+                                          :TARGET-PAGE :REMOTE-WIKI
+                                          :SNAPSHOT-1)
+                                         (!PREPARE-LOCAL-LINKS :LOCAL-WIKI
+                                          :TARGET-PAGE)
+                                         (!PREPARE-PARAGRAPH-RENDERING
+                                          :LOCAL-WIKI))) trees=1 states=(((PARAGRAPH-RENDERING-PREPARED
+                                                                           :LOCAL-WIKI)
+                                                                          (LOCAL-LINKS-PREPARED
+                                                                           :LOCAL-WIKI)
+                                                                          (MODELED-LOCAL-PAGE
+                                                                           :LOCAL-WIKI
+                                                                           :TARGET-PAGE)
+                                                                          (MODELED-FORK
+                                                                           :LOCAL-WIKI
+                                                                           :TARGET-PAGE
+                                                                           :REMOTE-WIKI
+                                                                           :SNAPSHOT-1)
+                                                                          (LOCAL-PAGE
+                                                                           :LOCAL-WIKI
+                                                                           :OTHER)
+                                                                          (FORK-PERMITTED
+                                                                           :LOCAL-WIKI
+                                                                           :TARGET-PAGE)
+                                                                          (REMOTE-SNAPSHOT
+                                                                           :LOCAL-WIKI
+                                                                           :TARGET-PAGE
+                                                                           :REMOTE-WIKI
+                                                                           :SNAPSHOT-1)
+                                                                          (LOCAL-PAGE-ABSENT
+                                                                           :LOCAL-WIKI
+                                                                           :OTHER)
+                                                                          (LOCAL-PAGE-ABSENT
+                                                                           :LOCAL-WIKI
+                                                                           :TARGET-PAGE)))
