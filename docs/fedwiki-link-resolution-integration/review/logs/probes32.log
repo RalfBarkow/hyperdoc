@@ -1,0 +1,34 @@
+P32 I1 imported modeled-local-page only, collaborative: plans=1 outcomes=(:MODELED-LOCAL) steps=((!USE-MODELED-PAGE)) added=(((PLANNED-HYPOTHETICAL-PANEL :L :ORIGIN :TARGET)))
+P32 I2 imported modeled-local-page only, local-only: plans=1 outcomes=(:MODELED-LOCAL) steps=((!USE-MODELED-PAGE)) added=(((PLANNED-HYPOTHETICAL-PANEL :L :ORIGIN :TARGET)))
+P32 I3 imported modeled-local-page + 404 + NO permission, prepare: plans=1 outcomes=(:ALREADY-MODELED-LOCAL) steps=(NIL) added=(NIL)
+P32 I4 imported modeled-local-page at remote :a, origin 404: plans=1 outcomes=(:MODELED-LOCAL) steps=(((!REQUEST :ORIGIN) !USE-MODELED-PAGE)) added=(((PLANNED-HYPOTHETICAL-PANEL :L :A :TARGET)))
+P32 I5 imported planned-fork only (no presence) + fork evidence, prepare: plans=1 outcomes=(:FORK-PLANNED) steps=((!PLAN-FORK)) added=(((MODELED-LOCAL-PAGE :ORIGIN :TARGET)))
+P32 I6 imported planned-panel marker, origin unknown, local-only: plans=0 outcomes=NIL steps=NIL added=NIL
+P32 F1 fork with HTTP 500 at origin: plans=1 outcomes=(:FORK-PLANNED) steps=((!PLAN-FORK)) added=(((PLANNED-FORK :ORIGIN :TARGET :A VERIFIED-COPY :SNAP) (MODELED-LOCAL-PAGE :ORIGIN :TARGET)))
+P32 F2 fork with explicit fork-forbidden as well: plans=0 outcomes=NIL steps=NIL added=NIL
+P32 F3 fork, strict policy, remote present, NO copy: plans=1 outcomes=(:FORK-PLANNED) steps=((!PLAN-FORK)) added=(((PLANNED-FORK :ORIGIN :TARGET :A CONFIRMED-REMOTE :A) (MODELED-LOCAL-PAGE :ORIGIN :TARGET)))
+P32 F4 fork, two verified copies: plans=2 outcomes=(:FORK-PLANNED :FORK-PLANNED) steps=((!PLAN-FORK) (!PLAN-FORK)) added=(((PLANNED-FORK :ORIGIN :TARGET :A VERIFIED-COPY :SNAP) (MODELED-LOCAL-PAGE :ORIGIN :TARGET)) ((PLANNED-FORK :ORIGIN :TARGET :B VERIFIED-COPY :SNAP2) (MODELED-LOCAL-PAGE :ORIGIN :TARGET)))
+P32 F5 fork, cached policy, copy from a remote observed 404: plans=1 outcomes=(:FORK-PLANNED) steps=((!PLAN-FORK)) added=(((PLANNED-FORK :ORIGIN :TARGET :A VERIFIED-COPY :SNAP) (MODELED-LOCAL-PAGE :ORIGIN :TARGET)))
+P32 F7 fork with request-error at origin (no HTTP answer): plans=0 outcomes=NIL steps=NIL added=NIL
+P32 F8 prepare twice: plans=1 outcomes=(:FORK-PLANNED) steps=((!PLAN-FORK)) added=(((PLANNED-FORK :ORIGIN :TARGET :A VERIFIED-COPY :SNAP) (MODELED-LOCAL-PAGE :ORIGIN :TARGET)))
+P32 F9 prepare, then resolve local-only: plans=1 outcomes=(:MODELED-LOCAL) steps=((!PLAN-FORK !USE-MODELED-PAGE)) added=(((PLANNED-FORK :ORIGIN :TARGET :A VERIFIED-COPY :SNAP) (MODELED-LOCAL-PAGE :ORIGIN :TARGET) (PLANNED-HYPOTHETICAL-PANEL :L :ORIGIN :TARGET)))
+P32 C1 conflict at an unrelated site/slug, local hit: plans=1 outcomes=(:LOCAL-OBSERVED) steps=(((!REQUEST :ORIGIN) !OPEN-PANEL)) added=(((PLANNED-PANEL :L :ORIGIN :TARGET :ORIGIN)))
+P32 C2 conflict at a later candidate after local hit: plans=1 outcomes=(:LOCAL-OBSERVED) steps=(((!REQUEST :ORIGIN) !OPEN-PANEL)) added=(((PLANNED-PANEL :L :ORIGIN :TARGET :ORIGIN)))
+P32 C2b conflict at a candidate before the hit: plans=0 outcomes=NIL steps=NIL added=NIL
+P32 C4 both fork policies, copy and remote evidence: plans=2 outcomes=(:FORK-PLANNED :FORK-PLANNED) steps=((!PLAN-FORK) (!PLAN-FORK)) added=(((PLANNED-FORK :ORIGIN :TARGET :A CONFIRMED-REMOTE :A) (MODELED-LOCAL-PAGE :ORIGIN :TARGET)) ((PLANNED-FORK :ORIGIN :TARGET :A VERIFIED-COPY :SNAP) (MODELED-LOCAL-PAGE :ORIGIN :TARGET)))
+P32 C5 fork-permitted + fork-forbidden: plans=0 outcomes=NIL steps=NIL added=NIL
+P32 C6 origin conflict, local-only: plans=0 outcomes=NIL steps=NIL added=NIL
+P32 C7 origin conflict + imported modeled-local-page, local-only: plans=0 outcomes=NIL steps=NIL added=NIL
+P32 M1 local-only, origin unknown: plans=0 outcomes=NIL steps=NIL added=NIL
+P32 M2 local-only, origin 404: plans=1 outcomes=(:NOT-FOUND) steps=(((!REQUEST :ORIGIN) !CONCLUDE-UNRESOLVED)) added=(((PLANNED-UNRESOLVED :L :TARGET LOCAL-ONLY)))
+P32 M3 collaborative, all 404: plans=1 outcomes=(:NOT-FOUND) steps=(((!REQUEST :ORIGIN) (!REQUEST :A) !CONCLUDE-UNRESOLVED)) added=(((PLANNED-UNRESOLVED :L :TARGET COLLABORATIVE)))
+P32 M4 collaborative, network failure at a: plans=1 outcomes=(:ABORTED-NETWORK-ERROR) steps=(((!REQUEST :ORIGIN) (!REQUEST :A) !ABORT-RESOLUTION)) added=(((PLANNED-ABORT :L :A :TARGET)))
+P32 M5 local-only, remote available but origin 404: plans=1 outcomes=(:NOT-FOUND) steps=(((!REQUEST :ORIGIN) !CONCLUDE-UNRESOLVED)) added=(((PLANNED-UNRESOLVED :L :TARGET LOCAL-ONLY)))
+P32 M6 collaborative, unknown a before hit b: plans=0 outcomes=NIL steps=NIL added=NIL
+P32 M6 diagnosis (:EVIDENCE-MISSING-OR-CONTRADICTORY :SITE :A :EVIDENCE :UNKNOWN)
+P32 X1 !plan-fork twice directly: plans=0 outcomes=NIL steps=NIL added=NIL
+P32 X2 !conclude-unresolved directly, no evidence: ERROR The value NIL is not of type CONS
+P32 X3 !request remote directly (no gate): ERROR The value NIL is not of type CONS
+P32 X4 try-candidate at remote position directly under 'local-only' intent: plans=1 outcomes=(:REMOTE-CONTEXT) steps=(((!REQUEST :A) !OPEN-PANEL)) added=(((PLANNED-PANEL :L :A :TARGET :JOURNAL)))
+P32 X5 !open-panel at a conflicting site: ERROR The value NIL is not of type CONS
+P32 R1 *all-problems* grew by 0; shop3:*domain* NIL

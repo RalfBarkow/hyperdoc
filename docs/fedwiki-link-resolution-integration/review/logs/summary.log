@@ -1,0 +1,15 @@
+REVIEW-RUN pr31=befce10dc0055222c33d9736723a05d0122a0c9d pr32=e1ab2f570ee793e301c5af706cbcf2fc984c02a9 pr33=68971d55f68273b77e1d33186bc66e9f019c0902 network-isolation=unshare --net
+STEP order-equivalence exit=0 marker=present
+STEP probes31 exit=0 marker=present
+STEP probes32 exit=0 marker=present
+STEP prim32 exit=0 marker=present
+STEP suite31 exit=0 marker=present
+STEP suite32 exit=0 marker=present
+STEP critic-reader32 exit=0 marker=present
+STEP hyperdoc-comparison32 exit=0 marker=present
+COMPARE hyperdoc-comparison32 identical to PR #32's committed log
+STEP merged31-suite exit=0 marker=present
+STEP merged32-suite exit=0 marker=present
+STEP java31 exit=0 marker=present cases=12
+STEP java32 exit=0 observed.json byte-identical to PR #32's committed file
+REVIEW-RUN-DONE

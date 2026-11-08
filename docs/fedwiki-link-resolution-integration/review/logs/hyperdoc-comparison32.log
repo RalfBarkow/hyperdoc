@@ -1,0 +1,28 @@
+HYPERDOC-COMPARISON H1 local-first origin/welcome-visitors java=("s1") hyperdoc=("s1") same
+HYPERDOC-COMPARISON H1 context-newest-first origin/welcome-visitors java=("s2" "s1") hyperdoc=("s2" "s1") same
+HYPERDOC-COMPARISON H1 context-fallthrough origin/welcome-visitors java=("s2" "s1") hyperdoc=("s2" "s1") same
+HYPERDOC-COMPARISON H1 item-site origin/welcome-visitors java=("s2" "s1") hyperdoc=("s2" "s1") same
+HYPERDOC-COMPARISON H1 journal-reorder origin/welcome-visitors java=("s1" "s2") hyperdoc=("s1" "s2") same
+HYPERDOC-COMPARISON H1 not-found origin/welcome-visitors java=("s2" "s1") hyperdoc=("s2" "s1") same
+HYPERDOC-COMPARISON H1 status-500 origin/welcome-visitors java=("s2" "s1") hyperdoc=("s2" "s1") same
+HYPERDOC-COMPARISON H1 redirect-302 origin/welcome-visitors java=("s2" "s1") hyperdoc=("s2" "s1") same
+HYPERDOC-COMPARISON H1 network-error origin/welcome-visitors java=("dead" "s1") hyperdoc=("dead" "s1") same
+HYPERDOC-COMPARISON H1 panel-site origin/welcome-visitors java=("s1") hyperdoc=("s1") same
+HYPERDOC-COMPARISON H1 panel-site s1/remote-page java=("s2") hyperdoc=("s2") same
+HYPERDOC-COMPARISON H1 origin-in-context origin/welcome-visitors java=("origin" "s1") hyperdoc=("origin" "s1") same
+HYPERDOC-COMPARISON H1 attribution-site origin/welcome-visitors java=NIL hyperdoc=("s1") DIFFERENT
+HYPERDOC-COMPARISON H2 local-first link1 hyperdoc-resolved="origin" consulted=((:FIND-PAGE "origin" "target")) java-lineup=("origin" "origin") java-requests=("origin" "origin")
+HYPERDOC-COMPARISON H2 context-newest-first link1 hyperdoc-resolved="s2" consulted=((:FIND-PAGE "origin" "target") (:PLUGIN-PAGE "origin" "target") (:FIND-PAGE "s2" "target")) java-lineup=("origin" "s2") java-requests=("origin" "origin" "s2")
+HYPERDOC-COMPARISON H2 context-fallthrough link1 hyperdoc-resolved="s1" consulted=((:FIND-PAGE "origin" "target") (:PLUGIN-PAGE "origin" "target") (:FIND-PAGE "s2" "target") (:FIND-PAGE "s1" "target")) java-lineup=("origin" "s1") java-requests=("origin" "origin" "s2" "s1")
+HYPERDOC-COMPARISON H2 item-site link1 hyperdoc-resolved="s2" consulted=((:FIND-PAGE "origin" "target") (:PLUGIN-PAGE "origin" "target") (:FIND-PAGE "s2" "target")) java-lineup=("origin" "s1") java-requests=("origin" "origin" "s1")
+HYPERDOC-COMPARISON H2 journal-reorder link1 hyperdoc-resolved="s1" consulted=((:FIND-PAGE "origin" "target") (:PLUGIN-PAGE "origin" "target") (:FIND-PAGE "s1" "target")) java-lineup=("origin" "s1") java-requests=("origin" "origin" "s1")
+HYPERDOC-COMPARISON H2 not-found link1 hyperdoc-resolved=NIL consulted=((:FIND-PAGE "origin" "target") (:PLUGIN-PAGE "origin" "target") (:FIND-PAGE "s2" "target") (:FIND-PAGE "s1" "target")) java-lineup=NIL java-requests=("origin" "origin" "s2" "s1")
+HYPERDOC-COMPARISON H2 panel-site link1 hyperdoc-resolved="s1" consulted=((:FIND-PAGE "origin" "remote-page") (:PLUGIN-PAGE "origin" "remote-page") (:FIND-PAGE "s1" "remote-page")) java-lineup=("origin" "s1" "s2") java-requests=("origin" "origin" "s1" "origin" "s1" "s2")
+HYPERDOC-COMPARISON H2 panel-site link2 from s1 (a REMOTE-FEDWIKI-PAGE held by origin) hyperdoc-resolved="s2" consulted=((:FIND-PAGE "origin" "target") (:PLUGIN-PAGE "origin" "target") (:FIND-PAGE "s1" "target") (:FIND-PAGE "s2" "target"))
+HYPERDOC-COMPARISON H2 panel-site link2 from s1's own page (a FEDWIKI-PAGE held by s1) hyperdoc-resolved="s2" consulted=((:FIND-PAGE "s1" "target") (:PLUGIN-PAGE "s1" "target") (:FIND-PAGE "s2" "target"))
+HYPERDOC-COMPARISON H2 origin-in-context link1 hyperdoc-resolved="s1" consulted=((:FIND-PAGE "origin" "target") (:PLUGIN-PAGE "origin" "target") (:FIND-PAGE "origin" "target") (:FIND-PAGE "s1" "target")) java-lineup=("origin" "s1") java-requests=("origin" "origin" "origin" "s1")
+HYPERDOC-COMPARISON H2 attribution-site link1 hyperdoc-resolved="s1" consulted=((:FIND-PAGE "origin" "target") (:PLUGIN-PAGE "origin" "target") (:FIND-PAGE "s1" "target")) java-lineup=NIL java-requests=("origin" "origin")
+HYPERDOC-COMPARISON H3 loading the local page: context=("remote.example") connection-attempts=(("remote.example" 443))
+HYPERDOC-COMPARISON H3 lookup with the default plugin-page resolver: signalled USOCKET:NS-HOST-NOT-FOUND-ERROR; connection-attempts=(("local.example" 443))
+HYPERDOC-COMPARISON H3 lookup with a NIL plugin-page resolver: resolved=NIL consulted=((:FIND-PAGE "local.example" "missing-page") (:PLUGIN-PAGE "local.example" "missing-page") (:FIND-PAGE "remote.example" "missing-page")) connection-attempts=NIL
+HYPERDOC-COMPARISON DONE

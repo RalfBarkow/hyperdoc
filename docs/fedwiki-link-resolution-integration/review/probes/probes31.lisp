@@ -1,0 +1,57 @@
+;;;; Contract counter-probes on PR #31 (befce10dc0055222c33d9736723a05d0122a0c9d), plans only, no network.
+;;;; PR_TREE = an unmodified extraction of that commit (run-review.sh provides it). Inputs I*, F*, C*, M*, X* mirror probes32.lisp
+;;;; where the two vocabularies allow. Prints one line per probe, prefixed P31.
+(require :asdf)
+(asdf:load-asd (merge-pathnames "dreyeck.asd" (uiop:ensure-directory-pathname (uiop:getenv "PR_TREE"))))
+(asdf:load-system "dreyeck/work/link-resolution")
+(in-package #:dreyeck/work/link-resolution)
+(setf *print-pretty* nil)
+(defun show (id label state candidates &rest keys)
+  (let ((r (handler-case (apply #'plan-resolution state candidates keys) (error (c) (format t "~&P31 ~A ~A: ERROR ~A~%" id label c) nil))))
+    (when r (format t "~&P31 ~A ~A: plans=~D ops=~S added=~S~%" id label (length (dreyeck/shop3:plans-of r))
+                    (mapcar (lambda (p) (mapcar (lambda (s) (if (member (first s) '(!record-resolution !record-miss)) (subseq s 0 (min 4 (length s))) (first s))) p)) (dreyeck/shop3:plans-of r))
+                    (mapcar (lambda (st) (set-difference (shop3:state-atoms st) state :test #'equal)) (dreyeck/shop3:final-states-of r))))
+    r))
+(defun prim (id label state tasks)
+  (shop3:make-problem (list 'p31 :domain 'fedwiki-ordered-resolution :silently t) (copy-tree state) tasks)
+  (format t "~&P31 ~A ~A: ~S~%" id label
+          (handler-case (mapcar (lambda (p) (mapcar #'first (shop3:shorter-plan p))) (shop3:find-plans 'p31 :which :all :verbose 0 :plan-tree nil))
+            (error (c) (list :error (type-of c)))))
+  (shop3:delete-problem 'p31))
+(defparameter +fork+ '((page-absent :origin :target) (verified-copy :a :target :snap) (fork-permitted :origin :target)
+                       (fork-source-policy :cached-copy-sufficient)))
+;; Contract 2: imported modeled facts / markers
+(show "I1" "imported modeled-local-page only, collaborative" '((modeled-local-page :origin :target)) '(:origin :a))
+(show "I2" "imported modeled-local-page only, local-only" '((modeled-local-page :origin :target)) '(:origin :a) :policy :local-only)
+(show "I3" "imported modeled-local-page + page-absent + NO permission, prepare" '((modeled-local-page :origin :target) (page-absent :origin :target)) '(:origin) :policy :local-only :prepare t)
+(show "I4" "imported modeled-local-page at remote :a, origin absent" '((page-absent :origin :target) (modeled-local-page :a :target)) '(:origin :a))
+(show "I5" "imported modeled-fork only (no presence) + fork evidence, prepare" (cons '(modeled-fork :origin :a :target :snap) (copy-tree +fork+)) '(:origin) :policy :local-only :prepare t)
+(show "I6" "imported resolution-prepared marker, origin unknown" '((resolution-prepared :target :origin :observed)) '(:origin) :policy :local-only)
+;; Fork semantics
+(show "F1" "fork with HTTP 500 at origin instead of page-absent" (cons '(http-miss :origin :target 500) (remove 'page-absent (copy-tree +fork+) :key #'first)) '(:origin) :policy :local-only :prepare t)
+(show "F2" "fork with explicit fork-forbidden as well" (cons '(fork-forbidden :origin :target) (copy-tree +fork+)) '(:origin) :policy :local-only :prepare t)
+(show "F3" "fork, strict policy, remote present" (list* '(page-present :a :target) '(fork-source-policy :require-remote-evidence) (remove 'fork-source-policy (copy-tree +fork+) :key #'first)) '(:origin) :policy :local-only :prepare t)
+(show "F4" "fork, two verified copies" (cons '(verified-copy :b :target :snap2) (copy-tree +fork+)) '(:origin) :policy :local-only :prepare t)
+(show "F5" "fork, cached policy, copy from a remote observed absent" (cons '(page-absent :a :target) (copy-tree +fork+)) '(:origin) :policy :local-only :prepare t)
+(show "F6" "fork + snapshot of copy declared unavailable (no such predicate)" (cons '(snapshot-unavailable :origin :target) (copy-tree +fork+)) '(:origin) :policy :local-only :prepare t)
+;; Conflicts and scope
+(show "C1" "conflict at an unrelated site/slug, local hit" '((page-present :origin :target) (page-present :zz :other) (page-absent :zz :other)) '(:origin))
+(show "C2" "conflict at a later candidate after local hit" '((page-present :origin :target) (page-present :b :target) (page-absent :b :target)) '(:origin :a :b))
+(show "C3" "page-present + http-miss 200 (consistent)" '((page-present :origin :target) (http-miss :origin :target 200)) '(:origin))
+(show "C4" "both fork policies" (cons '(fork-source-policy :require-remote-evidence) (copy-tree +fork+)) '(:origin) :policy :local-only :prepare t)
+(show "C5" "fork-permitted + fork-forbidden" (cons '(fork-forbidden :origin :target) (copy-tree +fork+)) '(:origin) :policy :local-only :prepare t)
+;; Missing / failed evidence
+(show "M1" "local-only, origin unknown" '() '(:origin) :policy :local-only)
+(show "M2" "local-only, origin absent" '((page-absent :origin :target)) '(:origin) :policy :local-only)
+(show "M3" "collaborative, all absent" '((page-absent :origin :target) (page-absent :a :target)) '(:origin :a))
+(show "M4" "collaborative, network failure at a" '((page-absent :origin :target) (network-failed :a :target) (page-present :b :target)) '(:origin :a :b))
+(show "M5" "local-only, remote present but origin absent" '((page-absent :origin :target) (page-present :a :target)) '(:origin :a) :policy :local-only)
+;; Contract 3: primitives
+(prim "X1" "!prepare-fork twice directly" (copy-tree +fork+) '((!prepare-fork :origin :a :target :snap) (!prepare-fork :origin :a :target :snap)))
+(prim "X2" "!prepare-fork with page-present at origin (conflict)" (cons '(page-present :origin :target) (copy-tree +fork+)) '((!prepare-fork :origin :a :target :snap)))
+(prim "X3" "!record-resolution remote without allowed gate" '((page-present :a :target)) '((!record-resolution :target :a :observed)))
+(prim "X4" "search-sites local-only directly, no consistency check" '((page-present :origin :target) (page-absent :origin :target)) '((search-sites :local-only :origin :target (:origin))))
+;; Registration
+(let ((n (length shop3::*all-problems*))) (dotimes (i 3) (plan-resolution '((page-present :origin :target)) '(:origin)))
+  (format t "~&P31 R1 *all-problems* grew by ~D; shop3:*domain* ~S~%" (- (length shop3::*all-problems*) n) (and shop3:*domain* (shop3::domain-name shop3:*domain*))))
+(format t "~&P31-DONE~%")
