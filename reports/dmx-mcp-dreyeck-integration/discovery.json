@@ -1,0 +1,62 @@
+{
+  "checks": 72,
+  "sourceBase": "591f275fc26ebef7967cc8d3e3fb5a0efc19cc85",
+  "negativeCases": {
+    "malformed-json": {
+      "http": 200,
+      "rpc": -32010
+    },
+    "html": {
+      "http": 200,
+      "rpc": -32010
+    },
+    "scalar": {
+      "http": 200,
+      "rpc": -32010
+    },
+    "false": {
+      "http": 200,
+      "rpc": -32010
+    },
+    "null": {
+      "http": 200,
+      "rpc": -32010
+    },
+    "array": {
+      "http": 200,
+      "rpc": -32010
+    },
+    "blank": {
+      "http": 200,
+      "rpc": -32010
+    },
+    "missing-topics": {
+      "http": 200,
+      "rpc": -32010
+    },
+    "bad-topics": {
+      "http": 200,
+      "rpc": -32010
+    },
+    "bad-topic-id": {
+      "http": 200,
+      "rpc": -32010
+    },
+    "unauthorized": {
+      "http": 200,
+      "rpc": -32010
+    },
+    "forbidden": {
+      "http": 200,
+      "rpc": -32010
+    },
+    "unavailable": {
+      "http": 200,
+      "rpc": -32010
+    }
+  },
+  "successfulDiscoveryHttpRequests": 1,
+  "discoveryTopicReads": 0,
+  "deployedGitRevision": "unknown; no operator deployment evidence",
+  "toolDefinitionsSHA256": "fcb41ea1be5db385ad58060fd45e2dcf0158dc0fb507b6d537029ebd5b9dc85d"
+}

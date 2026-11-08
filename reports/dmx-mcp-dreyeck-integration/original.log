@@ -1,0 +1,9 @@
+DMX-DISCOVERY initialize PASS
+DMX-DISCOVERY initialized PASS
+DMX-DISCOVERY original-internal-error PASS
+DMX-DISCOVERY original-false-id PASS
+DMX-DISCOVERY recorded-remote-error-fingerprint PASS
+DMX-DISCOVERY real-http-topicmap-read-before-failure PASS
+DMX-DISCOVERY existing-tool-schema-advertised PASS
+DMX-DISCOVERY local-server-exit PASS
+DMX-DISCOVERY-PASS: 8 checks; original=True
