@@ -464,6 +464,22 @@
     (check (find "Local-only evidence" (html-inspector-views:all-views object)
                  :key #'html-inspector-views:view-title :test #'equal)
            "Observation has no Local-only evidence view.")
+    ;; The renamed explanation is separately addressable; the old page ID remains.
+    (let* ((new-page (hyperbook:find-page book
+                        "A Missing Local Link in Ward's Defederation Experiment"
+                        :signal-error? t))
+           (new-view (find "Content" (html-inspector-views:all-views new-page)
+                           :key #'html-inspector-views:view-title :test #'equal)))
+      (check new-view "Defederation context page has no Content view.")
+      (let ((new-html (html-inspector-views:view-html new-view)))
+        (check (search "Why this experiment?" new-html)
+               "The defederation proposal is missing from the introduction.")
+        (check (search "Refederation" new-html)
+               "The refederation context is missing.")
+        (check (member object
+                       (mapcar #'cdr (html-inspector-views:view-references new-view))
+                       :test #'eq)
+               "The new context page does not reference the retained observation.")))
     t))
 
 (DEFUN RUN-CATALOG-STARTUP-SMOKE-TESTS ()
