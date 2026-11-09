@@ -24,7 +24,7 @@
 <ul>
 <li>Use a SLY mREPL connected to the intended local development image and the HyperDoc checkout with this optional system. Inspect <code>*default-pathname-defaults*</code> or the ASDF source directory if unsure which checkout the image is using.</li>
 <li>The image's ASDF source registry must include both <code>dreyeck/work/fedwiki-local-only</code> and the separate <code>clog-moldable-inspector</code> system. Loading the former does <strong>not</strong> load the latter.</li>
-<li>For the browser step, CLOG must already be running <em>in this same Lisp image</em>, with an existing connected browser body. A CLOG listener running in another SLY image does not satisfy this prerequisite.</li>
+<li>For the browser step, CLOG must run <em>in this same Lisp image</em>. Use an existing connected body (Case A), or explicitly start a separate loopback listener in this development image (Case B). A listener in another SLY image does not satisfy this prerequisite.</li>
 <li><strong>Evaluate each code block as its own SLY request.</strong> Do not paste all steps as one request: SLY reads the entire request before evaluating the first form. An as-yet unloaded package named later in the input therefore causes a reader-package error even if an earlier form would load it.</li>
 </ul>
 
