@@ -46,14 +46,29 @@
       (dreyeck/work/fedwiki-local-only:target-page *local-only-link-reading*))</pre>
 <p><strong>Expected.</strong> <code>(:CONFIRMED-LOCAL-ABSENCE NIL)</code>. <code>demo</code> prepares and resolves plans for the fixed local fixture; it performs no Wiki write or remote request. The result is one observation with references to its planning history.</p>
 
-<h3>Step 4. Verify the existing CLOG connection</h3>
+<h3>Step 4. Provide a CLOG connection in this SLY image</h3>
+<p>There are two distinct cases. First inspect the state:</p>
 <pre>(list :running (clog:is-running-p)
       :body (and (boundp 'clog-user:*body*)
                  clog-user:*body*
                  (clog:validp clog-user:*body*)))</pre>
-<p><strong>Expected.</strong> <code>:RUNNING T</code> and <code>:BODY T</code>. A missing body or inactive listener is a prerequisite failure, not evidence that the Local-only example failed. Do not run an implicit start operation against another listener or the production image.</p>
+<p><strong>Case A — a listener and valid browser body already exist.</strong> If the result is <code>(:RUNNING T :BODY T)</code>, use Step 5 below. Do not initialize CLOG again.</p>
+<p><strong>Case B — no listener exists.</strong> A result of <code>(:RUNNING NIL :BODY NIL)</code> means the Lisp runtime is ready but there is no browser connection. On an explicitly chosen local development image, start one dedicated loopback listener. This is an intentional local server start; it is not part of loading the ASDF system or viewing the public Catalog. Keep it separate from production and from other running CLOG images. Evaluate these two forms as separate SLY requests:</p>
+<pre>(asdf:load-system "clack-handler-hunchentoot")</pre>
+<pre>(progn
+  (assert (not (clog:is-running-p)) ()
+          "CLOG already runs in this image; do not initialize it again.")
+  (clog:initialize
+   (lambda (body)
+     (clog-moldable-inspector:on-new-inspector
+      body :object *local-only-link-reading*
+      :pane-width "600px" :playground? nil))
+   :host "127.0.0.1"
+   :port 18792))</pre>
+<p>Choose a different unused, local port if <code>18792</code> is occupied. Open <a href="http://127.0.0.1:18792/">http://127.0.0.1:18792/</a> on the same computer. Connecting the browser creates the Inspector for <code>*local-only-link-reading*</code> through the callback; <code>clog-user:*body*</code> need not be bound. Do not run Step 5 in Case B.</p>
+<p>If <code>:RUNNING T</code> but <code>:BODY NIL</code>, CLOG is already running without the assumed body binding. Do not call <code>initialize</code> again; identify the actual connected body or use the already working Inspector link on <code>dreyeck.ch</code>.</p>
 
-<h3>Step 5. Open the observation in the existing Inspector body</h3>
+<h3>Step 5. Use an existing connected body (Case A only)</h3>
 <pre>(let ((body (and (boundp 'clog-user:*body*)
                  clog-user:*body*)))
   (assert (clog:is-running-p) ()
@@ -63,13 +78,12 @@
   (clog-moldable-inspector:on-new-inspector
    body :object *local-only-link-reading*
    :pane-width "600px" :playground? nil))</pre>
-<p>This uses the existing <code>on-new-inspector</code> entry point rather than <code>clog-inspect</code>, which may start CLOG when no listener exists. If the body is not available in <code>clog-user:*body*</code>, first establish the actual body binding of this image; do not create another server merely to satisfy the example.</p>
-<p><strong>Expected.</strong> The <strong>Local-only evidence</strong> view links to the actual own-site object, source page and revision, story item, wiki link, observation evidence, preparation result, resolution result, SHOP3 problem, planned operations and simulated final states. These are object references, not illustrative copies.</p>
+<p>This opens a new pane in a valid existing browser body without starting a listener. In both cases, the expected <strong>Local-only evidence</strong> view contains references to the actual own-site, source page and revision, story item, link target, external evidence, preparation and resolution, SHOP3 problem, planned operations and simulated final states.</p>
 
 <h3>Result and troubleshooting</h3>
-<p>The reading succeeds when the Inspector lets the reader distinguish the observed missing local target from the external cached-copy claim and from the simulated fork, while the real store remains unchanged. The CLOG navigation itself has not yet been witnessed in this reading; record the actual result before marking it accepted.</p>
+<p>The reading succeeds when the Inspector lets the reader distinguish the observed missing local target from the external cached-copy claim and from the simulated fork, while the real store remains unchanged. The public Catalog's observation link has been exercised separately. For the optional local SLY path, record the browser result from this image before marking that path accepted.</p>
 <p><strong>Reader-package error:</strong> <code>Package CLOG-MOLDABLE-INSPECTOR does not exist</code> means Step 2 has not successfully run <em>before the next input is read</em>. It does not contradict a successful Step 1. Compiler and ASDF warnings during Step 1 do not by themselves establish a failure; check whether the load completed.</p>
-<p><strong>Missing or invalid CLOG body:</strong> Stop at Step 4, then inspect the actual Lisp image and browser connection. Do not restart an unrelated service.</p>
+<p><strong>Missing or invalid CLOG body:</strong> Use Case B of Step 4 only when CLOG is not running. Never call <code>initialize</code> a second time in a running image. This local listener is independent of the production Catalog and other SLY images.</p>
 
 <h2>What has and has not happened</h2>
 <ul>
