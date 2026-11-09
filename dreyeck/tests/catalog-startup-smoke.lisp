@@ -476,6 +476,10 @@
                "The defederation proposal is missing from the introduction.")
         (check (search "Refederation" new-html)
                "The refederation context is missing.")
+        (check (search "$H0FKiYMdtXEXxseWDX9d54GwLBdsLPrrzIcz1FZtpkY" new-html)
+               "Ward's original Matrix event permalink is missing.")
+        (check (search "push-based federation" new-html)
+               "Ward's follow-up clarification is missing.")
         (check (member object
                        (mapcar #'cdr (html-inspector-views:view-references new-view))
                        :test #'eq)
