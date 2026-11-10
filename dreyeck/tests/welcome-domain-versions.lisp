@@ -366,6 +366,7 @@
 
 (defun run-domain-version-tests ()
   (let ((*development-domain-debug* t))
+    (run-record-value-tests)
     (run-domain-trust-probes)
     (run-domain-reader-refusal-tests)
     (w2-test-reader) (w2-test-lifecycle) (w2-test-history) (w2-test-bindings)

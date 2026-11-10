@@ -1,5 +1,9 @@
 # W2 trust-screen correction: D1 and D2
 
+W2 was independently accepted at `276320e3`. The subsequent
+[N1 hardening](w2-record-values.md) addresses record-derived operands;
+the D1/D2 historical-source screen remains unchanged.
+
 Reviewed baseline: `32209c16ce93ddec50e30e820fafa3a6cee54d73`, PR #39.
 Date: 2026-11-10. Scope remains planning-domain replay and current validation;
 no execution capability, shared SHOP3 change or second planning/domain engine.

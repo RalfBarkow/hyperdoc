@@ -3695,7 +3695,8 @@
   :serial t
   :components ((:file "dreyeck/tests/welcome-domain-versions")
                (:file "dreyeck/tests/welcome-domain-trust")
-               (:file "dreyeck/tests/welcome-domain-reader-refusals"))
+               (:file "dreyeck/tests/welcome-domain-reader-refusals")
+               (:file "dreyeck/tests/welcome-record-values"))
   :perform (test-op (op component)
              (declare (ignore op component))
              (uiop:symbol-call :dreyeck/work/welcome-development :run-domain-version-tests)))

@@ -29,9 +29,13 @@
    :slice (data assignment :slice) :assignment (record-id assignment)
    :executor (data assignment :executor) :commit commit :status :claimed
    :text "Fixture agent claim, not verification."))
+(defun fixture-record-key (&rest parts)
+  "Explicit fixture-only serialization of composite identity meaning into data.
+No incoming development record ID is implicitly encoded or repaired."
+  (development-canonical-string parts))
 (defun fixture-verification (assignment commit &optional (verdict :verified))
   (make-development-record
-   'dev-verification (list :verification (record-id assignment) verdict) :fixture
+   'dev-verification (fixture-record-key :verification (record-id assignment) verdict) :fixture
    :slice (data assignment :slice) :assignment (record-id assignment) :commit commit
    :verifier 'independent-checker :independent t :observed-at "fixture-time"
    :verdict verdict :platform :fixture :network-isolation :none :syscall-trace :unverified
@@ -46,7 +50,7 @@
                       :markers '("FIXTURE-PASS") :log-sha256 (fixture-sha #\b 64)))))
 (defun fixture-review (assignment commit &optional (decision :accepted))
   (make-development-record
-   'dev-review (list :review (record-id assignment) decision commit) :fixture
+   'dev-review (fixture-record-key :review (record-id assignment) decision commit) :fixture
    :slice (data assignment :slice) :assignment (record-id assignment) :commit commit
    :reviewer (if (eq 'claude-code (data assignment :executor)) 'codex 'claude-code)
    :decision decision :findings '("Synthetic review") :text-digest (fixture-sha #\e 64)))
@@ -89,7 +93,7 @@
        (let ((records (copy-list p0)) (base +fixture-base+))
          (loop for s in '(s1 s2 s3 s4) for executor in '(codex codex codex claude-code)
                for character across "1234"
-               for a = (fixture-assignment (list :all s) s executor base records)
+               for a = (fixture-assignment (fixture-record-key :all s) s executor base records)
                for c = (fixture-sha character)
                do (setf records (append records (list a (fixture-submission a c)
                                                        (fixture-verification a c) (fixture-review a c)

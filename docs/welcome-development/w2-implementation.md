@@ -1,5 +1,8 @@
 # W2 implementation and review entry point
 
+N1 additionally enforces a [record-to-fact value contract](corrections/w2-record-values.md),
+with explicit fixture ID compatibility changes and complete regression evidence.
+
 The [D1/D2 review correction](corrections/w2-trust-screen.md) tightens executable
 contexts in the historical-source screen and preserves refusal diagnostics.
 It supersedes the original A7 coverage and records the current full regression run.

@@ -192,6 +192,59 @@ those shared observer/producer APIs remain absent. Never use the memoized checko
         (refuse-record :negative-verdict-with-passing-evidence))
       passed)))
 
+(defun development-fact-value-kind (value)
+  "Ground values only. Ordinary W1 symbols are constants, never Lisp bindings.
+No reader, macroexpander or evaluator is consulted. Unknown value types refuse."
+  (cond ((or (stringp value) (integerp value)) :self-evaluating)
+        ((symbolp value)
+         (when (and (symbol-package value)
+                    (not (and (plusp (length (symbol-name value)))
+                              (shop3.unifier::variable-symbol-p value))))
+           (cond ((or (keywordp value) (member value '(nil t))) :self-evaluating)
+                 ((and (eq (symbol-package value) (find-package "DREYECK/WORK/WELCOME-DEVELOPMENT"))
+                       (not (boundp value))
+                       ;; Includes declared-but-unbound specials and symbol macros.
+                       (eq :unknown (sb-int:info :variable :kind value)))
+                  :symbolic-constant))))))
+
+(defun validate-development-record-fact-values (record)
+  "Validate every input field which can enter a SHOP3 fact or replay task.
+Rich evidence/provenance stays on the original record; it is not projected."
+  (labels ((check (field value)
+             (unless (development-fact-value-kind value)
+               (refuse-record (list :unsafe-planning-value :record (record-id record) :field field))))
+           (fields (names)
+             (dolist (name names)
+               (check name (if (eq :record-id name) (record-id record) (data record name)))))
+           (roles (field)
+             (let ((pairs (data record field)))
+               (unless (alexandria:proper-list-p pairs)
+                 (refuse-record (list :invalid-policy-pairs field)))
+               (dolist (pair pairs)
+                 (unless (and (alexandria:proper-list-p pair) (= 2 (length pair)))
+                   (refuse-record (list :invalid-policy-pairs field)))
+                 (check (list field :actor) (first pair))
+                 (check (list field :slice) (second pair))
+                 (unless (and (or (text-p (first pair))
+                                  (and (symbolp (first pair)) (first pair)))
+                              (member (second pair) '(s1 s2 s3 s4)))
+                   (refuse-record (list :invalid-policy-pairs field)))))))
+    (typecase record
+      (dev-policy (fields '(:base :attempt-limit)) (roles :implementers) (roles :reviewers))
+      (dev-assignment (fields '(:slice :record-id :executor :base)))
+      (dev-submission (fields '(:slice :assignment :executor :commit)))
+      (dev-verification (fields '(:slice :assignment :commit :record-id)))
+      (dev-review (fields '(:slice :assignment :commit :record-id)))
+      (integration-observation (fields '(:slice :commit :head)))))
+  t)
+
+(defun validate-development-facts (facts)
+  "Check emitted arguments as well, so new projections cannot bypass the contract."
+  (dolist (fact facts facts)
+    (loop for value in (rest fact) for index from 1 do
+      (unless (development-fact-value-kind value)
+        (refuse-record (list :unsafe-planning-fact (first fact) index))))))
+
 (defun project-development-records (entries)
   "Validate record contents and project facts, without planning or history replay.
 Only DEVELOPMENT-STATE publishes a state after validating assignment history."
@@ -200,6 +253,7 @@ Only DEVELOPMENT-STATE publishes a state after validating assignment history."
          (assignments (remove-if-not (lambda (r) (typep r 'dev-assignment)) records))
          (policy (first policies)) (facts nil)
          (verdicts (make-hash-table :test #'equal)))
+    (mapc #'validate-development-record-fact-values records)
     (unless (= 1 (length policies)) (refuse-record :one-policy-required))
     (require-fields policy '(:base :attempt-limit :implementers :reviewers))
     (unless (and (sha-p (data policy :base)) (integerp (data policy :attempt-limit))
@@ -292,7 +346,7 @@ Only DEVELOPMENT-STATE publishes a state after validating assignment history."
                    (find-if (lambda (other) (and (eq (first other) (second pair))
                                                  (equal (subseq fact 1 3) (subseq other 1 3)))) facts))
           (refuse-record :contradictory-slice-commit))))
-    (nreverse (remove-duplicates facts :test #'equal))))
+    (validate-development-facts (nreverse (remove-duplicates facts :test #'equal)))))
 
 (defun development-state (entries)
   "Replay the ordered record journal, checking assignments and submissions against SHOP3.
@@ -302,6 +356,8 @@ Projection never calls this function or the planner: there is no circular path."
     (let ((records (accepted-records entries)) (prefix nil) (state nil) (validations nil)
           (versions (make-hash-table :test #'equal)) (submission-checks nil))
       (dolist (record records)
+        ;; Check the current record before any prefix-planning task can use it.
+        (validate-development-record-fact-values record)
         (when (typep record 'dev-domain-version)
           (let ((id (data record :version-id)))
             (when (gethash id versions) (domain-refuse :duplicate-domain-version))
