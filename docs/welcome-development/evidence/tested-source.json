@@ -1,0 +1,21 @@
+{
+  "base": "20ad13e650cd1aca0c40192080e724b3cb4e0304",
+  "branch": "codex/11570-w1-welcome-development",
+  "shop3_revision": "ce53f9b651acde8c44dc21eddb1a1c5b97f10536",
+  "files": {
+    "dreyeck.asd": "37b3e3a4488fae896cb591bda30bf271b7485ee41e5c7a39cab467dbfa5b960e",
+    "scripts/test-welcome-development.lisp": "a6f41bbfa720c34871b3c83a55a8c02f5ae180bbb36ed3e46547755af4eb18c6",
+    "dreyeck/tests/welcome-development.lisp": "c25070aa5ea9e137752d33f97b45f5ab2a4689cb3a44df2e54ee5a150ebe1e5e",
+    "dreyeck/work/welcome-development-examples.lisp": "52dca17e2f253e997c660f839495e9a1d6ea05415ab0e1b380cfc1a8bceffc5f",
+    "dreyeck/work/welcome-development-package.lisp": "f8fe13bffae3272ad3439f50e171ced2e2dca2e9aeeaa6560d843b441686516e",
+    "dreyeck/work/welcome-development-records.lisp": "0fec44f96fe3349f7e561f5ad7a6959a05ab15cc23c4dc890f61addc08328ef2",
+    "dreyeck/work/welcome-development-views.lisp": "f964016bd631f9f292b3b3876b265dc62a0c48d83e3242f57abb8ba568c9dcc6",
+    "dreyeck/work/welcome-development.lisp": "d6ed4c98a41f1c7bdefa467422987bd89d49c8442116e5928669cbb36523e21b"
+  },
+  "test_exit_code": 0,
+  "scenario_records": "explicit fixtures, not actual S1-S4 evidence",
+  "logs": {
+    "tests.log": "4a9c7de309b30c11d3650bcc7860cb6eef6fc712a05974f03fedf989c3ab90b5",
+    "baseline-tests.log": "972ad2f57157da6d63db42a0484df45e36ffe6b442cd024ff7b1a4435e5fcdbe"
+  }
+}
