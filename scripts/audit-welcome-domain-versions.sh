@@ -21,6 +21,7 @@ for w2_n in 1 2; do
   W2_MODE=identity w2_lisp scripts/test-welcome-domain-versions.lisp > "$w2_logs/identity-$w2_n.log" 2>&1
 done
 diff <(rg '^W2-IDENTITY ' "$w2_logs/identity-1.log") <(rg '^W2-IDENTITY ' "$w2_logs/identity-2.log")
+diff <(rg '^R1-IDENTITY ' "$w2_logs/identity-1.log") <(rg '^R1-IDENTITY ' "$w2_logs/identity-2.log")
 git -C "$w2_replay_repo" for-each-ref refs/tags > "$w2_logs/tags-before.txt"
 for w2_mode in fixture replay; do
   env HOME="$w2_logs/home" W2_FASLS="$w2_logs/fasls/" W2_MODE="$w2_mode" \

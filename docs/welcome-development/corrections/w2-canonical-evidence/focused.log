@@ -1,0 +1,112 @@
+WARNING: System definition file #P"/workspace/tools/nix-portable-data/.nix-portable/nix/store/fdrq5ji4dvm7jj0wzfvxcyr0rwiq2c24-sbcl-cl-who-20241012-git/cl-who.asd" contains definition for system "cl-who-test". Please only define "cl-who" and secondary systems with a name starting with "cl-who/" (e.g. "cl-who/test") in that file.
+
+
+SHOP3 version 4.3.1
+Copyright (C) 2004-2026 SIFT, LLC.
+
+Original SHOP2 code Copyright (C) 2002  University of Maryland.
+
+This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+KIND, either express or implied.  This software is distributed under an
+MPL/GPL/LGPL triple license.  For details, see the software source file.
+;;; Computing Hangul syllable namesSTYLE-WARNING:
+   The new FTYPE proclamation for FSET::VECTOR-SET-BINARY-SEARCH-LO
+     (FUNCTION (SIMPLE-VECTOR T) FIXNUM)
+   does not match the derived return type
+     (FUNCTION (SIMPLE-VECTOR T)
+      (VALUES (INTEGER -4611686018427387904 4611686018427387904) &OPTIONAL))
+STYLE-WARNING:
+   The new FTYPE proclamation for FSET::WB-BAG-TREE-TOTAL-COUNT
+     (FUNCTION (FSET::WB-BAG-TREE) INTEGER)
+   does not match the derived return type
+     (FUNCTION ((OR LIST FSET::WB-BAG-TREE-NODE)) *)
+STYLE-WARNING:
+   The new FTYPE proclamation for FSET::HASH-VALUE-FIXNUM
+     (FUNCTION (T) FIXNUM)
+   does not match the derived return type
+     (FUNCTION (T) (VALUES INTEGER &OPTIONAL))
+STYLE-WARNING:
+   The new FTYPE proclamation for FSET::CH-SET-NODE-ENTRY-MASK
+     (FUNCTION (T) FIXNUM)
+   does not match the derived return type
+     (FUNCTION (SIMPLE-VECTOR) (VALUES T &OPTIONAL))
+STYLE-WARNING:
+   The new FTYPE proclamation for FSET::CH-SET-NODE-SUBNODE-MASK
+     (FUNCTION (T) FIXNUM)
+   does not match the derived return type
+     (FUNCTION (SIMPLE-VECTOR) (VALUES T &OPTIONAL))
+STYLE-WARNING:
+   The new FTYPE proclamation for FSET::CH-SET-NODE-SIZE
+     (FUNCTION (T) FIXNUM)
+   does not match the derived return type
+     (FUNCTION (SIMPLE-VECTOR) (VALUES T &OPTIONAL))
+STYLE-WARNING:
+   The new FTYPE proclamation for FSET::CH-SET-NODE-HASH-VALUE
+     (FUNCTION (T) FIXNUM)
+   does not match the derived return type
+     (FUNCTION (SIMPLE-VECTOR) (VALUES T &OPTIONAL))
+STYLE-WARNING:
+   The new FTYPE proclamation for FSET::CH-MAP-NODE-ENTRY-MASK
+     (FUNCTION (T) FIXNUM)
+   does not match the derived return type
+     (FUNCTION (SIMPLE-VECTOR) (VALUES T &OPTIONAL))
+STYLE-WARNING:
+   The new FTYPE proclamation for FSET::CH-MAP-NODE-SUBNODE-MASK
+     (FUNCTION (T) FIXNUM)
+   does not match the derived return type
+     (FUNCTION (SIMPLE-VECTOR) (VALUES T &OPTIONAL))
+STYLE-WARNING:
+   The new FTYPE proclamation for FSET::CH-MAP-NODE-SIZE
+     (FUNCTION (T) FIXNUM)
+   does not match the derived return type
+     (FUNCTION (SIMPLE-VECTOR) (VALUES T &OPTIONAL))
+STYLE-WARNING:
+   The new FTYPE proclamation for FSET::CH-MAP-NODE-HASH-VALUE
+     (FUNCTION (T) FIXNUM)
+   does not match the derived return type
+     (FUNCTION (SIMPLE-VECTOR) (VALUES T &OPTIONAL))
+STYLE-WARNING:
+   Generic function FSET:ITERATOR clobbers an earlier FTYPE proclamation
+   (FUNCTION (T &KEY &ALLOW-OTHER-KEYS) (VALUES FUNCTION &REST T)) for the same
+   name with (FUNCTION (T &KEY &ALLOW-OTHER-KEYS) *).
+STYLE-WARNING:
+   The new FTYPE proclamation for SWANK/BACKEND:GETPID
+     (FUNCTION NIL (VALUES (SIGNED-BYTE 32) &OPTIONAL))
+   does not match the derived return type
+     (FUNCTION NIL *)
+WARNING:
+   redefining EMACS-INSPECT (#<SB-PCL:SYSTEM-CLASS COMMON-LISP:T>) in DEFMETHOD
+WARNING:
+   redefining 👀PRINT-STRING (#<SB-PCL:SYSTEM-CLASS COMMON-LISP:T>) in DEFMETHOD
+WARNING: redefining IRONCLAD:BLOCK-LENGTH in DEFGENERIC
+
+Defining domain WELCOME-DEVELOPMENT...
+
+Defining domain WELCOME-QUALIFIED-PROBE...
+
+Defining domain WELCOME-UNQUALIFIED-CALL-PROBE...
+
+Defining domain WELCOME-UNQUALIFIED-FORALL-PROBE...
+
+Defining problem WELCOME-QUALIFIED-POSITIVE ...
+
+Defining problem WELCOME-QUALIFIED-NEGATIVE ...
+
+Defining problem WELCOME-UNQUALIFIED-CALL ...
+
+Defining problem WELCOME-UNQUALIFIED-FORALL ...
+; compiling file "/workspace/work/welcome-w2/dreyeck/tests/welcome-canonical-replay.lisp" (written 10 NOV 2026 05:49:03 PM):
+
+; wrote /workspace/work/defederation-fasls/workspace/work/welcome-w2/dreyeck/tests/welcome-canonical-replay-tmpGHU3ALSV.fasl
+; compilation finished in 0:00:00.079
+R1 STRINGS PASS: EQUAL base/character/adjustable/displaced values share "\"same\"" / 106c4202d3d02a3ff34000f19889ac489e6a40f2ee68ea9e3984633ab059dd4d.
+R1 NESTED/INPUTS PASS: nested strings, actual v2 inputs and Unicode; character-only legacy bytes/digests unchanged; hostile printer settings ignored.
+R1 RESTRICTIONS PASS: nested unsupported values and uninterned symbols remain refused.
+R1 PINS PASS: domain f342bb4ad3455fac873a56d9a7d817ff35e7ace253527ef7db1068e3759ad315 unchanged; approved character-stable P0 ba9bbb10531faffdc221f1580360382bec2d39ec2fa6a64b83eb9a771ad48ba5; v2 unchanged.
+WELCOME REFUSAL R1-LEGACY-BINDING PASS: (:ASSIGNMENT-PLAN-BINDING-MISMATCH :A1)
+R1 LEGACY BINDING PASS: historical P0 1ebd24a84517314b1087526c13e27518f08f85e0b7e9e67f9185a3e7db3adc61 visibly refused; stored binding unchanged, no digest substitution.
+R1 PASS P1: EQUAL journal/state/plans, 1 alternatives, record/reference EQ identity, :PLAN-ONLY.
+R1 PASS P4: EQUAL journal/state/plans, 2 alternatives, record/reference EQ identity, :PLAN-ONLY.
+R1 PASS P11: EQUAL journal/state/plans, 3 alternatives, record/reference EQ identity, :PLAN-ONLY.
+R1 PASS COMPLETE: EQUAL journal/state/plans, 1 alternatives, record/reference EQ identity, :PLAN-ONLY.
+R1-IDENTITY 3843dea26201836adeb54aebaacfb412592ab9578ac35710eb1b015a7981b9e0 ecd58c6fac8c345012d547dac166ad9b86b4db3da07c96f8db64fa0786d44a13 "(:R1 \"identity\" (:NESTED \"value\"))"

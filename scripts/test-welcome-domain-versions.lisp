@@ -10,7 +10,8 @@
   (assert (equal catalog (hyperbook:hyperbooks-of hyperbook:*catalog*))))
 (let ((mode (uiop:getenv "W2_MODE")))
   (cond ((equal mode "identity")
-         (uiop:symbol-call :dreyeck/work/welcome-development :w2-identity))
+         (uiop:symbol-call :dreyeck/work/welcome-development :w2-identity)
+         (uiop:symbol-call :dreyeck/work/welcome-development :r1-canonical-identity))
         ((equal mode "fixture")
          (uiop:symbol-call :dreyeck/work/welcome-development :w2-test-transient)
          (uiop:symbol-call :dreyeck/work/welcome-development :w2-test-provenance

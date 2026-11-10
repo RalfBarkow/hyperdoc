@@ -1,5 +1,9 @@
 # W2 implementation and review entry point
 
+R1 makes [canonical serialization content-stable](corrections/w2-canonical-serialization.md).
+The approved P0 digest is now `ba9bbb10…`; historical mixed-string bindings
+remain visibly mismatched and are never silently rewritten.
+
 N1 additionally enforces a [record-to-fact value contract](corrections/w2-record-values.md),
 with explicit fixture ID compatibility changes and complete regression evidence.
 

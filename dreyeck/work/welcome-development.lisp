@@ -92,17 +92,23 @@
         (when partial (shop3:delete-problem partial))))))
 
 (defun development-canonical-string (value)
-  "Deterministic readable literal data, independent of caller printer settings.
-Reject objects and uninterned symbols rather than printing transient identities."
-  (labels ((literal (x)
+  "Serialize literal values by contents, independent of string storage/printer settings.
+Copy strings to CHARACTER arrays recursively before printing; also return a
+CHARACTER string. Never mutate retained data. Objects/uninterned symbols refuse."
+  (labels ((characters (text)
+             (replace (make-string (length text) :element-type 'character) text))
+           (literal (x)
              (typecase x
-               (cons (literal (car x)) (literal (cdr x)))
-               (symbol (unless (symbol-package x) (refuse-record :uninterned-planning-input)))
-               ((or string integer) nil)
+               (cons (cons (literal (car x)) (literal (cdr x))))
+               (symbol
+                (unless (symbol-package x) (refuse-record :uninterned-planning-input))
+                x)
+               (string (characters x))
+               (integer x)
                (t (refuse-record :nonliteral-planning-input)))))
-    (literal value))
-  (with-standard-io-syntax
-    (let ((*package* (find-package "KEYWORD"))) (prin1-to-string value))))
+    (with-standard-io-syntax
+      (let ((*package* (find-package "KEYWORD")))
+        (characters (prin1-to-string (literal value)))))))
 
 (defun development-data-digest (value)
   (ironclad:byte-array-to-hex-string

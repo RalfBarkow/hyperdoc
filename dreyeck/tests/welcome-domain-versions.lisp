@@ -366,6 +366,7 @@
 
 (defun run-domain-version-tests ()
   (let ((*development-domain-debug* t))
+    (run-canonical-replay-tests)
     (run-record-value-tests)
     (run-domain-trust-probes)
     (run-domain-reader-refusal-tests)

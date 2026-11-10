@@ -30,7 +30,7 @@
    :executor (data assignment :executor) :commit commit :status :claimed
    :text "Fixture agent claim, not verification."))
 (defun fixture-record-key (&rest parts)
-  "Explicit fixture-only serialization of composite identity meaning into data.
+  "Explicit fixture-only serialization of composite identity into a CHARACTER string.
 No incoming development record ID is implicitly encoded or repaired."
   (development-canonical-string parts))
 (defun fixture-verification (assignment commit &optional (verdict :verified))
