@@ -2,6 +2,8 @@
 ;;;; nix develop -c sbcl --noinform --no-sysinit --no-userinit --non-interactive \
 ;;;;   --load scripts/test-welcome-development.lisp
 (require :asdf)
+(format t "~&WELCOME ENVIRONMENT: ~A~%"
+        (string-trim '(#\Newline #\Return) (uiop:run-program '("git" "--version") :output :string)))
 (when (uiop:getenv "CL_SOURCE_REGISTRY")
   (asdf:initialize-source-registry
    `(:source-registry

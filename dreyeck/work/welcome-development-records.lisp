@@ -191,9 +191,9 @@ those shared observer/producer APIs remain absent. Never use the memoized checko
         (refuse-record :negative-verdict-with-passing-evidence))
       passed)))
 
-(defun development-state (entries)
-  "Rebuild exclusively from validated records. Reject plans, state atoms and contradictions.
-Fixture evidence yields fixture facts only; callers must keep that provenance visible."
+(defun project-development-records (entries)
+  "Validate record contents and project facts, without planning or history replay.
+Only DEVELOPMENT-STATE publishes a state after validating assignment history."
   (let* ((records (accepted-records entries))
          (policies (remove-if-not (lambda (r) (typep r 'dev-policy)) records))
          (assignments (remove-if-not (lambda (r) (typep r 'dev-assignment)) records))
@@ -256,6 +256,16 @@ Fixture evidence yields fixture facts only; callers must keep that provenance vi
                           (member (list (data record :reviewer) (data record :slice))
                                   (data policy :reviewers) :test #'equal))
                (refuse-record :invalid-review))
+             (unless (find-if (lambda (r) (and (typep r 'dev-submission)
+                                               (equal (data r :assignment) (record-id a))
+                                               (equal (data r :commit) (data record :commit)))) records)
+               (refuse-record :review-without-submission))
+             (when (and (eq :accepted (data record :decision))
+                        (not (find-if (lambda (r) (and (typep r 'dev-verification)
+                                                       (equal (data r :assignment) (record-id a))
+                                                       (equal (data r :commit) (data record :commit))
+                                                       (eq :verified (data r :verdict)))) records)))
+               (refuse-record :positive-review-without-verification))
              (when (or (actor= (data a :executor) (data record :reviewer))
                        (commit-implementer-p (data record :reviewer) record records assignments))
                (refuse-record :implementer-cannot-review))
@@ -282,6 +292,32 @@ Fixture evidence yields fixture facts only; callers must keep that provenance vi
                                                  (equal (subseq fact 1 3) (subseq other 1 3)))) facts))
           (refuse-record :contradictory-slice-commit))))
     (nreverse (remove-duplicates facts :test #'equal))))
+
+(defun development-state (entries)
+  "Replay the ordered record journal, validating each assignment against SHOP3.
+Return the state and inspectable assignment validations as a second value.
+Projection never calls this function or the planner: there is no circular path."
+  (let ((records (accepted-records entries)) (prefix nil) (state nil) (validations nil))
+    (dolist (record records)
+      (when (typep record 'dev-assignment)
+        (unless prefix (refuse-record :one-policy-required))
+        (let* ((result (plan-development-state state))
+               (step `(!assign ,(data record :slice) ,(data record :executor) ,(data record :base)))
+               (source (record-source record))
+               (binding (plan-assignment-binding state result source step))
+               (recorded (data record :source-plan)))
+          (unless (and (equal (getf recorded :step) step)
+                       (equal (getf recorded :digest) (getf binding :digest))
+                       (equal (getf recorded :alternative-id) (getf binding :alternative-id))
+                       (equal (getf recorded :inputs) (getf binding :inputs)))
+            (refuse-record (list :assignment-plan-binding-mismatch (record-id record))))
+          (push (list :assignment record :prior-records (copy-list prefix)
+                      :prior-state (copy-tree state) :planning-result result :binding binding)
+                validations)))
+      (setf prefix (append prefix (list record))
+            state (project-development-records prefix)))
+    (unless records (refuse-record :one-policy-required))
+    (values state (nreverse validations))))
 
 ;; All development records fit the existing evaluation-record inspection protocol.
 (defmethod dreyeck/evaluation-record:evaluation-specification-of ((r development-record)) (type-of r))

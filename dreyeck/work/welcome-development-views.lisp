@@ -37,7 +37,10 @@
       (dolist (alternative (development-next-action-view run))
         (add alternative (format nil "~S ~S" (getf alternative :classification)
                                   (getf alternative :step))
-             :alternative :hypothesized "plans")))
+             :alternative :hypothesized "plans"))
+      (dolist (validation (development-assignment-validations run))
+        (add validation (format nil "Proposal validation: ~A" (record-id (getf validation :assignment)))
+             :assignment-validation :derived "development")))
     (dreyeck/topicmap:make-topicmap-projection :source run :topics (nreverse topics)
                                              :associations (nreverse edges))))
 
@@ -53,6 +56,8 @@
                    (development-outcome run) (length (development-next-action-view run)))))
       (:p (html-inspector-views:object-ref (development-plan-result run) :display "Native SHOP3 result")
           " · " (html-inspector-views:object-ref (development-initial-state run) :display "Record-derived initial state")
+          " · " (html-inspector-views:object-ref (development-assignment-validations run)
+                                                :display "Assignment proposal validations")
           " · " (html-inspector-views:object-ref (development-topicmap run) :display "Development Topicmap"))
       (dolist (entry (development-records run))
         (html-inspector-views:html

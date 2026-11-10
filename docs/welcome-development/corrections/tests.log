@@ -1,0 +1,603 @@
+WELCOME ENVIRONMENT: git version 2.52.0
+
+
+SHOP3 version 4.3.1
+Copyright (C) 2004-2026 SIFT, LLC.
+
+Original SHOP2 code Copyright (C) 2002  University of Maryland.
+
+This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+KIND, either express or implied.  This software is distributed under an
+MPL/GPL/LGPL triple license.  For details, see the software source file.
+WARNING: System definition file #P"/workspace/tools/nix-portable-data/.nix-portable/nix/store/fdrq5ji4dvm7jj0wzfvxcyr0rwiq2c24-sbcl-cl-who-20241012-git/cl-who.asd" contains definition for system "cl-who-test". Please only define "cl-who" and secondary systems with a name starting with "cl-who/" (e.g. "cl-who/test") in that file.
+;;; Computing Hangul syllable namesSTYLE-WARNING:
+   The new FTYPE proclamation for FSET::VECTOR-SET-BINARY-SEARCH-LO
+     (FUNCTION (SIMPLE-VECTOR T) FIXNUM)
+   does not match the derived return type
+     (FUNCTION (SIMPLE-VECTOR T)
+      (VALUES (INTEGER -4611686018427387904 4611686018427387904) &OPTIONAL))
+STYLE-WARNING:
+   The new FTYPE proclamation for FSET::WB-BAG-TREE-TOTAL-COUNT
+     (FUNCTION (FSET::WB-BAG-TREE) INTEGER)
+   does not match the derived return type
+     (FUNCTION ((OR LIST FSET::WB-BAG-TREE-NODE)) *)
+STYLE-WARNING:
+   The new FTYPE proclamation for FSET::HASH-VALUE-FIXNUM
+     (FUNCTION (T) FIXNUM)
+   does not match the derived return type
+     (FUNCTION (T) (VALUES INTEGER &OPTIONAL))
+STYLE-WARNING:
+   The new FTYPE proclamation for FSET::CH-SET-NODE-ENTRY-MASK
+     (FUNCTION (T) FIXNUM)
+   does not match the derived return type
+     (FUNCTION (SIMPLE-VECTOR) (VALUES T &OPTIONAL))
+STYLE-WARNING:
+   The new FTYPE proclamation for FSET::CH-SET-NODE-SUBNODE-MASK
+     (FUNCTION (T) FIXNUM)
+   does not match the derived return type
+     (FUNCTION (SIMPLE-VECTOR) (VALUES T &OPTIONAL))
+STYLE-WARNING:
+   The new FTYPE proclamation for FSET::CH-SET-NODE-SIZE
+     (FUNCTION (T) FIXNUM)
+   does not match the derived return type
+     (FUNCTION (SIMPLE-VECTOR) (VALUES T &OPTIONAL))
+STYLE-WARNING:
+   The new FTYPE proclamation for FSET::CH-SET-NODE-HASH-VALUE
+     (FUNCTION (T) FIXNUM)
+   does not match the derived return type
+     (FUNCTION (SIMPLE-VECTOR) (VALUES T &OPTIONAL))
+STYLE-WARNING:
+   The new FTYPE proclamation for FSET::CH-MAP-NODE-ENTRY-MASK
+     (FUNCTION (T) FIXNUM)
+   does not match the derived return type
+     (FUNCTION (SIMPLE-VECTOR) (VALUES T &OPTIONAL))
+STYLE-WARNING:
+   The new FTYPE proclamation for FSET::CH-MAP-NODE-SUBNODE-MASK
+     (FUNCTION (T) FIXNUM)
+   does not match the derived return type
+     (FUNCTION (SIMPLE-VECTOR) (VALUES T &OPTIONAL))
+STYLE-WARNING:
+   The new FTYPE proclamation for FSET::CH-MAP-NODE-SIZE
+     (FUNCTION (T) FIXNUM)
+   does not match the derived return type
+     (FUNCTION (SIMPLE-VECTOR) (VALUES T &OPTIONAL))
+STYLE-WARNING:
+   The new FTYPE proclamation for FSET::CH-MAP-NODE-HASH-VALUE
+     (FUNCTION (T) FIXNUM)
+   does not match the derived return type
+     (FUNCTION (SIMPLE-VECTOR) (VALUES T &OPTIONAL))
+STYLE-WARNING:
+   Generic function FSET:ITERATOR clobbers an earlier FTYPE proclamation
+   (FUNCTION (T &KEY &ALLOW-OTHER-KEYS) (VALUES FUNCTION &REST T)) for the same
+   name with (FUNCTION (T &KEY &ALLOW-OTHER-KEYS) *).
+STYLE-WARNING:
+   The new FTYPE proclamation for SWANK/BACKEND:GETPID
+     (FUNCTION NIL (VALUES (SIGNED-BYTE 32) &OPTIONAL))
+   does not match the derived return type
+     (FUNCTION NIL *)
+WARNING:
+   redefining EMACS-INSPECT (#<SB-PCL:SYSTEM-CLASS COMMON-LISP:T>) in DEFMETHOD
+WARNING:
+   redefining 👀PRINT-STRING (#<SB-PCL:SYSTEM-CLASS COMMON-LISP:T>) in DEFMETHOD
+WARNING: redefining IRONCLAD:BLOCK-LENGTH in DEFGENERIC
+
+Defining domain WELCOME-DEVELOPMENT...
+
+Defining domain WELCOME-QUALIFIED-PROBE...
+
+Defining domain WELCOME-UNQUALIFIED-CALL-PROBE...
+
+Defining domain WELCOME-UNQUALIFIED-FORALL-PROBE...
+
+Defining problem WELCOME-QUALIFIED-POSITIVE ...
+
+Defining problem WELCOME-QUALIFIED-NEGATIVE ...
+
+Defining problem WELCOME-UNQUALIFIED-CALL ...
+
+Defining problem WELCOME-UNQUALIFIED-FORALL ...
+WELCOME P0 PASS: :ACTIONABLE; 2 plans/trees/states; :PLAN-ONLY; :FIXTURE
+  ((!ASSIGN S1 CODEX "99dbe5599dc6c0b080bec1b743dd864aa5635e0b")
+   (!ASSIGN S1 CLAUDE-CODE "99dbe5599dc6c0b080bec1b743dd864aa5635e0b"))
+WELCOME P1 PASS: :AWAITING; 1 plans/trees/states; :PLAN-ONLY; :FIXTURE
+  ((!AWAIT-SUBMISSION S1 :A1 CODEX))
+WELCOME P2 PASS: :ACTIONABLE; 1 plans/trees/states; :PLAN-ONLY; :FIXTURE
+  ((!VERIFY-SUBMISSION S1 :A1 "1111111111111111111111111111111111111111"))
+WELCOME P3 PASS: :ACTIONABLE; 1 plans/trees/states; :PLAN-ONLY; :FIXTURE
+  ((!REQUEST-REVIEW S1 "1111111111111111111111111111111111111111" CLAUDE-CODE))
+WELCOME P4 PASS: :ACTIONABLE; 2 plans/trees/states; :PLAN-ONLY; :FIXTURE
+  ((!PROPOSE-INTEGRATION S1 "1111111111111111111111111111111111111111")
+   (!ASSIGN S2 CODEX "1111111111111111111111111111111111111111"))
+WELCOME REFUSAL P4B PASS: :REVIEW-WITHOUT-SUBMISSION
+WELCOME P5 PASS: :ACTIONABLE; 1 plans/trees/states; :PLAN-ONLY; :FIXTURE
+  ((!ASSIGN S2 CODEX "1111111111111111111111111111111111111111"))
+WELCOME P6 PASS: :ACTIONABLE; 1 plans/trees/states; :PLAN-ONLY; :FIXTURE
+  ((!ASSIGN S1 CLAUDE-CODE "99dbe5599dc6c0b080bec1b743dd864aa5635e0b"))
+WELCOME P7 PASS: :BLOCKED; 1 plans/trees/states; :PLAN-ONLY; :FIXTURE
+  ((!REPORT-BLOCKER S1 ATTEMPTS-EXHAUSTED))
+WELCOME P8 PASS: :BLOCKED; 1 plans/trees/states; :PLAN-ONLY; :FIXTURE
+  ((!REPORT-BLOCKER S2 NO-ALTERNATIVE-EXECUTOR))
+WELCOME P9 PASS: :BLOCKED; 1 plans/trees/states; :PLAN-ONLY; :FIXTURE
+  ((!REPORT-BLOCKER S1 NO-ELIGIBLE-REVIEWER))
+WELCOME REFUSAL P10 PASS: (:ASSIGNMENT-NOT-PROPOSED
+                           (DREYECK/WORK/WELCOME-DEVELOPMENT::!ASSIGN
+                            DREYECK/WORK/WELCOME-DEVELOPMENT::S2
+                            DREYECK/WORK/WELCOME-DEVELOPMENT::CODEX
+                            "1111111111111111111111111111111111111111"))
+WELCOME P11 PASS: :ACTIONABLE; 3 plans/trees/states; :PLAN-ONLY; :FIXTURE
+  ((!PROPOSE-INTEGRATION S2 "2222222222222222222222222222222222222222")
+   (!PROPOSE-INTEGRATION S1 "1111111111111111111111111111111111111111")
+   (!ASSIGN S3 CODEX "2222222222222222222222222222222222222222"))
+WELCOME COMPLETE PASS: :COMPLETE; 1 plans/trees/states; :PLAN-ONLY; :FIXTURE
+  ((!REPORT-COMPLETE))
+WELCOME QUALIFICATION WELCOME-QUALIFIED-POSITIVE PASS: 1 plans/trees/states
+WELCOME QUALIFICATION WELCOME-QUALIFIED-NEGATIVE PASS: 0 plans/trees/states
+WELCOME QUALIFICATION WELCOME-UNQUALIFIED-CALL PASS: 0 plans/trees/states
+WELCOME QUALIFICATION WELCOME-UNQUALIFIED-FORALL PASS: 0 plans/trees/states
+WELCOME REFUSAL OPPOSITE-VERIFICATIONS PASS: (:CONTRADICTORY-RECORDS
+                                              (:VERIFICATION :A1
+                                               "1111111111111111111111111111111111111111"))
+WELCOME REFUSAL OPPOSITE-REVIEWS PASS: (:CONTRADICTORY-RECORDS
+                                        (:REVIEW :A1
+                                         "1111111111111111111111111111111111111111"))
+WELCOME REFUSAL SELF-VERIFIER PASS: :IMPLEMENTER-CANNOT-VERIFY
+WELCOME REFUSAL NOT-INDEPENDENT PASS: (:MISSING-FIELD
+                                       (:VERIFICATION :A1 :VERIFIED)
+                                       :INDEPENDENT)
+WELCOME REFUSAL MISSING-MARKER PASS: :POSITIVE-VERDICT-WITHOUT-PASSING-EVIDENCE
+WELCOME REFUSAL NONZERO-TEST-EXIT PASS: :POSITIVE-VERDICT-WITHOUT-PASSING-EVIDENCE
+WELCOME REFUSAL WRONG-TEST-COMMIT PASS: :POSITIVE-VERDICT-WITHOUT-PASSING-EVIDENCE
+WELCOME REFUSAL WRONG-TEST-TREE PASS: :POSITIVE-VERDICT-WITHOUT-PASSING-EVIDENCE
+WELCOME REFUSAL SCOPE-VIOLATION PASS: :POSITIVE-VERDICT-WITHOUT-PASSING-EVIDENCE
+WELCOME REFUSAL NOT-ANCESTOR PASS: :POSITIVE-VERDICT-WITHOUT-PASSING-EVIDENCE
+WELCOME REFUSAL MISSING-PLATFORM PASS: (:MISSING-FIELD
+                                        (:VERIFICATION :A1 :VERIFIED) :PLATFORM)
+WELCOME REFUSAL MISSING-VERIFIER PASS: (:MISSING-FIELD
+                                        (:VERIFICATION :A1 :VERIFIED) :VERIFIER)
+WELCOME REFUSAL UNSUPPORTED-POSITIVE-VERDICT PASS: :INVALID-VERIFICATION-VERDICT
+WELCOME REFUSAL SELF-REVIEW PASS: :IMPLEMENTER-CANNOT-REVIEW
+WELCOME REFUSAL P2B-INJECTED-PLANNED-EFFECT PASS: :RECORDS-REQUIRED-NOT-PLANNED-EFFECTS
+WELCOME REFUSAL P2B-INJECTED-PLANNED-EFFECT PASS: :RECORDS-REQUIRED-NOT-PLANNED-EFFECTS
+WELCOME REFUSAL P2B-INJECTED-PLANNED-EFFECT PASS: :RECORDS-REQUIRED-NOT-PLANNED-EFFECTS
+WELCOME REFUSAL PLANNED-FINAL-STATE PASS: :RECORDS-REQUIRED-NOT-PLANNED-EFFECTS
+WELCOME P2b/carriers/replanning PASS: returned is not verified; planned effects refused.
+WELCOME EMPTY-REVIEW-FINDINGS PASS: explicit empty findings remain an accepted review.
+WELCOME REVIEW-REJECTION PASS: reassignment proposed; no integration/S2.
+WELCOME RETURNED-REJECTION PASS: invocation transport did not turn rejection into verified.
+WELCOME REFUSAL CROSS-ASSIGNMENT-SELF-REVIEW PASS: (:ASSIGNMENT-NOT-PROPOSED
+                                                    (DREYECK/WORK/WELCOME-DEVELOPMENT::!ASSIGN
+                                                     DREYECK/WORK/WELCOME-DEVELOPMENT::S1
+                                                     DREYECK/WORK/WELCOME-DEVELOPMENT::CLAUDE-CODE
+                                                     "99dbe5599dc6c0b080bec1b743dd864aa5635e0b"))
+WELCOME REFUSAL NEGATIVE-VERDICT-POSITIVE-EVIDENCE PASS: :NEGATIVE-VERDICT-WITH-PASSING-EVIDENCE
+WELCOME REFUSAL FIXTURE-LAUNDERING PASS: :MIXED-FIXTURE-AND-OBSERVED-RECORDS
+WELCOME INCOMPLETE-INTEGRATION PASS: integration proposal, no complete report.
+WELCOME REFUSAL MISSING-REMOTE-OBSERVER PASS: :REMOTE-INTEGRATION-OBSERVER-UNAVAILABLE
+WELCOME LOCAL-GIT-OBSERVER PASS: actual handoff 20ad13e650cd1aca0c40192080e724b3cb4e0304 tree 80005d4694bedf5859a33c36e9d4ae1e13ac5c0c; explicit checkout; full base..commit scope.
+WELCOME RENAME-SCOPE PASS: old/deleted path checked, not only the allowed destination.
+WELCOME INSPECTION PASS: both P4 choices, record/carrier/result EQ links, labelled edges, no buttons.
+WELCOME REFUSAL B1-FORGED-DIGEST PASS: (:ASSIGNMENT-PLAN-BINDING-MISMATCH :A1)
+WELCOME REFUSAL B2-WRONG-S2-BASE PASS: (:ASSIGNMENT-NOT-PROPOSED
+                                        (DREYECK/WORK/WELCOME-DEVELOPMENT::!ASSIGN
+                                         DREYECK/WORK/WELCOME-DEVELOPMENT::S2
+                                         DREYECK/WORK/WELCOME-DEVELOPMENT::CODEX
+                                         "9999999999999999999999999999999999999999"))
+WELCOME REFUSAL B3-PREMATURE-S3 PASS: (:ASSIGNMENT-NOT-PROPOSED
+                                       (DREYECK/WORK/WELCOME-DEVELOPMENT::!ASSIGN
+                                        DREYECK/WORK/WELCOME-DEVELOPMENT::S3
+                                        DREYECK/WORK/WELCOME-DEVELOPMENT::CODEX
+                                        "99dbe5599dc6c0b080bec1b743dd864aa5635e0b"))
+WELCOME REFUSAL B4-OPEN-ASSIGNMENT PASS: (:ASSIGNMENT-NOT-PROPOSED
+                                          (DREYECK/WORK/WELCOME-DEVELOPMENT::!ASSIGN
+                                           DREYECK/WORK/WELCOME-DEVELOPMENT::S1
+                                           DREYECK/WORK/WELCOME-DEVELOPMENT::CLAUDE-CODE
+                                           "99dbe5599dc6c0b080bec1b743dd864aa5635e0b"))
+WELCOME REFUSAL B5-UNCLAIMED-REVIEW PASS: :REVIEW-WITHOUT-SUBMISSION
+WELCOME REFUSAL POSITIVE-REVIEW-WITHOUT-VERIFICATION PASS: :POSITIVE-REVIEW-WITHOUT-VERIFICATION
+WELCOME REFUSAL POSITIVE-REVIEW-AFTER-FAILED-VERIFICATION PASS: :POSITIVE-REVIEW-WITHOUT-VERIFICATION
+WELCOME REFUSAL STALE-POLICY-SAME-PROPOSALS PASS: (:ASSIGNMENT-PLAN-BINDING-MISMATCH
+                                                   :A1)
+WELCOME REFUSAL FUTURE-RECORDS-CANNOT-AUTHORIZE-PAST PASS: (:ASSIGNMENT-NOT-PROPOSED
+                                                            (DREYECK/WORK/WELCOME-DEVELOPMENT::!ASSIGN
+                                                             DREYECK/WORK/WELCOME-DEVELOPMENT::S2
+                                                             DREYECK/WORK/WELCOME-DEVELOPMENT::CODEX
+                                                             "1111111111111111111111111111111111111111"))
+WELCOME BINDING-DETERMINISM PASS: digest 3cd65ad15908d07ec47caa8364a21327949e4b4fea7bc2d9540527d7b8e574c9; stable choice 78506902f42c56e7ffc5aa553ca4dea0c706afe506a8cd9b65aadb7c3a08045b
+WELCOME PREFIX-VALIDATIONS PASS: inspectable native proposals; no self/future evidence.
+WELCOME-DEVELOPMENT-PASS: W1 only; real SHOP3; fixture scenario evidence; no action executed.
+WELCOME CATALOG PASS: opt-in load/test adds no Catalog member.
+WELCOME REGRESSION ORIGIN dreyeck/work/defederation-planning/tests: /workspace/work/welcome-development/dreyeck.asd
+
+Defining domain DEFEDERATION-PREPARATION...
+DEFEDERATION A PASS: :PLANNED; 1 plans/trees/states; :PLAN-ONLY; :NOT-EXECUTED
+  (((!PREPARE-LOCAL-LINKS :LOCAL-WIKI :TARGET-PAGE)
+    (!PREPARE-PARAGRAPH-RENDERING :LOCAL-WIKI :TARGET-PAGE)))
+DEFEDERATION B PASS: :PLANNED; 1 plans/trees/states; :PLAN-ONLY; :NOT-EXECUTED
+  (((!SIMULATE-FORK :LOCAL-WIKI :TARGET-PAGE :REMOTE-WIKI :SNAPSHOT-1)
+    (!PREPARE-LOCAL-LINKS :LOCAL-WIKI :TARGET-PAGE)
+    (!PREPARE-PARAGRAPH-RENDERING :LOCAL-WIKI :TARGET-PAGE)))
+DEFEDERATION C PASS: :NO-PLAN; 0 plans/trees/states; :PLAN-ONLY; :NOT-EXECUTED
+  NIL
+DEFEDERATION (MISSING FORK-PERMITTED) PASS: :NO-PLAN; 0 plans/trees/states; :PLAN-ONLY; :NOT-EXECUTED
+  NIL
+DEFEDERATION (MISSING REMOTE-SNAPSHOT) PASS: :NO-PLAN; 0 plans/trees/states; :PLAN-ONLY; :NOT-EXECUTED
+  NIL
+DEFEDERATION (MISSING LOCAL-PAGE-ABSENT) PASS: :NO-PLAN; 0 plans/trees/states; :PLAN-ONLY; :NOT-EXECUTED
+  NIL
+DEFEDERATION EXPLICITLY-FORBIDDEN PASS: :NO-PLAN; 0 plans/trees/states; :PLAN-ONLY; :NOT-EXECUTED
+  NIL
+DEFEDERATION SNAPSHOT-OBSERVED-UNAVAILABLE PASS: :NO-PLAN; 0 plans/trees/states; :PLAN-ONLY; :NOT-EXECUTED
+  NIL
+DEFEDERATION LOCAL-INSTEAD-OF-ABSENT PASS: :PLANNED; 1 plans/trees/states; :PLAN-ONLY; :NOT-EXECUTED
+  (((!PREPARE-LOCAL-LINKS :LOCAL-WIKI :TARGET-PAGE)
+    (!PREPARE-PARAGRAPH-RENDERING :LOCAL-WIKI :TARGET-PAGE)))
+DEFEDERATION LOCAL-EVEN-IF-FORK-FORBIDDEN PASS: :PLANNED; 1 plans/trees/states; :PLAN-ONLY; :NOT-EXECUTED
+  (((!PREPARE-LOCAL-LINKS :LOCAL-WIKI :TARGET-PAGE)
+    (!PREPARE-PARAGRAPH-RENDERING :LOCAL-WIKI :TARGET-PAGE)))
+DEFEDERATION (CONTRADICTION LOCAL-PAGE) PASS: :NO-PLAN; 0 plans/trees/states; :PLAN-ONLY; :NOT-EXECUTED
+  NIL
+DEFEDERATION (CONTRADICTION SNAPSHOT-UNAVAILABLE) PASS: :NO-PLAN; 0 plans/trees/states; :PLAN-ONLY; :NOT-EXECUTED
+  NIL
+DEFEDERATION (CONTRADICTION FORK-FORBIDDEN) PASS: :NO-PLAN; 0 plans/trees/states; :PLAN-ONLY; :NOT-EXECUTED
+  NIL
+DEFEDERATION CHANGED-FORK-METHOD-NO-ALTERNATIVE PASS: :NO-PLAN; 0 plans/trees/states; :PLAN-ONLY; :NOT-EXECUTED
+  NIL
+DEFEDERATION CHANGED-FORK-METHOD-LOCAL-STILL-WORKS PASS: :PLANNED; 1 plans/trees/states; :PLAN-ONLY; :NOT-EXECUTED
+  (((!PREPARE-LOCAL-LINKS :LOCAL-WIKI :TARGET-PAGE)
+    (!PREPARE-PARAGRAPH-RENDERING :LOCAL-WIKI :TARGET-PAGE)))
+DEFEDERATION CHANGED-FORK-METHOD-EVIDENCE-RESTORED PASS: :PLANNED; 1 plans/trees/states; :PLAN-ONLY; :NOT-EXECUTED
+  (((!SIMULATE-FORK :LOCAL-WIKI :TARGET-PAGE :REMOTE-WIKI :SNAPSHOT-1)
+    (!PREPARE-LOCAL-LINKS :LOCAL-WIKI :TARGET-PAGE)
+    (!PREPARE-PARAGRAPH-RENDERING :LOCAL-WIKI :TARGET-PAGE)))
+DEFEDERATION CHANGED-LOCAL-METHOD-FORK-CANNOT-BYPASS PASS: :NO-PLAN; 0 plans/trees/states; :PLAN-ONLY; :NOT-EXECUTED
+  NIL
+DEFEDERATION ORIGINAL-DOMAIN-INTACT PASS: :PLANNED; 1 plans/trees/states; :PLAN-ONLY; :NOT-EXECUTED
+  (((!SIMULATE-FORK :LOCAL-WIKI :TARGET-PAGE :REMOTE-WIKI :SNAPSHOT-1)
+    (!PREPARE-LOCAL-LINKS :LOCAL-WIKI :TARGET-PAGE)
+    (!PREPARE-PARAGRAPH-RENDERING :LOCAL-WIKI :TARGET-PAGE)))
+CONSOLIDATION REPEAT PASS: (((DREYECK/WORK/DEFEDERATION-PLANNING::!SIMULATE-FORK
+                              :LOCAL-WIKI :TARGET-PAGE :REMOTE-WIKI
+                              :SNAPSHOT-1)
+                             (DREYECK/WORK/DEFEDERATION-PLANNING::!PREPARE-LOCAL-LINKS
+                              :LOCAL-WIKI :TARGET-PAGE)
+                             (DREYECK/WORK/DEFEDERATION-PLANNING::!PREPARE-PARAGRAPH-RENDERING
+                              :LOCAL-WIKI :TARGET-PAGE)
+                             (DREYECK/WORK/DEFEDERATION-PLANNING::!PREPARE-LOCAL-LINKS
+                              :LOCAL-WIKI :TARGET-PAGE)
+                             (DREYECK/WORK/DEFEDERATION-PLANNING::!PREPARE-PARAGRAPH-RENDERING
+                              :LOCAL-WIKI :TARGET-PAGE))); one fork, two target preparations; observations retained.
+CONSOLIDATION PRIMITIVE-REPEAT PASS: no alternative plan.
+DEFEDERATION UNRELATED-CONTRADICTION PASS: :PLANNED; 1 plans/trees/states; :PLAN-ONLY; :NOT-EXECUTED
+  (((!SIMULATE-FORK :LOCAL-WIKI :TARGET-PAGE :REMOTE-WIKI :SNAPSHOT-1)
+    (!PREPARE-LOCAL-LINKS :LOCAL-WIKI :TARGET-PAGE)
+    (!PREPARE-PARAGRAPH-RENDERING :LOCAL-WIKI :TARGET-PAGE)))
+DEFEDERATION MISSING-SOURCE-POLICY PASS: :NO-PLAN; 0 plans/trees/states; :PLAN-ONLY; :NOT-EXECUTED
+  NIL
+DEFEDERATION STRICT-REMOTE-UNKNOWN PASS: :NO-PLAN; 0 plans/trees/states; :PLAN-ONLY; :NOT-EXECUTED
+  NIL
+DEFEDERATION STRICT-REMOTE-NEGATIVE PASS: :NO-PLAN; 0 plans/trees/states; :PLAN-ONLY; :NOT-EXECUTED
+  NIL
+DEFEDERATION STRICT-REMOTE-POSITIVE PASS: :PLANNED; 1 plans/trees/states; :PLAN-ONLY; :NOT-EXECUTED
+  (((!SIMULATE-FORK :LOCAL-WIKI :TARGET-PAGE :REMOTE-WIKI :SNAPSHOT-1)
+    (!PREPARE-LOCAL-LINKS :LOCAL-WIKI :TARGET-PAGE)
+    (!PREPARE-PARAGRAPH-RENDERING :LOCAL-WIKI :TARGET-PAGE)))
+DEFEDERATION CACHED-COPY-REMOTE-NEGATIVE PASS: :PLANNED; 1 plans/trees/states; :PLAN-ONLY; :NOT-EXECUTED
+  (((!SIMULATE-FORK :LOCAL-WIKI :TARGET-PAGE :REMOTE-WIKI :SNAPSHOT-1)
+    (!PREPARE-LOCAL-LINKS :LOCAL-WIKI :TARGET-PAGE)
+    (!PREPARE-PARAGRAPH-RENDERING :LOCAL-WIKI :TARGET-PAGE)))
+DEFEDERATION REMOTE-CONTRADICTION PASS: :NO-PLAN; 0 plans/trees/states; :PLAN-ONLY; :NOT-EXECUTED
+  NIL
+DEFEDERATION POLICY-CONTRADICTION PASS: :NO-PLAN; 0 plans/trees/states; :PLAN-ONLY; :NOT-EXECUTED
+  NIL
+CONSOLIDATION ALL-ALTERNATIVES PASS: (((DREYECK/WORK/DEFEDERATION-PLANNING::!SIMULATE-FORK
+                                        :LOCAL-WIKI :TARGET-PAGE :REMOTE-WIKI
+                                        :SNAPSHOT-1)
+                                       (DREYECK/WORK/DEFEDERATION-PLANNING::!PREPARE-LOCAL-LINKS
+                                        :LOCAL-WIKI :TARGET-PAGE)
+                                       (DREYECK/WORK/DEFEDERATION-PLANNING::!PREPARE-PARAGRAPH-RENDERING
+                                        :LOCAL-WIKI :TARGET-PAGE))
+                                      ((DREYECK/WORK/DEFEDERATION-PLANNING::!SIMULATE-FORK
+                                        :LOCAL-WIKI :TARGET-PAGE :OTHER-REMOTE
+                                        :SNAPSHOT-2)
+                                       (DREYECK/WORK/DEFEDERATION-PLANNING::!PREPARE-LOCAL-LINKS
+                                        :LOCAL-WIKI :TARGET-PAGE)
+                                       (DREYECK/WORK/DEFEDERATION-PLANNING::!PREPARE-PARAGRAPH-RENDERING
+                                        :LOCAL-WIKI :TARGET-PAGE)))
+DEFEDERATION X1.1 PASS: :NO-PLAN; 0 plans/trees/states; :PLAN-ONLY; :NOT-EXECUTED
+  NIL
+REVIEW (X1.1 LINKS) PASS: 0 primitive plans, no tree requested.
+REVIEW (X1.1 PARAGRAPH) PASS: 0 primitive plans, no tree requested.
+DEFEDERATION X1.2 PASS: :NO-PLAN; 0 plans/trees/states; :PLAN-ONLY; :NOT-EXECUTED
+  NIL
+REVIEW (X1.2 LINKS) PASS: 0 primitive plans, no tree requested.
+REVIEW (X1.2 PARAGRAPH) PASS: 0 primitive plans, no tree requested.
+DEFEDERATION X1.3 PASS: :NO-PLAN; 0 plans/trees/states; :PLAN-ONLY; :NOT-EXECUTED
+  NIL
+REVIEW (X1.3 LINKS) PASS: 0 primitive plans, no tree requested.
+REVIEW (X1.3 PARAGRAPH) PASS: 0 primitive plans, no tree requested.
+DEFEDERATION F2.7 PASS: :NO-PLAN; 0 plans/trees/states; :PLAN-ONLY; :NOT-EXECUTED
+  NIL
+REVIEW F2.7-DIRECT-FORK PASS: 0 primitive plans, no tree requested.
+REVIEW F2.7-LINKS PASS: 0 primitive plans, no tree requested.
+REVIEW F2.7-PARAGRAPH PASS: 0 primitive plans, no tree requested.
+DEFEDERATION INCOMPLETE-OTHER-TARGET PASS: :PLANNED; 1 plans/trees/states; :PLAN-ONLY; :NOT-EXECUTED
+  (((!SIMULATE-FORK :LOCAL-WIKI :TARGET-PAGE :REMOTE-WIKI :SNAPSHOT-1)
+    (!PREPARE-LOCAL-LINKS :LOCAL-WIKI :TARGET-PAGE)
+    (!PREPARE-PARAGRAPH-RENDERING :LOCAL-WIKI :TARGET-PAGE)))
+REVIEW DIRECT-FORK-CONFLICTING-PERMISSION PASS: 0 primitive plans, no tree requested.
+REVIEW DIRECT-FORK-CONSISTENT PASS: 1 primitive plans, no tree requested.
+REVIEW F3.5B PASS: 0 primitive plans, no tree requested.
+DEFEDERATION MISMATCHED-MODELED-PAIR PASS: :NO-PLAN; 0 plans/trees/states; :PLAN-ONLY; :NOT-EXECUTED
+  NIL
+DEFEDERATION MISMATCHED-MODELED-PAIR PASS: :NO-PLAN; 0 plans/trees/states; :PLAN-ONLY; :NOT-EXECUTED
+  NIL
+REVIEW PAIRED-STATE-DIRECT-PREPARATION PASS: 1 primitive plans, no tree requested.
+REVIEW-REGRESSIONS-PASS: paired simulation, scoped conflict, primitive readiness; no execution.
+DEFEDERATION-PLANNING-PASS: state-dependent methods; exhaustive alternatives; no execution.
+WELCOME REGRESSION PASS: dreyeck/work/defederation-planning/tests
+WELCOME REGRESSION ORIGIN dreyeck/work/fedwiki-local-only/tests: /workspace/work/welcome-development/dreyeck.asd
+WARNING: System definition file #P"/workspace/tools/nix-portable-data/.nix-portable/nix/store/rn29yxasws4x3wvcf6d0738zxbcrvmin-sbcl-parse-float-20200218-git/parse-float.asd" contains definition for system "parse-float-tests". Please only define "parse-float" and secondary systems with a name starting with "parse-float/" (e.g. "parse-float/test") in that file.
+WARNING: System definition file #P"/workspace/tools/nix-portable-data/.nix-portable/nix/store/bzssaly51znz21jychrjrjg22cbimv2h-sbcl-cl-template-20130615-git/cl-template.asd" contains definition for system "cl-template-tests". Please only define "cl-template" and secondary systems with a name starting with "cl-template/" (e.g. "cl-template/test") in that file.
+WARNING:
+   The new FTYPE proclamation for CLSS:MATCH-SELECTOR
+     (FUNCTION (LIST (OR PLUMP-DOM:NODE VECTOR LIST) KEYWORD)
+      (VALUES (AND (VECTOR PLUMP-DOM:NODE) (NOT SIMPLE-ARRAY))))
+   does not match the old FTYPE proclamation
+     (FUNCTION (LIST (OR LIST PLUMP-DOM:NODE VECTOR) &OPTIONAL KEYWORD)
+      (VALUES (AND (VECTOR PLUMP-DOM:NODE) (NOT SIMPLE-ARRAY)) &REST T))
+WARNING: redefining CL-ISAAC:RAND32 in DEFUN
+WARNING: redefining CL-ISAAC:RAND64 in DEFUN
+WARNING:
+   bare references to struct types are deprecated. Please use (:POINTER
+                                                               (:STRUCT
+                                                                SQLITE3)) or (:STRUCT
+                                                                              SQLITE3) instead.
+WARNING:
+   bare references to struct types are deprecated. Please use (:POINTER
+                                                               (:STRUCT
+                                                                SQLITE3-STMT)) or (:STRUCT
+                                                                                   SQLITE3-STMT) instead.
+WARNING: redefining DEFTYPE type to be a class: DBI.ERROR:<DBI-ERROR>
+WARNING: redefining DEFTYPE type to be a class: DBI.ERROR:<DBI-WARNING>
+WARNING: redefining DEFTYPE type to be a class: DBI.ERROR:<DBI-INTERFACE-ERROR>
+WARNING:
+   redefining DEFTYPE type to be a class: DBI.ERROR:<DBI-UNIMPLEMENTED-ERROR>
+WARNING: redefining DEFTYPE type to be a class: DBI.ERROR:<DBI-DATABASE-ERROR>
+WARNING: redefining DEFTYPE type to be a class: DBI.ERROR:<DBI-DATA-ERROR>
+WARNING:
+   redefining DEFTYPE type to be a class: DBI.ERROR:<DBI-OPERATIONAL-ERROR>
+WARNING: redefining DEFTYPE type to be a class: DBI.ERROR:<DBI-INTEGRITY-ERROR>
+WARNING: redefining DEFTYPE type to be a class: DBI.ERROR:<DBI-INTERNAL-ERROR>
+WARNING:
+   redefining DEFTYPE type to be a class: DBI.ERROR:<DBI-PROGRAMMING-ERROR>
+WARNING:
+   redefining DEFTYPE type to be a class: DBI.ERROR:<DBI-NOTSUPPORTED-ERROR>
+WARNING:
+   redefining DEFTYPE type to be a class: DBI.ERROR:<DBI-ALREADY-COMMITED-ERROR>
+WARNING:
+   redefining DEFTYPE type to be a class: DBI.ERROR:<DBI-ALREADY-ROLLED-BACK-ERROR>
+WARNING: redefining DEFTYPE type to be a class: DBI.DRIVER:<DBI-DRIVER>
+WARNING: redefining DEFTYPE type to be a class: DBI.DRIVER:<DBI-CONNECTION>
+WARNING: redefining DEFTYPE type to be a class: DBI.DRIVER:<DBI-QUERY>
+WARNING: redefining CLOG:PARENT in DEFGENERIC
+WARNING: redefining CLOG::CONNECTION-ID in DEFGENERIC
+WARNING: redefining CLOG:HTML-ID in DEFGENERIC
+WARNING: redefining CLOG:WINDOW in DEFGENERIC
+WARNING: redefining CLOG:HTML-DOCUMENT in DEFGENERIC
+WARNING: redefining CLOG:LOCATION in DEFGENERIC
+WARNING: redefining CLOG:NAVIGATOR in DEFGENERIC
+WARNING: redefining CLOG:DOCUMENT-ELEMENT in DEFGENERIC
+WARNING: redefining CLOG:HEAD-ELEMENT in DEFGENERIC
+WARNING: redefining CLOG:DISABLEDP in DEFGENERIC
+WARNING: redefining (COMMON-LISP:SETF CLOG:DISABLEDP) in DEFGENERIC
+WARNING: redefining CLOG:VALUE in DEFGENERIC
+WARNING: redefining (COMMON-LISP:SETF CLOG:VALUE) in DEFGENERIC
+WARNING: redefining CLOG:MINIMUM in DEFGENERIC
+WARNING: redefining (COMMON-LISP:SETF CLOG:MINIMUM) in DEFGENERIC
+WARNING: redefining CLOG:MAXIMUM in DEFGENERIC
+WARNING: redefining (COMMON-LISP:SETF CLOG:MAXIMUM) in DEFGENERIC
+WARNING: redefining CLOG:URL-SRC in DEFGENERIC
+WARNING: redefining (COMMON-LISP:SETF CLOG:URL-SRC) in DEFGENERIC
+WARNING: redefining CLOG:ALT-TEXT in DEFGENERIC
+WARNING: redefining (COMMON-LISP:SETF CLOG:ALT-TEXT) in DEFGENERIC
+WARNING: redefining CLOG:CENTER-PANEL in DEFGENERIC
+WARNING: redefining CLOG:TOP-PANEL in DEFGENERIC
+WARNING: redefining CLOG:LEFT-PANEL in DEFGENERIC
+WARNING: redefining CLOG:BOTTOM-PANEL in DEFGENERIC
+WARNING: redefining CLOG:PANEL-BOX in DEFGENERIC
+WARNING: redefining CLOG:TREE-ROOT in DEFGENERIC
+WARNING: redefining CLOG:INDENT-LEVEL in DEFGENERIC
+WARNING: redefining CLOG:TOGGLE-STATE in DEFGENERIC
+WARNING: redefining CLOG:TREE-ITEM in DEFGENERIC
+WARNING: redefining CLOG:DATABASE-CONNECTION in DEFGENERIC
+
+Defining domain FEDWIKI-LINK-RESOLUTION...
+LOCAL-ONLY NO-FALLBACK / COLLABORATIVE ORDER PASS (((DREYECK/WORK/LOCAL-ONLY-RESOLUTION::!REQUEST
+                                                     :LINK "fedwiki:local"
+                                                     "remote-only" :ORIGIN)
+                                                    (DREYECK/WORK/LOCAL-ONLY-RESOLUTION::!REQUEST
+                                                     :LINK "remote-item"
+                                                     "remote-only" :ITEM)
+                                                    (DREYECK/WORK/LOCAL-ONLY-RESOLUTION::!OPEN-PANEL
+                                                     :LINK "remote-item"
+                                                     "remote-only" :ITEM)))
+LOCAL-ONLY FORK ONCE / CONTINUATION PASS
+Plans (((DREYECK/WORK/DEFEDERATION-PLANNING::!SIMULATE-FORK "fedwiki:local"
+         "missing" "remote-item"
+         "3106428da16be933084ba9ecb2eed90b3fd37e80d2e843252936dfbfb9f2d3d7")
+        (DREYECK/WORK/DEFEDERATION-PLANNING::!PREPARE-LOCAL-LINKS
+         "fedwiki:local" "missing")
+        (DREYECK/WORK/DEFEDERATION-PLANNING::!PREPARE-PARAGRAPH-RENDERING
+         "fedwiki:local" "missing")
+        (DREYECK/WORK/DEFEDERATION-PLANNING::!PREPARE-LOCAL-LINKS
+         "fedwiki:local" "missing")
+        (DREYECK/WORK/DEFEDERATION-PLANNING::!PREPARE-PARAGRAPH-RENDERING
+         "fedwiki:local" "missing")))
+Trees ((((DREYECK/WORK/DEFEDERATION-PLANNING::PREPARE-DEFEDERATION
+          "fedwiki:local" "missing")
+         DREYECK/WORK/DEFEDERATION-PLANNING::PREPARE-AFTER-CONSISTENCY-CHECK
+         (((DREYECK/WORK/DEFEDERATION-PLANNING::ENSURE-LOCAL-TARGET
+            "fedwiki:local" "missing")
+           DREYECK/WORK/DEFEDERATION-PLANNING::FORK-PROVEN-REMOTE
+           ((1.0
+             (DREYECK/WORK/DEFEDERATION-PLANNING::!SIMULATE-FORK
+              "fedwiki:local" "missing" "remote-item"
+              "3106428da16be933084ba9ecb2eed90b3fd37e80d2e843252936dfbfb9f2d3d7")
+             0)))
+          (1.0
+           (DREYECK/WORK/DEFEDERATION-PLANNING::!PREPARE-LOCAL-LINKS
+            "fedwiki:local" "missing")
+           1)
+          (1.0
+           (DREYECK/WORK/DEFEDERATION-PLANNING::!PREPARE-PARAGRAPH-RENDERING
+            "fedwiki:local" "missing")
+           2)))
+        ((DREYECK/WORK/DEFEDERATION-PLANNING::PREPARE-DEFEDERATION
+          "fedwiki:local" "missing")
+         DREYECK/WORK/DEFEDERATION-PLANNING::PREPARE-AFTER-CONSISTENCY-CHECK
+         (((DREYECK/WORK/DEFEDERATION-PLANNING::ENSURE-LOCAL-TARGET
+            "fedwiki:local" "missing")
+           NIL NIL)
+          (1.0
+           (DREYECK/WORK/DEFEDERATION-PLANNING::!PREPARE-LOCAL-LINKS
+            "fedwiki:local" "missing")
+           3)
+          (1.0
+           (DREYECK/WORK/DEFEDERATION-PLANNING::!PREPARE-PARAGRAPH-RENDERING
+            "fedwiki:local" "missing")
+           4)))))
+Final ((DREYECK/WORK/DEFEDERATION-PLANNING::PARAGRAPH-RENDERING-PREPARED
+        "fedwiki:local" "missing")
+       (DREYECK/WORK/DEFEDERATION-PLANNING::LOCAL-LINKS-PREPARED
+        "fedwiki:local" "missing")
+       (DREYECK/WORK/DEFEDERATION-PLANNING::MODELED-LOCAL-PAGE "fedwiki:local"
+        "missing")
+       (DREYECK/WORK/DEFEDERATION-PLANNING::MODELED-FORK "fedwiki:local"
+        "missing" "remote-item"
+        "3106428da16be933084ba9ecb2eed90b3fd37e80d2e843252936dfbfb9f2d3d7")
+       (DREYECK/WORK/DEFEDERATION-PLANNING::LOCAL-PAGE-ABSENT "fedwiki:local"
+        "missing")
+       (DREYECK/WORK/LOCAL-ONLY-RESOLUTION::PAGE-AVAILABLE "remote-old"
+        "remote-only")
+       (DREYECK/WORK/LOCAL-ONLY-RESOLUTION::PAGE-AVAILABLE "remote-new"
+        "remote-only")
+       (DREYECK/WORK/LOCAL-ONLY-RESOLUTION::PAGE-AVAILABLE "remote-item"
+        "remote-only")
+       (DREYECK/WORK/DEFEDERATION-PLANNING::FORK-SOURCE-POLICY "fedwiki:local"
+        "missing" :CACHED-COPY-SUFFICIENT)
+       (DREYECK/WORK/DEFEDERATION-PLANNING::FORK-PERMITTED "fedwiki:local"
+        "missing")
+       (DREYECK/WORK/DEFEDERATION-PLANNING::REMOTE-SNAPSHOT "fedwiki:local"
+        "missing" "remote-item"
+        "3106428da16be933084ba9ecb2eed90b3fd37e80d2e843252936dfbfb9f2d3d7"))
+LOCAL-ONLY VIEW-SECTIONS / STATUS-VARIANTS / UNIQUE-RESULTS / REFERENCE-EQ PASS
+LOCAL-ONLY INPUT-GUARD / PROVENANCE / UNKNOWN / INSPECTOR-EQ PASS
+LOCAL-ONLY-NETWORK-PASS: 0 socket attempts, 0 plugin/context attempts; source loading included; fixture bytes unchanged.
+LOCAL-ONLY-INTEGRATION-PASS
+INPUT-PASS P1a Invalid observation: OWN-SITE-AVAILABILITY-MUST-COME-FROM-STORE
+INPUT-PASS P1b Invalid observation: OWN-SITE-AVAILABILITY-MUST-COME-FROM-STORE
+INPUT-PASS P1c Invalid observation: OWN-SITE-AVAILABILITY-MUST-COME-FROM-STORE
+INPUT-PASS P1d Invalid observation: OWN-SITE-AVAILABILITY-MUST-COME-FROM-STORE
+INPUT-PASS P1e Invalid observation: OWN-SITE-AVAILABILITY-MUST-COME-FROM-STORE
+INPUT-PASS P2a Invalid observation: (SNAPSHOT-PATH-OUTSIDE-AREA pages/source)
+INPUT-PASS P2b Invalid observation: (SNAPSHOT-PATH-OUTSIDE-AREA
+                                     outside-copy.json)
+INPUT-PASS P2c Invalid observation: (SNAPSHOT-PATH-OUTSIDE-AREA
+                                     /tmp/hyperdoc-inputs-G65935/snapshots/missing.json)
+INPUT-PASS P2d Invalid observation: SNAPSHOT-COPY-NOT-VERIFIED
+INPUT-PASS P2e Invalid observation: SNAPSHOT-COPY-NOT-VERIFIED
+INPUT-PASS (PATH snapshots/../pages/source) Invalid observation: (SNAPSHOT-PATH-OUTSIDE-AREA
+                                                                  snapshots/../pages/source)
+INPUT-PASS (PATH ../snapshots/missing.json) Invalid observation: (SNAPSHOT-PATH-OUTSIDE-AREA
+                                                                  ../snapshots/missing.json)
+INPUT-PASS (PATH snapshots/absent.json) Invalid observation: (SNAPSHOT-MISSING
+                                                              snapshots/absent.json
+                                                              Failed to find the TRUENAME of /tmp/hyperdoc-inputs-G65935/snapshots/absent.json:
+
+  No such file or directory)
+INPUT-PASS wrong digest Invalid observation: SNAPSHOT-DIGEST-MISMATCH
+INPUT-PASS snapshot JSON Invalid observation: (INVALID-JSON
+                                               /tmp/hyperdoc-inputs-G65935/snapshots/invalid.json
+                                               Unexpected character #\o found during parsing, expected #\u.)
+INPUT-PASS snapshot structure Invalid observation: PAGE-NEEDS-TITLE
+INPUT-PASS (SYMLINK ../pages/source) Invalid observation: (SNAPSHOT-SYMLINK
+                                                           snapshots/link.json)
+INPUT-PASS (SYMLINK missing.json) Invalid observation: (SNAPSHOT-SYMLINK
+                                                        snapshots/link.json)
+INPUT-PASS symlink directory Invalid observation: (SNAPSHOT-SYMLINK
+                                                   snapshots/missing.json)
+INPUT-PASS positive verified snapshot / fork once / continuation
+INPUT-PASS P3a Invalid observation: EVIDENCE-NEEDS-FACTS-ARRAY
+INPUT-PASS P3b Invalid observation: EVIDENCE-NEEDS-FACTS-ARRAY
+INPUT-PASS P3c Invalid observation: (INVALID-FACT-ROW fork-permitted)
+INPUT-PASS P3d Invalid observation: (INVALID-FACT-ROW #())
+INPUT-PASS P3e Invalid observation: (WRONG-FACT-ARITY #(fork-source-policy))
+INPUT-PASS P3f Invalid observation: (UNAPPROVED-FACT (FORK-PERMITTED NULL NULL))
+INPUT-PASS P3g Invalid observation: (UNAPPROVED-FACT (FORK-PERMITTED T missing))
+INPUT-PASS P3h Invalid observation: (UNAPPROVED-FACT
+                                     (PAGE-UNAVAILABLE remote-item missing
+                                      404.5))
+INPUT-PASS P3i Invalid observation: (UNAPPROVED-FACT
+                                     (FORK-PERMITTED #(a) missing))
+INPUT-PASS P3j Invalid observation: LOCAL-OBSERVATIONS-MUST-COME-FROM-STORE
+INPUT-PASS P3k Invalid observation: (UNAPPROVED-PREDICATE MODELED-FORK)
+INPUT-PASS P3l Invalid observation: (UNKNOWN-POLICY whatever)
+INPUT-PASS P3m Invalid observation: (INVALID-JSON
+                                     /tmp/hyperdoc-inputs-G65935/test.json
+                                     Unexpected character #\o found during parsing, expected #\u.)
+INPUT-PASS P3n Invalid observation: (WRONG-FACT-ARITY
+                                     #(fork-permitted fedwiki:local))
+INPUT-PASS P3o Invalid observation: (UNAPPROVED-FACT
+                                     (PAGE-UNAVAILABLE remote-item missing 500))
+INPUT-PASS trailing JSON Invalid observation: (INVALID-JSON
+                                               /tmp/hyperdoc-inputs-G65935/test.json
+                                               Unexpected character #\g found during parsing.)
+INPUT-PASS copies null Invalid observation: COPIES-NEEDS-ARRAY
+INPUT-PASS copy incomplete Invalid observation: INCOMPLETE-COPY-ENTRY
+INPUT-PASS policy missing value Invalid observation: (WRONG-FACT-ARITY
+                                                      #(fork-source-policy
+                                                        fedwiki:local missing))
+INPUT-PASS (P4a 9) Invalid observation: (INVALID-STORY-ITEM-INDEX 9)
+INPUT-PASS (P4a -1) Invalid observation: (INVALID-STORY-ITEM-INDEX -1)
+INPUT-PASS (P4a 0) Invalid observation: (INVALID-STORY-ITEM-INDEX 0)
+INPUT-PASS (P4a 0.0) Invalid observation: (INVALID-STORY-ITEM-INDEX 0.0)
+INPUT-PASS (P4a NIL) Invalid observation: (INVALID-STORY-ITEM-INDEX NIL)
+INPUT-PASS P4b Invalid observation: (PAGE-NEEDS-ARRAY story)
+INPUT-PASS no wiki link Invalid observation: ITEM-HAS-NO-WIKI-LINK
+INPUT-PASS invalid wiki target Invalid observation: INVALID-LINK-TARGET
+INPUT-PASS missing source Invalid observation: (INVALID-SOURCE-PAGE absent
+                                                Condition HYPERBOOK:PAGE-LOOKUP-FAILURE was signalled.)
+INPUT-PASS malformed source JSON Invalid observation: (INVALID-SOURCE-PAGE
+                                                       broken
+                                                       Unexpected character #\h found during parsing, expected #\r.)
+INPUT-PASS local read failure UNKNOWN / unexpected error propagates
+INPUT-PASS remote 500 / collaborative order / no local-only fallback
+INPUT-PASS remote 302 / collaborative order / no local-only fallback
+INPUT-PASS remote TRANSPORT / collaborative order / no local-only fallback
+INPUT-REGRESSIONS-PASS 48 invalid inputs rejected with details
+R1-PASS B7: Invalid observation: (OWN-SITE-CANNOT-BE-REMOTE-SOURCE
+                                  (REMOTE-SNAPSHOT fedwiki:local missing
+                                   fedwiki:local
+                                   3106428da16be933084ba9ecb2eed90b3fd37e80d2e843252936dfbfb9f2d3d7)); no observation/result/problem registered
+R1-PASS B8: Invalid observation: (OWN-SITE-CANNOT-BE-REMOTE-SOURCE
+                                  (REMOTE-PAGE fedwiki:local missing)); no observation/result/problem registered
+R1-PASS remote-page alone: Invalid observation: (OWN-SITE-CANNOT-BE-REMOTE-SOURCE
+                                                 (REMOTE-PAGE fedwiki:local
+                                                  missing)); no observation/result/problem registered
+R1-PASS remote-page-absent: Invalid observation: (OWN-SITE-CANNOT-BE-REMOTE-SOURCE
+                                                  (REMOTE-PAGE-ABSENT
+                                                   fedwiki:local missing)); no observation/result/problem registered
+R1-PASS unreferenced own copy: Invalid observation: (OWN-SITE-CANNOT-BE-REMOTE-COPY
+                                                     (SITE fedwiki:local SLUG
+                                                      missing PATHNAME
+                                                      /tmp/hyperdoc-r1-G66465/snapshots/missing.json
+                                                      SHA256
+                                                      3106428da16be933084ba9ecb2eed90b3fd37e80d2e843252936dfbfb9f2d3d7)); no observation/result/problem registered
+R1-PASS cached-copy-sufficient: one fork, native tree/final state, continuation without fork; store remains absent
+R1-PASS require-remote-evidence: one fork, native tree/final state, continuation without fork; store remains absent
+R1-PASS remote absence: accepted observation, no strict-policy plan
+R1-PASS own destination fork-forbidden: accepted observation, no plan
+R1-PASS two alternatives: one fork each; both continuations without fork
+R1-REGRESSIONS-PASS
+WELCOME REGRESSION PASS: dreyeck/work/fedwiki-local-only/tests
+WELCOME-ALL-PASS: W1 only; no development action executed.

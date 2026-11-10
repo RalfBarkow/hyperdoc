@@ -63,7 +63,9 @@
 (defclass development-run ()
   ((records :initarg :records :reader development-records)
    (initial-state :initarg :initial-state :reader development-initial-state)
-   (result :initarg :result :reader development-plan-result)))
+   (result :initarg :result :reader development-plan-result)
+   (assignment-validations :initarg :assignment-validations :reader development-assignment-validations)
+   (alternatives :initarg :alternatives :reader development-alternatives)))
 
 (defun plan-development-state (state)
   (let* ((name (gensym "WELCOME-DEVELOPMENT-"))
@@ -78,11 +80,59 @@
                      :time seconds :plan-trees trees :final-states states
                      :execution-mode :plan-only))))
 
+(defun development-canonical-string (value)
+  "Deterministic readable literal data, independent of caller printer settings.
+Reject objects and uninterned symbols rather than printing transient identities."
+  (labels ((literal (x)
+             (typecase x
+               (cons (literal (car x)) (literal (cdr x)))
+               (symbol (unless (symbol-package x) (refuse-record :uninterned-planning-input)))
+               ((or string integer) nil)
+               (t (refuse-record :nonliteral-planning-input)))))
+    (literal value))
+  (with-standard-io-syntax
+    (let ((*package* (find-package "KEYWORD"))) (prin1-to-string value))))
+
+(defun development-data-digest (value)
+  (ironclad:byte-array-to-hex-string
+   (ironclad:digest-sequence
+    :sha256 (sb-ext:string-to-octets (development-canonical-string value) :external-format :utf-8))))
+
+(defun development-plan-inputs (state result source)
+  "Canonical binding inputs, preserving alternative multiplicity but not enumeration order."
+  (list :format "welcome-development-plan-v1" :source source
+        ;; Pinned SHOP3's declared domain reader; no generated problem/tree data.
+        :domain (shop3::domain-items (shop3:find-domain 'welcome-development))
+        :state (sort (mapcar #'development-canonical-string state) #'string<)
+        :tasks '((advance-welcome)) :which :all
+        :alternatives (sort (mapcar #'development-canonical-string
+                                    (dreyeck/shop3:plans-of result)) #'string<)))
+
+(defun plan-assignment-binding (state result source step)
+  "Bind a chosen action to a complete native search; never choose an alternative."
+  (unless (and (eq '!assign (first step))
+               (member (list step) (dreyeck/shop3:plans-of result) :test #'equal))
+    (refuse-record (list :assignment-not-proposed step)))
+  (let ((inputs (development-plan-inputs state result source)))
+    (list :digest (development-data-digest inputs) :step (copy-tree step)
+          :alternative-id (development-data-digest (list "welcome-development-action-v1" step))
+          :inputs inputs)))
+
+(defun assignment-proposal-binding (records step)
+  "Validate prior history and ask SHOP3 for the binding of this explicitly chosen !ASSIGN.
+Return binding and native planning result; this does not append/execute an assignment."
+  (let* ((state (development-state records))
+         (source (record-source (first (accepted-records records))))
+         (result (plan-development-state state)))
+    (values (plan-assignment-binding state result source step) result)))
+
 (defun development-workflow (records)
   "One read-only planning cycle, with records and every native alternative retained."
-  (let ((state (development-state records)))
-    (make-instance 'development-run :records (copy-list records)
-                   :initial-state state :result (plan-development-state state))))
+  (multiple-value-bind (state validations) (development-state records)
+    (let ((result (plan-development-state state)))
+      (make-instance 'development-run :records (copy-list records)
+                     :initial-state state :result result :assignment-validations validations
+                     :alternatives (result-next-action-view result)))))
 
 (defun welcome-development-plan (records)
   "Return the existing native result, never a selected plan or an executed action."
@@ -96,10 +146,10 @@
     (!report-complete :complete)
     (otherwise (refuse-record :unknown-development-operator))))
 
-(defun development-next-action-view (source)
+(defun result-next-action-view (result)
   "Interpret every alternative locally. Reports/waits are not development assignments.
 No shared plan-step normalizer, default selection, callbacks or execution controls."
-  (let ((result (if (typep source 'development-run) (development-plan-result source) source)))
+  (progn
     (check-type result dreyeck/shop3:hyperdoc-htn-plan-result)
     (unless (eq :plan-only (dreyeck/shop3:execution-mode-of result))
       (refuse-record :plan-only-required))
@@ -117,7 +167,15 @@ No shared plan-step normalizer, default selection, callbacks or execution contro
                     (list :index index :classification (action-classification (caar plan))
                           :step (first plan) :plan plan :plan-tree tree :final-state state
                           :assignment-proposal-p (eq '!assign (caar plan))
+                          :alternative-id (development-data-digest
+                                           (list "welcome-development-action-v1" (first plan)))
                           :execution :not-executed)))))
+
+(defun development-next-action-view (source)
+  "Return the run's retained alternatives, shared by all Inspector/Topicmap projections.
+A bare native result remains supported without claiming a cross-view identity cache."
+  (if (typep source 'development-run) (development-alternatives source)
+      (result-next-action-view source)))
 
 (defun development-outcome (source)
   "Overall display priority: actionable, awaiting, blocked, complete; all choices remain visible."

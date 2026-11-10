@@ -54,6 +54,8 @@ including typed record values carried by workspace-operation invocations.
 * Assignments retain base, executor, branch, allowed paths, required tests and
   markers, forbidden actions and source plan digest/step. Attempts are counted
   from distinct assignment records, not supplied counter facts.
+  Each assignment is now also bound to the native proposal produced from its
+  validated journal prefix; see the correction notes below.
 * Submissions produce claims only. Free text has no planning authority.
 * Verification requires a distinct named verifier, explicit independence,
   commit/base/tree identity, ancestry, full base-to-commit changed-file scope,
@@ -62,7 +64,9 @@ including typed record values carried by workspace-operation invocations.
   syscall-trace metadata is refused. Environment limits are retained.
 * Reviews retain reviewer, commit, decision, findings and review digest. The
   reviewer must be permitted and different from the implementer, including
-  other assignments claiming that same slice/commit.
+  other assignments claiming that same slice/commit. The commit must have been
+  submitted for that assignment, and a positive review requires a matching,
+  successful verification already present in the journal.
 * Opposite verification/review decisions are refused for the same assignment
   and commit, and also across assignments for the same slice/commit, because
   SHOP3 joins on that coordinate. Duplicate IDs and duplicate property keys
@@ -101,6 +105,51 @@ Replanning reconstructs state solely from records. Passing a plan, raw facts or
 a previous simulated final state is refused. P2b's `planned-*` injection is
 refused rather than silently promoted or reused. No simulated effect counts as
 a verified slice, review, assignment or integration record.
+
+### Assignment proposal binding (F1/F2)
+
+Records form an **ordered journal**, starting with policy. `development-state`
+validates every prefix. Immediately before admitting each assignment, it runs
+the actual `(advance-welcome)` task on the preceding validated record state.
+The recorded `!assign` step, including its base, must be among all native
+alternatives. Later records cannot authorize an earlier assignment. An open
+assignment, premature S3 work or an S2 base different from S1's accepted commit
+is refused by this planner membership check.
+
+`assignment-proposal-binding` takes prior records and an explicitly chosen
+`!assign` step. It returns the binding and native result, without assigning or
+executing anything. Fixtures use this same entry point. Its versioned SHA-256
+digest covers provenance, the pinned domain's literal items, sorted canonical
+facts, tasks, `:which :all` and all alternatives (sorted, preserving multiplicity).
+Serialization uses literal Lisp data under standard printer settings and a
+fixed package; objects and uninterned symbols are refused. Problem gensyms,
+timing, trees, states-as-objects and enumeration indices are excluded.
+
+The source plan retains `:digest`, `:step`, `:alternative-id` and canonical
+`:inputs`; all are checked against the fresh search. `:alternative-id` is a
+content hash of the chosen step, so it survives alternative enumeration changes.
+The returned native result keeps the planner's original order and every plan.
+
+There is no recursive validation/planning cycle: the content projector does not
+call the planner or history validator; the history validator calls that
+projector and the state-only native runner. The public binding helper validates
+the *earlier* journal before issuing a new binding. `development-state` returns
+an audit list as its second value, also retained as
+`development-assignment-validations` in the run. Each entry links the original
+assignment, prior records/state, native result and binding. Inspector and
+Topicmap expose these validations. A run also retains its alternative objects,
+so repeated views and projections share those objects by EQ (F4).
+
+### Git compatibility (F5)
+
+The repository observation checks require **Git 2.44 or newer**. They reuse the
+existing `dreyeck/git` runner, which supplies global `--no-lazy-fetch` to prevent
+implicit promisor fetches during local object inspection. Older Git versions
+can reject this option before W1's observation logic runs. That is a runtime
+compatibility limitation, not evidence of a W1 planning defect. Do not drop the
+flag or fetch objects as a fallback. State the installed version and limitation;
+run the checks again in a supported environment. The correction suite ran with
+Git 2.52.0. Linux/macOS platform and live-Inspector limitations below still apply.
 
 ## Reproduce and inspect
 
@@ -166,7 +215,11 @@ After a source update, reload only the owning system with
 `(asdf:load-system "dreyeck/work/welcome-development" :force t)` and recreate
 the run from records. Do not feed its modeled final states into another cycle.
 
-## Executed results, 10 November 2026
+## Executed results
+
+The [post-review correction report](corrections/README.md) records F1–F5, the
+reviewed-commit reproductions, and the current test run. The original W1 run is
+retained separately in `evidence/`.
 
 Pinned SHOP3 `ce53f9b651acde8c44dc21eddb1a1c5b97f10536`, version 4.3.1,
 SBCL 2.4.10 on Linux. These are fresh executed observations, not the design's
@@ -179,13 +232,13 @@ claimed executions.
 | P2 | verify S1 claim, no S2 | actionable |
 | P3 | request independent S1 review | actionable |
 | P4 | propose S1 integration **and** assign S2 | actionable |
-| P4b | mismatched review commit; request S1 review | actionable |
+| P4b | unsubmitted review commit refused (F3) | invalid input |
 | P5 | assign S2 | actionable |
 | P6 | assign S1 to untried Claude Code | actionable |
 | P7 | attempts exhausted | blocked |
 | P8 | no alternative S2 executor | blocked |
 | P9 | no eligible independent reviewer | blocked |
-| P10 | verify S1 only, ignoring out-of-order S2 claim | actionable |
+| P10 | premature S2 assignment refused (F1/F2) | invalid input |
 | P11 | propose S1 integration, propose S2 integration, assign S3 | actionable |
 | all four accepted/integrated | report complete | complete |
 
@@ -204,9 +257,10 @@ adapter checks actually ran. The Git adapter separately observed the real
 handoff commit/tree and its two changed documentation paths, then rejected those
 paths under an unrelated scope. This is not evidence of an actual S1–S4 slice.
 
-Actual final command and full output: [evidence/run.md](evidence/run.md),
-[evidence/tests.log](evidence/tests.log). The tested source hashes are in
-[evidence/tested-source.json](evidence/tested-source.json). No dependency was
+The initial run's command/output are retained in [evidence/run.md](evidence/run.md)
+and [evidence/tests.log](evidence/tests.log); they precede these corrections.
+The current run and source hashes are linked from [corrections/README.md](corrections/README.md).
+No dependency was
 downloaded for W1. The available portable dependency set was reused; this does
 not validate the entire current Nix closure. Network namespace isolation and
 whole-process syscall tracing were not performed; the Local-only suite reports
