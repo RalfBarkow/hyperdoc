@@ -1,0 +1,259 @@
+WARNING: System definition file #P"/workspace/tools/nix-portable-data/.nix-portable/nix/store/fdrq5ji4dvm7jj0wzfvxcyr0rwiq2c24-sbcl-cl-who-20241012-git/cl-who.asd" contains definition for system "cl-who-test". Please only define "cl-who" and secondary systems with a name starting with "cl-who/" (e.g. "cl-who/test") in that file.
+; compiling file "/workspace/work/welcome-review-baseline/hyperbook/package.lisp" (written 10 NOV 2026 09:18:09 AM):
+
+; wrote /workspace/work/defederation-fasls/workspace/work/welcome-review-baseline/hyperbook/package-tmpGHU3ALSV.fasl
+; compilation finished in 0:00:00.000
+; compiling file "/workspace/work/welcome-review-baseline/hyperbook/hyperbooks.lisp" (written 10 NOV 2026 09:18:09 AM):
+
+; wrote /workspace/work/defederation-fasls/workspace/work/welcome-review-baseline/hyperbook/hyperbooks-tmpAAURSO1.fasl
+; compilation finished in 0:00:00.011
+; compiling file "/workspace/work/welcome-review-baseline/hyperbook/catalog.lisp" (written 10 NOV 2026 09:18:09 AM):
+
+; wrote /workspace/work/defederation-fasls/workspace/work/welcome-review-baseline/hyperbook/catalog-tmp5GEXGEG5.fasl
+; compilation finished in 0:00:00.012
+; compiling file "/workspace/work/welcome-review-baseline/hyperbook/html-books.lisp" (written 10 NOV 2026 09:18:09 AM):
+
+; wrote /workspace/work/defederation-fasls/workspace/work/welcome-review-baseline/hyperbook/html-books-tmpAR3FSGEY.fasl
+; compilation finished in 0:00:00.003
+; compiling file "/workspace/work/welcome-review-baseline/hyperbook/html-rendering-support.lisp" (written 10 NOV 2026 09:18:09 AM):
+
+; wrote /workspace/work/defederation-fasls/workspace/work/welcome-review-baseline/hyperbook/html-rendering-support-tmpJAIDFZTC.fasl
+; compilation finished in 0:00:00.004
+; compiling file "/workspace/work/welcome-review-baseline/hyperdoc/package.lisp" (written 10 NOV 2026 09:18:09 AM):
+
+; wrote /workspace/work/defederation-fasls/workspace/work/welcome-review-baseline/hyperdoc/package-tmp8V3J6PE9.fasl
+; compilation finished in 0:00:00.000
+; compiling file "/workspace/work/welcome-review-baseline/hyperdoc/core.lisp" (written 10 NOV 2026 09:18:09 AM):
+
+; wrote /workspace/work/defederation-fasls/workspace/work/welcome-review-baseline/hyperdoc/core-tmp9V47YWQF.fasl
+; compilation finished in 0:00:00.027
+; compiling file "/workspace/work/welcome-review-baseline/hyperdoc/links-in-code.lisp" (written 10 NOV 2026 09:18:09 AM):
+
+; wrote /workspace/work/defederation-fasls/workspace/work/welcome-review-baseline/hyperdoc/links-in-code-tmp9BN22RMA.fasl
+; compilation finished in 0:00:00.003
+; compiling file "/workspace/work/welcome-review-baseline/hyperdoc/defining.lisp" (written 10 NOV 2026 09:18:09 AM):
+
+; wrote /workspace/work/defederation-fasls/workspace/work/welcome-review-baseline/hyperdoc/defining-tmp1CXFJSK9.fasl
+; compilation finished in 0:00:00.004
+; compiling file "/workspace/work/welcome-review-baseline/hyperdoc/examples.lisp" (written 10 NOV 2026 09:18:09 AM):
+
+; wrote /workspace/work/defederation-fasls/workspace/work/welcome-review-baseline/hyperdoc/examples-tmpX4BRKI0R.fasl
+; compilation finished in 0:00:00.008
+; compiling file "/workspace/work/welcome-review-baseline/hyperdoc/tools.lisp" (written 10 NOV 2026 09:18:09 AM):
+
+; wrote /workspace/work/defederation-fasls/workspace/work/welcome-review-baseline/hyperdoc/tools-tmpQ371UGST.fasl
+; compilation finished in 0:00:00.011
+; compiling file "/workspace/work/welcome-review-baseline/hyperdoc/hyperdoc.lisp" (written 10 NOV 2026 09:18:09 AM):
+
+; wrote /workspace/work/defederation-fasls/workspace/work/welcome-review-baseline/hyperdoc/hyperdoc-tmp2OWI3Q7U.fasl
+; compilation finished in 0:00:00.000
+
+
+SHOP3 version 4.3.1
+Copyright (C) 2004-2026 SIFT, LLC.
+
+Original SHOP2 code Copyright (C) 2002  University of Maryland.
+
+This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+KIND, either express or implied.  This software is distributed under an
+MPL/GPL/LGPL triple license.  For details, see the software source file.
+; compiling file "/workspace/work/welcome-review-baseline/dreyeck/shop3/package.lisp" (written 10 NOV 2026 09:18:09 AM):
+
+; wrote /workspace/work/defederation-fasls/workspace/work/welcome-review-baseline/dreyeck/shop3/package-tmp9KKTJMYV.fasl
+; compilation finished in 0:00:00.004
+; compiling file "/workspace/work/welcome-review-baseline/dreyeck/shop3/manual-topics.lisp" (written 10 NOV 2026 09:18:09 AM):
+
+; wrote /workspace/work/defederation-fasls/workspace/work/welcome-review-baseline/dreyeck/shop3/manual-topics-tmpJU0JWO19.fasl
+; compilation finished in 0:00:00.039
+; compiling file "/workspace/work/welcome-review-baseline/dreyeck/shop3/plan-objects.lisp" (written 10 NOV 2026 09:18:09 AM):
+
+; file: /workspace/work/welcome-review-baseline/dreyeck/shop3/plan-objects.lisp
+; in: DEFUN %SOURCE->PLAN
+;     'NIL
+;
+; note: deleting unreachable code
+
+
+; wrote /workspace/work/defederation-fasls/workspace/work/welcome-review-baseline/dreyeck/shop3/plan-objects-tmpZX2WN8N4.fasl
+; compilation finished in 0:00:00.011
+; compiling file "/workspace/work/welcome-review-baseline/dreyeck/shop3/examples.lisp" (written 10 NOV 2026 09:18:09 AM):
+
+; wrote /workspace/work/defederation-fasls/workspace/work/welcome-review-baseline/dreyeck/shop3/examples-tmpOU81XRV0.fasl
+; compilation finished in 0:00:00.008
+; compiling file "/workspace/work/welcome-review-baseline/dreyeck/shop3/views.lisp" (written 10 NOV 2026 09:18:09 AM):
+
+; wrote /workspace/work/defederation-fasls/workspace/work/welcome-review-baseline/dreyeck/shop3/views-tmpY2ML9CFA.fasl
+; compilation finished in 0:00:00.004
+; compiling file "/workspace/work/welcome-review-baseline/dreyeck/src/topicmap-package.lisp" (written 10 NOV 2026 09:18:09 AM):
+
+; wrote /workspace/work/defederation-fasls/workspace/work/welcome-review-baseline/dreyeck/src/topicmap-package-tmpX2JYJDQE.fasl
+; compilation finished in 0:00:00.004
+; compiling file "/workspace/work/welcome-review-baseline/dreyeck/src/topicmap.lisp" (written 10 NOV 2026 09:18:09 AM):
+
+; wrote /workspace/work/defederation-fasls/workspace/work/welcome-review-baseline/dreyeck/src/topicmap-tmpOPCILR65.fasl
+; compilation finished in 0:00:00.047
+; compiling file "/workspace/work/welcome-review-baseline/dreyeck/src/asdf-source-package.lisp" (written 10 NOV 2026 09:18:09 AM):
+
+; wrote /workspace/work/defederation-fasls/workspace/work/welcome-review-baseline/dreyeck/src/asdf-source-package-tmpRV9F8A9A.fasl
+; compilation finished in 0:00:00.000
+; compiling file "/workspace/work/welcome-review-baseline/dreyeck/src/asdf-source.lisp" (written 10 NOV 2026 09:18:09 AM):
+
+; wrote /workspace/work/defederation-fasls/workspace/work/welcome-review-baseline/dreyeck/src/asdf-source-tmpK2ZAJT4I.fasl
+; compilation finished in 0:00:00.043
+; compiling file "/workspace/work/welcome-review-baseline/dreyeck/src/git-package.lisp" (written 10 NOV 2026 09:18:09 AM):
+
+; wrote /workspace/work/defederation-fasls/workspace/work/welcome-review-baseline/dreyeck/src/git-package-tmpUX5S4ADN.fasl
+; compilation finished in 0:00:00.004
+; compiling file "/workspace/work/welcome-review-baseline/dreyeck/src/git-repository-checkout.lisp" (written 10 NOV 2026 09:18:09 AM):
+
+; wrote /workspace/work/defederation-fasls/workspace/work/welcome-review-baseline/dreyeck/src/git-repository-checkout-tmp10401X32.fasl
+; compilation finished in 0:00:00.004
+; compiling file "/workspace/work/welcome-review-baseline/dreyeck/src/git-commit-inspection.lisp" (written 10 NOV 2026 09:18:09 AM):
+
+; wrote /workspace/work/defederation-fasls/workspace/work/welcome-review-baseline/dreyeck/src/git-commit-inspection-tmpZ7CBRM0G.fasl
+; compilation finished in 0:00:00.031
+; compiling file "/workspace/work/welcome-review-baseline/dreyeck/src/git-local-availability.lisp" (written 10 NOV 2026 09:18:09 AM):
+
+; wrote /workspace/work/defederation-fasls/workspace/work/welcome-review-baseline/dreyeck/src/git-local-availability-tmp9OZEQ0G2.fasl
+; compilation finished in 0:00:00.011
+; compiling file "/workspace/work/welcome-review-baseline/dreyeck/src/git-revision-reference.lisp" (written 10 NOV 2026 09:18:09 AM):
+
+; wrote /workspace/work/defederation-fasls/workspace/work/welcome-review-baseline/dreyeck/src/git-revision-reference-tmpB2JTL1W9.fasl
+; compilation finished in 0:00:00.011
+; compiling file "/workspace/work/welcome-review-baseline/dreyeck/src/git-source-slice.lisp" (written 10 NOV 2026 09:18:09 AM):
+
+; wrote /workspace/work/defederation-fasls/workspace/work/welcome-review-baseline/dreyeck/src/git-source-slice-tmpP3BI68WQ.fasl
+; compilation finished in 0:00:00.012
+; compiling file "/workspace/work/welcome-review-baseline/dreyeck/src/git-repository-topicmap.lisp" (written 10 NOV 2026 09:18:09 AM):
+
+; wrote /workspace/work/defederation-fasls/workspace/work/welcome-review-baseline/dreyeck/src/git-repository-topicmap-tmpQDARA81Z.fasl
+; compilation finished in 0:00:00.007
+; compiling file "/workspace/work/welcome-review-baseline/dreyeck/src/git-asdf-references.lisp" (written 10 NOV 2026 09:18:09 AM):
+
+; wrote /workspace/work/defederation-fasls/workspace/work/welcome-review-baseline/dreyeck/src/git-asdf-references-tmpYEMMM7SE.fasl
+; compilation finished in 0:00:00.020
+; compiling file "/workspace/work/welcome-review-baseline/dreyeck/src/git-asdf-reference-topicmap.lisp" (written 10 NOV 2026 09:18:09 AM):
+
+; wrote /workspace/work/defederation-fasls/workspace/work/welcome-review-baseline/dreyeck/src/git-asdf-reference-topicmap-tmp73HU0RPK.fasl
+; compilation finished in 0:00:00.043
+; compiling file "/workspace/work/welcome-review-baseline/dreyeck/src/evaluation-record-package.lisp" (written 10 NOV 2026 09:18:09 AM):
+
+; wrote /workspace/work/defederation-fasls/workspace/work/welcome-review-baseline/dreyeck/src/evaluation-record-package-tmpIO5N7K88.fasl
+; compilation finished in 0:00:00.000
+; compiling file "/workspace/work/welcome-review-baseline/dreyeck/src/evaluation-record.lisp" (written 10 NOV 2026 09:18:09 AM):
+
+; wrote /workspace/work/defederation-fasls/workspace/work/welcome-review-baseline/dreyeck/src/evaluation-record-tmpCM21U60Z.fasl
+; compilation finished in 0:00:00.004
+; compiling file "/workspace/work/welcome-review-baseline/dreyeck/src/workspace-operation-package.lisp" (written 10 NOV 2026 09:18:09 AM):
+
+; wrote /workspace/work/defederation-fasls/workspace/work/welcome-review-baseline/dreyeck/src/workspace-operation-package-tmp9DT7SEFG.fasl
+; compilation finished in 0:00:00.000
+; compiling file "/workspace/work/welcome-review-baseline/dreyeck/src/workspace-operation.lisp" (written 10 NOV 2026 09:18:09 AM):
+
+; wrote /workspace/work/defederation-fasls/workspace/work/welcome-review-baseline/dreyeck/src/workspace-operation-tmp8065ESJT.fasl
+; compilation finished in 0:00:00.004
+; compiling file "/workspace/work/welcome-review-baseline/dreyeck/src/evaluation-record-workspace-operation.lisp" (written 10 NOV 2026 09:18:09 AM):
+
+; wrote /workspace/work/defederation-fasls/workspace/work/welcome-review-baseline/dreyeck/src/evaluation-record-workspace-operation-tmp7S8Z6FGF.fasl
+; compilation finished in 0:00:00.007
+;;; Computing Hangul syllable namesSTYLE-WARNING:
+   The new FTYPE proclamation for FSET::VECTOR-SET-BINARY-SEARCH-LO
+     (FUNCTION (SIMPLE-VECTOR T) FIXNUM)
+   does not match the derived return type
+     (FUNCTION (SIMPLE-VECTOR T)
+      (VALUES (INTEGER -4611686018427387904 4611686018427387904) &OPTIONAL))
+STYLE-WARNING:
+   The new FTYPE proclamation for FSET::WB-BAG-TREE-TOTAL-COUNT
+     (FUNCTION (FSET::WB-BAG-TREE) INTEGER)
+   does not match the derived return type
+     (FUNCTION ((OR LIST FSET::WB-BAG-TREE-NODE)) *)
+STYLE-WARNING:
+   The new FTYPE proclamation for FSET::HASH-VALUE-FIXNUM
+     (FUNCTION (T) FIXNUM)
+   does not match the derived return type
+     (FUNCTION (T) (VALUES INTEGER &OPTIONAL))
+STYLE-WARNING:
+   The new FTYPE proclamation for FSET::CH-SET-NODE-ENTRY-MASK
+     (FUNCTION (T) FIXNUM)
+   does not match the derived return type
+     (FUNCTION (SIMPLE-VECTOR) (VALUES T &OPTIONAL))
+STYLE-WARNING:
+   The new FTYPE proclamation for FSET::CH-SET-NODE-SUBNODE-MASK
+     (FUNCTION (T) FIXNUM)
+   does not match the derived return type
+     (FUNCTION (SIMPLE-VECTOR) (VALUES T &OPTIONAL))
+STYLE-WARNING:
+   The new FTYPE proclamation for FSET::CH-SET-NODE-SIZE
+     (FUNCTION (T) FIXNUM)
+   does not match the derived return type
+     (FUNCTION (SIMPLE-VECTOR) (VALUES T &OPTIONAL))
+STYLE-WARNING:
+   The new FTYPE proclamation for FSET::CH-SET-NODE-HASH-VALUE
+     (FUNCTION (T) FIXNUM)
+   does not match the derived return type
+     (FUNCTION (SIMPLE-VECTOR) (VALUES T &OPTIONAL))
+STYLE-WARNING:
+   The new FTYPE proclamation for FSET::CH-MAP-NODE-ENTRY-MASK
+     (FUNCTION (T) FIXNUM)
+   does not match the derived return type
+     (FUNCTION (SIMPLE-VECTOR) (VALUES T &OPTIONAL))
+STYLE-WARNING:
+   The new FTYPE proclamation for FSET::CH-MAP-NODE-SUBNODE-MASK
+     (FUNCTION (T) FIXNUM)
+   does not match the derived return type
+     (FUNCTION (SIMPLE-VECTOR) (VALUES T &OPTIONAL))
+STYLE-WARNING:
+   The new FTYPE proclamation for FSET::CH-MAP-NODE-SIZE
+     (FUNCTION (T) FIXNUM)
+   does not match the derived return type
+     (FUNCTION (SIMPLE-VECTOR) (VALUES T &OPTIONAL))
+STYLE-WARNING:
+   The new FTYPE proclamation for FSET::CH-MAP-NODE-HASH-VALUE
+     (FUNCTION (T) FIXNUM)
+   does not match the derived return type
+     (FUNCTION (SIMPLE-VECTOR) (VALUES T &OPTIONAL))
+STYLE-WARNING:
+   Generic function FSET:ITERATOR clobbers an earlier FTYPE proclamation
+   (FUNCTION (T &KEY &ALLOW-OTHER-KEYS) (VALUES FUNCTION &REST T)) for the same
+   name with (FUNCTION (T &KEY &ALLOW-OTHER-KEYS) *).
+STYLE-WARNING:
+   The new FTYPE proclamation for SWANK/BACKEND:GETPID
+     (FUNCTION NIL (VALUES (SIGNED-BYTE 32) &OPTIONAL))
+   does not match the derived return type
+     (FUNCTION NIL *)
+WARNING:
+   redefining EMACS-INSPECT (#<SB-PCL:SYSTEM-CLASS COMMON-LISP:T>) in DEFMETHOD
+WARNING:
+   redefining 👀PRINT-STRING (#<SB-PCL:SYSTEM-CLASS COMMON-LISP:T>) in DEFMETHOD
+WARNING: redefining IRONCLAD:BLOCK-LENGTH in DEFGENERIC
+
+; compiling file "/workspace/work/welcome-review-baseline/dreyeck/work/welcome-development-package.lisp" (written 10 NOV 2026 09:18:09 AM):
+
+; wrote /workspace/work/defederation-fasls/workspace/work/welcome-review-baseline/dreyeck/work/welcome-development-package-tmpSIT3QPKP.fasl
+; compilation finished in 0:00:00.004
+; compiling file "/workspace/work/welcome-review-baseline/dreyeck/work/welcome-development-records.lisp" (written 10 NOV 2026 09:18:09 AM):
+
+; wrote /workspace/work/defederation-fasls/workspace/work/welcome-review-baseline/dreyeck/work/welcome-development-records-tmpE0PA0714.fasl
+; compilation finished in 0:00:00.083
+; compiling file "/workspace/work/welcome-review-baseline/dreyeck/work/welcome-development.lisp" (written 10 NOV 2026 09:18:09 AM):
+
+; wrote /workspace/work/defederation-fasls/workspace/work/welcome-review-baseline/dreyeck/work/welcome-development-tmpJRWHHVG0.fasl
+; compilation finished in 0:00:00.015
+
+Defining domain WELCOME-DEVELOPMENT...
+; compiling file "/workspace/work/welcome-review-baseline/dreyeck/work/welcome-development-examples.lisp" (written 10 NOV 2026 09:18:09 AM):
+
+; wrote /workspace/work/defederation-fasls/workspace/work/welcome-review-baseline/dreyeck/work/welcome-development-examples-tmp4WZVROCX.fasl
+; compilation finished in 0:00:00.019
+; compiling file "/workspace/work/welcome-review-baseline/dreyeck/work/welcome-development-views.lisp" (written 10 NOV 2026 09:18:09 AM):
+
+; wrote /workspace/work/defederation-fasls/workspace/work/welcome-review-baseline/dreyeck/work/welcome-development-views-tmpA0I3UKX8.fasl
+; compilation finished in 0:00:00.071
+;
+; compilation unit finished
+;   printed 1 note
+REVIEWED-COMMIT B1-FORGED-DIGEST ACCEPTED (invalid record admitted): 23 facts
+REVIEWED-COMMIT B2-WRONG-S2-BASE ACCEPTED (invalid record admitted): 27 facts
+REVIEWED-COMMIT B3-PREMATURE-S3 ACCEPTED (invalid record admitted): 23 facts
+REVIEWED-COMMIT B4-OPEN-ASSIGNMENT ACCEPTED (invalid record admitted): 24 facts
+REVIEWED-COMMIT B5-UNCLAIMED-REVIEW ACCEPTED (invalid record admitted): 26 facts

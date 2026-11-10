@@ -3668,3 +3668,23 @@
              (declare (ignore op component))
              (uiop:symbol-call :dreyeck/work/fedwiki-local-only/tests :run-tests)
              (uiop:symbol-call :dreyeck/work/fedwiki-local-only/tests :run-input-tests)))
+
+(defsystem "dreyeck/work/welcome-development"
+  :description "Opt-in W1 development proposals from accepted records; no executor"
+  :depends-on ("dreyeck/shop3" "dreyeck/git"
+               "dreyeck/evaluation-record/workspace-operation"
+               "html-inspector-views/standard" "ironclad")
+  :serial t
+  :components ((:file "dreyeck/work/welcome-development-package")
+               (:file "dreyeck/work/welcome-development-records")
+               (:file "dreyeck/work/welcome-development")
+               (:file "dreyeck/work/welcome-development-examples")
+               (:file "dreyeck/work/welcome-development-views"))
+  :in-order-to ((test-op (test-op "dreyeck/work/welcome-development/tests"))))
+
+(defsystem "dreyeck/work/welcome-development/tests"
+  :depends-on ("dreyeck/work/welcome-development")
+  :components ((:file "dreyeck/tests/welcome-development"))
+  :perform (test-op (op component)
+             (declare (ignore op component))
+             (uiop:symbol-call :dreyeck/work/welcome-development :run-tests)))
