@@ -1,0 +1,23 @@
+{
+  "reviewed_head": "ee05cddcbe0d5ba0db33494fee808946016a6e34",
+  "branch": "codex/11570-w1-welcome-development",
+  "shop3_commit": "ce53f9b651acde8c44dc21eddb1a1c5b97f10536",
+  "git": "git version 2.52.0",
+  "baseline_exit": 0,
+  "combined_tests_exit": 0,
+  "records": "explicit fixtures",
+  "files": {
+    "dreyeck.asd": "37b3e3a4488fae896cb591bda30bf271b7485ee41e5c7a39cab467dbfa5b960e",
+    "scripts/test-welcome-development.lisp": "4175c87be040b9be4daf570821f4f4641a3c60732859b0e106302a88e51f90fe",
+    "dreyeck/tests/welcome-development.lisp": "107e7dbc02075ddc0f696266616b577f3157fa436dceba329bddd73973d2ff8c",
+    "dreyeck/work/welcome-development-examples.lisp": "a90a199f74c0801f8829fc554e8ac45af2b3c8f98ef0272532788be2c4be8bae",
+    "dreyeck/work/welcome-development-package.lisp": "4a4f56b11270a764ef7bf281578b1b2d0d5dbd381f89cc650f329fd43dae26eb",
+    "dreyeck/work/welcome-development-records.lisp": "fc88147144ddf562aae47c0b238fd374996cd7b6be89fb114f1eae3b886f5155",
+    "dreyeck/work/welcome-development-views.lisp": "8c54c1a93f3121c37b719795066afc23c6a06c394f096837b28881aa4369b6f9",
+    "dreyeck/work/welcome-development.lisp": "5863b374642be227b4284692cee847bd697b7c7cd60047b52cb8b2714c3dfb9f"
+  },
+  "logs": {
+    "reviewed-probes.log": "8376031b7c8c0cced685dfa9be9ef73bcdbfdfc817d89ff8fa76b28359a7fad8",
+    "tests.log": "6a5359e6d7471aa86797ee41fcc38924c51f7b07ade1f1f0e98c347f9bc1e130"
+  }
+}

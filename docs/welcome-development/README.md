@@ -56,7 +56,12 @@ including typed record values carried by workspace-operation invocations.
   from distinct assignment records, not supplied counter facts.
   Each assignment is now also bound to the native proposal produced from its
   validated journal prefix; see the correction notes below.
-* Submissions produce claims only. Free text has no planning authority.
+* Submissions produce claims only. Before admitting one, journal replay runs
+  the existing planner on the preceding validated state and requires the exact
+  `(!await-submission slice assignment executor)` alternative. Otherwise it
+  refuses with `:submission-not-proposed`. A claimed, accepted or closed
+  assignment cannot receive another claim; later verification/review records
+  cannot authorize one retroactively. Free text has no planning authority.
 * Verification requires a distinct named verifier, explicit independence,
   commit/base/tree identity, ancestry, full base-to-commit changed-file scope,
   required test records, zero exits, passed verdicts, required markers, log
@@ -217,9 +222,10 @@ the run from records. Do not feed its modeled final states into another cycle.
 
 ## Executed results
 
-The [post-review correction report](corrections/README.md) records F1–F5, the
-reviewed-commit reproductions, and the current test run. The original W1 run is
-retained separately in `evidence/`.
+The [submission-proposal correction report](corrections/submission-proposals/README.md)
+records the current run and C1–C3 reproductions. The earlier
+[F1–F5 correction report](corrections/README.md) retains its original evidence
+and Claude/Codex label correspondence. The original W1 run remains in `evidence/`.
 
 Pinned SHOP3 `ce53f9b651acde8c44dc21eddb1a1c5b97f10536`, version 4.3.1,
 SBCL 2.4.10 on Linux. These are fresh executed observations, not the design's
@@ -259,7 +265,8 @@ paths under an unrelated scope. This is not evidence of an actual S1–S4 slice.
 
 The initial run's command/output are retained in [evidence/run.md](evidence/run.md)
 and [evidence/tests.log](evidence/tests.log); they precede these corrections.
-The current run and source hashes are linked from [corrections/README.md](corrections/README.md).
+The current run and source hashes are linked from
+[corrections/submission-proposals/README.md](corrections/submission-proposals/README.md).
 No dependency was
 downloaded for W1. The available portable dependency set was reused; this does
 not validate the entire current Nix closure. Network namespace isolation and

@@ -294,7 +294,7 @@ Only DEVELOPMENT-STATE publishes a state after validating assignment history."
     (nreverse (remove-duplicates facts :test #'equal))))
 
 (defun development-state (entries)
-  "Replay the ordered record journal, validating each assignment against SHOP3.
+  "Replay the ordered record journal, checking assignments and submissions against SHOP3.
 Return the state and inspectable assignment validations as a second value.
 Projection never calls this function or the planner: there is no circular path."
   (let ((records (accepted-records entries)) (prefix nil) (state nil) (validations nil))
@@ -314,6 +314,12 @@ Projection never calls this function or the planner: there is no circular path."
           (push (list :assignment record :prior-records (copy-list prefix)
                       :prior-state (copy-tree state) :planning-result result :binding binding)
                 validations)))
+      (when (typep record 'dev-submission)
+        (let* ((result (plan-development-state state))
+               (step `(!await-submission ,(data record :slice)
+                                         ,(data record :assignment) ,(data record :executor))))
+          (unless (member (list step) (dreyeck/shop3:plans-of result) :test #'equal)
+            (refuse-record :submission-not-proposed))))
       (setf prefix (append prefix (list record))
             state (project-development-records prefix)))
     (unless records (refuse-record :one-policy-required))
