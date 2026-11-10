@@ -1,0 +1,192 @@
+WARNING: System definition file #P"/workspace/tools/nix-portable-data/.nix-portable/nix/store/fdrq5ji4dvm7jj0wzfvxcyr0rwiq2c24-sbcl-cl-who-20241012-git/cl-who.asd" contains definition for system "cl-who-test". Please only define "cl-who" and secondary systems with a name starting with "cl-who/" (e.g. "cl-who/test") in that file.
+
+
+SHOP3 version 4.3.1
+Copyright (C) 2004-2026 SIFT, LLC.
+
+Original SHOP2 code Copyright (C) 2002  University of Maryland.
+
+This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+KIND, either express or implied.  This software is distributed under an
+MPL/GPL/LGPL triple license.  For details, see the software source file.
+;;; Computing Hangul syllable namesSTYLE-WARNING:
+   The new FTYPE proclamation for FSET::VECTOR-SET-BINARY-SEARCH-LO
+     (FUNCTION (SIMPLE-VECTOR T) FIXNUM)
+   does not match the derived return type
+     (FUNCTION (SIMPLE-VECTOR T)
+      (VALUES (INTEGER -4611686018427387904 4611686018427387904) &OPTIONAL))
+STYLE-WARNING:
+   The new FTYPE proclamation for FSET::WB-BAG-TREE-TOTAL-COUNT
+     (FUNCTION (FSET::WB-BAG-TREE) INTEGER)
+   does not match the derived return type
+     (FUNCTION ((OR LIST FSET::WB-BAG-TREE-NODE)) *)
+STYLE-WARNING:
+   The new FTYPE proclamation for FSET::HASH-VALUE-FIXNUM
+     (FUNCTION (T) FIXNUM)
+   does not match the derived return type
+     (FUNCTION (T) (VALUES INTEGER &OPTIONAL))
+STYLE-WARNING:
+   The new FTYPE proclamation for FSET::CH-SET-NODE-ENTRY-MASK
+     (FUNCTION (T) FIXNUM)
+   does not match the derived return type
+     (FUNCTION (SIMPLE-VECTOR) (VALUES T &OPTIONAL))
+STYLE-WARNING:
+   The new FTYPE proclamation for FSET::CH-SET-NODE-SUBNODE-MASK
+     (FUNCTION (T) FIXNUM)
+   does not match the derived return type
+     (FUNCTION (SIMPLE-VECTOR) (VALUES T &OPTIONAL))
+STYLE-WARNING:
+   The new FTYPE proclamation for FSET::CH-SET-NODE-SIZE
+     (FUNCTION (T) FIXNUM)
+   does not match the derived return type
+     (FUNCTION (SIMPLE-VECTOR) (VALUES T &OPTIONAL))
+STYLE-WARNING:
+   The new FTYPE proclamation for FSET::CH-SET-NODE-HASH-VALUE
+     (FUNCTION (T) FIXNUM)
+   does not match the derived return type
+     (FUNCTION (SIMPLE-VECTOR) (VALUES T &OPTIONAL))
+STYLE-WARNING:
+   The new FTYPE proclamation for FSET::CH-MAP-NODE-ENTRY-MASK
+     (FUNCTION (T) FIXNUM)
+   does not match the derived return type
+     (FUNCTION (SIMPLE-VECTOR) (VALUES T &OPTIONAL))
+STYLE-WARNING:
+   The new FTYPE proclamation for FSET::CH-MAP-NODE-SUBNODE-MASK
+     (FUNCTION (T) FIXNUM)
+   does not match the derived return type
+     (FUNCTION (SIMPLE-VECTOR) (VALUES T &OPTIONAL))
+STYLE-WARNING:
+   The new FTYPE proclamation for FSET::CH-MAP-NODE-SIZE
+     (FUNCTION (T) FIXNUM)
+   does not match the derived return type
+     (FUNCTION (SIMPLE-VECTOR) (VALUES T &OPTIONAL))
+STYLE-WARNING:
+   The new FTYPE proclamation for FSET::CH-MAP-NODE-HASH-VALUE
+     (FUNCTION (T) FIXNUM)
+   does not match the derived return type
+     (FUNCTION (SIMPLE-VECTOR) (VALUES T &OPTIONAL))
+STYLE-WARNING:
+   Generic function FSET:ITERATOR clobbers an earlier FTYPE proclamation
+   (FUNCTION (T &KEY &ALLOW-OTHER-KEYS) (VALUES FUNCTION &REST T)) for the same
+   name with (FUNCTION (T &KEY &ALLOW-OTHER-KEYS) *).
+STYLE-WARNING:
+   The new FTYPE proclamation for SWANK/BACKEND:GETPID
+     (FUNCTION NIL (VALUES (SIGNED-BYTE 32) &OPTIONAL))
+   does not match the derived return type
+     (FUNCTION NIL *)
+WARNING:
+   redefining EMACS-INSPECT (#<SB-PCL:SYSTEM-CLASS COMMON-LISP:T>) in DEFMETHOD
+WARNING:
+   redefining 👀PRINT-STRING (#<SB-PCL:SYSTEM-CLASS COMMON-LISP:T>) in DEFMETHOD
+WARNING: redefining IRONCLAD:BLOCK-LENGTH in DEFGENERIC
+
+; compiling file "/workspace/work/welcome-w2/dreyeck/work/welcome-development-domain-versions.lisp" (written 10 NOV 2026 02:15:17 PM):
+
+; wrote /workspace/work/defederation-fasls/workspace/work/welcome-w2/dreyeck/work/welcome-development-domain-versions-tmpGHU3ALSV.fasl
+; compilation finished in 0:00:00.095
+; compiling file "/workspace/work/welcome-w2/dreyeck/work/welcome-development-records.lisp" (written 10 NOV 2026 01:23:55 PM):
+
+; wrote /workspace/work/defederation-fasls/workspace/work/welcome-w2/dreyeck/work/welcome-development-records-tmpAAURSO1.fasl
+; compilation finished in 0:00:00.071
+; compiling file "/workspace/work/welcome-w2/dreyeck/work/welcome-development.lisp" (written 10 NOV 2026 01:16:30 PM):
+
+; wrote /workspace/work/defederation-fasls/workspace/work/welcome-w2/dreyeck/work/welcome-development-tmp5GEXGEG5.fasl
+; compilation finished in 0:00:00.035
+
+Defining domain WELCOME-DEVELOPMENT...
+; compiling file "/workspace/work/welcome-w2/dreyeck/work/welcome-development-examples.lisp" (written 10 NOV 2026 12:57:06 PM):
+
+; wrote /workspace/work/defederation-fasls/workspace/work/welcome-w2/dreyeck/work/welcome-development-examples-tmpAR3FSGEY.fasl
+; compilation finished in 0:00:00.019
+; compiling file "/workspace/work/welcome-w2/dreyeck/work/welcome-development-views.lisp" (written 10 NOV 2026 01:10:20 PM):
+
+; wrote /workspace/work/defederation-fasls/workspace/work/welcome-w2/dreyeck/work/welcome-development-views-tmpJAIDFZTC.fasl
+; compilation finished in 0:00:00.075
+; compiling file "/workspace/work/welcome-w2/dreyeck/tests/welcome-development.lisp" (written 10 NOV 2026 12:57:06 PM):
+
+; wrote /workspace/work/defederation-fasls/workspace/work/welcome-w2/dreyeck/tests/welcome-development-tmp8V3J6PE9.fasl
+; compilation finished in 0:00:00.075
+
+Defining domain WELCOME-QUALIFIED-PROBE...
+
+Defining domain WELCOME-UNQUALIFIED-CALL-PROBE...
+
+Defining domain WELCOME-UNQUALIFIED-FORALL-PROBE...
+
+Defining problem WELCOME-QUALIFIED-POSITIVE ...
+
+Defining problem WELCOME-QUALIFIED-NEGATIVE ...
+
+Defining problem WELCOME-UNQUALIFIED-CALL ...
+
+Defining problem WELCOME-UNQUALIFIED-FORALL ...
+; compiling file "/workspace/work/welcome-w2/dreyeck/tests/welcome-domain-versions.lisp" (written 10 NOV 2026 02:10:19 PM):
+
+; wrote /workspace/work/defederation-fasls/workspace/work/welcome-w2/dreyeck/tests/welcome-domain-versions-tmp9V47YWQF.fasl
+; compilation finished in 0:00:00.059
+; compiling file "/workspace/work/welcome-w2/dreyeck/tests/welcome-domain-trust.lisp" (written 10 NOV 2026 02:15:17 PM):
+
+; wrote /workspace/work/defederation-fasls/workspace/work/welcome-w2/dreyeck/tests/welcome-domain-trust-tmp9BN22RMA.fasl
+; compilation finished in 0:00:00.027
+W2 refusal PASS: (:DOMAIN-VERSION-UNTRUSTED
+                  (:DOMAIN-VERSION-UNTRUSTED :NON-PLAIN-CALL-ARGUMENT))
+D1 D PASS: refused before construction; builds=0; cache-clear calls=0; cache/public/problem registry unchanged.
+W2 refusal PASS: (:DOMAIN-VERSION-UNTRUSTED
+                  (:DOMAIN-VERSION-UNTRUSTED :SORT-BY-NOT-SUPPORTED))
+D1 E PASS: refused before construction; builds=0; cache-clear calls=0; cache/public/problem registry unchanged.
+W2 refusal PASS: (:DOMAIN-VERSION-UNTRUSTED
+                  (:DOMAIN-VERSION-UNTRUSTED :NON-PLAIN-CALL-ARGUMENT))
+D1 SPECIAL-VARIABLE PASS: refused before construction; builds=0; cache-clear calls=0; cache/public/problem registry unchanged.
+W2 refusal PASS: (:DOMAIN-VERSION-UNTRUSTED
+                  (:DOMAIN-VERSION-UNTRUSTED :SORT-BY-NOT-SUPPORTED))
+D1 SORT-COMPARISON PASS: refused before construction; builds=0; cache-clear calls=0; cache/public/problem registry unchanged.
+W2 refusal PASS: (:DOMAIN-VERSION-UNTRUSTED
+                  (:DOMAIN-VERSION-UNTRUSTED (:UNSUPPORTED-ATOMIC-FORM :TASK)))
+D1 METHOD-TASK PASS: refused before construction; builds=0; cache-clear calls=0; cache/public/problem registry unchanged.
+W2 refusal PASS: (:DOMAIN-VERSION-UNTRUSTED
+                  (:DOMAIN-VERSION-UNTRUSTED (:UNSUPPORTED-ATOMIC-FORM :TASK)))
+D1 METHOD-TASK-FLAT-CALL PASS: refused before construction; builds=0; cache-clear calls=0; cache/public/problem registry unchanged.
+W2 refusal PASS: (:DOMAIN-VERSION-UNTRUSTED
+                  (:DOMAIN-VERSION-UNTRUSTED :NON-PLAIN-CALL-ARGUMENT))
+D1 SPECIAL-SHOP-VARIABLE PASS: refused before construction; builds=0; cache-clear calls=0; cache/public/problem registry unchanged.
+W2 refusal PASS: (:DOMAIN-VERSION-UNTRUSTED
+                  (:DOMAIN-VERSION-UNTRUSTED :NON-PLAIN-CALL-ARGUMENT))
+D1 UNBOUND-SPECIAL PASS: refused before construction; builds=0; cache-clear calls=0; cache/public/problem registry unchanged.
+W2 refusal PASS: (:DOMAIN-VERSION-UNTRUSTED
+                  (:DOMAIN-VERSION-UNTRUSTED :NON-PLAIN-CALL-ARGUMENT))
+D1 KEYWORD-VARIABLE PASS: refused before construction; builds=0; cache-clear calls=0; cache/public/problem registry unchanged.
+W2 refusal PASS: (:DOMAIN-VERSION-UNTRUSTED
+                  (:DOMAIN-VERSION-UNTRUSTED :NON-PLAIN-CALL-ARGUMENT))
+D1 NESTED-CALL PASS: refused before construction; builds=0; cache-clear calls=0; cache/public/problem registry unchanged.
+W2 refusal PASS: (:DOMAIN-VERSION-UNTRUSTED
+                  (:DOMAIN-VERSION-UNTRUSTED :NON-PLAIN-CALL-ARGUMENT))
+D1 BARE-SYMBOL PASS: refused before construction; builds=0; cache-clear calls=0; cache/public/problem registry unchanged.
+W2 refusal PASS: (:DOMAIN-VERSION-UNTRUSTED
+                  (:DOMAIN-VERSION-UNTRUSTED :NON-PLAIN-CALL-ARGUMENT))
+D1 UNDER-NOT PASS: refused before construction; builds=0; cache-clear calls=0; cache/public/problem registry unchanged.
+W2 refusal PASS: (:DOMAIN-VERSION-UNTRUSTED
+                  (:DOMAIN-VERSION-UNTRUSTED :NON-PLAIN-CALL-ARGUMENT))
+D1 UNDER-OR PASS: refused before construction; builds=0; cache-clear calls=0; cache/public/problem registry unchanged.
+W2 refusal PASS: (:DOMAIN-VERSION-UNTRUSTED
+                  (:DOMAIN-VERSION-UNTRUSTED :NON-PLAIN-CALL-ARGUMENT))
+D1 UNDER-FORALL PASS: refused before construction; builds=0; cache-clear calls=0; cache/public/problem registry unchanged.
+W2 refusal PASS: (:DOMAIN-VERSION-UNTRUSTED
+                  (:DOMAIN-VERSION-UNTRUSTED :NON-FLAT-DOMAIN-TERM))
+D1 NESTED-PREDICATE-TERM PASS: refused before construction; builds=0; cache-clear calls=0; cache/public/problem registry unchanged.
+W2 refusal PASS: (:DOMAIN-VERSION-UNTRUSTED
+                  (:DOMAIN-VERSION-UNTRUSTED
+                   (:UNSUPPORTED-ATOMIC-FORM :EFFECT)))
+D1 EFFECT-CALL PASS: refused before construction; builds=0; cache-clear calls=0; cache/public/problem registry unchanged.
+W2 refusal PASS: (:DOMAIN-VERSION-UNTRUSTED
+                  (:DOMAIN-VERSION-UNTRUSTED :CALL-OUTSIDE-PRECONDITION))
+D1 EFFECT-FORALL-CALL PASS: refused before construction; builds=0; cache-clear calls=0; cache/public/problem registry unchanged.
+W2 refusal PASS: (:DOMAIN-VERSION-UNTRUSTED
+                  (:DOMAIN-VERSION-UNTRUSTED :SORT-BY-NOT-SUPPORTED))
+D1 EFFECT-SORT PASS: refused before construction; builds=0; cache-clear calls=0; cache/public/problem registry unchanged.
+W2 refusal PASS: (:DOMAIN-VERSION-UNTRUSTED
+                  (:DOMAIN-VERSION-UNTRUSTED :NON-PLAIN-CALL-ARGUMENT))
+D1 OPERATOR-PRECONDITION PASS: refused before construction; builds=0; cache-clear calls=0; cache/public/problem registry unchanged.
+W2 refusal PASS: (:DOMAIN-VERSION-UNTRUSTED
+                  (:DOMAIN-VERSION-UNTRUSTED :NON-PLAIN-CALL-ARGUMENT))
+D1 AXIOM-BODY PASS: refused before construction; builds=0; cache-clear calls=0; cache/public/problem registry unchanged.
+D1 W1-61CDEC0 PASS: exact tagged source admitted; two expected S1 assignments, native trees/states and :PLAN-ONLY.

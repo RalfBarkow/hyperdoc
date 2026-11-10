@@ -3692,7 +3692,9 @@
 
 (defsystem "dreyeck/work/welcome-development/domain-version-tests"
   :depends-on ("dreyeck/work/welcome-development/tests")
-  :components ((:file "dreyeck/tests/welcome-domain-versions"))
+  :serial t
+  :components ((:file "dreyeck/tests/welcome-domain-versions")
+               (:file "dreyeck/tests/welcome-domain-trust"))
   :perform (test-op (op component)
              (declare (ignore op component))
              (uiop:symbol-call :dreyeck/work/welcome-development :run-domain-version-tests)))

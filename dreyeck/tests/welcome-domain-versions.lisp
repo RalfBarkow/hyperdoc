@@ -366,6 +366,7 @@
 
 (defun run-domain-version-tests ()
   (let ((*development-domain-debug* t))
+    (run-domain-trust-probes)
     (w2-test-reader) (w2-test-lifecycle) (w2-test-history) (w2-test-bindings)
     (w2-test-provenance (welcome-development-demo :p2))
     (let ((root (uiop:ensure-directory-pathname
