@@ -1,5 +1,9 @@
 # W2 implementation and review entry point
 
+The [D1/D2 review correction](corrections/w2-trust-screen.md) tightens executable
+contexts in the historical-source screen and preserves refusal diagnostics.
+It supersedes the original A7 coverage and records the current full regression run.
+
 W2 implements the accepted [handoff](w2-domain-versions-handoff.md), based on
 `f982619116e33ce61fecd36f26819d62ac53e5fc`. The implementation branch is
 `codex/11570-w2-domain-versions`. It extends the existing optional

@@ -119,3 +119,90 @@ The fixture strings and native item expectations are separately retained; no
 host reader is used on historical text to create attack tags. OS `mktemp`
 allocates a fresh repository, and `unwind-protect` removes it. Native admission
 recomputes each baseline/positive version ID after actual SHOP3 expansion.
+
+## D2: isolated refusal diagnostics
+
+D1 is committed independently as
+`36d2cd8f90ed5207a8a312ecbc0edc4b3c704208`. D2 adds one diagnostic helper and
+separate [reader refusal probes](../../../dreyeck/tests/welcome-domain-reader-refusals.lisp).
+Direct `invalid-development-record` refusals retain their original data instead
+of collapsing to the generic reader-condition class. The helper also unwraps
+Eclector's real `read-time-evaluation-error` original condition. It uses the
+internal `original-condition` accessor inspected in pinned Eclector 0.11.0;
+that is not a claim of compatibility with other Eclector releases. Unknown
+syntax errors still report the Eclector reader-condition class. Structural
+screen refusals keep a single `:domain-version-untrusted` envelope.
+
+The reader's error/warning escape still occurs before any object is admitted.
+No recovery, use-value or intern restart is invoked. A failure-injection probe
+forces Eclector's read-eval state to T to reach the client-level fallback:
+Eclector actually wraps the client's refusal and offers its recover restart.
+The strict reader preserves `:read-time-evaluation`, returns no object and
+invokes no cache-clearing function. Normal production reading still forces
+read-eval NIL. [d2-focused.log](w2-trust-evidence/d2-focused.log) retains the
+exact reason checks and recoverable-condition observation.
+
+## Complete final regression run
+
+Executed with the same prepared SBCL 2.4.10 / SHOP3 4.3.1 / Eclector 0.11.0 / Git
+2.52.0 runtime, using fresh child processes, empty child HOME and a private FASL
+cache seeded from the prepared local dependency cache:
+
+```sh
+DEFEDERATION_REPO=/workspace/work/welcome-w2 \
+W2_SBCL=/workspace/scratch/tmdm-mcp-portable/bin/sbcl \
+W2_BOOTSTRAP=/workspace/work/defederation-bootstrap.lisp \
+W2_LOGS=/workspace/work/w2-trust-final-evidence \
+scripts/audit-welcome-domain-versions.sh
+```
+
+Exit status: **0**. No dependency acquisition occurred. The unchanged audit
+script records the exact individual SBCL flags, source loading, `asdf:test-system`
+entry points, fresh-process comparison, tag snapshots and strace commands.
+Registry bootstrap paths are retained in the original
+[environment-bootstrap.lisp](../w2-evidence/environment-bootstrap.lisp).
+
+| Suite / invariant | Executed result | Evidence |
+|---|---|---|
+| D1 | All 20 tagged negatives refuse before construction; original W1 blob produces both expected assignments. | [acceptance.log](w2-trust-evidence/acceptance.log) |
+| D2 | Exact client reasons preserved; actual wrapped Eclector error/recover restart observed without recovery, returned object or mutation. | acceptance.log; [d2-focused.log](w2-trust-evidence/d2-focused.log) |
+| A1–A13 | PASS, now including the missing evaluated-argument, sorting and task/effect contexts in A7. | acceptance.log; [audit.log](w2-trust-evidence/audit.log) |
+| P0–P11, P4b/P10 refusals, completion | PASS with real SHOP3 and all native alternatives. | [regressions.log](w2-trust-evidence/regressions.log) |
+| F1–F5, C1–C3, record validation, first-submission positives | PASS. C1–C3 remain `:submission-not-proposed`, including later acceptance chains. | regressions.log |
+| Inspector / Topicmap | PASS: retained alternative, version, record and commit EQ links, hypothetical fixture provenance, no buttons/Catalog additions. | regressions.log; acceptance.log; [fixture.log](w2-trust-evidence/fixture.log); [replay.log](w2-trust-evidence/replay.log) |
+| Private domains and L1 | PASS: injected reader/screen/install/id/planner failures and partial problem construction clean up; 100 complete runs + 20 journal builds leave problem registry/current pointer unchanged. | acceptance.log; fixture.log |
+| Defederation / Local-only | Both unchanged regression suites PASS. | regressions.log |
+| Cross-process version/binding identity | PASS; IDs remain identical to accepted W1/W2 behavior. | [identity-1.log](w2-trust-evidence/identity-1.log); [identity-2.log](w2-trust-evidence/identity-2.log) |
+| Syscalls / Git | Fixture: 0 Git exec attempts, 0 network calls. Replay: only `cat-file`, `rev-parse`, `show`, 0 network calls; socket positive control detected. | audit.log; [fixture.strace](w2-trust-evidence/fixture.strace); [replay.strace](w2-trust-evidence/replay.strace); trace-control.strace |
+| Tags | Temporary replay tag refs unchanged. Project tag refs also unchanged before/after the entire run. No project tags created. | tags-before.txt; tags-after.txt; project-tags-before.txt; project-tags-after.txt |
+| Plan-only / boundaries | All returned planning results remain `:PLAN-ONLY`; no alternative selected/executed, no shared SHOP3, Git, Defederation, FedWiki, authority or fork implementation changes. | native-result assertions and source diff |
+
+The raw logs, traces and checksum manifest are retained in
+[w2-trust-evidence](w2-trust-evidence/). The focused D1 log deliberately retains
+its pre-D2 diagnostic shape; the final acceptance log contains the flattened D2
+reasons. The previous W2 A7 vectors passed but were incomplete; the independently
+reproduced D/E attacks establish why that earlier PASS was insufficient.
+
+Runtime limitations remain: network namespace creation is unavailable on this
+host; strace observes zero network calls rather than enforcing network isolation.
+The reader screen is defence in depth for trusted source and current accepted
+records, not a sandbox. A Git tag is not cryptographic authentication and tag
+signatures remain unverified. The planning domain is versioned; current record
+validation and source-screen behavior are not historically replayed. Tests do
+not assert a historically rebuilt or authenticated runtime.
+
+Changed implementation/test paths since the reviewed commit:
+
+- `dreyeck/work/welcome-development-domain-versions.lisp`
+- `dreyeck/tests/welcome-domain-versions.lisp`
+- `dreyeck/tests/welcome-domain-trust.lisp`
+- `dreyeck/tests/welcome-domain-reader-refusals.lisp`
+- `dreyeck.asd`
+
+Documentation adds this report and its evidence and marks the original W2 report
+as superseded for A7. The Inspector entry point remains
+`(inspect (dreyeck/work/welcome-development:welcome-development-demo :p4))`
+after loading the optional ASDF system.
+
+No merge, deployment, service restart, S1 acquisition or agent execution. Stop
+for focused independent Claude Code re-review of draft PR #39.

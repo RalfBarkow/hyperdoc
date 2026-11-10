@@ -1,0 +1,239 @@
+
+
+SHOP3 version 4.3.1
+Copyright (C) 2004-2026 SIFT, LLC.
+
+Original SHOP2 code Copyright (C) 2002  University of Maryland.
+
+This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+KIND, either express or implied.  This software is distributed under an
+MPL/GPL/LGPL triple license.  For details, see the software source file.
+WARNING: System definition file #P"/workspace/tools/nix-portable-data/.nix-portable/nix/store/fdrq5ji4dvm7jj0wzfvxcyr0rwiq2c24-sbcl-cl-who-20241012-git/cl-who.asd" contains definition for system "cl-who-test". Please only define "cl-who" and secondary systems with a name starting with "cl-who/" (e.g. "cl-who/test") in that file.
+;;; Computing Hangul syllable namesSTYLE-WARNING:
+   The new FTYPE proclamation for FSET::VECTOR-SET-BINARY-SEARCH-LO
+     (FUNCTION (SIMPLE-VECTOR T) FIXNUM)
+   does not match the derived return type
+     (FUNCTION (SIMPLE-VECTOR T)
+      (VALUES (INTEGER -4611686018427387904 4611686018427387904) &OPTIONAL))
+STYLE-WARNING:
+   The new FTYPE proclamation for FSET::WB-BAG-TREE-TOTAL-COUNT
+     (FUNCTION (FSET::WB-BAG-TREE) INTEGER)
+   does not match the derived return type
+     (FUNCTION ((OR LIST FSET::WB-BAG-TREE-NODE)) *)
+STYLE-WARNING:
+   The new FTYPE proclamation for FSET::HASH-VALUE-FIXNUM
+     (FUNCTION (T) FIXNUM)
+   does not match the derived return type
+     (FUNCTION (T) (VALUES INTEGER &OPTIONAL))
+STYLE-WARNING:
+   The new FTYPE proclamation for FSET::CH-SET-NODE-ENTRY-MASK
+     (FUNCTION (T) FIXNUM)
+   does not match the derived return type
+     (FUNCTION (SIMPLE-VECTOR) (VALUES T &OPTIONAL))
+STYLE-WARNING:
+   The new FTYPE proclamation for FSET::CH-SET-NODE-SUBNODE-MASK
+     (FUNCTION (T) FIXNUM)
+   does not match the derived return type
+     (FUNCTION (SIMPLE-VECTOR) (VALUES T &OPTIONAL))
+STYLE-WARNING:
+   The new FTYPE proclamation for FSET::CH-SET-NODE-SIZE
+     (FUNCTION (T) FIXNUM)
+   does not match the derived return type
+     (FUNCTION (SIMPLE-VECTOR) (VALUES T &OPTIONAL))
+STYLE-WARNING:
+   The new FTYPE proclamation for FSET::CH-SET-NODE-HASH-VALUE
+     (FUNCTION (T) FIXNUM)
+   does not match the derived return type
+     (FUNCTION (SIMPLE-VECTOR) (VALUES T &OPTIONAL))
+STYLE-WARNING:
+   The new FTYPE proclamation for FSET::CH-MAP-NODE-ENTRY-MASK
+     (FUNCTION (T) FIXNUM)
+   does not match the derived return type
+     (FUNCTION (SIMPLE-VECTOR) (VALUES T &OPTIONAL))
+STYLE-WARNING:
+   The new FTYPE proclamation for FSET::CH-MAP-NODE-SUBNODE-MASK
+     (FUNCTION (T) FIXNUM)
+   does not match the derived return type
+     (FUNCTION (SIMPLE-VECTOR) (VALUES T &OPTIONAL))
+STYLE-WARNING:
+   The new FTYPE proclamation for FSET::CH-MAP-NODE-SIZE
+     (FUNCTION (T) FIXNUM)
+   does not match the derived return type
+     (FUNCTION (SIMPLE-VECTOR) (VALUES T &OPTIONAL))
+STYLE-WARNING:
+   The new FTYPE proclamation for FSET::CH-MAP-NODE-HASH-VALUE
+     (FUNCTION (T) FIXNUM)
+   does not match the derived return type
+     (FUNCTION (SIMPLE-VECTOR) (VALUES T &OPTIONAL))
+STYLE-WARNING:
+   Generic function FSET:ITERATOR clobbers an earlier FTYPE proclamation
+   (FUNCTION (T &KEY &ALLOW-OTHER-KEYS) (VALUES FUNCTION &REST T)) for the same
+   name with (FUNCTION (T &KEY &ALLOW-OTHER-KEYS) *).
+STYLE-WARNING:
+   The new FTYPE proclamation for SWANK/BACKEND:GETPID
+     (FUNCTION NIL (VALUES (SIGNED-BYTE 32) &OPTIONAL))
+   does not match the derived return type
+     (FUNCTION NIL *)
+WARNING:
+   redefining EMACS-INSPECT (#<SB-PCL:SYSTEM-CLASS COMMON-LISP:T>) in DEFMETHOD
+WARNING:
+   redefining 👀PRINT-STRING (#<SB-PCL:SYSTEM-CLASS COMMON-LISP:T>) in DEFMETHOD
+WARNING: redefining IRONCLAD:BLOCK-LENGTH in DEFGENERIC
+
+Defining domain WELCOME-DEVELOPMENT...
+
+Defining domain WELCOME-QUALIFIED-PROBE...
+
+Defining domain WELCOME-UNQUALIFIED-CALL-PROBE...
+
+Defining domain WELCOME-UNQUALIFIED-FORALL-PROBE...
+
+Defining problem WELCOME-QUALIFIED-POSITIVE ...
+
+Defining problem WELCOME-QUALIFIED-NEGATIVE ...
+
+Defining problem WELCOME-UNQUALIFIED-CALL ...
+
+Defining problem WELCOME-UNQUALIFIED-FORALL ...
+W2 refusal PASS: (:DOMAIN-VERSION-UNTRUSTED :NON-PLAIN-CALL-ARGUMENT)
+D1 D PASS: refused before construction; builds=0; cache-clear calls=0; cache/public/problem registry unchanged.
+W2 refusal PASS: (:DOMAIN-VERSION-UNTRUSTED :SORT-BY-NOT-SUPPORTED)
+D1 E PASS: refused before construction; builds=0; cache-clear calls=0; cache/public/problem registry unchanged.
+W2 refusal PASS: (:DOMAIN-VERSION-UNTRUSTED :NON-PLAIN-CALL-ARGUMENT)
+D1 SPECIAL-VARIABLE PASS: refused before construction; builds=0; cache-clear calls=0; cache/public/problem registry unchanged.
+W2 refusal PASS: (:DOMAIN-VERSION-UNTRUSTED :SORT-BY-NOT-SUPPORTED)
+D1 SORT-COMPARISON PASS: refused before construction; builds=0; cache-clear calls=0; cache/public/problem registry unchanged.
+W2 refusal PASS: (:DOMAIN-VERSION-UNTRUSTED (:UNSUPPORTED-ATOMIC-FORM :TASK))
+D1 METHOD-TASK PASS: refused before construction; builds=0; cache-clear calls=0; cache/public/problem registry unchanged.
+W2 refusal PASS: (:DOMAIN-VERSION-UNTRUSTED (:UNSUPPORTED-ATOMIC-FORM :TASK))
+D1 METHOD-TASK-FLAT-CALL PASS: refused before construction; builds=0; cache-clear calls=0; cache/public/problem registry unchanged.
+W2 refusal PASS: (:DOMAIN-VERSION-UNTRUSTED :NON-PLAIN-CALL-ARGUMENT)
+D1 SPECIAL-SHOP-VARIABLE PASS: refused before construction; builds=0; cache-clear calls=0; cache/public/problem registry unchanged.
+W2 refusal PASS: (:DOMAIN-VERSION-UNTRUSTED :NON-PLAIN-CALL-ARGUMENT)
+D1 UNBOUND-SPECIAL PASS: refused before construction; builds=0; cache-clear calls=0; cache/public/problem registry unchanged.
+W2 refusal PASS: (:DOMAIN-VERSION-UNTRUSTED :NON-PLAIN-CALL-ARGUMENT)
+D1 KEYWORD-VARIABLE PASS: refused before construction; builds=0; cache-clear calls=0; cache/public/problem registry unchanged.
+W2 refusal PASS: (:DOMAIN-VERSION-UNTRUSTED :NON-PLAIN-CALL-ARGUMENT)
+D1 NESTED-CALL PASS: refused before construction; builds=0; cache-clear calls=0; cache/public/problem registry unchanged.
+W2 refusal PASS: (:DOMAIN-VERSION-UNTRUSTED :NON-PLAIN-CALL-ARGUMENT)
+D1 BARE-SYMBOL PASS: refused before construction; builds=0; cache-clear calls=0; cache/public/problem registry unchanged.
+W2 refusal PASS: (:DOMAIN-VERSION-UNTRUSTED :NON-PLAIN-CALL-ARGUMENT)
+D1 UNDER-NOT PASS: refused before construction; builds=0; cache-clear calls=0; cache/public/problem registry unchanged.
+W2 refusal PASS: (:DOMAIN-VERSION-UNTRUSTED :NON-PLAIN-CALL-ARGUMENT)
+D1 UNDER-OR PASS: refused before construction; builds=0; cache-clear calls=0; cache/public/problem registry unchanged.
+W2 refusal PASS: (:DOMAIN-VERSION-UNTRUSTED :NON-PLAIN-CALL-ARGUMENT)
+D1 UNDER-FORALL PASS: refused before construction; builds=0; cache-clear calls=0; cache/public/problem registry unchanged.
+W2 refusal PASS: (:DOMAIN-VERSION-UNTRUSTED :NON-FLAT-DOMAIN-TERM)
+D1 NESTED-PREDICATE-TERM PASS: refused before construction; builds=0; cache-clear calls=0; cache/public/problem registry unchanged.
+W2 refusal PASS: (:DOMAIN-VERSION-UNTRUSTED (:UNSUPPORTED-ATOMIC-FORM :EFFECT))
+D1 EFFECT-CALL PASS: refused before construction; builds=0; cache-clear calls=0; cache/public/problem registry unchanged.
+W2 refusal PASS: (:DOMAIN-VERSION-UNTRUSTED :CALL-OUTSIDE-PRECONDITION)
+D1 EFFECT-FORALL-CALL PASS: refused before construction; builds=0; cache-clear calls=0; cache/public/problem registry unchanged.
+W2 refusal PASS: (:DOMAIN-VERSION-UNTRUSTED :SORT-BY-NOT-SUPPORTED)
+D1 EFFECT-SORT PASS: refused before construction; builds=0; cache-clear calls=0; cache/public/problem registry unchanged.
+W2 refusal PASS: (:DOMAIN-VERSION-UNTRUSTED :NON-PLAIN-CALL-ARGUMENT)
+D1 OPERATOR-PRECONDITION PASS: refused before construction; builds=0; cache-clear calls=0; cache/public/problem registry unchanged.
+W2 refusal PASS: (:DOMAIN-VERSION-UNTRUSTED :NON-PLAIN-CALL-ARGUMENT)
+D1 AXIOM-BODY PASS: refused before construction; builds=0; cache-clear calls=0; cache/public/problem registry unchanged.
+D1 W1-61CDEC0 PASS: exact tagged source admitted; two expected S1 assignments, native trees/states and :PLAN-ONLY.
+D2 refusal PASS: (:DOMAIN-VERSION-UNTRUSTED :UNSUPPORTED-DISPATCH-MACRO)
+D2 refusal PASS: (:DOMAIN-VERSION-UNTRUSTED :FOREIGN-PACKAGE)
+D2 refusal PASS: (:DOMAIN-VERSION-UNTRUSTED :SYMBOL-NOT-ALLOWLISTED)
+D2 refusal PASS: (:DOMAIN-VERSION-UNTRUSTED :STRUCTURE)
+D2 refusal PASS: (:DOMAIN-VERSION-UNTRUSTED :FEATURE-EXPRESSION)
+D2 refusal PASS: (:DOMAIN-VERSION-UNTRUSTED :UNSUPPORTED-DISPATCH-MACRO)
+D2 refusal PASS: (:DOMAIN-VERSION-UNTRUSTED :READ-TIME-EVALUATION)
+D2 WRAPPED PASS: real Eclector condition/recover restart observed; client reason preserved; no recovery/object/mutation.
+D2 SYNTAX PASS: (:DOMAIN-VERSION-UNTRUSTED
+                 (:READER-CONDITION ECLECTOR.READER:UNTERMINATED-LIST))
+W2 refusal PASS: (:DOMAIN-VERSION-UNTRUSTED :EVALUATING-LOGICAL-FORM)
+W2 refusal PASS: (:DOMAIN-VERSION-UNTRUSTED :EVALUATING-LOGICAL-FORM)
+W2 refusal PASS: (:DOMAIN-VERSION-UNTRUSTED
+                  (:READER-CONDITION
+                   ECLECTOR.READER:READ-TIME-EVALUATION-INHIBITED))
+W2 refusal PASS: (:DOMAIN-VERSION-UNTRUSTED
+                  (:READER-CONDITION
+                   ECLECTOR.READER:READ-TIME-EVALUATION-INHIBITED))
+W2 refusal PASS: (:DOMAIN-VERSION-UNTRUSTED :FEATURE-EXPRESSION)
+W2 refusal PASS: (:DOMAIN-VERSION-UNTRUSTED :FEATURE-EXPRESSION)
+W2 refusal PASS: (:DOMAIN-VERSION-UNTRUSTED :FEATURE-EXPRESSION)
+W2 refusal PASS: (:DOMAIN-VERSION-UNTRUSTED :FEATURE-EXPRESSION)
+W2 refusal PASS: (:DOMAIN-VERSION-UNTRUSTED :STRUCTURE)
+W2 refusal PASS: (:DOMAIN-VERSION-UNTRUSTED :STRUCTURE)
+W2 refusal PASS: (:DOMAIN-VERSION-UNTRUSTED :NONLITERAL-PLANNING-INPUT)
+W2 refusal PASS: (:DOMAIN-VERSION-UNTRUSTED :NONLITERAL-PLANNING-INPUT)
+W2 refusal PASS: (:DOMAIN-VERSION-UNTRUSTED :UNSUPPORTED-DISPATCH-MACRO)
+W2 refusal PASS: (:DOMAIN-VERSION-UNTRUSTED :UNSUPPORTED-DISPATCH-MACRO)
+W2 refusal PASS: (:DOMAIN-VERSION-UNTRUSTED :FOREIGN-PACKAGE)
+W2 refusal PASS: (:DOMAIN-VERSION-UNTRUSTED :FOREIGN-PACKAGE)
+W2 refusal PASS: (:DOMAIN-VERSION-UNTRUSTED :FOREIGN-PACKAGE)
+W2 refusal PASS: (:DOMAIN-VERSION-UNTRUSTED :FOREIGN-PACKAGE)
+W2 refusal PASS: (:DOMAIN-VERSION-UNTRUSTED :SYMBOL-NOT-ALLOWLISTED)
+W2 refusal PASS: (:DOMAIN-VERSION-UNTRUSTED :SYMBOL-NOT-ALLOWLISTED)
+W2 refusal PASS: (:DOMAIN-VERSION-UNTRUSTED :SYMBOL-NOT-ALLOWLISTED)
+W2 refusal PASS: (:DOMAIN-VERSION-UNTRUSTED :SYMBOL-NOT-ALLOWLISTED)
+W2 refusal PASS: (:DOMAIN-VERSION-UNTRUSTED :EVALUATING-LOGICAL-FORM)
+W2 refusal PASS: (:DOMAIN-VERSION-UNTRUSTED :EVALUATING-LOGICAL-FORM)
+W2 refusal PASS: (:DOMAIN-VERSION-UNTRUSTED :EVALUATING-LOGICAL-FORM)
+W2 refusal PASS: (:DOMAIN-VERSION-UNTRUSTED :EVALUATING-LOGICAL-FORM)
+W2 refusal PASS: (:DOMAIN-VERSION-UNTRUSTED :EVALUATING-LOGICAL-FORM)
+W2 refusal PASS: (:DOMAIN-VERSION-UNTRUSTED :EVALUATING-LOGICAL-FORM)
+W2 refusal PASS: (:DOMAIN-VERSION-UNTRUSTED :EVALUATING-LOGICAL-FORM)
+W2 refusal PASS: (:DOMAIN-VERSION-UNTRUSTED :EVALUATING-LOGICAL-FORM)
+W2 refusal PASS: (:DOMAIN-VERSION-UNTRUSTED :EVALUATING-LOGICAL-FORM)
+W2 refusal PASS: (:DOMAIN-VERSION-UNTRUSTED :EVALUATING-LOGICAL-FORM)
+W2 refusal PASS: (:DOMAIN-VERSION-UNTRUSTED :EVALUATING-LOGICAL-FORM)
+W2 refusal PASS: (:DOMAIN-VERSION-UNTRUSTED :EVALUATING-LOGICAL-FORM)
+W2 refusal PASS: (:DOMAIN-VERSION-UNTRUSTED :NONLITERAL-OPERATOR-COST)
+W2 refusal PASS: (:DOMAIN-VERSION-UNTRUSTED :NONLITERAL-OPERATOR-COST)
+W2 refusal PASS: (:DOMAIN-VERSION-UNTRUSTED :UNSUPPORTED-DISPATCH-MACRO)
+W2 refusal PASS: (:DOMAIN-VERSION-UNTRUSTED :UNSUPPORTED-DISPATCH-MACRO)
+W2 refusal PASS: (:DOMAIN-VERSION-UNTRUSTED :UNSUPPORTED-DISPATCH-MACRO)
+W2 refusal PASS: (:DOMAIN-VERSION-UNTRUSTED :UNSUPPORTED-DISPATCH-MACRO)
+W2 refusal PASS: (:DOMAIN-VERSION-UNTRUSTED :UNSUPPORTED-DISPATCH-MACRO)
+W2 refusal PASS: (:DOMAIN-VERSION-UNTRUSTED :UNSUPPORTED-DISPATCH-MACRO)
+W2 refusal PASS: (:DOMAIN-VERSION-UNTRUSTED :NONLITERAL-PLANNING-INPUT)
+W2 refusal PASS: (:DOMAIN-VERSION-UNTRUSTED :NONLITERAL-PLANNING-INPUT)
+W2 refusal PASS: (:DOMAIN-VERSION-UNTRUSTED :NONLITERAL-PLANNING-INPUT)
+W2 refusal PASS: (:DOMAIN-VERSION-UNTRUSTED :NONLITERAL-PLANNING-INPUT)
+W2 refusal PASS: (:DOMAIN-VERSION-UNTRUSTED :FOREIGN-PACKAGE)
+W2 refusal PASS: (:DOMAIN-VERSION-UNTRUSTED :FOREIGN-PACKAGE)
+W2 refusal PASS: (:DOMAIN-VERSION-UNTRUSTED :ONE-DEFDOMAIN-REQUIRED)
+W2 refusal PASS: (:DOMAIN-VERSION-UNTRUSTED :TRAILING-INPUT)
+A7 PASS: actual W1 source; strict Eclector 0.11.0; recover restart observed, never invoked; no foreign interning/builds.
+W2 refusal PASS: :DOMAIN-VERSION-MISMATCH
+A3/A4 PASS: public registration/properties/dynamic domain preserved, private construction and problem failure cleanup, replay with deleted public domain.
+W2 refusal PASS: (:DOMAIN-VERSION-UNAVAILABLE :EXPLICIT-VERSION-REQUIRED)
+A2/A8 PASS: old journal survives B and cache clear; new binding requires B record; submission uses assignment's A even when B has no await method.
+WELCOME REFUSAL V1-BINDING PASS: :UNSUPPORTED-BINDING-FORMAT
+WELCOME REFUSAL UNKNOWN-VERSION PASS: (:DOMAIN-VERSION-UNAVAILABLE
+                                       :RECORD-MUST-PRECEDE-USE)
+WELCOME REFUSAL LATE-VERSION PASS: (:DOMAIN-VERSION-UNAVAILABLE
+                                    :RECORD-MUST-PRECEDE-USE)
+WELCOME REFUSAL DUPLICATE-VERSION PASS: :DUPLICATE-DOMAIN-VERSION
+WELCOME REFUSAL RECORD-ITEMS PASS: (:DOMAIN-VERSION-UNTRUSTED
+                                    :RECORD-CARRIED-ITEMS)
+WELCOME REFUSAL PLANNER-PIN PASS: :PLANNER-VERSION-MISMATCH
+WELCOME REFUSAL MIXED-VERSIONS PASS: :MIXED-FIXTURE-AND-OBSERVED-RECORDS
+WELCOME REFUSAL SWAPPED-VALID-VERSION PASS: (:ASSIGNMENT-PLAN-BINDING-MISMATCH
+                                             :A1)
+A6 fixture/v2 PASS.
+A11/A12 PASS: :HYPOTHESIZED provenance, EQ version/record/commit references and derived links; current validator non-claim displayed.
+A1 PASS: loaded/git identities equal; two distinct commits same ID; changed axiom different ID.
+W2 refusal PASS: (:DOMAIN-VERSION-UNAVAILABLE
+                  ("rev-parse" "--verify" "--quiet"
+                   "refs/tags/hyperdoc/welcome-development/f342bb4ad3455fac873a56d9a7d817ff35e7ace253527ef7db1068e3759ad315^{commit}"))
+W2 refusal PASS: (:DOMAIN-VERSION-UNAVAILABLE
+                  ("rev-parse" "--verify" "--quiet"
+                   "refs/tags/hyperdoc/welcome-development/f342bb4ad3455fac873a56d9a7d817ff35e7ace253527ef7db1068e3759ad315^{commit}"))
+W2 refusal PASS: (:DOMAIN-VERSION-MISMATCH :TAG-TARGET)
+W2 refusal PASS: (:DOMAIN-VERSION-MISMATCH :BLOB)
+W2 refusal PASS: (:DOMAIN-VERSION-MISMATCH :FORM-DIGEST)
+W2 refusal PASS: (:DOMAIN-VERSION-MISMATCH :CACHED-SOURCE)
+A2/A3 durable Git PASS: tagged A re-read after public B replacement/deletion and cache clear.
+A11/A12 PASS: :OBSERVED provenance, EQ version/record/commit references and derived links; current validator non-claim displayed.
+A5/A6 Git PASS: missing/branch-only/wrong-target refused; both tag kinds accepted; metadata and cached-source forgery refused; refs unchanged.
+W2-REPLAY-FIXTURE /tmp/hyperdoc-w2-UrWaSlRb/ 9cf023911c156b92bd97c903573f5f7f35fada98 f342bb4ad3455fac873a56d9a7d817ff35e7ace253527ef7db1068e3759ad315
+A10 PASS: 100 complete runs + 20 journal builds; unchanged problem registry/current pointer; exactly one distinct cached version.
+W2-IDENTITY f342bb4ad3455fac873a56d9a7d817ff35e7ace253527ef7db1068e3759ad315 1ebd24a84517314b1087526c13e27518f08f85e0b7e9e67f9185a3e7db3adc61
+W2-ALL-PASS: A1–A13 in-image checks; cross-process identity and syscall audit are separate runner modes. No action executed.

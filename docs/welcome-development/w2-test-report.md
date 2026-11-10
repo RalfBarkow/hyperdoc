@@ -1,5 +1,11 @@
 # W2 executed acceptance report
 
+**Review correction:** The original A7 vectors below were incomplete. Independent
+review reproduced admitted executable D/E attacks at `32209c16`. See the
+[D1/D2 correction report and complete rerun](corrections/w2-trust-screen.md) for
+the corrected screen and current evidence. The original logs remain historical
+observations, not proof that the old trust boundary was sound.
+
 Date: 2026-11-10. Base and remote design branch verified at
 `f982619116e33ce61fecd36f26819d62ac53e5fc` before edits; implementation branch
 `codex/11570-w2-domain-versions`. W1's accepted implementation is the parent

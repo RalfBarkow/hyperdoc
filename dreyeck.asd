@@ -3694,7 +3694,8 @@
   :depends-on ("dreyeck/work/welcome-development/tests")
   :serial t
   :components ((:file "dreyeck/tests/welcome-domain-versions")
-               (:file "dreyeck/tests/welcome-domain-trust"))
+               (:file "dreyeck/tests/welcome-domain-trust")
+               (:file "dreyeck/tests/welcome-domain-reader-refusals"))
   :perform (test-op (op component)
              (declare (ignore op component))
              (uiop:symbol-call :dreyeck/work/welcome-development :run-domain-version-tests)))

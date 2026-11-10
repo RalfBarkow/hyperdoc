@@ -256,6 +256,19 @@ networks must stay quoted data; effects cannot introduce executable queries."
           (otherwise (refuse :unsupported-domain-item))))))
   t)
 
+(defun refuse-domain-reader-condition (condition)
+  "Preserve refusal data without recovering an object from a failed read.
+ORIGINAL-CONDITION is an internal accessor audited in pinned Eclector 0.11.0."
+  (cond
+    ((typep condition 'invalid-development-record)
+     (let ((reason (refusal-reason condition)))
+       (if (and (consp reason) (eq :domain-version-untrusted (first reason)))
+           (error condition)
+           (domain-refuse :domain-version-untrusted reason))))
+    ((typep condition 'eclector.reader:read-time-evaluation-error)
+     (refuse-domain-reader-condition (eclector.reader::original-condition condition)))
+    (t (domain-refuse :domain-version-untrusted (list :reader-condition (type-of condition))))))
+
 (defun read-development-domain-form (text)
   "Read only one extracted form. Every reader error/warning escapes without restart recovery."
   (unless (equal "0.11.0" (asdf:component-version (asdf:find-system "eclector")))
@@ -285,14 +298,14 @@ networks must stay quoted data; effects cannot introduce executable queries."
                       '*read-base* 10)) '*read-eval* nil))
                 '*package* (find-package "DREYECK/WORK/WELCOME-DEVELOPMENT"))))))
     (unless (and (consp outcome) (eq :read (first outcome)))
-      (domain-refuse :domain-version-untrusted (list :reader-condition (type-of outcome))))
+      (refuse-domain-reader-condition outcome))
     (let ((form (second outcome)))
       (unless (and (alexandria:proper-list-p form) (= 3 (length form))
                    (eq 'shop3:defdomain (first form))
                    (equal '(welcome-development :noset t) (second form)))
         (domain-refuse :domain-version-untrusted :domain-name-or-options))
       (handler-case (screen-development-domain-items (third form))
-        (invalid-development-record (c) (domain-refuse :domain-version-untrusted (refusal-reason c))))
+        (invalid-development-record (c) (refuse-domain-reader-condition c)))
       (values (third form) '(:passed :w2-v1)))))
 
 (defun development-domain-object (id items)
