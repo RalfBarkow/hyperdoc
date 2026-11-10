@@ -43,21 +43,35 @@ not its position in that order.
 
 ## Negative reproductions and changed fixture expectations
 
-The PR's accessible review/comment endpoints contained no reproduction script.
-The labels below explicitly map the five invalid cases described in the
-correction request; the retained script makes each reproduction unambiguous.
+Claude's original B1–B5 labels are authoritative. The independently retained
+Codex script and logs use a different ordering for B2–B4; the table below makes
+that correspondence explicit. The difference is in labels, not failure
+conditions. Historical script, test names and log labels remain unchanged so
+the retained evidence can be reconciled without rewriting executed results.
+
+The user reports that Claude's original script was retained at
+`/tmp/claude-0/-home-user/ba97d797-59fc-5816-9510-72426787f5b2/scratchpad/w1/review-probes.lisp`,
+with related `probes.log`, `full.log` and `full.strace`. These files were not
+attached or committed; their availability outside Claude's temporary environment
+is not established. They were not read or reproduced verbatim here.
 
 `reviewed-negatives.lisp` ran against an isolated checkout of **the exact
 reviewed commit**. All five invalid inputs were admitted before correction,
 as recorded in [reviewed-negatives.log](reviewed-negatives.log):
 
-| Case | Invalid record | Reviewed commit | Corrected branch |
-| --- | --- | --- | --- |
-| B1 | Arbitrary well-formed SHA-256 source-plan digest | admitted | `:assignment-plan-binding-mismatch` |
-| B2 | S2 based on a commit different from accepted S1 | admitted | `:assignment-not-proposed` |
-| B3 | Premature S3 assignment | admitted | `:assignment-not-proposed` |
-| B4 | Another S1 assignment while the first remains open | admitted | `:assignment-not-proposed` |
-| B5 | Positive review of an unclaimed commit | admitted | `:review-without-submission` |
+| Original Claude label | Retained Codex label | Invalid record | Reviewed commit | Corrected branch |
+| --- | --- | --- | --- | --- |
+| B1 | B1 (`FORGED-DIGEST`) | Forged `:source-plan` digest | admitted | `:assignment-plan-binding-mismatch` |
+| B2 | B3 (`PREMATURE-S3`) | Premature S3 assignment while S1 has not been assigned | admitted | `:assignment-not-proposed` |
+| B3 | B4 (`OPEN-ASSIGNMENT`) | Concurrent second S1 assignment while the first is open | admitted | `:assignment-not-proposed` |
+| B4 | B2 (`WRONG-S2-BASE`) | S2 based on a commit different from S1's accepted commit | admitted | `:assignment-not-proposed` |
+| B5 | B5 (`UNCLAIMED-REVIEW`) | Review accepting a commit that was never submitted | admitted | `:review-without-submission` |
+
+These independent reproductions demonstrate admission at `dccfd23c` and refusal
+at correction commit `d367625a`. This label reconciliation is documentation
+only; it changes neither the implementation nor the executed evidence, and
+does not claim a new test run. PR #38 remains a draft pending Claude Code's
+second independent review.
 
 Additional negatives cover positive reviews without a matching successful
 verification, future evidence placed after an assignment, and stale bindings
