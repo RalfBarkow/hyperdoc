@@ -20,6 +20,7 @@ The state builder revalidates them; it never accepts a plan or raw state atoms."
 (defclass dev-verification (development-record) ())
 (defclass dev-review (development-record) ())
 (defclass integration-observation (development-record) ())
+(defclass dev-domain-version (development-record) ())
 
 (defmethod print-object ((record development-record) stream)
   (print-unreadable-object (record stream :type t)
@@ -33,7 +34,7 @@ The state builder revalidates them; it never accepts a plan or raw state atoms."
   "Retain data without treating it as verified. DEVELOPMENT-STATE validates it.
 Only explicit fixture provenance permits synthetic git/test observations."
   (unless (member class '(dev-policy dev-assignment dev-submission dev-verification
-                         dev-review integration-observation))
+                         dev-review integration-observation dev-domain-version))
     (refuse-record :unknown-record-class))
   (make-instance class :id id :source source :data (copy-record-data data)))
 
@@ -69,7 +70,7 @@ Only explicit fixture provenance permits synthetic git/test observations."
         (ids (make-hash-table :test #'equal)))
     (dolist (record records)
       (unless (and (member (type-of record) '(dev-policy dev-assignment dev-submission
-                                             dev-verification dev-review integration-observation))
+                                             dev-verification dev-review integration-observation dev-domain-version))
                    (record-id record)
                    (member (record-source record) '(:fixture :observed))
                    (alexandria:proper-list-p (record-data record))
@@ -191,6 +192,59 @@ those shared observer/producer APIs remain absent. Never use the memoized checko
         (refuse-record :negative-verdict-with-passing-evidence))
       passed)))
 
+(defun development-fact-value-kind (value)
+  "Ground values only. Ordinary W1 symbols are constants, never Lisp bindings.
+No reader, macroexpander or evaluator is consulted. Unknown value types refuse."
+  (cond ((or (stringp value) (integerp value)) :self-evaluating)
+        ((symbolp value)
+         (when (and (symbol-package value)
+                    (not (and (plusp (length (symbol-name value)))
+                              (shop3.unifier::variable-symbol-p value))))
+           (cond ((or (keywordp value) (member value '(nil t))) :self-evaluating)
+                 ((and (eq (symbol-package value) (find-package "DREYECK/WORK/WELCOME-DEVELOPMENT"))
+                       (not (boundp value))
+                       ;; Includes declared-but-unbound specials and symbol macros.
+                       (eq :unknown (sb-int:info :variable :kind value)))
+                  :symbolic-constant))))))
+
+(defun validate-development-record-fact-values (record)
+  "Validate every input field which can enter a SHOP3 fact or replay task.
+Rich evidence/provenance stays on the original record; it is not projected."
+  (labels ((check (field value)
+             (unless (development-fact-value-kind value)
+               (refuse-record (list :unsafe-planning-value :record (record-id record) :field field))))
+           (fields (names)
+             (dolist (name names)
+               (check name (if (eq :record-id name) (record-id record) (data record name)))))
+           (roles (field)
+             (let ((pairs (data record field)))
+               (unless (alexandria:proper-list-p pairs)
+                 (refuse-record (list :invalid-policy-pairs field)))
+               (dolist (pair pairs)
+                 (unless (and (alexandria:proper-list-p pair) (= 2 (length pair)))
+                   (refuse-record (list :invalid-policy-pairs field)))
+                 (check (list field :actor) (first pair))
+                 (check (list field :slice) (second pair))
+                 (unless (and (or (text-p (first pair))
+                                  (and (symbolp (first pair)) (first pair)))
+                              (member (second pair) '(s1 s2 s3 s4)))
+                   (refuse-record (list :invalid-policy-pairs field)))))))
+    (typecase record
+      (dev-policy (fields '(:base :attempt-limit)) (roles :implementers) (roles :reviewers))
+      (dev-assignment (fields '(:slice :record-id :executor :base)))
+      (dev-submission (fields '(:slice :assignment :executor :commit)))
+      (dev-verification (fields '(:slice :assignment :commit :record-id)))
+      (dev-review (fields '(:slice :assignment :commit :record-id)))
+      (integration-observation (fields '(:slice :commit :head)))))
+  t)
+
+(defun validate-development-facts (facts)
+  "Check emitted arguments as well, so new projections cannot bypass the contract."
+  (dolist (fact facts facts)
+    (loop for value in (rest fact) for index from 1 do
+      (unless (development-fact-value-kind value)
+        (refuse-record (list :unsafe-planning-fact (first fact) index))))))
+
 (defun project-development-records (entries)
   "Validate record contents and project facts, without planning or history replay.
 Only DEVELOPMENT-STATE publishes a state after validating assignment history."
@@ -199,6 +253,7 @@ Only DEVELOPMENT-STATE publishes a state after validating assignment history."
          (assignments (remove-if-not (lambda (r) (typep r 'dev-assignment)) records))
          (policy (first policies)) (facts nil)
          (verdicts (make-hash-table :test #'equal)))
+    (mapc #'validate-development-record-fact-values records)
     (unless (= 1 (length policies)) (refuse-record :one-policy-required))
     (require-fields policy '(:base :attempt-limit :implementers :reviewers))
     (unless (and (sha-p (data policy :base)) (integerp (data policy :attempt-limit))
@@ -291,39 +346,85 @@ Only DEVELOPMENT-STATE publishes a state after validating assignment history."
                    (find-if (lambda (other) (and (eq (first other) (second pair))
                                                  (equal (subseq fact 1 3) (subseq other 1 3)))) facts))
           (refuse-record :contradictory-slice-commit))))
-    (nreverse (remove-duplicates facts :test #'equal))))
+    (validate-development-facts (nreverse (remove-duplicates facts :test #'equal)))))
 
 (defun development-state (entries)
   "Replay the ordered record journal, checking assignments and submissions against SHOP3.
-Return the state and inspectable assignment validations as a second value.
+Return state, assignment validations, version table and submission checks as four values.
 Projection never calls this function or the planner: there is no circular path."
-  (let ((records (accepted-records entries)) (prefix nil) (state nil) (validations nil))
-    (dolist (record records)
-      (when (typep record 'dev-assignment)
-        (unless prefix (refuse-record :one-policy-required))
-        (let* ((result (plan-development-state state))
-               (step `(!assign ,(data record :slice) ,(data record :executor) ,(data record :base)))
-               (source (record-source record))
-               (binding (plan-assignment-binding state result source step))
-               (recorded (data record :source-plan)))
-          (unless (and (equal (getf recorded :step) step)
-                       (equal (getf recorded :digest) (getf binding :digest))
-                       (equal (getf recorded :alternative-id) (getf binding :alternative-id))
-                       (equal (getf recorded :inputs) (getf binding :inputs)))
-            (refuse-record (list :assignment-plan-binding-mismatch (record-id record))))
-          (push (list :assignment record :prior-records (copy-list prefix)
-                      :prior-state (copy-tree state) :planning-result result :binding binding)
-                validations)))
-      (when (typep record 'dev-submission)
-        (let* ((result (plan-development-state state))
-               (step `(!await-submission ,(data record :slice)
-                                         ,(data record :assignment) ,(data record :executor))))
-          (unless (member (list step) (dreyeck/shop3:plans-of result) :test #'equal)
-            (refuse-record :submission-not-proposed))))
-      (setf prefix (append prefix (list record))
-            state (project-development-records prefix)))
-    (unless records (refuse-record :one-policy-required))
-    (values state (nreverse validations))))
+  (with-development-domain-invariants
+    (let ((records (accepted-records entries)) (prefix nil) (state nil) (validations nil)
+          (versions (make-hash-table :test #'equal)) (submission-checks nil))
+      (dolist (record records)
+        ;; Check the current record before any prefix-planning task can use it.
+        (validate-development-record-fact-values record)
+        (when (typep record 'dev-domain-version)
+          (let ((id (data record :version-id)))
+            (when (gethash id versions) (domain-refuse :duplicate-domain-version))
+            (setf (gethash id versions) (admit-development-domain-version record))))
+        (when (typep record 'dev-assignment)
+          (unless prefix (refuse-record :one-policy-required))
+          (let* ((recorded (data record :source-plan))
+                 (version (binding-domain-version recorded versions))
+                 (result (plan-development-state state (domain-version-domain version)))
+                 (step `(!assign ,(data record :slice) ,(data record :executor) ,(data record :base)))
+                 (source (record-source record))
+                 (binding (plan-assignment-binding state result source step version)))
+            (unless (and (equal (getf recorded :step) step)
+                         (equal (getf recorded :digest) (getf binding :digest))
+                         (equal (getf recorded :alternative-id) (getf binding :alternative-id))
+                         (equal (getf recorded :inputs) (getf binding :inputs)))
+              (refuse-record (list :assignment-plan-binding-mismatch (record-id record))))
+            (push (list :assignment record :prior-records (copy-list prefix)
+                        :prior-state (copy-tree state) :planning-result result :binding binding :domain-version version)
+                  validations)))
+        (when (typep record 'dev-submission)
+          (let* ((assignment (or (find-if (lambda (r) (and (typep r 'dev-assignment)
+                                                          (equal (record-id r) (data record :assignment)))) prefix)
+                                 (refuse-record :submission-not-proposed)))
+                 (version (binding-domain-version (data assignment :source-plan) versions))
+                 (result (plan-development-state state (domain-version-domain version)))
+                 (step `(!await-submission ,(data record :slice)
+                                           ,(data record :assignment) ,(data record :executor))))
+            (unless (member (list step) (dreyeck/shop3:plans-of result) :test #'equal)
+              (refuse-record :submission-not-proposed))
+            (push (list :submission record :prior-state (copy-tree state) :planning-result result
+                        :domain-version version) submission-checks)))
+        (setf prefix (append prefix (list record))
+              state (project-development-records prefix)))
+      (unless records (refuse-record :one-policy-required))
+      (values state (nreverse validations) versions (nreverse submission-checks)))))
+
+(defun binding-domain-version (binding versions)
+  (unless (equal "welcome-development-plan-v2" (getf binding :format))
+    (domain-refuse :unsupported-binding-format))
+  (or (gethash (getf (getf binding :inputs) :domain-version) versions)
+      (domain-refuse :domain-version-unavailable :record-must-precede-use)))
+
+(defparameter *development-validator-source*
+  (list :path +validator-path+
+        :sha256 (file-sha256 (asdf:system-relative-pathname "dreyeck/work/welcome-development" +validator-path+))))
+
+(defun fixture-domain-version-record ()
+  (let* ((items (copy-tree (shop3::domain-items (shop3:find-domain 'welcome-development))))
+         (id (domain-version-id items)))
+    (setf (gethash id *fixture-domain-sources*) items)
+    (make-development-record 'dev-domain-version (list :domain-version id) :fixture
+                             :version-id id :items-source :loaded-image
+                             :form-sha256 (development-data-digest items)
+                             :reader (copy-tree +domain-reader-contract+)
+                             :planner (running-development-planner-pin)
+                             :validator (copy-tree *development-validator-source*))))
+
+(defun git-domain-version-record (id repository commit &optional (path "dreyeck/work/welcome-development.lisp"))
+  "Prepare a record from local artifacts. Admission still requires its pre-existing dedicated tag."
+  (let ((description (describe-development-domain-version repository commit path)))
+    (apply #'make-development-record 'dev-domain-version id :observed
+           :items-source :git :repository repository
+           :validator (list :path +validator-path+
+                            :blob (version-git repository "rev-parse" (format nil "~A:~A" commit +validator-path+)))
+           (loop for key in '(:version-id :tag :commit :path :blob :form-sha256 :reader :planner)
+                 append (list key (getf description key))))))
 
 ;; All development records fit the existing evaluation-record inspection protocol.
 (defmethod dreyeck/evaluation-record:evaluation-specification-of ((r development-record)) (type-of r))

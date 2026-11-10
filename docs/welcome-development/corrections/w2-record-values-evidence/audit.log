@@ -1,0 +1,5 @@
+fixture: network calls=0; Git exec attempts=0; subcommands=[]
+replay: network calls=0; Git exec attempts=152; subcommands=['cat-file', 'rev-parse', 'show']
+Trace positive control PASS: socket syscall detected
+A1 cross-process ID/binding PASS; A5 read-only Git/unchanged tags PASS; A13 no fixture Git/network PASS
+W2 audit logs: /workspace/work/w2-n1-final-evidence
