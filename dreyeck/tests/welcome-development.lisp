@@ -74,12 +74,12 @@
 (defun test-record-evidence ()
   (let* ((records (fixture-records :p3))
          (verification (car (last records)))
-         (assignment (second records))
+         (assignment (fixture-first-assignment records))
          (commit (data verification :commit)))
     (test-refusal :opposite-verifications
                   (append records (list (fixture-verification assignment commit :rejected)))))
   (let* ((records (fixture-records :p4))
-         (assignment (second records))
+         (assignment (fixture-first-assignment records))
          (commit (fixture-sha #\1)))
     (test-refusal :opposite-reviews
                   (append records (list (fixture-review assignment commit :rejected)))))
@@ -110,10 +110,10 @@
       (setf (getf properties :reviewer) 'codex))
     (let ((properties (record-data (first records))))
       (push '(codex s1) (getf properties :reviewers)))
-    (let ((properties (record-data (second records))))
+    (let ((properties (record-data (fixture-first-assignment records))))
       (setf (getf properties :source-plan)
-            (assignment-proposal-binding (list (first records))
-                                         `(!assign s1 codex ,+fixture-base+))))
+            (assignment-proposal-binding (fixture-policy-prefix records)
+                                         `(!assign s1 codex ,+fixture-base+) :domain-version (fixture-version-id records))))
     (test-refusal :self-review records :implementer-cannot-review))
   (let* ((records (fixture-records :p3))
          (carrier (make-instance 'dreyeck/workspace-operation:workspace-operation-invocation
@@ -177,10 +177,10 @@
          (review (fixture-review a commit)))
     (let ((properties (record-data (first records))))
       (push '(codex s1) (getf properties :reviewers)))
-    (let ((properties (record-data (second records))))
+    (let ((properties (record-data (fixture-first-assignment records))))
       (setf (getf properties :source-plan)
-            (assignment-proposal-binding (list (first records))
-                                         `(!assign s1 codex ,+fixture-base+))))
+            (assignment-proposal-binding (fixture-policy-prefix records)
+                                         `(!assign s1 codex ,+fixture-base+) :domain-version (fixture-version-id records))))
     (test-refusal :cross-assignment-self-review
                   (append records (list a (fixture-submission a commit) review))
                   :assignment-not-proposed))
@@ -200,7 +200,7 @@
       (assert (equal `((!propose-integration s4 ,(fixture-sha #\4))) steps))
       (format t "~&WELCOME INCOMPLETE-INTEGRATION PASS: integration proposal, no complete report.~%")))
   (let* ((policy (fixture-policy))
-         (integration (fixture-integration (fixture-assignment :a1 's1 'codex +fixture-base+ (list policy))
+         (integration (fixture-integration (fixture-assignment :a1 's1 'codex +fixture-base+ (list policy (fixture-domain-version-record)))
                                             (fixture-sha #\1))))
     (setf (slot-value policy 'source) :observed (slot-value integration 'source) :observed)
     (test-refusal :missing-remote-observer (list policy integration)
@@ -238,7 +238,7 @@
 
 (defun test-inspection ()
   (let* ((records (fixture-records :p4))
-         (verification (fourth records))
+         (verification (find-if (lambda (r) (typep r 'dev-verification)) records))
          (carrier (make-instance 'dreyeck/workspace-operation:workspace-operation-invocation
                                 :status :returned :value verification))
          (entries (substitute carrier verification records :test #'eq))
@@ -289,7 +289,7 @@
   assignment)
 
 (defun test-review-corrections ()
-  (let* ((records (fixture-records :p1)) (binding (data (second records) :source-plan)))
+  (let* ((records (fixture-records :p1)) (binding (data (fixture-first-assignment records) :source-plan)))
     (setf (getf binding :digest) (fixture-sha #\0 64))
     (test-refusal :b1-forged-digest records :assignment-plan-binding-mismatch))
   (let* ((prior (fixture-records :p4))
@@ -302,14 +302,14 @@
     (test-refusal :b3-premature-s3 (append prior (list a)) :assignment-not-proposed))
   (let* ((a (fixture-assignment :concurrent 's1 'claude-code +fixture-base+ (fixture-records :p0))))
     (test-refusal :b4-open-assignment (append (fixture-records :p1) (list a)) :assignment-not-proposed))
-  (let* ((records (fixture-records :p3)) (a (second records)))
+  (let* ((records (fixture-records :p3)) (a (fixture-first-assignment records)))
     (test-refusal :b5-unclaimed-review
                   (append records (list (fixture-review a (fixture-sha #\0)))) :review-without-submission))
-  (let* ((records (fixture-records :p2)) (a (second records)))
+  (let* ((records (fixture-records :p2)) (a (fixture-first-assignment records)))
     (test-refusal :positive-review-without-verification
                   (append records (list (fixture-review a (fixture-sha #\1))))
                   :positive-review-without-verification))
-  (let* ((records (fixture-records :p6)) (a (second records)))
+  (let* ((records (fixture-records :p6)) (a (fixture-first-assignment records)))
     (test-refusal :positive-review-after-failed-verification
                   (append records (list (fixture-review a (fixture-sha #\1))))
                   :positive-review-without-verification))
@@ -319,14 +319,15 @@
   (let* ((accepted (fixture-records :p4))
          (assignment (fixture-assignment :future-evidence 's2 'codex (fixture-sha #\1) accepted)))
     (test-refusal :future-records-cannot-authorize-past
-                  (append (subseq accepted 0 3) (list assignment) (subseq accepted 3))
+                  (let ((split (position-if (lambda (r) (typep r 'dev-verification)) accepted)))
+                    (append (subseq accepted 0 split) (list assignment) (subseq accepted split)))
                   :assignment-not-proposed))
   ;; Digest and selected-action identity survive gensyms, printer settings, fact
   ;; order and alternative enumeration order; all native alternatives remain.
   (let* ((records (fixture-records :p0))
          (state (development-state records))
          (step `(!assign s1 claude-code ,+fixture-base+)))
-    (multiple-value-bind (binding result) (assignment-proposal-binding records step)
+    (multiple-value-bind (binding result) (assignment-proposal-binding records step :domain-version (fixture-version-id records))
       (let* ((other (make-instance 'dreyeck/shop3:hyperdoc-htn-plan-result
                                    :problem-name (gensym "OTHER-PROBLEM-") :time 12345
                                    :plans (reverse (dreyeck/shop3:plans-of result))
@@ -335,8 +336,9 @@
                                    :final-states (reverse (dreyeck/shop3:final-states-of result))
                                    :execution-mode :plan-only))
              (reordered (let ((*print-case* :downcase) (*print-base* 16) (*print-pretty* t))
-                          (plan-assignment-binding (reverse state) other :fixture step)))
-             (fresh (assignment-proposal-binding records step)))
+                          (plan-assignment-binding (reverse state) other :fixture step
+                                                   (admit-development-domain-version (second records)))))
+             (fresh (assignment-proposal-binding records step :domain-version (fixture-version-id records))))
         (assert (equal binding reordered))
         (assert (equal binding fresh))
         (assert (= 2 (length (dreyeck/shop3:plans-of result))))
@@ -389,13 +391,13 @@
            (assert (equal before (development-state records))))
   (dolist (change '((:slice s2) (:assignment :unknown) (:executor claude-code)))
     (let* ((records (fixture-records :p1))
-           (claim (fixture-submission (second records) (fixture-sha #\1)))
+           (claim (fixture-submission (fixture-first-assignment records) (fixture-sha #\1)))
            (properties (record-data claim)))
       (setf (getf properties (first change)) (second change))
       (test-refusal (list :exact-await-step (first change)) (append records (list claim))
                     :submission-not-proposed)))
   (let* ((records (fixture-records :p1))
-         (assignment (second records))
+         (assignment (fixture-first-assignment records))
          (before (welcome-development-plan records))
          (claim (fixture-submission assignment (fixture-sha #\1)))
          (run (development-workflow (append records (list claim))))

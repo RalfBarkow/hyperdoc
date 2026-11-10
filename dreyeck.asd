@@ -3673,9 +3673,10 @@
   :description "Opt-in W1 development proposals from accepted records; no executor"
   :depends-on ("dreyeck/shop3" "dreyeck/git"
                "dreyeck/evaluation-record/workspace-operation"
-               "html-inspector-views/standard" "ironclad")
+               "html-inspector-views/standard" "ironclad" "eclector" "shasht")
   :serial t
   :components ((:file "dreyeck/work/welcome-development-package")
+               (:file "dreyeck/work/welcome-development-domain-versions")
                (:file "dreyeck/work/welcome-development-records")
                (:file "dreyeck/work/welcome-development")
                (:file "dreyeck/work/welcome-development-examples")
@@ -3688,3 +3689,10 @@
   :perform (test-op (op component)
              (declare (ignore op component))
              (uiop:symbol-call :dreyeck/work/welcome-development :run-tests)))
+
+(defsystem "dreyeck/work/welcome-development/domain-version-tests"
+  :depends-on ("dreyeck/work/welcome-development/tests")
+  :components ((:file "dreyeck/tests/welcome-domain-versions"))
+  :perform (test-op (op component)
+             (declare (ignore op component))
+             (uiop:symbol-call :dreyeck/work/welcome-development :run-domain-version-tests)))

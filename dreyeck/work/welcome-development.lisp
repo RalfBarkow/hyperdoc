@@ -65,20 +65,31 @@
    (initial-state :initarg :initial-state :reader development-initial-state)
    (result :initarg :result :reader development-plan-result)
    (assignment-validations :initarg :assignment-validations :reader development-assignment-validations)
-   (alternatives :initarg :alternatives :reader development-alternatives)))
+   (alternatives :initarg :alternatives :reader development-alternatives)
+   (versions :initarg :versions :reader development-domain-versions)
+   (submission-checks :initarg :submission-checks :reader development-submission-checks)
+   (current-domain-version :initarg :current-domain-version :reader development-current-domain-version)
+   (current-version-tagged :initarg :current-version-tagged :reader development-current-version-tagged)
+   (validator-source :initarg :validator-source :reader development-validator-source)))
 
-(defun plan-development-state (state)
-  (let* ((name (gensym "WELCOME-DEVELOPMENT-"))
-         (problem (shop3:make-problem
-                   (list name :domain 'welcome-development :silently t)
-                   (copy-tree state) '((advance-welcome)))))
-    (multiple-value-bind (raw seconds trees states)
-        (shop3:find-plans problem :which :all :verbose 0 :plan-tree t :collect-state t)
-      (make-instance 'dreyeck/shop3:hyperdoc-htn-plan-result
-                     :problem-name name :raw-plans raw
-                     :plans (mapcar #'shop3:shorter-plan raw)
-                     :time seconds :plan-trees trees :final-states states
-                     :execution-mode :plan-only))))
+(defun plan-development-state (state &optional (domain (shop3:find-domain 'welcome-development)))
+  (let ((shop3::*problem* shop3::*problem*)
+        (name (gensym "WELCOME-DEVELOPMENT-")) (problem nil))
+    (unwind-protect
+         (progn
+           (setf problem (shop3:make-problem
+                          (list name :domain (shop3::domain-name domain) :silently t)
+                          (copy-tree state) '((advance-welcome))))
+           (multiple-value-bind (raw seconds trees states)
+               (shop3:find-plans problem :domain domain :which :all :verbose 0
+                                :plan-tree t :collect-state t)
+             (make-instance 'dreyeck/shop3:hyperdoc-htn-plan-result
+                            :problem-name name :raw-plans raw
+                            :plans (mapcar #'shop3:shorter-plan raw)
+                            :time seconds :plan-trees trees :final-states states
+                            :execution-mode :plan-only)))
+      (let ((partial (or problem (shop3:find-problem name))))
+        (when partial (shop3:delete-problem partial))))))
 
 (defun development-canonical-string (value)
   "Deterministic readable literal data, independent of caller printer settings.
@@ -98,41 +109,49 @@ Reject objects and uninterned symbols rather than printing transient identities.
    (ironclad:digest-sequence
     :sha256 (sb-ext:string-to-octets (development-canonical-string value) :external-format :utf-8))))
 
-(defun development-plan-inputs (state result source)
+(defun development-plan-inputs (state result source version)
   "Canonical binding inputs, preserving alternative multiplicity but not enumeration order."
-  (list :format "welcome-development-plan-v1" :source source
-        ;; Pinned SHOP3's declared domain reader; no generated problem/tree data.
-        :domain (shop3::domain-items (shop3:find-domain 'welcome-development))
+  (list :format "welcome-development-plan-v2" :source source
+        :domain-version (domain-version-identity version) :planner (domain-version-planner version)
         :state (sort (mapcar #'development-canonical-string state) #'string<)
         :tasks '((advance-welcome)) :which :all
         :alternatives (sort (mapcar #'development-canonical-string
                                     (dreyeck/shop3:plans-of result)) #'string<)))
 
-(defun plan-assignment-binding (state result source step)
+(defun plan-assignment-binding (state result source step version)
   "Bind a chosen action to a complete native search; never choose an alternative."
   (unless (and (eq '!assign (first step))
                (member (list step) (dreyeck/shop3:plans-of result) :test #'equal))
     (refuse-record (list :assignment-not-proposed step)))
-  (let ((inputs (development-plan-inputs state result source)))
-    (list :digest (development-data-digest inputs) :step (copy-tree step)
+  (let ((inputs (development-plan-inputs state result source version)))
+    (list :format "welcome-development-plan-v2" :digest (development-data-digest inputs) :step (copy-tree step)
           :alternative-id (development-data-digest (list "welcome-development-action-v1" step))
           :inputs inputs)))
 
-(defun assignment-proposal-binding (records step)
+(defun assignment-proposal-binding (records step &key domain-version)
   "Validate prior history and ask SHOP3 for the binding of this explicitly chosen !ASSIGN.
 Return binding and native planning result; this does not append/execute an assignment."
-  (let* ((state (development-state records))
-         (source (record-source (first (accepted-records records))))
-         (result (plan-development-state state)))
-    (values (plan-assignment-binding state result source step) result)))
+  (multiple-value-bind (state audit versions) (development-state records)
+    (declare (ignore audit))
+    (let* ((version (or (gethash domain-version versions)
+                        (domain-refuse :domain-version-unavailable :explicit-version-required)))
+           (source (record-source (first (accepted-records records))))
+           (result (plan-development-state state (domain-version-domain version))))
+      (values (plan-assignment-binding state result source step version) result))))
 
 (defun development-workflow (records)
   "One read-only planning cycle, with records and every native alternative retained."
-  (multiple-value-bind (state validations) (development-state records)
-    (let ((result (plan-development-state state)))
+  (multiple-value-bind (state validations versions submission-checks) (development-state records)
+    (let* ((public (shop3:find-domain 'welcome-development))
+           (current-id (domain-version-id (shop3::domain-items public)))
+           (version (gethash current-id versions))
+           (result (plan-development-state state public)))
       (make-instance 'development-run :records (copy-list records)
                      :initial-state state :result result :assignment-validations validations
-                     :alternatives (result-next-action-view result)))))
+                     :alternatives (result-next-action-view result)
+                     :versions versions :submission-checks submission-checks :current-domain-version current-id
+                     :current-version-tagged (and version (eq :observed (record-source (domain-version-record version))))
+                     :validator-source (copy-tree *development-validator-source*)))))
 
 (defun welcome-development-plan (records)
   "Return the existing native result, never a selected plan or an executed action."

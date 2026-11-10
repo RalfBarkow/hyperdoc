@@ -1,5 +1,9 @@
 # W1: Welcome development, proposals from accepted records
 
+W2 adds optional [versioned planning-domain replay](w2-implementation.md). Its
+v2 bindings supersede the W1 binding description below; W1 record rules and
+plan-only behavior remain in effect.
+
 Implements only W1 from [Claude's revised design](claude-revised-design.md) and
 the [approved handoff](codex-w1-handoff.md). Both documents remain unchanged.
 Before implementation, remote `dreyeck.ch` was verified as
