@@ -37,6 +37,9 @@ hyperdoc-dev: commands of this development shell
           [server]     starts a process that keeps running until you stop it
 
   hyperdoc-dev help                       [read-only]  this text
+  hyperdoc-dev task-location              [read-only]  show the existing problem-bestimmen / task-location
+                                          method and the current S2 routine lookup. No SHOP3 execution,
+                                          SQLite creation or automatic problem classification.
   hyperdoc-dev review [--base REF] [--patch]
                                           [read-only]  what this worktree changes against REF
                                           (default: origin/dreyeck.ch if that ref exists). Shows base, merge base,
@@ -80,8 +83,15 @@ Examples:
   HYPERDOC_REQUIRE_LOCAL_CHECKOUTS=1 hyperdoc-dev test dreyeck/nested-actions/reading/tests
   DREYECK_LISP_CRITIC_ROOT=/path/to/station/ hyperdoc-dev test dreyeck/lisp-critic/engine-integration/tests
 
-Documentation: README.md (Fresh interactive Lisp image, Catalog), dreyeck/CATALOG-OPERATIONS.md, docs/hyperdoc-dev.md
+Documentation: README.md (Fresh interactive Lisp image, Catalog), dreyeck/CATALOG-OPERATIONS.md, docs/hyperdoc-dev.md,
+               docs/task-location-before-problem.md
 EOF
+}
+
+cmd_task_location() {
+  [ $# -eq 0 ] || { echo "hyperdoc-dev task-location: no arguments; this only reads the method note." >&2; return 2; }
+  local root; root="$(repo_root)"
+  cat "$root/docs/task-location-before-problem.md"
 }
 
 cmd_review() {
@@ -199,6 +209,7 @@ main() {
     help|-h|--help) cmd_help ;;
     greeting) cmd_greeting ;;
     review) cmd_review "$@" ;;
+    task-location) cmd_task_location "$@" ;;
     test) cmd_test "$@" ;;
     check) cmd_check "$@" ;;
     *) echo "hyperdoc-dev: unknown command '$command'." >&2; usage_short >&2; return 2 ;;
