@@ -3701,3 +3701,17 @@
   :perform (test-op (op component)
              (declare (ignore op component))
              (uiop:symbol-call :dreyeck/work/welcome-development :run-domain-version-tests)))
+
+(defsystem "dreyeck/work/fedwiki-source-acquisition"
+  :description "Explicit FedWiki acquisition evidence around the existing reader; no executor"
+  :depends-on ("dreyeck/work/fedwiki-local-only" "drakma" "puri" "sb-posix"
+               "shasht" "ironclad" "cl-ppcre")
+  :components ((:file "dreyeck/work/fedwiki-source-acquisition"))
+  :in-order-to ((test-op (test-op "dreyeck/work/fedwiki-source-acquisition/tests"))))
+
+(defsystem "dreyeck/work/fedwiki-source-acquisition/tests"
+  :depends-on ("dreyeck/work/fedwiki-source-acquisition" "usocket" "bordeaux-threads" "flexi-streams")
+  :components ((:file "dreyeck/tests/fedwiki-source-acquisition"))
+  :perform (test-op (op component)
+             (declare (ignore op component))
+             (uiop:symbol-call :dreyeck/work/fedwiki-source-acquisition :run-tests)))

@@ -1,0 +1,10 @@
+DEFEDERATION_REPO=/workspace/work/s1-acquisition S1_TEST_MODE=s1 S1_FASL_CACHE=/tmp/s1-tree-fasls-11787/ /workspace/scratch/tmdm-mcp-portable/bin/sbcl --noinform --no-sysinit --no-userinit --non-interactive --load /workspace/work/defederation-bootstrap.lisp --load docs/welcome-development/s1-evidence/run.lisp > s1.log 2>&1
+exit code: 0
+
+DEFEDERATION_REPO=/workspace/work/s1-acquisition S1_TEST_MODE=regressions S1_FASL_CACHE=/tmp/s1-tree-fasls-11799/ /workspace/scratch/tmdm-mcp-portable/bin/sbcl --noinform --no-sysinit --no-userinit --non-interactive --load /workspace/work/defederation-bootstrap.lisp --load docs/welcome-development/s1-evidence/run.lisp > regressions.log 2>&1
+exit code: 0
+
+DEFEDERATION_REPO=/workspace/work/s1-acquisition S1_TEST_MODE=w2 S1_FASL_CACHE=/tmp/s1-tree-fasls-11798/ /workspace/scratch/tmdm-mcp-portable/bin/sbcl --noinform --no-sysinit --no-userinit --non-interactive --load /workspace/work/defederation-bootstrap.lisp --load docs/welcome-development/s1-evidence/run.lisp > w2.log 2>&1
+exit code: 0
+
+The retained environment-bootstrap.lisp is byte-identical to the bootstrap executed above.

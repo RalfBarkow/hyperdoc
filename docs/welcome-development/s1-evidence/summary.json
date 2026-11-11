@@ -1,0 +1,50 @@
+{
+  "assignment": ":S1-ASSIGNMENT-001",
+  "date": "2026-11-11",
+  "base": "596344ae95d746f436705808462259371f5a593c",
+  "branch": "codex/11570-s1-acquisition-adapter",
+  "source_sha256": {
+    "dreyeck.asd": "3ae1ef3566717ff1da5e05a3ae6f2e24c9446b7f164dd379cd24331098d5a201",
+    "dreyeck/work/fedwiki-source-acquisition.lisp": "3687f792c527ed99d505db5736a7e843e11413e3841755aa708fee61b6b47f12",
+    "dreyeck/tests/fedwiki-source-acquisition.lisp": "0ab0796a60c9a1a6c16aa3e1b8e58e9da7141666e3c7f7219b69e2aee413020e"
+  },
+  "runs": [
+    {
+      "mode": "s1",
+      "command": "DEFEDERATION_REPO=/workspace/work/s1-acquisition S1_TEST_MODE=s1 S1_FASL_CACHE=/tmp/s1-tree-fasls-11787/ /workspace/scratch/tmdm-mcp-portable/bin/sbcl --noinform --no-sysinit --no-userinit --non-interactive --load /workspace/work/defederation-bootstrap.lisp --load docs/welcome-development/s1-evidence/run.lisp",
+      "working_directory": "/workspace/work/s1-acquisition",
+      "exit_code": 0,
+      "log": "s1.log",
+      "source_unchanged_assertion": true
+    },
+    {
+      "mode": "regressions",
+      "command": "DEFEDERATION_REPO=/workspace/work/s1-acquisition S1_TEST_MODE=regressions S1_FASL_CACHE=/tmp/s1-tree-fasls-11799/ /workspace/scratch/tmdm-mcp-portable/bin/sbcl --noinform --no-sysinit --no-userinit --non-interactive --load /workspace/work/defederation-bootstrap.lisp --load docs/welcome-development/s1-evidence/run.lisp",
+      "working_directory": "/workspace/work/s1-acquisition",
+      "exit_code": 0,
+      "log": "regressions.log",
+      "source_unchanged_assertion": true
+    },
+    {
+      "mode": "w2",
+      "command": "DEFEDERATION_REPO=/workspace/work/s1-acquisition S1_TEST_MODE=w2 S1_FASL_CACHE=/tmp/s1-tree-fasls-11798/ /workspace/scratch/tmdm-mcp-portable/bin/sbcl --noinform --no-sysinit --no-userinit --non-interactive --load /workspace/work/defederation-bootstrap.lisp --load docs/welcome-development/s1-evidence/run.lisp",
+      "working_directory": "/workspace/work/s1-acquisition",
+      "exit_code": 0,
+      "log": "w2.log",
+      "source_unchanged_assertion": true
+    }
+  ],
+  "assertions": 190,
+  "real_network_in_s1_fixtures": "three HTTP requests on loopback: sitemap/page success plus rejected sitemap redirect",
+  "ward_requests": 0,
+  "independent_verification": "not performed; Claude Code pending",
+  "development_submission": "not created",
+  "limits": [
+    "SBCL 2.4.10 on Linux; no live SLY/CLOG or macOS validation",
+    "Prepared host-specific ASDF registry and previously built, isolated source-preserving FASL caches; no dependency acquisition",
+    "W2 ASDF in-image suite rerun; cross-process identity/syscall audit not rerun in this slice",
+    "No network namespace/syscall audit of this run; offline counters include a positive control; real HTTP fixture listens on 127.0.0.1 only",
+    "No observed Ward source, signed provenance or authenticated authorship",
+    "Read-only assignment Git metadata observed; operator-provided plan digest not independently reconstructed without the complete accepted journal"
+  ]
+}
