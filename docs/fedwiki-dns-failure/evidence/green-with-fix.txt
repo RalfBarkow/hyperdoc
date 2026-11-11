@@ -1,0 +1,13 @@
+# GREEN: the same, with the fix
+=== INJECTED: exit 0
+  OUTCOME NS-HOST-NOT-FOUND-ERROR NS-HOST-NOT-FOUND-ERROR ns-error=T snapshot=failed
+  OUTCOME NS-TRY-AGAIN-ERROR NS-TRY-AGAIN-ERROR ns-error=T snapshot=failed
+  OUTCOME NS-NO-RECOVERY-ERROR NS-NO-RECOVERY-ERROR ns-error=T snapshot=failed
+  ALL-SITES-FINISHED
+=== REAL: exit 0
+  OUTCOME REAL-RESOLVER NS-TRY-AGAIN-ERROR ns-error=T snapshot=failed
+  ALL-SITES-FINISHED
+
+## the check itself (dev shell: real resolver exercised under an empty network namespace)
+FEDWIKI-NAME-RESOLUTION-FAILURE: real resolver exercised under an empty network namespace (unshare -rn): OUTCOME REAL-RESOLVER NS-TRY-AGAIN-ERROR ns-error=T snapshot=failed
+CHECK-PASSED

@@ -1,0 +1,27 @@
+# The upstream commit, its place in upstream's history, and whether it applies to our file (2026-11-02)
+commit   58a2b2c66f0f5a0900a32910e5991e7d1833d9ed  "Catch more name service errors"  Konrad Hinsen, 2026-11-02T14:10:42+01:00
+parent   9f919fc64f13a9101c970bbea10a2524576723d2  "Allow HyperDocs to iterate over their pages"
+ancestry 8a1149197fabcb1ab5622316f09c5a60c2d3f1f8 (the upstream reference of dreyeck/hyperdoc/library-tests) is an ancestor of 58a2b2c: yes
+commits in 8a1149197..58a2b2c (newest first):
+  58a2b2c Catch more name service errors
+  9f919fc Allow HyperDocs to iterate over their pages
+  09dab4c More informative print representations of hyperbooks and pages
+  9227373 Load new text pages only once
+  b9c45a3 Make it possible to reload the systems without an error message
+  9891d6b Collect page assets recursively
+files that range touches under hyperbook-fedwiki/:
+   hyperbook-fedwiki/fedwiki.lisp | 2 +-
+   1 file changed, 1 insertion(+), 1 deletion(-)
+fedwiki.lisp, reference 8a1149197 against 58a2b2c (diff):
+  @@ -82,7 +82,7 @@ that occurred when reading the site map.")))
+                             (setf (status-of wiki) t))
+                    ((or stream-error
+                      usocket:timeout-error
+  -                   usocket:ns-host-not-found-error
+  +                   usocket:ns-error
+                      shasht:shasht-invalid-char) (c)
+                      (setf (status-of wiki) c))))))
+       wiki))
+git apply --check of the upstream diff to hyperbook-fedwiki/fedwiki.lisp at dreyeck.ch 0a7d4de:
+  error: patch failed: hyperbook-fedwiki/fedwiki.lisp:82
+  error: hyperbook-fedwiki/fedwiki.lisp: patch does not apply

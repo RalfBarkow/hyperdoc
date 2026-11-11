@@ -1,0 +1,9 @@
+# Related test systems, at the base 0a7d4de and with the change (dev shell, real runtime)
+hyperbook/fedwiki/tests [base]: SYSTEM-RESULT PASSED
+dreyeck/wiki-link/tests [base]: SYSTEM-RESULT PASSED
+dreyeck/local-fedwiki-view/tests [base]: SYSTEM-RESULT PASSED
+dreyeck/catalog-application [base]: SYSTEM-RESULT PASSED
+hyperbook/fedwiki/tests [change]: SYSTEM-RESULT PASSED
+dreyeck/wiki-link/tests [change]: SYSTEM-RESULT PASSED
+dreyeck/local-fedwiki-view/tests [change]: SYSTEM-RESULT PASSED
+dreyeck/catalog-application [change]: SYSTEM-RESULT PASSED

@@ -98,7 +98,11 @@ existing production behavior and escape to the caller."
         (setf (status-of wiki) t))
     ((or stream-error
          usocket:timeout-error
+         ;; The host name cannot be resolved: it does not exist, or the resolver cannot answer for now (EAI_AGAIN: no network, or
+         ;; failing name servers), or cannot answer at all. An escaped condition ends a process that runs without a debugger.
          usocket:ns-host-not-found-error
+         usocket:ns-try-again-error
+         usocket:ns-no-recovery-error
          shasht:shasht-invalid-char) (condition)
       (setf (status-of wiki) condition))))
 

@@ -1,0 +1,11 @@
+# The regular Catalog test asks no resolver any more (2026-11-02)
+# Method: `dreyeck/catalog-application` (what the Nix check runs) is started in `unshare -rnm` with loopback up, a UDP stub on 127.0.0.1:53
+# that counts and answers every query (NXDOMAIN), and /etc/resolv.conf bound to it. The number of queries the stub received is the number
+# of real name resolutions the test made. Command, in `nix develop .#fedwiki-original-editor`:
+#   unshare -rnm python3 count.py $SBCL --noinform --no-sysinit --no-userinit --non-interactive \
+#     --eval '(require :asdf)' --eval '(asdf:test-system "dreyeck/catalog-application")'
+#
+# BEFORE: the test file at 209f25b (the real-resolver part called by RUN-TESTS; this process sees only `lo`, so it took the isolation path)
+EXIT 0 | DNS QUERIES RECEIVED BY THE STUB: 2 ['\x04wiki\ttest-host\x07invalid\x00']
+# AFTER: the test file at 0d89285 (real-resolver part removed from RUN-TESTS)
+EXIT 0 | DNS QUERIES RECEIVED BY THE STUB: 0 []

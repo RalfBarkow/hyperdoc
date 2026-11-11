@@ -1,0 +1,9 @@
+# The explicit integration test, scripts/check-fedwiki-real-resolver.sh (2026-11-02), at 0d89285.
+# It starts a fresh SBCL under `unshare -rn` and asks the platform's real resolver for wiki.test-host.invalid.
+#
+# WITH the fix (hyperbook-fedwiki/fedwiki.lisp as in this branch): exit 0
+FEDWIKI-REAL-RESOLVER-INTEGRATION: PASS under an empty network namespace (unshare -rn): OUTCOME REAL-RESOLVER NS-TRY-AGAIN-ERROR ns-error=T snapshot=failed
+
+# WITHOUT the fix (hyperbook-fedwiki/fedwiki.lisp as at the base 0a7d4de): exit 1, the real resolver's failure ended the child process
+The platform resolver's failure ended the process (exit 1):
+unhandled condition in --disable-debugger mode, quitting

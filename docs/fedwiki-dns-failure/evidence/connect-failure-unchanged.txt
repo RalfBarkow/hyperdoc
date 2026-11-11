@@ -1,0 +1,12 @@
+# A connect-time failure (IP literal, no route) is NOT changed: it still ends the process. Not part of this fix; see README.
+## before
+=== HOST=192.0.2.1 (offline namespace, no route)
+DIRECT-PROBE 192.0.2.1: USOCKET:NETWORK-UNREACHABLE-ERROR socket-error-p=T ns-error-p=NIL
+Unhandled USOCKET:NETWORK-UNREACHABLE-ERROR in thread #<SB-THREAD:THREAD tid=1386 "Anonymous thread" RUNNING
+unhandled condition in --disable-debugger mode, quitting
+exit=1
+## after (with the fix)
+DIRECT-PROBE 192.0.2.1: USOCKET:NETWORK-UNREACHABLE-ERROR socket-error-p=T ns-error-p=NIL
+Unhandled USOCKET:NETWORK-UNREACHABLE-ERROR in thread #<SB-THREAD:THREAD tid=1578 "Anonymous thread" RUNNING
+unhandled condition in --disable-debugger mode, quitting
+exit=1
