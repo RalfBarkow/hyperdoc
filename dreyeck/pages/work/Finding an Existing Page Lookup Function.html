@@ -1,0 +1,48 @@
+<h1>Finding an Existing Page Lookup Function</h1>
+<in-package>dreyeck/work/reading</in-package>
+<p><strong>Status:</strong> A documented task-location investigation, not an automatic routine discovery system or an implemented SQLite page store. Context: Zettel 11601, 11604 and 11605.</p>
+
+<h2>Locate the task before declaring a problem</h2>
+<p>The <em>problem-bestimmen</em> workflow uses the distinction from Zettel 6129 (Simon 48.2): a problem is a task that existing routines of behavior, action or interaction cannot solve. Task Location (Zettel 8992) first asks where the task belongs in the existing learned task space. A failed first lookup is not evidence that no routine exists.</p>
+<ol>
+  <li>State the task as an observable outcome, not as a preferred implementation.</li>
+  <li>Locate existing routines, their inputs, ownership, effects and applicable constraints.</li>
+  <li>Check whether an existing routine covers the whole task or only part of it.</li>
+  <li>When relevant, let SHOP3 expose alternative existing decompositions, retaining native plans and <code>:PLAN-ONLY</code> provenance.</li>
+  <li>Only if the task remains unsolvable with the available routines, specify the gap as a problem and search for another method.</li>
+</ol>
+<p>This page records the inquiry; it does not claim that the complete task space has been searched or that HyperDoc provides an automatic task-location planner. The interactive development-shell orientation is in <code>docs/task-location-before-problem.md</code>, also available as <code>hyperdoc-dev task-location</code> on this branch.</p>
+
+<h2>Concrete task: local presence of a linked page</h2>
+<p>The real S1 capture from <code>ward.asia.wiki.org</code> acquired <em>Safe and Familiar Welcome</em> as HTTP response bytes and hydrated an offline native FedWiki page. Its Story has 17 Items and its Journal 28 actions. Item <strong>12</strong> links to <code>making-the-welcome-page</code>. Wards recorded sitemap contains that slug. Those facts describe the <strong>source</strong>, not our local destination.</p>
+<p><strong>Task, stated as an operation:</strong> Determine the presence of a page named <code>making-the-welcome-page</code>. The page slug is one argument; the lookup context (which HyperBook or local Wiki?) is another argument that must be supplied to <em>execute</em> a lookup. Choosing that context is not the task-location question.</p>
+<p><strong>Candidate routine:</strong> <code>hyperbook:find-page</code> performs the lookup. For an <code>own-site</code>, its specialized method returns a local page or <code>NIL</code>. <code>dreyeck/work/fedwiki-local-only:observe-link</code> builds on that lookup and classifies an observed Story Item's target as <code>:OBSERVED-LOCAL</code>, <code>:CONFIRMED-LOCAL-ABSENCE</code> or <code>:UNKNOWN</code> on read failure. These are different levels of behavior, not competing SQLite designs.</p>
+
+<h2>What existing routines already solve</h2>
+<table>
+<thead><tr><th>Routine</th><th>Existing behavior</th><th>Unresolved boundary</th></tr></thead>
+<tbody>
+<tr><td><code>acquire-source</code> / <code>verify-snapshot</code></td><td>Retain and verify the real source response and offline snapshot</td><td>Does not place a page in the destination wiki</td></tr>
+<tr><td><code>hyperbook:find-page</code> and <code>make-own-site</code></td><td>Look up a named local page</td><td>Current own-site implementation is file-backed</td></tr>
+<tr><td><code>observe-link</code></td><td>Observe a target through a Story Item, separating local presence, absence and unknown</td><td>Requires the source page in the selected own-site</td></tr>
+<tr><td><code>prepare-link</code> / <code>resolve-link</code></td><td>Use SHOP3 to plan defederation and link resolution</td><td>No fork or materialization is executed</td></tr>
+<tr><td><code>sqlite</code> / <code>dbi</code></td><td>ASDF systems present in the operator's development image</td><td>No demonstrated SQLite-backed FedWiki page lookup</td></tr>
+</tbody>
+</table>
+<p>Read the existing <a page="A Missing Local Link in Ward's Defederation Experiment">Local-only link investigation</a> to inspect the existing observation and plan objects. <a page="Planning with SHOP3">Planning with SHOP3</a> explains why a SHOP3 decomposition must not be confused with an executed operation. <a page="State and Persistence">State and Persistence</a> keeps runtime state, external authority and persistent records separate.</p>
+
+<h2>Problem assessment and next observation</h2>
+<p><strong>Not yet established as a new problem.</strong> There is an unanswered choice of local destination and a possible SQLite persistence adaptation; neither proves that existing routines cannot answer the task. A deliberately empty SQLite test database could only establish absence in <em>that database</em>, not in an already existing wiki. Do not infer local absence from Wards sitemap or from the S1 capture.</p>
+<p><strong>Next, locate the existing function:</strong> inspect the generic function <code>hyperbook:find-page</code> and its CLOS methods, especially the <code>own-site</code> method; then inspect how <code>observe-link</code> uses its result. Only after the required behavior has been identified should a concrete local Wiki argument be bound and the lookup run. SQLite remains one possible backend for a method on the existing lookup contract, not the name of the task. Any extension must preserve provenance, the observed/derived/hypothesized distinction, and the no-write boundary of S2 planning.</p>
+<pre>(mapcar (lambda (method)
+          (mapcar (lambda (specializer)
+                    (if (typep specializer 'class)
+                        (class-name specializer)
+                        specializer))
+                  (sb-mop:method-specializers method)))
+        (sb-mop:generic-function-methods
+         #'hyperbook:find-page))</pre>
+<p>This read-only SBCL/MOP form locates existing dispatch methods without running a page lookup or choosing a storage backend. Its output lists specializers, not verified behavior. Follow each relevant method's source and tests before concluding that another routine is necessary.</p>
+<p><strong>No operation is authorized by this reading:</strong> no remote fetch, database creation, fork, merge, automatic TMDM mapping, service restart or deployment.</p>
+
+<p><a page="Work Breakdown">Work Breakdown</a> · <a page="HyperDoc Dogfooding">HyperDoc Dogfooding</a></p>
