@@ -3195,7 +3195,7 @@
                       (:static-file "HyperDoc Dogfooding.html")
                       (:static-file "D2 Corpus.html")
                       (:static-file "Planning with SHOP3.html")
-                      (:static-file "Task Location Before S2 Storage Selection.html")
+                      (:static-file "Finding an Existing Page Lookup Function.html")
                       (:static-file "Collaborative Planning with Codex and SHOP3.html")
                       (:static-file "Authoring the CTM Plan Page.html")
                       (:static-file "CTM Plan Page WBS Dictionary.html")
