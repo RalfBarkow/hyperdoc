@@ -3179,6 +3179,7 @@
                       (:static-file "trails-rendered-dispatch-probe.mjs")
                       (:file "deployment-inspection")
                       (:file "source-text-view")
+                      (:file "page-lookup-methods-example")
                       (:module "deployment-evidence" :components
                                ((:static-file "publication.json")
                                 (:static-file "manifest.json")
