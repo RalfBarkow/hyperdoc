@@ -1,6 +1,10 @@
 <h1>Finding an Existing Page Lookup Function</h1>
 <in-package>dreyeck/work/reading</in-package>
 <p><strong>Status:</strong> A documented task-location investigation, not an automatic routine discovery system or an implemented SQLite page store. Context: Zettel 11601, 11604 and 11605.</p>
+<h2>Working agreement: start from HyperDoc</h2>
+<p>The common workplace is this HyperDoc: Text Pages formulate questions, record interpretations and link to evidence; Code Pages own named executable examples; Inspector views expose actual functions, methods, results and source objects; and the Work Workspace/Topicmap connects their subjects and relations. Chats and GitHub commits are <em>external sources and contributions</em> reachable from these subjects, not substitutes for the authored investigation.</p>
+<p>Follow the subject in the Workspace, then the linked Text and Code Pages, inspect the method or execute the example, and record what was observed separately from what is proposed, inferred or planned. Each remote conversation link must have a known URL and an appropriate disclosure decision; private chat contents are not automatically imported or published. A Git commit link names a revision, not the state of the running Lisp image.</p>
+<p>This reading is anchored in the Work Topicmap from <a page="Work Breakdown">Work Breakdown</a>, where the task-location investigation is a distinct Work item. For related planning behavior see <a page="Planning with SHOP3">Planning with SHOP3</a>. For the implementation at a fixed revision see the <a href="https://github.com/RalfBarkow/hyperdoc/commit/244ff38e55f8a5a91a70bba6dc70dbc02b6fd3b9">source-acquisition commit</a>; its source bytes are not the HTML page or the current Lisp image.</p>
 
 <h2>Locate the task before declaring a problem</h2>
 <p>The <em>problem-bestimmen</em> workflow uses the distinction from Zettel 6129 (Simon 48.2): a problem is a task that existing routines of behavior, action or interaction cannot solve. Task Location (Zettel 8992) first asks where the task belongs in the existing learned task space. A failed first lookup is not evidence that no routine exists.</p>
@@ -34,14 +38,11 @@
 <h2>Problem assessment and next observation</h2>
 <p><strong>Not yet established as a new problem.</strong> There is an unanswered choice of local destination and a possible SQLite persistence adaptation; neither proves that existing routines cannot answer the task. A deliberately empty SQLite test database could only establish absence in <em>that database</em>, not in an already existing wiki. Do not infer local absence from Wards sitemap or from the S1 capture.</p>
 <p><strong>Next, locate the existing function:</strong> inspect the generic function <code>hyperbook:find-page</code> and its CLOS methods, especially the <code>own-site</code> method; then inspect how <code>observe-link</code> uses its result. Only after the required behavior has been identified should a concrete local Wiki argument be bound and the lookup run. SQLite remains one possible backend for a method on the existing lookup contract, not the name of the task. Any extension must preserve provenance, the observed/derived/hypothesized distinction, and the no-write boundary of S2 planning.</p>
-<pre>(mapcar (lambda (method)
-          (mapcar (lambda (specializer)
-                    (if (typep specializer 'class)
-                        (class-name specializer)
-                        specializer))
-                  (sb-mop:method-specializers method)))
-        (sb-mop:generic-function-methods
-         #'hyperbook:find-page))</pre>
+<h3>Executable example from the Work Code Page</h3>
+<p>Inspect the <a expr="#'hyperbook:find-page">generic function</a> or the <a expr="(find-method #'hyperbook:find-page nil (list (find-class 'dreyeck/work/fedwiki-local-only::own-site) (find-class 't)))">existing own-site method</a>. Both links open the actual Lisp objects; neither performs a page lookup.</p>
+<p>The following is a transclusion of a named <code>hyperdoc:defexample</code> in <code>dreyeck/work/page-lookup-methods-example.lisp</code>. Its <strong>►</strong> action runs the read-only method inventory and opens the result in the Inspector. The Code Page must be loaded in the current image for the source transclusion and action to be available.</p>
+<source-of-function>page-lookup-methods-example</source-of-function>
+<p><a expr="#'page-lookup-methods-example">Inspect the example function</a>. A link with <code>expr</code> evaluates the expression while rendering a reference; the explicit <strong>►</strong> action is used for the actual example execution.</p>
 <p>This read-only SBCL/MOP form locates existing dispatch methods without running a page lookup or choosing a storage backend. Its output lists specializers, not verified behavior. Follow each relevant method's source and tests before concluding that another routine is necessary.</p>
 <p><strong>No operation is authorized by this reading:</strong> no remote fetch, database creation, fork, merge, automatic TMDM mapping, service restart or deployment.</p>
 
