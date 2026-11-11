@@ -3717,3 +3717,16 @@
   :perform (test-op (op component)
              (declare (ignore op component))
              (uiop:symbol-call :dreyeck/work/topic-maps-conformance-planning :run-tests)))
+
+(defsystem "dreyeck/work/topic-maps-instance-of-export"
+  :description "Optional read-only stated instance-of export from a retained native Project CTM revision"
+  :depends-on ("dreyeck/work/project")
+  :components ((:file "dreyeck/work/topic-maps-instance-of-export"))
+  :in-order-to ((test-op (test-op "dreyeck/work/topic-maps-instance-of-export/tests"))))
+
+(defsystem "dreyeck/work/topic-maps-instance-of-export/tests"
+  :depends-on ("dreyeck/work/topic-maps-instance-of-export")
+  :components ((:file "dreyeck/tests/topic-maps-instance-of-export"))
+  :perform (test-op (op component)
+             (declare (ignore op component))
+             (uiop:symbol-call :dreyeck/work/topic-maps-instance-of-export/tests :run-tests)))

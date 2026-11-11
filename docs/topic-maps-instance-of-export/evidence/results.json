@@ -1,0 +1,87 @@
+{
+  "recordedAtUTC": "2026-11-11T21:27:22.268090+00:00",
+  "hyperdocImplementationBase": "25f83196733a611810da2ea9596af1b4b2d215fb",
+  "targetDreyeckCh": "596344ae95d746f436705808462259371f5a593c",
+  "topicMapsCandidate": "c446a8228017f405c3a2650ca893e9450ac7cd7b",
+  "activeTopicMapsUnchanged": "88994c1b9e1edbf13e665e984a5c9c3b2cdf7575",
+  "environment": {
+    "lisp": "SBCL 2.4.10",
+    "os": "Linux",
+    "shop3": "4.3.1 / ce53f9b651acde8c44dc21eddb1a1c5b97f10536",
+    "nix": "2.20.6",
+    "git": "2.52.0"
+  },
+  "runs": [
+    {
+      "mode": "isolated",
+      "command": "DEFEDERATION_REPO=/workspace/work/topic-maps-instance-of-export TOPIC_MAPS_CANDIDATE_ROOT=/workspace/work/topic-maps-candidate-runtime/topic-maps-c446a822 TOPIC_MAPS_EVIDENCE_REPOSITORY=/workspace/topic-maps CONFORMANCE_TEST_MODE=regressions /workspace/scratch/tmdm-mcp-portable/bin/sbcl --noinform --no-sysinit --no-userinit --non-interactive --load docs/topic-maps-instance-of-export/evidence/environment-bootstrap.lisp --load docs/topic-maps-instance-of-export/run.lisp > docs/topic-maps-instance-of-export/evidence/isolated.log 2>&1",
+      "cwd": "/workspace/work/topic-maps-instance-of-export",
+      "exitCode": 0,
+      "log": "isolated.log",
+      "logSHA256": "61d951e8f8233ad005b98ef976fb8c89cfe2a2561c951a20b9e396544dc6b12d",
+      "verifiedMarkers": [
+        "CANDIDATE-SOURCE-PASS",
+        "CANDIDATE-TAMPER-REFUSAL-PASS",
+        "INSTANCE-OF-EXPORT-PASS: 51 checks",
+        "CONFORMANCE-INVESTIGATION-PASS: 195 assertions",
+        "INTEGRATION-ISOLATED-RUN-PASS"
+      ]
+    },
+    {
+      "mode": "old-pin",
+      "command": "DEFEDERATION_REPO=/workspace/work/topic-maps-instance-of-export TOPIC_MAPS_CANDIDATE_ROOT=/workspace/work/topic-maps-active-runtime/topic-maps-88994c1b TOPIC_MAPS_EVIDENCE_REPOSITORY=/workspace/topic-maps CONFORMANCE_TEST_MODE=regressions /workspace/scratch/tmdm-mcp-portable/bin/sbcl --noinform --no-sysinit --no-userinit --non-interactive --load docs/topic-maps-instance-of-export/evidence/environment-bootstrap.lisp --load docs/topic-maps-instance-of-export/old-pin.lisp > docs/topic-maps-instance-of-export/evidence/old-pin.log 2>&1",
+      "cwd": "/workspace/work/topic-maps-instance-of-export",
+      "exitCode": 0,
+      "log": "old-pin.log",
+      "logSHA256": "656c5509ced6123843ca2ff429cc58efb594874660048a75582fcac72ac762f5",
+      "verifiedMarkers": [
+        "OLD-PIN-REFUSAL-PASS"
+      ]
+    },
+    {
+      "mode": "regressions",
+      "command": "DEFEDERATION_REPO=/workspace/work/topic-maps-instance-of-export TOPIC_MAPS_CANDIDATE_ROOT=/workspace/work/topic-maps-candidate-runtime/topic-maps-c446a822 TOPIC_MAPS_EVIDENCE_REPOSITORY=/workspace/topic-maps CONFORMANCE_TEST_MODE=regressions /workspace/scratch/tmdm-mcp-portable/bin/sbcl --noinform --no-sysinit --no-userinit --non-interactive --load docs/topic-maps-instance-of-export/evidence/environment-bootstrap.lisp --load docs/topic-maps-conformance-planning/run.lisp > docs/topic-maps-instance-of-export/evidence/regressions.log 2>&1",
+      "cwd": "/workspace/work/topic-maps-instance-of-export",
+      "exitCode": 0,
+      "log": "regressions.log",
+      "logSHA256": "f8a6719411a649c1b8ae5b7fc292eca7c547dd99a41650a29f105a6b3e48dc41",
+      "verifiedMarkers": [
+        "INVESTIGATION REGRESSION PASS dreyeck/work/planning/tests",
+        "INVESTIGATION REGRESSION PASS dreyeck/work/defederation-planning/tests",
+        "INVESTIGATION REGRESSION PASS dreyeck/work/remote-control-planning/tests"
+      ]
+    }
+  ],
+  "snapshotCommands": [
+    "PATH=/workspace/tools/nix-portable-data/.nix-portable/bin:$PATH NIX_CONFIG='experimental-features = nix-command' python3 scripts/topic-maps-snapshot.py create /workspace/work/topic-maps-readers-source.git c446a8228017f405c3a2650ca893e9450ac7cd7b nix",
+    "PATH=/workspace/tools/nix-portable-data/.nix-portable/bin:$PATH NIX_CONFIG='experimental-features = nix-command' python3 scripts/topic-maps-snapshot.py create /workspace/work/topic-maps-readers-source.git c446a8228017f405c3a2650ca893e9450ac7cd7b /tmp/topic-maps-c446-repeat",
+    "PATH=/workspace/tools/nix-portable-data/.nix-portable/bin:$PATH NIX_CONFIG='experimental-features = nix-command' python3 scripts/topic-maps-snapshot.py verify /workspace/work/topic-maps-readers-source.git c446a8228017f405c3a2650ca893e9450ac7cd7b nix/topic-maps-c446a822-runtime.tar.gz nix/topic-maps-c446a822.manifest docs/topic-maps-instance-of-export/evidence/snapshot-verification.json",
+    "cmp nix/topic-maps-c446a822-runtime.tar.gz /tmp/topic-maps-c446-repeat/topic-maps-c446a822-runtime.tar.gz",
+    "cmp nix/topic-maps-c446a822.manifest /tmp/topic-maps-c446-repeat/topic-maps-c446a822.manifest"
+  ],
+  "snapshotCommandExitCodes": [
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "initialDiagnostic": {
+    "exitCode": 1,
+    "log": "initial-runner-refusal.log",
+    "reason": "Runner referred to UIOP:READ-FILE-INTO-BYTE-VECTOR, unavailable in pinned UIOP. Replaced by the existing source-snapshot byte-reading routine. Final commands pass."
+  },
+  "notExecuted": [
+    "Full Nix fixed-output application build",
+    "Interactive CLOG/SLY browser navigation",
+    "Full Topic Maps conformance or XTM suites",
+    "Production runtime adoption",
+    "Any real SHOP3 action, agent or page acquisition"
+  ],
+  "limits": [
+    "Candidate integrity verified relative to the selected Git commit; not author authentication or independent human acceptance",
+    "Explicit writable tree verification in isolated tests does not relax production /nix/store source policy",
+    "Existing ASDF and Project/dependency style warnings are retained in logs",
+    "The source revision and native map remain mutable; fingerprints and EQ references describe export time, not locked history"
+  ]
+}

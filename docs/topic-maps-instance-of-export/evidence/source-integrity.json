@@ -1,0 +1,64 @@
+{
+  "candidateRevision": "c446a8228017f405c3a2650ca893e9450ac7cd7b",
+  "hyperdocBase": "25f83196733a611810da2ea9596af1b4b2d215fb",
+  "observedTarget": "596344ae95d746f436705808462259371f5a593c",
+  "sourceSHA256": {
+    "dreyeck.asd": "aca6fd1e3da59e7ccd488ad4544258d6c2765c9d2af1138721861de31b5f3544",
+    "dreyeck/work/topic-maps-instance-of-export.lisp": "6372284d2401d9b62b1cfab78cd59730161a6fbf323dc3ae36ddcaeee55f58f0",
+    "dreyeck/tests/topic-maps-instance-of-export.lisp": "c3854ab6f81001b5af3d0147ec7396b4bed0bd62c32d1f439139a08b72fb647b",
+    "docs/topic-maps-instance-of-export/run.lisp": "8f39d3baf4fc630b02f338de60e0825eb36d3963bf656524fc90f26ed32e4eef",
+    "docs/topic-maps-instance-of-export/old-pin.lisp": "318167b825972ad264a3df05119748f28ee9c0f32af77f43c33c9120855b22ed",
+    "docs/topic-maps-instance-of-export/evidence/environment-bootstrap.lisp": "2e79722c57e137d070f3e1e416624fc8a30cfe25d65f0513edcb5bf6254f30d6",
+    "nix/topic-maps-c446a822.manifest": "6d1d9117b0dcbb0bde00caf6014035c0e702f0c4c5fb198b6aa950332201baf9",
+    "nix/topic-maps-c446a822-runtime.tar.gz": "bb1c64c9b0ecdb2d55ef76c8c4cc4ce19ab3eacebf8a32d380dd5a2453c6bdf2"
+  },
+  "protectedPaths": [
+    {
+      "path": "nix/topic-maps-source.nix",
+      "sha256": "32a2a2cfe0a565eb2100d70ebb99f205b3170cc23edbd223706265b2f4aa93da",
+      "unchangedFromImplementationBase": true
+    },
+    {
+      "path": "scripts/topic-maps-snapshot.py",
+      "sha256": "a99aa5ce79ea225847d243b362832c3139b11362acad31501e0e5709cbeb5eb5",
+      "unchangedFromImplementationBase": true
+    },
+    {
+      "path": "dreyeck/src/source-snapshot.lisp",
+      "sha256": "a1a652b339907fc0777163ca563f71d68bb8a48d41ae2f14648bd04f53de4a26",
+      "unchangedFromImplementationBase": true
+    },
+    {
+      "path": "nix/topic-maps-88994c1b.manifest",
+      "sha256": "f3bc7890ef5b7cfa4b85126d64d3660765ed3a2ef1f1dc30316ff5610dfc2b89",
+      "unchangedFromImplementationBase": true
+    },
+    {
+      "path": "nix/topic-maps-88994c1b-runtime.tar.gz",
+      "sha256": "6fe74dc31e5291b03d440cfbeaf41c38d021225f36ce7fb96afcbcd632006cdd",
+      "unchangedFromImplementationBase": true
+    },
+    {
+      "path": "dreyeck/work/project/project-workspace.lisp",
+      "sha256": "aac51495705f51bea0cc5a7d5cedd6fd4fcd56dab674c135be7ba1477f8fff9e",
+      "unchangedFromImplementationBase": true
+    },
+    {
+      "path": "dreyeck/work/project/hyperdoc-project.ctm",
+      "sha256": "e7c4478cf1cab9e3555efbb359b19818f68ab4a0c51ed8850dd1519e545edd52",
+      "unchangedFromImplementationBase": true
+    },
+    {
+      "path": "dreyeck/work/topic-maps-conformance-planning.lisp",
+      "sha256": "168bb2a11c7680bcb218d47c42cec43363becb0a423fe5d233f3deb0fdd1d0ea",
+      "unchangedFromImplementationBase": true
+    },
+    {
+      "path": "dreyeck/tests/topic-maps-conformance-planning.lisp",
+      "sha256": "bed25fd1988c17fe4b415d1a8f7c6b4b8caa58bf7c18dabcdd29305cf9742c49",
+      "unchangedFromImplementationBase": true
+    }
+  ],
+  "archiveRepeatedByteExactly": true,
+  "manifestRepeatedByteExactly": true
+}
