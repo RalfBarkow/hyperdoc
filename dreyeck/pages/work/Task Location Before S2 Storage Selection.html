@@ -15,7 +15,8 @@
 
 <h2>Concrete task: local presence of a linked page</h2>
 <p>The real S1 capture from <code>ward.asia.wiki.org</code> acquired <em>Safe and Familiar Welcome</em> as HTTP response bytes and hydrated an offline native FedWiki page. Its Story has 17 Items and its Journal 28 actions. Item <strong>12</strong> links to <code>making-the-welcome-page</code>. Wards recorded sitemap contains that slug. Those facts describe the <strong>source</strong>, not our local destination.</p>
-<p><strong>Task:</strong> Determine whether the destination wiki contains <code>making-the-welcome-page</code>, preserving the identity of the source relation and distinguishing observed presence, confirmed local absence and read failure. The destination wiki is not yet selected.</p>
+<p><strong>Task, stated as an operation:</strong> Determine the presence of a page named <code>making-the-welcome-page</code>. The page slug is one argument; the lookup context (which HyperBook or local Wiki?) is another argument that must be supplied to <em>execute</em> a lookup. Choosing that context is not the task-location question.</p>
+<p><strong>Candidate routine:</strong> <code>hyperbook:find-page</code> performs the lookup. For an <code>own-site</code>, its specialized method returns a local page or <code>NIL</code>. <code>dreyeck/work/fedwiki-local-only:observe-link</code> builds on that lookup and classifies an observed Story Item's target as <code>:OBSERVED-LOCAL</code>, <code>:CONFIRMED-LOCAL-ABSENCE</code> or <code>:UNKNOWN</code> on read failure. These are different levels of behavior, not competing SQLite designs.</p>
 
 <h2>What existing routines already solve</h2>
 <table>
@@ -32,7 +33,16 @@
 
 <h2>Problem assessment and next observation</h2>
 <p><strong>Not yet established as a new problem.</strong> There is an unanswered choice of local destination and a possible SQLite persistence adaptation; neither proves that existing routines cannot answer the task. A deliberately empty SQLite test database could only establish absence in <em>that database</em>, not in an already existing wiki. Do not infer local absence from Wards sitemap or from the S1 capture.</p>
-<p>Next, name the actual destination wiki and observe its local lookup contract. If SQLite is adopted, first consider a storage implementation behind existing <code>hyperbook:find-page</code> and <code>observe-link</code> rather than a second link-resolution workflow. Any new method must preserve provenance, the observed/derived/hypothesized distinction, and the no-write boundary of S2 planning.</p>
+<p><strong>Next, locate the existing function:</strong> inspect the generic function <code>hyperbook:find-page</code> and its CLOS methods, especially the <code>own-site</code> method; then inspect how <code>observe-link</code> uses its result. Only after the required behavior has been identified should a concrete local Wiki argument be bound and the lookup run. SQLite remains one possible backend for a method on the existing lookup contract, not the name of the task. Any extension must preserve provenance, the observed/derived/hypothesized distinction, and the no-write boundary of S2 planning.</p>
+<pre>(mapcar (lambda (method)
+          (mapcar (lambda (specializer)
+                    (if (typep specializer 'class)
+                        (class-name specializer)
+                        specializer))
+                  (sb-mop:method-specializers method)))
+        (sb-mop:generic-function-methods
+         #'hyperbook:find-page))</pre>
+<p>This read-only SBCL/MOP form locates existing dispatch methods without running a page lookup or choosing a storage backend. Its output lists specializers, not verified behavior. Follow each relevant method's source and tests before concluding that another routine is necessary.</p>
 <p><strong>No operation is authorized by this reading:</strong> no remote fetch, database creation, fork, merge, automatic TMDM mapping, service restart or deployment.</p>
 
 <p><a page="Work Breakdown">Work Breakdown</a> · <a page="HyperDoc Dogfooding">HyperDoc Dogfooding</a></p>
