@@ -1,0 +1,41 @@
+{
+  "hyperdocBase": "596344ae95d746f436705808462259371f5a593c",
+  "branch": "codex/topic-maps-conformance-planning",
+  "sourceSHA256": {
+    "dreyeck.asd": "d23d2daf8be79277c5f90bb85bb8e8a97aa3d73aadd0cb9eb83e2417db74e736",
+    "dreyeck/work/topic-maps-conformance-planning.lisp": "168bb2a11c7680bcb218d47c42cec43363becb0a423fe5d233f3deb0fdd1d0ea",
+    "dreyeck/tests/topic-maps-conformance-planning.lisp": "bed25fd1988c17fe4b415d1a8f7c6b4b8caa58bf7c18dabcdd29305cf9742c49",
+    "dreyeck/pages/topic-maps-conformance-planning/Planning Evidence-Based Investigations.html": "a2358bb41f789c054cad73f41a3e19c1c8a85f3948a7d4331a2fa76c5193e056"
+  },
+  "runs": [
+    {
+      "mode": "focused",
+      "command": "TOPIC_MAPS_EVIDENCE_REPOSITORY=/workspace/topic-maps DEFEDERATION_REPO=/workspace/work/topic-maps-conformance-planning CONFORMANCE_TEST_MODE=focused /workspace/scratch/tmdm-mcp-portable/bin/sbcl --noinform --no-sysinit --no-userinit --non-interactive --load /workspace/work/defederation-bootstrap.lisp --load docs/topic-maps-conformance-planning/run.lisp",
+      "cwd": "/workspace/work/topic-maps-conformance-planning",
+      "exitCode": 0,
+      "log": "focused.log"
+    },
+    {
+      "mode": "regressions",
+      "command": "TOPIC_MAPS_EVIDENCE_REPOSITORY=/workspace/topic-maps DEFEDERATION_REPO=/workspace/work/topic-maps-conformance-planning CONFORMANCE_TEST_MODE=regressions /workspace/scratch/tmdm-mcp-portable/bin/sbcl --noinform --no-sysinit --no-userinit --non-interactive --load /workspace/work/defederation-bootstrap.lisp --load docs/topic-maps-conformance-planning/run.lisp",
+      "cwd": "/workspace/work/topic-maps-conformance-planning",
+      "exitCode": 0,
+      "log": "regressions.log"
+    }
+  ],
+  "focusedAssertions": 195,
+  "topicMapsConformanceTestsExecuted": 0,
+  "existingTestsModified": false,
+  "existingRegressions": [
+    "dreyeck/work/planning/tests",
+    "dreyeck/work/defederation-planning/tests",
+    "dreyeck/work/remote-control-planning/tests"
+  ],
+  "limits": [
+    "Historical evidence read from pinned Git objects; Topic Maps implementation not loaded or tested",
+    "SBCL 2.4.10, SHOP3 4.3.1 at ce53f9b651acde8c44dc21eddb1a1c5b97f10536, Linux",
+    "No live SLY/CLOG navigation or full Nix closure validation",
+    "Prepared existing dependency registry/cache; no dependency acquisition",
+    "No statements about Fable working-tree changes; no source/API integration with that work"
+  ]
+}
