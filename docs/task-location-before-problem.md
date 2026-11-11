@@ -74,7 +74,7 @@ Neither the source-item inspection nor the method listing determines local prese
 
 ## Related living documentation
 
-- Work HyperDoc: **Task Location Before S2 Storage Selection** (this same case).
+- Work HyperDoc: **Finding an Existing Page Lookup Function** (this same case).
 - Work HyperDoc: **Reading a Local-only FedWiki Link** and **A Missing Local Link in Ward's Defederation Experiment** (existing routines and their exact constraints).
 - Work HyperDoc: **Planning with SHOP3** (existing planning example; no general routine-finder).
 - `docs/fedwiki-local-only/README.md` (local observation and planning contract).
