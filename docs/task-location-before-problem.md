@@ -36,7 +36,7 @@ The existing `dreyeck/fedwiki-source-relations` reading demonstrates the same *t
 
 ### Decision
 
-The next task is **to identify the intended local wiki authority and query that authority** for `making-the-welcome-page`. No such destination has yet been selected. An empty, newly created SQLite database would establish absence **only in that new database**; it would not establish absence in an existing local Wiki. Equally, the missing `about-reserved-asset-paths` entry in Ward's sitemap does not show local absence.
+The task to locate is **to determine the presence of `making-the-welcome-page`**. Before binding a destination, inspect the existing `hyperbook:find-page` generic function, its applicable methods, and `observe-link` as a higher-level behavior that classifies lookup outcomes. The Wiki is an argument required to execute the routine, **not the initial search target**. No destination has yet been selected. An empty, newly created SQLite database would establish absence **only in that new database**; it would not establish absence in an existing local Wiki. Equally, the missing `about-reserved-asset-paths` entry in Ward's sitemap does not show local absence.
 
 Before specifying a SQLite adapter, determine whether the task can be satisfied through the existing `hyperbook:find-page` / `observe-link` contracts against the actual selected destination. If SQLite is chosen as its store, investigate implementing a **storage method behind the existing lookup contract**, preserving existing page identity, provenance and the distinction between `OBSERVED-LOCAL`, `CONFIRMED-LOCAL-ABSENCE` and `UNKNOWN`. This is a candidate adaptation, not an accepted requirement.
 
@@ -44,7 +44,22 @@ No S2 destination is created, no new SHOP3 domain is defined, and no fork, merge
 
 ## Next inspection
 
-In the existing SLY image, without new network or disk writes, inspect the known S1 object and the one Story Item:
+First inspect the function and its CLOS dispatch in the existing SBCL/SLY image, without choosing a Wiki, opening a database or making a network request:
+
+```lisp
+(mapcar (lambda (method)
+          (mapcar (lambda (specializer)
+                    (if (typep specializer 'class)
+                        (class-name specializer)
+                        specializer))
+                  (sb-mop:method-specializers method)))
+        (sb-mop:generic-function-methods
+         #'hyperbook:find-page))
+```
+
+This gives candidate method specializers; it does not itself establish semantic correctness. Read the relevant method definitions and see how `observe-link` maps a successful lookup, a missing page, or a read failure to a separate observed finding.
+
+The source example remains available in the SLY image, without new network or disk writes:
 
 ```lisp
 (let* ((page (dreyeck/work/fedwiki-source-acquisition:acquisition-page
@@ -55,7 +70,7 @@ In the existing SLY image, without new network or disk writes, inspect the known
         :item-id (gethash "id" (hyperbook/fedwiki::data-of item))))
 ```
 
-That inspection does not determine local presence. The next practical experiment must use a **named and observed local store**; it should compare its lookup behavior with existing `observe-link` before implementing new persistence.
+Neither the source-item inspection nor the method listing determines local presence. Only after the existing routine has been located and its required inputs understood should a concrete Wiki/store be supplied for a real lookup. Compare that result with `observe-link` before proposing new persistence.
 
 ## Related living documentation
 
