@@ -42,7 +42,7 @@ service integration, the limits of the packaged runtime and the checks.
 (read-only branch review, `asdf:test-system` runs, Nix checks), what each changes and which tests need external material. See
 [docs/hyperdoc-dev.md](docs/hyperdoc-dev.md).
 
-Before selecting a new persistence layer or implementation, use `hyperdoc-dev task-location` to read the existing *problem-bestimmen* method: locate the task and applicable routines before declaring an unsolved problem. The S2 / SQLite example is documented in [Task location before problem determination](docs/task-location-before-problem.md) and in the Work HyperDoc's **Task Location Before S2 Storage Selection** page. This is read-only guidance; it does not run SHOP3 or create a SQLite database.
+Before selecting a new persistence layer or implementation, use `hyperdoc-dev task-location` to read the existing *problem-bestimmen* method: locate the task and applicable routines before declaring an unsolved problem. The S2 / SQLite example is documented in [Task location before problem determination](docs/task-location-before-problem.md) and in the Work HyperDoc's **Finding an Existing Page Lookup Function** page. This is read-only guidance; it does not run SHOP3 or create a SQLite database.
 
 ### Documentation language
 
