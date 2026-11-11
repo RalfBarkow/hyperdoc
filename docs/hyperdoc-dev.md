@@ -10,7 +10,7 @@ Run `hyperdoc-dev task-location` to read [Task location before problem determina
 
 The command deliberately **does not** run SHOP3, perform repository search, declare a problem, create a database, or change the worktree. For a bounded case, identify the task, inspect candidate routines and their contracts, then use an existing SHOP3 domain only if its task and preconditions fit. Preserve native alternatives and `:plan-only` status; a missing domain is not evidence of a missing routine.
 
-Zettel 11605 illustrates this with Ward's `making-the-welcome-page` link: S1 successfully acquired the source, existing local-only code can observe and plan a link in a file-backed own-site, but **no destination wiki has yet been chosen**. ASDF reports `sqlite` and `dbi` available in the operator's image; this does not establish a SQLite-backed local page store. The [Work HyperDoc reading](../dreyeck/pages/work/Task%20Location%20Before%20S2%20Storage%20Selection.html) exposes that distinction alongside the existing source-backed Local-only and SHOP3 readings. It is documentation, not an accepted new S2 implementation.
+Zettel 11605 illustrates this with Ward's `making-the-welcome-page` link: S1 successfully acquired the source, existing local-only code can observe and plan a link in a file-backed own-site, but **no destination wiki has yet been chosen**. ASDF reports `sqlite` and `dbi` available in the operator's image; this does not establish a SQLite-backed local page store. The [Work HyperDoc reading](../dreyeck/pages/work/Finding%20an%20Existing%20Page%20Lookup%20Function.html) exposes that distinction alongside the existing source-backed Local-only and SHOP3 readings. It is documentation, not an accepted new S2 implementation.
 
 ## Greeting
 
