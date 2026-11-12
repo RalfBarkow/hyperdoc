@@ -1,0 +1,119 @@
+# Manually curated reading of Taylor H. Paul (2026).
+# Page numbers are the dissertation's printed page numbers, not PDF indices.
+# The source for every term is the attached dissertation, NOT a claim that
+# WORKSWORLD code is installed or running in HyperDoc.
+# urn:hyperdoc:* identifiers are local to this reading, not standard PSIs.
+%version 1.0
+paper <urn:hyperdoc:reference:paul-2026>;
+  - "A Network Model for the Automated Planning and Scheduling of Pipelined Workflows";
+  author: "Taylor H. Paul";
+  year: "2026";
+  citation: "PhD dissertation, University of Maryland, College Park";
+  source-url: "https://search.proquest.com/openview/04c374e7775805391be20977693d1056/1".
+shop3 <urn:hyperdoc:subject:shop3>;
+  - "SHOP3";
+  source-page: "42-44, 91-98".
+enhsp <urn:hyperdoc:paul-2026:planner:enhsp>;
+  - "ENHSP";
+  source-page: "42-44".
+worksworld <urn:hyperdoc:paul-2026:domain:worksworld>;
+  - "WORKSWORLD";
+  source-page: "78-85".
+worksworld-2 <urn:hyperdoc:paul-2026:domain:worksworld-2>;
+  - "WORKSWORLD-2";
+  source-page: "86-90".
+worksworld-2h <urn:hyperdoc:paul-2026:domain:worksworld-2h>;
+  - "WORKSWORLD-2H";
+  source-page: "90-98";
+  source-url: "https://github.com/taylorpaul/WORKSWORLD".
+resource-graph <urn:hyperdoc:paul-2026:concept:resource-graph>;
+  - "Resource Graph (GR)";
+  source-page: "66-67, Definition 3.4.4, Figure 3.7".
+workflow-graph <urn:hyperdoc:paul-2026:concept:workflow-request-graph>;
+  - "Workflow Request Graph (Gwf)";
+  source-page: "68-70, Definitions 3.4.5-3.4.6".
+site <urn:hyperdoc:paul-2026:concept:site>;
+  - "Site";
+  source-page: "62-63, 66-67".
+link <urn:hyperdoc:paul-2026:concept:link>;
+  - "Intrasite / Intersite Link";
+  source-page: "64-67".
+dsi <urn:hyperdoc:paul-2026:concept:dsi>;
+  - "Data Sharing Interface (DSI)";
+  source-page: "51-55, 63-64".
+dpi <urn:hyperdoc:paul-2026:concept:dpi>;
+  - "Data Processing Interface (DPI)";
+  source-page: "51-55, 63-64".
+data-component <urn:hyperdoc:paul-2026:concept:data-component>;
+  - "Data Component (DC)";
+  source-page: "68-70".
+processing-component <urn:hyperdoc:paul-2026:concept:processing-component>;
+  - "Processing Component (PC)";
+  source-page: "68-70".
+achieve-all-goals <urn:hyperdoc:paul-2026:method:achieve-all-goals>;
+  - "achieve-all-goals";
+  source-page: "91-93, Table 4.9, Algorithm 1".
+select-goal-interface <urn:hyperdoc:paul-2026:method:select-goal-interface>;
+  - "select-goal-interface";
+  source-page: "91-94, Table 4.9, Algorithm 1".
+plan-source-coverage <urn:hyperdoc:paul-2026:method:plan-source-coverage>;
+  - "plan-source-coverage";
+  source-page: "91-95, Table 4.9, Algorithm 1".
+plan-source-delivery <urn:hyperdoc:paul-2026:method:plan-source-delivery>;
+  - "plan-source-delivery";
+  source-page: "91-97, Table 4.9, Table 4.11".
+commit-rate-flow <urn:hyperdoc:paul-2026:method:commit-rate-flow>;
+  - "commit-rate-flow";
+  source-page: "92-97, Figure 4.2, Algorithm 1".
+reuse <urn:hyperdoc:paul-2026:strategy:reuse>;
+  - "Reuse";
+  source-page: "95-97, Table 4.11 (1a-1c)".
+replicate <urn:hyperdoc:paul-2026:strategy:replicate>;
+  - "Replicate";
+  source-page: "95-97, Table 4.11 (2a-2c)".
+transform <urn:hyperdoc:paul-2026:strategy:transform>;
+  - "Transform";
+  source-page: "95-97, Table 4.11 (3a-3d)".
+author - "Author".
+year - "Year".
+citation - "Citation".
+source-url - "Source URL; no retrieval implied".
+source-page - "Printed dissertation page / figure".
+describes - "Describes".
+uses-planner - "Uses planner".
+mapped-to - "Mapped to".
+contains - "Contains".
+decomposes-into - "Decomposes into".
+case-of - "Case of".
+work - "Work".
+subject - "Subject".
+domain - "Planning domain".
+planner - "Planner".
+workflow - "Workflow".
+resources - "Resources".
+whole - "Whole".
+part - "Part".
+case - "Case".
+method - "Method".
+# Source-observed relations; see docs/paul-2026-topic-map.md for exact warrants.
+describes(work: paper, subject: resource-graph)
+describes(work: paper, subject: workflow-graph)
+describes(work: paper, subject: worksworld)
+describes(work: paper, subject: worksworld-2)
+describes(work: paper, subject: worksworld-2h)
+uses-planner(domain: worksworld, planner: enhsp)
+uses-planner(domain: worksworld-2, planner: enhsp)
+uses-planner(domain: worksworld-2h, planner: shop3)
+mapped-to(workflow: workflow-graph, resources: resource-graph)
+contains(whole: resource-graph, part: site)
+contains(whole: resource-graph, part: link)
+contains(whole: workflow-graph, part: data-component)
+contains(whole: workflow-graph, part: processing-component)
+decomposes-into(whole: worksworld-2h, part: achieve-all-goals)
+decomposes-into(whole: achieve-all-goals, part: select-goal-interface)
+decomposes-into(whole: achieve-all-goals, part: plan-source-coverage)
+decomposes-into(whole: achieve-all-goals, part: commit-rate-flow)
+decomposes-into(whole: plan-source-coverage, part: plan-source-delivery)
+case-of(case: reuse, method: plan-source-delivery)
+case-of(case: replicate, method: plan-source-delivery)
+case-of(case: transform, method: plan-source-delivery)
