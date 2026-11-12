@@ -1,10 +1,20 @@
 # Inspecting one source-backed acceptance evidence chain
 
-This optional experiment is an uncommitted change in a detached worktree based
-on HyperDoc `9176349edb473becd7423a7ca246f9bc07a75388`. The initially observed
-main worktree was clean at `a33fa97a5ae3138b814151745228b1e4f5d1ebb8`;
-remote `dreyeck.ch` was `596344ae95d746f436705808462259371f5a593c`.
-Neither worktree nor branch is assumed to be the evidence source automatically.
+This optional experiment was developed and tested in a detached worktree based
+on HyperDoc `9176349edb473becd7423a7ca246f9bc07a75388`. The tested implementation
+was then committed as `637970ba79168d97d6d45455b3601cd9f1183ab8` and published
+on `codex/acceptance-evidence-chain`.
+
+At development time, the initially observed main worktree was clean at
+`a33fa97a5ae3138b814151745228b1e4f5d1ebb8`; remote `dreyeck.ch` was
+`596344ae95d746f436705808462259371f5a593c`. These are historical observations,
+not claims about the current checkout or remote branches. Neither worktree nor
+branch is assumed to be the evidence source automatically.
+
+The retained `test-results.json` describes the uncommitted test-time state;
+its source hashes, including the README hash, refer to the tested files now
+preserved in `637970ba`. This publication-status correction does not rewrite
+those historical records or claim a new test execution.
 
 ## Integration point and reuse
 
