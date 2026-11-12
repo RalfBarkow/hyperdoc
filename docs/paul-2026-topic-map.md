@@ -29,7 +29,7 @@ The `hyperdoc-context.ctm` record is an authored **derived crosswalk** to existi
 | Topology phase and `commit-rate-flow` phase | 92–97 | Fig. 4.2; Algorithm 1 |
 | Numeric versus hierarchical planner tradeoff | 159–175, 202–206 | §6.2, §8.1; performance is reported by Paul, **not remeasured here** |
 
-All named concept and relation assertions in `paul-2026.ctm` are **source-observed manual selections** against these pages. The CTM abstraction is a **derived representation**, not Paul's own Topic Map. For example, `decomposes-into` abbreviates the control-flow representation in Figure 4.2; it does **not** claim every subordinate method is a direct SHOP3 method-body task of `achieve-all-goals`.
+All named concept and relation assertions in `paul-2026.ctm` are **source-observed manual selections** against these pages. The CTM abstraction is a **derived representation**, not Paul's own Topic Map. For example, `has-entry-method` identifies the top-level method and `calls` abstracts the Figure 4.2 control flow; `may-call` distinguishes the conditional `plan-source-delivery` → `commit-rate-flow` rate flush in recursive Transform cases. These relations are readings of Paul's algorithm, **not** a claim that every step is an immediate SHOP3 method-body subtask.
 
 No inferred equivalence between a HyperDoc planning *task* and a WORKSWORLD *task* is asserted. New research connections can be added later with an explicit `inferred` or `hypothesized` warrant, while retaining the source-claim distinction.
 
