@@ -115,9 +115,11 @@
       "(asdf:test-system \"dreyeck/lisp-critic/critique/tests\")"
     ],
     "exitCode": 1,
-    "status": "FAIL",
+    "status": "BLOCKED",
     "log": "dreyeck-lisp-critic-critique-tests.log",
-    "sha256": "65b64a802f3e16d85603149dd5c97d550723ada36867fcea7b80c540e0772888"
+    "sha256": "65b64a802f3e16d85603149dd5c97d550723ada36867fcea7b80c540e0772888",
+    "processOutcome": "FAIL",
+    "qualification": "Terminal missing real-engine/source-station prerequisite inspected; same failure retained in A1 baseline-suites.json; no real engine scenario completed."
   },
   {
     "worktree": "/workspace/work/lisp-critic-reader-safety-a2",
@@ -135,9 +137,11 @@
       "(asdf:test-system \"dreyeck/lisp-critic/engine-integration/tests\")"
     ],
     "exitCode": 1,
-    "status": "FAIL",
+    "status": "BLOCKED",
     "log": "dreyeck-lisp-critic-engine-integration-tests.log",
-    "sha256": "5206c221d753379a1a1976c56dcb9db728e539ba1420d4f7af13964f3cc37cea"
+    "sha256": "5206c221d753379a1a1976c56dcb9db728e539ba1420d4f7af13964f3cc37cea",
+    "processOutcome": "FAIL",
+    "qualification": "Terminal missing real-engine/source-station prerequisite inspected; same failure retained in A1 baseline-suites.json; no real engine scenario completed."
   },
   {
     "worktree": "/workspace/work/lisp-critic-reader-safety-a2",
@@ -155,9 +159,11 @@
       "(asdf:test-system \"dreyeck/lisp-critic/page-station/tests\")"
     ],
     "exitCode": 1,
-    "status": "FAIL",
+    "status": "BLOCKED",
     "log": "dreyeck-lisp-critic-page-station-tests.log",
-    "sha256": "5b7b32eef336e44fd24e4f40b77a75b5359eb00460ea792a553455938b583b0a"
+    "sha256": "5b7b32eef336e44fd24e4f40b77a75b5359eb00460ea792a553455938b583b0a",
+    "processOutcome": "FAIL",
+    "qualification": "Terminal missing real-engine/source-station prerequisite inspected; same failure retained in A1 baseline-suites.json; no real engine scenario completed."
   },
   {
     "worktree": "/workspace/work/lisp-critic-reader-safety-a2",
@@ -177,6 +183,7 @@
     "exitCode": 1,
     "status": "FAIL",
     "log": "dreyeck-catalog-tests.log",
-    "sha256": "c8fcf0a4a31c425f407126433ece4a4a9cf0a1469327876082a538bf76b311f7"
+    "sha256": "c8fcf0a4a31c425f407126433ece4a4a9cf0a1469327876082a538bf76b311f7",
+    "qualification": "Actual assertion failure in CHECK-PAGE-LOADING-REPOSITORY-CONTEXT; same missing-history failure retained in A1 baseline-launcher-suites.json."
   }
 ]
