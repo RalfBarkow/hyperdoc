@@ -40,8 +40,19 @@
       (multiple-value-bind (merged resolve)
           (m:import-map-content target source)
         (assert (eq merged target))
-        (assert (eq old-target (r:find-subject merged subject)))
-        (assert (eq old-target (funcall resolve old-source)))
+        (let ((current (r:find-subject merged subject)))
+          ;; TMDM §6.2 replaces two equal Topics with a new canonical Topic.
+          ;; OLD-TARGET remains a valid forwarding handle, not an EQ survivor.
+          (assert current)
+          (assert (eq current (m:canonical-topic old-target)))
+          (assert (eq current (funcall resolve old-source)))
+          (assert (eq current (m:canonical-topic current)))
+          (assert (member current (m:topic-map-topics merged) :test #'eq))
+          (assert (eq merged (m:topic-parent old-target)))
+          (assert (member subject (m:topic-subject-identifiers current)
+                          :test #'string=)))
+        ;; Import does not mutate or forward the independent source Topic.
+        (assert (eq old-source (m:canonical-topic old-source)))
         (assert (eq source (m:topic-parent old-source)))
         (assert (= source-count (length (m:topic-map-topics source))))
         (assert (equalp source-before
