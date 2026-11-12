@@ -1,0 +1,182 @@
+[
+  {
+    "worktree": "/workspace/work/lisp-critic-reader-safety-a2",
+    "revision": "c0b5f8328805ebfaa929f4ff4c2e51052dd39511",
+    "system": "dreyeck/lisp-critic/text-criticism/integration-tests",
+    "command": [
+      "/workspace/work/lisp-critic-reader-safety-a2/docs/lisp-critic-reader-safety/portable-sbcl",
+      "--noinform",
+      "--no-sysinit",
+      "--no-userinit",
+      "--non-interactive",
+      "--load",
+      "/workspace/work/lisp-critic-reader-safety-a2/docs/lisp-critic-reader-safety/bootstrap.lisp",
+      "--eval",
+      "(asdf:test-system \"dreyeck/lisp-critic/text-criticism/integration-tests\")"
+    ],
+    "exitCode": 0,
+    "status": "PASS",
+    "log": "dreyeck-lisp-critic-text-criticism-integration-tests.log",
+    "sha256": "6337b0f177ca62ab5bc2ba119c8057e6caf53861b9289c98cb16280dd85b8cc3"
+  },
+  {
+    "worktree": "/workspace/work/lisp-critic-reader-safety-a2",
+    "revision": "c0b5f8328805ebfaa929f4ff4c2e51052dd39511",
+    "system": "dreyeck/lisp-critic/tests",
+    "command": [
+      "/workspace/work/lisp-critic-reader-safety-a2/docs/lisp-critic-reader-safety/portable-sbcl",
+      "--noinform",
+      "--no-sysinit",
+      "--no-userinit",
+      "--non-interactive",
+      "--load",
+      "/workspace/work/lisp-critic-reader-safety-a2/docs/lisp-critic-reader-safety/bootstrap.lisp",
+      "--eval",
+      "(asdf:test-system \"dreyeck/lisp-critic/tests\")"
+    ],
+    "exitCode": 0,
+    "status": "PASS",
+    "log": "dreyeck-lisp-critic-tests.log",
+    "sha256": "69cb9de1c2023e0043efe121be65ccdab21eb5eb27168fae4c0cd8cdf8991f2e"
+  },
+  {
+    "worktree": "/workspace/work/lisp-critic-reader-safety-a2",
+    "revision": "c0b5f8328805ebfaa929f4ff4c2e51052dd39511",
+    "system": "dreyeck/lisp-critic/federated-context/tests",
+    "command": [
+      "/workspace/work/lisp-critic-reader-safety-a2/docs/lisp-critic-reader-safety/portable-sbcl",
+      "--noinform",
+      "--no-sysinit",
+      "--no-userinit",
+      "--non-interactive",
+      "--load",
+      "/workspace/work/lisp-critic-reader-safety-a2/docs/lisp-critic-reader-safety/bootstrap.lisp",
+      "--eval",
+      "(asdf:test-system \"dreyeck/lisp-critic/federated-context/tests\")"
+    ],
+    "exitCode": 0,
+    "status": "PASS",
+    "log": "dreyeck-lisp-critic-federated-context-tests.log",
+    "sha256": "3dc786f5177a9c0d49674eb74be49b08aaa2c2aa11440943a4fa5eb476cd8ba6"
+  },
+  {
+    "worktree": "/workspace/work/lisp-critic-reader-safety-a2",
+    "revision": "24ffdbaed60bcf5f37e8d4891a4c5c83687b453f",
+    "system": "dreyeck/lisp-critic/reading/tests",
+    "command": [
+      "/workspace/work/lisp-critic-reader-safety-a2/docs/lisp-critic-reader-safety/portable-sbcl",
+      "--noinform",
+      "--no-sysinit",
+      "--no-userinit",
+      "--non-interactive",
+      "--load",
+      "/workspace/work/lisp-critic-reader-safety-a2/docs/lisp-critic-reader-safety/bootstrap.lisp",
+      "--eval",
+      "(asdf:test-system \"dreyeck/lisp-critic/reading/tests\")"
+    ],
+    "exitCode": 0,
+    "status": "PASS",
+    "log": "dreyeck-lisp-critic-reading-tests.log",
+    "sha256": "b25b23051c083bd169b60047d3df56019668b562fc3bd431f2e8e08114b76b9b"
+  },
+  {
+    "worktree": "/workspace/work/lisp-critic-reader-safety-a2",
+    "revision": "24ffdbaed60bcf5f37e8d4891a4c5c83687b453f",
+    "system": "dreyeck/lisp-critic/recorded/tests",
+    "command": [
+      "/workspace/work/lisp-critic-reader-safety-a2/docs/lisp-critic-reader-safety/portable-sbcl",
+      "--noinform",
+      "--no-sysinit",
+      "--no-userinit",
+      "--non-interactive",
+      "--load",
+      "/workspace/work/lisp-critic-reader-safety-a2/docs/lisp-critic-reader-safety/bootstrap.lisp",
+      "--eval",
+      "(asdf:test-system \"dreyeck/lisp-critic/recorded/tests\")"
+    ],
+    "exitCode": 0,
+    "status": "PASS",
+    "log": "dreyeck-lisp-critic-recorded-tests.log",
+    "sha256": "aeb7b81288a6909ea07bc95e91336447cd90edc1f886912bc7688fa078a66a74"
+  },
+  {
+    "worktree": "/workspace/work/lisp-critic-reader-safety-a2",
+    "revision": "24ffdbaed60bcf5f37e8d4891a4c5c83687b453f",
+    "system": "dreyeck/lisp-critic/critique/tests",
+    "command": [
+      "/workspace/work/lisp-critic-reader-safety-a2/docs/lisp-critic-reader-safety/portable-sbcl",
+      "--noinform",
+      "--no-sysinit",
+      "--no-userinit",
+      "--non-interactive",
+      "--load",
+      "/workspace/work/lisp-critic-reader-safety-a2/docs/lisp-critic-reader-safety/bootstrap.lisp",
+      "--eval",
+      "(asdf:test-system \"dreyeck/lisp-critic/critique/tests\")"
+    ],
+    "exitCode": 1,
+    "status": "FAIL",
+    "log": "dreyeck-lisp-critic-critique-tests.log",
+    "sha256": "65b64a802f3e16d85603149dd5c97d550723ada36867fcea7b80c540e0772888"
+  },
+  {
+    "worktree": "/workspace/work/lisp-critic-reader-safety-a2",
+    "revision": "24ffdbaed60bcf5f37e8d4891a4c5c83687b453f",
+    "system": "dreyeck/lisp-critic/engine-integration/tests",
+    "command": [
+      "/workspace/work/lisp-critic-reader-safety-a2/docs/lisp-critic-reader-safety/portable-sbcl",
+      "--noinform",
+      "--no-sysinit",
+      "--no-userinit",
+      "--non-interactive",
+      "--load",
+      "/workspace/work/lisp-critic-reader-safety-a2/docs/lisp-critic-reader-safety/bootstrap.lisp",
+      "--eval",
+      "(asdf:test-system \"dreyeck/lisp-critic/engine-integration/tests\")"
+    ],
+    "exitCode": 1,
+    "status": "FAIL",
+    "log": "dreyeck-lisp-critic-engine-integration-tests.log",
+    "sha256": "5206c221d753379a1a1976c56dcb9db728e539ba1420d4f7af13964f3cc37cea"
+  },
+  {
+    "worktree": "/workspace/work/lisp-critic-reader-safety-a2",
+    "revision": "24ffdbaed60bcf5f37e8d4891a4c5c83687b453f",
+    "system": "dreyeck/lisp-critic/page-station/tests",
+    "command": [
+      "/workspace/work/lisp-critic-reader-safety-a2/docs/lisp-critic-reader-safety/portable-sbcl",
+      "--noinform",
+      "--no-sysinit",
+      "--no-userinit",
+      "--non-interactive",
+      "--load",
+      "/workspace/work/lisp-critic-reader-safety-a2/docs/lisp-critic-reader-safety/bootstrap.lisp",
+      "--eval",
+      "(asdf:test-system \"dreyeck/lisp-critic/page-station/tests\")"
+    ],
+    "exitCode": 1,
+    "status": "FAIL",
+    "log": "dreyeck-lisp-critic-page-station-tests.log",
+    "sha256": "5b7b32eef336e44fd24e4f40b77a75b5359eb00460ea792a553455938b583b0a"
+  },
+  {
+    "worktree": "/workspace/work/lisp-critic-reader-safety-a2",
+    "revision": "24ffdbaed60bcf5f37e8d4891a4c5c83687b453f",
+    "system": "dreyeck/catalog/tests",
+    "command": [
+      "/workspace/work/lisp-critic-reader-safety-a2/docs/lisp-critic-reader-safety/portable-sbcl",
+      "--noinform",
+      "--no-sysinit",
+      "--no-userinit",
+      "--non-interactive",
+      "--load",
+      "/workspace/work/lisp-critic-reader-safety-a2/docs/lisp-critic-reader-safety/bootstrap.lisp",
+      "--eval",
+      "(asdf:test-system \"dreyeck/catalog/tests\")"
+    ],
+    "exitCode": 1,
+    "status": "FAIL",
+    "log": "dreyeck-catalog-tests.log",
+    "sha256": "c8fcf0a4a31c425f407126433ece4a4a9cf0a1469327876082a538bf76b311f7"
+  }
+]

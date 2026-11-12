@@ -64,3 +64,38 @@ checks; both startup-error logs are retained as `initial-*-harness-error.log`.
 No successful test is inferred from those attempts. Existing A1 evidence is
 retained unchanged, apart from the explicit terminology clarification in its
 README. Regression qualification follows in `suites.json` and the handover.
+
+## Final regression qualification
+
+All runs used isolated SBCL processes and the existing A1 portable launcher.
+
+| Check | Outcome |
+|---|---|
+| Reconstructed counterexamples against fixed A1 | PASS: both incorrect acceptances reproduced |
+| Corrected reader | PASS: 37 A2 checks, existing A1 probes and 80 source-reader checks |
+| Trusted character-boundary comparison with standard SBCL reader | PASS: four cases, exit 0 |
+| Text-criticism integration | PASS: nine checks, exit 0 |
+| Base Lisp Critic, Federated Context, Recorded, Reading | PASS: exit 0 for each |
+| Critique, Engine Integration, Page Station | BLOCKED: each exits 1 at its real-engine/source-station prerequisite |
+| Catalog | FAIL: exit 1 at `CHECK-PAGE-LOADING-REPOSITORY-CONTEXT`, "Local upstream object is absent." |
+| Verbatim Claude review examples | NOT RUN: exact source text requested but not supplied |
+
+The source-station and Catalog outcomes match the retained, paired A1 baseline
+findings in the parent directory. Those earlier runs are historical evidence,
+not newly executed A2 baseline regression suites. The current terminal
+conditions and stack frames were inspected; classification is not inferred
+from arbitrary log substrings. The three engine scenarios beyond their missing
+prerequisite and the Catalog assertions after its failure were not executed.
+No real engine, history dependency or substitute station was acquired.
+
+`character-oracle.lisp` uses READ only on four fixed trusted character tokens,
+with `*read-eval*` false. It is a test oracle, not an extractor fallback. Run it
+with the same launcher and `--load docs/lisp-critic-reader-safety/a2/character-oracle.lisp`.
+The production source, logs and test scripts are hashed in `manifest.json`.
+Initial harness syntax errors are retained separately and are not test passes.
+
+Independent review must supply and execute Claude's two exact examples, confirm
+that the token boundaries match supported Common Lisp syntax, and review the
+unsupported-name refusals. The original A1 history and Claude's branch are
+unchanged. This handover does not declare completion of the missing mandatory
+review-example check or owner acceptance.
