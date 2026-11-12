@@ -1,0 +1,62 @@
+{
+  "implementationBase": "9176349edb473becd7423a7ca246f9bc07a75388",
+  "implementationState": "uncommitted detached worktree",
+  "evidenceRevision": "9176349edb473becd7423a7ca246f9bc07a75388",
+  "specifiedTestedRevision": "36c69d3312ae70748ecd40a5452759fcfaad25c4",
+  "environment": {
+    "lisp": "SBCL 2.4.10",
+    "git": "2.52.0",
+    "os": "Linux",
+    "dependencies": "Fixed prepared source registry from the acceptance evidence; fresh Lisp processes, reused dependency compilation cache"
+  },
+  "runs": [
+    {
+      "command": "DEFEDERATION_REPO=/workspace/work/acceptance-evidence-chain EVIDENCE_CHAIN_REPOSITORY=/workspace/work/acceptance-evidence-chain /workspace/scratch/tmdm-mcp-portable/bin/sbcl --noinform --no-sysinit --no-userinit --non-interactive --load docs/topic-maps-integration-acceptance/hyperdoc-bootstrap.lisp --eval '(asdf:test-system \"dreyeck/work/acceptance-evidence-chain\")'",
+      "cwd": "/workspace/work/acceptance-evidence-chain",
+      "exitCode": 0,
+      "log": "focused.log",
+      "checks": 101,
+      "logSHA256": "31a48227f1fc86877402db835ac7fe0e2e08c6f5fcb9eb746561f6f3f97bd3ba"
+    },
+    {
+      "command": "DEFEDERATION_REPO=/workspace/work/acceptance-evidence-chain /workspace/scratch/tmdm-mcp-portable/bin/sbcl --noinform --no-sysinit --no-userinit --non-interactive --load docs/topic-maps-integration-acceptance/hyperdoc-bootstrap.lisp --eval '(asdf:load-system \"dreyeck/work/acceptance-evidence-chain\")' --eval '(asdf:test-system \"dreyeck/git/tests\")' --eval '(format t \"~&EXISTING-GIT-SUITE-COMPLETED~%\")' --eval '(asdf:test-system \"dreyeck/evaluation-record/tests\")' --eval '(format t \"~&EXISTING-EVALUATION-SUITE-COMPLETED~%\")'",
+      "cwd": "/workspace/work/acceptance-evidence-chain",
+      "exitCode": 0,
+      "log": "regressions.log",
+      "systems": [
+        "dreyeck/git/tests",
+        "dreyeck/evaluation-record/tests"
+      ],
+      "logSHA256": "57e2a087b04a7305f175a5947fa189f9016eb5819ed808d453e154a00f4822b1"
+    }
+  ],
+  "sourceSHA256": {
+    "dreyeck.asd": "d0a7d3669e2309b9cdffffb8682d1a57eda5bc80c7b66a8b51fea9175ecedf25",
+    "dreyeck/work/acceptance-evidence-chain.lisp": "992a841d7e2dcdda73c0abc77d1001452bbb509d4af99111b15745ab9cfbef6e",
+    "dreyeck/tests/acceptance-evidence-chain.lisp": "bff04ab29a2912e467231dc37a2afcb951afd892cf7de2c51c69781629a533b8",
+    "dreyeck/pages/acceptance-evidence-chain/Inspecting One Acceptance Evidence Chain.html": "3bf18b779d862a8f6ed611f5b8119cfbee448583e6bd6a5ad2bdd5c989673144",
+    "docs/acceptance-evidence-chain/README.md": "3bebc5a42194b28ff5ef7c4b7e7eb848ce38c5cd5be4952ff6b246e571cb99f8"
+  },
+  "unchangedImplementationAndPinPaths": [
+    "dreyeck/src/git-package.lisp",
+    "dreyeck/src/git-commit-inspection.lisp",
+    "dreyeck/src/git-local-availability.lisp",
+    "dreyeck/src/git-revision-reference.lisp",
+    "dreyeck/src/evaluation-record.lisp",
+    "dreyeck/src/source-snapshot.lisp",
+    "dreyeck/shop3/plan-objects.lisp",
+    "dreyeck/work/topic-maps-conformance-planning.lisp",
+    "dreyeck/work/topic-maps-instance-of-export.lisp",
+    "nix/topic-maps-source.nix",
+    "flake.lock"
+  ],
+  "limits": [
+    "No interactive CLOG browser or running image used",
+    "Historical execution not rerun",
+    "Tested revision is specified context with a retained descriptor literal; historical execution binding not independently established",
+    "Git source views re-query the attached repository; checked text views retain the original reading",
+    "UTF-8 text only, guarded by Git blob round-trip identity",
+    "Initial development compile/argv-validation errors corrected before the final successful runs; no base-suite failure observed",
+    "Temporary Git fixture commits only; no project commit, push or PR"
+  ]
+}

@@ -1,0 +1,29 @@
+<h1>Inspecting One Acceptance Evidence Chain</h1>
+<p>This optional reading connects one original execution report, its retained log and a specified HyperDoc revision. Its evidence revision is <code>9176349edb473becd7423a7ca246f9bc07a75388</code>; its specified tested revision is <code>36c69d3312ae70748ecd40a5452759fcfaad25c4</code>. It reads Git objects at these exact commits, not the checkout's moving files.</p>
+<p>The report says that a command executed, with its recorded working directory, environment overrides, timestamps and exit code. Those remain <strong>reported</strong> statements. This inspection independently checks properties of the retained artifacts: Git blob identities and the log's SHA-256 against the report. A matching digest establishes content consistency, not that every historical event occurred as reported.</p>
+<p>The JSON has no tested-revision field. The source <code>candidate-build.nix</code>, retained at the evidence commit, contains a literal reference to the specified revision. The reading retains that source too. It neither evaluates Nix nor proves that the historical process used these exact descriptor contents. The source revision is an explicit inspection context; its local Git commit identity is checked separately.</p>
+<h2>Inspect the retained objects</h2>
+<p>Use a newly prepared, coherent local image with the project's dependency registry. Do not retarget an existing runtime to this worktree. Evaluate this block separately, so the package exists before reading later forms. Replace the implementation path on another machine. Loading registers this optional HyperDoc; it does not read evidence, run a recorded command or start a listener.</p>
+<pre>(require :asdf)
+(dolist (name '("dreyeck.asd" "hyperbook.asd" "hyperdoc.asd"))
+  (asdf:load-asd
+   (merge-pathnames name #P"/workspace/work/acceptance-evidence-chain/")))
+(asdf:load-system "dreyeck/work/acceptance-evidence-chain")</pre>
+<p>Supply an actual local HyperDoc Git repository containing the fixed objects. The example path is the prepared Cloud repository, not a requirement on another machine. No remote acquisition or lazy fetching is performed. Git must support the existing <code>--no-lazy-fetch</code> contract (Git 2.44 or later).</p>
+<pre>(defparameter *acceptance-evidence-repository*
+  (make-instance 'dreyeck/git:git-repository-checkout
+    :root #P"/workspace/hyperdoc/"
+    :root-source :explicit-fixed-acceptance-evidence))
+(defparameter *acceptance-evidence-chain*
+  (dreyeck/work/acceptance-evidence-chain:inspect-acceptance-evidence-chain
+   *acceptance-evidence-repository*))
+(inspect *acceptance-evidence-chain*)</pre>
+<p>With CLOG Moldable Inspector already connected in the same image:</p>
+<pre>(clog-moldable-inspector:clog-inspect
+ :object *acceptance-evidence-chain*)</pre>
+<p>In <strong>Evidence chain</strong>, inspect <em>Original execution report</em>, <em>Original retained log</em>, <em>Fixed evidence revision</em> and <em>Specified tested HyperDoc revision</em>. These are the existing Git evidence objects, kept by identity. <em>Parsed report (retained data)</em> opens the original parsed data object. Each projected statement retains its warrant, source objects and basis.</p>
+<p><strong>Retained report text</strong> and <strong>Retained log text</strong> show the checked reading captured from the original blobs. Existing Git source views query the attached repository again; their availability is separate from this retained reading. Repository authority and full OID identify the source; a historical working-directory string is only reported data.</p>
+<h2>What the result means</h2>
+<p>The evaluation protocol describes this inspection. Its status is <code>:inspected</code>; its times are the inspection's times. The historical timestamps and exit code stay in the report and carry <code>:reported</code> warrant. A nonzero reported exit code is still inspectable when its retained artifacts are consistent.</p>
+<p>The log is UTF-8 text containing non-ASCII characters. Before hashing it, the adapter verifies that the decoded text re-encodes to octets with the exact original Git blob identity. A lossy round-trip is refused. This bounded reader does not claim to be a generic binary Git-file reader.</p>
+<p>No acceptance record, TMDM schema or SHOP3 domain is created. No result here supplies an acceptance decision, independent-author assessment or deployment authority. The command, working directory and environment strings are never executed or followed.</p>
