@@ -40,8 +40,10 @@
 
 (defun read-merged-map ()
   "Return TARGET, SOURCE, and source-to-target resolver from a real TMDM import.
-The HyperDoc SHOP3 Topic survives the merge, and the Paul Topic resolves to it.
-This is a fresh in-memory reading; no content, runtime or repository is modified."
+The previous target SHOP3 handle resolves through CANONICAL-TOPIC to the
+current merged Topic; the independent Paul Topic resolves there through RESOLVE.
+TMDM 6.2 can replace both target and copied Topic objects when merging.
+This is a fresh in-memory reading; neither CTM source is modified."
   (multiple-value-bind (target source) (read-source-maps)
     (let ((context-shop3 (find-subject target +shared-shop3-subject+))
           (paul-shop3 (find-subject source +shared-shop3-subject+)))
@@ -49,14 +51,17 @@ This is a fresh in-memory reading; no content, runtime or repository is modified
         (error "Both sources must identify the shared SHOP3 subject."))
       (multiple-value-bind (merged resolve)
           (m:import-map-content target source)
-        (unless (and (eq merged target)
-                     (eq context-shop3
-                         (find-subject merged +shared-shop3-subject+))
-                     (eq context-shop3 (funcall resolve paul-shop3))
-                     (not (eq paul-shop3 context-shop3))
-                     (find-subject merged
-                       "urn:hyperdoc:paul-2026:domain:worksworld-2h"))
-          (error "Native TMDM subject merge contract was not met."))
+        (let ((current-shop3
+                (find-subject merged +shared-shop3-subject+)))
+          (unless (and (eq merged target)
+                       current-shop3
+                       (eq current-shop3
+                           (m:canonical-topic context-shop3))
+                       (eq current-shop3 (funcall resolve paul-shop3))
+                       (not (eq paul-shop3 context-shop3))
+                       (find-subject merged
+                         "urn:hyperdoc:paul-2026:domain:worksworld-2h"))
+            (error "Native TMDM canonical subject merge contract was not met.")))
         (values merged source resolve)))))
 
 (hyperdoc:defexample inspect-paul-workflows
