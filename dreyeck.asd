@@ -3701,3 +3701,25 @@
   :perform (test-op (op component)
              (declare (ignore op component))
              (uiop:symbol-call :dreyeck/work/welcome-development :run-domain-version-tests)))
+
+
+;; Optional, explicit local reading of Paul (2026) as native Topic Maps. Not loaded by Catalog.
+;; It uses the independent topic-maps checkout, not an alternate Topic/Association graph.
+(defsystem "dreyeck/work/paul-2026"
+  :description "Read two source-backed CTM maps and inspect a genuine TMDM SHOP3 subject merge"
+  :depends-on ("topic-maps/ctm" "topic-maps/tmdm" "topic-maps/cxtm"
+               "dreyeck/inspector/tmdm" "dreyeck/authority-policy"
+               "hyperdoc/explorer")
+  :serial t
+  :components ((:file "dreyeck/work/paul-2026/merged-reading")
+               (:module "dreyeck/pages/paul-2026"
+                :components ((:static-file "Reading Paul 2026 with Topic Maps.html"))))
+  :in-order-to ((test-op (test-op "dreyeck/work/paul-2026/tests"))))
+
+(defsystem "dreyeck/work/paul-2026/tests"
+  :description "Native source-preserving cross-map identity and Role tests for Paul's workflow reading"
+  :depends-on ("dreyeck/work/paul-2026")
+  :components ((:file "dreyeck/tests/paul-2026-topic-map"))
+  :perform (test-op (operation component)
+             (declare (ignore operation component))
+             (uiop:symbol-call :dreyeck/work/paul-2026/tests :run-tests)))
