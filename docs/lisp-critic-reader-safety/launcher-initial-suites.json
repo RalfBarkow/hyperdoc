@@ -1,0 +1,44 @@
+[
+  {
+    "worktree": "/workspace/work/lisp-critic-reader-safety",
+    "revision": "9228ab022e003de815822bdbb1cf4bbd3ba8aba7",
+    "system": "dreyeck/lisp-critic/reading/tests",
+    "command": [
+      "/workspace/work/lisp-critic-reader-safety/docs/lisp-critic-reader-safety/portable-sbcl",
+      "--noinform",
+      "--no-sysinit",
+      "--no-userinit",
+      "--non-interactive",
+      "--load",
+      "/workspace/work/lisp-critic-reader-safety/docs/lisp-critic-reader-safety/bootstrap.lisp",
+      "--eval",
+      "(asdf:test-system \"dreyeck/lisp-critic/reading/tests\")"
+    ],
+    "exitCode": 1,
+    "status": "FAIL",
+    "log": "launcher-initial-dreyeck-lisp-critic-reading-tests.log",
+    "sha256": "98a745e68b805724d6650c39734ffcff9d7b358b340bfc0d2083a0316cca9467",
+    "assessment": "Harness startup failure before test execution: SBCL runtime option --noinform followed Lisp options; retained, not counted as a suite result."
+  },
+  {
+    "worktree": "/workspace/work/lisp-critic-reader-safety",
+    "revision": "9228ab022e003de815822bdbb1cf4bbd3ba8aba7",
+    "system": "dreyeck/catalog/tests",
+    "command": [
+      "/workspace/work/lisp-critic-reader-safety/docs/lisp-critic-reader-safety/portable-sbcl",
+      "--noinform",
+      "--no-sysinit",
+      "--no-userinit",
+      "--non-interactive",
+      "--load",
+      "/workspace/work/lisp-critic-reader-safety/docs/lisp-critic-reader-safety/bootstrap.lisp",
+      "--eval",
+      "(asdf:test-system \"dreyeck/catalog/tests\")"
+    ],
+    "exitCode": 1,
+    "status": "FAIL",
+    "log": "launcher-initial-dreyeck-catalog-tests.log",
+    "sha256": "98a745e68b805724d6650c39734ffcff9d7b358b340bfc0d2083a0316cca9467",
+    "assessment": "Harness startup failure before test execution: SBCL runtime option --noinform followed Lisp options; retained, not counted as a suite result."
+  }
+]

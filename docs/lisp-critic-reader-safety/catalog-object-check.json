@@ -1,0 +1,30 @@
+[
+  {
+    "command": [
+      "git",
+      "--no-lazy-fetch",
+      "-C",
+      "/workspace/work/lisp-critic-reader-safety",
+      "cat-file",
+      "-t",
+      "8a1149197fabcb1ab5622316f09c5a60c2d3f1f8"
+    ],
+    "exitCode": 128,
+    "stdout": "",
+    "stderr": "fatal: git cat-file: could not get object info\n"
+  },
+  {
+    "command": [
+      "git",
+      "--no-lazy-fetch",
+      "-C",
+      "/workspace/work/lisp-critic-a1-baseline",
+      "cat-file",
+      "-t",
+      "8a1149197fabcb1ab5622316f09c5a60c2d3f1f8"
+    ],
+    "exitCode": 128,
+    "stdout": "",
+    "stderr": "fatal: git cat-file: could not get object info\n"
+  }
+]

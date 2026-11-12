@@ -1,0 +1,42 @@
+[
+  {
+    "worktree": "/workspace/work/lisp-critic-a1-baseline",
+    "revision": "1da262deee28c614ab63c2311f5355de2dfaafc5",
+    "system": "dreyeck/lisp-critic/reading/tests",
+    "command": [
+      "/workspace/work/lisp-critic-reader-safety/docs/lisp-critic-reader-safety/portable-sbcl",
+      "--noinform",
+      "--no-sysinit",
+      "--no-userinit",
+      "--non-interactive",
+      "--load",
+      "/workspace/work/lisp-critic-reader-safety/docs/lisp-critic-reader-safety/bootstrap.lisp",
+      "--eval",
+      "(asdf:test-system \"dreyeck/lisp-critic/reading/tests\")"
+    ],
+    "exitCode": 0,
+    "status": "PASS",
+    "log": "baseline-launcher-dreyeck-lisp-critic-reading-tests.log",
+    "sha256": "c741031bbc7b67d4cff5f6bc780bd14575b2b49d9ce826295e7cba7a7ace1643"
+  },
+  {
+    "worktree": "/workspace/work/lisp-critic-a1-baseline",
+    "revision": "1da262deee28c614ab63c2311f5355de2dfaafc5",
+    "system": "dreyeck/catalog/tests",
+    "command": [
+      "/workspace/work/lisp-critic-reader-safety/docs/lisp-critic-reader-safety/portable-sbcl",
+      "--noinform",
+      "--no-sysinit",
+      "--no-userinit",
+      "--non-interactive",
+      "--load",
+      "/workspace/work/lisp-critic-reader-safety/docs/lisp-critic-reader-safety/bootstrap.lisp",
+      "--eval",
+      "(asdf:test-system \"dreyeck/catalog/tests\")"
+    ],
+    "exitCode": 1,
+    "status": "FAIL",
+    "log": "baseline-launcher-dreyeck-catalog-tests.log",
+    "sha256": "0c67c4fd9c98a6c709cfcd83dc3a9b6ba7e6c207490a21560010d9ebba6e286d"
+  }
+]

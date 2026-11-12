@@ -1,0 +1,8 @@
+; compiling file "/workspace/work/lisp-critic-a1-baseline/dreyeck/tests/lisp-critic-test-package.lisp" (written 12 NOV 2026 02:50:52 PM):
+
+; wrote /workspace/work/defederation-fasls/workspace/work/lisp-critic-a1-baseline/dreyeck/tests/lisp-critic-test-package-tmpGHU3ALSV.fasl
+; compilation finished in 0:00:00.004
+; compiling file "/workspace/work/lisp-critic-a1-baseline/dreyeck/tests/lisp-critic-smoke.lisp" (written 12 NOV 2026 02:50:52 PM):
+
+; wrote /workspace/work/defederation-fasls/workspace/work/lisp-critic-a1-baseline/dreyeck/tests/lisp-critic-smoke-tmpAAURSO1.fasl
+; compilation finished in 0:00:00.012

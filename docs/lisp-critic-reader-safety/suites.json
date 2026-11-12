@@ -1,0 +1,202 @@
+[
+  {
+    "system": "dreyeck/lisp-critic/text-criticism/integration-tests",
+    "command": [
+      "/workspace/scratch/tmdm-mcp-portable/bin/sbcl",
+      "--noinform",
+      "--no-sysinit",
+      "--no-userinit",
+      "--non-interactive",
+      "--load",
+      "docs/lisp-critic-reader-safety/bootstrap.lisp",
+      "--eval",
+      "(asdf:test-system \"dreyeck/lisp-critic/text-criticism/integration-tests\")"
+    ],
+    "exitCode": 0,
+    "status": "PASS",
+    "log": "dreyeck-lisp-critic-text-criticism-integration-tests.log",
+    "sha256": "36d531f3c943d52935e73dcdfc7111159ab87e255ba91ce8e4b030254fef2907",
+    "worktree": "/workspace/work/lisp-critic-reader-safety",
+    "revision": "9228ab022e003de815822bdbb1cf4bbd3ba8aba7"
+  },
+  {
+    "system": "dreyeck/lisp-critic/tests",
+    "command": [
+      "/workspace/scratch/tmdm-mcp-portable/bin/sbcl",
+      "--noinform",
+      "--no-sysinit",
+      "--no-userinit",
+      "--non-interactive",
+      "--load",
+      "docs/lisp-critic-reader-safety/bootstrap.lisp",
+      "--eval",
+      "(asdf:test-system \"dreyeck/lisp-critic/tests\")"
+    ],
+    "exitCode": 0,
+    "status": "PASS",
+    "log": "dreyeck-lisp-critic-tests.log",
+    "sha256": "afcc37e8ad96013e854ca99b9fdfc2ce4aa1670156a1593f00ec16d6aa49722b",
+    "worktree": "/workspace/work/lisp-critic-reader-safety",
+    "revision": "9228ab022e003de815822bdbb1cf4bbd3ba8aba7"
+  },
+  {
+    "system": "dreyeck/lisp-critic/federated-context/tests",
+    "command": [
+      "/workspace/scratch/tmdm-mcp-portable/bin/sbcl",
+      "--noinform",
+      "--no-sysinit",
+      "--no-userinit",
+      "--non-interactive",
+      "--load",
+      "docs/lisp-critic-reader-safety/bootstrap.lisp",
+      "--eval",
+      "(asdf:test-system \"dreyeck/lisp-critic/federated-context/tests\")"
+    ],
+    "exitCode": 0,
+    "status": "PASS",
+    "log": "dreyeck-lisp-critic-federated-context-tests.log",
+    "sha256": "2cbd6ac9f56679c973070e6063ed1074e2bd35bcbbf53bfcdff3a048cc73e39f",
+    "worktree": "/workspace/work/lisp-critic-reader-safety",
+    "revision": "9228ab022e003de815822bdbb1cf4bbd3ba8aba7"
+  },
+  {
+    "system": "dreyeck/lisp-critic/reading/tests",
+    "command": [
+      "/workspace/scratch/tmdm-mcp-portable/bin/sbcl",
+      "--noinform",
+      "--no-sysinit",
+      "--no-userinit",
+      "--non-interactive",
+      "--load",
+      "docs/lisp-critic-reader-safety/bootstrap.lisp",
+      "--eval",
+      "(asdf:test-system \"dreyeck/lisp-critic/reading/tests\")"
+    ],
+    "exitCode": 1,
+    "status": "BLOCKED",
+    "log": "dreyeck-lisp-critic-reading-tests.log",
+    "sha256": "106948546838e1742b13b727012512ac3908773b969b383fa882526767f01493",
+    "reason": "Unhandled UIOP SUBPROCESS-ERROR; invoked ld-linux with Lisp options; child exited 1.",
+    "worktree": "/workspace/work/lisp-critic-reader-safety",
+    "revision": "9228ab022e003de815822bdbb1cf4bbd3ba8aba7",
+    "blockerCategory": "portable-child-launch",
+    "classificationBasis": "Manual inspection of terminal condition and failing call, reproduced on the unchanged base; not inferred from arbitrary log matches.",
+    "pairedLog": "baseline-dreyeck-lisp-critic-reading-tests.log"
+  },
+  {
+    "system": "dreyeck/lisp-critic/recorded/tests",
+    "command": [
+      "/workspace/scratch/tmdm-mcp-portable/bin/sbcl",
+      "--noinform",
+      "--no-sysinit",
+      "--no-userinit",
+      "--non-interactive",
+      "--load",
+      "docs/lisp-critic-reader-safety/bootstrap.lisp",
+      "--eval",
+      "(asdf:test-system \"dreyeck/lisp-critic/recorded/tests\")"
+    ],
+    "exitCode": 0,
+    "status": "PASS",
+    "log": "dreyeck-lisp-critic-recorded-tests.log",
+    "sha256": "aeb7b81288a6909ea07bc95e91336447cd90edc1f886912bc7688fa078a66a74",
+    "worktree": "/workspace/work/lisp-critic-reader-safety",
+    "revision": "9228ab022e003de815822bdbb1cf4bbd3ba8aba7"
+  },
+  {
+    "system": "dreyeck/lisp-critic/critique/tests",
+    "command": [
+      "/workspace/scratch/tmdm-mcp-portable/bin/sbcl",
+      "--noinform",
+      "--no-sysinit",
+      "--no-userinit",
+      "--non-interactive",
+      "--load",
+      "docs/lisp-critic-reader-safety/bootstrap.lisp",
+      "--eval",
+      "(asdf:test-system \"dreyeck/lisp-critic/critique/tests\")"
+    ],
+    "exitCode": 1,
+    "status": "BLOCKED",
+    "log": "dreyeck-lisp-critic-critique-tests.log",
+    "sha256": "e6bbaaf2f2a38c4664951a5385d74cb663b21f361a3661c6044146808817b137",
+    "reason": "Real Critic run failed: MISSING-COMPONENT a-critic-for-lisp.",
+    "worktree": "/workspace/work/lisp-critic-reader-safety",
+    "revision": "9228ab022e003de815822bdbb1cf4bbd3ba8aba7",
+    "blockerCategory": "missing-source-station",
+    "classificationBasis": "Manual inspection of terminal condition and failing call, reproduced on the unchanged base; not inferred from arbitrary log matches.",
+    "pairedLog": "baseline-dreyeck-lisp-critic-critique-tests.log"
+  },
+  {
+    "system": "dreyeck/lisp-critic/engine-integration/tests",
+    "command": [
+      "/workspace/scratch/tmdm-mcp-portable/bin/sbcl",
+      "--noinform",
+      "--no-sysinit",
+      "--no-userinit",
+      "--non-interactive",
+      "--load",
+      "docs/lisp-critic-reader-safety/bootstrap.lisp",
+      "--eval",
+      "(asdf:test-system \"dreyeck/lisp-critic/engine-integration/tests\")"
+    ],
+    "exitCode": 1,
+    "status": "BLOCKED",
+    "log": "dreyeck-lisp-critic-engine-integration-tests.log",
+    "sha256": "82c34fcfe82d01a4c11dd29889cda94d95c438ecec18d27bb703178764a80e9a",
+    "reason": "ENGINE-INTEGRATION-REQUIRES-A-SOURCE-STATION raised before the real-engine scenario.",
+    "worktree": "/workspace/work/lisp-critic-reader-safety",
+    "revision": "9228ab022e003de815822bdbb1cf4bbd3ba8aba7",
+    "blockerCategory": "missing-source-station",
+    "classificationBasis": "Manual inspection of terminal condition and failing call, reproduced on the unchanged base; not inferred from arbitrary log matches.",
+    "pairedLog": "baseline-dreyeck-lisp-critic-engine-integration-tests.log"
+  },
+  {
+    "system": "dreyeck/lisp-critic/page-station/tests",
+    "command": [
+      "/workspace/scratch/tmdm-mcp-portable/bin/sbcl",
+      "--noinform",
+      "--no-sysinit",
+      "--no-userinit",
+      "--non-interactive",
+      "--load",
+      "docs/lisp-critic-reader-safety/bootstrap.lisp",
+      "--eval",
+      "(asdf:test-system \"dreyeck/lisp-critic/page-station/tests\")"
+    ],
+    "exitCode": 1,
+    "status": "BLOCKED",
+    "log": "dreyeck-lisp-critic-page-station-tests.log",
+    "sha256": "51f0dcd4b2a2329e25de9f7b4554c4f46b7317619afb9abffd19684f852ae64f",
+    "reason": "ENGINE-INTEGRATION-REQUIRES-A-SOURCE-STATION raised before the real-engine scenario.",
+    "worktree": "/workspace/work/lisp-critic-reader-safety",
+    "revision": "9228ab022e003de815822bdbb1cf4bbd3ba8aba7",
+    "blockerCategory": "missing-source-station",
+    "classificationBasis": "Manual inspection of terminal condition and failing call, reproduced on the unchanged base; not inferred from arbitrary log matches.",
+    "pairedLog": "baseline-dreyeck-lisp-critic-page-station-tests.log"
+  },
+  {
+    "system": "dreyeck/catalog/tests",
+    "command": [
+      "/workspace/scratch/tmdm-mcp-portable/bin/sbcl",
+      "--noinform",
+      "--no-sysinit",
+      "--no-userinit",
+      "--non-interactive",
+      "--load",
+      "docs/lisp-critic-reader-safety/bootstrap.lisp",
+      "--eval",
+      "(asdf:test-system \"dreyeck/catalog/tests\")"
+    ],
+    "exitCode": 1,
+    "status": "BLOCKED",
+    "log": "dreyeck-catalog-tests.log",
+    "sha256": "28dec266ea7376ecabdfcecb08e70e24e7b9fd3ff6afef655ae675746760d24d",
+    "reason": "Unhandled UIOP SUBPROCESS-ERROR; invoked ld-linux with Lisp options; child exited 1.",
+    "worktree": "/workspace/work/lisp-critic-reader-safety",
+    "revision": "9228ab022e003de815822bdbb1cf4bbd3ba8aba7",
+    "blockerCategory": "portable-child-launch",
+    "classificationBasis": "Manual inspection of terminal condition and failing call, reproduced on the unchanged base; not inferred from arbitrary log matches.",
+    "pairedLog": "baseline-dreyeck-catalog-tests.log"
+  }
+]

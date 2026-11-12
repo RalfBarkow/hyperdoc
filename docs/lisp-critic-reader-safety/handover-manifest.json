@@ -1,0 +1,69 @@
+{
+  "baseRevision": "1da262deee28c614ab63c2311f5355de2dfaafc5",
+  "implementationRevision": "9228ab022e003de815822bdbb1cf4bbd3ba8aba7",
+  "evidenceState": "Uncommitted evidence follow-up; implementation unchanged from implementationRevision",
+  "independentAcceptance": false,
+  "hashes": {
+    "docs/lisp-critic-reader-safety/README.md": "3fa770b5b61dfab5c15580e98653bb574737f881d8bc846864cff6eb1f2fed4f",
+    "docs/lisp-critic-reader-safety/baseline-dreyeck-catalog-tests.log": "481b573583ae026f52c1cedd2231ae66bf86a6d82259eea17f80568385ad5078",
+    "docs/lisp-critic-reader-safety/baseline-dreyeck-lisp-critic-critique-tests.log": "a261be3d3eb62bfe4c8aafcd4f6b302379915f4821caf3f902fae74c5b8e795e",
+    "docs/lisp-critic-reader-safety/baseline-dreyeck-lisp-critic-engine-integration-tests.log": "49c12cbbf628ca65fc19be247d45f5ffb6988ecd93bff913eb22cc5f9783e868",
+    "docs/lisp-critic-reader-safety/baseline-dreyeck-lisp-critic-federated-context-tests.log": "00d068c82aa3945e0b132e44e1b4cd5077debb2c222765027f17254f68a6b9e6",
+    "docs/lisp-critic-reader-safety/baseline-dreyeck-lisp-critic-page-station-tests.log": "ee1142127eb71b5fb1d83708c5524b88b2d5621d0fe2ec967f19f2a7c595628a",
+    "docs/lisp-critic-reader-safety/baseline-dreyeck-lisp-critic-reading-tests.log": "3505e49cb9d9b46e8bb73fbdb74b0db036dd4455ab560dfeda9f893372a91bcb",
+    "docs/lisp-critic-reader-safety/baseline-dreyeck-lisp-critic-recorded-tests.log": "aeb7b81288a6909ea07bc95e91336447cd90edc1f886912bc7688fa078a66a74",
+    "docs/lisp-critic-reader-safety/baseline-dreyeck-lisp-critic-tests.log": "47a2d1ff8fd1ef04d6e0790116ee8be09afcf8100544995be1d35fa0bdeeb189",
+    "docs/lisp-critic-reader-safety/baseline-dreyeck-lisp-critic-text-criticism-integration-tests.log": "b7bd7e79b38459bebe8e29dbc05fcc670815adf4ee8e9fcb65087b742c41d85f",
+    "docs/lisp-critic-reader-safety/baseline-launcher-dreyeck-catalog-tests.log": "0c67c4fd9c98a6c709cfcd83dc3a9b6ba7e6c207490a21560010d9ebba6e286d",
+    "docs/lisp-critic-reader-safety/baseline-launcher-dreyeck-lisp-critic-reading-tests.log": "c741031bbc7b67d4cff5f6bc780bd14575b2b49d9ce826295e7cba7a7ace1643",
+    "docs/lisp-critic-reader-safety/baseline-launcher-suites.json": "e70a881c0fffd5931e96dee146c3a632c9ff59404f703e4ed813532837d6afd0",
+    "docs/lisp-critic-reader-safety/baseline-replay.log": "7712dbc7ab803f204c3130447bd273a3d86e3ec736445f8a5df35ad8631a6dee",
+    "docs/lisp-critic-reader-safety/baseline-suites.json": "ffb0b659ed1e6c4d4b013532964a57c8805f3918cde38ef62c9e03811eacf154",
+    "docs/lisp-critic-reader-safety/baseline.log": "dfdedb1c7252a8ab02ac33597dca2be3050e20d7812cd00028e54adb15cc20a2",
+    "docs/lisp-critic-reader-safety/bootstrap.lisp": "9275bcf1c244e8fd82d0ca8e5a506a3d69037c12eb85bbbe8d72f431ad22808e",
+    "docs/lisp-critic-reader-safety/catalog-object-check.json": "c5a35833746fb77daa59a15e62d379115d48dbba615fb5cadf0790b216c7912a",
+    "docs/lisp-critic-reader-safety/corrected-final.log": "ff99a9c82d031df7e2a63fcd1bd6aeb6d9af325d6b5dc1eea978026cf0949081",
+    "docs/lisp-critic-reader-safety/corrected.log": "ff99a9c82d031df7e2a63fcd1bd6aeb6d9af325d6b5dc1eea978026cf0949081",
+    "docs/lisp-critic-reader-safety/dreyeck-catalog-tests.log": "28dec266ea7376ecabdfcecb08e70e24e7b9fd3ff6afef655ae675746760d24d",
+    "docs/lisp-critic-reader-safety/dreyeck-lisp-critic-critique-tests.log": "e6bbaaf2f2a38c4664951a5385d74cb663b21f361a3661c6044146808817b137",
+    "docs/lisp-critic-reader-safety/dreyeck-lisp-critic-engine-integration-tests.log": "82c34fcfe82d01a4c11dd29889cda94d95c438ecec18d27bb703178764a80e9a",
+    "docs/lisp-critic-reader-safety/dreyeck-lisp-critic-federated-context-tests.log": "2cbd6ac9f56679c973070e6063ed1074e2bd35bcbbf53bfcdff3a048cc73e39f",
+    "docs/lisp-critic-reader-safety/dreyeck-lisp-critic-page-station-tests.log": "51f0dcd4b2a2329e25de9f7b4554c4f46b7317619afb9abffd19684f852ae64f",
+    "docs/lisp-critic-reader-safety/dreyeck-lisp-critic-reading-tests.log": "106948546838e1742b13b727012512ac3908773b969b383fa882526767f01493",
+    "docs/lisp-critic-reader-safety/dreyeck-lisp-critic-recorded-tests.log": "aeb7b81288a6909ea07bc95e91336447cd90edc1f886912bc7688fa078a66a74",
+    "docs/lisp-critic-reader-safety/dreyeck-lisp-critic-tests.log": "afcc37e8ad96013e854ca99b9fdfc2ce4aa1670156a1593f00ec16d6aa49722b",
+    "docs/lisp-critic-reader-safety/dreyeck-lisp-critic-text-criticism-integration-tests.log": "36d531f3c943d52935e73dcdfc7111159ab87e255ba91ce8e4b030254fef2907",
+    "docs/lisp-critic-reader-safety/launcher-check.lisp": "61fd3ac358acf65e8160efcf8c86999df50139b5767b4dfb14e0cb4703c472d7",
+    "docs/lisp-critic-reader-safety/launcher-check.log": "76bf2d68706d1dc4a2d22cc2d2573962b064c86e2dd68382b951de073d92a9fe",
+    "docs/lisp-critic-reader-safety/launcher-dreyeck-catalog-tests.log": "9bf85101960d60e0e3fed92402dbaff3e1e9c20b551ce76d6c26816746bbfeaa",
+    "docs/lisp-critic-reader-safety/launcher-dreyeck-lisp-critic-reading-tests.log": "c741031bbc7b67d4cff5f6bc780bd14575b2b49d9ce826295e7cba7a7ace1643",
+    "docs/lisp-critic-reader-safety/launcher-initial-check.log": "98a745e68b805724d6650c39734ffcff9d7b358b340bfc0d2083a0316cca9467",
+    "docs/lisp-critic-reader-safety/launcher-initial-dreyeck-catalog-tests.log": "98a745e68b805724d6650c39734ffcff9d7b358b340bfc0d2083a0316cca9467",
+    "docs/lisp-critic-reader-safety/launcher-initial-dreyeck-lisp-critic-reading-tests.log": "98a745e68b805724d6650c39734ffcff9d7b358b340bfc0d2083a0316cca9467",
+    "docs/lisp-critic-reader-safety/launcher-initial-suites.json": "c197909277bfec05784eda75d5421cb1c763b56c7c9a4c3044b8149eb9c92909",
+    "docs/lisp-critic-reader-safety/launcher-suites.json": "8ac7989aeb23dd3fd722585146378cf8b9994543ba76493e8961412d63255166",
+    "docs/lisp-critic-reader-safety/portable-sbcl": "695f8109632ef13017fb34ebd2b95c3e7a6452fb514a5ab61f624ab30e05398d",
+    "docs/lisp-critic-reader-safety/probes.lisp": "1b9fa51b086d81fcb1f28eb55ab31c273848beb2d84a9a9125bfc6e98f9471a0",
+    "docs/lisp-critic-reader-safety/run-suites.py": "0071f4a7e61072780a6c8fc55c9ec8551947a1357c63b6c5be2dfe37c0003411",
+    "docs/lisp-critic-reader-safety/suites.json": "2764423d5780a862b291b6be54ba2f3abe71cd767ce3d5a7f6c2ae67921cd567",
+    "dreyeck/src/lisp-critic-text-passage.lisp": "7113f38524014f676d3f4975b9c745c6c4fbc61528f6faf7d9d472772cd3d5fb",
+    "dreyeck/tests/lisp-critic-text-criticism.lisp": "59ea290190f115c664a725efdfc9bf85a0f0a62772de0fac4c198240abc7e119"
+  },
+  "additionalRuns": [
+    {
+      "log": "baseline-replay.log",
+      "exitCode": 0,
+      "mode": "Original reader and original 80-check tests loaded from the fixed base; expected attack effects reproduced"
+    },
+    {
+      "log": "corrected-final.log",
+      "exitCode": 0,
+      "mode": "Corrected probes and 80 checks"
+    },
+    {
+      "log": "launcher-check.log",
+      "exitCode": 0,
+      "mode": "Fresh child execution; intentional child exit 7 preserved"
+    }
+  ]
+}

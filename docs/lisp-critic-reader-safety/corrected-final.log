@@ -1,0 +1,10 @@
+WARNING: redefining IRONCLAD:BLOCK-LENGTH in DEFGENERIC
+CONSTRUCTOR effect=NIL
+CHANGED-SOURCE effect=NIL discrepancy=:NOT-DETERMINED claims=:CLAIMS-NOT-PARSED
+COMMENT refusal=(:DEFINITIONS-FOUND 0)
+FEATURES same=T results=(NIL (:READER-REFUSED "UNSUPPORTED-SOURCE-SYNTAX")) / (NIL
+                                                                               (:READER-REFUSED
+                                                                                "UNSUPPORTED-SOURCE-SYNTAX"))
+A1-CORRECTED-PROBES-PASS
+TEXT-CRITICISM-SOURCE-STATE content matches-recorded, revision membership verified, scope verified-revision
+TEXT-CRITICISM-PASS: 80 checks. No critic engine was loaded and no rule ran; the judgement-basis resolver of the federated context is exercised by the integration tests, not here.

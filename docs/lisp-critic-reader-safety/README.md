@@ -65,7 +65,8 @@ in `bootstrap.lisp` available:
 export DEFEDERATION_REPO="$PWD"
 SBCL=/workspace/scratch/tmdm-mcp-portable/bin/sbcl
 git show 1da262deee28c614ab63c2311f5355de2dfaafc5:dreyeck/src/lisp-critic-text-passage.lisp > /tmp/a1-original-passage.lisp
-A1_BASELINE_SOURCE=/tmp/a1-original-passage.lisp "$SBCL" --noinform --no-sysinit --no-userinit --non-interactive --load docs/lisp-critic-reader-safety/bootstrap.lisp --load docs/lisp-critic-reader-safety/probes.lisp --eval '(dreyeck/lisp-critic/text-criticism/tests:run-tests)'
+git show 1da262deee28c614ab63c2311f5355de2dfaafc5:dreyeck/tests/lisp-critic-text-criticism.lisp > /tmp/a1-original-tests.lisp
+A1_BASELINE_TESTS=/tmp/a1-original-tests.lisp A1_BASELINE_SOURCE=/tmp/a1-original-passage.lisp "$SBCL" --noinform --no-sysinit --no-userinit --non-interactive --load docs/lisp-critic-reader-safety/bootstrap.lisp --load docs/lisp-critic-reader-safety/probes.lisp --eval '(dreyeck/lisp-critic/text-criticism/tests:run-tests)'
 "$SBCL" --noinform --no-sysinit --no-userinit --non-interactive --load docs/lisp-critic-reader-safety/bootstrap.lisp --load docs/lisp-critic-reader-safety/probes.lisp --eval '(dreyeck/lisp-critic/text-criticism/tests:run-tests)'
 ```
 
@@ -87,3 +88,96 @@ new process; it must not be loaded into a running service.
 
 Parsing success alone creates no criticism. Observation, derived discrepancy,
 reviewer judgement, recommendation, engine Critique and planning remain distinct.
+
+## Regression qualification and independent-review handover
+
+The implementation was published promptly as
+`9228ab022e003de815822bdbb1cf4bbd3ba8aba7`. The follow-up adds verification
+artifacts and stronger no-effect/line-comment probes; production Lisp and its
+80-check test file are unchanged from that commit.
+
+`suites.json` and `baseline-suites.json` retain the original commands, exit
+codes and log hashes. All nine suites were attempted in separate processes on
+both the correction and clean base `1da262deee28c614ab63c2311f5355de2dfaafc5`.
+A nonzero exit is never silently converted into a successful test. BLOCKED
+classifications were checked against the actual terminal condition and failing
+call on both revisions. The runner now labels a nonzero execution FAIL pending
+review; it no longer infers blockers from matching log substrings.
+
+| Suite | Original correction/base runs | Qualification |
+|---|---|---|
+| Text criticism | 80 checks PASS on each | Changed grammar expectations documented above; identity and membership checks retained |
+| A1 probes | Expected old violations reproduced; corrected probes PASS | Reconstruction of the reported counterexamples, not the unavailable original review script |
+| Text criticism integration | PASS / PASS | 9 checks; authentic table and unchanged judgement-basis resolver |
+| Lisp Critic base | PASS / PASS | Existing smoke tests |
+| Federated context | PASS / PASS | Existing observations and judgement-basis contracts |
+| Recorded Critiques | PASS / PASS | Stored records, no real engine needed |
+| Reading | BLOCKED / BLOCKED in original launcher | Child invoked ELF loader with Lisp options; see new launcher runs |
+| Catalog | BLOCKED / BLOCKED in original launcher | Same child-launch defect; see new launcher runs |
+| Critique | BLOCKED / BLOCKED | Actual terminal error: real Critic run lacks `a-critic-for-lisp` |
+| Engine integration | BLOCKED / BLOCKED | Explicit source-station prerequisite raises an error |
+| Page station | BLOCKED / BLOCKED | Same explicit source-station prerequisite |
+
+The three source-station suites returned exit 1 on both revisions. Their real
+engine scenarios remain **NOT RUN beyond the prerequisite**, not accepted and
+not skipped into PASS. No real station was fabricated or fetched. Expected
+negative controls using temporary synthetic stations belong to the existing
+Reading tests and do not substitute for these integration scenarios.
+
+### Portable child-process verification
+
+`portable-sbcl` is a test-only adapter around the pre-existing portable SBCL
+2.4.10 launcher. It selects the same prepared source registry in every fresh
+child and sets `SB-EXT:*RUNTIME-PATHNAME*` to the callable adapter. It neither
+changes assertions nor grants source-station permission. All test expressions
+and child exit statuses are preserved. `launcher-check.lisp` confirms actual
+child Lisp execution and preservation of a deliberate exit code 7; its own
+check exits 0. The initial adapter attempt placed a runtime option after Lisp
+options and failed before tests started. Its logs and records are retained as
+`launcher-initial-*`; they are not suite results.
+
+Reproduction (run from the correction checkout):
+
+```sh
+DEFEDERATION_REPO="$PWD" docs/lisp-critic-reader-safety/portable-sbcl --noinform --no-userinit --non-interactive --load docs/lisp-critic-reader-safety/launcher-check.lisp
+A1_SBCL="$PWD/docs/lisp-critic-reader-safety/portable-sbcl" A1_LOG_PREFIX=launcher- A1_SYSTEMS='dreyeck/lisp-critic/reading/tests dreyeck/catalog/tests' python docs/lisp-critic-reader-safety/run-suites.py
+A1_WORKTREE=/workspace/work/lisp-critic-a1-baseline A1_SBCL="$PWD/docs/lisp-critic-reader-safety/portable-sbcl" A1_LOG_PREFIX=baseline-launcher- A1_SYSTEMS='dreyeck/lisp-critic/reading/tests dreyeck/catalog/tests' python docs/lisp-critic-reader-safety/run-suites.py
+```
+
+The baseline worktree must be a clean checkout of the exact base. Existing
+run files should be copied aside before reproduction. Host-specific paths in
+the bootstrap and portable runtime need reconstruction on another machine;
+no active runtime or dependency pin was changed. A current source inventory
+and evidence hashes are retained in `handover-manifest.json`.
+
+A different reviewer must inspect the positive grammar and refusal boundary,
+reproduce the original attacks against the base and corrected outcomes against
+the final commit, confirm early coherence gating and feature independence,
+and rerun the 80 checks and nine integration checks. Review the paired
+regression logs and rerun the three real-engine suites with a legitimately
+available source station before claiming their coverage. Explicitly review
+unsupported syntax, the limited structural envelope (not a general Common
+Lisp validator), and the SHOP3 input-safety rules above. No independent A1
+acceptance follows from these implementer-run results. Browser/UI, Nix builds
+and production activation were NOT RUN in A1.
+
+### Final observed outcomes after launcher repair
+
+- Reading: **PASS**, exit 0 on correction and unchanged base, including current
+  image, fresh child image, policy canaries, nonfunctional synthetic engine and
+  expected integration-failure negative controls.
+- Catalog: **FAIL**, exit 1 on both, at the unchanged
+  `check-page-loading-repository-context` assertion in
+  `dreyeck/tests/upstream-intake-smoke.lisp:1404`: "Local upstream object is
+  absent." The context asks for `8a1149197fabcb1ab5622316f09c5a60c2d3f1f8`;
+  direct `git --no-lazy-fetch cat-file -t` also fails in both checkouts. This
+  is a reproduced baseline assertion failure with a missing local-history
+  resource, not a passing Catalog and not a newly established A1 regression.
+  Subsequent Catalog assertions were not reached. No history was fetched to
+  change the test environment.
+
+`launcher-suites.json` and `baseline-launcher-suites.json` retain the exact
+rerun commands, exit codes and hashes. The old launcher failures remain in the
+original records; they are not overwritten by these results. A complete Catalog
+pass and the three real source-station suites remain outstanding. An independent
+reviewer needs those resources to extend the evidence beyond this bounded slice.

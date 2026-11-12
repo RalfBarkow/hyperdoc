@@ -1,0 +1,738 @@
+WARNING: System definition file #P"/workspace/tools/nix-portable-data/.nix-portable/nix/store/fdrq5ji4dvm7jj0wzfvxcyr0rwiq2c24-sbcl-cl-who-20241012-git/cl-who.asd" contains definition for system "cl-who-test". Please only define "cl-who" and secondary systems with a name starting with "cl-who/" (e.g. "cl-who/test") in that file.
+WARNING: System definition file #P"/workspace/tools/nix-portable-data/.nix-portable/nix/store/rn29yxasws4x3wvcf6d0738zxbcrvmin-sbcl-parse-float-20200218-git/parse-float.asd" contains definition for system "parse-float-tests". Please only define "parse-float" and secondary systems with a name starting with "parse-float/" (e.g. "parse-float/test") in that file.
+WARNING: System definition file #P"/workspace/tools/nix-portable-data/.nix-portable/nix/store/bzssaly51znz21jychrjrjg22cbimv2h-sbcl-cl-template-20130615-git/cl-template.asd" contains definition for system "cl-template-tests". Please only define "cl-template" and secondary systems with a name starting with "cl-template/" (e.g. "cl-template/test") in that file.
+;;; Computing Hangul syllable namesSTYLE-WARNING:
+   The new FTYPE proclamation for FSET::VECTOR-SET-BINARY-SEARCH-LO
+     (FUNCTION (SIMPLE-VECTOR T) FIXNUM)
+   does not match the derived return type
+     (FUNCTION (SIMPLE-VECTOR T)
+      (VALUES (INTEGER -4611686018427387904 4611686018427387904) &OPTIONAL))
+STYLE-WARNING:
+   The new FTYPE proclamation for FSET::WB-BAG-TREE-TOTAL-COUNT
+     (FUNCTION (FSET::WB-BAG-TREE) INTEGER)
+   does not match the derived return type
+     (FUNCTION ((OR LIST FSET::WB-BAG-TREE-NODE)) *)
+STYLE-WARNING:
+   The new FTYPE proclamation for FSET::HASH-VALUE-FIXNUM
+     (FUNCTION (T) FIXNUM)
+   does not match the derived return type
+     (FUNCTION (T) (VALUES INTEGER &OPTIONAL))
+STYLE-WARNING:
+   The new FTYPE proclamation for FSET::CH-SET-NODE-ENTRY-MASK
+     (FUNCTION (T) FIXNUM)
+   does not match the derived return type
+     (FUNCTION (SIMPLE-VECTOR) (VALUES T &OPTIONAL))
+STYLE-WARNING:
+   The new FTYPE proclamation for FSET::CH-SET-NODE-SUBNODE-MASK
+     (FUNCTION (T) FIXNUM)
+   does not match the derived return type
+     (FUNCTION (SIMPLE-VECTOR) (VALUES T &OPTIONAL))
+STYLE-WARNING:
+   The new FTYPE proclamation for FSET::CH-SET-NODE-SIZE
+     (FUNCTION (T) FIXNUM)
+   does not match the derived return type
+     (FUNCTION (SIMPLE-VECTOR) (VALUES T &OPTIONAL))
+STYLE-WARNING:
+   The new FTYPE proclamation for FSET::CH-SET-NODE-HASH-VALUE
+     (FUNCTION (T) FIXNUM)
+   does not match the derived return type
+     (FUNCTION (SIMPLE-VECTOR) (VALUES T &OPTIONAL))
+STYLE-WARNING:
+   The new FTYPE proclamation for FSET::CH-MAP-NODE-ENTRY-MASK
+     (FUNCTION (T) FIXNUM)
+   does not match the derived return type
+     (FUNCTION (SIMPLE-VECTOR) (VALUES T &OPTIONAL))
+STYLE-WARNING:
+   The new FTYPE proclamation for FSET::CH-MAP-NODE-SUBNODE-MASK
+     (FUNCTION (T) FIXNUM)
+   does not match the derived return type
+     (FUNCTION (SIMPLE-VECTOR) (VALUES T &OPTIONAL))
+STYLE-WARNING:
+   The new FTYPE proclamation for FSET::CH-MAP-NODE-SIZE
+     (FUNCTION (T) FIXNUM)
+   does not match the derived return type
+     (FUNCTION (SIMPLE-VECTOR) (VALUES T &OPTIONAL))
+STYLE-WARNING:
+   The new FTYPE proclamation for FSET::CH-MAP-NODE-HASH-VALUE
+     (FUNCTION (T) FIXNUM)
+   does not match the derived return type
+     (FUNCTION (SIMPLE-VECTOR) (VALUES T &OPTIONAL))
+STYLE-WARNING:
+   Generic function FSET:ITERATOR clobbers an earlier FTYPE proclamation
+   (FUNCTION (T &KEY &ALLOW-OTHER-KEYS) (VALUES FUNCTION &REST T)) for the same
+   name with (FUNCTION (T &KEY &ALLOW-OTHER-KEYS) *).
+STYLE-WARNING:
+   The new FTYPE proclamation for SWANK/BACKEND:GETPID
+     (FUNCTION NIL (VALUES (SIGNED-BYTE 32) &OPTIONAL))
+   does not match the derived return type
+     (FUNCTION NIL *)
+WARNING:
+   redefining EMACS-INSPECT (#<SB-PCL:SYSTEM-CLASS COMMON-LISP:T>) in DEFMETHOD
+WARNING:
+   redefining 👀PRINT-STRING (#<SB-PCL:SYSTEM-CLASS COMMON-LISP:T>) in DEFMETHOD
+WARNING:
+   The new FTYPE proclamation for CLSS:MATCH-SELECTOR
+     (FUNCTION (LIST (OR PLUMP-DOM:NODE VECTOR LIST) KEYWORD)
+      (VALUES (AND (VECTOR PLUMP-DOM:NODE) (NOT SIMPLE-ARRAY))))
+   does not match the old FTYPE proclamation
+     (FUNCTION (LIST (OR LIST PLUMP-DOM:NODE VECTOR) &OPTIONAL KEYWORD)
+      (VALUES (AND (VECTOR PLUMP-DOM:NODE) (NOT SIMPLE-ARRAY)) &REST T))
+WARNING: redefining CL-ISAAC:RAND32 in DEFUN
+WARNING: redefining CL-ISAAC:RAND64 in DEFUN
+WARNING:
+   bare references to struct types are deprecated. Please use (:POINTER
+                                                               (:STRUCT
+                                                                SQLITE3)) or (:STRUCT
+                                                                              SQLITE3) instead.
+WARNING:
+   bare references to struct types are deprecated. Please use (:POINTER
+                                                               (:STRUCT
+                                                                SQLITE3-STMT)) or (:STRUCT
+                                                                                   SQLITE3-STMT) instead.
+WARNING: redefining DEFTYPE type to be a class: DBI.ERROR:<DBI-ERROR>
+WARNING: redefining DEFTYPE type to be a class: DBI.ERROR:<DBI-WARNING>
+WARNING: redefining DEFTYPE type to be a class: DBI.ERROR:<DBI-INTERFACE-ERROR>
+WARNING:
+   redefining DEFTYPE type to be a class: DBI.ERROR:<DBI-UNIMPLEMENTED-ERROR>
+WARNING: redefining DEFTYPE type to be a class: DBI.ERROR:<DBI-DATABASE-ERROR>
+WARNING: redefining DEFTYPE type to be a class: DBI.ERROR:<DBI-DATA-ERROR>
+WARNING:
+   redefining DEFTYPE type to be a class: DBI.ERROR:<DBI-OPERATIONAL-ERROR>
+WARNING: redefining DEFTYPE type to be a class: DBI.ERROR:<DBI-INTEGRITY-ERROR>
+WARNING: redefining DEFTYPE type to be a class: DBI.ERROR:<DBI-INTERNAL-ERROR>
+WARNING:
+   redefining DEFTYPE type to be a class: DBI.ERROR:<DBI-PROGRAMMING-ERROR>
+WARNING:
+   redefining DEFTYPE type to be a class: DBI.ERROR:<DBI-NOTSUPPORTED-ERROR>
+WARNING:
+   redefining DEFTYPE type to be a class: DBI.ERROR:<DBI-ALREADY-COMMITED-ERROR>
+WARNING:
+   redefining DEFTYPE type to be a class: DBI.ERROR:<DBI-ALREADY-ROLLED-BACK-ERROR>
+WARNING: redefining DEFTYPE type to be a class: DBI.DRIVER:<DBI-DRIVER>
+WARNING: redefining DEFTYPE type to be a class: DBI.DRIVER:<DBI-CONNECTION>
+WARNING: redefining DEFTYPE type to be a class: DBI.DRIVER:<DBI-QUERY>
+WARNING: redefining IRONCLAD:BLOCK-LENGTH in DEFGENERIC
+WARNING: redefining CLOG:PARENT in DEFGENERIC
+WARNING: redefining CLOG::CONNECTION-ID in DEFGENERIC
+WARNING: redefining CLOG:HTML-ID in DEFGENERIC
+WARNING: redefining CLOG:WINDOW in DEFGENERIC
+WARNING: redefining CLOG:HTML-DOCUMENT in DEFGENERIC
+WARNING: redefining CLOG:LOCATION in DEFGENERIC
+WARNING: redefining CLOG:NAVIGATOR in DEFGENERIC
+WARNING: redefining CLOG:DOCUMENT-ELEMENT in DEFGENERIC
+WARNING: redefining CLOG:HEAD-ELEMENT in DEFGENERIC
+WARNING: redefining CLOG:DISABLEDP in DEFGENERIC
+WARNING: redefining (COMMON-LISP:SETF CLOG:DISABLEDP) in DEFGENERIC
+WARNING: redefining CLOG:VALUE in DEFGENERIC
+WARNING: redefining (COMMON-LISP:SETF CLOG:VALUE) in DEFGENERIC
+WARNING: redefining CLOG:MINIMUM in DEFGENERIC
+WARNING: redefining (COMMON-LISP:SETF CLOG:MINIMUM) in DEFGENERIC
+WARNING: redefining CLOG:MAXIMUM in DEFGENERIC
+WARNING: redefining (COMMON-LISP:SETF CLOG:MAXIMUM) in DEFGENERIC
+WARNING: redefining CLOG:URL-SRC in DEFGENERIC
+WARNING: redefining (COMMON-LISP:SETF CLOG:URL-SRC) in DEFGENERIC
+WARNING: redefining CLOG:ALT-TEXT in DEFGENERIC
+WARNING: redefining (COMMON-LISP:SETF CLOG:ALT-TEXT) in DEFGENERIC
+WARNING: redefining CLOG:CENTER-PANEL in DEFGENERIC
+WARNING: redefining CLOG:TOP-PANEL in DEFGENERIC
+WARNING: redefining CLOG:LEFT-PANEL in DEFGENERIC
+WARNING: redefining CLOG:BOTTOM-PANEL in DEFGENERIC
+WARNING: redefining CLOG:PANEL-BOX in DEFGENERIC
+WARNING: redefining CLOG:TREE-ROOT in DEFGENERIC
+WARNING: redefining CLOG:INDENT-LEVEL in DEFGENERIC
+WARNING: redefining CLOG:TOGGLE-STATE in DEFGENERIC
+WARNING: redefining CLOG:TREE-ITEM in DEFGENERIC
+WARNING: redefining CLOG:DATABASE-CONNECTION in DEFGENERIC
+WARNING: redefining CLOG:READ-ONLY-P in DEFGENERIC
+WARNING: redefining (COMMON-LISP:SETF CLOG:READ-ONLY-P) in DEFGENERIC
+WARNING:
+   redefining HV:👀PLAYGROUND (#<SB-PCL:SYSTEM-CLASS COMMON-LISP:T>) in DEFMETHOD
+WARNING:
+   redefining ENCODE-TO-STRING (#<SB-PCL:SYSTEM-CLASS COMMON-LISP:T>) in DEFMETHOD
+WARNING:
+   redefining HVS::👀OPERATIONS (#<SB-PCL:SYSTEM-CLASS COMMON-LISP:T>) in DEFMETHOD
+WARNING:
+   redefining HVS:RENDER-TOPLEVEL-CST :AROUND (#<SB-MOP:EQL-SPECIALIZER HYPERDOC:DEFEXAMPLE>
+                                               #<SB-PCL:SYSTEM-CLASS COMMON-LISP:T>
+                                               #<SB-PCL:SYSTEM-CLASS COMMON-LISP:T>
+                                               #<SB-PCL:SYSTEM-CLASS COMMON-LISP:T>) in DEFMETHOD
+
+; compiling file "/workspace/work/lisp-critic-a1-baseline/dreyeck/src/hyperspec.lisp" (written 12 NOV 2026 02:50:52 PM):
+
+; wrote /workspace/work/defederation-fasls/workspace/work/lisp-critic-a1-baseline/dreyeck/src/hyperspec-tmpAAURSO1.fasl
+; compilation finished in 0:00:00.068
+; compiling file "/workspace/work/lisp-critic-a1-baseline/dreyeck/src/wikipedia-title-bar.lisp" (written 12 NOV 2026 02:50:52 PM):
+
+; wrote /workspace/work/defederation-fasls/workspace/work/lisp-critic-a1-baseline/dreyeck/src/wikipedia-title-bar-tmp5GEXGEG5.fasl
+; compilation finished in 0:00:00.012
+WARNING:
+   redefining HTML-INSPECTOR-VIEWS:TITLE-BAR-ACTION-BUTTONS (#<STANDARD-CLASS HYPERBOOK/WIKIPEDIA::WIKIPEDIA-PAGE>) in DEFMETHOD
+; compiling file "/workspace/work/lisp-critic-a1-baseline/dreyeck/src/wiki-link.lisp" (written 12 NOV 2026 02:50:52 PM):
+
+; wrote /workspace/work/defederation-fasls/workspace/work/lisp-critic-a1-baseline/dreyeck/src/wiki-link-tmpAR3FSGEY.fasl
+; compilation finished in 0:00:00.115
+; compiling file "/workspace/work/lisp-critic-a1-baseline/dreyeck/src/fedwiki-journal-context-debugger.lisp" (written 12 NOV 2026 02:50:52 PM):
+
+; wrote /workspace/work/defederation-fasls/workspace/work/lisp-critic-a1-baseline/dreyeck/src/fedwiki-journal-context-debugger-tmpJAIDFZTC.fasl
+; compilation finished in 0:00:00.071
+; compiling file "/workspace/work/lisp-critic-a1-baseline/dreyeck/src/fedwiki-story-item-transfer.lisp" (written 12 NOV 2026 02:50:52 PM):
+
+; wrote /workspace/work/defederation-fasls/workspace/work/lisp-critic-a1-baseline/dreyeck/src/fedwiki-story-item-transfer-tmp8V3J6PE9.fasl
+; compilation finished in 0:00:00.079
+; compiling file "/workspace/work/lisp-critic-a1-baseline/dreyeck/src/upstream-intake-inspector-package.lisp" (written 12 NOV 2026 02:50:52 PM):
+
+; wrote /workspace/work/defederation-fasls/workspace/work/lisp-critic-a1-baseline/dreyeck/src/upstream-intake-inspector-package-tmp9V47YWQF.fasl
+; compilation finished in 0:00:00.000
+; compiling file "/workspace/work/lisp-critic-a1-baseline/dreyeck/src/upstream-intake-views.lisp" (written 12 NOV 2026 02:50:52 PM):
+
+; wrote /workspace/work/defederation-fasls/workspace/work/lisp-critic-a1-baseline/dreyeck/src/upstream-intake-views-tmp9BN22RMA.fasl
+; compilation finished in 0:00:00.119
+; compiling file "/workspace/work/lisp-critic-a1-baseline/dreyeck/src/fedwiki-source-relations-package.lisp" (written 12 NOV 2026 02:50:52 PM):
+
+; wrote /workspace/work/defederation-fasls/workspace/work/lisp-critic-a1-baseline/dreyeck/src/fedwiki-source-relations-package-tmp1CXFJSK9.fasl
+; compilation finished in 0:00:00.000
+; compiling file "/workspace/work/lisp-critic-a1-baseline/dreyeck/src/fedwiki-source-relations.lisp" (written 12 NOV 2026 02:50:52 PM):
+
+; wrote /workspace/work/defederation-fasls/workspace/work/lisp-critic-a1-baseline/dreyeck/src/fedwiki-source-relations-tmpX4BRKI0R.fasl
+; compilation finished in 0:00:00.091
+; compiling file "/workspace/work/lisp-critic-a1-baseline/dreyeck/src/fedwiki-source-relations-hyperdoc.lisp" (written 12 NOV 2026 02:50:52 PM):
+
+; wrote /workspace/work/defederation-fasls/workspace/work/lisp-critic-a1-baseline/dreyeck/src/fedwiki-source-relations-hyperdoc-tmpQ371UGST.fasl
+; compilation finished in 0:00:00.004
+; compiling file "/workspace/work/lisp-critic-a1-baseline/dreyeck/src/fedwiki-source-relations-inspector-package.lisp" (written 12 NOV 2026 02:50:52 PM):
+
+; wrote /workspace/work/defederation-fasls/workspace/work/lisp-critic-a1-baseline/dreyeck/src/fedwiki-source-relations-inspector-package-tmp2OWI3Q7U.fasl
+; compilation finished in 0:00:00.004
+; compiling file "/workspace/work/lisp-critic-a1-baseline/dreyeck/src/fedwiki-source-relations-views.lisp" (written 12 NOV 2026 02:50:52 PM):
+
+; wrote /workspace/work/defederation-fasls/workspace/work/lisp-critic-a1-baseline/dreyeck/src/fedwiki-source-relations-views-tmp9KKTJMYV.fasl
+; compilation finished in 0:00:00.447
+; compiling file "/workspace/work/lisp-critic-a1-baseline/dreyeck/src/upstream-temporal-projection.lisp" (written 12 NOV 2026 02:50:52 PM):
+
+; wrote /workspace/work/defederation-fasls/workspace/work/lisp-critic-a1-baseline/dreyeck/src/upstream-temporal-projection-tmpJU0JWO19.fasl
+; compilation finished in 0:00:00.032
+; compiling file "/workspace/work/lisp-critic-a1-baseline/dreyeck/src/gesture-binding-reading.lisp" (written 12 NOV 2026 02:50:52 PM):
+
+; wrote /workspace/work/defederation-fasls/workspace/work/lisp-critic-a1-baseline/dreyeck/src/gesture-binding-reading-tmpZX2WN8N4.fasl
+; compilation finished in 0:00:00.015
+; compiling file "/workspace/work/lisp-critic-a1-baseline/dreyeck/src/gesture-ordering-reading.lisp" (written 12 NOV 2026 02:50:52 PM):
+
+; wrote /workspace/work/defederation-fasls/workspace/work/lisp-critic-a1-baseline/dreyeck/src/gesture-ordering-reading-tmpOU81XRV0.fasl
+; compilation finished in 0:00:00.015
+; compiling file "/workspace/work/lisp-critic-a1-baseline/dreyeck/authority/reading.lisp" (written 12 NOV 2026 02:50:52 PM):
+
+; wrote /workspace/work/defederation-fasls/workspace/work/lisp-critic-a1-baseline/dreyeck/authority/reading-tmpY2ML9CFA.fasl
+; compilation finished in 0:00:00.215
+; compiling file "/workspace/work/lisp-critic-a1-baseline/dreyeck/authority/navigation.lisp" (written 12 NOV 2026 02:50:52 PM):
+
+; wrote /workspace/work/defederation-fasls/workspace/work/lisp-critic-a1-baseline/dreyeck/authority/navigation-tmpX2JYJDQE.fasl
+; compilation finished in 0:00:00.020
+; compiling file "/workspace/work/lisp-critic-a1-baseline/dreyeck/src/clog-tutorial.lisp" (written 12 NOV 2026 02:50:52 PM):
+
+; wrote /workspace/work/defederation-fasls/workspace/work/lisp-critic-a1-baseline/dreyeck/src/clog-tutorial-tmpOPCILR65.fasl
+; compilation finished in 0:00:00.019
+; compiling file "/workspace/work/lisp-critic-a1-baseline/dreyeck/clog-tutorial/reading.lisp" (written 12 NOV 2026 02:50:52 PM):
+
+; wrote /workspace/work/defederation-fasls/workspace/work/lisp-critic-a1-baseline/dreyeck/clog-tutorial/reading-tmpRV9F8A9A.fasl
+; compilation finished in 0:00:00.075
+; compiling file "/workspace/work/lisp-critic-a1-baseline/dreyeck/clog-tutorial/tutorial-01.lisp" (written 12 NOV 2026 02:50:52 PM):
+
+; wrote /workspace/work/defederation-fasls/workspace/work/lisp-critic-a1-baseline/dreyeck/clog-tutorial/tutorial-01-tmpK2ZAJT4I.fasl
+; compilation finished in 0:00:00.004
+; compiling file "/workspace/work/lisp-critic-a1-baseline/dreyeck/clog-tutorial/tutorial-02.lisp" (written 12 NOV 2026 02:50:52 PM):
+
+; wrote /workspace/work/defederation-fasls/workspace/work/lisp-critic-a1-baseline/dreyeck/clog-tutorial/tutorial-02-tmpUX5S4ADN.fasl
+; compilation finished in 0:00:00.000
+; compiling file "/workspace/work/lisp-critic-a1-baseline/dreyeck/clog-tutorial/tutorial-01-execution.lisp" (written 12 NOV 2026 02:50:52 PM):
+
+; wrote /workspace/work/defederation-fasls/workspace/work/lisp-critic-a1-baseline/dreyeck/clog-tutorial/tutorial-01-execution-tmp10401X32.fasl
+; compilation finished in 0:00:00.283
+; compiling file "/workspace/work/lisp-critic-a1-baseline/dreyeck/clog-tutorial/observations.lisp" (written 12 NOV 2026 02:50:52 PM):
+
+; wrote /workspace/work/defederation-fasls/workspace/work/lisp-critic-a1-baseline/dreyeck/clog-tutorial/observations-tmpZ7CBRM0G.fasl
+; compilation finished in 0:00:00.371
+; compiling file "/workspace/work/lisp-critic-a1-baseline/dreyeck/src/ccnx-federated-wiki-package.lisp" (written 12 NOV 2026 02:50:52 PM):
+
+; wrote /workspace/work/defederation-fasls/workspace/work/lisp-critic-a1-baseline/dreyeck/src/ccnx-federated-wiki-package-tmp9OZEQ0G2.fasl
+; compilation finished in 0:00:00.004
+; compiling file "/workspace/work/lisp-critic-a1-baseline/dreyeck/src/ccnx-federated-wiki.lisp" (written 12 NOV 2026 02:50:52 PM):
+
+; wrote /workspace/work/defederation-fasls/workspace/work/lisp-critic-a1-baseline/dreyeck/src/ccnx-federated-wiki-tmpB2JTL1W9.fasl
+; compilation finished in 0:00:00.004
+; compiling file "/workspace/work/lisp-critic-a1-baseline/dreyeck/src/ccnx-federated-wiki-hyperdoc.lisp" (written 12 NOV 2026 02:50:52 PM):
+
+; wrote /workspace/work/defederation-fasls/workspace/work/lisp-critic-a1-baseline/dreyeck/src/ccnx-federated-wiki-hyperdoc-tmpP3BI68WQ.fasl
+; compilation finished in 0:00:00.004
+; compiling file "/workspace/work/lisp-critic-a1-baseline/dreyeck/src/ccnx-typography.lisp" (written 12 NOV 2026 02:50:52 PM):
+
+; wrote /workspace/work/defederation-fasls/workspace/work/lisp-critic-a1-baseline/dreyeck/src/ccnx-typography-tmpQDARA81Z.fasl
+; compilation finished in 0:00:00.031
+; compiling file "/workspace/work/lisp-critic-a1-baseline/dreyeck/src/ccnx-typography-views.lisp" (written 12 NOV 2026 02:50:52 PM):
+
+; wrote /workspace/work/defederation-fasls/workspace/work/lisp-critic-a1-baseline/dreyeck/src/ccnx-typography-views-tmpYEMMM7SE.fasl
+; compilation finished in 0:00:00.079
+
+
+SHOP3 version 4.3.1
+Copyright (C) 2004-2026 SIFT, LLC.
+
+Original SHOP2 code Copyright (C) 2002  University of Maryland.
+
+This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+KIND, either express or implied.  This software is distributed under an
+MPL/GPL/LGPL triple license.  For details, see the software source file.
+; compiling file "/workspace/work/lisp-critic-a1-baseline/dreyeck/shop3/package.lisp" (written 12 NOV 2026 02:50:52 PM):
+
+; wrote /workspace/work/defederation-fasls/workspace/work/lisp-critic-a1-baseline/dreyeck/shop3/package-tmp73HU0RPK.fasl
+; compilation finished in 0:00:00.008
+; compiling file "/workspace/work/lisp-critic-a1-baseline/dreyeck/shop3/manual-topics.lisp" (written 12 NOV 2026 02:50:52 PM):
+
+; wrote /workspace/work/defederation-fasls/workspace/work/lisp-critic-a1-baseline/dreyeck/shop3/manual-topics-tmpIO5N7K88.fasl
+; compilation finished in 0:00:00.067
+; compiling file "/workspace/work/lisp-critic-a1-baseline/dreyeck/shop3/plan-objects.lisp" (written 12 NOV 2026 02:50:52 PM):
+
+; file: /workspace/work/lisp-critic-a1-baseline/dreyeck/shop3/plan-objects.lisp
+; in: DEFUN %SOURCE->PLAN
+;     'NIL
+; 
+; note: deleting unreachable code
+
+
+; wrote /workspace/work/defederation-fasls/workspace/work/lisp-critic-a1-baseline/dreyeck/shop3/plan-objects-tmpCM21U60Z.fasl
+; compilation finished in 0:00:00.020
+; compiling file "/workspace/work/lisp-critic-a1-baseline/dreyeck/shop3/examples.lisp" (written 12 NOV 2026 02:50:52 PM):
+
+; wrote /workspace/work/defederation-fasls/workspace/work/lisp-critic-a1-baseline/dreyeck/shop3/examples-tmp9DT7SEFG.fasl
+; compilation finished in 0:00:00.012
+; compiling file "/workspace/work/lisp-critic-a1-baseline/dreyeck/shop3/views.lisp" (written 12 NOV 2026 02:50:52 PM):
+
+; wrote /workspace/work/defederation-fasls/workspace/work/lisp-critic-a1-baseline/dreyeck/shop3/views-tmp8065ESJT.fasl
+; compilation finished in 0:00:00.004
+; compiling file "/workspace/work/lisp-critic-a1-baseline/dreyeck/work/remote-control-planning.lisp" (written 12 NOV 2026 02:50:52 PM):
+
+; wrote /workspace/work/defederation-fasls/workspace/work/lisp-critic-a1-baseline/dreyeck/work/remote-control-planning-tmp7S8Z6FGF.fasl
+; compilation finished in 0:00:00.012
+
+Defining domain ZETTELKASTEN-MOBILE-CONTROL...
+
+Defining problem REMOTE-CONTROL-A ...
+
+Defining problem REMOTE-CONTROL-B ...
+
+Defining problem REMOTE-CONTROL-C ...
+
+Defining problem REMOTE-CONTROL-D ...
+
+Defining problem REMOTE-CONTROL-E ...
+; compiling file "/workspace/work/lisp-critic-a1-baseline/dreyeck/work/remote-control-reading.lisp" (written 12 NOV 2026 02:50:52 PM):
+
+; wrote /workspace/work/defederation-fasls/workspace/work/lisp-critic-a1-baseline/dreyeck/work/remote-control-reading-tmpSIT3QPKP.fasl
+; compilation finished in 0:00:00.008
+; compiling file "/workspace/work/lisp-critic-a1-baseline/dreyeck/work/defederation-planning.lisp" (written 12 NOV 2026 02:50:52 PM):
+
+; wrote /workspace/work/defederation-fasls/workspace/work/lisp-critic-a1-baseline/dreyeck/work/defederation-planning-tmpE0PA0714.fasl
+; compilation finished in 0:00:00.016
+
+Defining domain DEFEDERATION-PREPARATION...
+; compiling file "/workspace/work/lisp-critic-a1-baseline/dreyeck/work/local-only-resolution.lisp" (written 12 NOV 2026 02:50:52 PM):
+
+; wrote /workspace/work/defederation-fasls/workspace/work/lisp-critic-a1-baseline/dreyeck/work/local-only-resolution-tmpJRWHHVG0.fasl
+; compilation finished in 0:00:00.016
+
+Defining domain FEDWIKI-LINK-RESOLUTION...
+; compiling file "/workspace/work/lisp-critic-a1-baseline/dreyeck/work/fedwiki-local-only.lisp" (written 12 NOV 2026 02:50:52 PM):
+
+; wrote /workspace/work/defederation-fasls/workspace/work/lisp-critic-a1-baseline/dreyeck/work/fedwiki-local-only-tmp4WZVROCX.fasl
+; compilation finished in 0:00:00.239
+; compiling file "/workspace/work/lisp-critic-a1-baseline/dreyeck/traverse/revisions.lisp" (written 12 NOV 2026 02:50:52 PM):
+
+; wrote /workspace/work/defederation-fasls/workspace/work/lisp-critic-a1-baseline/dreyeck/traverse/revisions-tmpA0I3UKX8.fasl
+; compilation finished in 0:00:00.203
+; compiling file "/workspace/work/lisp-critic-a1-baseline/dreyeck/traverse/entry.lisp" (written 12 NOV 2026 02:50:52 PM):
+
+; wrote /workspace/work/defederation-fasls/workspace/work/lisp-critic-a1-baseline/dreyeck/traverse/entry-tmp267Y2N80.fasl
+; compilation finished in 0:00:00.012
+; compiling file "/workspace/work/lisp-critic-a1-baseline/dreyeck/traverse/example.lisp" (written 12 NOV 2026 02:50:52 PM):
+
+; wrote /workspace/work/defederation-fasls/workspace/work/lisp-critic-a1-baseline/dreyeck/traverse/example-tmpOUPE5FSJ.fasl
+; compilation finished in 0:00:00.091
+; compiling file "/workspace/work/lisp-critic-a1-baseline/dreyeck/traverse/deployment.lisp" (written 12 NOV 2026 02:50:52 PM):
+
+; wrote /workspace/work/defederation-fasls/workspace/work/lisp-critic-a1-baseline/dreyeck/traverse/deployment-tmpIGHCU6ZA.fasl
+; compilation finished in 0:00:00.008
+; compiling file "/workspace/work/lisp-critic-a1-baseline/dreyeck/traverse/workspace.lisp" (written 12 NOV 2026 02:50:52 PM):
+
+; wrote /workspace/work/defederation-fasls/workspace/work/lisp-critic-a1-baseline/dreyeck/traverse/workspace-tmpBO0TUGLK.fasl
+; compilation finished in 0:00:00.020
+; compiling file "/workspace/work/lisp-critic-a1-baseline/dreyeck/traverse/wiki-snapshot.lisp" (written 12 NOV 2026 02:50:52 PM):
+
+; wrote /workspace/work/defederation-fasls/workspace/work/lisp-critic-a1-baseline/dreyeck/traverse/wiki-snapshot-tmpIIXPIQNW.fasl
+; compilation finished in 0:00:00.375
+; compiling file "/workspace/work/lisp-critic-a1-baseline/dreyeck/traverse/replay.lisp" (written 12 NOV 2026 02:50:52 PM):
+
+; wrote /workspace/work/defederation-fasls/workspace/work/lisp-critic-a1-baseline/dreyeck/traverse/replay-tmpOHM494YR.fasl
+; compilation finished in 0:00:00.259
+; compiling file "/workspace/work/lisp-critic-a1-baseline/dreyeck/traverse/experiment-workspace.lisp" (written 12 NOV 2026 02:50:52 PM):
+
+; wrote /workspace/work/defederation-fasls/workspace/work/lisp-critic-a1-baseline/dreyeck/traverse/experiment-workspace-tmpOVFB07XF.fasl
+; compilation finished in 0:00:00.071
+; compiling file "/workspace/work/lisp-critic-a1-baseline/dreyeck/traverse/wiki-topicmap.lisp" (written 12 NOV 2026 02:50:52 PM):
+
+; wrote /workspace/work/defederation-fasls/workspace/work/lisp-critic-a1-baseline/dreyeck/traverse/wiki-topicmap-tmpG6VFGMYP.fasl
+; compilation finished in 0:00:00.191
+; compiling file "/workspace/work/lisp-critic-a1-baseline/dreyeck/traverse/item-search.lisp" (written 12 NOV 2026 02:50:52 PM):
+
+; wrote /workspace/work/defederation-fasls/workspace/work/lisp-critic-a1-baseline/dreyeck/traverse/item-search-tmp4QIPRMOF.fasl
+; compilation finished in 0:00:00.255
+; compiling file "/workspace/work/lisp-critic-a1-baseline/dreyeck/src/fedwiki-original-editor-configuration.lisp" (written 12 NOV 2026 02:50:52 PM):
+
+; wrote /workspace/work/defederation-fasls/workspace/work/lisp-critic-a1-baseline/dreyeck/src/fedwiki-original-editor-configuration-tmpGW0QV22K.fasl
+; compilation finished in 0:00:00.043
+; compiling file "/workspace/work/lisp-critic-a1-baseline/dreyeck/src/fedwiki-original-editor-demo.lisp" (written 12 NOV 2026 02:50:52 PM):
+
+; wrote /workspace/work/defederation-fasls/workspace/work/lisp-critic-a1-baseline/dreyeck/src/fedwiki-original-editor-demo-tmp2K9J0HSR.fasl
+; compilation finished in 0:00:00.243
+; compiling file "/workspace/work/lisp-critic-a1-baseline/dreyeck/src/catalog.lisp" (written 12 NOV 2026 02:50:52 PM):
+
+; wrote /workspace/work/defederation-fasls/workspace/work/lisp-critic-a1-baseline/dreyeck/src/catalog-tmpP44I4E0Y.fasl
+; compilation finished in 0:00:00.008
+; compiling file "/workspace/work/lisp-critic-a1-baseline/dreyeck/src/catalog-membership.lisp" (written 12 NOV 2026 02:50:52 PM):
+
+; wrote /workspace/work/defederation-fasls/workspace/work/lisp-critic-a1-baseline/dreyeck/src/catalog-membership-tmp63LQ7EX6.fasl
+; compilation finished in 0:00:00.103
+; compiling file "/workspace/work/lisp-critic-a1-baseline/dreyeck/tests/catalog-membership.lisp" (written 12 NOV 2026 02:50:52 PM):
+
+; wrote /workspace/work/defederation-fasls/workspace/work/lisp-critic-a1-baseline/dreyeck/tests/catalog-membership-tmp86F1A8FB.fasl
+; compilation finished in 0:00:00.031
+; compiling file "/workspace/work/lisp-critic-a1-baseline/dreyeck/tests/catalog-startup-smoke.lisp" (written 12 NOV 2026 02:50:52 PM):
+
+; wrote /workspace/work/defederation-fasls/workspace/work/lisp-critic-a1-baseline/dreyeck/tests/catalog-startup-smoke-tmpH7D4HL98.fasl
+; compilation finished in 0:00:00.036
+CATALOG-MEMBERSHIP-SELF-TESTS-PASS: the source scan reads declarations and ignores comments and strings; the report names a missing, doubled, wrong-system, undeclared, unattributed and unscanned book; the loading checks name a removed, replaced, doubled or reordered member and a registration that replaces.
+WARNING:
+   Deprecated recursive use of (ASDF/OPERATE:OPERATE 'ASDF/LISP-ACTION:LOAD-OP
+   '("dreyeck/catalog")) while visiting
+   (ASDF/LISP-ACTION:TEST-OP "dreyeck/catalog/tests") - please use proper
+   dependencies instead
+WARNING:
+   Deprecated recursive use of (ASDF/OPERATE:OPERATE 'ASDF/LISP-ACTION:LOAD-OP
+   '("dreyeck/ccnx-federated-wiki")) while visiting
+   (ASDF/LISP-ACTION:TEST-OP "dreyeck/catalog/tests") - please use proper
+   dependencies instead
+WARNING:
+   Deprecated recursive use of (ASDF/OPERATE:OPERATE 'ASDF/LISP-ACTION:LOAD-OP
+   '("dreyeck/ccnx-federated-wiki")) while visiting
+   (ASDF/LISP-ACTION:TEST-OP "dreyeck/catalog/tests") - please use proper
+   dependencies instead
+CATALOG-MEMBERSHIP-PASS: what the ASDF closure of dreyeck/catalog and the sources of its systems declare is what the Catalog materialized, each book once with its declared main page; the CCNx reading is a regular member without HYPERDOC_CATALOG_SYSTEM; the first book of an id is kept; loading again changes nothing; loading more only adds.
+/workspace/tools/nix-portable-data/.nix-portable/nix/store/5m9amsvvh2z8sl7jrnc87hzy21glw6k1-glibc-2.40-66/lib/ld-linux-x86-64.so.2: unrecognized option '--noinform'
+Try '/workspace/tools/nix-portable-data/.nix-portable/nix/store/5m9amsvvh2z8sl7jrnc87hzy21glw6k1-glibc-2.40-66/lib/ld-linux-x86-64.so.2 --help' for more information.
+Unhandled UIOP/RUN-PROGRAM:SUBPROCESS-ERROR in thread #<SB-THREAD:THREAD tid=22864 "main thread" RUNNING
+                                                         {10003C8143}>:
+  Subprocess #<UIOP/LAUNCH-PROGRAM::PROCESS-INFO {1009043073}>
+ with command ("/workspace/tools/nix-portable-data/.nix-portable/nix/store/5m9amsvvh2z8sl7jrnc87hzy21glw6k1-glibc-2.40-66/lib/ld-linux-x86-64.so.2"
+               "--noinform" "--no-userinit" "--non-interactive" "--eval"
+               "(require :asdf)" "--eval"
+               "(asdf:load-asd #P\"/workspace/work/lisp-critic-a1-baseline/dreyeck.asd\")"
+               "--eval" "(asdf:load-system \"dreyeck\")" "--eval"
+               "(let* ((system (asdf/system-registry:registered-system \"dreyeck/catalog\")) (children (asdf:component-children system))) (assert (not (null children))))"
+               "--eval"
+               "(LET* ((SYSTEM (ASDF/SYSTEM-REGISTRY:REGISTERED-SYSTEM \"dreyeck/catalog\"))
+       (COMPONENT (FIRST (ASDF/COMPONENT:COMPONENT-CHILDREN SYSTEM)))
+       (EXPECTED
+        (MERGE-PATHNAMES #P\"dreyeck/src/catalog.lisp\"
+                         (ASDF/SYSTEM:SYSTEM-SOURCE-DIRECTORY SYSTEM))))
+  (ASSERT
+   (EQUAL (TRUENAME EXPECTED)
+          (TRUENAME (ASDF/COMPONENT:COMPONENT-PATHNAME COMPONENT)))))"
+               "--eval" "(asdf:load-system \"hyperdoc\")" "--eval"
+               "(asdf:load-system \"hyperbook/server\")" "--eval"
+               "(assert (null (find-package \"DREYECK/UPSTREAM-INTAKE\")))"
+               "--eval"
+               "(assert (null (find-package \"DREYECK/FEDWIKI-SOURCE-RELATIONS\")))"
+               "--eval"
+               "(assert (not (asdf:component-loaded-p (asdf:find-system \"dreyeck/upstream-intake\"))))"
+               "--eval"
+               "(assert (not (asdf:component-loaded-p (asdf:find-system \"dreyeck/fedwiki-source-relations\"))))"
+               "--eval"
+               "(assert (null (hyperbook:find-hyperbook \"dreyeck/wiki-link\")))"
+               "--eval"
+               "(assert (null (hyperbook:find-hyperbook \"dreyeck/upstream-intake\")))"
+               "--eval"
+               "(assert (null (hyperbook:find-hyperbook \"dreyeck/fedwiki-source-relations\")))"
+               "--eval" "(assert (null (find-package \"DREYECK/LISP-IMAGE\")))"
+               "--eval"
+               "(assert (not (asdf:component-loaded-p (asdf:find-system \"dreyeck/lisp-image\"))))"
+               "--eval"
+               "(assert (null (hyperbook:find-hyperbook \"dreyeck/lisp-image\")))"
+               "--eval" "(asdf:load-system \"dreyeck/catalog\")" "--eval"
+               "(LET* ((PACKAGE (FIND-PACKAGE \"DREYECK/CATALOG\"))
+       (SYMBOL
+        (AND PACKAGE (FIND-SYMBOL \"CATALOG-PRESENTATION-STATE\" PACKAGE))))
+  (ASSERT (AND SYMBOL (FBOUNDP SYMBOL))))"
+               "--eval" "(LET* ((CATALOG HYPERBOOK:*CATALOG*)
+       (BEFORE (COPY-LIST (HYPERBOOK:HYPERBOOKS-OF CATALOG))))
+  (DREYECK/CATALOG:CATALOG-PRESENTATION-STATE CATALOG NIL)
+  (ASSERT (EQUAL BEFORE (HYPERBOOK:HYPERBOOKS-OF CATALOG))))"
+               "--eval" "(LET* ((TOPIC
+        (MAKE-INSTANCE 'DREYECK/TOPICMAP:TOPICMAP-TOPIC :ID \"workspace:test\"
+                       :TYPE :WORKSPACE :LABEL \"Workspace Test\"))
+       (STATE
+        (DREYECK/CATALOG:CATALOG-PRESENTATION-STATE HYPERBOOK:*CATALOG*
+                                                    (LIST TOPIC)))
+       (ENTRY (FIRST (GETF STATE :WORKSPACES))))
+  (ASSERT
+   (EQUAL ENTRY
+          '(:ID \"workspace:test\" :LABEL \"Workspace Test\" :STATE :DISCOVERED)))
+  T)"
+               "--eval" "(LET* ((SUBJECT
+        (FIND \"hyperdoc\" (HYPERBOOK:HYPERBOOKS-OF HYPERBOOK:*CATALOG*) :KEY
+              #'HYPERBOOK:ID-OF :TEST #'STRING=))
+       (STATE
+        (DREYECK/CATALOG:CATALOG-PRESENTATION-STATE HYPERBOOK:*CATALOG* NIL))
+       (ENTRY
+        (AND SUBJECT
+             (FIND (HYPERBOOK:ID-OF SUBJECT) (GETF STATE :HYPERBOOKS) :KEY
+                   (LAMBDA (ITEM) (GETF ITEM :ID)) :TEST #'EQUAL))))
+  (ASSERT SUBJECT)
+  (ASSERT ENTRY)
+  (ASSERT (EQUAL (HYPERBOOK:ID-OF SUBJECT) (GETF ENTRY :ID)))
+  (ASSERT (EQUAL (HYPERBOOK:TITLE-OF SUBJECT) (GETF ENTRY :LABEL)))
+  (ASSERT (EQ :MATERIALIZED (GETF ENTRY :STATE)))
+  T)"
+               "--eval" "(LET* ((EXPECTED
+        (SORT
+         (MAPCAR #'HYPERBOOK:TITLE-OF
+                 (COPY-LIST (HYPERBOOK:HYPERBOOKS-OF HYPERBOOK:*CATALOG*)))
+         #'STRING<))
+       (PRESENTED
+        (MAPCAR (LAMBDA (ENTRY) (GETF ENTRY :LABEL))
+                (GETF
+                 (DREYECK/CATALOG:CATALOG-PRESENTATION-STATE
+                  HYPERBOOK:*CATALOG* NIL)
+                 :HYPERBOOKS))))
+  (ASSERT (EQUAL EXPECTED PRESENTED))
+  T)"
+               "--eval"
+               "(assert (asdf:component-loaded-p (asdf:find-system \"dreyeck/lisp-image\")))"
+               "--eval" "(assert (find-package \"DREYECK/LISP-IMAGE\"))"
+               "--eval"
+               "(assert (asdf:component-loaded-p (asdf:find-system \"dreyeck/upstream-intake\")))"
+               "--eval"
+               "(assert (asdf:component-loaded-p (asdf:find-system \"dreyeck/fedwiki-source-relations\")))"
+               "--eval" "(assert (find-package \"DREYECK/UPSTREAM-INTAKE\"))"
+               "--eval"
+               "(assert (find-package \"DREYECK/FEDWIKI-SOURCE-RELATIONS\"))"
+               "--eval"
+               "(LET* ((WIKI (HYPERBOOK:FIND-HYPERBOOK \"dreyeck/wiki-link\" :SIGNAL-ERROR? T)) (INTAKE (HYPERBOOK:FIND-HYPERBOOK \"dreyeck/upstream-intake\" :SIGNAL-ERROR? T)) (RELATIONS (HYPERBOOK:FIND-HYPERBOOK \"dreyeck/fedwiki-source-relations\" :SIGNAL-ERROR? T)) (MEMBERS (HYPERBOOK:HYPERBOOKS-OF HYPERBOOK:*CATALOG*))) (HYPERDOC::ENSURE-PAGES-LOADED WIKI) (HYPERDOC::ENSURE-PAGES-LOADED INTAKE) (HYPERDOC::ENSURE-PAGES-LOADED RELATIONS) (ASSERT (STRING= \"Wiki-link title and slug lookup contracts\" (HYPERBOOK:MAIN-PAGE-ID-OF WIKI))) (ASSERT (HYPERBOOK:FIND-PAGE WIKI \"Wiki-link title and slug lookup contracts\" :SIGNAL-ERROR? T)) (ASSERT (STRING= \"Upstream Intake as a Read-Only Observation\" (HYPERBOOK:MAIN-PAGE-ID-OF INTAKE))) (ASDF/OPERATE:LOAD-SYSTEM \"dreyeck/upstream-intake/tests\") (ASSERT (EQ INTAKE (UIOP/PACKAGE:SYMBOL-CALL :DREYECK/UPSTREAM-INTAKE/TESTS :RUN-PAGE-ASDF-AND-CATALOG-TEST))) (ASSERT (= 1 (COUNT \"dreyeck/fedwiki-source-relations\" MEMBERS :KEY (FUNCTION HYPERBOOK:ID-OF) :TEST (FUNCTION STRING=)))) (ASSERT (STRING= \"FedWiki Component Order and Source Relations\" (HYPERBOOK:TITLE-OF RELATIONS))) (ASSERT (STRING= \"FedWiki Component Order and Source Relations\" (HYPERBOOK:MAIN-PAGE-ID-OF RELATIONS))) (ASSERT (= 1 (HASH-TABLE-COUNT (HYPERDOC:PAGES-OF RELATIONS)))) (ASSERT (HYPERBOOK:FIND-PAGE RELATIONS \"FedWiki Component Order and Source Relations\" :SIGNAL-ERROR? T)) (FORMAT T \"FRESH-DREYECK-CATALOG=~S~%\" (MAPCAR (LAMBDA (BOOK) (LIST (HYPERBOOK:ID-OF BOOK) (HYPERBOOK:TITLE-OF BOOK))) MEMBERS)))"
+               "--eval"
+               "(let* ((wiki (hyperbook:find-hyperbook \"dreyeck/wiki-link\" :signal-error? t)) (lisp-image (hyperbook:find-hyperbook \"dreyeck/lisp-image\" :signal-error? t)) (members (hyperbook:hyperbooks-of hyperbook:*catalog*))) (hyperdoc::ensure-pages-loaded wiki) (hyperdoc::ensure-pages-loaded lisp-image) (assert (= 1 (count \"dreyeck/lisp-image\" members :key #'hyperbook:id-of :test #'string=))) (assert (string= \"dreyeck.ch Lisp image\" (hyperbook:title-of lisp-image))) (assert (string= \"Lisp image HyperBook refactor\" (hyperbook:main-page-id-of lisp-image))) (assert (= 1 (hash-table-count (hyperdoc:pages-of lisp-image)))) (assert (hyperbook:find-page lisp-image \"Lisp image HyperBook refactor\" :signal-error? t)) (assert (null (hyperbook:find-page wiki \"Lisp image HyperBook refactor\" :signal-error? nil))))"
+               "--eval"
+               "(let ((git-intake (dreyeck/upstream-intake:make-hyperdoc-host-not-found-intake)) (component-intake (dreyeck/upstream-intake:make-hyperspec-component-intake))) (assert (find \"Upstream Intake\" (html-inspector-views:all-views git-intake) :key #'html-inspector-views:view-title :test #'string=)) (assert (find \"Upstream Intake\" (html-inspector-views:all-views component-intake) :key #'html-inspector-views:view-title :test #'string=)))"
+               "--eval"
+               "(uiop:symbol-call :dreyeck/upstream-intake/tests :check-page-loading-repository-context)"
+               "--eval"
+               "(asdf:load-system \"dreyeck/lisp-critic/reading/tests\")"
+               "--eval"
+               "(uiop:symbol-call :dreyeck/lisp-critic/reading/tests :check-under-catalog-runtime)"
+               "--eval"
+               "(format t \"Fresh Dreyeck catalog startup tests passed.~%\")"
+               "--eval"
+               "(progn (asdf:load-system \"dreyeck/catalog/membership\") (uiop:symbol-call :dreyeck/catalog/membership :assert-membership :check-pages t) (format t \"CATALOG-MEMBERSHIP: what dreyeck/catalog and the sources of its systems declare is the Catalog, each book once with its main page.~%\"))"
+               "--eval"
+               "(progn (assert (zerop (length (or (uiop:getenv \"HYPERDOC_CATALOG_SYSTEM\") \"\")))) (uiop:symbol-call :dreyeck/catalog/membership :assert-hyperbook-present \"dreyeck/ccnx-federated-wiki\") (format t \"CCNX-FEDERATED-WIKI-CATALOG-MEMBER: present once with its declared main page, without HYPERDOC_CATALOG_SYSTEM.~%\"))"
+               "--eval"
+               "(let* ((book (hyperbook:find-hyperbook \"dreyeck/work/remote-control-planning\" :signal-error? t)) (titles '(\"Planning Remote Control for the Zettelkasten App with SHOP3\" \"Model Authority and the Control Surface\" \"How SHOP3 Reads the Architecture Task\" \"Case C - Two Alternative Plan Trees\" \"Cases D and E - When Planning Refuses\" \"Evidence and Open Acceptance\"))) (assert (= 1 (count \"dreyeck/work/remote-control-planning\" (hyperbook:hyperbooks-of hyperbook:*catalog*) :key #'hyperbook:id-of :test #'string=))) (assert (string= \"Planning Remote Control for the Zettelkasten App with SHOP3\" (hyperbook:main-page-id-of book))) (dolist (name titles) (assert (string= name (hyperbook:id-of (hyperbook:find-page book name :signal-error? t))))) (format t \"REMOTE-CONTROL-READING-CATALOG-PAGES-PASS~%\"))"
+               "--eval" "(PROGN
+ (ASSERT (NULL (FIND-PACKAGE :DREYECK/WORKFLOW/AUTHORING)))
+ (ASSERT (NULL (FIND-PACKAGE :DREYECK/WORK/AUTHORING)))
+ (PROGN
+        (LET
+             ((BOOK
+                    (HYPERBOOK:FIND-HYPERBOOK \"dreyeck/nested-actions/reading\"
+                                              :SIGNAL-ERROR? T)))
+             (ASSERT
+                     (= 1
+                        (COUNT \"dreyeck/nested-actions/reading\"
+                               (HYPERBOOK:HYPERBOOKS-OF HYPERBOOK:*CATALOG*)
+                               :KEY (FUNCTION HYPERBOOK:ID-OF) :TEST
+                               (FUNCTION EQUAL))))
+             (ASSERT
+                     (EQUAL \"Nested Actions in Solo\"
+                            (HYPERBOOK:TITLE-OF BOOK)))
+             (ASSERT
+                     (EQUAL \"Nested Actions in Solo\"
+                            (HYPERBOOK:MAIN-PAGE-ID-OF BOOK)))
+             (ASSERT
+                     (HYPERBOOK:LOOKUP-PATH BOOK
+                                            (QUOTE
+                                                   (\"Nested Actions in Solo\")))))
+        (ASDF/OPERATE:TEST-SYSTEM \"dreyeck/nested-actions/reading/tests\"))
+ (ASSERT (= 1 (COUNT \"dreyeck/authority/reading\" (HYPERBOOK:HYPERBOOKS-OF HYPERBOOK:*CATALOG*) :KEY #'HYPERBOOK:ID-OF :TEST #'STRING=)))
+ (ASDF:TEST-SYSTEM \"dreyeck/authority/reading\")
+ (LET ((BOOK (HYPERBOOK:FIND-HYPERBOOK \"dreyeck/work/reading\" :SIGNAL-ERROR? T)))
+   (ASSERT (= 1 (COUNT \"dreyeck/work/reading\"
+                      (HYPERBOOK:HYPERBOOKS-OF HYPERBOOK:*CATALOG*)
+                      :KEY #'HYPERBOOK:ID-OF :TEST #'STRING=)))
+   (ASSERT (STRING= \"Working on HyperDoc\" (HYPERBOOK:TITLE-OF BOOK)))
+   (ASSERT (STRING= \"Work Breakdown\" (HYPERBOOK:MAIN-PAGE-ID-OF BOOK)))
+   (ASSERT (NULL (HYPERBOOK:FIND-HYPERBOOK \"dreyeck/working-on-hyperdoc\")))
+   (DOLIST (TITLE '(\"Federated Wiki deployment state\" \"wiki.ralfbarkow.ch deployment\"
+                    \"dreyeck.ch deployment\" \"Cookie Secret\"))
+     (LET* ((PAGE (HYPERBOOK:FIND-PAGE BOOK TITLE :SIGNAL-ERROR? T))
+            (VIEW (FIND \"Content\" (HTML-INSPECTOR-VIEWS:ALL-VIEWS PAGE)
+                        :KEY #'HTML-INSPECTOR-VIEWS:VIEW-TITLE :TEST #'STRING=)))
+       (ASSERT VIEW)
+       (HTML-INSPECTOR-VIEWS:VIEW-HTML VIEW)
+       (ASSERT (NOTANY (LAMBDA (REF) (TYPEP (CDR REF) 'CONDITION))
+                       (HTML-INSPECTOR-VIEWS:VIEW-REFERENCES VIEW))))))
+ ;; Catalog membership is what dreyeck/catalog and its systems declare,
+ ;; checked as derived properties just before this form, not through a total.
+ (ASSERT (HYPERBOOK:FIND-PAGE
+          (HYPERBOOK:FIND-HYPERBOOK \"dreyeck/work/reading\" :SIGNAL-ERROR? T)
+          \"Work Breakdown\" :SIGNAL-ERROR? T))
+ (ASSERT (NULL (FIND-PACKAGE :DREYECK/WORK/PLANNING)))
+ (LET ((TEMPORAL
+        (HYPERBOOK:FIND-HYPERBOOK \"dreyeck/upstream-intake/temporal\"
+                                  :SIGNAL-ERROR? T)))
+   (HYPERDOC::ENSURE-PAGES-LOADED TEMPORAL)
+   (ASSERT
+    (HYPERBOOK:FIND-PAGE TEMPORAL \"Page-Loading Contract Evolution\"
+                         :SIGNAL-ERROR? T)))
+ (DOLIST
+     (ENTRY
+      '((\"dreyeck/topicmap/tala/reading\" \"Reading TALA as a Layout Layer\" 12)
+        (\"dreyeck/workflow/reading\" \"Reconstructing Workflow\" 12)))
+   (LET* ((BOOK (HYPERBOOK:FIND-HYPERBOOK (FIRST ENTRY) :SIGNAL-ERROR? T)))
+     (HYPERDOC::ENSURE-PAGES-LOADED BOOK)
+     (LET* ((PAGE (HYPERBOOK:FIND-PAGE BOOK (SECOND ENTRY) :SIGNAL-ERROR? T))
+            (VIEW
+             (FIND \"Content\" (HTML-INSPECTOR-VIEWS:ALL-VIEWS PAGE) :KEY
+                   #'HTML-INSPECTOR-VIEWS:VIEW-TITLE :TEST #'STRING=)))
+       (HTML-INSPECTOR-VIEWS:VIEW-HTML VIEW)
+       ;; A page link retains the page object and an EXPR link retains
+       ;; the object it names, so not every reference of a Content view
+       ;; is an executable widget. The pinned number counts widgets.
+       (LET ((WIDGETS
+              (REMOVE-IF-NOT
+               (LAMBDA (REF) (TYPEP (CDR REF) 'HTML-INSPECTOR-VIEWS:VIEW))
+               (HTML-INSPECTOR-VIEWS:VIEW-REFERENCES VIEW))))
+         (ASSERT (= (THIRD ENTRY) (LENGTH WIDGETS)))
+         (DOLIST (WIDGET WIDGETS)
+           (let* ((widget-view (cdr widget))
+                  (html (html-inspector-views:view-html widget-view))
+                  (thunks (count-if (lambda (ref) (typep (cdr ref) 'html-inspector-views:thunk))
+                                    (html-inspector-views:view-references widget-view))))
+             (unless (= 1 thunks)
+               ;; The optional layout tool is absent in this fresh default
+               ;; image. Its four source widgets remain, with explicit evidence
+               ;; in place of execution; other widgets must retain their thunk.
+               (assert (= 0 thunks))
+               (assert (equal (first entry) \"dreyeck/topicmap/tala/reading\"))
+               (assert (some (lambda (name) (search name html :test #'char-equal))
+                             '(\"READING-LAYOUT-RESULT\" \"READING-GEOMETRY\"
+                               \"READING-INVARIANT-REPORT\" \"READING-COMPARISON\")))
+               (assert (search \"inspect capability\" html))
+               (assert (find-if
+                        (lambda (ref)
+                          (let ((value (cdr ref)))
+                            (and (listp value) (member (getf value :status) '(:unavailable :unsupported))
+                                 (equal (getf value :program) \"d2\"))))
+                        (html-inspector-views:view-references widget-view))))))))))
+
+ (LET* ((SOURCE-PATH
+         (ASDF:SYSTEM-RELATIVE-PATHNAME \"dreyeck\" \"dreyeck/src/gesture-ordering-reading.lisp\"))
+        (SOURCE-BEFORE (UIOP:READ-FILE-STRING SOURCE-PATH :EXTERNAL-FORMAT :UTF-8))
+        (BOOK (HYPERBOOK:FIND-HYPERBOOK \"dreyeck/gesture/reading\" :SIGNAL-ERROR? T)))
+   (HYPERDOC::ENSURE-PAGES-LOADED BOOK)
+   (LET* ((PAGE
+           (HYPERBOOK:FIND-PAGE BOOK \"Reading the two continuations of one interaction.\"
+                                :SIGNAL-ERROR? T))
+          (VIEW
+           (FIND \"Operations\" (HTML-INSPECTOR-VIEWS:ALL-VIEWS PAGE) :KEY
+                 #'HTML-INSPECTOR-VIEWS:VIEW-TITLE :TEST #'STRING=)))
+     (ASSERT VIEW)
+     (ASSERT
+      (ASDF:COMPONENT-LOADED-P (ASDF:FIND-SYSTEM \"dreyeck/gesture/operation-request\")))
+     (HTML-INSPECTOR-VIEWS:VIEW-HTML VIEW)
+     (FLET ((REQUEST-API (NAME &REST ARGUMENTS)
+              (APPLY #'UIOP:SYMBOL-CALL :DREYECK/GESTURE/OPERATION-REQUEST NAME ARGUMENTS)))
+       (LET* ((KEY (LIST :DEFINITION (FIND-SYMBOL \"RACE-READING\" \"DREYECK/GESTURE/ORDERING\")))
+              (BUTTONS
+               (REMOVE-IF-NOT (LAMBDA (REF) (TYPEP (CDR REF) 'HTML-INSPECTOR-VIEWS:THUNK))
+                              (HTML-INSPECTOR-VIEWS:VIEW-REFERENCES VIEW)))
+              (BUTTON
+               (FIND KEY BUTTONS :KEY
+                     (LAMBDA (REF)
+                       (REQUEST-API :OPERATION-REQUEST-FORM-KEY
+                                    (HTML-INSPECTOR-VIEWS:EVAL-THUNK (CDR REF))))
+                     :TEST #'EQUAL))
+              (REQUEST (HTML-INSPECTOR-VIEWS:EVAL-THUNK (CDR BUTTON)))
+              (OPERATION
+               (UIOP:SYMBOL-CALL :DREYECK/GESTURE-BINDING-WITNESS
+                                 :INSERT-EXECUTABLE-DEFEXAMPLE-OPERATION))
+              (MARK
+               (FIND \"binding/mark-insert-defexample\"
+                     (UIOP:SYMBOL-CALL :DREYECK/GESTURE-BINDING-WITNESS
+                                       :MAKE-GESTURE-BINDING-CATALOG)
+                     :KEY (FIND-SYMBOL \"GESTURE-BINDING-ID\" \"DREYECK/GESTURE-BINDING-WITNESS\")
+                     :TEST #'STRING=)))
+         (ASSERT (EQ PAGE (REQUEST-API :OPERATION-REQUEST-PAGE REQUEST)))
+         (ASSERT (EQ OPERATION (REQUEST-API :OPERATION-REQUEST-OPERATION REQUEST)))
+         (ASSERT (EQ REQUEST (HTML-INSPECTOR-VIEWS:EVAL-THUNK (CDR BUTTON))))
+         (ASSERT (EQ REQUEST (REQUEST-API :REQUEST-THROUGH-BINDING MARK PAGE KEY))))))
+   (ASSERT
+    (STRING= SOURCE-BEFORE (UIOP:READ-FILE-STRING SOURCE-PATH :EXTERNAL-FORMAT :UTF-8))))
+ (ASSERT (NULL (FIND-PACKAGE :DREYECK/WORKFLOW/AUTHORING)))
+ (ASSERT (NULL (FIND-PACKAGE :DREYECK/WORK/AUTHORING)))
+ (FORMAT T
+         \"OPERATION-REQUEST-CATALOG-PROOF: the gesture reading code page offers Operations; its button and the mark Binding reach one unexecuted request; source unchanged; no authoring runtime.~%\")
+ (FORMAT T
+         \"NORMAL-LAUNCHER-PROOF: the admitted books including Nested Actions, Maintained Mech and FedWiki Configurations; TALA 12 source widgets (layout capability gated), workflow 12 play thunks; no authoring runtime.~%\"))"
+               "--eval"
+               "(LET* ((BOOK (HYPERBOOK:FIND-HYPERBOOK \"dreyeck/upstream-intake\" :SIGNAL-ERROR? T)) (PAGE (HYPERBOOK:FIND-PAGE BOOK \"Upstream Intake as a Read-Only Observation\" :SIGNAL-ERROR? T)) (DOM (PLUMP-PARSER:PARSE (HYPERDOC:FILE-OF PAGE))) (ACTION \"(upstream-intake-removal-workspace-example)\") (ANCHORS (REMOVE-IF-NOT (LAMBDA (A) (EQUAL ACTION (PLUMP-DOM:ATTRIBUTE A \"expr\"))) (PLUMP-DOM:GET-ELEMENTS-BY-TAG-NAME DOM \"a\"))) (VIEW (FIND \"Content\" (HTML-INSPECTOR-VIEWS:ALL-VIEWS PAGE) :KEY (FUNCTION HTML-INSPECTOR-VIEWS:VIEW-TITLE) :TEST (FUNCTION EQUAL)))) (ASSERT (= 1 (LENGTH ANCHORS))) (ASSERT (EQUAL \"Topicmap\" (PLUMP-DOM:ATTRIBUTE (FIRST ANCHORS) \"view\"))) (HTML-INSPECTOR-VIEWS:VIEW-HTML VIEW) (LET* ((WIDGET (FIND-IF (LAMBDA (ENTRY) (SEARCH \"upstream-intake-removal-workspace-example\" (HTML-INSPECTOR-VIEWS:VIEW-HTML (CDR ENTRY)) :TEST (FUNCTION CHAR-EQUAL))) (HTML-INSPECTOR-VIEWS:VIEW-REFERENCES VIEW))) (THUNKS (AND WIDGET (REMOVE-IF-NOT (LAMBDA (ENTRY) (TYPEP (CDR ENTRY) (QUOTE HTML-INSPECTOR-VIEWS:THUNK))) (HTML-INSPECTOR-VIEWS:VIEW-REFERENCES (CDR WIDGET)))))) (ASSERT WIDGET) (ASSERT (= 1 (LENGTH THUNKS))) (LET* ((WORKSPACE (HTML-INSPECTOR-VIEWS:EVAL-THUNK (CDAR THUNKS))) (PROJECTION (DREYECK/TOPICMAP:TOPICMAP-WORKSPACE-PROJECTION-OF WORKSPACE)) (WORKSPACE-VIEW (FIND \"Topicmap\" (HTML-INSPECTOR-VIEWS:ALL-VIEWS WORKSPACE) :KEY (FUNCTION HTML-INSPECTOR-VIEWS:VIEW-TITLE) :TEST (FUNCTION EQUAL)))) (ASSERT (TYPEP WORKSPACE (QUOTE DREYECK/TOPICMAP:TOPICMAP-WORKSPACE))) (ASSERT (EQUAL \"page:dreyeck/upstream-intake/Observing an Upstream Commit\" (DREYECK/TOPICMAP:TOPICMAP-WORKSPACE-POINT-OF WORKSPACE))) (PROGN (ASDF/OPERATE:LOAD-SYSTEM \"dreyeck/hyperdoc/curation/tests\") (LET ((EXPECTED (UIOP/PACKAGE:SYMBOL-CALL :DREYECK/HYPERDOC/CURATION/TESTS :EXPECTED-INTAKE-IMPACT :COMMIT)) (ACTUAL (DREYECK/TOPICMAP/CURATION:IMPACT-SUMMARY PROJECTION))) (ASSERT (= (LENGTH EXPECTED) (LENGTH ACTUAL))) (ASSERT (NULL (SET-EXCLUSIVE-OR EXPECTED ACTUAL :TEST (FUNCTION EQUAL)))))) (ASSERT WORKSPACE-VIEW) (LET ((HTML (HTML-INSPECTOR-VIEWS:VIEW-HTML WORKSPACE-VIEW))) (ASSERT (SEARCH \"Point\" HTML)) (ASSERT (SEARCH \"Associations\" HTML))) (FORMAT T \"~%CATALOG-CURATION-DEMO-PASS: existing overview, one action/play thunk, Point and exact warranted impact.~%\"))))"
+               "--eval"
+               "(LET ((BOOK (HYPERBOOK:FIND-HYPERBOOK \"dreyeck/mech-intake/reading\" :SIGNAL-ERROR? T))) (ASSERT (STRING= \"Reading a Maintained Mech Composition\" (HYPERBOOK:TITLE-OF BOOK))) (ASSERT (HYPERBOOK:FIND-PAGE BOOK \"Reading a Maintained Mech Composition\" :SIGNAL-ERROR? T)))"
+               "--eval"
+               "(LET ((BOOK (HYPERBOOK:FIND-HYPERBOOK \"dreyeck/fedwiki-config/reading\" :SIGNAL-ERROR? T))) (ASSERT (STRING= \"Reading FedWiki Configuration and Fork Behavior\" (HYPERBOOK:TITLE-OF BOOK))) (ASSERT (HYPERBOOK:FIND-PAGE BOOK \"Forking a Local Page Across Origins\" :SIGNAL-ERROR? T)))")
+ exited with error code 1
+
+Backtrace for: #<SB-THREAD:THREAD tid=22864 "main thread" RUNNING {10003C8143}>
+0: (SB-DEBUG::DEBUGGER-DISABLED-HOOK #<UIOP/RUN-PROGRAM:SUBPROCESS-ERROR {1009054093}> #<unused argument> :QUIT T)
+1: (SB-DEBUG::RUN-HOOK *INVOKE-DEBUGGER-HOOK* #<UIOP/RUN-PROGRAM:SUBPROCESS-ERROR {1009054093}>)
+2: (INVOKE-DEBUGGER #<UIOP/RUN-PROGRAM:SUBPROCESS-ERROR {1009054093}>)
+3: (CERROR "IGNORE-ERROR-STATUS" UIOP/RUN-PROGRAM:SUBPROCESS-ERROR :COMMAND ("/workspace/tools/nix-portable-data/.nix-portable/nix/store/5m9amsvvh2z8sl7jrnc87hzy21glw6k1-glibc-2.40-66/lib/ld-linux-x86-64.so.2" "--noinform" "--no-userinit" "--non-interactive" #1="--eval" "(require :asdf)" #1# "(asdf:load-asd #P\"/workspace/work/lisp-critic-a1-baseline/dreyeck.asd\")" #1# "(asdf:load-system \"dreyeck\")" #1# "(let* ((system (asdf/system-registry:registered-system \"dreyeck/catalog\")) (children (asdf:component-children system))) (assert (not (null children))))" ...) :CODE 1 :PROCESS #<UIOP/LAUNCH-PROGRAM::PROCESS-INFO {1009043073}>)
+4: (UIOP/RUN-PROGRAM::%CHECK-RESULT 1 :COMMAND ("/workspace/tools/nix-portable-data/.nix-portable/nix/store/5m9amsvvh2z8sl7jrnc87hzy21glw6k1-glibc-2.40-66/lib/ld-linux-x86-64.so.2" "--noinform" "--no-userinit" "--non-interactive" #1="--eval" "(require :asdf)" #1# "(asdf:load-asd #P\"/workspace/work/lisp-critic-a1-baseline/dreyeck.asd\")" #1# "(asdf:load-system \"dreyeck\")" #1# "(let* ((system (asdf/system-registry:registered-system \"dreyeck/catalog\")) (children (asdf:component-children system))) (assert (not (null children))))" ...) :PROCESS #<UIOP/LAUNCH-PROGRAM::PROCESS-INFO {1009043073}> :IGNORE-ERROR-STATUS NIL)
+5: (UIOP/RUN-PROGRAM::%USE-LAUNCH-PROGRAM ("/workspace/tools/nix-portable-data/.nix-portable/nix/store/5m9amsvvh2z8sl7jrnc87hzy21glw6k1-glibc-2.40-66/lib/ld-linux-x86-64.so.2" "--noinform" "--no-userinit" "--non-interactive" #1="--eval" "(require :asdf)" #1# "(asdf:load-asd #P\"/workspace/work/lisp-critic-a1-baseline/dreyeck.asd\")" #1# "(asdf:load-system \"dreyeck\")" #1# "(let* ((system (asdf/system-registry:registered-system \"dreyeck/catalog\")) (children (asdf:component-children system))) (assert (not (null children))))" ...) :DIRECTORY #P"/workspace/work/lisp-critic-a1-baseline/" :OUTPUT #<SYNONYM-STREAM :SYMBOL SB-SYS:*STDOUT* {10015A8673}> :ERROR-OUTPUT #<SYNONYM-STREAM :SYMBOL SB-SYS:*STDERR* {10015A8773}>)
+6: (DREYECK/CATALOG/TESTS:RUN-CATALOG-STARTUP-SMOKE-TESTS)
+7: ((SB-PCL::EMF ASDF/ACTION:PERFORM) #<unused argument> #<unused argument> #<ASDF/LISP-ACTION:TEST-OP > #<ASDF/SYSTEM:SYSTEM "dreyeck/catalog/tests">)
+8: ((LAMBDA NIL :IN ASDF/ACTION:CALL-WHILE-VISITING-ACTION))
+9: ((:METHOD ASDF/ACTION:PERFORM-WITH-RESTARTS :AROUND (T T)) #<ASDF/LISP-ACTION:TEST-OP > #<ASDF/SYSTEM:SYSTEM "dreyeck/catalog/tests">) [fast-method]
+10: ((:METHOD ASDF/PLAN:PERFORM-PLAN (T)) #<ASDF/PLAN:SEQUENTIAL-PLAN {1004192623}>) [fast-method]
+11: ((FLET SB-C::WITH-IT :IN SB-C::%WITH-COMPILATION-UNIT))
+12: ((:METHOD ASDF/PLAN:PERFORM-PLAN :AROUND (T)) #<ASDF/PLAN:SEQUENTIAL-PLAN {1004192623}>) [fast-method]
+13: ((:METHOD ASDF/OPERATE:OPERATE (ASDF/OPERATION:OPERATION ASDF/COMPONENT:COMPONENT)) #<ASDF/LISP-ACTION:TEST-OP > #<ASDF/SYSTEM:SYSTEM "dreyeck/catalog/tests"> :PLAN-CLASS NIL :PLAN-OPTIONS NIL) [fast-method]
+14: ((SB-PCL::EMF ASDF/OPERATE:OPERATE) #<unused argument> #<unused argument> #<ASDF/LISP-ACTION:TEST-OP > #<ASDF/SYSTEM:SYSTEM "dreyeck/catalog/tests">)
+15: ((LAMBDA NIL :IN ASDF/OPERATE:OPERATE))
+16: ((:METHOD ASDF/OPERATE:OPERATE :AROUND (T T)) #<ASDF/LISP-ACTION:TEST-OP > #<ASDF/SYSTEM:SYSTEM "dreyeck/catalog/tests">) [fast-method]
+17: ((SB-PCL::EMF ASDF/OPERATE:OPERATE) #<unused argument> #<unused argument> ASDF/LISP-ACTION:TEST-OP "dreyeck/catalog/tests")
+18: ((LAMBDA NIL :IN ASDF/OPERATE:OPERATE))
+19: ((:METHOD ASDF/OPERATE:OPERATE :AROUND (T T)) ASDF/LISP-ACTION:TEST-OP "dreyeck/catalog/tests") [fast-method]
+20: (ASDF/SESSION:CALL-WITH-ASDF-SESSION #<FUNCTION (LAMBDA NIL :IN ASDF/OPERATE:OPERATE) {10041191CB}> :OVERRIDE T :KEY NIL :OVERRIDE-CACHE T :OVERRIDE-FORCING NIL)
+21: ((LAMBDA NIL :IN ASDF/OPERATE:OPERATE))
+22: (ASDF/SESSION:CALL-WITH-ASDF-SESSION #<FUNCTION (LAMBDA NIL :IN ASDF/OPERATE:OPERATE) {100411831B}> :OVERRIDE NIL :KEY NIL :OVERRIDE-CACHE NIL :OVERRIDE-FORCING NIL)
+23: ((:METHOD ASDF/OPERATE:OPERATE :AROUND (T T)) ASDF/LISP-ACTION:TEST-OP "dreyeck/catalog/tests") [fast-method]
+24: (ASDF/OPERATE:TEST-SYSTEM "dreyeck/catalog/tests")
+25: (SB-INT:SIMPLE-EVAL-IN-LEXENV (ASDF/OPERATE:TEST-SYSTEM "dreyeck/catalog/tests") #<NULL-LEXENV>)
+26: (EVAL (ASDF/OPERATE:TEST-SYSTEM "dreyeck/catalog/tests"))
+27: (SB-IMPL::PROCESS-EVAL/LOAD-OPTIONS ((:LOAD . "/workspace/work/lisp-critic-reader-safety/docs/lisp-critic-reader-safety/bootstrap.lisp") (:EVAL . "(asdf:test-system \"dreyeck/catalog/tests\")") (:QUIT)))
+28: (SB-IMPL::TOPLEVEL-INIT)
+29: ((FLET SB-UNIX::BODY :IN SB-IMPL::START-LISP))
+30: ((FLET "WITHOUT-INTERRUPTS-BODY-3" :IN SB-IMPL::START-LISP))
+31: (SB-IMPL::%START-LISP)
+
+unhandled condition in --disable-debugger mode, quitting
+; 
+; compilation unit aborted
+;   caught 1 fatal ERROR condition
+;   printed 1 note
