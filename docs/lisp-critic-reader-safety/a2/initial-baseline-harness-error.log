@@ -1,0 +1,68 @@
+WARNING: redefining IRONCLAD:BLOCK-LENGTH in DEFGENERIC
+; compiling file "/workspace/work/lisp-critic-reader-safety-a2/dreyeck/src/lisp-critic-text-passage.lisp" (written 12 NOV 2026 08:49:08 PM):
+
+; wrote /workspace/work/defederation-fasls/workspace/work/lisp-critic-reader-safety-a2/dreyeck/src/lisp-critic-text-passage-tmpGHU3ALSV.fasl
+; compilation finished in 0:00:00.147
+; compiling file "/workspace/work/lisp-critic-reader-safety-a2/dreyeck/src/lisp-critic-text-criticism.lisp" (written 12 NOV 2026 08:48:07 PM):
+
+; wrote /workspace/work/defederation-fasls/workspace/work/lisp-critic-reader-safety-a2/dreyeck/src/lisp-critic-text-criticism-tmpAAURSO1.fasl
+; compilation finished in 0:00:00.015
+; compiling file "/workspace/work/lisp-critic-reader-safety-a2/dreyeck/tests/lisp-critic-text-criticism.lisp" (written 12 NOV 2026 08:48:07 PM):
+
+; wrote /workspace/work/defederation-fasls/workspace/work/lisp-critic-reader-safety-a2/dreyeck/tests/lisp-critic-text-criticism-tmp5GEXGEG5.fasl
+; compilation finished in 0:00:00.055
+WARNING: redefining DREYECK/LISP-CRITIC/TEXT-PASSAGE:SHA256-OF in DEFUN
+WARNING: redefining DREYECK/LISP-CRITIC/TEXT-PASSAGE:GIT-BLOB-ID-OF in DEFUN
+WARNING: redefining DREYECK/LISP-CRITIC/TEXT-PASSAGE::%FILE-OCTETS in DEFUN
+WARNING: redefining DREYECK/LISP-CRITIC/TEXT-PASSAGE::%DECODE-UTF-8 in DEFUN
+WARNING: redefining DREYECK/LISP-CRITIC/TEXT-PASSAGE::%ISO-TIME in DEFUN
+WARNING: redefining DREYECK/LISP-CRITIC/TEXT-PASSAGE::%EXECUTED in DEFUN
+WARNING: redefining DREYECK/LISP-CRITIC/TEXT-PASSAGE::%FULL-OBJECT-ID-P in DEFUN
+WARNING: redefining DREYECK/LISP-CRITIC/TEXT-PASSAGE::%GIT in DEFUN
+WARNING:
+   redefining DREYECK/LISP-CRITIC/TEXT-PASSAGE::%REVISION-MEMBERSHIP in DEFUN
+WARNING: redefining DREYECK/LISP-CRITIC/TEXT-PASSAGE::%OBSERVE-FILE in DEFUN
+WARNING:
+   redefining DREYECK/LISP-CRITIC/TEXT-PASSAGE:OBSERVE-SOURCE-STATE in DEFUN
+WARNING: redefining DREYECK/LISP-CRITIC/TEXT-PASSAGE:SOURCE-COHERENCE in DEFUN
+WARNING: redefining DREYECK/LISP-CRITIC/TEXT-PASSAGE::%OCCURRENCES in DEFUN
+WARNING: redefining DREYECK/LISP-CRITIC/TEXT-PASSAGE:OBSERVE-PASSAGE in DEFUN
+WARNING: redefining DREYECK/LISP-CRITIC/TEXT-PASSAGE::%SOURCE-FORMS in DEFUN
+WARNING: redefining DREYECK/LISP-CRITIC/TEXT-PASSAGE::%TOKEN-IS in DEFUN
+WARNING: redefining DREYECK/LISP-CRITIC/TEXT-PASSAGE::%LITERAL-NODE-P in DEFUN
+WARNING:
+   redefining DREYECK/LISP-CRITIC/TEXT-PASSAGE::%LITERAL-NODE-VALUE in DEFUN
+WARNING: redefining DREYECK/LISP-CRITIC/TEXT-PASSAGE:READ-CLAIM-TABLE in DEFUN
+WARNING:
+   redefining DREYECK/LISP-CRITIC/TEXT-PASSAGE:OBSERVE-CLAIM-EVIDENCE in DEFUN
+WARNING:
+   redefining DREYECK/LISP-CRITIC/TEXT-PASSAGE::%ASSERTION-OBSERVED in DEFUN
+WARNING:
+   redefining DREYECK/LISP-CRITIC/TEXT-PASSAGE:PASSAGE-DISCREPANCIES in DEFUN
+WARNING: redefining DREYECK/LISP-CRITIC/TEXT-PASSAGE:CRITICISE-PASSAGE in DEFUN
+Unhandled SB-C::INPUT-ERROR-IN-LOAD in thread #<SB-THREAD:THREAD tid=27311 "main thread" RUNNING
+                                                 {10003C8143}>:
+  READ error during LOAD:
+
+    end of file on #<SB-INT:FORM-TRACKING-STREAM for "file /workspace/work/lisp-critic-reader-safety-a2/docs/lisp-critic-reader-safety/a2/probes.lisp" {1004198D73}>
+
+    (in form starting at line: 5, column: 0, position: 282)
+
+Backtrace for: #<SB-THREAD:THREAD tid=27311 "main thread" RUNNING {10003C8143}>
+0: (SB-DEBUG::DEBUGGER-DISABLED-HOOK #<SB-C::INPUT-ERROR-IN-LOAD {10022A3BA3}> #<unused argument> :QUIT T)
+1: (SB-DEBUG::RUN-HOOK SB-EXT:*INVOKE-DEBUGGER-HOOK* #<SB-C::INPUT-ERROR-IN-LOAD {10022A3BA3}>)
+2: (INVOKE-DEBUGGER #<SB-C::INPUT-ERROR-IN-LOAD {10022A3BA3}>)
+3: (ERROR #<SB-C::INPUT-ERROR-IN-LOAD {10022A3BA3}>)
+4: (SB-C:COMPILER-ERROR SB-C::INPUT-ERROR-IN-LOAD :CONDITION #<END-OF-FILE {10022A3B73}> :POSITION 282 :LINE/COL (5 . 0) :STREAM #<SB-INT:FORM-TRACKING-STREAM for "file /workspace/work/lisp-critic-reader-safety-a2/docs/lisp-critic-reader-safety/a2/probes.lisp" {1004198D73}>)
+5: (SB-C::%DO-FORMS-FROM-INFO #<FUNCTION (LAMBDA (SB-KERNEL:FORM &KEY :CURRENT-INDEX &ALLOW-OTHER-KEYS) :IN SB-INT:LOAD-AS-SOURCE) {7F5098F8F4CB}> #<SB-C::SOURCE-INFO {1004136C13}> SB-C::INPUT-ERROR-IN-LOAD)
+6: (SB-INT:LOAD-AS-SOURCE #<SB-INT:FORM-TRACKING-STREAM for "file /workspace/work/lisp-critic-reader-safety-a2/docs/lisp-critic-reader-safety/a2/probes.lisp" {1004198D73}> :VERBOSE NIL :PRINT NIL :CONTEXT "loading")
+7: ((LABELS SB-FASL::LOAD-STREAM-1 :IN LOAD) #<SB-INT:FORM-TRACKING-STREAM for "file /workspace/work/lisp-critic-reader-safety-a2/docs/lisp-critic-reader-safety/a2/probes.lisp" {1004198D73}> NIL)
+8: (SB-FASL::CALL-WITH-LOAD-BINDINGS #<FUNCTION (LABELS SB-FASL::LOAD-STREAM-1 :IN LOAD) {7F5098F8F88B}> #<SB-INT:FORM-TRACKING-STREAM for "file /workspace/work/lisp-critic-reader-safety-a2/docs/lisp-critic-reader-safety/a2/probes.lisp" {1004198D73}> NIL #<SB-INT:FORM-TRACKING-STREAM for "file /workspace/work/lisp-critic-reader-safety-a2/docs/lisp-critic-reader-safety/a2/probes.lisp" {1004198D73}>)
+9: (LOAD #P"docs/lisp-critic-reader-safety/a2/probes.lisp" :VERBOSE NIL :PRINT NIL :IF-DOES-NOT-EXIST :ERROR :EXTERNAL-FORMAT :DEFAULT)
+10: (SB-IMPL::PROCESS-EVAL/LOAD-OPTIONS ((:LOAD . "/workspace/work/lisp-critic-reader-safety-a2/docs/lisp-critic-reader-safety/bootstrap.lisp") (:EVAL . "(setf sb-ext:*runtime-pathname* (pathname (uiop:getenv \"A1_PORTABLE_LAUNCHER\")))") (:LOAD . "docs/lisp-critic-reader-safety/a2/probes.lisp") (:QUIT)))
+11: (SB-IMPL::TOPLEVEL-INIT)
+12: ((FLET SB-UNIX::BODY :IN SB-IMPL::START-LISP))
+13: ((FLET "WITHOUT-INTERRUPTS-BODY-3" :IN SB-IMPL::START-LISP))
+14: (SB-IMPL::%START-LISP)
+
+unhandled condition in --disable-debugger mode, quitting

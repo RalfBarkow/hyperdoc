@@ -15,6 +15,11 @@ Explicit `(quote table)` is also accepted. Comments and strings cannot supply
 candidate definitions. Quoted and nested forms cannot supply them either.
 Malformed or incomplete source anywhere is refused.
 
+Here, "active definition" means only a syntactically recognized direct top-level
+definition within the supported grammar. It establishes neither runtime
+execution nor supersession by another definition. Keywords are interned only
+after complete validation of the candidate and all of its literal table data.
+
 The structural envelope supports balanced lists, whitespace, line comments,
 nested block comments, strings with backslash escapes and unescaped token
 spellings. Quote, backquote and comma prefixes consume their following form;

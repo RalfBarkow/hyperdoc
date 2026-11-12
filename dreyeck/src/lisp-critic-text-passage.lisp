@@ -266,8 +266,21 @@ the commit was not verified here; otherwise :NOT-DETERMINED, with why."
                           ((eql (peek) #\') (incf position)
                            (list (list :token "FUNCTION") (form (1+ depth))))
                           ((eql (peek) #\\)
-                           (incf position) (unless (peek) (fail)) (incf position)
-                           (loop while (and (peek) (not (spacep (peek))) (not (find (peek) "()"))) do (incf position))
+                           ;; The first character is escaped even when it is a
+                           ;; terminating macro character (e.g. semicolon or quote).
+                           ;; Subsequent terminating characters belong to the source.
+                           (incf position) (unless (peek) (fail))
+                           (let ((start position))
+                             (incf position)
+                             (loop while (and (peek) (not (spacep (peek)))
+                                              (not (find (peek) "();\"'`,")))
+                                   do (incf position))
+                             (let ((name (subseq text start position)))
+                               (unless (or (= 1 (length name))
+                                           (member name '("Space" "Newline" "Tab" "Return"
+                                                          "Page" "Rubout" "Backspace")
+                                                   :test #'string-equal))
+                                 (fail))))
                            (list :token "UNSUPPORTED-CHARACTER"))
                           (t (fail))))
                    (t
