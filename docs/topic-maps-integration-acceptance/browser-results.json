@@ -1,0 +1,60 @@
+{
+  "lispCommand": [
+    "/workspace/scratch/tmdm-mcp-portable/bin/sbcl",
+    "--noinform",
+    "--no-sysinit",
+    "--no-userinit",
+    "--non-interactive",
+    "--load",
+    "/workspace/work/topic-maps-integration-acceptance/docs/topic-maps-integration-acceptance/hyperdoc-bootstrap.lisp",
+    "--load",
+    "/workspace/work/topic-maps-integration-acceptance/docs/topic-maps-integration-acceptance/inspector.lisp"
+  ],
+  "port": 50591,
+  "steps": [
+    {
+      "actualPaneObjectEQ": "STATEMENT",
+      "result": "EQ:STATEMENT; map unchanged; mode :PLAN-ONLY"
+    },
+    {
+      "actualPaneObjectEQ": "ASSOCIATION",
+      "result": "EQ:ASSOCIATION; map unchanged; mode :PLAN-ONLY"
+    },
+    {
+      "actualPaneObjectEQ": "INSTANCE",
+      "result": "EQ:INSTANCE; map unchanged; mode :PLAN-ONLY"
+    },
+    {
+      "actualPaneObjectEQ": "TYPE",
+      "result": "EQ:TYPE; map unchanged; mode :PLAN-ONLY"
+    },
+    {
+      "actualPaneObjectEQ": "MAP",
+      "result": "EQ:MAP; map unchanged; mode :PLAN-ONLY"
+    },
+    {
+      "actualPaneObjectEQ": "REVISION",
+      "result": "EQ:REVISION; map unchanged; mode :PLAN-ONLY"
+    },
+    {
+      "actualPaneObjectEQ": "INVESTIGATION",
+      "result": "EQ:INVESTIGATION; map unchanged; mode :PLAN-ONLY"
+    },
+    {
+      "actualPaneObjectEQ": "PLAN-RESULT",
+      "result": "EQ:PLAN-RESULT; map unchanged; mode :PLAN-ONLY"
+    },
+    {
+      "actualPaneObjectEQ": "PLAN-TREE-0",
+      "result": "EQ:PLAN-TREE-0; map unchanged; mode :PLAN-ONLY"
+    },
+    {
+      "actualPaneObjectEQ": "PLAN-TREE-1",
+      "result": "EQ:PLAN-TREE-1; map unchanged; mode :PLAN-ONLY"
+    }
+  ],
+  "externalRequests": [],
+  "browserErrors": [],
+  "success": true,
+  "lispExitCode": 0
+}

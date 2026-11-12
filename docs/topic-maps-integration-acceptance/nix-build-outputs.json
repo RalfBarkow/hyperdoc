@@ -1,0 +1,10 @@
+{
+  "catalogDerivation": "/nix/store/bjvr6bjh2y18mc5zkm9vhyrb30d17a2i-hyperdoc-catalog.drv",
+  "candidateDerivation": "/nix/store/jh789q8by2ihdnlikw746in5cvmwrxcf-topic-maps-c446a822-acceptance-source.drv",
+  "outputs": [
+    "/nix/store/4c0bkyyin13xpby4r8cvnxr5w73w662d-hyperdoc-catalog",
+    "/nix/store/g72z50szzsc5b5b3id0xyh2cxwd2iyy8-topic-maps-c446a822-acceptance-source"
+  ],
+  "closurePaths": 351,
+  "candidateInCatalogRegistry": "/nix/store/g72z50szzsc5b5b3id0xyh2cxwd2iyy8-topic-maps-c446a822-acceptance-source"
+}

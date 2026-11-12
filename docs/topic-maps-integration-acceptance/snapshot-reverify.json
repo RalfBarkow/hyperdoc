@@ -1,0 +1,22 @@
+{
+  "command": [
+    "python3",
+    "scripts/topic-maps-snapshot.py",
+    "verify",
+    "/workspace/work/topic-maps-readers-source.git",
+    "c446a8228017f405c3a2650ca893e9450ac7cd7b",
+    "nix/topic-maps-c446a822-runtime.tar.gz",
+    "nix/topic-maps-c446a822.manifest",
+    "/workspace/work/topic-maps-integration-acceptance/docs/topic-maps-integration-acceptance/snapshot-reverified.json"
+  ],
+  "cwd": "/workspace/work/acceptance-pr42",
+  "environmentOverrides": {
+    "PATH": "/workspace/tools/nix-portable-data/.nix-portable/bin:/usr/local/bin:/usr/bin:/bin",
+    "NIX_CONFIG": "experimental-features = nix-command flakes"
+  },
+  "startedAtUTC": "2026-11-12T05:51:07.305028+00:00",
+  "exitCode": 0,
+  "finishedAtUTC": "2026-11-12T05:51:08.514143+00:00",
+  "log": "snapshot-reverify.log",
+  "logSHA256": "f2569c7dc4446890f854b6045f7066f2c05d178cb6a1c941e441161ca1b82edf"
+}

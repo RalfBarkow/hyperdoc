@@ -1,0 +1,20 @@
+{
+  "command": [
+    "/workspace/tools/nix-portable-data/.nix-portable/bin/nix",
+    "--extra-experimental-features",
+    "nix-command",
+    "derivation",
+    "show",
+    "--store",
+    "/workspace/work/acceptance-nix-root",
+    "/nix/store/bjvr6bjh2y18mc5zkm9vhyrb30d17a2i-hyperdoc-catalog.drv",
+    "/nix/store/jh789q8by2ihdnlikw746in5cvmwrxcf-topic-maps-c446a822-acceptance-source.drv"
+  ],
+  "cwd": "/workspace/work/acceptance-pr42",
+  "environmentOverrides": {},
+  "startedAtUTC": "2026-11-12T06:08:00.748248+00:00",
+  "exitCode": 0,
+  "finishedAtUTC": "2026-11-12T06:08:01.011795+00:00",
+  "log": "nix-catalog-derivation.log",
+  "logSHA256": "0b8f8f3438a9fd89e046d690c6cf8e4923125f0baa949b994e445dcc9fd8be6e"
+}

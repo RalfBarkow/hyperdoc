@@ -1,0 +1,36 @@
+{
+  "command": [
+    "/workspace/tools/nix-portable-data/.nix-portable/bin/nix",
+    "build",
+    "--store",
+    "/workspace/work/acceptance-nix-root",
+    "--extra-experimental-features",
+    "nix-command flakes",
+    "--option",
+    "sandbox",
+    "true",
+    "--option",
+    "sandbox-fallback",
+    "false",
+    "--option",
+    "build-users-group",
+    "",
+    "--no-write-lock-file",
+    "--no-link",
+    "--print-build-logs",
+    "--show-trace",
+    "--file",
+    "/workspace/work/topic-maps-integration-acceptance/docs/topic-maps-integration-acceptance/candidate-build.nix",
+    "catalog"
+  ],
+  "cwd": "/workspace/work/acceptance-pr42",
+  "environmentOverrides": {
+    "XDG_CACHE_HOME": "/workspace/work/acceptance-nix-cache",
+    "XDG_STATE_HOME": "/workspace/work/acceptance-nix-state"
+  },
+  "startedAtUTC": "2026-11-12T05:52:16.801080+00:00",
+  "exitCode": 1,
+  "finishedAtUTC": "2026-11-12T05:53:41.407755+00:00",
+  "log": "nix-full-candidate-private.log",
+  "logSHA256": "74c0db1724ce0f5a760505e63eaad56df027fe6717f654fe4208f0994a72d268"
+}

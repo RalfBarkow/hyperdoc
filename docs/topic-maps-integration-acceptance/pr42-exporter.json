@@ -1,0 +1,24 @@
+{
+  "command": [
+    "/workspace/scratch/tmdm-mcp-portable/bin/sbcl",
+    "--noinform",
+    "--no-sysinit",
+    "--no-userinit",
+    "--non-interactive",
+    "--load",
+    "/workspace/work/topic-maps-integration-acceptance/docs/topic-maps-integration-acceptance/hyperdoc-bootstrap.lisp",
+    "--load",
+    "docs/topic-maps-instance-of-export/run.lisp"
+  ],
+  "cwd": "/workspace/work/acceptance-pr42",
+  "environmentOverrides": {
+    "DEFEDERATION_REPO": "/workspace/work/acceptance-pr42",
+    "TOPIC_MAPS_CANDIDATE_ROOT": "/workspace/work/acceptance-runtime/topic-maps-c446a822",
+    "TOPIC_MAPS_EVIDENCE_REPOSITORY": "/workspace/topic-maps"
+  },
+  "startedAtUTC": "2026-11-12T05:52:18.176712+00:00",
+  "exitCode": 1,
+  "finishedAtUTC": "2026-11-12T05:53:09.486615+00:00",
+  "log": "pr42-exporter.log",
+  "logSHA256": "a35a0994b615fa49ee64f95fe9630bfc6e9b0869213a5b1e4bee66f2779dcc5c"
+}

@@ -1,0 +1,82 @@
+{
+  "namespace-preflight": {
+    "exitCode": 1,
+    "record": "namespace-preflight.json",
+    "log": "namespace-preflight.log"
+  },
+  "pr42-old-pin": {
+    "exitCode": 0,
+    "record": "pr42-old-pin.json",
+    "log": "pr42-old-pin.log"
+  },
+  "pr42-exporter": {
+    "exitCode": 1,
+    "record": "pr42-exporter.json",
+    "log": "pr42-exporter.log"
+  },
+  "browser": {
+    "exitCode": 0,
+    "record": "browser.json",
+    "log": "browser.log"
+  },
+  "nix-full-candidate-private": {
+    "exitCode": 1,
+    "record": "nix-full-candidate-private.json",
+    "log": "nix-full-candidate-private.log"
+  },
+  "pr1-focused": {
+    "exitCode": 0,
+    "record": "pr1-focused.json",
+    "log": "pr1-focused.log"
+  },
+  "pr41-planning": {
+    "exitCode": 0,
+    "record": "pr41-planning.json",
+    "log": "pr41-planning.log"
+  },
+  "nix-full-candidate-relocated": {
+    "exitCode": 1,
+    "record": "nix-full-candidate-relocated.json",
+    "log": "nix-full-candidate-relocated.log"
+  },
+  "snapshot-reverify": {
+    "exitCode": 0,
+    "record": "snapshot-reverify.json",
+    "log": "snapshot-reverify.log"
+  },
+  "nix-closure": {
+    "exitCode": 0,
+    "record": "nix-closure.json",
+    "log": "nix-closure.log"
+  },
+  "pr42-exporter-clean": {
+    "exitCode": 0,
+    "record": "pr42-exporter-clean.json",
+    "log": "pr42-exporter-clean.log"
+  },
+  "pr1-full-launcher": {
+    "exitCode": 0,
+    "record": "pr1-full-launcher.json",
+    "log": "pr1-full-launcher.log"
+  },
+  "nix-exporter-check": {
+    "exitCode": 0,
+    "record": "nix-exporter-check.json",
+    "log": "nix-exporter-check.log"
+  },
+  "nix-full-candidate-outer": {
+    "exitCode": 0,
+    "record": "nix-full-candidate-outer.json",
+    "log": "nix-full-candidate-outer.log"
+  },
+  "nix-catalog-derivation": {
+    "exitCode": 0,
+    "record": "nix-catalog-derivation.json",
+    "log": "nix-catalog-derivation.log"
+  },
+  "nix-full-candidate": {
+    "exitCode": 1,
+    "record": "nix-full-candidate.json",
+    "log": "nix-full-candidate.log"
+  }
+}

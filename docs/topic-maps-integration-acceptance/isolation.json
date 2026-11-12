@@ -1,0 +1,19 @@
+[
+  {
+    "source": "pr41",
+    "root": "/workspace/work/acceptance-pr41",
+    "head": "25f83196733a611810da2ea9596af1b4b2d215fb",
+    "worktreeClean": true
+  },
+  {
+    "source": "pr42",
+    "root": "/workspace/work/acceptance-pr42",
+    "head": "36c69d3312ae70748ecd40a5452759fcfaad25c4",
+    "worktreeClean": true
+  },
+  {
+    "freshInspectorPort": 50591,
+    "closedAfterTest": true,
+    "childExitCode": 0
+  }
+]

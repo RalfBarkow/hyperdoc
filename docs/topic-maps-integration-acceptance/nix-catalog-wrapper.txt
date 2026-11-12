@@ -1,0 +1,15 @@
+#!/nix/store/mjhcjikhxps97mq5z54j4gjjfzgmsir5-bash-5.2p37/bin/bash
+set -o errexit
+set -o nounset
+set -o pipefail
+
+export PATH="/nix/store/49ny89ra9jhj59j0m6xfqhi5sm0r0yl6-git-2.47.2/bin:/nix/store/24xpp0sgdn1zi1b2snjcbgfhn37faqfx-d2-tala-0.9.0/bin:$PATH"
+
+# Explicit store sources, independent of shellHook, cwd and personal ASDF config.
+export CL_SOURCE_REGISTRY="/nix/store/7l95gid3niz995qqpkgclj6355k50phf-source//:/nix/store/w26nr9dxpfsyzbviphnaaydmcww2h3y6-source//:/nix/store/ibq9zs9js02ln87vjmcl6xdafvpxzffx-source//:/nix/store/p62cd9zn5gnrd34wgbjjnqragxwx6dhh-source//:/nix/store/w15dbn9gy780n3p9k5b69dr3rrr5lczr-source//:/nix/store/9zkvhs70z8w06kximfrw3zm099qa87vj-source//:/nix/store/r40b3p08hidpxcf6cvdhfazlvlig1dyn-source/shop3//:/nix/store/wzikvxsqhg07y862kz3ljn6gvh2c3ijl-source//:/nix/store/9krmxz2ri6fal0135y8q3zindx1v8b3r-source//:/nix/store/5zzdqpa66a6imm6007s8q7392plkrjw1-source//:/nix/store/l4sgpdmp3siiy430nqdw0b3b2s23l4w6-source//:/nix/store/j7gvc1zmvf7gp6ymdjra8vn33am1npmi-source//:/nix/store/4ab75xd8k9p4nq75p9iiz7mcwfyb4l34-source//:/nix/store/b5wa1lk18nanag0myb7p02bq1gm7gnbq-source//:/nix/store/g72z50szzsc5b5b3id0xyh2cxwd2iyy8-topic-maps-c446a822-acceptance-source//:/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source//"
+export HYPERDOC_HYPERSPEC_ROOT="/nix/store/sbnljd0w8w2513iicp77533lwk06bfva-common-lisp-hyperspec-7.0/share/common-lisp-hyperspec/HyperSpec"
+# HyperDoc's revision as the flake states it (self.rev, or self.dirtyRev); the store source has no .git.
+export HYPERDOC_SOURCE_REVISION="36c69d3312ae70748ecd40a5452759fcfaad25c4"
+exec /nix/store/s7wb16wpmlr4b4grrg8s6rz0m7ai6zna-sbcl-with-packages/bin/sbcl --noinform --no-sysinit --no-userinit \
+  --script /nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/scripts/catalog-main.lisp "$@"
+

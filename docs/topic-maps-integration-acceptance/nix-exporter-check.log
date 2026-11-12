@@ -1,0 +1,958 @@
+warning: could not read HEAD ref from repo at '/workspace/work/acceptance-pr42', using 'master'
+this derivation will be built:
+  /nix/store/hwj4dz7hfzzlg1blq9rv9w90y821zxba-hyperdoc-instance-of-acceptance.drv
+building '/nix/store/hwj4dz7hfzzlg1blq9rv9w90y821zxba-hyperdoc-instance-of-acceptance.drv'...
+hyperdoc-instance-of-acceptance> WARNING: System definition file #P"/nix/store/fdrq5ji4dvm7jj0wzfvxcyr0rwiq2c24-sbcl-cl-who-20241012-git/cl-who.asd" contains definition for system "cl-who-test". Please only define "cl-who" and secondary systems with a name starting with "cl-who/" (e.g. "cl-who/test") in that file.
+hyperdoc-instance-of-acceptance> WARNING: redefining IRONCLAD:BLOCK-LENGTH in DEFGENERIC
+hyperdoc-instance-of-acceptance> ;;; Computing Hangul syllable names
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/w26nr9dxpfsyzbviphnaaydmcww2h3y6-source/package.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/w26nr9dxpfsyzbviphnaaydmcww2h3y6-source/package-tmpGHU3ALSV.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.004
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/w26nr9dxpfsyzbviphnaaydmcww2h3y6-source/thunks.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/w26nr9dxpfsyzbviphnaaydmcww2h3y6-source/thunks-tmpAAURSO1.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.011
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/w26nr9dxpfsyzbviphnaaydmcww2h3y6-source/html.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/w26nr9dxpfsyzbviphnaaydmcww2h3y6-source/html-tmp5GEXGEG5.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.155
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/w26nr9dxpfsyzbviphnaaydmcww2h3y6-source/title-bar.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/w26nr9dxpfsyzbviphnaaydmcww2h3y6-source/title-bar-tmpAR3FSGEY.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.079
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/w26nr9dxpfsyzbviphnaaydmcww2h3y6-source/views.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/w26nr9dxpfsyzbviphnaaydmcww2h3y6-source/views-tmpJAIDFZTC.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.107
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/w26nr9dxpfsyzbviphnaaydmcww2h3y6-source/view-support.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/w26nr9dxpfsyzbviphnaaydmcww2h3y6-source/view-support-tmp8V3J6PE9.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.275
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/w26nr9dxpfsyzbviphnaaydmcww2h3y6-source/gui-class.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/w26nr9dxpfsyzbviphnaaydmcww2h3y6-source/gui-class-tmp9V47YWQF.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.011
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/dreyeck/src/source-snapshot.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; file: /nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/dreyeck/src/source-snapshot.lisp
+hyperdoc-instance-of-acceptance> ; in: DEFUN %LISTING
+hyperdoc-instance-of-acceptance> ;     (SB-POSIX:DIRENT-NAME DREYECK/SOURCE-SNAPSHOT::ENTRY)
+hyperdoc-instance-of-acceptance> ; --> BLOCK CAST SB-ALIEN-INTERNALS:%CAST
+hyperdoc-instance-of-acceptance> ; ==>
+hyperdoc-instance-of-acceptance> ;   1
+hyperdoc-instance-of-acceptance> ;
+hyperdoc-instance-of-acceptance> ; note: doing SAP to pointer coercion (cost 20)
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/dreyeck/src/source-snapshot-tmp9BN22RMA.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.151
+hyperdoc-instance-of-acceptance> ;
+hyperdoc-instance-of-acceptance> ; compilation unit finished
+hyperdoc-instance-of-acceptance> ;   printed 1 note
+hyperdoc-instance-of-acceptance> NIX-CANDIDATE-STORE-PASS: 2390 blobs, unchanged production store verification policy.
+hyperdoc-instance-of-acceptance> WARNING: System definition file #P"/nix/store/rn29yxasws4x3wvcf6d0738zxbcrvmin-sbcl-parse-float-20200218-git/parse-float.asd" contains definition for system "parse-float-tests". Please only define "parse-float" and secondary systems with a name starting with "parse-float/" (e.g. "parse-float/test") in that file.
+hyperdoc-instance-of-acceptance> WARNING: System definition file #P"/nix/store/bzssaly51znz21jychrjrjg22cbimv2h-sbcl-cl-template-20130615-git/cl-template.asd" contains definition for system "cl-template-tests". Please only define "cl-template" and secondary systems with a name starting with "cl-template/" (e.g. "cl-template/test") in that file.
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/dreyeck/src/topicmap-package.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/dreyeck/src/topicmap-package-tmp1CXFJSK9.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.000
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/dreyeck/src/topicmap.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/dreyeck/src/topicmap-tmpX4BRKI0R.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.063
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/dreyeck/src/topicmap-curation-package.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/dreyeck/src/topicmap-curation-package-tmpQ371UGST.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.004
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/dreyeck/src/topicmap-curation.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/dreyeck/src/topicmap-curation-tmp2OWI3Q7U.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.019
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/hyperbook/package.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/hyperbook/package-tmp9KKTJMYV.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.000
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/hyperbook/hyperbooks.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/hyperbook/hyperbooks-tmpJU0JWO19.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.011
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/hyperbook/catalog.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/hyperbook/catalog-tmpZX2WN8N4.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.015
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/hyperbook/html-books.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/hyperbook/html-books-tmpOU81XRV0.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.000
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/hyperbook/html-rendering-support.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/hyperbook/html-rendering-support-tmpY2ML9CFA.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.011
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/hyperdoc/package.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/hyperdoc/package-tmpX2JYJDQE.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.000
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/hyperdoc/core.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/hyperdoc/core-tmpOPCILR65.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.055
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/hyperdoc/links-in-code.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/hyperdoc/links-in-code-tmpRV9F8A9A.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.004
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/hyperdoc/defining.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/hyperdoc/defining-tmpK2ZAJT4I.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.007
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/hyperdoc/examples.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/hyperdoc/examples-tmpUX5S4ADN.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.023
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/hyperdoc/tools.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/hyperdoc/tools-tmp10401X32.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.027
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/hyperdoc/hyperdoc.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/hyperdoc/hyperdoc-tmpZ7CBRM0G.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.000
+hyperdoc-instance-of-acceptance> STYLE-WARNING:
+hyperdoc-instance-of-acceptance>    The new FTYPE proclamation for FSET::VECTOR-SET-BINARY-SEARCH-LO
+hyperdoc-instance-of-acceptance>      (FUNCTION (SIMPLE-VECTOR T) FIXNUM)
+hyperdoc-instance-of-acceptance>    does not match the derived return type
+hyperdoc-instance-of-acceptance>      (FUNCTION (SIMPLE-VECTOR T)
+hyperdoc-instance-of-acceptance>       (VALUES (INTEGER -4611686018427387904 4611686018427387904) &OPTIONAL))
+hyperdoc-instance-of-acceptance> STYLE-WARNING:
+hyperdoc-instance-of-acceptance>    The new FTYPE proclamation for FSET::WB-BAG-TREE-TOTAL-COUNT
+hyperdoc-instance-of-acceptance>      (FUNCTION (FSET::WB-BAG-TREE) INTEGER)
+hyperdoc-instance-of-acceptance>    does not match the derived return type
+hyperdoc-instance-of-acceptance>      (FUNCTION ((OR LIST FSET::WB-BAG-TREE-NODE)) *)
+hyperdoc-instance-of-acceptance> STYLE-WARNING:
+hyperdoc-instance-of-acceptance>    The new FTYPE proclamation for FSET::HASH-VALUE-FIXNUM
+hyperdoc-instance-of-acceptance>      (FUNCTION (T) FIXNUM)
+hyperdoc-instance-of-acceptance>    does not match the derived return type
+hyperdoc-instance-of-acceptance>      (FUNCTION (T) (VALUES INTEGER &OPTIONAL))
+hyperdoc-instance-of-acceptance> STYLE-WARNING:
+hyperdoc-instance-of-acceptance>    The new FTYPE proclamation for FSET::CH-SET-NODE-ENTRY-MASK
+hyperdoc-instance-of-acceptance>      (FUNCTION (T) FIXNUM)
+hyperdoc-instance-of-acceptance>    does not match the derived return type
+hyperdoc-instance-of-acceptance>      (FUNCTION (SIMPLE-VECTOR) (VALUES T &OPTIONAL))
+hyperdoc-instance-of-acceptance> STYLE-WARNING:
+hyperdoc-instance-of-acceptance>    The new FTYPE proclamation for FSET::CH-SET-NODE-SUBNODE-MASK
+hyperdoc-instance-of-acceptance>      (FUNCTION (T) FIXNUM)
+hyperdoc-instance-of-acceptance>    does not match the derived return type
+hyperdoc-instance-of-acceptance>      (FUNCTION (SIMPLE-VECTOR) (VALUES T &OPTIONAL))
+hyperdoc-instance-of-acceptance> STYLE-WARNING:
+hyperdoc-instance-of-acceptance>    The new FTYPE proclamation for FSET::CH-SET-NODE-SIZE
+hyperdoc-instance-of-acceptance>      (FUNCTION (T) FIXNUM)
+hyperdoc-instance-of-acceptance>    does not match the derived return type
+hyperdoc-instance-of-acceptance>      (FUNCTION (SIMPLE-VECTOR) (VALUES T &OPTIONAL))
+hyperdoc-instance-of-acceptance> STYLE-WARNING:
+hyperdoc-instance-of-acceptance>    The new FTYPE proclamation for FSET::CH-SET-NODE-HASH-VALUE
+hyperdoc-instance-of-acceptance>      (FUNCTION (T) FIXNUM)
+hyperdoc-instance-of-acceptance>    does not match the derived return type
+hyperdoc-instance-of-acceptance>      (FUNCTION (SIMPLE-VECTOR) (VALUES T &OPTIONAL))
+hyperdoc-instance-of-acceptance> STYLE-WARNING:
+hyperdoc-instance-of-acceptance>    The new FTYPE proclamation for FSET::CH-MAP-NODE-ENTRY-MASK
+hyperdoc-instance-of-acceptance>      (FUNCTION (T) FIXNUM)
+hyperdoc-instance-of-acceptance>    does not match the derived return type
+hyperdoc-instance-of-acceptance>      (FUNCTION (SIMPLE-VECTOR) (VALUES T &OPTIONAL))
+hyperdoc-instance-of-acceptance> STYLE-WARNING:
+hyperdoc-instance-of-acceptance>    The new FTYPE proclamation for FSET::CH-MAP-NODE-SUBNODE-MASK
+hyperdoc-instance-of-acceptance>      (FUNCTION (T) FIXNUM)
+hyperdoc-instance-of-acceptance>    does not match the derived return type
+hyperdoc-instance-of-acceptance>      (FUNCTION (SIMPLE-VECTOR) (VALUES T &OPTIONAL))
+hyperdoc-instance-of-acceptance> STYLE-WARNING:
+hyperdoc-instance-of-acceptance>    The new FTYPE proclamation for FSET::CH-MAP-NODE-SIZE
+hyperdoc-instance-of-acceptance>      (FUNCTION (T) FIXNUM)
+hyperdoc-instance-of-acceptance>    does not match the derived return type
+hyperdoc-instance-of-acceptance>      (FUNCTION (SIMPLE-VECTOR) (VALUES T &OPTIONAL))
+hyperdoc-instance-of-acceptance> STYLE-WARNING:
+hyperdoc-instance-of-acceptance>    The new FTYPE proclamation for FSET::CH-MAP-NODE-HASH-VALUE
+hyperdoc-instance-of-acceptance>      (FUNCTION (T) FIXNUM)
+hyperdoc-instance-of-acceptance>    does not match the derived return type
+hyperdoc-instance-of-acceptance>      (FUNCTION (SIMPLE-VECTOR) (VALUES T &OPTIONAL))
+hyperdoc-instance-of-acceptance> STYLE-WARNING:
+hyperdoc-instance-of-acceptance>    Generic function FSET:ITERATOR clobbers an earlier FTYPE proclamation
+hyperdoc-instance-of-acceptance>    (FUNCTION (T &KEY &ALLOW-OTHER-KEYS) (VALUES FUNCTION &REST T)) for the same
+hyperdoc-instance-of-acceptance>    name with (FUNCTION (T &KEY &ALLOW-OTHER-KEYS) *).
+hyperdoc-instance-of-acceptance> STYLE-WARNING:
+hyperdoc-instance-of-acceptance>    The new FTYPE proclamation for SWANK/BACKEND:GETPID
+hyperdoc-instance-of-acceptance>      (FUNCTION NIL (VALUES (SIGNED-BYTE 32) &OPTIONAL))
+hyperdoc-instance-of-acceptance>    does not match the derived return type
+hyperdoc-instance-of-acceptance>      (FUNCTION NIL *)
+hyperdoc-instance-of-acceptance> WARNING:
+hyperdoc-instance-of-acceptance>    redefining EMACS-INSPECT (#<SB-PCL:SYSTEM-CLASS COMMON-LISP:T>) in DEFMETHOD
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/w26nr9dxpfsyzbviphnaaydmcww2h3y6-source/package-standard.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/w26nr9dxpfsyzbviphnaaydmcww2h3y6-source/package-standard-tmp9OZEQ0G2.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.000
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/w26nr9dxpfsyzbviphnaaydmcww2h3y6-source/svg.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/w26nr9dxpfsyzbviphnaaydmcww2h3y6-source/svg-tmpB2JTL1W9.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.004
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/w26nr9dxpfsyzbviphnaaydmcww2h3y6-source/basic.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/w26nr9dxpfsyzbviphnaaydmcww2h3y6-source/basic-tmpP3BI68WQ.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.107
+hyperdoc-instance-of-acceptance> WARNING:
+hyperdoc-instance-of-acceptance>    redefining 👀PRINT-STRING (#<SB-PCL:SYSTEM-CLASS COMMON-LISP:T>) in DEFMETHOD
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/w26nr9dxpfsyzbviphnaaydmcww2h3y6-source/pathnames.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/w26nr9dxpfsyzbviphnaaydmcww2h3y6-source/pathnames-tmpQDARA81Z.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.075
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/w26nr9dxpfsyzbviphnaaydmcww2h3y6-source/numbers.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/w26nr9dxpfsyzbviphnaaydmcww2h3y6-source/numbers-tmpYEMMM7SE.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.015
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/w26nr9dxpfsyzbviphnaaydmcww2h3y6-source/characters.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/w26nr9dxpfsyzbviphnaaydmcww2h3y6-source/characters-tmp73HU0RPK.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.003
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/w26nr9dxpfsyzbviphnaaydmcww2h3y6-source/strings.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/w26nr9dxpfsyzbviphnaaydmcww2h3y6-source/strings-tmpIO5N7K88.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.004
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/w26nr9dxpfsyzbviphnaaydmcww2h3y6-source/symbols.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/w26nr9dxpfsyzbviphnaaydmcww2h3y6-source/symbols-tmpCM21U60Z.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.043
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/w26nr9dxpfsyzbviphnaaydmcww2h3y6-source/lists.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/w26nr9dxpfsyzbviphnaaydmcww2h3y6-source/lists-tmp9DT7SEFG.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.008
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/w26nr9dxpfsyzbviphnaaydmcww2h3y6-source/arrays.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/w26nr9dxpfsyzbviphnaaydmcww2h3y6-source/arrays-tmp8065ESJT.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.015
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/w26nr9dxpfsyzbviphnaaydmcww2h3y6-source/hash-tables.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/w26nr9dxpfsyzbviphnaaydmcww2h3y6-source/hash-tables-tmp7S8Z6FGF.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.039
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/w26nr9dxpfsyzbviphnaaydmcww2h3y6-source/swank.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/w26nr9dxpfsyzbviphnaaydmcww2h3y6-source/swank-tmpSIT3QPKP.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.023
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/w26nr9dxpfsyzbviphnaaydmcww2h3y6-source/functions.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/w26nr9dxpfsyzbviphnaaydmcww2h3y6-source/functions-tmpE0PA0714.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.067
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/w26nr9dxpfsyzbviphnaaydmcww2h3y6-source/classes.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/w26nr9dxpfsyzbviphnaaydmcww2h3y6-source/classes-tmpJRWHHVG0.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.047
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/w26nr9dxpfsyzbviphnaaydmcww2h3y6-source/packages.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/w26nr9dxpfsyzbviphnaaydmcww2h3y6-source/packages-tmp4WZVROCX.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.079
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/w26nr9dxpfsyzbviphnaaydmcww2h3y6-source/image.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/w26nr9dxpfsyzbviphnaaydmcww2h3y6-source/image-tmpA0I3UKX8.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.095
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/w26nr9dxpfsyzbviphnaaydmcww2h3y6-source/systems.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/w26nr9dxpfsyzbviphnaaydmcww2h3y6-source/systems-tmp267Y2N80.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.147
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/w26nr9dxpfsyzbviphnaaydmcww2h3y6-source/conditions.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/w26nr9dxpfsyzbviphnaaydmcww2h3y6-source/conditions-tmpOUPE5FSJ.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.047
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/w26nr9dxpfsyzbviphnaaydmcww2h3y6-source/views-on-views.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/w26nr9dxpfsyzbviphnaaydmcww2h3y6-source/views-on-views-tmpIGHCU6ZA.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.079
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/w26nr9dxpfsyzbviphnaaydmcww2h3y6-source/s-graphviz.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/w26nr9dxpfsyzbviphnaaydmcww2h3y6-source/s-graphviz-tmpBO0TUGLK.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.000
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/w26nr9dxpfsyzbviphnaaydmcww2h3y6-source/fset.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/w26nr9dxpfsyzbviphnaaydmcww2h3y6-source/fset-tmpIIXPIQNW.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.059
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/w26nr9dxpfsyzbviphnaaydmcww2h3y6-source/web-pages.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/w26nr9dxpfsyzbviphnaaydmcww2h3y6-source/web-pages-tmpOHM494YR.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.043
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/w26nr9dxpfsyzbviphnaaydmcww2h3y6-source/hyperspec.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/w26nr9dxpfsyzbviphnaaydmcww2h3y6-source/hyperspec-tmpOVFB07XF.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.047
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/w26nr9dxpfsyzbviphnaaydmcww2h3y6-source/lisp-parser.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/w26nr9dxpfsyzbviphnaaydmcww2h3y6-source/lisp-parser-tmpG6VFGMYP.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.067
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/w26nr9dxpfsyzbviphnaaydmcww2h3y6-source/lisp-code.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/w26nr9dxpfsyzbviphnaaydmcww2h3y6-source/lisp-code-tmp4QIPRMOF.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.239
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/w26nr9dxpfsyzbviphnaaydmcww2h3y6-source/playgrounds.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/w26nr9dxpfsyzbviphnaaydmcww2h3y6-source/playgrounds-tmpGW0QV22K.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.075
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/w26nr9dxpfsyzbviphnaaydmcww2h3y6-source/json.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/w26nr9dxpfsyzbviphnaaydmcww2h3y6-source/json-tmp2K9J0HSR.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.051
+hyperdoc-instance-of-acceptance> WARNING:
+hyperdoc-instance-of-acceptance>    The new FTYPE proclamation for CLSS:MATCH-SELECTOR
+hyperdoc-instance-of-acceptance>      (FUNCTION (LIST (OR PLUMP-DOM:NODE VECTOR LIST) KEYWORD)
+hyperdoc-instance-of-acceptance>       (VALUES (AND (VECTOR PLUMP-DOM:NODE) (NOT SIMPLE-ARRAY))))
+hyperdoc-instance-of-acceptance>    does not match the old FTYPE proclamation
+hyperdoc-instance-of-acceptance>      (FUNCTION (LIST (OR LIST PLUMP-DOM:NODE VECTOR) &OPTIONAL KEYWORD)
+hyperdoc-instance-of-acceptance>       (VALUES (AND (VECTOR PLUMP-DOM:NODE) (NOT SIMPLE-ARRAY)) &REST T))
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/hyperbook-explorer/package.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/hyperbook-explorer/package-tmpP44I4E0Y.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.000
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/hyperbook-explorer/links.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/hyperbook-explorer/links-tmp63LQ7EX6.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.047
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/hyperbook-explorer/link-views.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/hyperbook-explorer/link-views-tmp86F1A8FB.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.119
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/hyperbook-explorer/link-redirection.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/hyperbook-explorer/link-redirection-tmpH7D4HL98.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.004
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/hyperbook-explorer/explorer.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/hyperbook-explorer/explorer-tmpCDM7YXYI.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.035
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/hyperbook-explorer/catalog.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/hyperbook-explorer/catalog-tmpLM57P5P.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.007
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/hyperbook-explorer/rendering.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/hyperbook-explorer/rendering-tmpZE69DN33.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.075
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/hyperbook-explorer/html-books.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/hyperbook-explorer/html-books-tmpG8099TO3.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.031
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/hyperbook-explorer/hyperbook-the-book.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/hyperbook-explorer/hyperbook-the-book-tmpTASQCYAW.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.004
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/hyperbook-explorer/asdf-systems.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/hyperbook-explorer/asdf-systems-tmp35U57IV6.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.023
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/hyperbook-explorer/lisp-functions.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/hyperbook-explorer/lisp-functions-tmpTZOONXRW.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.043
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/hyperbook-explorer/lisp-classes.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/hyperbook-explorer/lisp-classes-tmpWN0UKDSV.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.031
+hyperdoc-instance-of-acceptance> WARNING: redefining CL-ISAAC:RAND32 in DEFUN
+hyperdoc-instance-of-acceptance> WARNING: redefining CL-ISAAC:RAND64 in DEFUN
+hyperdoc-instance-of-acceptance> WARNING:
+hyperdoc-instance-of-acceptance>    bare references to struct types are deprecated. Please use (:POINTER
+hyperdoc-instance-of-acceptance>                                                                (:STRUCT
+hyperdoc-instance-of-acceptance>                                                                 SQLITE3)) or (:STRUCT
+hyperdoc-instance-of-acceptance>                                                                               SQLITE3) instead.
+hyperdoc-instance-of-acceptance> WARNING:
+hyperdoc-instance-of-acceptance>    bare references to struct types are deprecated. Please use (:POINTER
+hyperdoc-instance-of-acceptance>                                                                (:STRUCT
+hyperdoc-instance-of-acceptance>                                                                 SQLITE3-STMT)) or (:STRUCT
+hyperdoc-instance-of-acceptance>                                                                                    SQLITE3-STMT) instead.
+hyperdoc-instance-of-acceptance> WARNING: redefining DEFTYPE type to be a class: DBI.ERROR:<DBI-ERROR>
+hyperdoc-instance-of-acceptance> WARNING: redefining DEFTYPE type to be a class: DBI.ERROR:<DBI-WARNING>
+hyperdoc-instance-of-acceptance> WARNING: redefining DEFTYPE type to be a class: DBI.ERROR:<DBI-INTERFACE-ERROR>
+hyperdoc-instance-of-acceptance> WARNING:
+hyperdoc-instance-of-acceptance>    redefining DEFTYPE type to be a class: DBI.ERROR:<DBI-UNIMPLEMENTED-ERROR>
+hyperdoc-instance-of-acceptance> WARNING: redefining DEFTYPE type to be a class: DBI.ERROR:<DBI-DATABASE-ERROR>
+hyperdoc-instance-of-acceptance> WARNING: redefining DEFTYPE type to be a class: DBI.ERROR:<DBI-DATA-ERROR>
+hyperdoc-instance-of-acceptance> WARNING:
+hyperdoc-instance-of-acceptance>    redefining DEFTYPE type to be a class: DBI.ERROR:<DBI-OPERATIONAL-ERROR>
+hyperdoc-instance-of-acceptance> WARNING: redefining DEFTYPE type to be a class: DBI.ERROR:<DBI-INTEGRITY-ERROR>
+hyperdoc-instance-of-acceptance> WARNING: redefining DEFTYPE type to be a class: DBI.ERROR:<DBI-INTERNAL-ERROR>
+hyperdoc-instance-of-acceptance> WARNING:
+hyperdoc-instance-of-acceptance>    redefining DEFTYPE type to be a class: DBI.ERROR:<DBI-PROGRAMMING-ERROR>
+hyperdoc-instance-of-acceptance> WARNING:
+hyperdoc-instance-of-acceptance>    redefining DEFTYPE type to be a class: DBI.ERROR:<DBI-NOTSUPPORTED-ERROR>
+hyperdoc-instance-of-acceptance> WARNING:
+hyperdoc-instance-of-acceptance>    redefining DEFTYPE type to be a class: DBI.ERROR:<DBI-ALREADY-COMMITED-ERROR>
+hyperdoc-instance-of-acceptance> WARNING:
+hyperdoc-instance-of-acceptance>    redefining DEFTYPE type to be a class: DBI.ERROR:<DBI-ALREADY-ROLLED-BACK-ERROR>
+hyperdoc-instance-of-acceptance> WARNING: redefining DEFTYPE type to be a class: DBI.DRIVER:<DBI-DRIVER>
+hyperdoc-instance-of-acceptance> WARNING: redefining DEFTYPE type to be a class: DBI.DRIVER:<DBI-CONNECTION>
+hyperdoc-instance-of-acceptance> WARNING: redefining DEFTYPE type to be a class: DBI.DRIVER:<DBI-QUERY>
+hyperdoc-instance-of-acceptance> WARNING: redefining CLOG:PARENT in DEFGENERIC
+hyperdoc-instance-of-acceptance> WARNING: redefining CLOG::CONNECTION-ID in DEFGENERIC
+hyperdoc-instance-of-acceptance> WARNING: redefining CLOG:HTML-ID in DEFGENERIC
+hyperdoc-instance-of-acceptance> WARNING: redefining CLOG:WINDOW in DEFGENERIC
+hyperdoc-instance-of-acceptance> WARNING: redefining CLOG:HTML-DOCUMENT in DEFGENERIC
+hyperdoc-instance-of-acceptance> WARNING: redefining CLOG:LOCATION in DEFGENERIC
+hyperdoc-instance-of-acceptance> WARNING: redefining CLOG:NAVIGATOR in DEFGENERIC
+hyperdoc-instance-of-acceptance> WARNING: redefining CLOG:DOCUMENT-ELEMENT in DEFGENERIC
+hyperdoc-instance-of-acceptance> WARNING: redefining CLOG:HEAD-ELEMENT in DEFGENERIC
+hyperdoc-instance-of-acceptance> WARNING: redefining CLOG:DISABLEDP in DEFGENERIC
+hyperdoc-instance-of-acceptance> WARNING: redefining (COMMON-LISP:SETF CLOG:DISABLEDP) in DEFGENERIC
+hyperdoc-instance-of-acceptance> WARNING: redefining CLOG:VALUE in DEFGENERIC
+hyperdoc-instance-of-acceptance> WARNING: redefining (COMMON-LISP:SETF CLOG:VALUE) in DEFGENERIC
+hyperdoc-instance-of-acceptance> WARNING: redefining CLOG:MINIMUM in DEFGENERIC
+hyperdoc-instance-of-acceptance> WARNING: redefining (COMMON-LISP:SETF CLOG:MINIMUM) in DEFGENERIC
+hyperdoc-instance-of-acceptance> WARNING: redefining CLOG:MAXIMUM in DEFGENERIC
+hyperdoc-instance-of-acceptance> WARNING: redefining (COMMON-LISP:SETF CLOG:MAXIMUM) in DEFGENERIC
+hyperdoc-instance-of-acceptance> WARNING: redefining CLOG:URL-SRC in DEFGENERIC
+hyperdoc-instance-of-acceptance> WARNING: redefining (COMMON-LISP:SETF CLOG:URL-SRC) in DEFGENERIC
+hyperdoc-instance-of-acceptance> WARNING: redefining CLOG:ALT-TEXT in DEFGENERIC
+hyperdoc-instance-of-acceptance> WARNING: redefining (COMMON-LISP:SETF CLOG:ALT-TEXT) in DEFGENERIC
+hyperdoc-instance-of-acceptance> WARNING: redefining CLOG:CENTER-PANEL in DEFGENERIC
+hyperdoc-instance-of-acceptance> WARNING: redefining CLOG:TOP-PANEL in DEFGENERIC
+hyperdoc-instance-of-acceptance> WARNING: redefining CLOG:LEFT-PANEL in DEFGENERIC
+hyperdoc-instance-of-acceptance> WARNING: redefining CLOG:BOTTOM-PANEL in DEFGENERIC
+hyperdoc-instance-of-acceptance> WARNING: redefining CLOG:PANEL-BOX in DEFGENERIC
+hyperdoc-instance-of-acceptance> WARNING: redefining CLOG:TREE-ROOT in DEFGENERIC
+hyperdoc-instance-of-acceptance> WARNING: redefining CLOG:INDENT-LEVEL in DEFGENERIC
+hyperdoc-instance-of-acceptance> WARNING: redefining CLOG:TOGGLE-STATE in DEFGENERIC
+hyperdoc-instance-of-acceptance> WARNING: redefining CLOG:TREE-ITEM in DEFGENERIC
+hyperdoc-instance-of-acceptance> WARNING: redefining CLOG:DATABASE-CONNECTION in DEFGENERIC
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/ibq9zs9js02ln87vjmcl6xdafvpxzffx-source/package.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/ibq9zs9js02ln87vjmcl6xdafvpxzffx-source/package-tmpGYUNPZCY.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.004
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/ibq9zs9js02ln87vjmcl6xdafvpxzffx-source/plump-inspector-views.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; file: /nix/store/ibq9zs9js02ln87vjmcl6xdafvpxzffx-source/plump-inspector-views.lisp
+hyperdoc-instance-of-acceptance> ; in: DEFVIEW 👀TEXT
+hyperdoc-instance-of-acceptance> ;     (ERROR (PLUMP-INSPECTOR-VIEWS::C) NIL)
+hyperdoc-instance-of-acceptance> ;
+hyperdoc-instance-of-acceptance> ; caught STYLE-WARNING:
+hyperdoc-instance-of-acceptance> ;   The variable C is defined but never used.
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/ibq9zs9js02ln87vjmcl6xdafvpxzffx-source/plump-inspector-views-tmpD68Q8WCA.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.043
+hyperdoc-instance-of-acceptance> WARNING:
+hyperdoc-instance-of-acceptance>    Lisp compilation had style-warnings while
+hyperdoc-instance-of-acceptance>    compiling #<CL-SOURCE-FILE "plump-inspector-views" "plump-inspector-views">
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/hyperbook-wikipedia/package.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/hyperbook-wikipedia/package-tmp7MK9KM9C.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.003
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/hyperbook-wikipedia/wikipedia-editions.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/hyperbook-wikipedia/wikipedia-editions-tmpJJ71X849.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.004
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/hyperbook-wikipedia/wikipedia.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/hyperbook-wikipedia/wikipedia-tmp1VUK6SR2.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.075
+hyperdoc-instance-of-acceptance> WARNING: redefining CLOG:READ-ONLY-P in DEFGENERIC
+hyperdoc-instance-of-acceptance> WARNING: redefining (COMMON-LISP:SETF CLOG:READ-ONLY-P) in DEFGENERIC
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/w15dbn9gy780n3p9k5b69dr3rrr5lczr-source/named-closure.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/w15dbn9gy780n3p9k5b69dr3rrr5lczr-source/named-closure-tmpR2FIHSUG.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.039
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/p62cd9zn5gnrd34wgbjjnqragxwx6dhh-source/lwcells.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/p62cd9zn5gnrd34wgbjjnqragxwx6dhh-source/lwcells-tmp8PYELRKX.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.167
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/w26nr9dxpfsyzbviphnaaydmcww2h3y6-source/package-reactive.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/w26nr9dxpfsyzbviphnaaydmcww2h3y6-source/package-reactive-tmpEHTOKYT0.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.000
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/w26nr9dxpfsyzbviphnaaydmcww2h3y6-source/reactive.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/w26nr9dxpfsyzbviphnaaydmcww2h3y6-source/reactive-tmpS6U1VHI9.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.455
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/w26nr9dxpfsyzbviphnaaydmcww2h3y6-source/cell-views.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/w26nr9dxpfsyzbviphnaaydmcww2h3y6-source/cell-views-tmpVTFK6ZJW.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.123
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/7l95gid3niz995qqpkgclj6355k50phf-source/package.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/7l95gid3niz995qqpkgclj6355k50phf-source/package-tmp75WVSJEW.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.004
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/7l95gid3niz995qqpkgclj6355k50phf-source/utilities.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/7l95gid3niz995qqpkgclj6355k50phf-source/utilities-tmpBU5UM3S4.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.003
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/7l95gid3niz995qqpkgclj6355k50phf-source/svg-buttons.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/7l95gid3niz995qqpkgclj6355k50phf-source/svg-buttons-tmpOBHVA3CD.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.004
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/7l95gid3niz995qqpkgclj6355k50phf-source/inspector.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; file: /nix/store/7l95gid3niz995qqpkgclj6355k50phf-source/inspector.lisp
+hyperdoc-instance-of-acceptance> ; in: DEFUN EVAL-THUNK-WITH-ACTIVE-BUTTON
+hyperdoc-instance-of-acceptance> ;     (DEFUN CLOG-MOLDABLE-INSPECTOR::EVAL-THUNK-WITH-ACTIVE-BUTTON
+hyperdoc-instance-of-acceptance> ;            (CLOG-MOLDABLE-INSPECTOR::PANE-CLOG-OBJ CLOG-MOLDABLE-INSPECTOR::OBJ
+hyperdoc-instance-of-acceptance> ;             CLOG-MOLDABLE-INSPECTOR::TARGET)
+hyperdoc-instance-of-acceptance> ;       (CLOG:REMOVE-CLASS CLOG-MOLDABLE-INSPECTOR::OBJ "inspector-action")
+hyperdoc-instance-of-acceptance> ;       (CLOG:ADD-CLASS CLOG-MOLDABLE-INSPECTOR::OBJ "inspector-action-active")
+hyperdoc-instance-of-acceptance> ;       (LET ((CLOG-MOLDABLE-INSPECTOR::RESULT
+hyperdoc-instance-of-acceptance> ;              (HTML-INSPECTOR-VIEWS:EVAL-THUNK CLOG-MOLDABLE-INSPECTOR::TARGET)))
+hyperdoc-instance-of-acceptance> ;         (CLOG:REMOVE-CLASS CLOG-MOLDABLE-INSPECTOR::OBJ
+hyperdoc-instance-of-acceptance> ;                            "inspector-action-active")
+hyperdoc-instance-of-acceptance> ;         (CLOG:ADD-CLASS CLOG-MOLDABLE-INSPECTOR::OBJ "inspector-action")
+hyperdoc-instance-of-acceptance> ;         CLOG-MOLDABLE-INSPECTOR::RESULT))
+hyperdoc-instance-of-acceptance> ; --> SB-IMPL::%DEFUN SB-IMPL::%DEFUN SB-INT:NAMED-LAMBDA
+hyperdoc-instance-of-acceptance> ; ==>
+hyperdoc-instance-of-acceptance> ;   #'(SB-INT:NAMED-LAMBDA CLOG-MOLDABLE-INSPECTOR::EVAL-THUNK-WITH-ACTIVE-BUTTON
+hyperdoc-instance-of-acceptance> ;         (CLOG-MOLDABLE-INSPECTOR::PANE-CLOG-OBJ CLOG-MOLDABLE-INSPECTOR::OBJ
+hyperdoc-instance-of-acceptance> ;          CLOG-MOLDABLE-INSPECTOR::TARGET)
+hyperdoc-instance-of-acceptance> ;       (DECLARE (SB-C::TOP-LEVEL-FORM))
+hyperdoc-instance-of-acceptance> ;       (BLOCK CLOG-MOLDABLE-INSPECTOR::EVAL-THUNK-WITH-ACTIVE-BUTTON
+hyperdoc-instance-of-acceptance> ;         (CLOG:REMOVE-CLASS CLOG-MOLDABLE-INSPECTOR::OBJ "inspector-action")
+hyperdoc-instance-of-acceptance> ;         (CLOG:ADD-CLASS CLOG-MOLDABLE-INSPECTOR::OBJ "inspector-action-active")
+hyperdoc-instance-of-acceptance> ;         (LET ((CLOG-MOLDABLE-INSPECTOR::RESULT #))
+hyperdoc-instance-of-acceptance> ;           (CLOG:REMOVE-CLASS CLOG-MOLDABLE-INSPECTOR::OBJ
+hyperdoc-instance-of-acceptance> ;                              "inspector-action-active")
+hyperdoc-instance-of-acceptance> ;           (CLOG:ADD-CLASS CLOG-MOLDABLE-INSPECTOR::OBJ "inspector-action")
+hyperdoc-instance-of-acceptance> ;           CLOG-MOLDABLE-INSPECTOR::RESULT)))
+hyperdoc-instance-of-acceptance> ;
+hyperdoc-instance-of-acceptance> ; caught STYLE-WARNING:
+hyperdoc-instance-of-acceptance> ;   The variable PANE-CLOG-OBJ is defined but never used.
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/7l95gid3niz995qqpkgclj6355k50phf-source/inspector-tmpJ6ELVFLF.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.207
+hyperdoc-instance-of-acceptance> WARNING:
+hyperdoc-instance-of-acceptance>    Lisp compilation had style-warnings while
+hyperdoc-instance-of-acceptance>    compiling #<CL-SOURCE-FILE "clog-moldable-inspector" "inspector">
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/7l95gid3niz995qqpkgclj6355k50phf-source/views.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/7l95gid3niz995qqpkgclj6355k50phf-source/views-tmpULDB0RG.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.179
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/7l95gid3niz995qqpkgclj6355k50phf-source/playground.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/7l95gid3niz995qqpkgclj6355k50phf-source/playground-tmpUTZ0UUTE.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.015
+hyperdoc-instance-of-acceptance> WARNING:
+hyperdoc-instance-of-acceptance>    redefining HV:👀PLAYGROUND (#<SB-PCL:SYSTEM-CLASS COMMON-LISP:T>) in DEFMETHOD
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/inspector-hyperdoc/package.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/inspector-hyperdoc/package-tmpOOSRA8PZ.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.004
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/inspector-hyperdoc/hyperdoc.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/inspector-hyperdoc/hyperdoc-tmpDMIL0RVK.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.000
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/9zkvhs70z8w06kximfrw3zm099qa87vj-source/package.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/9zkvhs70z8w06kximfrw3zm099qa87vj-source/package-tmp8MR9IMIO.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.004
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/9zkvhs70z8w06kximfrw3zm099qa87vj-source/conditions.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/9zkvhs70z8w06kximfrw3zm099qa87vj-source/conditions-tmpJQDKAVAY.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.047
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/9zkvhs70z8w06kximfrw3zm099qa87vj-source/njson.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/9zkvhs70z8w06kximfrw3zm099qa87vj-source/njson-tmp3I8CEEQY.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.019
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/9zkvhs70z8w06kximfrw3zm099qa87vj-source/functions.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/9zkvhs70z8w06kximfrw3zm099qa87vj-source/functions-tmpA3RHFLWZ.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.103
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/9zkvhs70z8w06kximfrw3zm099qa87vj-source/macros.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/9zkvhs70z8w06kximfrw3zm099qa87vj-source/macros-tmpYZIB7VXO.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.067
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/9zkvhs70z8w06kximfrw3zm099qa87vj-source/aliases.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/9zkvhs70z8w06kximfrw3zm099qa87vj-source/aliases-tmpR8PK79V8.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.004
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/9zkvhs70z8w06kximfrw3zm099qa87vj-source/backend/jzon.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/9zkvhs70z8w06kximfrw3zm099qa87vj-source/backend/jzon-tmpN1ZVB1HZ.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.035
+hyperdoc-instance-of-acceptance> WARNING:
+hyperdoc-instance-of-acceptance>    redefining ENCODE-TO-STRING (#<SB-PCL:SYSTEM-CLASS COMMON-LISP:T>) in DEFMETHOD
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/hyperdoc-explorer/package.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/hyperdoc-explorer/package-tmpZGRRPISB.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.000
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/hyperdoc-explorer/links.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/hyperdoc-explorer/links-tmpFNKDE5XP.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.023
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/hyperdoc-explorer/explorer.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/hyperdoc-explorer/explorer-tmpRJTU435C.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.083
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/hyperdoc-explorer/packages.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/hyperdoc-explorer/packages-tmpI9WG87JK.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.012
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/hyperdoc-explorer/parse-expr.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/hyperdoc-explorer/parse-expr-tmpYDE6I9E6.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.007
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/hyperdoc-explorer/html-pages.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/hyperdoc-explorer/html-pages-tmp319UV2V8.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.059
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/hyperdoc-explorer/markdown-pages.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/hyperdoc-explorer/markdown-pages-tmpLYQINFYS.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.003
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/hyperdoc-explorer/code-pages.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/hyperdoc-explorer/code-pages-tmpGA31XWNO.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.031
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/hyperdoc-explorer/links-in-code.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/hyperdoc-explorer/links-in-code-tmp5HT23M6C.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.015
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/hyperdoc-explorer/tools.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/hyperdoc-explorer/tools-tmpA60KLDKY.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.055
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/hyperdoc-explorer/codemeta.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/hyperdoc-explorer/codemeta-tmpD801X3GJ.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.031
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/hyperdoc-explorer/examples.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/hyperdoc-explorer/examples-tmpGOW1GC70.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.004
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/hyperdoc-explorer/hyperdoc.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/hyperdoc-explorer/hyperdoc-tmpPQ1X28TL.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.000
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/dreyeck/src/hyperdoc-curation-package.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/dreyeck/src/hyperdoc-curation-package-tmpE92ECU7O.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.000
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/dreyeck/src/hyperdoc-curation.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/dreyeck/src/hyperdoc-curation-tmp8S0II570.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.111
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/dreyeck/src/workflow-model.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/dreyeck/src/workflow-model-tmpJE88A12F.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.035
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/dreyeck/src/asdf-source-package.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/dreyeck/src/asdf-source-package-tmpA5FNLPLT.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.000
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/dreyeck/src/asdf-source.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/dreyeck/src/asdf-source-tmpHKCV9TP8.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.067
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/dreyeck/src/git-package.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/dreyeck/src/git-package-tmpZ18MA7XE.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.003
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/dreyeck/src/git-repository-checkout.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/dreyeck/src/git-repository-checkout-tmp6LQJ9T0C.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.008
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/dreyeck/src/git-commit-inspection.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/dreyeck/src/git-commit-inspection-tmpTX7OA81T.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.043
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/dreyeck/src/git-local-availability.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/dreyeck/src/git-local-availability-tmpWOTC3PB7.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.015
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/dreyeck/src/git-revision-reference.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/dreyeck/src/git-revision-reference-tmpHQE95SAC.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.019
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/dreyeck/src/git-source-slice.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/dreyeck/src/git-source-slice-tmpO87FP9NR.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.011
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/dreyeck/src/git-repository-topicmap.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/dreyeck/src/git-repository-topicmap-tmpP6A3E92I.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.007
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/dreyeck/src/git-asdf-references.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/dreyeck/src/git-asdf-references-tmpUSHT8RIL.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.019
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/dreyeck/src/git-asdf-reference-topicmap.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/dreyeck/src/git-asdf-reference-topicmap-tmp7YCPD44Y.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.043
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/dreyeck/src/upstream-intake-package.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/dreyeck/src/upstream-intake-package-tmpQXR7SNXD.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.000
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/dreyeck/src/upstream-intake.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/dreyeck/src/upstream-intake-tmp6FLI1OC3.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.179
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/dreyeck/src/upstream-assessment-package.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/dreyeck/src/upstream-assessment-package-tmpWBK8JTS9.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.000
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/dreyeck/src/upstream-assessment.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/dreyeck/src/upstream-assessment-tmpUVEUD2ZN.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.511
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/dreyeck/src/state-machine-package.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/dreyeck/src/state-machine-package-tmpOWNJOEU.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.000
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/dreyeck/src/state-machine.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/dreyeck/src/state-machine-tmpVT5BMTA5.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.067
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/dreyeck/src/gesture-binding-witness.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/dreyeck/src/gesture-binding-witness-tmpN3CFVWZF.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.087
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/dreyeck/src/gesture-clog-transport.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/dreyeck/src/gesture-clog-transport-tmpNK27C0R1.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.087
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/dreyeck/src/gesture-clog-binder.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/dreyeck/src/gesture-clog-binder-tmp3BPE71HR.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.091
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/hyperbook-fedwiki/package.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/hyperbook-fedwiki/package-tmp758YUXMV.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.000
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/hyperbook-fedwiki/utilities.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/hyperbook-fedwiki/utilities-tmpGMQXK1HK.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.004
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/hyperbook-fedwiki/pages.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/hyperbook-fedwiki/pages-tmp49Q238TW.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.207
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/hyperbook-fedwiki/fedwiki.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/hyperbook-fedwiki/fedwiki-tmpMXPMJ5KG.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.071
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/hyperbook-fedwiki/story-items.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/hyperbook-fedwiki/story-items-tmpB69313KI.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.143
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/hyperbook-fedwiki/wiki-links.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/hyperbook-fedwiki/wiki-links-tmp9ZT99EEA.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.075
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/hyperbook-fedwiki/plugins.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/hyperbook-fedwiki/plugins-tmpW045U8V2.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.015
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/hyperbook-fedwiki/views.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/hyperbook-fedwiki/views-tmp6XOIRI3N.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.051
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/dreyeck/src/authority-policy.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/dreyeck/src/authority-policy-tmp9ZHTLHSG.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.259
+hyperdoc-instance-of-acceptance> WARNING:
+hyperdoc-instance-of-acceptance>    redefining HVS::👀OPERATIONS (#<SB-PCL:SYSTEM-CLASS COMMON-LISP:T>) in DEFMETHOD
+hyperdoc-instance-of-acceptance> WARNING:
+hyperdoc-instance-of-acceptance>    redefining HVS:RENDER-TOPLEVEL-CST :AROUND (#<SB-MOP:EQL-SPECIALIZER HYPERDOC:DEFEXAMPLE>
+hyperdoc-instance-of-acceptance>                                                #<SB-PCL:SYSTEM-CLASS COMMON-LISP:T>
+hyperdoc-instance-of-acceptance>                                                #<SB-PCL:SYSTEM-CLASS COMMON-LISP:T>
+hyperdoc-instance-of-acceptance>                                                #<SB-PCL:SYSTEM-CLASS COMMON-LISP:T>) in DEFMETHOD
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/dreyeck/src/topicmap-inspector-package.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/dreyeck/src/topicmap-inspector-package-tmpRW73Q691.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.000
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/dreyeck/src/topicmap-gesture.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/dreyeck/src/topicmap-gesture-tmp4TM0ME1F.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.091
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/dreyeck/src/topicmap-inspector.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/dreyeck/src/topicmap-inspector-tmpU2IL9N4.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.199
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/dreyeck/src/upstream-assessment-inspector-package.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/dreyeck/src/upstream-assessment-inspector-package-tmpOPW41KDL.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.000
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/dreyeck/src/upstream-assessment-views.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/dreyeck/src/upstream-assessment-views-tmpIPVWLON2.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:01.379
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/dreyeck/src/hyperdoc-pages.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/dreyeck/src/hyperdoc-pages-tmpO0LCOIDS.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.011
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/dreyeck/src/upstream-intake-hyperdoc.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/dreyeck/src/upstream-intake-hyperdoc-tmpP264WQ6O.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.023
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/dreyeck/src/upstream-page-loading-history.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/dreyeck/src/upstream-page-loading-history-tmpESC43OCR.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.119
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/dreyeck/src/upstream-assessment-hyperdoc.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/dreyeck/src/upstream-assessment-hyperdoc-tmpWCAM54ZJ.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.007
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/dreyeck/src/topicmap-tala.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/dreyeck/src/topicmap-tala-tmpVTMW561L.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.139
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/dreyeck/src/topicmap-tala-inspector.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/dreyeck/src/topicmap-tala-inspector-tmpUNNGT9CF.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.203
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/dreyeck/src/git-inspector-package.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/dreyeck/src/git-inspector-package-tmp4L3W83SU.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.000
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/dreyeck/src/git-commit-inspection-views.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/dreyeck/src/git-commit-inspection-views-tmpGE7QNNEE.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.351
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/dreyeck/src/git-asdf-reference-views.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/dreyeck/src/git-asdf-reference-views-tmp9B0UZGT4.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.215
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/dreyeck/src/git-revision-reference-views.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/dreyeck/src/git-revision-reference-views-tmpAJ5U325P.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.107
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/dreyeck/nested-actions/action-tree.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/dreyeck/nested-actions/action-tree-tmpAOF1CYAS.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.043
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/dreyeck/nested-actions/probes.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/dreyeck/nested-actions/probes-tmpIXCQTSHA.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.004
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/dreyeck/nested-actions/message-path.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/dreyeck/nested-actions/message-path-tmp5E6VIEMS.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.083
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/dreyeck/nested-actions/source-revisions.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/dreyeck/nested-actions/source-revisions-tmpI0PODGVV.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.027
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/dreyeck/nested-actions/input-path.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/dreyeck/nested-actions/input-path-tmp1Z95I17K.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.167
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/dreyeck/nested-actions/solo-history.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/dreyeck/nested-actions/solo-history-tmpCFVK1AC1.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.255
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/dreyeck/nested-actions/reading.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/dreyeck/nested-actions/reading-tmpHHRR8E8N.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.027
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/dreyeck/mech-intake/catalog.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/dreyeck/mech-intake/catalog-tmpWWJ02E3I.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.123
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/dreyeck/mech-intake/execution.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/dreyeck/mech-intake/execution-tmpONTOHUJ2.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.051
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/dreyeck/mech-intake/acceptance.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/dreyeck/mech-intake/acceptance-tmpQT9APWMH.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.004
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/dreyeck/mech-intake/reading.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/dreyeck/mech-intake/reading-tmp6LYQXY0L.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.027
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/dreyeck/fedwiki-config/configuration.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/dreyeck/fedwiki-config/configuration-tmpNKVDR0J1.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.159
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/dreyeck/fedwiki-config/composition.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/dreyeck/fedwiki-config/composition-tmp6F83SDCV.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.039
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/dreyeck/fedwiki-config/fork.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/dreyeck/fedwiki-config/fork-tmpEJNPPMJY.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.047
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/dreyeck/fedwiki-config/workspace.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/dreyeck/fedwiki-config/workspace-tmp31RWPSX2.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.043
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/dreyeck/src/lisp-image-package.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/dreyeck/src/lisp-image-package-tmp1HKLMSTH.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.000
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/dreyeck/src/lisp-image-inventory.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/dreyeck/src/lisp-image-inventory-tmpEWG5XJ53.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.027
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/dreyeck/src/lisp-image-definition-sources.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/dreyeck/src/lisp-image-definition-sources-tmpXHL60MUV.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.008
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/dreyeck/src/lisp-image-observations.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/dreyeck/src/lisp-image-observations-tmpB7NPDQCW.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.035
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/dreyeck/src/lisp-image-views.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/dreyeck/src/lisp-image-views-tmpGZ70QILE.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.015
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/dreyeck/src/lisp-image-hyperdoc.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/dreyeck/src/lisp-image-hyperdoc-tmpKYD38Q95.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.004
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/dreyeck/src/lisp-image-topicmap.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/dreyeck/src/lisp-image-topicmap-tmpV4YQ0HKA.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.011
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/dreyeck/src/topicmap-tala-reading.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/dreyeck/src/topicmap-tala-reading-tmpJXWE1HN2.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.031
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/dreyeck/src/topicmap-tala-authored.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/dreyeck/src/topicmap-tala-authored-tmpMNC5LX5B.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.031
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/dreyeck/src/topicmap-tala-dispatch-reading.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/dreyeck/src/topicmap-tala-dispatch-reading-tmp4RNSVVC1.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.004
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/dreyeck/src/topicmap-tala-reference-reading.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/dreyeck/src/topicmap-tala-reference-reading-tmpN626KU7B.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.007
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/dreyeck/src/gesture-operation-request.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/dreyeck/src/gesture-operation-request-tmpOO0K1B0C.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.099
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/dreyeck/work/reading.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; file: /nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/dreyeck/work/reading.lisp
+hyperdoc-instance-of-acceptance> ; in: DEFUN %FEDWIKI-STORY
+hyperdoc-instance-of-acceptance> ;     'NIL
+hyperdoc-instance-of-acceptance> ;
+hyperdoc-instance-of-acceptance> ; note: deleting unreachable code
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/dreyeck/work/reading-tmpVFL7JAFK.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.371
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/dreyeck/work/operation-requests.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/dreyeck/work/operation-requests-tmpU45RTF.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.011
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/dreyeck/work/deployment-reading.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/dreyeck/work/deployment-reading-tmpZTS6G7ND.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.003
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/dreyeck/work/authoring-architecture.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/dreyeck/work/authoring-architecture-tmp5TNBATEG.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.071
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/dreyeck/work/addresses.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/dreyeck/work/addresses-tmpJL6JXW7Z.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.195
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/dreyeck/work/trails-rendered-reading.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/dreyeck/work/trails-rendered-reading-tmp5PQ00DH7.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.023
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/dreyeck/work/trails-rendered-federated-context.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/dreyeck/work/trails-rendered-federated-context-tmp5R1KP4O2.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.823
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/dreyeck/work/trails-rendered-following.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; file: /nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/dreyeck/work/trails-rendered-following.lisp
+hyperdoc-instance-of-acceptance> ; in: DEFUN TRAIL-LEARNING-PROJECTION
+hyperdoc-instance-of-acceptance> ;     (DREYECK/WORK/TRAILS-RENDERED-READING::CONTEXT
+hyperdoc-instance-of-acceptance> ;      (DREYECK/WORK/TRAILS-RENDERED-READING::FOLLOWING-CONTEXT
+hyperdoc-instance-of-acceptance> ;       DREYECK/WORK/TRAILS-RENDERED-READING::FOLLOWING))
+hyperdoc-instance-of-acceptance> ;
+hyperdoc-instance-of-acceptance> ; caught STYLE-WARNING:
+hyperdoc-instance-of-acceptance> ;   The variable CONTEXT is defined but never used.
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/dreyeck/work/trails-rendered-following-tmpXQDKKJYI.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.199
+hyperdoc-instance-of-acceptance> WARNING:
+hyperdoc-instance-of-acceptance>    Lisp compilation had style-warnings while compiling
+hyperdoc-instance-of-acceptance>    #<CL-SOURCE-FILE "dreyeck/work/reading" "dreyeck/work" "trails-rendered-following">
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/dreyeck/work/how-trails-sources.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/dreyeck/work/how-trails-sources-tmpGJ3P31TF.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.391
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/dreyeck/work/javascript-definitions.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/dreyeck/work/javascript-definitions-tmpT2P2LFJI.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.123
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/dreyeck/work/reading-mech-hubs.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/dreyeck/work/reading-mech-hubs-tmpKOV75BS9.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.039
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/dreyeck/work/inspecting-hub-selection.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/dreyeck/work/inspecting-hub-selection-tmpP07HWIXP.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.131
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/dreyeck/work/investigating-ward-hub-selection.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/dreyeck/work/investigating-ward-hub-selection-tmpURW0SA3C.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.115
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/dreyeck/work/collaborative-planning-reading.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/dreyeck/work/collaborative-planning-reading-tmp627QKRZN.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.391
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/dreyeck/work/ctm-plan-page-authoring.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/dreyeck/work/ctm-plan-page-authoring-tmpK8OFNZFV.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.555
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/dreyeck/work/conversation-coordinates-reading.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/dreyeck/work/conversation-coordinates-reading-tmpRMCY5COB.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.419
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/dreyeck/work/item-edit-view-diagnosis.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/dreyeck/work/item-edit-view-diagnosis-tmp9TN1FOJ6.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.711
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/dreyeck/work/trails-rendered-browser-check.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/dreyeck/work/trails-rendered-browser-check-tmpEID7NJG3.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.075
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/dreyeck/work/shift-click.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/dreyeck/work/shift-click-tmp8CJLVG9R.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.039
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/dreyeck/work/deployment-inspection.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/dreyeck/work/deployment-inspection-tmpZCJK45JG.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.195
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/dreyeck/work/source-text-view.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/dreyeck/work/source-text-view-tmpQC4TENAZ.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.004
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/g72z50szzsc5b5b3id0xyh2cxwd2iyy8-topic-maps-c446a822-acceptance-source/src/tmdm/package.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/g72z50szzsc5b5b3id0xyh2cxwd2iyy8-topic-maps-c446a822-acceptance-source/src/tmdm/package-tmp4HJFFDY3.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.004
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/g72z50szzsc5b5b3id0xyh2cxwd2iyy8-topic-maps-c446a822-acceptance-source/src/tmdm/integers.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/g72z50szzsc5b5b3id0xyh2cxwd2iyy8-topic-maps-c446a822-acceptance-source/src/tmdm/integers-tmp78H81ZL.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.011
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/g72z50szzsc5b5b3id0xyh2cxwd2iyy8-topic-maps-c446a822-acceptance-source/src/tmdm/decimals.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/g72z50szzsc5b5b3id0xyh2cxwd2iyy8-topic-maps-c446a822-acceptance-source/src/tmdm/decimals-tmp86K6JU7V.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.007
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/g72z50szzsc5b5b3id0xyh2cxwd2iyy8-topic-maps-c446a822-acceptance-source/src/tmdm/dates.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/g72z50szzsc5b5b3id0xyh2cxwd2iyy8-topic-maps-c446a822-acceptance-source/src/tmdm/dates-tmp2L6X9BVQ.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.047
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/g72z50szzsc5b5b3id0xyh2cxwd2iyy8-topic-maps-c446a822-acceptance-source/src/tmdm/datetimes.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/g72z50szzsc5b5b3id0xyh2cxwd2iyy8-topic-maps-c446a822-acceptance-source/src/tmdm/datetimes-tmpES5DCUFN.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.151
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/g72z50szzsc5b5b3id0xyh2cxwd2iyy8-topic-maps-c446a822-acceptance-source/src/tmdm/items.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/g72z50szzsc5b5b3id0xyh2cxwd2iyy8-topic-maps-c446a822-acceptance-source/src/tmdm/items-tmpDVKOEP6R.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.143
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/g72z50szzsc5b5b3id0xyh2cxwd2iyy8-topic-maps-c446a822-acceptance-source/src/tmdm/core-subjects.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/g72z50szzsc5b5b3id0xyh2cxwd2iyy8-topic-maps-c446a822-acceptance-source/src/tmdm/core-subjects-tmp4TWTKS75.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.015
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/g72z50szzsc5b5b3id0xyh2cxwd2iyy8-topic-maps-c446a822-acceptance-source/src/tmdm/item-identifiers.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/g72z50szzsc5b5b3id0xyh2cxwd2iyy8-topic-maps-c446a822-acceptance-source/src/tmdm/item-identifiers-tmpXSOQ2I78.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.027
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/g72z50szzsc5b5b3id0xyh2cxwd2iyy8-topic-maps-c446a822-acceptance-source/src/tmdm/reification.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/g72z50szzsc5b5b3id0xyh2cxwd2iyy8-topic-maps-c446a822-acceptance-source/src/tmdm/reification-tmpUA03GLW1.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.035
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/g72z50szzsc5b5b3id0xyh2cxwd2iyy8-topic-maps-c446a822-acceptance-source/src/tmdm/merging.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/g72z50szzsc5b5b3id0xyh2cxwd2iyy8-topic-maps-c446a822-acceptance-source/src/tmdm/merging-tmpO0OW34V4.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.059
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/g72z50szzsc5b5b3id0xyh2cxwd2iyy8-topic-maps-c446a822-acceptance-source/src/tmdm/occurrences.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/g72z50szzsc5b5b3id0xyh2cxwd2iyy8-topic-maps-c446a822-acceptance-source/src/tmdm/occurrences-tmpU8KQLETJ.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.019
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/g72z50szzsc5b5b3id0xyh2cxwd2iyy8-topic-maps-c446a822-acceptance-source/src/tmdm/variants.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/g72z50szzsc5b5b3id0xyh2cxwd2iyy8-topic-maps-c446a822-acceptance-source/src/tmdm/variants-tmpLBWGBOTB.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.023
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/g72z50szzsc5b5b3id0xyh2cxwd2iyy8-topic-maps-c446a822-acceptance-source/src/tmdm/associations.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/g72z50szzsc5b5b3id0xyh2cxwd2iyy8-topic-maps-c446a822-acceptance-source/src/tmdm/associations-tmpRX2XGI9U.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.023
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/g72z50szzsc5b5b3id0xyh2cxwd2iyy8-topic-maps-c446a822-acceptance-source/src/tmdm/import.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/g72z50szzsc5b5b3id0xyh2cxwd2iyy8-topic-maps-c446a822-acceptance-source/src/tmdm/import-tmpT2A3PQL9.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.011
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/g72z50szzsc5b5b3id0xyh2cxwd2iyy8-topic-maps-c446a822-acceptance-source/src/tmdm/core-relationships.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/g72z50szzsc5b5b3id0xyh2cxwd2iyy8-topic-maps-c446a822-acceptance-source/src/tmdm/core-relationships-tmpOVHYA3BO.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.008
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/dreyeck/src/evaluation-record-package.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/dreyeck/src/evaluation-record-package-tmpLT3TYWCE.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.000
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/dreyeck/src/evaluation-record.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/dreyeck/src/evaluation-record-tmp3YF2HENI.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.003
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/dreyeck/src/tmdm-model-navigation.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/dreyeck/src/tmdm-model-navigation-tmp9EEV8FN4.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.243
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/g72z50szzsc5b5b3id0xyh2cxwd2iyy8-topic-maps-c446a822-acceptance-source/src/ctm/package.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/g72z50szzsc5b5b3id0xyh2cxwd2iyy8-topic-maps-c446a822-acceptance-source/src/ctm/package-tmpDK25NJJO.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.004
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/g72z50szzsc5b5b3id0xyh2cxwd2iyy8-topic-maps-c446a822-acceptance-source/src/ctm/conditions.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/g72z50szzsc5b5b3id0xyh2cxwd2iyy8-topic-maps-c446a822-acceptance-source/src/ctm/conditions-tmpNMZ5RT9R.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.015
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/g72z50szzsc5b5b3id0xyh2cxwd2iyy8-topic-maps-c446a822-acceptance-source/src/ctm/unicode.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; file: /nix/store/g72z50szzsc5b5b3id0xyh2cxwd2iyy8-topic-maps-c446a822-acceptance-source/src/ctm/unicode.lisp
+hyperdoc-instance-of-acceptance> ; in: DEFUN SCALAR-CHARACTER
+hyperdoc-instance-of-acceptance> ;     (TOPIC-MAPS.CTM::PROBLEM 'TOPIC-MAPS.CTM:CTM-UNSUPPORTED
+hyperdoc-instance-of-acceptance> ;                              :CHARACTER-REPERTOIRE POSITION
+hyperdoc-instance-of-acceptance> ;                              "The Common Lisp implementation cannot represent this Unicode character.")
+hyperdoc-instance-of-acceptance> ;
+hyperdoc-instance-of-acceptance> ; note: deleting unreachable code
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/g72z50szzsc5b5b3id0xyh2cxwd2iyy8-topic-maps-c446a822-acceptance-source/src/ctm/unicode-tmp8K51P1O1.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.047
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/g72z50szzsc5b5b3id0xyh2cxwd2iyy8-topic-maps-c446a822-acceptance-source/src/ctm/iri.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/g72z50szzsc5b5b3id0xyh2cxwd2iyy8-topic-maps-c446a822-acceptance-source/src/ctm/iri-tmpXAVJ8WEV.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.055
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/g72z50szzsc5b5b3id0xyh2cxwd2iyy8-topic-maps-c446a822-acceptance-source/src/ctm/lexer.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/g72z50szzsc5b5b3id0xyh2cxwd2iyy8-topic-maps-c446a822-acceptance-source/src/ctm/lexer-tmpOZHFIU2N.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.099
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/g72z50szzsc5b5b3id0xyh2cxwd2iyy8-topic-maps-c446a822-acceptance-source/src/ctm/reader.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/g72z50szzsc5b5b3id0xyh2cxwd2iyy8-topic-maps-c446a822-acceptance-source/src/ctm/reader-tmpJD9SCIW3.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.239
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/g72z50szzsc5b5b3id0xyh2cxwd2iyy8-topic-maps-c446a822-acceptance-source/src/ctm/templates.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/g72z50szzsc5b5b3id0xyh2cxwd2iyy8-topic-maps-c446a822-acceptance-source/src/ctm/templates-tmpICVK4HSI.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.183
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/g72z50szzsc5b5b3id0xyh2cxwd2iyy8-topic-maps-c446a822-acceptance-source/src/ctm/resources.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/g72z50szzsc5b5b3id0xyh2cxwd2iyy8-topic-maps-c446a822-acceptance-source/src/ctm/resources-tmpA5CK3QHN.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.031
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/g72z50szzsc5b5b3id0xyh2cxwd2iyy8-topic-maps-c446a822-acceptance-source/src/cxtm/package.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/g72z50szzsc5b5b3id0xyh2cxwd2iyy8-topic-maps-c446a822-acceptance-source/src/cxtm/package-tmp5KE6HXAY.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.004
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/g72z50szzsc5b5b3id0xyh2cxwd2iyy8-topic-maps-c446a822-acceptance-source/src/cxtm/nfc-data.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/g72z50szzsc5b5b3id0xyh2cxwd2iyy8-topic-maps-c446a822-acceptance-source/src/cxtm/nfc-data-tmp5UBS1APN.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.123
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/g72z50szzsc5b5b3id0xyh2cxwd2iyy8-topic-maps-c446a822-acceptance-source/src/cxtm/unicode.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; file: /nix/store/g72z50szzsc5b5b3id0xyh2cxwd2iyy8-topic-maps-c446a822-acceptance-source/src/cxtm/unicode.lisp
+hyperdoc-instance-of-acceptance> ; in: DEFUN NFC
+hyperdoc-instance-of-acceptance> ;     (TOPIC-MAPS.CXTM::FAIL :UNSUPPORTED-CHARACTER
+hyperdoc-instance-of-acceptance> ;                            "Lisp character repertoire is insufficient." T)
+hyperdoc-instance-of-acceptance> ;
+hyperdoc-instance-of-acceptance> ; note: deleting unreachable code
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/g72z50szzsc5b5b3id0xyh2cxwd2iyy8-topic-maps-c446a822-acceptance-source/src/cxtm/unicode-tmpSI9E4AQB.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.027
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/g72z50szzsc5b5b3id0xyh2cxwd2iyy8-topic-maps-c446a822-acceptance-source/src/cxtm/canonicalizer.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/g72z50szzsc5b5b3id0xyh2cxwd2iyy8-topic-maps-c446a822-acceptance-source/src/cxtm/canonicalizer-tmpID7X8UGC.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.095
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/dreyeck/work/project/project-ctm.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/dreyeck/work/project/project-ctm-tmpFYN8G5D1.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.319
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/dreyeck/work/project/project-workspace.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/dreyeck/work/project/project-workspace-tmpG1VNK6NW.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.627
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/dreyeck/work/topic-maps-instance-of-export.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/dreyeck/work/topic-maps-instance-of-export-tmpV4YWE7CS.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.095
+hyperdoc-instance-of-acceptance> ; file: /nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/dreyeck/work/project/project-workspace.lisp
+hyperdoc-instance-of-acceptance> ; in:
+hyperdoc-instance-of-acceptance> ;      HTML-INSPECTOR-VIEWS:DEFVIEW DREYECK/WORK/PROJECT::PROJECT-ROUNDTRIP
+hyperdoc-instance-of-acceptance> ;     (:P
+hyperdoc-instance-of-acceptance> ;      "Equal octets, equal CXTM, the same Lisp object and the same Workspace sign are four different things; each row says which it compares.")
+hyperdoc-instance-of-acceptance> ;
+hyperdoc-instance-of-acceptance> ; caught STYLE-WARNING:
+hyperdoc-instance-of-acceptance> ;   undefined function: :P
+hyperdoc-instance-of-acceptance> ;
+hyperdoc-instance-of-acceptance> ; compilation unit finished
+hyperdoc-instance-of-acceptance> ;   Undefined function:
+hyperdoc-instance-of-acceptance> ;     :P
+hyperdoc-instance-of-acceptance> ;   caught 4 STYLE-WARNING conditions
+hyperdoc-instance-of-acceptance> ;   printed 3 notes
+hyperdoc-instance-of-acceptance> ; compiling file "/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/dreyeck/tests/topic-maps-instance-of-export.lisp" (written 01 JAN 1970 12:00:01 AM):
+hyperdoc-instance-of-acceptance> ; wrote /build/cache/common-lisp/sbcl-2.4.10-linux-x64/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/dreyeck/tests/topic-maps-instance-of-export-tmpC487WU3K.fasl
+hyperdoc-instance-of-acceptance> ; compilation finished in 0:00:00.035
+hyperdoc-instance-of-acceptance> INSTANCE-OF-OBSERVATION: (DREYECK/WORK/TOPIC-MAPS-INSTANCE-OF-EXPORT::INSTANCE-OF
+hyperdoc-instance-of-acceptance>                           "tag:dreyeck.ch,2026:hyperdoc/page/dreyeck/work/reading/work-breakdown"
+hyperdoc-instance-of-acceptance>                           "tag:dreyeck.ch,2026:hyperdoc/schema/hyperdoc-page")
+hyperdoc-instance-of-acceptance>   source CTM SHA256 e7c4478cf1cab9e3555efbb359b19818f68ab4a0c51ed8850dd1519e545edd52
+hyperdoc-instance-of-acceptance>   map CXTM SHA256 47a2d02f82960813773d62a16011ac8801cdd1888c94c9308c5b3616f19fa32f
+hyperdoc-instance-of-acceptance>   source Association, players, map and revision retained by EQ; scope NIL
+hyperdoc-instance-of-acceptance> INSTANCE-OF-EXPORT-PASS: 51 checks; actual Project snapshot, source EQ links, unchanged CXTM/octets/items; no inference, Case Record or planning action.
+hyperdoc-instance-of-acceptance> NIX-EXPORTER-ACCEPTANCE-PASS: native instance-of export in the isolated Nix dependency closure.

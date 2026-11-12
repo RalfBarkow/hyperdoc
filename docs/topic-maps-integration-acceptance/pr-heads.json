@@ -1,0 +1,35 @@
+[
+  {
+    "repo": "RalfBarkow/topic-maps",
+    "number": 1,
+    "url": "https://github.com/RalfBarkow/topic-maps/pull/1",
+    "head": "c446a8228017f405c3a2650ca893e9450ac7cd7b",
+    "headRef": "claude/tmdm-core-relationship-readers",
+    "base": "88994c1b9e1edbf13e665e984a5c9c3b2cdf7575",
+    "baseRef": "dreyeck.ch",
+    "draft": true,
+    "state": "open"
+  },
+  {
+    "repo": "RalfBarkow/hyperdoc",
+    "number": 41,
+    "url": "https://github.com/RalfBarkow/hyperdoc/pull/41",
+    "head": "25f83196733a611810da2ea9596af1b4b2d215fb",
+    "headRef": "codex/topic-maps-conformance-planning",
+    "base": "596344ae95d746f436705808462259371f5a593c",
+    "baseRef": "dreyeck.ch",
+    "draft": true,
+    "state": "open"
+  },
+  {
+    "repo": "RalfBarkow/hyperdoc",
+    "number": 42,
+    "url": "https://github.com/RalfBarkow/hyperdoc/pull/42",
+    "head": "36c69d3312ae70748ecd40a5452759fcfaad25c4",
+    "headRef": "codex/topic-maps-instance-of-export",
+    "base": "25f83196733a611810da2ea9596af1b4b2d215fb",
+    "baseRef": "codex/topic-maps-conformance-planning",
+    "draft": true,
+    "state": "open"
+  }
+]

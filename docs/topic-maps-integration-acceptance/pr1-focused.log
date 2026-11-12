@@ -1,0 +1,282 @@
+; compiling file "/workspace/work/acceptance-runtime/topic-maps-c446a822/src/tmdm/package.lisp" (written 11 NOV 2026 08:13:45 PM):
+
+; wrote /workspace/work/acceptance-fasls-topic/workspace/work/acceptance-runtime/topic-maps-c446a822/src/tmdm/package-tmpGHU3ALSV.fasl
+; compilation finished in 0:00:00.004
+; compiling file "/workspace/work/acceptance-runtime/topic-maps-c446a822/src/tmdm/integers.lisp" (written 11 NOV 2026 08:13:45 PM):
+
+; wrote /workspace/work/acceptance-fasls-topic/workspace/work/acceptance-runtime/topic-maps-c446a822/src/tmdm/integers-tmpAAURSO1.fasl
+; compilation finished in 0:00:00.015
+; compiling file "/workspace/work/acceptance-runtime/topic-maps-c446a822/src/tmdm/decimals.lisp" (written 11 NOV 2026 08:13:45 PM):
+
+; wrote /workspace/work/acceptance-fasls-topic/workspace/work/acceptance-runtime/topic-maps-c446a822/src/tmdm/decimals-tmp5GEXGEG5.fasl
+; compilation finished in 0:00:00.015
+; compiling file "/workspace/work/acceptance-runtime/topic-maps-c446a822/src/tmdm/dates.lisp" (written 11 NOV 2026 08:13:45 PM):
+
+; wrote /workspace/work/acceptance-fasls-topic/workspace/work/acceptance-runtime/topic-maps-c446a822/src/tmdm/dates-tmpAR3FSGEY.fasl
+; compilation finished in 0:00:00.079
+; compiling file "/workspace/work/acceptance-runtime/topic-maps-c446a822/src/tmdm/datetimes.lisp" (written 11 NOV 2026 08:13:45 PM):
+
+; wrote /workspace/work/acceptance-fasls-topic/workspace/work/acceptance-runtime/topic-maps-c446a822/src/tmdm/datetimes-tmpJAIDFZTC.fasl
+; compilation finished in 0:00:00.067
+; compiling file "/workspace/work/acceptance-runtime/topic-maps-c446a822/src/tmdm/items.lisp" (written 11 NOV 2026 08:13:45 PM):
+
+; wrote /workspace/work/acceptance-fasls-topic/workspace/work/acceptance-runtime/topic-maps-c446a822/src/tmdm/items-tmp8V3J6PE9.fasl
+; compilation finished in 0:00:00.159
+; compiling file "/workspace/work/acceptance-runtime/topic-maps-c446a822/src/tmdm/core-subjects.lisp" (written 11 NOV 2026 08:13:45 PM):
+
+; wrote /workspace/work/acceptance-fasls-topic/workspace/work/acceptance-runtime/topic-maps-c446a822/src/tmdm/core-subjects-tmp9V47YWQF.fasl
+; compilation finished in 0:00:00.007
+; compiling file "/workspace/work/acceptance-runtime/topic-maps-c446a822/src/tmdm/item-identifiers.lisp" (written 11 NOV 2026 08:13:45 PM):
+
+; wrote /workspace/work/acceptance-fasls-topic/workspace/work/acceptance-runtime/topic-maps-c446a822/src/tmdm/item-identifiers-tmp9BN22RMA.fasl
+; compilation finished in 0:00:00.027
+; compiling file "/workspace/work/acceptance-runtime/topic-maps-c446a822/src/tmdm/reification.lisp" (written 11 NOV 2026 08:13:45 PM):
+
+; wrote /workspace/work/acceptance-fasls-topic/workspace/work/acceptance-runtime/topic-maps-c446a822/src/tmdm/reification-tmp1CXFJSK9.fasl
+; compilation finished in 0:00:00.031
+; compiling file "/workspace/work/acceptance-runtime/topic-maps-c446a822/src/tmdm/merging.lisp" (written 11 NOV 2026 08:13:45 PM):
+
+; wrote /workspace/work/acceptance-fasls-topic/workspace/work/acceptance-runtime/topic-maps-c446a822/src/tmdm/merging-tmpX4BRKI0R.fasl
+; compilation finished in 0:00:00.103
+; compiling file "/workspace/work/acceptance-runtime/topic-maps-c446a822/src/tmdm/occurrences.lisp" (written 11 NOV 2026 08:13:45 PM):
+
+; wrote /workspace/work/acceptance-fasls-topic/workspace/work/acceptance-runtime/topic-maps-c446a822/src/tmdm/occurrences-tmpQ371UGST.fasl
+; compilation finished in 0:00:00.019
+; compiling file "/workspace/work/acceptance-runtime/topic-maps-c446a822/src/tmdm/variants.lisp" (written 11 NOV 2026 08:13:45 PM):
+
+; wrote /workspace/work/acceptance-fasls-topic/workspace/work/acceptance-runtime/topic-maps-c446a822/src/tmdm/variants-tmp2OWI3Q7U.fasl
+; compilation finished in 0:00:00.019
+; compiling file "/workspace/work/acceptance-runtime/topic-maps-c446a822/src/tmdm/associations.lisp" (written 11 NOV 2026 08:13:45 PM):
+
+; wrote /workspace/work/acceptance-fasls-topic/workspace/work/acceptance-runtime/topic-maps-c446a822/src/tmdm/associations-tmp9KKTJMYV.fasl
+; compilation finished in 0:00:00.023
+; compiling file "/workspace/work/acceptance-runtime/topic-maps-c446a822/src/tmdm/import.lisp" (written 11 NOV 2026 08:13:45 PM):
+
+; wrote /workspace/work/acceptance-fasls-topic/workspace/work/acceptance-runtime/topic-maps-c446a822/src/tmdm/import-tmpJU0JWO19.fasl
+; compilation finished in 0:00:00.016
+; compiling file "/workspace/work/acceptance-runtime/topic-maps-c446a822/src/tmdm/core-relationships.lisp" (written 11 NOV 2026 08:13:45 PM):
+
+; wrote /workspace/work/acceptance-fasls-topic/workspace/work/acceptance-runtime/topic-maps-c446a822/src/tmdm/core-relationships-tmpZX2WN8N4.fasl
+; compilation finished in 0:00:00.007
+; compiling file "/workspace/work/acceptance-runtime/topic-maps-c446a822/src/cxtm/package.lisp" (written 11 NOV 2026 08:13:45 PM):
+
+; wrote /workspace/work/acceptance-fasls-topic/workspace/work/acceptance-runtime/topic-maps-c446a822/src/cxtm/package-tmpOU81XRV0.fasl
+; compilation finished in 0:00:00.008
+; compiling file "/workspace/work/acceptance-runtime/topic-maps-c446a822/src/cxtm/nfc-data.lisp" (written 11 NOV 2026 08:13:45 PM):
+
+; wrote /workspace/work/acceptance-fasls-topic/workspace/work/acceptance-runtime/topic-maps-c446a822/src/cxtm/nfc-data-tmpY2ML9CFA.fasl
+; compilation finished in 0:00:00.135
+; compiling file "/workspace/work/acceptance-runtime/topic-maps-c446a822/src/cxtm/unicode.lisp" (written 11 NOV 2026 08:13:45 PM):
+
+; file: /workspace/work/acceptance-runtime/topic-maps-c446a822/src/cxtm/unicode.lisp
+; in: DEFUN NFC
+;     (TOPIC-MAPS.CXTM::FAIL :UNSUPPORTED-CHARACTER
+;                            "Lisp character repertoire is insufficient." T)
+; 
+; note: deleting unreachable code
+
+
+; wrote /workspace/work/acceptance-fasls-topic/workspace/work/acceptance-runtime/topic-maps-c446a822/src/cxtm/unicode-tmpX2JYJDQE.fasl
+; compilation finished in 0:00:00.087
+; compiling file "/workspace/work/acceptance-runtime/topic-maps-c446a822/src/cxtm/canonicalizer.lisp" (written 11 NOV 2026 08:13:45 PM):
+
+; wrote /workspace/work/acceptance-fasls-topic/workspace/work/acceptance-runtime/topic-maps-c446a822/src/cxtm/canonicalizer-tmpOPCILR65.fasl
+; compilation finished in 0:00:00.095
+; compiling file "/workspace/work/acceptance-runtime/topic-maps-c446a822/src/ctm/package.lisp" (written 11 NOV 2026 08:13:45 PM):
+
+; wrote /workspace/work/acceptance-fasls-topic/workspace/work/acceptance-runtime/topic-maps-c446a822/src/ctm/package-tmpRV9F8A9A.fasl
+; compilation finished in 0:00:00.000
+; compiling file "/workspace/work/acceptance-runtime/topic-maps-c446a822/src/ctm/conditions.lisp" (written 11 NOV 2026 08:13:45 PM):
+
+; wrote /workspace/work/acceptance-fasls-topic/workspace/work/acceptance-runtime/topic-maps-c446a822/src/ctm/conditions-tmpK2ZAJT4I.fasl
+; compilation finished in 0:00:00.015
+; compiling file "/workspace/work/acceptance-runtime/topic-maps-c446a822/src/ctm/unicode.lisp" (written 11 NOV 2026 08:13:45 PM):
+
+; file: /workspace/work/acceptance-runtime/topic-maps-c446a822/src/ctm/unicode.lisp
+; in: DEFUN SCALAR-CHARACTER
+;     (TOPIC-MAPS.CTM::PROBLEM 'TOPIC-MAPS.CTM:CTM-UNSUPPORTED
+;                              :CHARACTER-REPERTOIRE POSITION
+;                              "The Common Lisp implementation cannot represent this Unicode character.")
+; 
+; note: deleting unreachable code
+
+
+; wrote /workspace/work/acceptance-fasls-topic/workspace/work/acceptance-runtime/topic-maps-c446a822/src/ctm/unicode-tmpUX5S4ADN.fasl
+; compilation finished in 0:00:00.047
+; compiling file "/workspace/work/acceptance-runtime/topic-maps-c446a822/src/ctm/iri.lisp" (written 11 NOV 2026 08:13:45 PM):
+
+; wrote /workspace/work/acceptance-fasls-topic/workspace/work/acceptance-runtime/topic-maps-c446a822/src/ctm/iri-tmp10401X32.fasl
+; compilation finished in 0:00:00.063
+; compiling file "/workspace/work/acceptance-runtime/topic-maps-c446a822/src/ctm/lexer.lisp" (written 11 NOV 2026 08:13:45 PM):
+
+; wrote /workspace/work/acceptance-fasls-topic/workspace/work/acceptance-runtime/topic-maps-c446a822/src/ctm/lexer-tmpZ7CBRM0G.fasl
+; compilation finished in 0:00:00.103
+; compiling file "/workspace/work/acceptance-runtime/topic-maps-c446a822/src/ctm/reader.lisp" (written 11 NOV 2026 08:13:45 PM):
+
+; wrote /workspace/work/acceptance-fasls-topic/workspace/work/acceptance-runtime/topic-maps-c446a822/src/ctm/reader-tmp9OZEQ0G2.fasl
+; compilation finished in 0:00:00.227
+; compiling file "/workspace/work/acceptance-runtime/topic-maps-c446a822/src/ctm/templates.lisp" (written 11 NOV 2026 08:13:45 PM):
+
+; wrote /workspace/work/acceptance-fasls-topic/workspace/work/acceptance-runtime/topic-maps-c446a822/src/ctm/templates-tmpB2JTL1W9.fasl
+; compilation finished in 0:00:00.087
+; compiling file "/workspace/work/acceptance-runtime/topic-maps-c446a822/src/ctm/resources.lisp" (written 11 NOV 2026 08:13:45 PM):
+
+; wrote /workspace/work/acceptance-fasls-topic/workspace/work/acceptance-runtime/topic-maps-c446a822/src/ctm/resources-tmpP3BI68WQ.fasl
+; compilation finished in 0:00:00.067
+; compiling file "/workspace/work/acceptance-runtime/topic-maps-c446a822/src/package.lisp" (written 11 NOV 2026 08:13:45 PM):
+
+; wrote /workspace/work/acceptance-fasls-topic/workspace/work/acceptance-runtime/topic-maps-c446a822/src/package-tmpQDARA81Z.fasl
+; compilation finished in 0:00:00.000
+; compiling file "/workspace/work/acceptance-runtime/topic-maps-c446a822/src/filesystem.lisp" (written 11 NOV 2026 08:13:45 PM):
+
+; wrote /workspace/work/acceptance-fasls-topic/workspace/work/acceptance-runtime/topic-maps-c446a822/src/filesystem-tmpYEMMM7SE.fasl
+; compilation finished in 0:00:00.015
+; compiling file "/workspace/work/acceptance-runtime/topic-maps-c446a822/src/corpus.lisp" (written 11 NOV 2026 08:13:45 PM):
+
+; wrote /workspace/work/acceptance-fasls-topic/workspace/work/acceptance-runtime/topic-maps-c446a822/src/corpus-tmp73HU0RPK.fasl
+; compilation finished in 0:00:00.083
+; compiling file "/workspace/work/acceptance-runtime/topic-maps-c446a822/src/report.lisp" (written 11 NOV 2026 08:13:45 PM):
+
+; wrote /workspace/work/acceptance-fasls-topic/workspace/work/acceptance-runtime/topic-maps-c446a822/src/report-tmpIO5N7K88.fasl
+; compilation finished in 0:00:00.031
+; compiling file "/workspace/work/acceptance-runtime/topic-maps-c446a822/tests/package.lisp" (written 11 NOV 2026 08:13:45 PM):
+
+; wrote /workspace/work/acceptance-fasls-topic/workspace/work/acceptance-runtime/topic-maps-c446a822/tests/package-tmpCM21U60Z.fasl
+; compilation finished in 0:00:00.004
+; compiling file "/workspace/work/acceptance-runtime/topic-maps-c446a822/tests/foundation.lisp" (written 11 NOV 2026 08:13:45 PM):
+
+; wrote /workspace/work/acceptance-fasls-topic/workspace/work/acceptance-runtime/topic-maps-c446a822/tests/foundation-tmp9DT7SEFG.fasl
+; compilation finished in 0:00:00.035
+; compiling file "/workspace/work/acceptance-runtime/topic-maps-c446a822/tests/ctm-package.lisp" (written 11 NOV 2026 08:13:45 PM):
+
+; wrote /workspace/work/acceptance-fasls-topic/workspace/work/acceptance-runtime/topic-maps-c446a822/tests/ctm-package-tmp8065ESJT.fasl
+; compilation finished in 0:00:00.000
+; compiling file "/workspace/work/acceptance-runtime/topic-maps-c446a822/tests/ctm-identity.lisp" (written 11 NOV 2026 08:13:45 PM):
+
+; wrote /workspace/work/acceptance-fasls-topic/workspace/work/acceptance-runtime/topic-maps-c446a822/tests/ctm-identity-tmp7S8Z6FGF.fasl
+; compilation finished in 0:00:00.103
+; compiling file "/workspace/work/acceptance-runtime/topic-maps-c446a822/tests/ctm-report.lisp" (written 11 NOV 2026 08:13:45 PM):
+
+; wrote /workspace/work/acceptance-fasls-topic/workspace/work/acceptance-runtime/topic-maps-c446a822/tests/ctm-report-tmpSIT3QPKP.fasl
+; compilation finished in 0:00:00.011
+; compiling file "/workspace/work/acceptance-runtime/topic-maps-c446a822/tests/ctm-merging.lisp" (written 11 NOV 2026 08:13:45 PM):
+
+; wrote /workspace/work/acceptance-fasls-topic/workspace/work/acceptance-runtime/topic-maps-c446a822/tests/ctm-merging-tmpE0PA0714.fasl
+; compilation finished in 0:00:00.035
+; compiling file "/workspace/work/acceptance-runtime/topic-maps-c446a822/tests/merge-graphs.lisp" (written 11 NOV 2026 08:13:45 PM):
+
+; wrote /workspace/work/acceptance-fasls-topic/workspace/work/acceptance-runtime/topic-maps-c446a822/tests/merge-graphs-tmpJRWHHVG0.fasl
+; compilation finished in 0:00:00.019
+; compiling file "/workspace/work/acceptance-runtime/topic-maps-c446a822/tests/ctm-associations.lisp" (written 11 NOV 2026 08:13:45 PM):
+
+; wrote /workspace/work/acceptance-fasls-topic/workspace/work/acceptance-runtime/topic-maps-c446a822/tests/ctm-associations-tmp4WZVROCX.fasl
+; compilation finished in 0:00:00.083
+; compiling file "/workspace/work/acceptance-runtime/topic-maps-c446a822/tests/association-graphs.lisp" (written 11 NOV 2026 08:13:45 PM):
+
+; wrote /workspace/work/acceptance-fasls-topic/workspace/work/acceptance-runtime/topic-maps-c446a822/tests/association-graphs-tmpA0I3UKX8.fasl
+; compilation finished in 0:00:00.011
+; compiling file "/workspace/work/acceptance-runtime/topic-maps-c446a822/tests/association-report.lisp" (written 11 NOV 2026 08:13:45 PM):
+
+; wrote /workspace/work/acceptance-fasls-topic/workspace/work/acceptance-runtime/topic-maps-c446a822/tests/association-report-tmp267Y2N80.fasl
+; compilation finished in 0:00:00.008
+; compiling file "/workspace/work/acceptance-runtime/topic-maps-c446a822/tests/cxtm.lisp" (written 11 NOV 2026 08:13:45 PM):
+
+; wrote /workspace/work/acceptance-fasls-topic/workspace/work/acceptance-runtime/topic-maps-c446a822/tests/cxtm-tmpOUPE5FSJ.fasl
+; compilation finished in 0:00:00.179
+; compiling file "/workspace/work/acceptance-runtime/topic-maps-c446a822/tests/ctm-occurrences.lisp" (written 11 NOV 2026 08:13:45 PM):
+
+; wrote /workspace/work/acceptance-fasls-topic/workspace/work/acceptance-runtime/topic-maps-c446a822/tests/ctm-occurrences-tmpIGHCU6ZA.fasl
+; compilation finished in 0:00:00.131
+; compiling file "/workspace/work/acceptance-runtime/topic-maps-c446a822/tests/ctm-prefixes.lisp" (written 11 NOV 2026 08:13:45 PM):
+
+; wrote /workspace/work/acceptance-fasls-topic/workspace/work/acceptance-runtime/topic-maps-c446a822/tests/ctm-prefixes-tmpBO0TUGLK.fasl
+; compilation finished in 0:00:00.063
+; compiling file "/workspace/work/acceptance-runtime/topic-maps-c446a822/tests/ctm-integers.lisp" (written 11 NOV 2026 08:13:45 PM):
+
+; wrote /workspace/work/acceptance-fasls-topic/workspace/work/acceptance-runtime/topic-maps-c446a822/tests/ctm-integers-tmpIIXPIQNW.fasl
+; compilation finished in 0:00:00.087
+; compiling file "/workspace/work/acceptance-runtime/topic-maps-c446a822/tests/ctm-decimals.lisp" (written 11 NOV 2026 08:13:45 PM):
+
+; wrote /workspace/work/acceptance-fasls-topic/workspace/work/acceptance-runtime/topic-maps-c446a822/tests/ctm-decimals-tmpOHM494YR.fasl
+; compilation finished in 0:00:00.059
+; compiling file "/workspace/work/acceptance-runtime/topic-maps-c446a822/tests/ctm-dates.lisp" (written 11 NOV 2026 08:13:45 PM):
+
+; wrote /workspace/work/acceptance-fasls-topic/workspace/work/acceptance-runtime/topic-maps-c446a822/tests/ctm-dates-tmpOVFB07XF.fasl
+; compilation finished in 0:00:00.075
+; compiling file "/workspace/work/acceptance-runtime/topic-maps-c446a822/tests/ctm-datetimes.lisp" (written 11 NOV 2026 08:13:45 PM):
+
+; wrote /workspace/work/acceptance-fasls-topic/workspace/work/acceptance-runtime/topic-maps-c446a822/tests/ctm-datetimes-tmpG6VFGMYP.fasl
+; compilation finished in 0:00:00.055
+; compiling file "/workspace/work/acceptance-runtime/topic-maps-c446a822/tests/ctm-datetime-timezones.lisp" (written 11 NOV 2026 08:13:45 PM):
+
+; wrote /workspace/work/acceptance-fasls-topic/workspace/work/acceptance-runtime/topic-maps-c446a822/tests/ctm-datetime-timezones-tmp4QIPRMOF.fasl
+; compilation finished in 0:00:00.031
+; compiling file "/workspace/work/acceptance-runtime/topic-maps-c446a822/tests/ctm-typed-names.lisp" (written 11 NOV 2026 08:13:45 PM):
+
+; wrote /workspace/work/acceptance-fasls-topic/workspace/work/acceptance-runtime/topic-maps-c446a822/tests/ctm-typed-names-tmpGW0QV22K.fasl
+; compilation finished in 0:00:00.095
+; compiling file "/workspace/work/acceptance-runtime/topic-maps-c446a822/tests/ctm-scopes.lisp" (written 11 NOV 2026 08:13:45 PM):
+
+; wrote /workspace/work/acceptance-fasls-topic/workspace/work/acceptance-runtime/topic-maps-c446a822/tests/ctm-scopes-tmp2K9J0HSR.fasl
+; compilation finished in 0:00:00.115
+; compiling file "/workspace/work/acceptance-runtime/topic-maps-c446a822/tests/ctm-variants.lisp" (written 11 NOV 2026 08:13:45 PM):
+
+; wrote /workspace/work/acceptance-fasls-topic/workspace/work/acceptance-runtime/topic-maps-c446a822/tests/ctm-variants-tmpP44I4E0Y.fasl
+; compilation finished in 0:00:00.123
+; compiling file "/workspace/work/acceptance-runtime/topic-maps-c446a822/tests/ctm-references.lisp" (written 11 NOV 2026 08:13:45 PM):
+
+; wrote /workspace/work/acceptance-fasls-topic/workspace/work/acceptance-runtime/topic-maps-c446a822/tests/ctm-references-tmp63LQ7EX6.fasl
+; compilation finished in 0:00:00.063
+; compiling file "/workspace/work/acceptance-runtime/topic-maps-c446a822/tests/item-identifiers.lisp" (written 11 NOV 2026 08:13:45 PM):
+
+; wrote /workspace/work/acceptance-fasls-topic/workspace/work/acceptance-runtime/topic-maps-c446a822/tests/item-identifiers-tmp86F1A8FB.fasl
+; compilation finished in 0:00:00.099
+; compiling file "/workspace/work/acceptance-runtime/topic-maps-c446a822/tests/reification.lisp" (written 11 NOV 2026 08:13:45 PM):
+
+; wrote /workspace/work/acceptance-fasls-topic/workspace/work/acceptance-runtime/topic-maps-c446a822/tests/reification-tmpH7D4HL98.fasl
+; compilation finished in 0:00:00.131
+; compiling file "/workspace/work/acceptance-runtime/topic-maps-c446a822/tests/ctm-association-arity.lisp" (written 11 NOV 2026 08:13:45 PM):
+
+; wrote /workspace/work/acceptance-fasls-topic/workspace/work/acceptance-runtime/topic-maps-c446a822/tests/ctm-association-arity-tmpCDM7YXYI.fasl
+; compilation finished in 0:00:00.091
+; compiling file "/workspace/work/acceptance-runtime/topic-maps-c446a822/tests/ctm-type-relationships.lisp" (written 11 NOV 2026 08:13:45 PM):
+
+; wrote /workspace/work/acceptance-fasls-topic/workspace/work/acceptance-runtime/topic-maps-c446a822/tests/ctm-type-relationships-tmpLM57P5P.fasl
+; compilation finished in 0:00:00.111
+; compiling file "/workspace/work/acceptance-runtime/topic-maps-c446a822/tests/ctm-templates.lisp" (written 11 NOV 2026 08:13:45 PM):
+
+; wrote /workspace/work/acceptance-fasls-topic/workspace/work/acceptance-runtime/topic-maps-c446a822/tests/ctm-templates-tmpZE69DN33.fasl
+; compilation finished in 0:00:00.083
+; compiling file "/workspace/work/acceptance-runtime/topic-maps-c446a822/tests/map-import.lisp" (written 11 NOV 2026 08:13:45 PM):
+
+; wrote /workspace/work/acceptance-fasls-topic/workspace/work/acceptance-runtime/topic-maps-c446a822/tests/map-import-tmpG8099TO3.fasl
+; compilation finished in 0:00:00.195
+; compiling file "/workspace/work/acceptance-runtime/topic-maps-c446a822/tests/default-name-types.lisp" (written 11 NOV 2026 08:13:45 PM):
+
+; wrote /workspace/work/acceptance-fasls-topic/workspace/work/acceptance-runtime/topic-maps-c446a822/tests/default-name-types-tmpTASQCYAW.fasl
+; compilation finished in 0:00:00.019
+DEFAULT-NAME-TYPE-PASS: 21 checks; both identifiers kept apart; XTM path NOT-RUN in this suite.
+
+; file: /workspace/work/acceptance-runtime/topic-maps-c446a822/tests/map-import.lisp
+; in: DEFUN TOPIC-MAPS.IMPORT.TESTS:RUN-TESTS
+;     (TOPIC-MAPS.IMPORT.TESTS::IDENTITY-TESTS)
+; 
+; caught STYLE-WARNING:
+;   undefined function: TOPIC-MAPS.IMPORT.TESTS::IDENTITY-TESTS
+
+;     (TOPIC-MAPS.IMPORT.TESTS::MERGE-TESTS)
+; 
+; caught STYLE-WARNING:
+;   undefined function: TOPIC-MAPS.IMPORT.TESTS::MERGE-TESTS
+; 
+; compilation unit finished
+;   Undefined functions:
+;     TOPIC-MAPS.IMPORT.TESTS::IDENTITY-TESTS TOPIC-MAPS.IMPORT.TESTS::MERGE-TESTS
+;   caught 2 STYLE-WARNING conditions
+;   printed 2 notes
+; compiling file "/workspace/work/acceptance-runtime/topic-maps-c446a822/tests/core-relationships.lisp" (written 11 NOV 2026 08:13:45 PM):
+
+; wrote /workspace/work/acceptance-fasls-topic/workspace/work/acceptance-runtime/topic-maps-c446a822/tests/core-relationships-tmp35U57IV6.fasl
+; compilation finished in 0:00:00.035
+CORE-RELATIONSHIP-PASS: 50 checks; TMDM 7.2 and 7.3 recognized as stated, 11 original inputs, nothing inferred or changed.
+ACCEPTANCE-PR1-PASS: 21 default-name and 50 relationship checks from the fixed source; no HyperDoc code loaded.

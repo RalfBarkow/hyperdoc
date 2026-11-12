@@ -1,0 +1,18 @@
+{
+  "command": [
+    "/workspace/scratch/tmdm-mcp-portable/bin/sbcl",
+    "--noinform",
+    "--no-sysinit",
+    "--no-userinit",
+    "--non-interactive",
+    "--load",
+    "/workspace/work/topic-maps-integration-acceptance/docs/topic-maps-integration-acceptance/pr1-focused.lisp"
+  ],
+  "cwd": "/workspace/work/acceptance-runtime/topic-maps-c446a822",
+  "environmentOverrides": {},
+  "startedAtUTC": "2026-11-12T05:51:08.588676+00:00",
+  "exitCode": 0,
+  "finishedAtUTC": "2026-11-12T05:51:13.400547+00:00",
+  "log": "pr1-focused.log",
+  "logSHA256": "135410522dc52d73a599ad35f5bba5f305fca3fd5f2c57515e5f46a9a72c502a"
+}

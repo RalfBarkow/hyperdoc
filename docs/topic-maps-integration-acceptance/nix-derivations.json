@@ -1,0 +1,204 @@
+{
+  "/nix/store/bjvr6bjh2y18mc5zkm9vhyrb30d17a2i-hyperdoc-catalog.drv": {
+    "args": [
+      "-e",
+      "/nix/store/v6x3cs394jgqfbi0a42pam708flxaphh-default-builder.sh"
+    ],
+    "builder": "/nix/store/mjhcjikhxps97mq5z54j4gjjfzgmsir5-bash-5.2p37/bin/bash",
+    "env": {
+      "__structuredAttrs": "",
+      "allowSubstitutes": "1",
+      "buildCommand": "target=$out/bin/hyperdoc-catalog\nmkdir -p \"$(dirname \"$target\")\"\n\nif [ -e \"$textPath\" ]; then\n  mv \"$textPath\" \"$target\"\nelse\n  echo -n \"$text\" > \"$target\"\nfi\n\nif [ -n \"$executable\" ]; then\n  chmod +x \"$target\"\nfi\n\neval \"$checkPhase\"\n",
+      "buildInputs": "",
+      "builder": "/nix/store/mjhcjikhxps97mq5z54j4gjjfzgmsir5-bash-5.2p37/bin/bash",
+      "checkPhase": "runHook preCheck\n/nix/store/mjhcjikhxps97mq5z54j4gjjfzgmsir5-bash-5.2p37/bin/bash -n -O extglob \"$target\"\n# use shellcheck which does not include docs\n# pandoc takes long to build and documentation isn't needed for just running the cli\n/nix/store/zbi11w56srcrp6wyxf1vwqq0n1df63s0-ShellCheck-0.10.0/bin/shellcheck  \"$target\"\n\nrunHook postCheck\n",
+      "cmakeFlags": "",
+      "configureFlags": "",
+      "depsBuildBuild": "",
+      "depsBuildBuildPropagated": "",
+      "depsBuildTarget": "",
+      "depsBuildTargetPropagated": "",
+      "depsHostHost": "",
+      "depsHostHostPropagated": "",
+      "depsTargetTarget": "",
+      "depsTargetTargetPropagated": "",
+      "doCheck": "",
+      "doInstallCheck": "",
+      "enableParallelBuilding": "1",
+      "enableParallelChecking": "1",
+      "enableParallelInstalling": "1",
+      "executable": "1",
+      "mesonFlags": "",
+      "name": "hyperdoc-catalog",
+      "nativeBuildInputs": "",
+      "out": "/nix/store/4c0bkyyin13xpby4r8cvnxr5w73w662d-hyperdoc-catalog",
+      "outputs": "out",
+      "passAsFile": "buildCommand text",
+      "patches": "",
+      "preferLocalBuild": "",
+      "propagatedBuildInputs": "",
+      "propagatedNativeBuildInputs": "",
+      "stdenv": "/nix/store/4mmdi8a6znw6qkf2gayg0iqig708pc3b-stdenv-linux",
+      "strictDeps": "",
+      "system": "x86_64-linux",
+      "text": "#!/nix/store/mjhcjikhxps97mq5z54j4gjjfzgmsir5-bash-5.2p37/bin/bash\nset -o errexit\nset -o nounset\nset -o pipefail\n\nexport PATH=\"/nix/store/49ny89ra9jhj59j0m6xfqhi5sm0r0yl6-git-2.47.2/bin:/nix/store/24xpp0sgdn1zi1b2snjcbgfhn37faqfx-d2-tala-0.9.0/bin:$PATH\"\n\n# Explicit store sources, independent of shellHook, cwd and personal ASDF config.\nexport CL_SOURCE_REGISTRY=\"/nix/store/7l95gid3niz995qqpkgclj6355k50phf-source//:/nix/store/w26nr9dxpfsyzbviphnaaydmcww2h3y6-source//:/nix/store/ibq9zs9js02ln87vjmcl6xdafvpxzffx-source//:/nix/store/p62cd9zn5gnrd34wgbjjnqragxwx6dhh-source//:/nix/store/w15dbn9gy780n3p9k5b69dr3rrr5lczr-source//:/nix/store/9zkvhs70z8w06kximfrw3zm099qa87vj-source//:/nix/store/r40b3p08hidpxcf6cvdhfazlvlig1dyn-source/shop3//:/nix/store/wzikvxsqhg07y862kz3ljn6gvh2c3ijl-source//:/nix/store/9krmxz2ri6fal0135y8q3zindx1v8b3r-source//:/nix/store/5zzdqpa66a6imm6007s8q7392plkrjw1-source//:/nix/store/l4sgpdmp3siiy430nqdw0b3b2s23l4w6-source//:/nix/store/j7gvc1zmvf7gp6ymdjra8vn33am1npmi-source//:/nix/store/4ab75xd8k9p4nq75p9iiz7mcwfyb4l34-source//:/nix/store/b5wa1lk18nanag0myb7p02bq1gm7gnbq-source//:/nix/store/g72z50szzsc5b5b3id0xyh2cxwd2iyy8-topic-maps-c446a822-acceptance-source//:/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source//\"\nexport HYPERDOC_HYPERSPEC_ROOT=\"/nix/store/sbnljd0w8w2513iicp77533lwk06bfva-common-lisp-hyperspec-7.0/share/common-lisp-hyperspec/HyperSpec\"\n# HyperDoc's revision as the flake states it (self.rev, or self.dirtyRev); the store source has no .git.\nexport HYPERDOC_SOURCE_REVISION=\"36c69d3312ae70748ecd40a5452759fcfaad25c4\"\nexec /nix/store/s7wb16wpmlr4b4grrg8s6rz0m7ai6zna-sbcl-with-packages/bin/sbcl --noinform --no-sysinit --no-userinit \\\n  --script /nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/scripts/catalog-main.lisp \"$@\"\n\n"
+    },
+    "inputDrvs": {
+      "/nix/store/d5qnm9ndj2d522g5a1skf1f2dmzq02fj-common-lisp-hyperspec-7.0.drv": {
+        "dynamicOutputs": {},
+        "outputs": [
+          "out"
+        ]
+      },
+      "/nix/store/g6i53wpfisscqqj8d2hf3z83rzb9jklg-bash-5.2p37.drv": {
+        "dynamicOutputs": {},
+        "outputs": [
+          "out"
+        ]
+      },
+      "/nix/store/jf63l6s4x6343mcbpg7h0q1kdkjgbrv0-sbcl-with-packages.drv": {
+        "dynamicOutputs": {},
+        "outputs": [
+          "out"
+        ]
+      },
+      "/nix/store/jh789q8by2ihdnlikw746in5cvmwrxcf-topic-maps-c446a822-acceptance-source.drv": {
+        "dynamicOutputs": {},
+        "outputs": [
+          "out"
+        ]
+      },
+      "/nix/store/n1j4sb7rns69gp5yxd6qqa1vm0kxhnlv-ShellCheck-0.10.0.drv": {
+        "dynamicOutputs": {},
+        "outputs": [
+          "out"
+        ]
+      },
+      "/nix/store/p470qfnbrf16agb4r05fllbsqgi2m8k5-git-2.47.2.drv": {
+        "dynamicOutputs": {},
+        "outputs": [
+          "out"
+        ]
+      },
+      "/nix/store/qpm66ir9sdpya8nvfnm0y18cr31hc1rh-d2-tala-0.9.0.drv": {
+        "dynamicOutputs": {},
+        "outputs": [
+          "out"
+        ]
+      },
+      "/nix/store/yvh3qnp56mszx3h9rxbz9p76d8q4ml0l-stdenv-linux.drv": {
+        "dynamicOutputs": {},
+        "outputs": [
+          "out"
+        ]
+      }
+    },
+    "inputSrcs": [
+      "/nix/store/4ab75xd8k9p4nq75p9iiz7mcwfyb4l34-source",
+      "/nix/store/5zzdqpa66a6imm6007s8q7392plkrjw1-source",
+      "/nix/store/7l95gid3niz995qqpkgclj6355k50phf-source",
+      "/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source",
+      "/nix/store/9krmxz2ri6fal0135y8q3zindx1v8b3r-source",
+      "/nix/store/9zkvhs70z8w06kximfrw3zm099qa87vj-source",
+      "/nix/store/b5wa1lk18nanag0myb7p02bq1gm7gnbq-source",
+      "/nix/store/ibq9zs9js02ln87vjmcl6xdafvpxzffx-source",
+      "/nix/store/j7gvc1zmvf7gp6ymdjra8vn33am1npmi-source",
+      "/nix/store/l4sgpdmp3siiy430nqdw0b3b2s23l4w6-source",
+      "/nix/store/p62cd9zn5gnrd34wgbjjnqragxwx6dhh-source",
+      "/nix/store/r40b3p08hidpxcf6cvdhfazlvlig1dyn-source",
+      "/nix/store/v6x3cs394jgqfbi0a42pam708flxaphh-default-builder.sh",
+      "/nix/store/w15dbn9gy780n3p9k5b69dr3rrr5lczr-source",
+      "/nix/store/w26nr9dxpfsyzbviphnaaydmcww2h3y6-source",
+      "/nix/store/wzikvxsqhg07y862kz3ljn6gvh2c3ijl-source"
+    ],
+    "name": "hyperdoc-catalog",
+    "outputs": {
+      "out": {
+        "path": "/nix/store/4c0bkyyin13xpby4r8cvnxr5w73w662d-hyperdoc-catalog"
+      }
+    },
+    "system": "x86_64-linux"
+  },
+  "/nix/store/jh789q8by2ihdnlikw746in5cvmwrxcf-topic-maps-c446a822-acceptance-source.drv": {
+    "args": [
+      "-e",
+      "/nix/store/v6x3cs394jgqfbi0a42pam708flxaphh-default-builder.sh"
+    ],
+    "builder": "/nix/store/mjhcjikhxps97mq5z54j4gjjfzgmsir5-bash-5.2p37/bin/bash",
+    "env": {
+      "__structuredAttrs": "",
+      "buildCommand": "mkdir \"$out\"\ntar -xzf /nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source/nix/topic-maps-c446a822-runtime.tar.gz -C \"$out\" --strip-components=1 --no-same-owner\n",
+      "buildInputs": "",
+      "builder": "/nix/store/mjhcjikhxps97mq5z54j4gjjfzgmsir5-bash-5.2p37/bin/bash",
+      "cmakeFlags": "",
+      "configureFlags": "",
+      "depsBuildBuild": "",
+      "depsBuildBuildPropagated": "",
+      "depsBuildTarget": "",
+      "depsBuildTargetPropagated": "",
+      "depsHostHost": "",
+      "depsHostHostPropagated": "",
+      "depsTargetTarget": "",
+      "depsTargetTargetPropagated": "",
+      "doCheck": "",
+      "doInstallCheck": "",
+      "enableParallelBuilding": "1",
+      "enableParallelChecking": "1",
+      "enableParallelInstalling": "1",
+      "mesonFlags": "",
+      "name": "topic-maps-c446a822-acceptance-source",
+      "nativeBuildInputs": "/nix/store/gvpbq82xln2cm1wz2gr0isyxvispqmcg-gnutar-1.35 /nix/store/2jamrqz6pl1bsswv4fm3jsr7v1dal64z-gzip-1.13",
+      "out": "/nix/store/g72z50szzsc5b5b3id0xyh2cxwd2iyy8-topic-maps-c446a822-acceptance-source",
+      "outputHash": "sha256-d+qp4MmVOwHnEIRn3zzyIQhR/eUYCBos+XAu7OHs3/I=",
+      "outputHashAlgo": "sha256",
+      "outputHashMode": "recursive",
+      "outputs": "out",
+      "passAsFile": "buildCommand",
+      "patches": "",
+      "propagatedBuildInputs": "",
+      "propagatedNativeBuildInputs": "",
+      "stdenv": "/nix/store/4mmdi8a6znw6qkf2gayg0iqig708pc3b-stdenv-linux",
+      "strictDeps": "",
+      "system": "x86_64-linux"
+    },
+    "inputDrvs": {
+      "/nix/store/8yk3n5gb1sf867msd82cjcb8y4c20vxv-gnutar-1.35.drv": {
+        "dynamicOutputs": {},
+        "outputs": [
+          "out"
+        ]
+      },
+      "/nix/store/g6i53wpfisscqqj8d2hf3z83rzb9jklg-bash-5.2p37.drv": {
+        "dynamicOutputs": {},
+        "outputs": [
+          "out"
+        ]
+      },
+      "/nix/store/h5jb41j1cziv66c1n0cx3myxdvharg79-gzip-1.13.drv": {
+        "dynamicOutputs": {},
+        "outputs": [
+          "out"
+        ]
+      },
+      "/nix/store/yvh3qnp56mszx3h9rxbz9p76d8q4ml0l-stdenv-linux.drv": {
+        "dynamicOutputs": {},
+        "outputs": [
+          "out"
+        ]
+      }
+    },
+    "inputSrcs": [
+      "/nix/store/9by1pcwkighw35r18qjgzdr2r6z1p357-source",
+      "/nix/store/v6x3cs394jgqfbi0a42pam708flxaphh-default-builder.sh"
+    ],
+    "name": "topic-maps-c446a822-acceptance-source",
+    "outputs": {
+      "out": {
+        "hash": "77eaa9e0c9953b01e7108467df3cf2210851fde518081a2cf9702eece1ecdff2",
+        "hashAlgo": "r:sha256",
+        "path": "/nix/store/g72z50szzsc5b5b3id0xyh2cxwd2iyy8-topic-maps-c446a822-acceptance-source"
+      }
+    },
+    "system": "x86_64-linux"
+  }
+}

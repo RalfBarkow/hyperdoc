@@ -1,0 +1,1 @@
+error: executing SQLite statement 'pragma synchronous = normal': unable to open database file, unable to open database file (in '/workspace/tools/nix-portable-data/.nix-portable/nix/var/nix/db/db.sqlite')

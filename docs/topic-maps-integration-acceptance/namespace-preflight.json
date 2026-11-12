@@ -1,0 +1,18 @@
+{
+  "command": [
+    "unshare",
+    "--user",
+    "--map-root-user",
+    "--mount",
+    "--pid",
+    "--fork",
+    "/bin/true"
+  ],
+  "cwd": "/workspace/work/acceptance-pr42",
+  "environmentOverrides": {},
+  "startedAtUTC": "2026-11-12T05:59:15.330216+00:00",
+  "exitCode": 1,
+  "finishedAtUTC": "2026-11-12T05:59:15.334421+00:00",
+  "log": "namespace-preflight.log",
+  "logSHA256": "731fa347449bfb63ad97dd72dadf5ae4776694f1365e5638d81b7860c7819cfd"
+}

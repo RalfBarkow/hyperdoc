@@ -1,0 +1,36 @@
+{
+  "pr41": {
+    "head": "25f83196733a611810da2ea9596af1b4b2d215fb",
+    "worktreeClean": true,
+    "sourceSHA256": {
+      "flake.nix": "fc08fcc76225294c7ed71aca40a46d7c534f2c4b3eb9c3984ecf827a89d51fd1",
+      "flake.lock": "019dcaff428e1abf426f165c3afd70fe163077454d1c348d4965d86a93a7e836",
+      "nix/topic-maps-source.nix": "32a2a2cfe0a565eb2100d70ebb99f205b3170cc23edbd223706265b2f4aa93da",
+      "scripts/topic-maps-snapshot.py": "a99aa5ce79ea225847d243b362832c3139b11362acad31501e0e5709cbeb5eb5",
+      "dreyeck/src/source-snapshot.lisp": "a1a652b339907fc0777163ca563f71d68bb8a48d41ae2f14648bd04f53de4a26",
+      "dreyeck/work/project/project-workspace.lisp": "aac51495705f51bea0cc5a7d5cedd6fd4fcd56dab674c135be7ba1477f8fff9e",
+      "dreyeck/work/project/hyperdoc-project.ctm": "e7c4478cf1cab9e3555efbb359b19818f68ab4a0c51ed8850dd1519e545edd52",
+      "dreyeck/work/topic-maps-conformance-planning.lisp": "168bb2a11c7680bcb218d47c42cec43363becb0a423fe5d233f3deb0fdd1d0ea",
+      "dreyeck/tests/topic-maps-conformance-planning.lisp": "bed25fd1988c17fe4b415d1a8f7c6b4b8caa58bf7c18dabcdd29305cf9742c49"
+    }
+  },
+  "pr42": {
+    "head": "36c69d3312ae70748ecd40a5452759fcfaad25c4",
+    "worktreeClean": true,
+    "sourceSHA256": {
+      "flake.nix": "fc08fcc76225294c7ed71aca40a46d7c534f2c4b3eb9c3984ecf827a89d51fd1",
+      "flake.lock": "019dcaff428e1abf426f165c3afd70fe163077454d1c348d4965d86a93a7e836",
+      "nix/topic-maps-source.nix": "32a2a2cfe0a565eb2100d70ebb99f205b3170cc23edbd223706265b2f4aa93da",
+      "scripts/topic-maps-snapshot.py": "a99aa5ce79ea225847d243b362832c3139b11362acad31501e0e5709cbeb5eb5",
+      "dreyeck/src/source-snapshot.lisp": "a1a652b339907fc0777163ca563f71d68bb8a48d41ae2f14648bd04f53de4a26",
+      "dreyeck/work/project/project-workspace.lisp": "aac51495705f51bea0cc5a7d5cedd6fd4fcd56dab674c135be7ba1477f8fff9e",
+      "dreyeck/work/project/hyperdoc-project.ctm": "e7c4478cf1cab9e3555efbb359b19818f68ab4a0c51ed8850dd1519e545edd52",
+      "dreyeck/work/topic-maps-conformance-planning.lisp": "168bb2a11c7680bcb218d47c42cec43363becb0a423fe5d233f3deb0fdd1d0ea",
+      "dreyeck/tests/topic-maps-conformance-planning.lisp": "bed25fd1988c17fe4b415d1a8f7c6b4b8caa58bf7c18dabcdd29305cf9742c49",
+      "dreyeck/work/topic-maps-instance-of-export.lisp": "6372284d2401d9b62b1cfab78cd59730161a6fbf323dc3ae36ddcaeee55f58f0",
+      "dreyeck/tests/topic-maps-instance-of-export.lisp": "c3854ab6f81001b5af3d0147ec7396b4bed0bd62c32d1f439139a08b72fb647b",
+      "nix/topic-maps-c446a822.manifest": "6d1d9117b0dcbb0bde00caf6014035c0e702f0c4c5fb198b6aa950332201baf9",
+      "nix/topic-maps-c446a822-runtime.tar.gz": "bb1c64c9b0ecdb2d55ef76c8c4cc4ce19ab3eacebf8a32d380dd5a2453c6bdf2"
+    }
+  }
+}

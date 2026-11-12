@@ -1,0 +1,13 @@
+{
+  "command": [
+    "python3",
+    "/workspace/work/topic-maps-integration-acceptance/docs/topic-maps-integration-acceptance/browser.py"
+  ],
+  "cwd": "/workspace/work/acceptance-pr42",
+  "environmentOverrides": {},
+  "startedAtUTC": "2026-11-12T05:58:29.256543+00:00",
+  "exitCode": 1,
+  "finishedAtUTC": "2026-11-12T05:59:26.343059+00:00",
+  "log": "browser.log",
+  "logSHA256": "2328a499e0122ffbfdc23c3d36ec1b50a41e53f3261677f1858f6a19156d9807"
+}
