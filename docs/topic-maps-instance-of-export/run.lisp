@@ -1,0 +1,30 @@
+;;;; Explicit isolated-image test runner. Load an environment bootstrap before this file.
+(require :asdf)
+(let ((root (truename (merge-pathnames "../../" (uiop:pathname-directory-pathname *load-truename*)))))
+  (dolist (file '("dreyeck.asd" "hyperbook.asd" "hyperdoc.asd")) (asdf:load-asd (merge-pathnames file root))))
+(asdf:load-system "dreyeck/source-snapshot")
+(let* ((commit "c446a8228017f405c3a2650ca893e9450ac7cd7b")
+       (root (uiop:ensure-directory-pathname (or (uiop:getenv "TOPIC_MAPS_CANDIDATE_ROOT") (error "Set TOPIC_MAPS_CANDIDATE_ROOT."))))
+       (manifest (dreyeck/source-snapshot:find-snapshot-manifest commit))
+       (verification (dreyeck/source-snapshot:verify-snapshot-tree root manifest)))
+  (format t "~&CANDIDATE-SOURCE-PASS: ~A; ~D blobs; ~S~%" commit
+          (dreyeck/source-snapshot:verification-blob-count verification)
+          (dreyeck/source-snapshot:verification-checks verification))
+  ;; A negative test on the disposable extracted candidate, restored before any Topic Maps code loads.
+  (let* ((path (merge-pathnames "src/tmdm/core-relationships.lisp" root))
+         (octets (dreyeck/source-snapshot::%file-octets path)))
+    (unwind-protect
+         (progn
+           (with-open-file (out path :direction :output :if-exists :append :element-type '(unsigned-byte 8)) (write-byte 32 out))
+           (assert (handler-case (progn (dreyeck/source-snapshot:verify-snapshot-tree root manifest) nil)
+                     (dreyeck/source-snapshot:snapshot-refused () t))))
+      (with-open-file (out path :direction :output :if-exists :supersede :element-type '(unsigned-byte 8)) (write-sequence octets out))))
+  (dreyeck/source-snapshot:verify-snapshot-tree root manifest)
+  (format t "~&CANDIDATE-TAMPER-REFUSAL-PASS: changed blob refused; original candidate restored and reverified.~%"))
+(asdf:load-system "dreyeck/work/topic-maps-instance-of-export")
+(let ((root (truename (uiop:ensure-directory-pathname (uiop:getenv "TOPIC_MAPS_CANDIDATE_ROOT")))))
+  (dolist (system '("topic-maps" "topic-maps/tmdm" "topic-maps/ctm" "topic-maps/cxtm"))
+    (assert (equal root (truename (asdf:system-source-directory system))))))
+(asdf:test-system "dreyeck/work/topic-maps-instance-of-export")
+(asdf:test-system "dreyeck/work/topic-maps-conformance-planning")
+(format t "~&INTEGRATION-ISOLATED-RUN-PASS: exporter and unchanged conformance-planning tests; active dependency unchanged.~%")

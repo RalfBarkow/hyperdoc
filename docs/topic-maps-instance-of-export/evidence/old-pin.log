@@ -1,0 +1,312 @@
+WARNING: System definition file #P"/workspace/tools/nix-portable-data/.nix-portable/nix/store/fdrq5ji4dvm7jj0wzfvxcyr0rwiq2c24-sbcl-cl-who-20241012-git/cl-who.asd" contains definition for system "cl-who-test". Please only define "cl-who" and secondary systems with a name starting with "cl-who/" (e.g. "cl-who/test") in that file.
+WARNING: redefining IRONCLAD:BLOCK-LENGTH in DEFGENERIC
+;;; Computing Hangul syllable namesWARNING: System definition file #P"/workspace/tools/nix-portable-data/.nix-portable/nix/store/rn29yxasws4x3wvcf6d0738zxbcrvmin-sbcl-parse-float-20200218-git/parse-float.asd" contains definition for system "parse-float-tests". Please only define "parse-float" and secondary systems with a name starting with "parse-float/" (e.g. "parse-float/test") in that file.
+WARNING: System definition file #P"/workspace/tools/nix-portable-data/.nix-portable/nix/store/bzssaly51znz21jychrjrjg22cbimv2h-sbcl-cl-template-20130615-git/cl-template.asd" contains definition for system "cl-template-tests". Please only define "cl-template" and secondary systems with a name starting with "cl-template/" (e.g. "cl-template/test") in that file.
+STYLE-WARNING:
+   The new FTYPE proclamation for FSET::VECTOR-SET-BINARY-SEARCH-LO
+     (FUNCTION (SIMPLE-VECTOR T) FIXNUM)
+   does not match the derived return type
+     (FUNCTION (SIMPLE-VECTOR T)
+      (VALUES (INTEGER -4611686018427387904 4611686018427387904) &OPTIONAL))
+STYLE-WARNING:
+   The new FTYPE proclamation for FSET::WB-BAG-TREE-TOTAL-COUNT
+     (FUNCTION (FSET::WB-BAG-TREE) INTEGER)
+   does not match the derived return type
+     (FUNCTION ((OR LIST FSET::WB-BAG-TREE-NODE)) *)
+STYLE-WARNING:
+   The new FTYPE proclamation for FSET::HASH-VALUE-FIXNUM
+     (FUNCTION (T) FIXNUM)
+   does not match the derived return type
+     (FUNCTION (T) (VALUES INTEGER &OPTIONAL))
+STYLE-WARNING:
+   The new FTYPE proclamation for FSET::CH-SET-NODE-ENTRY-MASK
+     (FUNCTION (T) FIXNUM)
+   does not match the derived return type
+     (FUNCTION (SIMPLE-VECTOR) (VALUES T &OPTIONAL))
+STYLE-WARNING:
+   The new FTYPE proclamation for FSET::CH-SET-NODE-SUBNODE-MASK
+     (FUNCTION (T) FIXNUM)
+   does not match the derived return type
+     (FUNCTION (SIMPLE-VECTOR) (VALUES T &OPTIONAL))
+STYLE-WARNING:
+   The new FTYPE proclamation for FSET::CH-SET-NODE-SIZE
+     (FUNCTION (T) FIXNUM)
+   does not match the derived return type
+     (FUNCTION (SIMPLE-VECTOR) (VALUES T &OPTIONAL))
+STYLE-WARNING:
+   The new FTYPE proclamation for FSET::CH-SET-NODE-HASH-VALUE
+     (FUNCTION (T) FIXNUM)
+   does not match the derived return type
+     (FUNCTION (SIMPLE-VECTOR) (VALUES T &OPTIONAL))
+STYLE-WARNING:
+   The new FTYPE proclamation for FSET::CH-MAP-NODE-ENTRY-MASK
+     (FUNCTION (T) FIXNUM)
+   does not match the derived return type
+     (FUNCTION (SIMPLE-VECTOR) (VALUES T &OPTIONAL))
+STYLE-WARNING:
+   The new FTYPE proclamation for FSET::CH-MAP-NODE-SUBNODE-MASK
+     (FUNCTION (T) FIXNUM)
+   does not match the derived return type
+     (FUNCTION (SIMPLE-VECTOR) (VALUES T &OPTIONAL))
+STYLE-WARNING:
+   The new FTYPE proclamation for FSET::CH-MAP-NODE-SIZE
+     (FUNCTION (T) FIXNUM)
+   does not match the derived return type
+     (FUNCTION (SIMPLE-VECTOR) (VALUES T &OPTIONAL))
+STYLE-WARNING:
+   The new FTYPE proclamation for FSET::CH-MAP-NODE-HASH-VALUE
+     (FUNCTION (T) FIXNUM)
+   does not match the derived return type
+     (FUNCTION (SIMPLE-VECTOR) (VALUES T &OPTIONAL))
+STYLE-WARNING:
+   Generic function FSET:ITERATOR clobbers an earlier FTYPE proclamation
+   (FUNCTION (T &KEY &ALLOW-OTHER-KEYS) (VALUES FUNCTION &REST T)) for the same
+   name with (FUNCTION (T &KEY &ALLOW-OTHER-KEYS) *).
+STYLE-WARNING:
+   The new FTYPE proclamation for SWANK/BACKEND:GETPID
+     (FUNCTION NIL (VALUES (SIGNED-BYTE 32) &OPTIONAL))
+   does not match the derived return type
+     (FUNCTION NIL *)
+WARNING:
+   redefining EMACS-INSPECT (#<SB-PCL:SYSTEM-CLASS COMMON-LISP:T>) in DEFMETHOD
+WARNING:
+   redefining 👀PRINT-STRING (#<SB-PCL:SYSTEM-CLASS COMMON-LISP:T>) in DEFMETHOD
+WARNING:
+   The new FTYPE proclamation for CLSS:MATCH-SELECTOR
+     (FUNCTION (LIST (OR PLUMP-DOM:NODE VECTOR LIST) KEYWORD)
+      (VALUES (AND (VECTOR PLUMP-DOM:NODE) (NOT SIMPLE-ARRAY))))
+   does not match the old FTYPE proclamation
+     (FUNCTION (LIST (OR LIST PLUMP-DOM:NODE VECTOR) &OPTIONAL KEYWORD)
+      (VALUES (AND (VECTOR PLUMP-DOM:NODE) (NOT SIMPLE-ARRAY)) &REST T))
+WARNING: redefining CL-ISAAC:RAND32 in DEFUN
+WARNING: redefining CL-ISAAC:RAND64 in DEFUN
+WARNING:
+   bare references to struct types are deprecated. Please use (:POINTER
+                                                               (:STRUCT
+                                                                SQLITE3)) or (:STRUCT
+                                                                              SQLITE3) instead.
+WARNING:
+   bare references to struct types are deprecated. Please use (:POINTER
+                                                               (:STRUCT
+                                                                SQLITE3-STMT)) or (:STRUCT
+                                                                                   SQLITE3-STMT) instead.
+WARNING: redefining DEFTYPE type to be a class: DBI.ERROR:<DBI-ERROR>
+WARNING: redefining DEFTYPE type to be a class: DBI.ERROR:<DBI-WARNING>
+WARNING: redefining DEFTYPE type to be a class: DBI.ERROR:<DBI-INTERFACE-ERROR>
+WARNING:
+   redefining DEFTYPE type to be a class: DBI.ERROR:<DBI-UNIMPLEMENTED-ERROR>
+WARNING: redefining DEFTYPE type to be a class: DBI.ERROR:<DBI-DATABASE-ERROR>
+WARNING: redefining DEFTYPE type to be a class: DBI.ERROR:<DBI-DATA-ERROR>
+WARNING:
+   redefining DEFTYPE type to be a class: DBI.ERROR:<DBI-OPERATIONAL-ERROR>
+WARNING: redefining DEFTYPE type to be a class: DBI.ERROR:<DBI-INTEGRITY-ERROR>
+WARNING: redefining DEFTYPE type to be a class: DBI.ERROR:<DBI-INTERNAL-ERROR>
+WARNING:
+   redefining DEFTYPE type to be a class: DBI.ERROR:<DBI-PROGRAMMING-ERROR>
+WARNING:
+   redefining DEFTYPE type to be a class: DBI.ERROR:<DBI-NOTSUPPORTED-ERROR>
+WARNING:
+   redefining DEFTYPE type to be a class: DBI.ERROR:<DBI-ALREADY-COMMITED-ERROR>
+WARNING:
+   redefining DEFTYPE type to be a class: DBI.ERROR:<DBI-ALREADY-ROLLED-BACK-ERROR>
+WARNING: redefining DEFTYPE type to be a class: DBI.DRIVER:<DBI-DRIVER>
+WARNING: redefining DEFTYPE type to be a class: DBI.DRIVER:<DBI-CONNECTION>
+WARNING: redefining DEFTYPE type to be a class: DBI.DRIVER:<DBI-QUERY>
+WARNING: redefining CLOG:PARENT in DEFGENERIC
+WARNING: redefining CLOG::CONNECTION-ID in DEFGENERIC
+WARNING: redefining CLOG:HTML-ID in DEFGENERIC
+WARNING: redefining CLOG:WINDOW in DEFGENERIC
+WARNING: redefining CLOG:HTML-DOCUMENT in DEFGENERIC
+WARNING: redefining CLOG:LOCATION in DEFGENERIC
+WARNING: redefining CLOG:NAVIGATOR in DEFGENERIC
+WARNING: redefining CLOG:DOCUMENT-ELEMENT in DEFGENERIC
+WARNING: redefining CLOG:HEAD-ELEMENT in DEFGENERIC
+WARNING: redefining CLOG:DISABLEDP in DEFGENERIC
+WARNING: redefining (COMMON-LISP:SETF CLOG:DISABLEDP) in DEFGENERIC
+WARNING: redefining CLOG:VALUE in DEFGENERIC
+WARNING: redefining (COMMON-LISP:SETF CLOG:VALUE) in DEFGENERIC
+WARNING: redefining CLOG:MINIMUM in DEFGENERIC
+WARNING: redefining (COMMON-LISP:SETF CLOG:MINIMUM) in DEFGENERIC
+WARNING: redefining CLOG:MAXIMUM in DEFGENERIC
+WARNING: redefining (COMMON-LISP:SETF CLOG:MAXIMUM) in DEFGENERIC
+WARNING: redefining CLOG:URL-SRC in DEFGENERIC
+WARNING: redefining (COMMON-LISP:SETF CLOG:URL-SRC) in DEFGENERIC
+WARNING: redefining CLOG:ALT-TEXT in DEFGENERIC
+WARNING: redefining (COMMON-LISP:SETF CLOG:ALT-TEXT) in DEFGENERIC
+WARNING: redefining CLOG:CENTER-PANEL in DEFGENERIC
+WARNING: redefining CLOG:TOP-PANEL in DEFGENERIC
+WARNING: redefining CLOG:LEFT-PANEL in DEFGENERIC
+WARNING: redefining CLOG:BOTTOM-PANEL in DEFGENERIC
+WARNING: redefining CLOG:PANEL-BOX in DEFGENERIC
+WARNING: redefining CLOG:TREE-ROOT in DEFGENERIC
+WARNING: redefining CLOG:INDENT-LEVEL in DEFGENERIC
+WARNING: redefining CLOG:TOGGLE-STATE in DEFGENERIC
+WARNING: redefining CLOG:TREE-ITEM in DEFGENERIC
+WARNING: redefining CLOG:DATABASE-CONNECTION in DEFGENERIC
+WARNING: redefining CLOG:READ-ONLY-P in DEFGENERIC
+WARNING: redefining (COMMON-LISP:SETF CLOG:READ-ONLY-P) in DEFGENERIC
+WARNING:
+   redefining HV:👀PLAYGROUND (#<SB-PCL:SYSTEM-CLASS COMMON-LISP:T>) in DEFMETHOD
+WARNING:
+   redefining ENCODE-TO-STRING (#<SB-PCL:SYSTEM-CLASS COMMON-LISP:T>) in DEFMETHOD
+WARNING:
+   redefining HVS::👀OPERATIONS (#<SB-PCL:SYSTEM-CLASS COMMON-LISP:T>) in DEFMETHOD
+WARNING:
+   redefining HVS:RENDER-TOPLEVEL-CST :AROUND (#<SB-MOP:EQL-SPECIALIZER HYPERDOC:DEFEXAMPLE>
+                                               #<SB-PCL:SYSTEM-CLASS COMMON-LISP:T>
+                                               #<SB-PCL:SYSTEM-CLASS COMMON-LISP:T>
+                                               #<SB-PCL:SYSTEM-CLASS COMMON-LISP:T>) in DEFMETHOD
+
+; compiling file "/workspace/work/topic-maps-active-runtime/topic-maps-88994c1b/src/tmdm/package.lisp" (written 28 OCT 2026 03:42:36 PM):
+
+; wrote /workspace/work/topic-maps-export-fasls/workspace/work/topic-maps-active-runtime/topic-maps-88994c1b/src/tmdm/package-tmpAAURSO1.fasl
+; compilation finished in 0:00:00.008
+; compiling file "/workspace/work/topic-maps-active-runtime/topic-maps-88994c1b/src/tmdm/integers.lisp" (written 28 OCT 2026 03:42:36 PM):
+
+; wrote /workspace/work/topic-maps-export-fasls/workspace/work/topic-maps-active-runtime/topic-maps-88994c1b/src/tmdm/integers-tmp5GEXGEG5.fasl
+; compilation finished in 0:00:00.047
+; compiling file "/workspace/work/topic-maps-active-runtime/topic-maps-88994c1b/src/tmdm/decimals.lisp" (written 28 OCT 2026 03:42:36 PM):
+
+; wrote /workspace/work/topic-maps-export-fasls/workspace/work/topic-maps-active-runtime/topic-maps-88994c1b/src/tmdm/decimals-tmpAR3FSGEY.fasl
+; compilation finished in 0:00:00.019
+; compiling file "/workspace/work/topic-maps-active-runtime/topic-maps-88994c1b/src/tmdm/dates.lisp" (written 28 OCT 2026 03:42:36 PM):
+
+; wrote /workspace/work/topic-maps-export-fasls/workspace/work/topic-maps-active-runtime/topic-maps-88994c1b/src/tmdm/dates-tmpJAIDFZTC.fasl
+; compilation finished in 0:00:00.095
+; compiling file "/workspace/work/topic-maps-active-runtime/topic-maps-88994c1b/src/tmdm/datetimes.lisp" (written 28 OCT 2026 03:42:36 PM):
+
+; wrote /workspace/work/topic-maps-export-fasls/workspace/work/topic-maps-active-runtime/topic-maps-88994c1b/src/tmdm/datetimes-tmp8V3J6PE9.fasl
+; compilation finished in 0:00:00.223
+; compiling file "/workspace/work/topic-maps-active-runtime/topic-maps-88994c1b/src/tmdm/items.lisp" (written 28 OCT 2026 03:42:36 PM):
+
+; wrote /workspace/work/topic-maps-export-fasls/workspace/work/topic-maps-active-runtime/topic-maps-88994c1b/src/tmdm/items-tmp9V47YWQF.fasl
+; compilation finished in 0:00:00.571
+; compiling file "/workspace/work/topic-maps-active-runtime/topic-maps-88994c1b/src/tmdm/core-subjects.lisp" (written 28 OCT 2026 03:42:36 PM):
+
+; wrote /workspace/work/topic-maps-export-fasls/workspace/work/topic-maps-active-runtime/topic-maps-88994c1b/src/tmdm/core-subjects-tmp9BN22RMA.fasl
+; compilation finished in 0:00:00.016
+; compiling file "/workspace/work/topic-maps-active-runtime/topic-maps-88994c1b/src/tmdm/item-identifiers.lisp" (written 28 OCT 2026 03:42:36 PM):
+
+; wrote /workspace/work/topic-maps-export-fasls/workspace/work/topic-maps-active-runtime/topic-maps-88994c1b/src/tmdm/item-identifiers-tmp1CXFJSK9.fasl
+; compilation finished in 0:00:00.079
+; compiling file "/workspace/work/topic-maps-active-runtime/topic-maps-88994c1b/src/tmdm/reification.lisp" (written 28 OCT 2026 03:42:36 PM):
+
+; wrote /workspace/work/topic-maps-export-fasls/workspace/work/topic-maps-active-runtime/topic-maps-88994c1b/src/tmdm/reification-tmpX4BRKI0R.fasl
+; compilation finished in 0:00:00.087
+; compiling file "/workspace/work/topic-maps-active-runtime/topic-maps-88994c1b/src/tmdm/merging.lisp" (written 28 OCT 2026 03:42:36 PM):
+
+; wrote /workspace/work/topic-maps-export-fasls/workspace/work/topic-maps-active-runtime/topic-maps-88994c1b/src/tmdm/merging-tmpQ371UGST.fasl
+; compilation finished in 0:00:00.115
+; compiling file "/workspace/work/topic-maps-active-runtime/topic-maps-88994c1b/src/tmdm/occurrences.lisp" (written 28 OCT 2026 03:42:36 PM):
+
+; wrote /workspace/work/topic-maps-export-fasls/workspace/work/topic-maps-active-runtime/topic-maps-88994c1b/src/tmdm/occurrences-tmp2OWI3Q7U.fasl
+; compilation finished in 0:00:00.067
+; compiling file "/workspace/work/topic-maps-active-runtime/topic-maps-88994c1b/src/tmdm/variants.lisp" (written 28 OCT 2026 03:42:36 PM):
+
+; wrote /workspace/work/topic-maps-export-fasls/workspace/work/topic-maps-active-runtime/topic-maps-88994c1b/src/tmdm/variants-tmp9KKTJMYV.fasl
+; compilation finished in 0:00:00.095
+; compiling file "/workspace/work/topic-maps-active-runtime/topic-maps-88994c1b/src/tmdm/associations.lisp" (written 28 OCT 2026 03:42:36 PM):
+
+; wrote /workspace/work/topic-maps-export-fasls/workspace/work/topic-maps-active-runtime/topic-maps-88994c1b/src/tmdm/associations-tmpJU0JWO19.fasl
+; compilation finished in 0:00:00.039
+; compiling file "/workspace/work/topic-maps-active-runtime/topic-maps-88994c1b/src/tmdm/import.lisp" (written 28 OCT 2026 03:42:36 PM):
+
+; wrote /workspace/work/topic-maps-export-fasls/workspace/work/topic-maps-active-runtime/topic-maps-88994c1b/src/tmdm/import-tmpZX2WN8N4.fasl
+; compilation finished in 0:00:00.067
+; compiling file "/workspace/work/topic-maps-instance-of-export/dreyeck/src/tmdm-model-navigation.lisp" (written 11 NOV 2026 09:15:14 PM):
+
+; wrote /workspace/work/topic-maps-export-fasls/workspace/work/topic-maps-instance-of-export/dreyeck/src/tmdm-model-navigation-tmpOU81XRV0.fasl
+; compilation finished in 0:00:00.875
+; compiling file "/workspace/work/topic-maps-active-runtime/topic-maps-88994c1b/src/ctm/package.lisp" (written 28 OCT 2026 03:42:36 PM):
+
+; wrote /workspace/work/topic-maps-export-fasls/workspace/work/topic-maps-active-runtime/topic-maps-88994c1b/src/ctm/package-tmpY2ML9CFA.fasl
+; compilation finished in 0:00:00.000
+; compiling file "/workspace/work/topic-maps-active-runtime/topic-maps-88994c1b/src/ctm/conditions.lisp" (written 28 OCT 2026 03:42:36 PM):
+
+; wrote /workspace/work/topic-maps-export-fasls/workspace/work/topic-maps-active-runtime/topic-maps-88994c1b/src/ctm/conditions-tmpX2JYJDQE.fasl
+; compilation finished in 0:00:00.035
+; compiling file "/workspace/work/topic-maps-active-runtime/topic-maps-88994c1b/src/ctm/unicode.lisp" (written 28 OCT 2026 03:42:36 PM):
+
+; file: /workspace/work/topic-maps-active-runtime/topic-maps-88994c1b/src/ctm/unicode.lisp
+; in: DEFUN SCALAR-CHARACTER
+;     (TOPIC-MAPS.CTM::PROBLEM 'TOPIC-MAPS.CTM:CTM-UNSUPPORTED
+;                              :CHARACTER-REPERTOIRE POSITION
+;                              "The Common Lisp implementation cannot represent this Unicode character.")
+; 
+; note: deleting unreachable code
+
+
+; wrote /workspace/work/topic-maps-export-fasls/workspace/work/topic-maps-active-runtime/topic-maps-88994c1b/src/ctm/unicode-tmpOPCILR65.fasl
+; compilation finished in 0:00:00.163
+; compiling file "/workspace/work/topic-maps-active-runtime/topic-maps-88994c1b/src/ctm/iri.lisp" (written 28 OCT 2026 03:42:36 PM):
+
+; wrote /workspace/work/topic-maps-export-fasls/workspace/work/topic-maps-active-runtime/topic-maps-88994c1b/src/ctm/iri-tmpRV9F8A9A.fasl
+; compilation finished in 0:00:00.211
+; compiling file "/workspace/work/topic-maps-active-runtime/topic-maps-88994c1b/src/ctm/lexer.lisp" (written 28 OCT 2026 03:42:36 PM):
+
+; wrote /workspace/work/topic-maps-export-fasls/workspace/work/topic-maps-active-runtime/topic-maps-88994c1b/src/ctm/lexer-tmpK2ZAJT4I.fasl
+; compilation finished in 0:00:00.283
+; compiling file "/workspace/work/topic-maps-active-runtime/topic-maps-88994c1b/src/ctm/reader.lisp" (written 28 OCT 2026 03:42:36 PM):
+
+; wrote /workspace/work/topic-maps-export-fasls/workspace/work/topic-maps-active-runtime/topic-maps-88994c1b/src/ctm/reader-tmpUX5S4ADN.fasl
+; compilation finished in 0:00:00.879
+; compiling file "/workspace/work/topic-maps-active-runtime/topic-maps-88994c1b/src/ctm/templates.lisp" (written 28 OCT 2026 03:42:36 PM):
+
+; wrote /workspace/work/topic-maps-export-fasls/workspace/work/topic-maps-active-runtime/topic-maps-88994c1b/src/ctm/templates-tmp10401X32.fasl
+; compilation finished in 0:00:00.223
+; compiling file "/workspace/work/topic-maps-active-runtime/topic-maps-88994c1b/src/ctm/resources.lisp" (written 28 OCT 2026 03:42:36 PM):
+
+; wrote /workspace/work/topic-maps-export-fasls/workspace/work/topic-maps-active-runtime/topic-maps-88994c1b/src/ctm/resources-tmpZ7CBRM0G.fasl
+; compilation finished in 0:00:00.187
+; compiling file "/workspace/work/topic-maps-active-runtime/topic-maps-88994c1b/src/cxtm/package.lisp" (written 28 OCT 2026 03:42:36 PM):
+
+; wrote /workspace/work/topic-maps-export-fasls/workspace/work/topic-maps-active-runtime/topic-maps-88994c1b/src/cxtm/package-tmp9OZEQ0G2.fasl
+; compilation finished in 0:00:00.004
+; compiling file "/workspace/work/topic-maps-active-runtime/topic-maps-88994c1b/src/cxtm/nfc-data.lisp" (written 28 OCT 2026 03:42:36 PM):
+
+; wrote /workspace/work/topic-maps-export-fasls/workspace/work/topic-maps-active-runtime/topic-maps-88994c1b/src/cxtm/nfc-data-tmpB2JTL1W9.fasl
+; compilation finished in 0:00:00.207
+; compiling file "/workspace/work/topic-maps-active-runtime/topic-maps-88994c1b/src/cxtm/unicode.lisp" (written 28 OCT 2026 03:42:36 PM):
+
+; file: /workspace/work/topic-maps-active-runtime/topic-maps-88994c1b/src/cxtm/unicode.lisp
+; in: DEFUN NFC
+;     (TOPIC-MAPS.CXTM::FAIL :UNSUPPORTED-CHARACTER
+;                            "Lisp character repertoire is insufficient." T)
+; 
+; note: deleting unreachable code
+
+
+; wrote /workspace/work/topic-maps-export-fasls/workspace/work/topic-maps-active-runtime/topic-maps-88994c1b/src/cxtm/unicode-tmpP3BI68WQ.fasl
+; compilation finished in 0:00:00.059
+; compiling file "/workspace/work/topic-maps-active-runtime/topic-maps-88994c1b/src/cxtm/canonicalizer.lisp" (written 28 OCT 2026 03:42:36 PM):
+
+; wrote /workspace/work/topic-maps-export-fasls/workspace/work/topic-maps-active-runtime/topic-maps-88994c1b/src/cxtm/canonicalizer-tmpQDARA81Z.fasl
+; compilation finished in 0:00:00.207
+; compiling file "/workspace/work/topic-maps-instance-of-export/dreyeck/work/project/project-ctm.lisp" (written 11 NOV 2026 09:15:14 PM):
+
+; wrote /workspace/work/topic-maps-export-fasls/workspace/work/topic-maps-instance-of-export/dreyeck/work/project/project-ctm-tmpYEMMM7SE.fasl
+; compilation finished in 0:00:00.631
+; compiling file "/workspace/work/topic-maps-instance-of-export/dreyeck/work/project/project-workspace.lisp" (written 11 NOV 2026 09:15:14 PM):
+
+; wrote /workspace/work/topic-maps-export-fasls/workspace/work/topic-maps-instance-of-export/dreyeck/work/project/project-workspace-tmp73HU0RPK.fasl
+; compilation finished in 0:00:01.627
+; compiling file "/workspace/work/topic-maps-instance-of-export/dreyeck/work/topic-maps-instance-of-export.lisp" (written 11 NOV 2026 09:17:12 PM):
+
+; wrote /workspace/work/topic-maps-export-fasls/workspace/work/topic-maps-instance-of-export/dreyeck/work/topic-maps-instance-of-export-tmpIO5N7K88.fasl
+; compilation finished in 0:00:00.083
+
+; file: /workspace/work/topic-maps-instance-of-export/dreyeck/work/project/project-workspace.lisp
+; in:
+;      HTML-INSPECTOR-VIEWS:DEFVIEW DREYECK/WORK/PROJECT::PROJECT-ROUNDTRIP
+;     (:P
+;      "Equal octets, equal CXTM, the same Lisp object and the same Workspace sign are four different things; each row says which it compares.")
+; 
+; caught STYLE-WARNING:
+;   undefined function: :P
+; 
+; compilation unit finished
+;   Undefined function:
+;     :P
+;   caught 1 STYLE-WARNING condition
+;   printed 2 notes
+OLD-PIN-REFUSAL-PASS: active 88994c1b verified; optional system loads; missing public reader explicitly refused.
