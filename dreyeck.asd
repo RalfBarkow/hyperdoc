@@ -3730,3 +3730,19 @@
   :perform (test-op (op component)
              (declare (ignore op component))
              (uiop:symbol-call :dreyeck/work/topic-maps-instance-of-export/tests :run-tests)))
+
+(defsystem "dreyeck/work/acceptance-evidence-chain"
+  :description "Optional read-only inspection of one fixed execution report, retained log and source revision"
+  :depends-on ("dreyeck/inspector/git" "dreyeck/evaluation-record" "dreyeck/source-snapshot" "shasht" "ironclad")
+  :serial t
+  :components ((:file "dreyeck/work/acceptance-evidence-chain")
+               (:module "dreyeck/pages/acceptance-evidence-chain"
+                :components ((:static-file "Inspecting One Acceptance Evidence Chain.html"))))
+  :in-order-to ((test-op (test-op "dreyeck/work/acceptance-evidence-chain/tests"))))
+
+(defsystem "dreyeck/work/acceptance-evidence-chain/tests"
+  :depends-on ("dreyeck/work/acceptance-evidence-chain")
+  :components ((:file "dreyeck/tests/acceptance-evidence-chain"))
+  :perform (test-op (op component)
+             (declare (ignore op component))
+             (uiop:symbol-call :dreyeck/work/acceptance-evidence-chain/tests :run-tests)))
