@@ -27,14 +27,22 @@ the supported grammar. It does not establish execution or which definition
 would supersede another at runtime. Keywords are interned after complete
 literal validation; extraction is not a claim of zero interning on success.
 
-## Counterexample provenance and outstanding input
+## Counterexample provenance
 
-The exact two complete examples from Claude's independent A1 review were not
-available in the accessible review files or GitHub PR search. They have been
-requested from the owner. `probes.lisp` retains explicitly **reconstructed**
-complete examples of both reported failure modes; these must not be represented
-as the verbatim review script. Running the verbatim examples remains **NOT RUN**
-until they are supplied. This is an outstanding acceptance requirement.
+The owner has now supplied the two complete inputs from Claude's independent
+A1 review. They are retained verbatim, without a trailing newline, in
+`reviewer-cases/line-comment.txt` and `reviewer-cases/string.txt` and read directly
+by `reviewer-probes.lisp`. The attribution is owner-supplied; Claude's private
+review directory and `probes3.lisp` were not independently accessed.
+
+The original reconstruction tests and logs remain preserved and labelled as
+reconstructions. The previously outstanding mandatory input check is now
+executed: `verbatim-baseline.log` reproduces both exact false tables on the fixed
+A1 reader; `verbatim-corrected.log` verifies that A2 returns NIL with
+`:definitions-found 0` for both. It also verifies the standard reader's actual
+forms (character only; character, string, NIL), literal semicolon and quote,
+and genuine direct top-level definitions following those characters or the
+inactive reviewer examples. The authentic Fischer table remains accepted.
 
 The reconstruction sources are printed in `baseline.log`: A1 accepts a direct
 apparent definition after an incorrectly swallowed comment delimiter, and
@@ -78,7 +86,7 @@ All runs used isolated SBCL processes and the existing A1 portable launcher.
 | Base Lisp Critic, Federated Context, Recorded, Reading | PASS: exit 0 for each |
 | Critique, Engine Integration, Page Station | BLOCKED: each exits 1 at its real-engine/source-station prerequisite |
 | Catalog | FAIL: exit 1 at `CHECK-PAGE-LOADING-REPOSITORY-CONTEXT`, "Local upstream object is absent." |
-| Verbatim Claude review examples | NOT RUN: exact source text requested but not supplied |
+| Verbatim Claude review examples | PASS: exact A1 false tables reproduced, corrected A2 refusals verified |
 
 The source-station and Catalog outcomes match the retained, paired A1 baseline
 findings in the parent directory. Those earlier runs are historical evidence,
@@ -94,8 +102,32 @@ with the same launcher and `--load docs/lisp-critic-reader-safety/a2/character-o
 The production source, logs and test scripts are hashed in `manifest.json`.
 Initial harness syntax errors are retained separately and are not test passes.
 
-Independent review must supply and execute Claude's two exact examples, confirm
-that the token boundaries match supported Common Lisp syntax, and review the
-unsupported-name refusals. The original A1 history and Claude's branch are
-unchanged. This handover does not declare completion of the missing mandatory
-review-example check or owner acceptance.
+## Verbatim-review follow-up execution
+
+```sh
+python docs/lisp-critic-reader-safety/a2/run-reviewer-probes.py
+```
+
+This driver extracts the original reader from Git at the fixed A1 commit into
+an automatically removed temporary file, and runs each check in a fresh SBCL
+process. It writes separate logs and `verbatim-results.json` with exact
+commands, environment overrides, exit codes and source/log SHA-256 values.
+
+- Baseline: **PASS**, 8 checks, exit 0; the two erroneous table values match
+  Claude's report exactly. PASS here means successful defect reproduction.
+- Corrected: **PASS**, 18 verbatim-case/positive-control checks, the existing
+  37 A2 checks, A1 safety probes and 80 source-reader checks; exit 0.
+- Integration: **PASS**, 9 checks, exit 0; authentic table and unchanged
+  judgement-basis resolver.
+
+Production Lisp is byte-identical to implementation commit
+`24ffdbaed60bcf5f37e8d4891a4c5c83687b453f`. The broader A2 regression results
+above are retained prior runs, not newly rerun for this tests/documentation
+follow-up. Their Catalog FAIL, source-station BLOCKED and unexecuted downstream
+scenarios remain explicit.
+
+Independent review must replay the two supplied inputs, confirm the token
+boundaries and positive character cases, and review the unsupported-name
+refusals and narrow grammar. The exact-input requirement is now exercised by
+the implementer; independent acceptance and owner acceptance remain separate.
+A1's history and Claude's branch are unchanged.

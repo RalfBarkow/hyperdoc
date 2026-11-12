@@ -1,4 +1,4 @@
-;;;; Independent reconstructions pending the verbatim reviewer counterexamples.
+;;;; Independent reconstructions; verbatim cases are in reviewer-probes.lisp.
 (asdf:load-system "dreyeck/lisp-critic/text-criticism/tests")
 (when (uiop:getenv "A2_BASELINE_SOURCE") (load (uiop:getenv "A2_BASELINE_SOURCE")))
 (in-package #:dreyeck/lisp-critic/text-criticism/tests)

@@ -1,0 +1,20 @@
+WARNING: redefining IRONCLAD:BLOCK-LENGTH in DEFGENERIC
+REVIEW-CASE :IN-LINE-COMMENT source="#\\a; (defun historical-claims () (copy-tree '((:subject :in-line-comment))))" table=NIL refusal=(:DEFINITIONS-FOUND
+                                                                                                                                       0)
+REVIEW-CASE :IN-STRING source="#\\a\" (defun historical-claims () (copy-tree '((:subject :in-string)))) #\\b\" nil" table=NIL refusal=(:DEFINITIONS-FOUND
+                                                                                                                                       0)
+A2-VERBATIM-CORRECTED-PASS: 18 checks.
+RECONSTRUCTED-COMMENT source="#\\a;(defun historical-claims () (copy-tree '((:subject :a))))
+" refusal=(:DEFINITIONS-FOUND 0)
+RECONSTRUCTED-STRING source="#\\a\"(defun historical-claims () (copy-tree '((:subject :a))))
+#\\b\"" refusal=(:DEFINITIONS-FOUND 0)
+A2-CORRECTED-PASS: 37 checks.
+CONSTRUCTOR effect=NIL
+CHANGED-SOURCE effect=NIL discrepancy=:NOT-DETERMINED claims=:CLAIMS-NOT-PARSED
+COMMENT refusal=(:DEFINITIONS-FOUND 0)
+FEATURES same=T results=(NIL (:READER-REFUSED "UNSUPPORTED-SOURCE-SYNTAX")) / (NIL
+                                                                               (:READER-REFUSED
+                                                                                "UNSUPPORTED-SOURCE-SYNTAX"))
+A1-CORRECTED-PROBES-PASS
+TEXT-CRITICISM-SOURCE-STATE content matches-recorded, revision membership verified, scope verified-revision
+TEXT-CRITICISM-PASS: 80 checks. No critic engine was loaded and no rule ran; the judgement-basis resolver of the federated context is exercised by the integration tests, not here.

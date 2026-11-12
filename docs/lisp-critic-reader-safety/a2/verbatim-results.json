@@ -1,0 +1,75 @@
+[
+  {
+    "mode": "baseline",
+    "command": [
+      "/workspace/work/lisp-critic-reader-safety-a2/docs/lisp-critic-reader-safety/portable-sbcl",
+      "--noinform",
+      "--no-userinit",
+      "--non-interactive",
+      "--load",
+      "/workspace/work/lisp-critic-reader-safety-a2/docs/lisp-critic-reader-safety/a2/reviewer-probes.lisp"
+    ],
+    "cwd": "/workspace/work/lisp-critic-reader-safety-a2",
+    "exitCode": 0,
+    "environmentOverrides": {
+      "DEFEDERATION_REPO": "/workspace/work/lisp-critic-reader-safety-a2",
+      "A2_BASELINE_SOURCE": "/tmp/a2-verbatim-a4nq0f22/original-passage.lisp"
+    },
+    "baselineRevision": "c0b5f8328805ebfaa929f4ff4c2e51052dd39511",
+    "baselineSourceSHA256": "7113f38524014f676d3f4975b9c745c6c4fbc61528f6faf7d9d472772cd3d5fb",
+    "implementationRevision": "00d514c0e6848efac96bc5a51aee4f50f92477ea",
+    "implementationSHA256": "b978cf42b8bb1893cbd5b651dd6e1be4ef909951833f6aa88b56c2a84fac0838",
+    "log": "verbatim-baseline.log",
+    "sha256": "bcf8f578b53a8e39e14262f0789874f846e53467f541532888b8f76c30f0b49e"
+  },
+  {
+    "mode": "corrected",
+    "command": [
+      "/workspace/work/lisp-critic-reader-safety-a2/docs/lisp-critic-reader-safety/portable-sbcl",
+      "--noinform",
+      "--no-userinit",
+      "--non-interactive",
+      "--load",
+      "/workspace/work/lisp-critic-reader-safety-a2/docs/lisp-critic-reader-safety/a2/reviewer-probes.lisp",
+      "--load",
+      "/workspace/work/lisp-critic-reader-safety-a2/docs/lisp-critic-reader-safety/a2/probes.lisp",
+      "--load",
+      "/workspace/work/lisp-critic-reader-safety-a2/docs/lisp-critic-reader-safety/probes.lisp",
+      "--eval",
+      "(asdf:test-system \"dreyeck/lisp-critic/text-criticism\")"
+    ],
+    "cwd": "/workspace/work/lisp-critic-reader-safety-a2",
+    "exitCode": 0,
+    "environmentOverrides": {
+      "DEFEDERATION_REPO": "/workspace/work/lisp-critic-reader-safety-a2"
+    },
+    "baselineRevision": "c0b5f8328805ebfaa929f4ff4c2e51052dd39511",
+    "baselineSourceSHA256": "7113f38524014f676d3f4975b9c745c6c4fbc61528f6faf7d9d472772cd3d5fb",
+    "implementationRevision": "00d514c0e6848efac96bc5a51aee4f50f92477ea",
+    "implementationSHA256": "b978cf42b8bb1893cbd5b651dd6e1be4ef909951833f6aa88b56c2a84fac0838",
+    "log": "verbatim-corrected.log",
+    "sha256": "9081786e9ba1a81751611f7e0d51d44c54bba899c73e32e5faddb69eb6f69214"
+  },
+  {
+    "mode": "integration",
+    "command": [
+      "/workspace/work/lisp-critic-reader-safety-a2/docs/lisp-critic-reader-safety/portable-sbcl",
+      "--noinform",
+      "--no-userinit",
+      "--non-interactive",
+      "--eval",
+      "(asdf:test-system \"dreyeck/lisp-critic/text-criticism/integration-tests\")"
+    ],
+    "cwd": "/workspace/work/lisp-critic-reader-safety-a2",
+    "exitCode": 0,
+    "environmentOverrides": {
+      "DEFEDERATION_REPO": "/workspace/work/lisp-critic-reader-safety-a2"
+    },
+    "baselineRevision": "c0b5f8328805ebfaa929f4ff4c2e51052dd39511",
+    "baselineSourceSHA256": "7113f38524014f676d3f4975b9c745c6c4fbc61528f6faf7d9d472772cd3d5fb",
+    "implementationRevision": "00d514c0e6848efac96bc5a51aee4f50f92477ea",
+    "implementationSHA256": "b978cf42b8bb1893cbd5b651dd6e1be4ef909951833f6aa88b56c2a84fac0838",
+    "log": "verbatim-integration.log",
+    "sha256": "eaa6c03decd8e4e13b58d08baf7fe211fbbea781f07863f79f6de2af3c5b2057"
+  }
+]

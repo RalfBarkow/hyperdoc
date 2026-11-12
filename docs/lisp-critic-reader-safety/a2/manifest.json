@@ -2,7 +2,7 @@
   "base": "c0b5f8328805ebfaa929f4ff4c2e51052dd39511",
   "implementationCommit": "24ffdbaed60bcf5f37e8d4891a4c5c83687b453f",
   "independentAcceptance": false,
-  "outstanding": "Verbatim independent-review counterexamples unavailable; reconstructions explicitly labelled",
+  "outstanding": "Independent reviewer verification and owner acceptance; missing real engine/source-station and Catalog history prerequisites remain.",
   "runs": [
     {
       "log": "baseline.log",
@@ -22,7 +22,7 @@
   ],
   "sha256": {
     "docs/lisp-critic-reader-safety/README.md": "05eec1b06edadf9cb2e0b1893565415ace2441234a31209ac389a716d77740cf",
-    "docs/lisp-critic-reader-safety/a2/README.md": "df9574ea497040f0dff6c0247e8f065f64bdd95c5b21c9e5d67bbeb1844f84bf",
+    "docs/lisp-critic-reader-safety/a2/README.md": "17dc636f3560cb6fe3d5b42aadc17b4d51a40a923c495bc409aef3eb80fb7918",
     "docs/lisp-critic-reader-safety/a2/baseline.log": "5a4b4f0a6c8f2a30ee4ba2045bcd8902b8a61e89e8d9a71708ea6d6f067154c3",
     "docs/lisp-critic-reader-safety/a2/character-oracle.lisp": "2d365757a16386aea6e5ede4c31d962f858d040fa892e087d7424eeae1ee4086",
     "docs/lisp-critic-reader-safety/a2/character-oracle.log": "4c48e2f772c02e090cff97755e1707b78bdbfee75605d69b59ecafdc47309a1e",
@@ -38,8 +38,21 @@
     "docs/lisp-critic-reader-safety/a2/dreyeck-lisp-critic-text-criticism-integration-tests.log": "6337b0f177ca62ab5bc2ba119c8057e6caf53861b9289c98cb16280dd85b8cc3",
     "docs/lisp-critic-reader-safety/a2/initial-baseline-harness-error.log": "2c3a5e8437c9b483221688bc1f367847baee94a41432e78f262f9f75cac459ea",
     "docs/lisp-critic-reader-safety/a2/initial-corrected-harness-error.log": "cabcfa93c4d78bb550974b255781ce68c53fa42974a7ef770285bf328a2d9072",
-    "docs/lisp-critic-reader-safety/a2/probes.lisp": "8f6188bbc85e35ffce154255d548a81a7fa50cfa6d6809b9b129feb3c55ad21b",
+    "docs/lisp-critic-reader-safety/a2/probes.lisp": "435dbd0da5ed6d2f016e283eaceb30f3ec7d5fbdc802ce9f1bc0a8baf118ad7b",
+    "docs/lisp-critic-reader-safety/a2/reviewer-cases/line-comment.txt": "6115805b1421fbdbebd64924ac492325d01cd41d4f5fd45fa4a42e1b4b7d462f",
+    "docs/lisp-critic-reader-safety/a2/reviewer-cases/string.txt": "d478b4aa7c96a0738fe7d4c1102c5e6f8d920e3bf3c0ee0cdd16d6555232938c",
+    "docs/lisp-critic-reader-safety/a2/reviewer-probes.lisp": "6bdc261a3918dc50cbaec4bfc89bb5729a9bff86aea5319af122d1657f2a097e",
+    "docs/lisp-critic-reader-safety/a2/run-reviewer-probes.py": "cb2a3a1b585fd17310ea43d9c480bef84517be50f34eab84c765674d9287133e",
     "docs/lisp-critic-reader-safety/a2/suites.json": "5f700b819bc28d31e7e8c79df2cbdef9b6c5dd35e270e316700a706b9b24c6e1",
+    "docs/lisp-critic-reader-safety/a2/verbatim-baseline.log": "bcf8f578b53a8e39e14262f0789874f846e53467f541532888b8f76c30f0b49e",
+    "docs/lisp-critic-reader-safety/a2/verbatim-corrected.log": "9081786e9ba1a81751611f7e0d51d44c54bba899c73e32e5faddb69eb6f69214",
+    "docs/lisp-critic-reader-safety/a2/verbatim-integration.log": "eaa6c03decd8e4e13b58d08baf7fe211fbbea781f07863f79f6de2af3c5b2057",
+    "docs/lisp-critic-reader-safety/a2/verbatim-results.json": "4774e7d2b08317750099fab412df5974898a29408fe61f21ecde2493f2a5d2ef",
     "dreyeck/src/lisp-critic-text-passage.lisp": "b978cf42b8bb1893cbd5b651dd6e1be4ef909951833f6aa88b56c2a84fac0838"
+  },
+  "verbatimReviewInputs": {
+    "provenance": "Exact text supplied by owner from Claude independent A1 review; private review files not accessed",
+    "executionRecords": "verbatim-results.json",
+    "allThreeProcessesExitCode": 0
   }
 }
