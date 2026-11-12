@@ -39,12 +39,14 @@ No inferred equivalence between a HyperDoc planning *task* and a WORKSWORLD *tas
 
 1. `topic-maps.ctm:deserialize-file` reads two different CTM sources with distinct Document IRIs into two Maps.
 2. `topic-maps.tmdm:import-map-content` transfers source content into the target Map and returns its native source-object resolver.
-3. The pre-import target SHOP3 Topic stays `EQ` to the post-import target Topic. Resolving the independent source SHOP3 Topic returns that **same target object**.
+3. Same-Map Topic merging creates a new canonical Topic under TMDM §6.2. The retained pre-import target SHOP3 handle is *not* necessarily `EQ` to the live post-import Topic: `(topic-maps.tmdm:canonical-topic old-target)` **is** `EQ` to that live Topic. Resolving the independent source SHOP3 Topic with the import's resolver likewise returns the **same live canonical Topic**. The unmodified source Topic remains canonical within its separate source Map.
 4. A distinct WORKSWORLD-2H Topic is present; source Map remains a separate native Map. Native Association Roles can be followed in the existing `dreyeck/inspector/tmdm` views.
 
 The original TMDM source and target are in-memory objects; the two CTM files are **not changed** and no second Topic/Association graph is constructed. The source/target object resolver is only meaningful during the same Lisp process. `topic-maps.tmdm:import-map-content` specifically excludes a source Map's own item identifiers; it is not a merge of two root Map items. See the independent [Map Content Import contract](https://github.com/RalfBarkow/topic-maps/blob/dreyeck.ch/docs/reading-map-content-import.md).
 
 ## Reproduce and verify
+
+The first SLY run on 2026-11-12 reached the integration test but refuted its initial `(eq old-target current)` assertion. Both printed objects showed the merged identifiers because the public printer reads canonical properties; their object identities were different. The independent `topic-maps` implementation explicitly constructs a new Topic in `merge-two-topics` and forwards both old handles to it. This revision corrects the expectation; a new test execution is required.
 
 With the independent `topic-maps` ASDF source available from the pinned project environment:
 
@@ -60,4 +62,4 @@ With the independent `topic-maps` ASDF source available from the pinned project 
 
 Use the optional HyperDoc reading `Reading Paul 2026 with Topic Maps` and the existing native TMDM Inspector to navigate. Loading and tests do not run from the normal Catalog startup. No external services or download are implied by the CTM identifiers or URLs.
 
-**Acceptance boundary:** validate actual parsing, native `EQ` identity, source nonmutation and resolvable WORKSWORLD-2H/SHOP3 Role players in a fresh Lisp. Static checks of the Lisp syntax or CTM text are **not** substitutes for this execution. If a test has not been run, record it as NOT-RUN, not PASS.
+**Acceptance boundary:** validate actual parsing, native `EQ` identity *between canonical representatives*, forwarding of a retained target handle, source nonmutation and resolvable WORKSWORLD-2H/SHOP3 Role players in a fresh Lisp. Static checks of the Lisp syntax or CTM text are **not** substitutes for this execution. If a test has not been run, record it as NOT-RUN, not PASS.
