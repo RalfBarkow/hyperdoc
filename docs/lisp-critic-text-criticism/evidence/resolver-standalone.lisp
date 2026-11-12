@@ -1,0 +1,28 @@
+;;; Supplementary check, not part of the patch: the committed definition of
+;;; RESOLVE-JUDGEMENT-BASIS, read as one form from its source file and
+;;; evaluated on its own in a scratch package, applied to the new records.
+;;; This is not a load of dreyeck/lisp-critic/federated-context.
+(defpackage #:resolver-standalone (:use #:cl))
+(in-package #:resolver-standalone)
+(asdf:load-system "dreyeck/lisp-critic/text-criticism")
+(defun prior-observations () (error "The default observations are not available standalone."))
+(let* ((path (merge-pathnames "dreyeck/src/lisp-critic-federated-context.lisp" (asdf:system-source-directory "dreyeck")))
+       (text (uiop:read-file-string path :external-format :utf-8))
+       (start (search (format nil "~%(defun resolve-judgement-basis ") text))
+       (form (let ((*read-eval* nil) (*package* (find-package '#:resolver-standalone)))
+               (with-input-from-string (in text :start (1+ start)) (read in)))))
+  (format t "~&RESOLVER-SOURCE sha256 ~A~%" (dreyeck/lisp-critic/text-passage:sha256-of (sb-ext:string-to-octets text :external-format :utf-8)))
+  (eval form))
+(defvar *n* 0)
+(defun check (v msg) (incf *n*) (unless v (error msg)))
+(defun refuses-p (j o) (handler-case (progn (resolve-judgement-basis j o) nil) (error () t)))
+(let ((j (dreyeck/lisp-critic/text-criticism:judgement)) (o (dreyeck/lisp-critic/text-criticism:recorded-observations)))
+  (check (equal '(:passage :claims) (mapcar (lambda (x) (getf x :id)) (resolve-judgement-basis j o))) "basis did not resolve")
+  (let ((d (copy-tree j))) (setf (getf d :basis) (list (list :state dreyeck/lisp-critic/text-criticism:+state+ :observation :papers-read)))
+    (check (refuses-p d o) "unrecorded observation resolved"))
+  (let ((d (copy-tree j))) (setf (getf d :basis) (list (list :state "0123456789abcdef0123456789abcdef01234567" :observation :passage)))
+    (check (refuses-p d o) "other state resolved"))
+  (let ((d (copy-tree j))) (setf (getf d :targets) (append (getf d :targets) (list "another page")))
+    (check (refuses-p d o) "unobserved target resolved"))
+  (check (refuses-p j nil) "resolved against no observations"))
+(format t "~&RESOLVER-STANDALONE-PASS: ~D checks against the committed definition, evaluated standalone.~%" *n*)

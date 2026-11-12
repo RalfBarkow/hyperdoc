@@ -1,0 +1,23 @@
+This is SBCL 2.4.10, an implementation of ANSI Common Lisp.
+More information about SBCL is available at <http://www.sbcl.org/>.
+
+SBCL is free software, provided as is, with absolutely no warranty.
+It is mostly in the public domain; some portions are provided under
+BSD-style licenses.  See the CREDITS and COPYING files in the
+distribution for more information.
+WARNING: redefining IRONCLAD:BLOCK-LENGTH in DEFGENERIC
+; compiling file "/home/user/hyperdoc-slice-a/dreyeck/src/lisp-critic-text-passage.lisp" (written 12 NOV 2026 01:44:36 PM):
+
+; wrote /tmp/claude-0/-home-user/3d6d8307-3084-5d7f-b90f-d41785c3279e/scratchpad/slice-a/home/.cache/common-lisp/sbcl-2.4.10-linux-x64/home/user/hyperdoc-slice-a/dreyeck/src/lisp-critic-text-passage-tmpGHU3ALSV.fasl
+; compilation finished in 0:00:00.068
+; compiling file "/home/user/hyperdoc-slice-a/dreyeck/src/lisp-critic-text-criticism.lisp" (written 12 NOV 2026 01:45:16 PM):
+
+; wrote /tmp/claude-0/-home-user/3d6d8307-3084-5d7f-b90f-d41785c3279e/scratchpad/slice-a/home/.cache/common-lisp/sbcl-2.4.10-linux-x64/home/user/hyperdoc-slice-a/dreyeck/src/lisp-critic-text-criticism-tmpAAURSO1.fasl
+; compilation finished in 0:00:00.008
+; compiling file "/home/user/hyperdoc-slice-a/dreyeck/tests/lisp-critic-text-criticism.lisp" (written 12 NOV 2026 01:49:49 PM):
+
+; wrote /tmp/claude-0/-home-user/3d6d8307-3084-5d7f-b90f-d41785c3279e/scratchpad/slice-a/home/.cache/common-lisp/sbcl-2.4.10-linux-x64/home/user/hyperdoc-slice-a/dreyeck/tests/lisp-critic-text-criticism-tmp5GEXGEG5.fasl
+; compilation finished in 0:00:00.055
+TEXT-CRITICISM-SOURCE-STATE content matches-recorded, revision membership verified, scope verified-revision
+TEXT-CRITICISM-PASS: 80 checks. No critic engine was loaded and no rule ran; the judgement-basis resolver of the federated context is exercised by the integration tests, not here.
+EXIT-OK
