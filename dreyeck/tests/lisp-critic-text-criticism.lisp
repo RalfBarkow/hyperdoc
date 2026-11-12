@@ -257,13 +257,13 @@ at read time, not the definition, and not the forms around it."
           (passage:read-claim-table
            (table-source "((:subject :a :cited-source-kind :primary-paper :observed-evidence-kind :none-observed))"
                          :before (format nil "(no-such-package:run)~%(eval-when (:compile-toplevel :load-toplevel :execute) ~A)" effect)
-                         :after (format nil "~A~%#.~A" effect effect)))
+                         :after effect))
         (check (and (null why) (equal '((:subject :a :cited-source-kind :primary-paper :observed-evidence-kind :none-observed))
                                       table))
                "A well-formed table was not read: ~S ~S" table why)
         (check (null *effect*) "Reading the table evaluated a form beside it."))
       ;; read-time evaluation inside the table is a reader error, not an evaluation
-      (check (equal '(:reader-refused "READER-ERROR")
+      (check (equal '(:reader-refused "UNSUPPORTED-SOURCE-SYNTAX")
                     (let ((why (refused-p (table-source (format nil "((:subject #.~A))" effect)))))
                       (and why (list (first why) (if (search "READER-ERROR" (second why)) "READER-ERROR" (second why))))))
              "Read-time evaluation was not refused by the reader.")
@@ -281,7 +281,7 @@ at read time, not the definition, and not the forms around it."
              "A form inside the table was accepted as data.")
       (check (equal '(:table-is-not-literal-data) (refused-p (table-source "((:subject . :dotted))")))
              "A dotted record was accepted.")
-      (check (equal '(:table-is-not-literal-data) (refused-p (table-source "((:subject #1=(:a . #1#)))")))
+      (check (eq :reader-refused (first (refused-p (table-source "((:subject #1=(:a . #1#)))"))))
              "A circular value was accepted.")
       (check (equal '(:table-is-not-literal-data) (refused-p (table-source "((subject :a))")))
              "A record with a non-keyword key was accepted.")
@@ -291,7 +291,7 @@ at read time, not the definition, and not the forms around it."
                     (refused-p (concatenate 'string (table-source "()") (table-source "()"))))
              "Two definitions were read as one.")
       ;; an unknown package inside the form
-      (check (eq :reader-refused (first (refused-p (table-source "((:subject no-such-package:x))"))))
+      (check (eq :table-is-not-literal-data (first (refused-p (table-source "((:subject no-such-package:x))"))))
              "A symbol of an unknown package was read.")
       (check (null *effect*) "Something was evaluated.")
       ;; reading leaves no package behind

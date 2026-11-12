@@ -1,0 +1,22 @@
+WARNING: redefining IRONCLAD:BLOCK-LENGTH in DEFGENERIC
+; compiling file "/workspace/work/lisp-critic-reader-safety/dreyeck/src/lisp-critic-text-passage.lisp" (written 12 NOV 2026 02:47:34 PM):
+
+; wrote /workspace/work/defederation-fasls/workspace/work/lisp-critic-reader-safety/dreyeck/src/lisp-critic-text-passage-tmpGHU3ALSV.fasl
+; compilation finished in 0:00:00.163
+; compiling file "/workspace/work/lisp-critic-reader-safety/dreyeck/src/lisp-critic-text-criticism.lisp" (written 12 NOV 2026 02:43:04 PM):
+
+; wrote /workspace/work/defederation-fasls/workspace/work/lisp-critic-reader-safety/dreyeck/src/lisp-critic-text-criticism-tmpAAURSO1.fasl
+; compilation finished in 0:00:00.015
+; compiling file "/workspace/work/lisp-critic-reader-safety/dreyeck/tests/lisp-critic-text-criticism.lisp" (written 12 NOV 2026 02:47:34 PM):
+
+; wrote /workspace/work/defederation-fasls/workspace/work/lisp-critic-reader-safety/dreyeck/tests/lisp-critic-text-criticism-tmp5GEXGEG5.fasl
+; compilation finished in 0:00:00.068
+CONSTRUCTOR effect=NIL
+CHANGED-SOURCE effect=NIL discrepancy=:NOT-DETERMINED claims=:CLAIMS-NOT-PARSED
+COMMENT refusal=(:DEFINITIONS-FOUND 0)
+FEATURES same=T results=(NIL (:READER-REFUSED "UNSUPPORTED-SOURCE-SYNTAX")) / (NIL
+                                                                               (:READER-REFUSED
+                                                                                "UNSUPPORTED-SOURCE-SYNTAX"))
+A1-CORRECTED-PROBES-PASS
+TEXT-CRITICISM-SOURCE-STATE content matches-recorded, revision membership verified, scope verified-revision
+TEXT-CRITICISM-PASS: 80 checks. No critic engine was loaded and no rule ran; the judgement-basis resolver of the federated context is exercised by the integration tests, not here.

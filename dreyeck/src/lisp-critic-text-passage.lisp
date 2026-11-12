@@ -211,79 +211,123 @@ the commit was not verified here; otherwise :NOT-DETERMINED, with why."
 
 ;;;; The records, read from the text of their definition
 
-(defparameter +definition-prefix+ "(defun historical-claims"
-  "How the one definition this reads begins, at the start of a line.")
+(defun %source-forms (text)
+  "Inert syntax only. Tokens are tagged strings, never interned or read by READ."
+  (let ((position 0) (size (length text)))
+    (labels ((peek () (and (< position size) (char text position)))
+             (fail () (error "Unsupported or incomplete source at offset ~D" position))
+             (spacep (c) (and c (find c '(#\Space #\Tab #\Newline #\Return #\Page))))
+             (skip ()
+               (loop
+                 (cond ((spacep (peek)) (incf position))
+                       ((eql (peek) #\;) (loop while (and (peek) (not (eql (peek) #\Newline))) do (incf position)))
+                       ((and (eql (peek) #\#) (< (1+ position) size)
+                             (char= #\| (char text (1+ position))))
+                        (incf position 2)
+                        (let ((depth 1))
+                          (loop while (plusp depth) do
+                            (unless (peek) (fail))
+                            (cond ((and (< (1+ position) size)
+                                        (string= text "#|" :start1 position :end1 (+ position 2)))
+                                   (incf depth) (incf position 2))
+                                  ((and (< (1+ position) size)
+                                        (string= text "|#" :start1 position :end1 (+ position 2)))
+                                   (decf depth) (incf position 2))
+                                  (t (incf position))))))
+                       (t (return)))))
+             (form (depth)
+               (when (> depth 128) (fail))
+               (skip)
+               (let ((c (peek)))
+                 (unless c (fail))
+                 (incf position)
+                 (cond
+                   ((char= c #\() (loop do (skip) (unless (peek) (fail))
+                                       (when (eql (peek) #\)) (incf position) (return values))
+                                       collect (form (1+ depth)) into values))
+                   ((char= c #\)) (fail))
+                   ((char= c #\")
+                    (with-output-to-string (out)
+                      (loop (unless (peek) (fail))
+                            (let ((next (char text position)))
+                              (incf position)
+                              (when (char= next #\") (return))
+                              (when (char= next #\\)
+                                (unless (peek) (fail))
+                                (setf next (char text position)) (incf position))
+                              (write-char next out)))))
+                   ((find c '(#\' #\` #\,))
+                    (when (and (char= c #\,) (eql (peek) #\@)) (incf position))
+                    (list (list :token (if (char= c #\') "QUOTE" "UNSUPPORTED-PREFIX"))
+                          (form (1+ depth))))
+                   ((char= c #\#)
+                    (cond ((eql (peek) #\:)
+                           (list (list :token "UNINTERNED-SYMBOL") (form (1+ depth))))
+                          ((eql (peek) #\') (incf position)
+                           (list (list :token "FUNCTION") (form (1+ depth))))
+                          ((eql (peek) #\\)
+                           (incf position) (unless (peek) (fail)) (incf position)
+                           (loop while (and (peek) (not (spacep (peek))) (not (find (peek) "()"))) do (incf position))
+                           (list :token "UNSUPPORTED-CHARACTER"))
+                          (t (fail))))
+                   (t
+                    (let ((start (1- position)))
+                      (when (find c "|\\") (fail))
+                      (loop while (and (peek) (not (spacep (peek))) (not (find (peek) "();\"'`,")))
+                            do (when (find (peek) "#|\\") (fail)) (incf position))
+                      (list :token (string-upcase (subseq text start position)))))))))
+      (loop do (skip) (unless (peek) (return forms)) collect (form 0) into forms))))
 
-(defun %definition-starts (text)
-  "The positions in TEXT at which a line begins with the definition."
-  (loop for position in (%occurrences +definition-prefix+ text)
-        for end = (+ position (length +definition-prefix+))
-        when (and (or (zerop position) (char= #\Newline (char text (1- position))))
-                  (< end (length text))
-                  (member (char text end) '(#\Space #\Newline #\Tab)))
-          collect position))
+(defun %token-is (node name)
+  (and (consp node) (eq :token (first node)) (equal name (second node))))
 
-(defun %proper-list-p (object)
-  (and (listp object) (handler-case (list-length object) (error () nil)) t))
+(defun %literal-node-p (node depth)
+  (and (not (minusp depth))
+       (cond ((stringp node) t)
+             ((and (consp node) (eq :token (first node)))
+              (let ((name (second node)))
+                (or (member name '("T" "NIL") :test #'equal)
+                    (and (> (length name) 1) (char= #\: (char name 0))
+                         (every (lambda (c) (or (alpha-char-p c) (digit-char-p c) (find c "-_*"))) (subseq name 1)))
+                    (ignore-errors (parse-integer name :junk-allowed nil)))))
+             ((listp node) (every (lambda (x) (%literal-node-p x (1- depth))) node)))))
 
-(defun %literal-p (value depth)
-  "Whether VALUE is data that says the same wherever it is read: a keyword, a
-string, T, NIL, an integer, or a proper list of such, not nested beyond DEPTH."
-  (cond ((minusp depth) nil)
-        ((or (keywordp value) (stringp value) (integerp value) (eq t value) (null value)) t)
-        ((consp value)
-         (and (%proper-list-p value)
-              (every (lambda (element) (%literal-p element (1- depth))) value)))
-        (t nil)))
-
-(defun %claim-record-p (record)
-  (and (%proper-list-p record) (evenp (length record))
-       (loop for (key value) on record by #'cddr
-             always (and (keywordp key) (%literal-p value 8)))))
+(defun %literal-node-value (node)
+  (cond ((stringp node) node)
+        ((and (consp node) (eq :token (first node)))
+         (let ((name (second node)))
+           (cond ((equal name "NIL") nil) ((equal name "T") t)
+                 ((char= #\: (char name 0)) (intern (subseq name 1) :keyword))
+                 (t (parse-integer name)))))
+        (t (mapcar #'%literal-node-value node))))
 
 (defun read-claim-table (text)
-  "The quoted table inside the one definition of HISTORICAL-CLAIMS in TEXT, as
-data. Two values: the table and NIL, or NIL and why it was refused.
-
-Reads one form, with the standard readtable and *READ-EVAL* false, so #. is a
-reader error and nothing is evaluated at read time; symbols are read into a
-package made for the purpose and deleted afterwards. The form is never
-evaluated, compiled or loaded: the table is taken out of it only when the form
-is exactly (DEFUN HISTORICAL-CLAIMS () [docstring] (COPY-TREE (QUOTE table)))
-and the table is a list of property lists with keyword keys and literal
-values. Anything else is refused, not interpreted."
-  (let ((starts (%definition-starts text)))
-    (unless (= 1 (length starts))
-      (return-from read-claim-table (values nil (list :definitions-found (length starts)))))
-    (let ((package (make-package (format nil "DREYECK/TEXT-PASSAGE/READ-~36R" (random (expt 36 10)))
-                                 :use '(#:common-lisp))))
-      (unwind-protect
-           (let ((form (handler-case
-                           (with-standard-io-syntax
-                             (let ((*read-eval* nil) (*package* package))
-                               (with-input-from-string (stream text :start (first starts))
-                                 (read stream))))
-                         (error (condition)
-                           (return-from read-claim-table
-                             (values nil (list :reader-refused (format nil "~A" (type-of condition)))))))))
-             (unless (and (%proper-list-p form)
-                          (member (length form) '(4 5))
-                          (eq 'defun (first form))
-                          (symbolp (second form))
-                          (string= "HISTORICAL-CLAIMS" (symbol-name (second form)))
-                          (null (third form))
-                          (or (= 4 (length form)) (stringp (fourth form))))
-               (return-from read-claim-table (values nil (list :unexpected-definition-shape))))
-             (let ((body (first (last form))))
-               (unless (and (%proper-list-p body) (= 2 (length body)) (eq 'copy-tree (first body))
-                            (%proper-list-p (second body)) (= 2 (length (second body)))
-                            (eq 'quote (first (second body))))
-                 (return-from read-claim-table (values nil (list :unexpected-definition-shape))))
-               (let ((table (second (second body))))
-                 (if (and (%proper-list-p table) (every #'%claim-record-p table))
-                     (values table nil)
-                     (values nil (list :table-is-not-literal-data))))))
-        (delete-package package)))))
+  "Extract one active top-level literal definition using an inert structural grammar.
+No Common Lisp reader, package lookup, constructor, feature conditional or evaluation is invoked.
+Return TABLE,NIL or NIL,REASON. See docs/lisp-critic-reader-safety/README.md."
+  (let* ((forms (handler-case (%source-forms text)
+                  (error () (return-from read-claim-table (values nil '(:reader-refused "UNSUPPORTED-SOURCE-SYNTAX"))))))
+         (candidates (remove-if-not
+                      (lambda (form) (and (listp form) (%token-is (first form) "DEFUN")
+                                          (%token-is (second form) "HISTORICAL-CLAIMS"))) forms)))
+    (unless (= 1 (length candidates))
+      (return-from read-claim-table (values nil (list :definitions-found (length candidates)))))
+    (let* ((form (first candidates)) (body (car (last form))))
+      (unless (and (member (length form) '(4 5)) (null (third form))
+                   (or (= 4 (length form)) (stringp (fourth form)))
+                   (listp body) (= 2 (length body)) (%token-is (first body) "COPY-TREE")
+                   (listp (second body)) (= 2 (length (second body)))
+                   (%token-is (first (second body)) "QUOTE"))
+        (return-from read-claim-table (values nil '(:unexpected-definition-shape))))
+      (let ((table (second (second body))))
+        (unless (and (listp table) (%literal-node-p table 10)
+                     (every (lambda (row)
+                              (and (listp row) (evenp (length row))
+                                   (loop for key in row by #'cddr
+                                         always (and (consp key) (eq :token (first key))
+                                                     (char= #\: (char (second key) 0)))))) table))
+          (return-from read-claim-table (values nil '(:table-is-not-literal-data))))
+        (values (%literal-node-value table) nil)))))
 
 (defun observe-claim-evidence (table)
   "What TABLE records as the observed evidence of each claim that cites a
@@ -349,7 +393,8 @@ only when both are the recorded texts. :DISCREPANCIES is a list, NIL, or
          (claims-source (find :claims-source files :key (lambda (file) (getf file :role))))
          (passage (and (getf page :text) (observe-passage (getf recorded :passage) (getf page :text))))
          (table-refusal nil)
-         (claims (and (getf claims-source :text)
+         (claims (and (not (eq :not-determined (getf coherence :scope)))
+                      (getf claims-source :text)
                       (multiple-value-bind (table why) (read-claim-table (getf claims-source :text))
                         (setf table-refusal why)
                         (and (null why) (observe-claim-evidence table)))))
@@ -363,7 +408,10 @@ only when both are the recorded texts. :DISCREPANCIES is a list, NIL, or
                                               files)
                                (let ((copy (copy-list source))) (remf copy :files) copy))
           :passage (or passage (list :kind :passage-observation :status :not-observed))
-          :claims (or claims (list :kind :probe-observation :status :claims-unreadable :why table-refusal))
+          :claims (or claims (list :kind :probe-observation :status (if (and (getf claims-source :text) (eq :not-determined (getf coherence :scope)))
+                                                        :claims-not-parsed :claims-unreadable)
+                                  :why (or table-refusal (and (eq :not-determined (getf coherence :scope))
+                                                             :source-state-not-coherent))))
           :coherence coherence
           :scope (if determined (getf coherence :scope) :not-determined)
           :discrepancies (if determined (passage-discrepancies reading claims) :not-determined)
