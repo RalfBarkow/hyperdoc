@@ -83,7 +83,9 @@ describes - "Describes".
 uses-planner - "Uses planner".
 mapped-to - "Mapped to".
 contains - "Contains".
-decomposes-into - "Decomposes into".
+has-entry-method - "Has top-level planning method".
+calls - "Calls as part of planned control flow".
+may-call - "May call conditionally".
 case-of - "Case of".
 work - "Work".
 subject - "Subject".
@@ -95,6 +97,8 @@ whole - "Whole".
 part - "Part".
 case - "Case".
 method - "Method".
+caller - "Calling method".
+callee - "Called method".
 # Source-observed relations; see docs/paul-2026-topic-map.md for exact warrants.
 describes(work: paper, subject: resource-graph)
 describes(work: paper, subject: workflow-graph)
@@ -109,11 +113,12 @@ contains(whole: resource-graph, part: site)
 contains(whole: resource-graph, part: link)
 contains(whole: workflow-graph, part: data-component)
 contains(whole: workflow-graph, part: processing-component)
-decomposes-into(whole: worksworld-2h, part: achieve-all-goals)
-decomposes-into(whole: achieve-all-goals, part: select-goal-interface)
-decomposes-into(whole: achieve-all-goals, part: plan-source-coverage)
-decomposes-into(whole: achieve-all-goals, part: commit-rate-flow)
-decomposes-into(whole: plan-source-coverage, part: plan-source-delivery)
+has-entry-method(domain: worksworld-2h, method: achieve-all-goals)
+calls(caller: achieve-all-goals, callee: select-goal-interface)
+calls(caller: select-goal-interface, callee: plan-source-coverage)
+calls(caller: plan-source-coverage, callee: plan-source-delivery)
+calls(caller: plan-source-coverage, callee: commit-rate-flow)
+may-call(caller: plan-source-delivery, callee: commit-rate-flow)
 case-of(case: reuse, method: plan-source-delivery)
 case-of(case: replicate, method: plan-source-delivery)
 case-of(case: transform, method: plan-source-delivery)
