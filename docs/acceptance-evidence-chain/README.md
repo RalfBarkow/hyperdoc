@@ -131,8 +131,11 @@ With an already connected CLOG Inspector in that same image:
 
 Replace the explicit repository path for another machine. Loading this system
 does not inspect evidence or start a server. No running image was changed to
-develop or test the experiment. Interactive browser navigation is not claimed
-by the automated HTML/reference checks.
+develop or test the experiment. The development-time automated HTML/reference
+checks did not establish interactive browser navigation. A subsequent
+[isolated Chromium/CLOG check](inspector-check/README.md) exercised the native
+links in a fresh Lisp process and verified the actual opened pane objects by EQ.
+It is separate execution evidence, not an independent-author assessment.
 
 ## Focused verification
 

@@ -1,0 +1,88 @@
+{
+  "startedAtUTC": "2026-11-12T08:18:37.739620+00:00",
+  "implementationRevision": "731d62dfe8fc9527399e86d59dbf2212c15c7afa",
+  "evidenceRevision": "9176349edb473becd7423a7ca246f9bc07a75388",
+  "specifiedTestedRevision": "36c69d3312ae70748ecd40a5452759fcfaad25c4",
+  "lispCommand": [
+    "/workspace/scratch/tmdm-mcp-portable/bin/sbcl",
+    "--noinform",
+    "--no-sysinit",
+    "--no-userinit",
+    "--non-interactive",
+    "--load",
+    "/workspace/work/acceptance-evidence-chain/docs/topic-maps-integration-acceptance/hyperdoc-bootstrap.lisp",
+    "--load",
+    "/workspace/work/acceptance-evidence-chain/docs/acceptance-evidence-chain/inspector-check/inspector.lisp"
+  ],
+  "cwd": "/workspace/work/acceptance-evidence-chain",
+  "port": 59487,
+  "sourceSHA256Before": {
+    "dreyeck.asd": "d0a7d3669e2309b9cdffffb8682d1a57eda5bc80c7b66a8b51fea9175ecedf25",
+    "dreyeck/work/acceptance-evidence-chain.lisp": "992a841d7e2dcdda73c0abc77d1001452bbb509d4af99111b15745ab9cfbef6e",
+    "dreyeck/tests/acceptance-evidence-chain.lisp": "bff04ab29a2912e467231dc37a2afcb951afd892cf7de2c51c69781629a533b8"
+  },
+  "steps": [
+    {
+      "actualPaneObjectEQ": "CHAIN",
+      "result": "EQ:CHAIN; :INSPECTED; revision binding :NOT-ESTABLISHED; acceptance :NONE"
+    },
+    {
+      "actualPaneObjectEQ": "CHAIN",
+      "result": "EQ:CHAIN; :INSPECTED; revision binding :NOT-ESTABLISHED; acceptance :NONE",
+      "retainedView": "Retained report text"
+    },
+    {
+      "actualPaneObjectEQ": "CHAIN",
+      "result": "EQ:CHAIN; :INSPECTED; revision binding :NOT-ESTABLISHED; acceptance :NONE",
+      "retainedView": "Retained log text"
+    },
+    {
+      "actualPaneObjectEQ": "REPORT-FILE",
+      "result": "EQ:REPORT-FILE; :INSPECTED; revision binding :NOT-ESTABLISHED; acceptance :NONE",
+      "followedLabel": "Original execution report"
+    },
+    {
+      "actualPaneObjectEQ": "LOG-FILE",
+      "result": "EQ:LOG-FILE; :INSPECTED; revision binding :NOT-ESTABLISHED; acceptance :NONE",
+      "followedLabel": "Original retained log"
+    },
+    {
+      "actualPaneObjectEQ": "EVIDENCE-REVISION",
+      "result": "EQ:EVIDENCE-REVISION; :INSPECTED; revision binding :NOT-ESTABLISHED; acceptance :NONE",
+      "followedLabel": "Fixed evidence revision"
+    },
+    {
+      "actualPaneObjectEQ": "PARSED-REPORT",
+      "result": "EQ:PARSED-REPORT; :INSPECTED; revision binding :NOT-ESTABLISHED; acceptance :NONE",
+      "followedLabel": "Parsed report (retained data)"
+    },
+    {
+      "actualPaneObjectEQ": "SPECIFIED-REVISION",
+      "result": "EQ:SPECIFIED-REVISION; :INSPECTED; revision binding :NOT-ESTABLISHED; acceptance :NONE",
+      "followedLabel": "Specified tested HyperDoc revision"
+    },
+    {
+      "actualPaneObjectEQ": "DESCRIPTOR-FILE",
+      "result": "EQ:DESCRIPTOR-FILE; :INSPECTED; revision binding :NOT-ESTABLISHED; acceptance :NONE",
+      "followedLabel": "Retained Nix reference source"
+    },
+    {
+      "actualPaneObjectEQ": "REPORT-FILE",
+      "result": "EQ:REPORT-FILE; :INSPECTED; revision binding :NOT-ESTABLISHED; acceptance :NONE",
+      "followedLabel": "Original execution report"
+    }
+  ],
+  "browserErrors": [],
+  "externalRequests": [],
+  "lispPID": 16929,
+  "browserVersion": "154.0.8037.57",
+  "success": true,
+  "lispExitCode": 0,
+  "sourceSHA256After": {
+    "dreyeck.asd": "d0a7d3669e2309b9cdffffb8682d1a57eda5bc80c7b66a8b51fea9175ecedf25",
+    "dreyeck/work/acceptance-evidence-chain.lisp": "992a841d7e2dcdda73c0abc77d1001452bbb509d4af99111b15745ab9cfbef6e",
+    "dreyeck/tests/acceptance-evidence-chain.lisp": "bff04ab29a2912e467231dc37a2afcb951afd892cf7de2c51c69781629a533b8"
+  },
+  "finishedAtUTC": "2026-11-12T08:18:54.781022+00:00",
+  "logSHA256": "8ea58550870ddcc9c910a1b0146d50aa9fba4882a19874ab73ccd7a4b2976f1d"
+}
