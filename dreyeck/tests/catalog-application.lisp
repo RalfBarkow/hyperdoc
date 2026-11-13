@@ -73,8 +73,8 @@
 
 (defun check-mech-host-startup ()
   ;; Use the actual original-page Story view, without opening a browser/server.
-  (let ((hyperbook/fedwiki::*mech-plugin-host-url* "https://manual.fixture.test/")
-        (page (hyperbook/fedwiki/tests::original-page)))
+  (let ((dreyeck/fedwiki-story:*mech-plugin-host-url* "https://manual.fixture.test/")
+        (page (dreyeck/fedwiki-mech/tests::original-page)))
     (dolist (host '(nil "" "https://mech.dreyeck.ch/assets/hyperdoc-mech/"))
       (let ((configuration
               (dreyeck/catalog-application::%configuration
@@ -87,8 +87,8 @@
                   configuration)))
         (let* ((expected (unless (equal host "") host))
                (html (html-inspector-views:view-html
-                      (hyperbook/fedwiki/tests::story-view page))))
-          (assert (equal expected hyperbook/fedwiki::*mech-plugin-host-url*))
+                      (dreyeck/fedwiki-mech/tests::story-view page))))
+          (assert (equal expected dreyeck/fedwiki-story:*mech-plugin-host-url*))
           (assert (search "No Code item has run" html))
           (assert (if expected
                       (search expected html)

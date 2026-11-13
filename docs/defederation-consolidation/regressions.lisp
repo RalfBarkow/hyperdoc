@@ -5,7 +5,7 @@
                   "dreyeck/work/remote-control-planning/tests"
                   "dreyeck/work/remote-control-planning/reading/tests"
                   "dreyeck/local-fedwiki-page/tests"
-                  "hyperbook/fedwiki/tests"))
+                  "dreyeck/fedwiki-mech/tests"))
   (format t "~&BASELINE TEST-BEGIN ~A~%" system)
   (asdf:test-system system)
   (format t "~&BASELINE TEST-PASS ~A~%" system))

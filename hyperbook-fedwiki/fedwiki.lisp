@@ -156,26 +156,6 @@ JSON-FETCHER is the same read-only loader used for production and test fixtures.
             (setf (slot-value wiki 'sitemap) retained
                   (slot-value wiki 'sitemap-state) :ready)))))))
 
-(defun sitemap-snapshot (wiki)
-  "Copy a coherent read-only snapshot; never fetch or join an initializer."
-  (bt:with-lock-held ((slot-value wiki 'sitemap-lock))
-    (let* ((state (slot-value wiki 'sitemap-state))
-           (initialization (status-of wiki))
-           (effective (if (eq state :missing)
-                          (cond ((typep initialization 'condition) initialization)
-                                ((and (typep initialization 'bt:thread)
-                                      (bt:thread-alive-p initialization)) :loading)
-                                (t state))
-                          state)))
-      (alexandria:plist-hash-table
-       (list "domain" (domain-name-of wiki)
-             "sourceUrl" (or (slot-value wiki 'sitemap-source-url) :null)
-             "state" (if (typep effective 'condition) "failed"
-                         (string-downcase (symbol-name effective)))
-             "message" (if (typep effective 'condition) (princ-to-string effective) :null)
-             "sitemap" (if (eq effective :ready) (copy-page-json (sitemap-of wiki)) :null))
-       :test 'equal))))
-
 ;; see https://matrix.to/#/!BkPDqaI4Qv3Gjcxk1HoInFDyL14M41hU7aC9evyWGZQ/$4MOZVD4F5_BMRwWv6GjsfrCTPqJlmrFZ7qxIhtSapzU
 ;; and https://matrix.to/#/!BkPDqaI4Qv3Gjcxk1HoInFDyL14M41hU7aC9evyWGZQ/$hdhNbB8kOl5kOYghNwaudGVbk1JlnqCWlbB8lS2bgXo
 (defparameter *magic-owner-item-id* "63ad2e58eecdd9e5")

@@ -1,5 +1,17 @@
 # HyperDoc library and optional workflow intake
 
+## Intake through `bdad8d9b` (2026-11-13)
+
+Upstream `main` at `bdad8d9b83952b2675294b97a50edf1d5a182405` is the source reference for this intake. The comparison from `8a1149197` covers ten commits. The checkout takes the upstream page iteration API, the single-load path for new pages, package exports, print methods, recursive asset collection, CSS, documentation links, and the `lisp-code` printer. The DNS change `58a2b2c` remains the subject of the existing handler assessment. Source adoption and Git ancestry are independent.
+
+The upstream printer makes `<lisp-code executable>` runnable on click. Presence of the attribute is the upstream opt-in, including a value of `false`. In the served Catalog, `dreyeck/authority-policy` passes an attribute-free copy of the snippet to the upstream printer and leaves the page DOM intact. Reference containment still applies. In a local development session the upstream printer offers the button.
+
+`dreyeck/fedwiki-story` owns the Mech bridge, the JSON envelope for the page-scoped sitemap, the Solo SVG rendering adapter, and the two Inspector scripts. The Catalog loads it explicitly. Ordinary HTML story items use the upstream primary method. The browser host bundle and its retained source references stay at their deployed paths. `dreyeck/fedwiki-mech/tests` owns the fixture tests.
+
+The library source comparison enumerates the retained compatibility paths: the separate code directory in `hyperdoc/core.lisp` and `hyperdoc/defining.lisp`, explicit library dependencies in `hyperbook.asd`, host forwarding in `hyperbook-server/server.lisp`, and the FedWiki proxy, page data, image and navigation compatibility in four files under `hyperbook-fedwiki/`. They are part of the library copy this repository builds. Using the unmodified external Codeberg checkout as the ASDF provider requires resolving those extensions, including the missing seams for code discovery and lossless FedWiki ingestion.
+
+The rest of this document records the earlier intake at `8a1149197`.
+
 The refactor started on `dreyeck.ch` at `401953522ec503cf78764bddc5534f7a9f16fd22`, initially clean. The interrupted state was retained: 17 modified files, the structurally migrated HyperSpec file removed from its former path, and two new dreyeck source files; nothing staged. Early page-form verification exposed reader representation/package differences. These were repaired and the intended structures read back before further work. No partial failed edit was accepted as proof.
 
 ## Verified authority and decision

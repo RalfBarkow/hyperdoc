@@ -23,7 +23,9 @@
            #:defhyperdoc
            #:make-hyperdoc
            #:data-of
+           ;; Load a page
            #:load-page
+           ;; Defining page classes for file types
            #:page-class
            ;; Referencing HyperDocs and pages from code files
            #:see #:page #:hyperdoc
@@ -37,12 +39,18 @@
            ;; Access to the global catalog of registered HyperDocs
            #:*catalog* #:hyperdocs-of
            ;; Access to HyperDoc data
-           #:title-of #:directory-of #:asdf-system-of #:pages-of
+           #:title-of #:directory-of #:writable-of #:asdf-system-of #:pages-of
            #:hyperdoc-of #:file-of
            ;; HTML page assets
            #:*hyperdoc-html-page-assets*
            ;; HyperDoc's own HyperDoc
-           #:*hyperdoc*))
+           #:*hyperdoc*
+           ;; Symbols defined in system hyperdoc/explorer
+           #:html-page
+           #:markdown-page
+           #:*current-package*
+           #:ensure-pages-loaded
+           #:text-pages #:code-pages #:tool-pages))
 
 (trivial-package-local-nicknames:add-package-local-nickname
  :hb :hyperbook :hyperdoc)

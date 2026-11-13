@@ -1,113 +1,85 @@
+(defpackage #:dreyeck/hyperdoc/library-tests
+  (:use #:cl)
+  (:export #:run-tests))
 
-(COMMON-LISP:DEFPACKAGE :DREYECK/HYPERDOC/LIBRARY-TESTS
-  (:USE :CL)
-  (:EXPORT :RUN-TESTS))
+(in-package #:dreyeck/hyperdoc/library-tests)
 
-(COMMON-LISP:IN-PACKAGE :DREYECK/HYPERDOC/LIBRARY-TESTS)
+(defparameter +upstream+ "bdad8d9b83952b2675294b97a50edf1d5a182405")
 
-(COMMON-LISP:DEFPARAMETER DREYECK/HYPERDOC/LIBRARY-TESTS::+UPSTREAM+
-  "8a1149197fabcb1ab5622316f09c5a60c2d3f1f8")
-
-(COMMON-LISP:DEFPARAMETER DREYECK/HYPERDOC/LIBRARY-TESTS::+PREVIOUS+
-  "401953522ec503cf78764bddc5534f7a9f16fd22")
-
-(defparameter +host-forwarding+ "53732270d42177eb01a46dad7940e60244ec52a2"
-  "Existing reusable HOST forwarding; compare its two forms exactly, not just their names.")
-
-(defun compatibility-revision (path)
-  (if (string= path "hyperbook-server/server.lisp") +host-forwarding+ +previous+))
-
-(COMMON-LISP:DEFPARAMETER DREYECK/HYPERDOC/LIBRARY-TESTS::+PATHS+
+(defparameter +paths+
   '("hyperdoc" "hyperbook" "hyperdoc-explorer" "hyperbook-explorer"
     "inspector-hyperdoc" "hyperbook-fedwiki" "hyperbook-wikipedia"
-    "hyperbook-server" "hyperdoc.asd" "hyperbook.asd"))
+    "hyperbook-server" "hyperbook-the-book" "hyperdoc.asd" "hyperbook.asd"
+    "assets/hyperbook/css" "assets/hyperbook/icons" "assets/hyperbook-server"
+    "assets/hyperdoc"))
 
-(COMMON-LISP:DEFUN DREYECK/HYPERDOC/LIBRARY-TESTS::FORMS-AT
-                   (DREYECK/HYPERDOC/LIBRARY-TESTS::ROOT
-                    DREYECK/HYPERDOC/LIBRARY-TESTS::REVISION
-                    DREYECK/HYPERDOC/LIBRARY-TESTS::PATH)
-  (COMMON-LISP:LET ((COMMON-LISP:*PACKAGE*
-                     (COMMON-LISP:IF (COMMON-LISP:STRING=
-                                      (COMMON-LISP:PATHNAME-TYPE
-                                       DREYECK/HYPERDOC/LIBRARY-TESTS::PATH)
-                                      "asd")
-                                     (COMMON-LISP:FIND-PACKAGE :ASDF)
-                                     COMMON-LISP:*PACKAGE*)))
-    (DREYECK/WORKFLOW:SOURCE-FORMS
-     (COMMON-LISP:IF DREYECK/HYPERDOC/LIBRARY-TESTS::REVISION
-                     (DREYECK/GIT:GIT-RUN-STRING
-                      DREYECK/HYPERDOC/LIBRARY-TESTS::ROOT "show"
-                      (COMMON-LISP:CONCATENATE 'COMMON-LISP:STRING
-                                               DREYECK/HYPERDOC/LIBRARY-TESTS::REVISION
-                                               ":"
-                                               DREYECK/HYPERDOC/LIBRARY-TESTS::PATH))
-                     (COMMON-LISP:MERGE-PATHNAMES
-                      DREYECK/HYPERDOC/LIBRARY-TESTS::PATH
-                      DREYECK/HYPERDOC/LIBRARY-TESTS::ROOT)))))
+(defparameter +retained-files+
+  '(("hyperbook-fedwiki/pages.lisp" . "68ca0c587e25459b59c2cc246432207f2258975c")
+    ("hyperbook-fedwiki/wiki-links.lisp" . "68ca0c587e25459b59c2cc246432207f2258975c")
+    ("hyperbook-fedwiki/story-items.lisp" . "38fc35dc49b0b22c754761e98b83a30dbde23691")
+    ("hyperbook-server/server.lisp" . "53732270d42177eb01a46dad7940e60244ec52a2")
+    ("hyperdoc/defining.lisp" . "f3de505eb21f726e52e69786c522d50f990927e0"))
+  "Reusable compatibility implementations pinned to their source commits.")
 
-(COMMON-LISP:DEFUN DREYECK/HYPERDOC/LIBRARY-TESTS::COMPATIBILITY-FORM-P
-                   (DREYECK/HYPERDOC/LIBRARY-TESTS::PATH
-                    DREYECK/HYPERDOC/LIBRARY-TESTS::FORM)
-  (COMMON-LISP:AND
-   (COMMON-LISP:SYMBOLP
-    (COMMON-LISP:SECOND DREYECK/HYPERDOC/LIBRARY-TESTS::FORM))
-   (COMMON-LISP:MEMBER
-    (COMMON-LISP:SYMBOL-NAME
-     (COMMON-LISP:SECOND DREYECK/HYPERDOC/LIBRARY-TESTS::FORM))
-    (COMMON-LISP:COND
-     ((COMMON-LISP:STRING= DREYECK/HYPERDOC/LIBRARY-TESTS::PATH
-                           "hyperdoc/core.lisp")
-      '("MAKE-HYPERDOC" "CL-SOURCE-FILE-COMPONENTS-UNDER"))
-     ((COMMON-LISP:STRING= DREYECK/HYPERDOC/LIBRARY-TESTS::PATH
-                           "hyperdoc/defining.lisp")
-      '("DEFHYPERDOC"))
-     ((string= path "hyperbook-server/server.lisp")
-      '("SERVE-HYPERBOOKS" "SERVE-CATALOG")))
-    :TEST #'COMMON-LISP:EQUAL)))
+(defparameter +sitemap-retention+ "99521dc6a8df21fd56fc0e9da25302bfb7b87f3f")
+(defparameter +code-directory+ "f3de505eb21f726e52e69786c522d50f990927e0")
 
-(COMMON-LISP:DEFUN DREYECK/HYPERDOC/LIBRARY-TESTS::NORMALIZE-DEPENDENCIES
-                   (DREYECK/HYPERDOC/LIBRARY-TESTS::PATH
-                    DREYECK/HYPERDOC/LIBRARY-TESTS::FORMS)
-  (COMMON-LISP:WHEN
-      (COMMON-LISP:STRING= DREYECK/HYPERDOC/LIBRARY-TESTS::PATH
-                           "hyperbook.asd")
-    (COMMON-LISP:DOLIST
-        (DREYECK/HYPERDOC/LIBRARY-TESTS::FORM
-         DREYECK/HYPERDOC/LIBRARY-TESTS::FORMS)
-      (COMMON-LISP:WHEN
-          (COMMON-LISP:AND
-           (COMMON-LISP:SYMBOLP
-            (COMMON-LISP:FIRST DREYECK/HYPERDOC/LIBRARY-TESTS::FORM))
-           (COMMON-LISP:STRING-EQUAL
-            (COMMON-LISP:FIRST DREYECK/HYPERDOC/LIBRARY-TESTS::FORM)
-            "DEFSYSTEM")
-           (COMMON-LISP:STRING-EQUAL
-            (COMMON-LISP:SECOND DREYECK/HYPERDOC/LIBRARY-TESTS::FORM)
-            "hyperbook/fedwiki"))
-        (COMMON-LISP:SETF (COMMON-LISP:GETF
-                           (COMMON-LISP:CDDR
-                            DREYECK/HYPERDOC/LIBRARY-TESTS::FORM)
-                           :DEPENDS-ON)
-                            (COMMON-LISP:REMOVE "CLOG"
-                                                (COMMON-LISP:GETF
-                                                 (COMMON-LISP:CDDR
-                                                  DREYECK/HYPERDOC/LIBRARY-TESTS::FORM)
-                                                 :DEPENDS-ON)
-                                                :TEST
-                                                #'COMMON-LISP:STRING-EQUAL)))))
-  DREYECK/HYPERDOC/LIBRARY-TESTS::FORMS)
+(defun source-at (root revision path)
+  (if revision
+      (dreyeck/git:git-run-string root "show" (format nil "~A:~A" revision path))
+      (uiop:read-file-string (merge-pathnames path root) :external-format :utf-8)))
 
-(DEFUN SOURCE-EQUAL (COMMON-LISP-USER::A COMMON-LISP-USER::B)
-  (COND
-   ((AND (CONSP COMMON-LISP-USER::A) (CONSP COMMON-LISP-USER::B))
-    (AND (SOURCE-EQUAL (CAR COMMON-LISP-USER::A) (CAR COMMON-LISP-USER::B))
-         (SOURCE-EQUAL (CDR COMMON-LISP-USER::A) (CDR COMMON-LISP-USER::B))))
-   ((AND (VECTORP COMMON-LISP-USER::A) (VECTORP COMMON-LISP-USER::B)
-         (NOT (STRINGP COMMON-LISP-USER::A))
-         (NOT (STRINGP COMMON-LISP-USER::B)))
-    (AND (= (LENGTH COMMON-LISP-USER::A) (LENGTH COMMON-LISP-USER::B))
-         (EVERY #'SOURCE-EQUAL COMMON-LISP-USER::A COMMON-LISP-USER::B)))
-   (T (DREYECK/WORKFLOW:FORM-EQUAL COMMON-LISP-USER::A COMMON-LISP-USER::B))))
+(defun forms-at (root revision path)
+  (let ((*package* (if (equal "asd" (pathname-type path)) (find-package :asdf) *package*)))
+    (dreyeck/workflow:source-forms (source-at root revision path))))
+
+(defun named-form-p (form name)
+  (and (consp form) (symbolp (second form))
+       (string-equal (second form) name)))
+
+(defun remove-fedwiki-extra-dependencies (forms)
+  (let ((fedwiki (find-if (lambda (form) (named-form-p form "hyperbook/fedwiki")) forms)))
+    (setf (getf (cddr fedwiki) :depends-on)
+          (remove-if (lambda (dependency)
+                       (member dependency '("clog" "flexi-streams") :test #'string-equal))
+                     (getf (cddr fedwiki) :depends-on))))
+  forms)
+
+(defun source-equal (a b)
+  (cond
+    ((and (consp a) (consp b))
+     (and (source-equal (car a) (car b)) (source-equal (cdr a) (cdr b))))
+    ((and (vectorp a) (vectorp b) (not (stringp a)) (not (stringp b)))
+     (and (= (length a) (length b)) (every #'source-equal a b)))
+    (t (dreyeck/workflow:form-equal a b))))
+
+(defun check-library-file (root path)
+  (flet ((matches (revision)
+           (string= (string-right-trim '(#\Newline #\Return) (source-at root nil path))
+                    (string-right-trim '(#\Newline #\Return) (source-at root revision path)))))
+    (assert
+     (or (matches +upstream+)
+         (let ((retained (cdr (assoc path +retained-files+ :test #'string=))))
+           (cond
+             (retained (matches retained))
+             ((string= path "hyperbook-fedwiki/fedwiki.lisp")
+              (source-equal (forms-at root nil path)
+                            (remove-if (lambda (form) (named-form-p form "sitemap-snapshot"))
+                                       (forms-at root +sitemap-retention+ path))))
+             ((string= path "hyperdoc/core.lisp")
+              (flet ((extension-p (form)
+                       (some (lambda (name) (named-form-p form name))
+                             '("cl-source-file-components-under" "make-hyperdoc"))))
+                (let ((current (forms-at root nil path)))
+                  (and (source-equal (remove-if #'extension-p current)
+                                     (remove-if #'extension-p (forms-at root +upstream+ path)))
+                       (source-equal (remove-if-not #'extension-p current)
+                                     (remove-if-not #'extension-p (forms-at root +code-directory+ path)))))))
+             ((string= path "hyperbook.asd")
+              (source-equal (remove-fedwiki-extra-dependencies (forms-at root nil path))
+                            (forms-at root +upstream+ path)))
+             (t nil))))
+     () "Unaccounted library delta against ~A: ~A" +upstream+ path)))
 
 (DEFUN CHECK-FEDWIKI-IMAGE-COMPATIBILITY ()
   (LET* ((WIKI
@@ -159,131 +131,16 @@
              (HYPERBOOK/FEDWIKI::STORY-ITEM-IMAGE-PRESENTATION-HINTS ITEM)))))
   T)
 
-(COMMON-LISP:DEFUN DREYECK/HYPERDOC/LIBRARY-TESTS:RUN-TESTS NIL
-                   (DREYECK/HYPERDOC/LIBRARY-TESTS::CHECK-FEDWIKI-IMAGE-COMPATIBILITY)
-                   (COMMON-LISP:LET*
-                                     ((DREYECK/HYPERDOC/LIBRARY-TESTS::ROOT
-                                                                            (ASDF/SYSTEM:SYSTEM-SOURCE-DIRECTORY
-                                                                                                                 (ASDF/SYSTEM:FIND-SYSTEM
-                                                                                                                                          "dreyeck")))
-                                      (DREYECK/HYPERDOC/LIBRARY-TESTS::CHANGED
-                                                                               (COMMON-LISP:REMOVE
-                                                                                                   ""
-                                                                                                   (UIOP/UTILITY:SPLIT-STRING
-                                                                                                                              (COMMON-LISP:APPLY
-                                                                                                                                                 (FUNCTION
-                                                                                                                                                           DREYECK/GIT:GIT-RUN-STRING)
-                                                                                                                                                 DREYECK/HYPERDOC/LIBRARY-TESTS::ROOT
-                                                                                                                                                 "diff"
-                                                                                                                                                 "--name-only"
-                                                                                                                                                 DREYECK/HYPERDOC/LIBRARY-TESTS::+UPSTREAM+
-                                                                                                                                                 "--"
-                                                                                                                                                 DREYECK/HYPERDOC/LIBRARY-TESTS::+PATHS+)
-                                                                                                                              :SEPARATOR
-                                                                                                                              (QUOTE
-                                                                                                                                     (#\Newline)))
-                                                                                                   :TEST
-                                                                                                   (FUNCTION
-                                                                                                             COMMON-LISP:EQUAL))))
-                                     (COMMON-LISP:ASSERT
-                                                         (COMMON-LISP:ZEROP
-                                                                            (COMMON-LISP:LENGTH
-                                                                                                (COMMON-LISP:APPLY
-                                                                                                                   (FUNCTION
-                                                                                                                             DREYECK/GIT:GIT-RUN-STRING)
-                                                                                                                   DREYECK/HYPERDOC/LIBRARY-TESTS::ROOT
-                                                                                                                   "ls-files"
-                                                                                                                   "--others"
-                                                                                                                   "--exclude-standard"
-                                                                                                                   "--"
-                                                                                                                   DREYECK/HYPERDOC/LIBRARY-TESTS::+PATHS+))))
-                                     (COMMON-LISP:DOLIST
-                                                         (DREYECK/HYPERDOC/LIBRARY-TESTS::PATH
-                                                                                               DREYECK/HYPERDOC/LIBRARY-TESTS::CHANGED)
-                                                         (COMMON-LISP:LET*
-                                                                           ((DREYECK/HYPERDOC/LIBRARY-TESTS::LOCAL
-                                                                                                                   (DREYECK/HYPERDOC/LIBRARY-TESTS::FORMS-AT
-                                                                                                                                                             DREYECK/HYPERDOC/LIBRARY-TESTS::ROOT
-                                                                                                                                                             NIL
-                                                                                                                                                             DREYECK/HYPERDOC/LIBRARY-TESTS::PATH))
-                                                                            (DREYECK/HYPERDOC/LIBRARY-TESTS::UPSTREAM
-                                                                                                                      (DREYECK/HYPERDOC/LIBRARY-TESTS::FORMS-AT
-                                                                                                                                                                DREYECK/HYPERDOC/LIBRARY-TESTS::ROOT
-                                                                                                                                                                DREYECK/HYPERDOC/LIBRARY-TESTS::+UPSTREAM+
-                                                                                                                                                                DREYECK/HYPERDOC/LIBRARY-TESTS::PATH)))
-                                                                           (COMMON-LISP:IF
-                                                                                           (COMMON-LISP:MEMBER
-                                                                                                               DREYECK/HYPERDOC/LIBRARY-TESTS::PATH
-                                                                                                               (QUOTE
-                                                                                                                      ("hyperbook-fedwiki/fedwiki.lisp"
-                                                                                                                       "hyperbook-fedwiki/pages.lisp"
-                                                                                                                       "hyperbook-fedwiki/story-items.lisp"
-                                                                                                                       "hyperbook-fedwiki/wiki-links.lisp"))
-                                                                                                               :TEST
-                                                                                                               (FUNCTION
-                                                                                                                         COMMON-LISP:EQUAL))
-                                                                                           (COMMON-LISP:ASSERT
-                                                                                                               (DREYECK/HYPERDOC/LIBRARY-TESTS::SOURCE-EQUAL
-                                                                                                                                                             DREYECK/HYPERDOC/LIBRARY-TESTS::LOCAL
-                                                                                                                                                             (DREYECK/HYPERDOC/LIBRARY-TESTS::FORMS-AT
-                                                                                                                                                                                                       DREYECK/HYPERDOC/LIBRARY-TESTS::ROOT
-                                                                                                                                                                                                       DREYECK/HYPERDOC/LIBRARY-TESTS::+PREVIOUS+
-                                                                                                                                                                                                       DREYECK/HYPERDOC/LIBRARY-TESTS::PATH)))
-                                                                                           (COMMON-LISP:LET*
-                                                                                                             ((DREYECK/HYPERDOC/LIBRARY-TESTS::ALLOWED
-                                                                                                                                                       (COMMON-LISP:LAMBDA
-                                                                                                                                                                           (DREYECK/HYPERDOC/LIBRARY-TESTS::F)
-                                                                                                                                                                           (DREYECK/HYPERDOC/LIBRARY-TESTS::COMPATIBILITY-FORM-P
-                                                                                                                                                                                                                                 DREYECK/HYPERDOC/LIBRARY-TESTS::PATH
-                                                                                                                                                                                                                                 DREYECK/HYPERDOC/LIBRARY-TESTS::F)))
-                                                                                                              (DREYECK/HYPERDOC/LIBRARY-TESTS::RETAINED
-                                                                                                                                                        (COMMON-LISP:REMOVE-IF-NOT
-                                                                                                                                                                                   DREYECK/HYPERDOC/LIBRARY-TESTS::ALLOWED
-                                                                                                                                                                                   DREYECK/HYPERDOC/LIBRARY-TESTS::LOCAL))
-                                                                                                              (DREYECK/HYPERDOC/LIBRARY-TESTS::LEFT
-                                                                                                                                                    (DREYECK/HYPERDOC/LIBRARY-TESTS::NORMALIZE-DEPENDENCIES
-                                                                                                                                                                                                            DREYECK/HYPERDOC/LIBRARY-TESTS::PATH
-                                                                                                                                                                                                            (COMMON-LISP:REMOVE-IF
-                                                                                                                                                                                                                                   DREYECK/HYPERDOC/LIBRARY-TESTS::ALLOWED
-                                                                                                                                                                                                                                   (COMMON-LISP:COPY-TREE
-                                                                                                                                                                                                                                                          DREYECK/HYPERDOC/LIBRARY-TESTS::LOCAL))))
-                                                                                                              (DREYECK/HYPERDOC/LIBRARY-TESTS::RIGHT
-                                                                                                                                                     (COMMON-LISP:REMOVE-IF
-                                                                                                                                                                            DREYECK/HYPERDOC/LIBRARY-TESTS::ALLOWED
-                                                                                                                                                                            DREYECK/HYPERDOC/LIBRARY-TESTS::UPSTREAM)))
-                                                                                                             (COMMON-LISP:WHEN
-                                                                                                                               DREYECK/HYPERDOC/LIBRARY-TESTS::RETAINED
-                                                                                                                               (COMMON-LISP:ASSERT
-                                                                                                                                                   (DREYECK/HYPERDOC/LIBRARY-TESTS::SOURCE-EQUAL
-                                                                                                                                                                                                 DREYECK/HYPERDOC/LIBRARY-TESTS::RETAINED
-                                                                                                                                                                                                 (COMMON-LISP:REMOVE-IF-NOT
-                                                                                                                                                                                                                            DREYECK/HYPERDOC/LIBRARY-TESTS::ALLOWED
-                                                                                                                                                                                                                            (DREYECK/HYPERDOC/LIBRARY-TESTS::FORMS-AT
-                                                                                                                                                                                                                                                                      DREYECK/HYPERDOC/LIBRARY-TESTS::ROOT
-                                                                                                                                                                                                                                                                      (compatibility-revision path)
-                                                                                                                                                                                                                                                                      DREYECK/HYPERDOC/LIBRARY-TESTS::PATH)))))
-                                                                                                             (COMMON-LISP:ASSERT
-                                                                                                                                 (COMMON-LISP:=
-                                                                                                                                                (COMMON-LISP:LENGTH
-                                                                                                                                                                    DREYECK/HYPERDOC/LIBRARY-TESTS::LEFT)
-                                                                                                                                                (COMMON-LISP:LENGTH
-                                                                                                                                                                    DREYECK/HYPERDOC/LIBRARY-TESTS::RIGHT)))
-                                                                                                             (COMMON-LISP:ASSERT
-                                                                                                                                 (COMMON-LISP:NULL
-                                                                                                                                                   (COMMON-LISP:SET-DIFFERENCE
-                                                                                                                                                                               DREYECK/HYPERDOC/LIBRARY-TESTS::LEFT
-                                                                                                                                                                               DREYECK/HYPERDOC/LIBRARY-TESTS::RIGHT
-                                                                                                                                                                               :TEST
-                                                                                                                                                                               (FUNCTION
-                                                                                                                                                                                         DREYECK/HYPERDOC/LIBRARY-TESTS::SOURCE-EQUAL))))
-                                                                                                             (COMMON-LISP:ASSERT
-                                                                                                                                 (COMMON-LISP:NULL
-                                                                                                                                                   (COMMON-LISP:SET-DIFFERENCE
-                                                                                                                                                                               DREYECK/HYPERDOC/LIBRARY-TESTS::RIGHT
-                                                                                                                                                                               DREYECK/HYPERDOC/LIBRARY-TESTS::LEFT
-                                                                                                                                                                               :TEST
-                                                                                                                                                                               (FUNCTION
-                                                                                                                                                                                         DREYECK/HYPERDOC/LIBRARY-TESTS::SOURCE-EQUAL))))))))
-                                     (COMMON-LISP:FORMAT COMMON-LISP:T
-                                                         "Library source matches upstream apart from the enumerated compatibility forms.~%"))
-                   COMMON-LISP:T)
+(defun run-tests ()
+  (let* ((root (asdf:system-source-directory "dreyeck"))
+         (untracked (apply #'dreyeck/git:git-run-string root "ls-files"
+                           "--others" "--exclude-standard" "--" +paths+))
+         (changed (apply #'dreyeck/git:git-run-string root "diff"
+                         "--name-only" "--no-renames" +upstream+ "--" +paths+)))
+    (assert (zerop (length untracked)) () "Untracked library sources: ~A" untracked)
+    (dolist (path (remove "" (uiop:split-string changed :separator '(#\Newline))
+                          :test #'string=))
+      (check-library-file root path)))
+  (check-fedwiki-image-compatibility)
+  (format t "~&HYPERDOC-LIBRARY-PASS: upstream source and retained compatibility verified.~%")
+  t)

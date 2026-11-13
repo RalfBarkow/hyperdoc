@@ -32,6 +32,9 @@
    ;; from the code files in hyperdoc-explorer.
    (packages :reader packages-of :initform nil)))
 
+(defmethod print-object ((hd hyperdoc) stream)
+  (format stream "#<hyperdoc ~s>" (hb:id-of hd)))
+
 ;; Accessor for the ASDF system
 ;; (a generic function to ensure it appears in the "Operations" view)
 
@@ -66,6 +69,9 @@
 
 (defclass code-page (page)
   ((file :reader file-of :initarg :file)))
+
+(defmethod print-object ((p page) stream)
+  (format stream "#<page ~s in hyperdoc ~s>" (hb:id-of p) (hb:id-of (hb:hyperbook-of p))))
 
 ;;
 ;; Create a HyperDoc instance.
@@ -155,14 +161,14 @@ the macro DEFHYPERDOC."
 ;;
 
 (defun make-text-page (hdoc file)
-       "Create a page instance in HyperDoc HDOC for the page stored in FILE."
-       (let*
-             ((type (pathname-type file))
-              (type-as-kw (alexandria:make-keyword (string-upcase type)))
-              (page
-                    (make-instance (page-class hdoc type-as-kw) :hyperbook hdoc
-                                   :file file)))
-             (load-page page) page))
+  "Create a page instance in HyperDoc HDOC for the page stored in FILE."
+  (let* ((type (pathname-type file))
+         (type-as-kw (alexandria:make-keyword (string-upcase type)))
+         (page (make-instance (page-class hdoc type-as-kw)
+                              :hyperbook hdoc
+                              :file file)))
+    (load-page page)
+    page))
 
 (defun make-code-page (hdoc code-file)
   "Create a page instance in HyperDoc HDOC for CODE-FILE"
@@ -186,7 +192,7 @@ the macro DEFHYPERDOC."
 ;; are in hyperdoc/explorer.
 ;;
 
-(defgeneric page-class (hyperdoc::hdoc filetype))
+(defgeneric page-class (hdoc filetype))
 
 (defgeneric load-page (page))
 

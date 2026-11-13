@@ -17,10 +17,12 @@ from the Inspector. The included local launcher uses only Node built-ins:
 node scripts/serve-fedwiki-mech-host.mjs 8099
 ```
 
-In the **fresh runtime's** configuration, after loading `hyperbook/fedwiki`:
+In the **fresh runtime's** configuration, load the Story extension and set its host:
 
 ```lisp
-(setf hyperbook/fedwiki::*mech-plugin-host-url* "http://127.0.0.1:8099/")
+(asdf:load-system "dreyeck/fedwiki-story")
+
+(setf dreyeck/fedwiki-story:*mech-plugin-host-url* "http://127.0.0.1:8099/")
 ```
 
 Then inspect the original FedWiki page and choose **Story**. The first `CLICK ▶`
@@ -87,7 +89,7 @@ this intentionally small host. They are not required by the CODE/Solo path.
 ## Repeatable acceptance
 
 ```lisp
-(asdf:test-system "hyperbook/fedwiki/tests")
+(asdf:test-system "dreyeck/fedwiki-mech/tests")
 ```
 
 ```sh
@@ -116,7 +118,7 @@ production activation, general Wiki compatibility, re-layout or renaming.
 
 Use `https://mech.dreyeck.ch/assets/hyperdoc-mech/`. The packaged Catalog reads
 `HYPERDOC_MECH_PLUGIN_HOST_URL` at startup into
-`hyperbook/fedwiki::*mech-plugin-host-url*`. Missing/empty means inert, including
+`dreyeck/fedwiki-story:*mech-plugin-host-url*`. Missing/empty means inert, including
 when clearing an earlier interactive setting. Direct `start-catalog` callers
 can retain their explicitly configured value. No host or Code starts implicitly.
 The existing Wiki on port 3000 serves the files; unchanged Mech opens Solo at

@@ -399,6 +399,18 @@ decision is taken again when it is evaluated, not only when it was shown."))
                       "▷ " (cl-who:esc label) " (not run in a served Catalog)"))
       (hv:eval-button label thunk hover-label)))
 
+;; Let the upstream printer render the snippet without a run button.
+;; Keep the authored DOM available to the Inspector and local development.
+(defmethod plump:serialize-object :around ((element plump:element))
+  (if (and (string-equal "lisp-code" (plump:tag-name element))
+           (typep hyperbook:*current-page* 'hyperdoc:page)
+           (plump:attribute element "executable")
+           (policy-enforced-p))
+      (let ((display (plump:clone-node element)))
+        (plump:remove-attribute display "executable")
+        (call-next-method display))
+      (call-next-method)))
+
 ;;;; The runtime boundary for Inspector controls
 ;;
 ;; The Inspector evaluates, when it is clicked, the thunk a view registered under an EVAL- or ACTION- id (HV:EVAL-BUTTON, HV:ACTION-BUTTON,

@@ -25,9 +25,15 @@
 (defclass hyperbook ()
   ((id :reader id-of :type string :initarg :id)))
 
+(defmethod print-object ((hb hyperbook) stream)
+  (format stream "#<hyperbook ~s>" (id-of hb)))
+
 (defclass page ()
   ((hyperbook :reader hyperbook-of :type hyperbook :initarg :hyperbook)
    (id :reader id-of :type string :initarg :id)))
+
+(defmethod print-object ((p page) stream)
+  (format stream "#<page ~s in hyperbook ~s>" (id-of p) (id-of (hyperbook-of p))))
 
 ;;
 ;; HyperBooks and their pages have titles. In most places in a UI, the titles

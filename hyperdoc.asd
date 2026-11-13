@@ -25,20 +25,23 @@
                              (:file "tools")
                              (:file "hyperdoc")))))
 
-(defsystem #:hyperdoc/inspector :description
-           "HyperDoc for the moldable inspector" :author
-           "Konrad Hinsen <konrad.hinsen@fastmail.net>" :license "BSD" :version
-           "0.0.1" :homepage "https://codeberg.org/khinsen/hyperdoc"
-           :source-control (:git "https://codeberg.org/khinsen/hyperdoc.git")
-           :serial t :depends-on
-           (#:hyperdoc #:hyperbook/wikipedia #:html-inspector-views
-                       #:clog-moldable-inspector
-                       #:trivial-package-local-nicknames)
-           :components
-           ((:module "inspector-hyperdoc" :serial t :components
-                     ((:file "package") (:file "hyperdoc")))))
-
-
+(defsystem #:hyperdoc/inspector
+  :description "HyperDoc for the moldable inspector"
+  :author "Konrad Hinsen <konrad.hinsen@fastmail.net>"
+  :license  "BSD"
+  :version "0.0.1"
+  :homepage "https://codeberg.org/khinsen/hyperdoc"
+  :source-control (:git "https://codeberg.org/khinsen/hyperdoc.git")
+  :serial t
+  :depends-on (#:hyperdoc
+               #:hyperbook/wikipedia
+               #:html-inspector-views
+               #:clog-moldable-inspector
+               #:trivial-package-local-nicknames)
+  :components ((:module "inspector-hyperdoc"
+                :serial t
+                :components ((:file "package")
+                             (:file "hyperdoc")))))
 
 (defsystem #:hyperdoc/explorer
   :description "Explorer for HyperDocs"

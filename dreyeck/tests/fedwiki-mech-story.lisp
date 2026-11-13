@@ -1,13 +1,13 @@
-(defpackage :hyperbook/fedwiki/tests
+(defpackage :dreyeck/fedwiki-mech/tests
   (:use :cl)
   (:local-nicknames (:fw :hyperbook/fedwiki) (:v :html-inspector-views))
   (:export :run-tests :serve-browser-witness))
-(in-package :hyperbook/fedwiki/tests)
+(in-package :dreyeck/fedwiki-mech/tests)
 
 (defun original-page ()
   "Use the existing retained original; do not manufacture a Wiki fixture."
   (let* ((json (with-open-file
-                  (in (asdf:system-relative-pathname :hyperbook
+                  (in (asdf:system-relative-pathname :dreyeck
                         "dreyeck/work/trails-rendered-evidence/ward.voices.ustawi.wiki--trails-rendered.json"))
                 (shasht:read-json in)))
          (fw::*neighborhood* (make-hash-table :test #'equal)))
@@ -50,7 +50,13 @@
          (ordinary (make-instance 'fw::story-item :item-type :html
                                   :id "ordinary-html-fixture" :text "<em>plain HTML</em>" :data nil)))
     (setf (slot-value page 'fw::story) (vector solo ordinary))
-    (let ((html (v:view-html (story-view page))))
+    (let* ((view (story-view page))
+           (html (v:view-html view))
+           (assets (v:view-assets view)))
+      (assert (member '(:js . "/dreyeck-fedwiki/solo-trail-story.js") assets :test #'equal))
+      (assert (member "/dreyeck-fedwiki/" assets :key (lambda (asset)
+                                                       (when (eq :path (car asset)) (second asset)))
+                      :test #'equal))
       (assert (search "fedwiki-inline-svg" html))
       (assert (search "<template>" html))
       (assert (search "&lt;svg" html))
@@ -74,17 +80,19 @@
     (assert (= 3 (count "code" (gethash "story" raw)
                         :key (lambda (x) (gethash "type" x)) :test #'equal)))
     (assert (every (lambda (x) (and (gethash "id" x) (gethash "type" x))) (gethash "story" raw)))
-    (let ((fw::*mech-plugin-host-url* nil))
+    (let ((dreyeck/fedwiki-story:*mech-plugin-host-url* nil))
       (let ((html (v:view-html (story-view page))))
         (assert (search "Wiki plugin host is not configured" html))
         (assert (search "fedwiki-mech-host" html))
         (assert (search "6405b752d1739af0" html))
         (assert (search "data-page-json" html))
         (assert (not (search "<script" html)))))
-    (let ((fw::*mech-plugin-host-url* "http://127.0.0.1:8099/"))
+    (let ((dreyeck/fedwiki-story:*mech-plugin-host-url* "http://127.0.0.1:8099/"))
       (let* ((view (story-view page)) (html (v:view-html view)))
         (assert (search "http://127.0.0.1:8099/" html))
         (assert (search "No Code item has run" html))
+        (assert (member '(:js . "/dreyeck-fedwiki/mech-story.js")
+                        (v:view-assets view) :test #'equal))
         (assert (member item (mapcar #'cdr (v:view-references view)) :test #'eq))
         (assert (notany (lambda (ref) (typep (cdr ref) 'condition)) (v:view-references view)))))
     (assert (eq item (find :mech (fw::story-of page) :key #'fw::item-type-of)))
@@ -104,7 +112,7 @@
 
 (defun serve-browser-witness (port host-url stop-file)
   "Explicit fresh Inspector witness. Never starts during ASDF TEST-OP."
-  (setf fw::*mech-plugin-host-url* host-url)
+  (setf dreyeck/fedwiki-story:*mech-plugin-host-url* host-url)
   (let ((page (original-page)))
     (clog:initialize
      (lambda (body)
