@@ -1992,7 +1992,7 @@
   :SERIAL
   T
   :DEPENDS-ON
-  (#:HYPERDOC #:SHOP3)
+  (#:HYPERDOC #:SHOP3 #:HTML-INSPECTOR-VIEWS)
   :COMPONENTS
   ((:MODULE "dreyeck/shop3" :SERIAL T :COMPONENTS
     ((:FILE "package") (:FILE "manual-topics") (:FILE "plan-objects")
@@ -3646,7 +3646,7 @@
 
 (defsystem "dreyeck/work/remote-control-planning/reading/tests"
   :description "Reading links, shared planner observations and book-local assets"
-  :depends-on ("dreyeck/work/remote-control-planning/reading")
+  :depends-on ("dreyeck/work/remote-control-planning/reading" "plump")
   :components ((:file "dreyeck/tests/remote-control-reading"))
   :perform (test-op (op component)
              (declare (ignore op component))

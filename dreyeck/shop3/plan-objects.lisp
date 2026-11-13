@@ -6,6 +6,9 @@
            (raw-plans :initarg :raw-plans :reader raw-plans-of)
            (plan-trees :initarg :plan-trees :reader plan-trees-of)
            (final-states :initarg :final-states :reader final-states-of)
+           ;; NIL is a known empty state; :UNAVAILABLE marks older results.
+           (initial-facts :initarg :initial-facts :initform :unavailable
+            :reader initial-facts-of)
            (time :initarg :time :reader time-of)
            (execution-mode :initarg :execution-mode :initform :plan-only
             :reader execution-mode-of)))

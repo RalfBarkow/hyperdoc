@@ -69,13 +69,16 @@
 
 (defun remote-control-plan (&optional (case :c))
   "Enumerate all plans. NIL raw plans means failure, not a successful empty plan."
-  (let ((name (second (case-specification case))))
+  (let* ((name (second (case-specification case)))
+         (problem (shop3:find-problem name t))
+         (initial-facts (copy-tree (shop3:state-atoms problem))))
     (multiple-value-bind (raw seconds trees states)
-        (shop3:find-plans name :which :all :verbose 0 :plan-tree t :collect-state t)
+        (shop3:find-plans problem :which :all :verbose 0 :plan-tree t :collect-state t)
       (make-instance 'dreyeck/shop3:hyperdoc-htn-plan-result
                      :problem-name name :raw-plans raw
                      :plans (mapcar #'shop3:shorter-plan raw)
                      :time seconds :plan-trees trees :final-states states
+                     :initial-facts initial-facts
                      :execution-mode :plan-only))))
 
 (defun remote-control-experiment (&optional (case :c))

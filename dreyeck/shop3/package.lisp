@@ -6,6 +6,7 @@
            #:raw-plans-of
            #:plan-trees-of
            #:final-states-of
+           #:initial-facts-of
            #:time-of
            #:execution-mode-of
            #:plan-tree->safe-sexp
