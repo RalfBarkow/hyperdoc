@@ -167,12 +167,24 @@
   (let* ((package-name (plump:attribute element "package"))
          (package (or (and package-name
                            (find-package (str:upcase package-name)))
-                      *current-package*)))
-    (-> element
-        plump:text
-        str:trim
-        (views/standard:parse-lisp-code package)
-        views/standard:render-as-html))
+                      *current-package*))
+         (executable? (plump:attribute element "executable"))
+         (code (-> element plump:text str:trim))
+         (cst (views/standard:parse-lisp-code code package)))
+    (views:html
+      (:table
+        (:tr
+         (when executable?
+           (views:html
+             (:td
+              (views:eval-button "►"
+                                 (views:thunk
+                                   (let ((*package* package))
+                                     (-> code parse-and-eval)))
+                                 "Run code"))))
+         (views:html
+           (:td
+            (views/standard:render-as-html cst)))))))
   t)
 
 
