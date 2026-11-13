@@ -274,6 +274,9 @@ Any non-empty string size is retained as presentation metadata."
           (views:include-script "mountFedwikiSoloTrailStory(window.currentInspectorView)")
           (views:html
             (:div :class "fedwiki-inline-svg"
+                  :data-site (domain-name-of (origin-of page))
+                  :data-slug (origin-id-of page)
+                  :data-item (id-of item)
               (:template (views:esc text)))))
         (views:unsafe-html text))))
 
