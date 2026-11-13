@@ -1,0 +1,48 @@
+This is SBCL 2.4.10, an implementation of ANSI Common Lisp.
+More information about SBCL is available at <http://www.sbcl.org/>.
+
+SBCL is free software, provided as is, with absolutely no warranty.
+It is mostly in the public domain; some portions are provided under
+BSD-style licenses.  See the CREDITS and COPYING files in the
+distribution for more information.
+WARNING: redefining IRONCLAD:BLOCK-LENGTH in DEFGENERIC
+=== revision c0b5f83 (second batch)
+PROBE char-literal #\(                 table=((:A :B)) why=NIL effects=0 cl-reader=(:OTHER-LIST
+                                                                                    :ACTIVE-DEFINITION)
+PROBE char-literal #\)                 table=((:A :B)) why=NIL effects=0 cl-reader=(:OTHER-LIST
+                                                                                    :ACTIVE-DEFINITION)
+PROBE char-literal #;                  table=NIL why=(:READER-REFUSED
+                                                      "UNSUPPORTED-SOURCE-SYNTAX") effects=0 cl-reader=(:READER-ERROR
+                                                                                                        SB-INT:SIMPLE-READER-ERROR)
+PROBE char-literal #\"                 table=((:A :B)) why=NIL effects=0 cl-reader=(:OTHER-LIST
+                                                                                    :ACTIVE-DEFINITION)
+PROBE char-literal #\Space             table=((:A :B)) why=NIL effects=0 cl-reader=(:OTHER-LIST
+                                                                                    :ACTIVE-DEFINITION)
+PROBE char-literal #\\                 table=((:A :B)) why=NIL effects=0 cl-reader=(:OTHER-LIST
+                                                                                    :ACTIVE-DEFINITION)
+PROBE char-literal #\a                 table=((:A :B)) why=NIL effects=0 cl-reader=(:OTHER-LIST
+                                                                                    :ACTIVE-DEFINITION)
+PROBE char-literal #\'                 table=((:A :B)) why=NIL effects=0 cl-reader=(:OTHER-LIST
+                                                                                    :ACTIVE-DEFINITION)
+PROBE char-literal #\`                 table=((:A :B)) why=NIL effects=0 cl-reader=(:OTHER-LIST
+                                                                                    :ACTIVE-DEFINITION)
+PROBE char-literal #\,                 table=((:A :B)) why=NIL effects=0 cl-reader=(:OTHER-LIST
+                                                                                    :ACTIVE-DEFINITION)
+PROBE char-literal #\#                 table=((:A :B)) why=NIL effects=0 cl-reader=(:OTHER-LIST
+                                                                                    :ACTIVE-DEFINITION)
+PROBE char-literal #\|                 table=((:A :B)) why=NIL effects=0 cl-reader=(:OTHER-LIST
+                                                                                    :ACTIVE-DEFINITION)
+PROBE char-then-string-2               table=((:SUBJECT :IN-STRING)) why=NIL effects=0 cl-reader=(:CHARACTER
+                                                                                                  :STRING
+                                                                                                  :ATOM)
+PROBE char-then-line-comment           table=((:SUBJECT :IN-LINE-COMMENT)) why=NIL effects=0 cl-reader=(:CHARACTER)
+PROBE char-then-comment+real           table=NIL why=(:DEFINITIONS-FOUND 2) effects=0 cl-reader=(:OTHER-LIST
+                                                                                                 :CHARACTER
+                                                                                                 :ACTIVE-DEFINITION)
+PROBE char;hides-real-definition       table=((:SUBJECT :REAL)) why=NIL effects=0 cl-reader=(:READER-ERROR
+                                                                                             SB-INT:SIMPLE-READER-ERROR)
+CALLER image-agreement without the reading system: (:KIND :IMAGE-AGREEMENT
+                                                    :STATUS
+                                                    :READING-SYSTEM-NOT-LOADED)
+TOTAL effects: 0
+EXIT-OK

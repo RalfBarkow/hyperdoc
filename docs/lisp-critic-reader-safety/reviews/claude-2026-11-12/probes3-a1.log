@@ -1,0 +1,13 @@
+This is SBCL 2.4.10, an implementation of ANSI Common Lisp.
+More information about SBCL is available at <http://www.sbcl.org/>.
+
+SBCL is free software, provided as is, with absolutely no warranty.
+It is mostly in the public domain; some portions are provided under
+BSD-style licenses.  See the CREDITS and COPYING files in the
+distribution for more information.
+WARNING: redefining IRONCLAD:BLOCK-LENGTH in DEFGENERIC
+PROBE char-literal-semicolon           table=((:A :B)) why=NIL effects=0 cl-reader=(:OTHER-LIST
+                                                                                    :ACTIVE-DEFINITION)
+PROBE real-definition-after-char       table=((:SUBJECT :REAL)) why=NIL effects=0 cl-reader=(:CHARACTER
+                                                                                             :ACTIVE-DEFINITION)
+EXIT-OK

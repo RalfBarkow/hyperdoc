@@ -1,0 +1,55 @@
+This is SBCL 2.4.10, an implementation of ANSI Common Lisp.
+More information about SBCL is available at <http://www.sbcl.org/>.
+
+SBCL is free software, provided as is, with absolutely no warranty.
+It is mostly in the public domain; some portions are provided under
+BSD-style licenses.  See the CREDITS and COPYING files in the
+distribution for more information.
+WARNING: redefining IRONCLAD:BLOCK-LENGTH in DEFGENERIC
+; compiling file "/home/user/hyperdoc-a1-base/dreyeck/src/lisp-critic-text-passage.lisp" (written 12 NOV 2026 05:57:13 PM):
+
+; wrote /tmp/claude-0/-home-user/3d6d8307-3084-5d7f-b90f-d41785c3279e/scratchpad/slice-a/home/.cache/common-lisp/sbcl-2.4.10-linux-x64/home/user/hyperdoc-a1-base/dreyeck/src/lisp-critic-text-passage-tmpGHU3ALSV.fasl
+; compilation finished in 0:00:00.071
+; compiling file "/home/user/hyperdoc-a1-base/dreyeck/src/lisp-critic-text-criticism.lisp" (written 12 NOV 2026 05:57:13 PM):
+
+; wrote /tmp/claude-0/-home-user/3d6d8307-3084-5d7f-b90f-d41785c3279e/scratchpad/slice-a/home/.cache/common-lisp/sbcl-2.4.10-linux-x64/home/user/hyperdoc-a1-base/dreyeck/src/lisp-critic-text-criticism-tmpAAURSO1.fasl
+; compilation finished in 0:00:00.016
+=== revision 1da262d (second batch)
+PROBE char-literal #\(                 table=((:A :B)) why=NIL effects=0 cl-reader=(:OTHER-LIST
+                                                                                    :ACTIVE-DEFINITION)
+PROBE char-literal #\)                 table=((:A :B)) why=NIL effects=0 cl-reader=(:OTHER-LIST
+                                                                                    :ACTIVE-DEFINITION)
+PROBE char-literal #;                  table=((:A :B)) why=NIL effects=0 cl-reader=(:READER-ERROR
+                                                                                    SB-INT:SIMPLE-READER-ERROR)
+PROBE char-literal #\"                 table=((:A :B)) why=NIL effects=0 cl-reader=(:OTHER-LIST
+                                                                                    :ACTIVE-DEFINITION)
+PROBE char-literal #\Space             table=((:A :B)) why=NIL effects=0 cl-reader=(:OTHER-LIST
+                                                                                    :ACTIVE-DEFINITION)
+PROBE char-literal #\\                 table=((:A :B)) why=NIL effects=0 cl-reader=(:OTHER-LIST
+                                                                                    :ACTIVE-DEFINITION)
+PROBE char-literal #\a                 table=((:A :B)) why=NIL effects=0 cl-reader=(:OTHER-LIST
+                                                                                    :ACTIVE-DEFINITION)
+PROBE char-literal #\'                 table=((:A :B)) why=NIL effects=0 cl-reader=(:OTHER-LIST
+                                                                                    :ACTIVE-DEFINITION)
+PROBE char-literal #\`                 table=((:A :B)) why=NIL effects=0 cl-reader=(:OTHER-LIST
+                                                                                    :ACTIVE-DEFINITION)
+PROBE char-literal #\,                 table=((:A :B)) why=NIL effects=0 cl-reader=(:OTHER-LIST
+                                                                                    :ACTIVE-DEFINITION)
+PROBE char-literal #\#                 table=((:A :B)) why=NIL effects=0 cl-reader=(:OTHER-LIST
+                                                                                    :ACTIVE-DEFINITION)
+PROBE char-literal #\|                 table=((:A :B)) why=NIL effects=0 cl-reader=(:OTHER-LIST
+                                                                                    :ACTIVE-DEFINITION)
+PROBE char-then-string-2               table=NIL why=(:DEFINITIONS-FOUND 0) effects=0 cl-reader=(:CHARACTER
+                                                                                                 :STRING
+                                                                                                 :ATOM)
+PROBE char-then-line-comment           table=NIL why=(:DEFINITIONS-FOUND 0) effects=0 cl-reader=(:CHARACTER)
+PROBE char-then-comment+real           table=((:SUBJECT :REAL)) why=NIL effects=0 cl-reader=(:OTHER-LIST
+                                                                                             :CHARACTER
+                                                                                             :ACTIVE-DEFINITION)
+PROBE char;hides-real-definition       table=NIL why=(:DEFINITIONS-FOUND 0) effects=0 cl-reader=(:READER-ERROR
+                                                                                                 SB-INT:SIMPLE-READER-ERROR)
+CALLER image-agreement without the reading system: (:KIND :IMAGE-AGREEMENT
+                                                    :STATUS
+                                                    :READING-SYSTEM-NOT-LOADED)
+TOTAL effects: 0
+EXIT-OK
