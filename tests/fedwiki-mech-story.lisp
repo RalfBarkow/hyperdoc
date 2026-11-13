@@ -43,6 +43,22 @@
   (or (find "Story" (v:all-views page) :key #'v:view-title :test #'equal)
       (error "Missing Story view")))
 
+(defun check-solo-html-story (page)
+  (let* ((source "<svg xmlns='http://www.w3.org/2000/svg'><path id='trail' d='M1 1 L10 10' style='fill:none;stroke:red;stroke-width:5;' marker-end='url(#arrow)'/></svg>")
+         (solo (make-instance 'fw::story-item :item-type :html
+                              :id "solo-html-fixture" :text source :data nil))
+         (ordinary (make-instance 'fw::story-item :item-type :html
+                                  :id "ordinary-html-fixture" :text "<em>plain HTML</em>" :data nil)))
+    (setf (slot-value page 'fw::story) (vector solo ordinary))
+    (let ((html (v:view-html (story-view page))))
+      (assert (search "fedwiki-inline-svg" html))
+      (assert (search "<template>" html))
+      (assert (search "&lt;svg" html))
+      (assert (not (search "<svg xmlns=" html)))
+      (assert (search "<unsafe-html" html))
+      (assert (search "&lt;em&gt;plain HTML&lt;/em&gt;" html)))
+    (assert (string= source (fw::text-of solo)))))
+
 (defun run-tests ()
   (check-dialog-contract)
   (check-topics-contract)
@@ -82,6 +98,7 @@
       (assert (not (eq raw (fw::raw-json-of remote))))
       (assert (equal "trails-rendered" (fw::origin-id-of remote)))
       (assert (eq (fw::origin-of page) (fw::origin-of remote))))
+    (check-solo-html-story page)
     (format t "~&FEDWIKI-MECH-STORY-PASS: original page/IDs/Code preserved, pure actual Story view, host bridge contract.~%"))
   t)
 

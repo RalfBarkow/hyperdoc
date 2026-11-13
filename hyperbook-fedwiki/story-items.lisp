@@ -266,7 +266,16 @@ Any non-empty string size is retained as presentation metadata."
 ;; HTML snippets
 
 (defmethod render-story-item ((type (eql :html)) item page)
-  (views:unsafe-html (text-of item)))
+  (let ((text (text-of item)))
+    (if (and (search "url(#arrow)" text)
+             (cl-ppcre:scan "(?i)^\\s*<svg(?:\\s|>)" text))
+        (progn
+          (views:include-js "/hyperbook/fedwiki/solo-trail-story.js")
+          (views:include-script "mountFedwikiSoloTrailStory(window.currentInspectorView)")
+          (views:html
+            (:div :class "fedwiki-inline-svg"
+              (:template (views:esc text)))))
+        (views:unsafe-html text))))
 
 ;; Missing story item types (with reference to examples)
 
