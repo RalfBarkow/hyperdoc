@@ -173,7 +173,7 @@ try {
   assert(evidence.includes('Click order: unknown. Historical runtime revision: unknown.'))
   assert(evidence.includes('unsupported')&&evidence.includes('needed'))
   await page.locator('.inspector-pane').last().getByText('Original site-qualified Wiki page',{exact:true}).click()
-  await page.getByRole('heading',{name:'Dewey Alexander Trail — source and reading',exact:true}).last().waitFor()
+  await page.getByRole('heading',{name:'Dewey Alexander Trail — evidence',exact:true}).last().waitFor()
   await page.locator('.inspector-pane').last().getByText('Return to From Two Hubs to One Trail',{exact:true}).click()
   await page.getByRole('heading',{name:'From Two Hubs to One Trail',exact:true}).last().waitFor()
   await page.locator('.inspector-pane').last().getByText("Identify Ward's Hub Selection and Trail — Plan",{exact:true}).click()
@@ -228,8 +228,11 @@ try {
 
  await page.locator('.inspector-pane').last().getByText('Dewey Alexander Trail',{exact:true}).click()
  await page.locator('.inspector-pane').last().locator('.inspector-title').filter({hasText:'Dewey Alexander Trail'}).waitFor()
- await page.locator('.inspector-pane').last().getByRole('button',{name:'Hub and trail reading',exact:true}).click()
- await page.getByRole('heading',{name:'Dewey Alexander Trail — source and reading',exact:true}).last().waitFor()
+ const deweyPane = page.locator('.inspector-pane').last()
+ await deweyPane.getByRole('heading',{name:'Dewey Alexander Trail — evidence',exact:true}).waitFor()
+ const expectedTabs = ['Story', 'Journal', 'Context', 'Links', 'Backlinks', 'URL', 'Trail evidence', 'Slots']
+ const tabLabels = await deweyPane.getByRole('button').allTextContents()
+ assert.deepEqual(tabLabels.map(label => label.trim()).filter(label => expectedTabs.includes(label)), expectedTabs)
  await page.getByText("Ward's How Trails Travel Plan",{exact:true}).and(page.locator(':visible')).last().click()
  await page.getByRole('heading',{name:"Ward's plan — original order",exact:true}).last().waitFor()
  await page.getByText('Plan step fcbf4b3a2dcbe81b',{exact:true}).and(page.locator(':visible')).first().click()
