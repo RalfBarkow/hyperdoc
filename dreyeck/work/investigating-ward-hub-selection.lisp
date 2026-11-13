@@ -138,7 +138,7 @@
       (:p (views:object-ref (finding-record finding) :display "Structured finding and qualified coordinates"))
       (:ul (dolist (source (finding-sources finding))
         (views:html (:li (views:object-ref (cdr source) :display (car source))))))
-      (:p (views:object-ref (hub-wiki-page "ward.voices.ustawi.wiki" "dewey-alexander-trail" "Dewey Alexander Trail") :display "Original site-qualified Wiki page" :select "Hub and trail reading"))
+      (:p (views:object-ref (hub-wiki-page "ward.voices.ustawi.wiki" "dewey-alexander-trail" "Dewey Alexander Trail") :display "Original site-qualified Wiki page" :select "Trail evidence"))
       (:p (views:object-ref (finding-step finding) :display "Return to investigation step" :select "Investigation step") " / "
           (views:object-ref *hub-investigation-plan* :display "Return to Investigation Plan" :select "Investigation Plan"))
       (:p (views:object-ref (work:work-page "From Two Hubs to One Trail") :display "Return to From Two Hubs to One Trail" :select "Content")))))

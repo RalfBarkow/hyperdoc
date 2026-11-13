@@ -148,10 +148,11 @@
        (equal "ward.voices.ustawi.wiki" (hyperbook/fedwiki::domain-name-of (hyperbook/fedwiki::origin-of page)))))
 (views:defview dewey-trail-reading-view (page hyperbook/fedwiki::fedwiki-page)
   (when (dewey-trail-page-p page)
-    (views:html-view :title "Hub and trail reading" :priority 3
+    ;; After the page views (URL is 20) and before generic Inspector views.
+    (views:html-view :title "Trail evidence" :priority 25
       (views:html
-        (:h2 "Dewey Alexander Trail — source and reading")
-        (:p "This is the original site-qualified Wiki page object. Its ordinary Story/Data views remain available. This view reads documentation and retained source evidence; it executes no Story or Mech program.")
+        (:h2 "Dewey Alexander Trail — evidence")
+        (:p "Explore the archived Wiki JSON, Ward's report on selecting two hubs and drawing the trail, and the investigation into how Solo renders it.")
         (:p (:a :href "http://ward.voices.ustawi.wiki/view/welcome-visitors/view/dewey-alexander-trail" "Original Wiki lineup URL"))
         (:p (views:object-ref (hub-page-capture) :display "Retained original page JSON")
             " / " (views:object-ref (ward-hub-report) :display "Ward's report and open runtime questions"))

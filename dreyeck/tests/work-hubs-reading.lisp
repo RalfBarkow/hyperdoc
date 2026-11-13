@@ -107,7 +107,15 @@
     (assert (equal "ward.voices.ustawi.wiki" (hyperbook/fedwiki::domain-name-of (hyperbook/fedwiki::origin-of ward))))
     (assert (= 3 (length (hyperbook/fedwiki::story-of ward))))
     (let* ((before (hyperbook/fedwiki::copy-page-json (hyperbook/fedwiki::raw-json-of ward)))
-           (view (r::following-view ward "Hub and trail reading")))
+           (all-views (views:all-views ward))
+           (titles (mapcar #'views:view-title all-views))
+           (expected '("Story" "Journal" "Context" "Links" "Backlinks" "URL"
+                       "Trail evidence"))
+           (view (find "Trail evidence" all-views :key #'views:view-title :test #'equal)))
+      (assert (equal expected
+                     (remove-if-not (lambda (title) (member title expected :test #'equal))
+                                    titles)))
+      (assert (< (views:view-priority view) 100))
       (assert (member plan (mapcar #'cdr (views:view-references view)) :test #'eq))
       (assert (equalp before (hyperbook/fedwiki::raw-json-of ward))))
     (assert (null (h::dewey-trail-reading-view plan)))
