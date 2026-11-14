@@ -48,17 +48,22 @@
   (ASDF/LISP-ACTION:TEST-OP (OP COMPONENT) (DECLARE (IGNORE OP COMPONENT))
    (UIOP/PACKAGE:SYMBOL-CALL :DREYECK/HYPERDOC/BOUNDARY-TESTS :RUN-TESTS)))
 
-(ASDF/PARSE-DEFSYSTEM:DEFSYSTEM "dreyeck/hyperdoc/library-tests"
-  :DESCRIPTION
-  "CST comparison against the verified upstream and retained compatibility inventory"
-  :DEPENDS-ON
-  ("hyperdoc/explorer" "hyperbook/fedwiki" "hyperbook/server"
-   "dreyeck/workflow" "dreyeck/git")
-  :COMPONENTS
-  ((:FILE "dreyeck/tests/hyperdoc-library-delta"))
-  :PERFORM
-  (ASDF/LISP-ACTION:TEST-OP (OP COMPONENT) (DECLARE (IGNORE OP COMPONENT))
-   (UIOP/PACKAGE:SYMBOL-CALL :DREYECK/HYPERDOC/LIBRARY-TESTS :RUN-TESTS)))
+(asdf:defsystem "dreyeck/hyperdoc/library-source-tests"
+  :description "Source comparison against the pinned upstream and retained compatibility"
+  :depends-on ("dreyeck/asdf-source" "dreyeck/git")
+  :components ((:file "dreyeck/tests/hyperdoc-library-source"))
+  :perform (asdf:test-op (op component)
+             (declare (ignore op component))
+             (uiop:symbol-call :dreyeck/hyperdoc/library-source-tests :run-tests)))
+
+(asdf:defsystem "dreyeck/hyperdoc/library-tests"
+  :description "Source boundary and FedWiki image compatibility checks"
+  :depends-on ("hyperbook/fedwiki")
+  :components ((:file "dreyeck/tests/hyperdoc-library-delta"))
+  :in-order-to ((asdf:test-op (asdf:test-op "dreyeck/hyperdoc/library-source-tests")))
+  :perform (asdf:test-op (op component)
+             (declare (ignore op component))
+             (uiop:symbol-call :dreyeck/hyperdoc/library-tests :run-tests)))
 
 (ASDF/PARSE-DEFSYSTEM:DEFSYSTEM "dreyeck/hyperdoc"
   :DESCRIPTION

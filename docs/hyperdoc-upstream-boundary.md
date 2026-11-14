@@ -10,6 +10,8 @@ The upstream printer makes `<lisp-code executable>` runnable on click. Presence 
 
 The library source comparison enumerates the retained compatibility paths: the separate code directory in `hyperdoc/core.lisp` and `hyperdoc/defining.lisp`, explicit library dependencies in `hyperbook.asd`, host forwarding in `hyperbook-server/server.lisp`, and the FedWiki proxy, page data, image and navigation compatibility in four files under `hyperbook-fedwiki/`. They are part of the library copy this repository builds. Using the unmodified external Codeberg checkout as the ASDF provider requires resolving those extensions, including the missing seams for code discovery and lossless FedWiki ingestion.
 
+`(asdf:test-system "dreyeck/hyperdoc/library-source-tests")` compares the working tree with the pinned Git objects using the existing source scanner. It needs the upstream objects in the local Git store and can run in a fresh image without loading HyperDoc. `dreyeck/hyperdoc/library-tests` also checks the FedWiki image renderer.
+
 The rest of this document records the earlier intake at `8a1149197`.
 
 The refactor started on `dreyeck.ch` at `401953522ec503cf78764bddc5534f7a9f16fd22`, initially clean. The interrupted state was retained: 17 modified files, the structurally migrated HyperSpec file removed from its former path, and two new dreyeck source files; nothing staged. Early page-form verification exposed reader representation/package differences. These were repaired and the intended structures read back before further work. No partial failed edit was accepted as proof.

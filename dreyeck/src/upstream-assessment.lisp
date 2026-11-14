@@ -641,7 +641,7 @@ Whether the text the proposal was made against is the text of the fork now is co
     (make-ownership-policy :upstream-paths +library-paths+ :inventory inventory :page-directory "dreyeck/pages" :root (uiop:ensure-directory-pathname root)
                            :outside (let ((file (merge-pathnames "docs/upstream-intake/ownership-statements.lisp-data" (uiop:ensure-directory-pathname root))))
                                       (and (probe-file file) (rest (read-plain-data file))))
-                           :contract-paths '("dreyeck/tests/hyperdoc-library-delta.lisp" "dreyeck/tests/hyperdoc-boundary.lisp"))))
+                           :contract-paths '("dreyeck/tests/hyperdoc-library-source.lisp" "dreyeck/tests/hyperdoc-boundary.lisp"))))
 
 (defun system-names-in-root (root)
   (loop for asd in (directory (merge-pathnames "*.asd" root))

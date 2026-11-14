@@ -109,7 +109,7 @@
 (defun check-example-intake-reference ()
   "The later intake and the library source comparison use the same reference."
   (let ((state (ua:read-state (in-checkout "docs/upstream-intake/state.lisp-data")))
-        (contract (uiop:read-file-string (in-checkout "dreyeck/tests/hyperdoc-library-delta.lisp"))))
+        (contract (uiop:read-file-string (in-checkout "dreyeck/tests/hyperdoc-library-source.lisp"))))
     (assert (search (ua:state-last-examined state) contract))
     (assert (not (search +example-commit+ contract)) () "the DNS example is assessed separately"))
   t)
