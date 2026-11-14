@@ -5,27 +5,30 @@ window.mountFedwikiMech = function (view) {
     container.dataset.mounted = 'true'
     const status = container.querySelector('.mech-host-status')
     if (!container.dataset.hostUrl) continue
+    const attached = container.dataset.hostScope === 'page-attached'
     let url
     try {
-      url = new URL(container.dataset.hostUrl)
+      url = new URL(container.dataset.hostUrl, attached ? location.origin : undefined)
       if (!['https:', 'http:'].includes(url.protocol) || url.username || url.password)
         throw Error('The Wiki plugin host must use an HTTP(S) origin without credentials.')
-      if (url.origin === location.origin)
-        throw Error('The Wiki plugin host must have a separate origin from the Lisp Inspector.')
+      if (attached ? url.origin !== location.origin : url.origin === location.origin)
+        throw Error(attached ? 'The page attachment must use the Inspector server.'
+          : 'The Wiki plugin host must have a separate origin from the Lisp Inspector.')
     } catch (error) { status.textContent = error.message; return }
     url.hash = new URLSearchParams({parent: location.origin}).toString()
     const frame = document.createElement('iframe')
     frame.title = 'Mech operations — ' + container.dataset.itemId
-    // Separate origin is mandatory: allow-same-origin preserves unchanged Solo
-    // opener/postMessage behavior, without granting access to the Inspector DOM.
-    frame.sandbox = 'allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox'
+    // An attached host has an opaque origin. The legacy host needs its own
+    // separate origin and popups for the original Solo contract.
+    frame.sandbox = attached ? 'allow-scripts'
+      : 'allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox'
     frame.referrerPolicy = 'no-referrer'
     frame.style.cssText = 'width:100%;height:260px;border:1px solid #bbb;box-sizing:border-box'
     let initialized = false
     const timeout = setTimeout(() => { if (!initialized) status.textContent = 'Wiki plugin host unavailable. No Code item has run.' }, 10000)
     const receive = event => {
       if (!frame.isConnected) { window.removeEventListener('message', receive); clearTimeout(timeout); return }
-      if (event.source !== frame.contentWindow || event.origin !== url.origin) return
+      if (event.source !== frame.contentWindow || event.origin !== (attached ? 'null' : url.origin)) return
       if (event.data?.type === 'hyperdoc-mech-ready' && !initialized) {
         initialized = true; clearTimeout(timeout)
         frame.contentWindow.postMessage({type: 'hyperdoc-mech-page',
@@ -33,8 +36,9 @@ window.mountFedwikiMech = function (view) {
           site: container.dataset.site, slug: container.dataset.slug,
           neighborhood: container.dataset.neighborhoodJsonBase64
             ? JSON.parse(new TextDecoder().decode(Uint8Array.from(atob(container.dataset.neighborhoodJsonBase64), c => c.charCodeAt(0))))
-            : null}, url.origin)
-        status.textContent = 'Code runs only after Play. Solo opens in a separate browser window.'
+            : null}, attached ? '*' : url.origin)
+        status.textContent = attached ? 'Code runs only after Play.'
+          : 'Code runs only after Play. Solo opens in a separate browser window.'
       } else if (event.data?.type === 'hyperdoc-mech-height') {
         const height = Number(event.data.height)
         if (Number.isFinite(height)) frame.style.height = Math.min(900, Math.max(180, height)) + 'px'

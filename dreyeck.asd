@@ -76,8 +76,10 @@
 (asdf:defsystem "dreyeck/fedwiki-story"
   :description "Dreyeck's browser Mech bridge and Solo Trail Story renderer"
   :depends-on ("hyperbook/fedwiki" "html-inspector-views" "cl-base64"
-               "flexi-streams" "alexandria" "cl-ppcre" "shasht" "bordeaux-threads")
-  :components ((:file "dreyeck/src/fedwiki-story")
+               "flexi-streams" "alexandria" "cl-ppcre" "shasht" "bordeaux-threads"
+               "dreyeck/local-fedwiki-page" "zip")
+  :components ((:file "dreyeck/src/fedwiki-story-assets")
+               (:file "dreyeck/src/fedwiki-story" :depends-on ("dreyeck/src/fedwiki-story-assets"))
                (:static-file "assets/dreyeck-fedwiki/mech-story.js")
                (:static-file "assets/dreyeck-fedwiki/solo-trail-story.js"))
   :in-order-to ((test-op (test-op "dreyeck/fedwiki-mech/tests"))))
@@ -87,6 +89,7 @@
   :depends-on ("dreyeck/fedwiki-story" "clog-moldable-inspector")
   :serial t
   :components ((:file "dreyeck/tests/fedwiki-mech-story")
+               (:file "dreyeck/tests/fedwiki-mech-assets")
                (:file "dreyeck/tests/fedwiki-mech-sitemaps")
                (:file "dreyeck/tests/fedwiki-mech-topics")
                (:file "dreyeck/tests/fedwiki-mech-dialog"))
@@ -1680,7 +1683,7 @@
   T
   :DEPENDS-ON
   (#:DREYECK/LOCAL-FEDWIKI-PAGE #:HYPERBOOK/SERVER #:DREYECK/PAGE-ATTACHED-ASDF
-   #:DREYECK/CATALOG #:DREYECK/GESTURE/CLOG)
+   #:DREYECK/CATALOG #:DREYECK/GESTURE/CLOG #:DREYECK/FEDWIKI-STORY)
   :COMPONENTS
   ((:FILE "local-fedwiki-view-package") (:FILE "local-fedwiki-view")
    (:FILE "local-fedwiki-page-source-views"))

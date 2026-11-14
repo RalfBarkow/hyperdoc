@@ -127,8 +127,8 @@ runtime that is allowed to ask it."
        (pane-width "700px")
        (development nil)
        (wiki-id *default-wiki-id*))
-  "Serve the HyperBook catalog, server-independent /view/<slug> FedWiki pages
-and the /gesture marking-menu window."
+  "Serve the HyperBook catalog, local /view/<slug> FedWiki pages,
+attached Mech browser assets and the /gesture marking-menu window."
 
   ;; Register the local FedWiki before SERVE-CATALOG installs the
   ;; routes for all currently registered HyperBooks.
@@ -136,11 +136,15 @@ and the /gesture marking-menu window."
    site-root
    wiki-id)
 
-  (hyperbook/server:serve-catalog
-   :port port
-   :host host
-   :pane-width pane-width
-   :development development)
+  (let ((asset-site-root (truename (uiop:ensure-directory-pathname site-root))))
+    (hyperbook/server:serve-catalog
+     :port port
+     :host host
+     :pane-width pane-width
+     :development development
+     :lack-middleware-list
+     (list (lambda (app)
+             (dreyeck/fedwiki-story-assets:wrap-mastodon-assets app asset-site-root)))))
 
   (install-local-fedwiki-view-route
    site-root

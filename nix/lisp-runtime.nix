@@ -39,6 +39,7 @@
       ps."trivial-cltl2"
       ps."trivial-package-local-nicknames"
       usocket
+      zip
       ps._3bmd
       ps._3bmd-ext-code-blocks
     ]

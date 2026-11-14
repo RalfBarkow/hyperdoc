@@ -66,6 +66,7 @@
     (assert (string= source (fw::text-of solo)))))
 
 (defun run-tests ()
+  (check-page-attached-browser-assets)
   (check-dialog-contract)
   (check-topics-contract)
   (check-sitemap-contract)

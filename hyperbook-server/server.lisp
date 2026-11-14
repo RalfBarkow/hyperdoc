@@ -14,13 +14,14 @@
                                        (host "0.0.0.0")
                                        (title "Inspector")
                                        (pane-width "700px")
-                                       (development nil))
+                                       (development nil)
+                                       lack-middleware-list)
   "Start a Web server on PORT that serves an inspector on ROOT-OBJECT at path \"/\"
 with the given TITLE and PANE-WIDTH. All registered HyperBooks are
 served at the URL defined by their slug. If DEVELOPMENT is non-nil,
 enable playgrounds and other development tools. This is not
 recommended on public servers because it allows the execution of
-arbitrary Lisp code.
+arbitrary Lisp code. LACK-MIDDLEWARE-LIST is passed to CLOG at startup.
 
 HOST is the address to bind to, and defaults to what CLOG would have
 chosen on its own, every interface. Passing \"127.0.0.1\" is what makes
@@ -37,7 +38,8 @@ nobody happened to connect."
                                                  :playground? development))
    :host host
    :port port
-   :extended-routing t)
+   :extended-routing t
+   :lack-middleware-list lack-middleware-list)
   (dolist (hb (hyperbook:hyperbooks-of hyperbook:*catalog*))
     (add-path-to-hyperbook hb pane-width development))
   (setf *server-parameters* (list pane-width development)))
@@ -85,7 +87,7 @@ nobody happened to connect."
             (:p (views:esc (str:join "/" (path-of notfound))))))))
 
 (defun serve-catalog (&key (port 8080) (host "0.0.0.0") (pane-width "700px")
-                        (development nil))
+                        (development nil) lack-middleware-list)
   "Start a Web server on PORT that serves the HyperBook catalog at path \"/\"
 with the given PANE-WIDTH. All registered HyperBooks are served at the
 URL defined by their slug. If DEVELOPMENT is non-nil, enable
@@ -97,6 +99,7 @@ HOST is passed through unchanged; see SERVE-HYPERBOOKS."
                    :host host
                    :title "HyperBook Catalog"
                    :development development
+                   :lack-middleware-list lack-middleware-list
                    :pane-width pane-width))
 
 ;;
