@@ -52,7 +52,22 @@
            #:work-fedwiki-item-observation #:observe-work-fedwiki-item
            #:fedwiki-item-observation-site #:fedwiki-item-observation-slug
            #:fedwiki-item-observation-item-id #:fedwiki-item-observation-item
-           #:resolve-work-fedwiki-item-observation #:project-fedwiki-work))
+           #:resolve-work-fedwiki-item-observation #:project-fedwiki-work
+           #:addresses-creation-request
+           #:addresses-read-set
+           #:addresses-warrant
+           #:qualified-addresses-bridge
+           #:bridge-warrant
+           #:bridge-occurrence
+           #:bridge-annotation-end
+           #:qualified-bridges
+           #:resolve-addresses-bridge
+           #:evidence-neighborhood
+           #:addresses-qualification-error
+           #:stale-addresses-bridge
+           #:addresses-stale-reason
+           #:relationship-insertion-position
+           #:addresses-authority-descriptor))
 (in-package #:dreyeck/work/reading)
 
 (hyperdoc:see (hyperdoc:page "D2 Connections"))
