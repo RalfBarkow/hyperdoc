@@ -16,8 +16,9 @@
 ;; The page class for file type "html" is html-page.
 ;;
 
-(defmethod page-class ((hyperdoc::hd hyperdoc:hyperdoc) (filetype (eql :html)))
-           (declare (ignore hyperdoc::hd)) (find-class (quote html-page)))
+(defmethod page-class ((hd hyperdoc) (filetype (eql :html)))
+  (declare (ignore hd))
+  (find-class 'html-page))
 
 ;;
 ;; Load an HTML page, parse it, set the title, and compile a
@@ -166,12 +167,24 @@
   (let* ((package-name (plump:attribute element "package"))
          (package (or (and package-name
                            (find-package (str:upcase package-name)))
-                      *current-package*)))
-    (-> element
-        plump:text
-        str:trim
-        (views/standard:parse-lisp-code package)
-        views/standard:render-as-html))
+                      *current-package*))
+         (executable? (plump:attribute element "executable"))
+         (code (-> element plump:text str:trim))
+         (cst (views/standard:parse-lisp-code code package)))
+    (views:html
+      (:table
+        (:tr
+         (when executable?
+           (views:html
+             (:td
+              (views:eval-button "►"
+                                 (views:thunk
+                                   (let ((*package* package))
+                                     (-> code parse-and-eval)))
+                                 "Run code"))))
+         (views:html
+           (:td
+            (views/standard:render-as-html cst)))))))
   t)
 
 
@@ -235,7 +248,8 @@
   *hyperdoc-html-page-assets*)
 
 (defmethod hb:serialize-page-dom ((page page))
-           (let ((*current-package* (find-package "CL"))) (call-next-method)))
+  (let ((*current-package* (find-package "CL")))
+    (call-next-method)))
 
 ;;
 ;; Parse tree view

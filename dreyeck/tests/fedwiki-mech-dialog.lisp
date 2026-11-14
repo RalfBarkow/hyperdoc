@@ -1,4 +1,4 @@
-(in-package :hyperbook/fedwiki/tests)
+(in-package :dreyeck/fedwiki-mech/tests)
 
 (defun dialog-large-page (fixture-file)
   "Trusted generated 1500-entry input supplied by the offline driver only."
@@ -17,7 +17,7 @@
 (defun check-dialog-contract ()
   (let* ((page (topics-page))
          (item (find :mech (fw::story-of page) :key #'fw::item-type-of))
-         (fw::*mech-plugin-host-url* "https://mech.dreyeck.ch/assets/hyperdoc-mech/")
+         (dreyeck/fedwiki-story:*mech-plugin-host-url* "https://mech.dreyeck.ch/assets/hyperdoc-mech/")
          (view (story-view page)) (html (v:view-html view)))
     (assert (equal "3a62aa636c883134" (fw::id-of item)))
     (assert (search (format nil "CLICK~% POPUP state") (fw::text-of item)))
@@ -27,7 +27,7 @@
 
 (defun serve-dialog-browser-witness (port host-url stop-file fixture-file)
   "Fresh Inspector; original page plus explicit trusted generated large input."
-  (setf fw::*mech-plugin-host-url* host-url)
+  (setf dreyeck/fedwiki-story:*mech-plugin-host-url* host-url)
   (clog:initialize (lambda (body) (declare (ignore body))) :port port :host "127.0.0.1")
   (dolist (entry (list (cons "/ready" (topics-page))
                        (cons "/large" (dialog-large-page fixture-file))))

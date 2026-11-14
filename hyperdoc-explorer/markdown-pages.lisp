@@ -16,8 +16,9 @@
 
 ;; The page class for file type "md" is markdown-page.
 
-(defmethod page-class ((hyperdoc::hd hyperdoc:hyperdoc) (filetype (eql :md)))
-           (declare (ignore hyperdoc::hd)) (find-class (quote markdown-page)))
+(defmethod page-class ((hd hyperdoc ) (filetype (eql :md)))
+  (declare (ignore hd))
+  (find-class 'markdown-page))
 
 ;;
 ;; Load a Markdown page into an HTML parse tree.

@@ -27,10 +27,10 @@
           ;; Pages can be HTML or Markdown files
           ((member (pathname-type file) '("html" "md") :test #'string=)
            (let ((page (gethash file text-pages)))
-             (unless page
-               (setf page (make-text-page hdoc file))
-               (setf (gethash file text-pages) page))
-             (load-page page)
+             (if page
+                 (load-page page)
+                 (progn (setf page (make-text-page hdoc file))
+                        (setf (gethash file text-pages) page)))
              (push file page-files)))))
       ;; Remove pages whose files have been deleted.
       (loop for file being the hash-keys in text-pages
@@ -70,6 +70,22 @@ PAGE-LOOKUP-FAILURE."
   (or (gethash id (pages-of hdoc))
       (and signal-error?
            (error 'page-lookup-failure :hyperbook hdoc :page-id id))))
+
+;;
+;; Access text, code, and tool pages
+;; (external API for use in HyperDocs)
+;;
+
+(defun text-pages (hd)
+  (ensure-pages-loaded hd)
+  (alexandria:hash-table-values (text-pages-of hd)))
+
+(defun code-pages (hd)
+  (loop for page across (code-pages-of hd)
+        collect page))
+
+(defun tool-pages (hd)
+  (tools-of hd))
 
 ;;
 ;; The inspector title bar for HyperDocs

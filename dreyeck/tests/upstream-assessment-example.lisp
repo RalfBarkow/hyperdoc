@@ -106,14 +106,12 @@
       (assert (uiop:string-prefix-p "DIED" (funcall cell "probe-real" "0a7d4de")) () "the fork at dreyeck.ch ends the process in the first attempt")))
   t)
 
-(defun check-example-nothing-moved ()
-  "The assessment moved neither the last examined state nor the references of the library contract."
+(defun check-example-intake-reference ()
+  "The later intake and the library source comparison use the same reference."
   (let ((state (ua:read-state (in-checkout "docs/upstream-intake/state.lisp-data")))
-        (contract (uiop:read-file-string (in-checkout "dreyeck/tests/hyperdoc-library-delta.lisp"))))
-    (assert (equal "8a1149197fabcb1ab5622316f09c5a60c2d3f1f8" (ua:state-last-examined state)))
-    (assert (search "8a1149197fabcb1ab5622316f09c5a60c2d3f1f8" contract) () "the contract's upstream reference is the last examined state")
-    (assert (search "401953522ec503cf78764bddc5534f7a9f16fd22" contract) () "+PREVIOUS+ is where it was")
-    (assert (not (search +example-commit+ contract)) () "the contract does not name the new commit"))
+        (contract (uiop:read-file-string (in-checkout "dreyeck/tests/hyperdoc-library-source.lisp"))))
+    (assert (search (ua:state-last-examined state) contract))
+    (assert (not (search +example-commit+ contract)) () "the DNS example is assessed separately"))
   t)
 
 (defun rendered-views (object)
@@ -304,7 +302,7 @@
   (check-example-in-the-fork)
   (check-example-decisions)
   (check-example-reused-analysis)
-  (check-example-nothing-moved)
+  (check-example-intake-reference)
   (check-example-views)
   (check-example-vocabulary)
   (check-example-ownership-evidence)

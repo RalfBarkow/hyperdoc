@@ -6,7 +6,7 @@ import {test} from 'node:test'
 // Playwright and Chromium when they are outside this checkout.
 const playwright = process.env.HYPERDOC_PLAYWRIGHT || 'playwright'
 const {chromium} = await import(playwright)
-const script = fileURLToPath(new URL('../assets/hyperbook/fedwiki/solo-trail-story.js', import.meta.url))
+const script = fileURLToPath(new URL('../assets/dreyeck-fedwiki/solo-trail-story.js', import.meta.url))
 
 const node = (id, label, x, y) =>
   '<g class="node"><title>' + id + '</title><polygon fill="white" stroke="black" points="' +

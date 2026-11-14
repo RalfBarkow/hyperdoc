@@ -1,12 +1,6 @@
 ;;;; Domain findings from the existing Riesbeck/Beane rule engine.
 (in-package #:dreyeck/lisp-critic)
 
-(export '(critic-rule critic-target critique critic-rule-run-record
-          rule-name-of rule-pattern-of rule-response-of rule-source-of
-          target-form-of target-runs-of rule-of target-of critiques-of
-          critique-record-of critique-evidence-of critique-explanation-of
-          make-critic-source-station run-critic-rule car-cdr-critique-example))
-
 (defclass critic-rule ()
   ((name :initarg :name :reader rule-name-of)
    (pattern :initarg :pattern :reader rule-pattern-of)

@@ -19,7 +19,7 @@ const origin=`http://127.0.0.1:${port}`,script=path.join(work,'witness.lisp')
 fs.writeFileSync(script,`(require :asdf)
 (asdf:load-system "dreyeck/work/reading/tests")
 (defvar *navigation-inspector* nil)
-(setf hyperbook/fedwiki::*mech-plugin-host-url* "https://mech.dreyeck.ch/assets/hyperdoc-mech/")
+(setf dreyeck/fedwiki-story:*mech-plugin-host-url* "https://mech.dreyeck.ch/assets/hyperdoc-mech/")
 (clog:initialize
  (lambda (body)
    (setf (clog:text (clog:create-style-block body)) clog-moldable-inspector::*css*)

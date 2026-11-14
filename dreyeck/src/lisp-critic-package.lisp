@@ -42,4 +42,23 @@
            #:lisp-critic-run-record-notes-of
            #:lisp-critic-source-station-present-p
            #:lisp-critic-contract-available-p
-           #:run-lisp-critic-contract))
+           #:run-lisp-critic-contract
+           #:critic-rule
+           #:critic-target
+           #:critique
+           #:critic-rule-run-record
+           #:rule-name-of
+           #:rule-pattern-of
+           #:rule-response-of
+           #:rule-source-of
+           #:target-form-of
+           #:target-runs-of
+           #:rule-of
+           #:target-of
+           #:critiques-of
+           #:critique-record-of
+           #:critique-evidence-of
+           #:critique-explanation-of
+           #:make-critic-source-station
+           #:run-critic-rule
+           #:car-cdr-critique-example))

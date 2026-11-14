@@ -399,6 +399,18 @@ decision is taken again when it is evaluated, not only when it was shown."))
                       "▷ " (cl-who:esc label) " (not run in a served Catalog)"))
       (hv:eval-button label thunk hover-label)))
 
+;; Let the upstream printer render the snippet without a run button.
+;; Keep the authored DOM available to the Inspector and local development.
+(defmethod plump:serialize-object :around ((element plump:element))
+  (if (and (string-equal "lisp-code" (plump:tag-name element))
+           (typep hyperbook:*current-page* 'hyperdoc:page)
+           (plump:attribute element "executable")
+           (policy-enforced-p))
+      (let ((display (plump:clone-node element)))
+        (plump:remove-attribute display "executable")
+        (call-next-method display))
+      (call-next-method)))
+
 ;;;; The runtime boundary for Inspector controls
 ;;
 ;; The Inspector evaluates, when it is clicked, the thunk a view registered under an EVAL- or ACTION- id (HV:EVAL-BUTTON, HV:ACTION-BUTTON,
@@ -604,10 +616,20 @@ actions, and the two examples reviewed to run.")
      :sha256 "c74271d2e1779279d1043e0f5770ee4263257dbb70708c0d04dc8fac534147e4")
     (:point "a control is registered by pushing (id . thunk) on the view accumulator's references (CONTAIN-CONTROLS replaces the cdr)"
      :system "html-inspector-views" :file "html.lisp" :form "(defun html-id"
-     :sha256 "b94e3dceb3079a54c14f6a067f092efcfd6606f1df2d028d0b273d962c772aab"))
-  "Each upstream point this layer replaces or relies on, with the digest of the
-source form as reviewed: html-inspector-views 386df893, clog-moldable-inspector
-b369f0a4, the revisions dreyeck's flake pins.")
+     :sha256 "b94e3dceb3079a54c14f6a067f092efcfd6606f1df2d028d0b273d962c772aab")
+    (:point "Local-only FedWiki pages suppress inherited title-bar actions"
+     :system "dreyeck" :file "dreyeck/work/fedwiki-local-only.lisp"
+     :form "(defmethod v:title-bar-action-buttons ((page own-page))"
+     :title-bar-class ("DREYECK/WORK/FEDWIKI-LOCAL-ONLY" "OWN-PAGE")
+     :sha256 "b513753cae95014bba1120f22669286e9d65a751db4131db4ca4031cfbc61b8e")
+    (:point "Historical FedWiki pages suppress inherited title-bar actions"
+     :system "dreyeck" :file "dreyeck/work/trails-rendered-federated-context.lisp"
+     :form "(defmethod html-inspector-views:title-bar-action-buttons ((page context-fedwiki-page))"
+     :title-bar-class ("DREYECK/WORK/TRAILS-RENDERED-READING" "CONTEXT-FEDWIKI-PAGE")
+     :sha256 "e6147641fcabedbfb15be681eb8ece49f5392420f29fb670ae5e4b48baf61e65"))
+  "Reviewed source forms for the containment layer and action-free title bars.
+The upstream inspector revisions are html-inspector-views 386df893 and
+clog-moldable-inspector b369f0a4, pinned in Dreyeck's flake.")
 
 (defparameter +replacement-methods+
   (flet ((entry (label generic qualifiers specializers)
@@ -652,8 +674,8 @@ function, so both are recorded here.")
           (ironclad:digest-sequence :sha256 (sb-ext:string-to-octets (%form-text text start) :external-format :utf-8))))))
 
 (defun containment-adapter-drift (&optional (adapters +containment-adapters+))
-  "Each adapted upstream point that no longer matches what was reviewed, and each
-new pathname view or title-bar class that nothing here has reviewed. NIL when
+  "Each adapted point that no longer matches what was reviewed, and each new
+pathname view or title-bar class that nothing here has reviewed. NIL when
 everything is as reviewed."
   (append
    (loop for adapter in adapters
@@ -668,9 +690,15 @@ everything is as reviewed."
            collect (list :point (format nil "new pathname view ~S" view)))
    (loop for method in (c2mop:generic-function-methods #'hv:title-bar-action-buttons)
          for class = (first (c2mop:method-specializers method))
-         when (and (null (method-qualifiers method)) (typep class 'class) (not (eq class (find-class t)))
-                   (not (member (symbol-name (class-name class)) +known-title-bar-classes+ :test #'string=)))
-           collect (list :point (format nil "new title-bar actions on ~S" (class-name class))))
+         for name = (and (typep class 'class) (class-name class))
+         for package = (and (symbolp name) (symbol-package name))
+         when (and name (null (method-qualifiers method)) (not (eq class (find-class t)))
+                   (not (member (symbol-name name) +known-title-bar-classes+ :test #'string=))
+                   (not (and package
+                             (find (list (package-name package) (symbol-name name))
+                                   +containment-adapters+ :test #'equal
+                                   :key (lambda (adapter) (getf adapter :title-bar-class))))))
+           collect (list :point (format nil "new title-bar actions on ~S" name)))
    (loop for (label generic qualifiers specializers method) in +replacement-methods+
          unless (eq method (find-method generic qualifiers specializers nil))
            collect (list :point (format nil "~A is no longer this layer's method" label)))))

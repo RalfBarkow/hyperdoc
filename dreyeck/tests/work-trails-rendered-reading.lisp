@@ -496,7 +496,7 @@
         (assert (search "hyperbook-reference" html))
         (assert (not (search "hyperbook-error" html)))))
     ;; Even with a configured host, documentation creates no executable frame.
-    (let* ((hyperbook/fedwiki::*mech-plugin-host-url*
+    (let* ((dreyeck/fedwiki-story:*mech-plugin-host-url*
              "https://mech.dreyeck.ch/assets/hyperdoc-mech/")
            (page (find "hyperdoc-mech" targets :key #'hyperbook:id-of :test #'equal))
            (view (hyperbook/fedwiki::👀story page))

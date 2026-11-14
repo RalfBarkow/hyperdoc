@@ -141,11 +141,9 @@
     (plump:serialize (dom-of page) views::*html-stream*)))
 
 (defun collect-assets (assets)
-  "ASSETS is a list whose first element is the most specific; the result is that list with every inherited asset set in front of it,
-most general first, however long the chain of INHERIT is."
   (let ((inherit (inherit-of (first assets))))
     (if inherit
-        (collect-assets (cons inherit assets))
+        (append (collect-assets (list inherit)) assets)
         assets)))
 
 (defun collect-tag-dispatchers (all-assets)

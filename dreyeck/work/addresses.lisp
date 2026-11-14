@@ -2,12 +2,6 @@
 ;;;; separately validated from snapshot-bound operation requests.
 (in-package #:dreyeck/work/reading)
 
-(export '(addresses-creation-request addresses-read-set addresses-warrant
-          qualified-addresses-bridge bridge-warrant bridge-occurrence bridge-annotation-end
-          qualified-bridges resolve-addresses-bridge evidence-neighborhood
-          addresses-qualification-error stale-addresses-bridge addresses-stale-reason
-          relationship-insertion-position addresses-authority-descriptor))
-
 (defparameter +addresses-version+ "addresses-v1")
 (defparameter +addresses-annotation+ "<!--work-addresses-warrant:v1:")
 

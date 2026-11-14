@@ -240,6 +240,43 @@ registered, so no click can reach it."
         (assert (not (member thunk references))))))
   t)
 
+(defun check-inline-lisp-code ()
+  "Exercise the upstream tag printer in served and local Content views."
+  (uiop:with-temporary-file (:stream out :pathname path :type "html")
+    (write-string
+     "<h1>Inline Lisp fixture</h1>
+<lisp-code>(+ 1 2)</lisp-code>
+<lisp-code package='CL-USER' executable='false'>(incf dreyeck/authority-policy/tests::*probe-calls*)</lisp-code>"
+     out)
+    (finish-output out)
+    (let* ((book (make-instance 'hyperdoc:hyperdoc :id "inline-lisp-fixture"))
+           (page (hyperdoc::make-text-page book path))
+           (snippet (second (plump:get-elements-by-tag-name (hyperbook:dom-of page) "lisp-code")))
+           (*probe-calls* 0))
+      (flet ((render ()
+               (let* ((view (hv:👀content page))
+                      (html (hv:view-html view))
+                      ;; Highlighted symbols also use eval-ids to open their definitions.
+                      (controls (remove-if-not
+                                 (lambda (reference)
+                                   (and (uiop:string-prefix-p "eval-" (car reference))
+                                        (typep (cdr reference) 'hv:thunk)))
+                                 (hv:view-references view))))
+                 (assert (search "probe-calls" html :test #'char-equal))
+                 (assert (zerop *probe-calls*))
+                 (values html controls))))
+        (served (lambda ()
+                  (multiple-value-bind (html controls) (render)
+                    (assert (null controls))
+                    (assert (not (search "Run code" html))))))
+        (assert (string= "false" (plump:attribute snippet "executable")))
+        (developing (lambda ()
+                      (multiple-value-bind (html controls) (render)
+                        (assert (search "Run code" html))
+                        (assert (= 1 (length controls)))
+                        (assert (= 1 (hv:eval-thunk (cdar controls))))))))))
+  t)
+
 ;;; The runtime boundary: a control no one reviewed is refused when served, whoever made it and however it got into the view.
 
 (defvar *ran* nil "Set by the probe controls, so that a refused control can be shown not to have run.")
@@ -372,6 +409,19 @@ registered as unresolved or unsafe."
     (assert (not (member "dreyeck/local-fedwiki-page/activation-inspector" closure :test #'string=))))
   t)
 
+(defun check-read-only-fedwiki-title-bars ()
+  "The local-only and historical pages suppress inherited actions in both modes."
+  (dolist (class '(dreyeck/work/fedwiki-local-only::own-page
+                   dreyeck/work/trails-rendered-reading::context-fedwiki-page))
+    (let ((page (make-instance class)))
+      (flet ((check-title-bar ()
+               (let ((view (hv:title-bar-action-buttons page)))
+                 (assert (string= "" (hv:view-html view)))
+                 (assert (null (hv:view-references view))))))
+        (served #'check-title-bar)
+        (developing #'check-title-bar))))
+  t)
+
 (defun check-adapters-as-reviewed ()
   "Every adapted upstream point is as reviewed; a changed one is reported."
   (assert (null (ap:containment-adapter-drift)) () "Drifted: ~S" (ap:containment-adapter-drift))
@@ -391,6 +441,7 @@ CHECK-ADAPTERS-AS-REVIEWED compares the adapted upstream points and classes with
   (check-lazy-cell-withheld)
   (check-examples-gated)
   (check-run-buttons)
+  (check-inline-lisp-code)
   (check-control-boundary)
   (check-reviewed-controls-match-their-sites)
   (check-contracts)
@@ -401,6 +452,7 @@ CHECK-ADAPTERS-AS-REVIEWED compares the adapted upstream points and classes with
   (run-gate-tests)
   (check-fedwiki-actions-withheld)
   (check-reload-withheld)
+  (check-read-only-fedwiki-title-bars)
   (check-adapters-as-reviewed)
   (format t "~&AUTHORITY-POLICY-PASS: served, Operations stays and shows contract status; an unreviewed ~
 new method is listed, gets no Evaluate and is refused if invoked anyway; a contracted reader-like ~

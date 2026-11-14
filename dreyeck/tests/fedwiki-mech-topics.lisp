@@ -1,7 +1,7 @@
-(in-package :hyperbook/fedwiki/tests)
+(in-package :dreyeck/fedwiki-mech/tests)
 
 (defun topics-json (name)
-  (with-open-file (in (asdf:system-relative-pathname :hyperbook
+  (with-open-file (in (asdf:system-relative-pathname :dreyeck
                        (concatenate 'string "tests/fixtures/mech-topics/" name)))
     (shasht:read-json in)))
 
@@ -43,17 +43,17 @@ original journal context with unavailable sitemaps; never fill those synthetical
 (defun check-topics-contract ()
   (let* ((page (topics-page))
          (item (find :mech (fw::story-of page) :key #'fw::item-type-of))
-         (fw::*mech-plugin-host-url* "https://host.fixture.test/")
+         (dreyeck/fedwiki-story:*mech-plugin-host-url* "https://host.fixture.test/")
          (view (story-view page))
          (html (v:view-html view))
-         (snapshot (fw::mech-neighborhood-snapshot page)))
+         (snapshot (dreyeck/fedwiki-story::mech-neighborhood-snapshot page)))
     (assert (equal "3a62aa636c883134" (fw::id-of item)))
     (assert (search "WALK 15 topics" (fw::text-of item)))
     (assert (= 1 (length (gethash "sites" snapshot))))
     (assert (= 45 (length (gethash "sitemap" (aref (gethash "sites" snapshot) 0)))))
     (assert (search "No Code item has run" html))
     (assert (member item (mapcar #'cdr (v:view-references view)) :test #'eq)))
-  (let ((sites (gethash "sites" (fw::mech-neighborhood-snapshot (topics-page :context)))))
+  (let ((sites (gethash "sites" (dreyeck/fedwiki-story::mech-neighborhood-snapshot (topics-page :context)))))
     (assert (= 3 (length sites)))
     (assert (equalp #("ready" "missing" "missing")
                    (map 'vector (lambda (s) (gethash "state" s)) sites))))
@@ -61,7 +61,7 @@ original journal context with unavailable sitemaps; never fill those synthetical
 
 (defun serve-topics-browser-witness (port host-url stop-file)
   "Fresh offline Inspector for original Pattern Machinery; no production access."
-  (setf fw::*mech-plugin-host-url* host-url)
+  (setf dreyeck/fedwiki-story:*mech-plugin-host-url* host-url)
   (clog:initialize (lambda (body) (declare (ignore body))) :port port :host "127.0.0.1")
   (dolist (mode '(:ready :missing :loading :failed :context))
     (let ((page (topics-page mode)))

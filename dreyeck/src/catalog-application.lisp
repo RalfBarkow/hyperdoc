@@ -36,7 +36,7 @@
                           (site-root (dreyeck/local-fedwiki-view:configured-site-root))
                           (catalog-system "dreyeck/catalog")
                           (mech-plugin-host-url
-                            hyperbook/fedwiki::*mech-plugin-host-url*)
+                            dreyeck/fedwiki-story:*mech-plugin-host-url*)
                           (pane-width "700px") (development nil))
   "Start Catalog and local /view and /gesture routes; return to the caller.
 ASDF loads the default Catalog through LOCAL-FEDWIKI-VIEW. CATALOG-SYSTEM
@@ -45,10 +45,15 @@ Interactive callers own shutdown. MAIN owns executable lifetime."
   (let ((port (%port port)))
     ;; MAIN always supplies the environment choice, including NIL when absent.
     ;; Interactive callers may retain their explicitly configured host instead.
-    (setf hyperbook/fedwiki::*mech-plugin-host-url* mech-plugin-host-url)
+    (setf dreyeck/fedwiki-story:*mech-plugin-host-url* mech-plugin-host-url)
     ;; The default membership is already a static ASDF dependency.
     (unless (equal catalog-system "dreyeck/catalog")
       (asdf:load-system catalog-system))
+    ;; The Explorer lazily fills two shared page tables on first access.
+    ;; Finish that work before any CLOG connection can start a page lookup.
+    (dolist (book (hyperbook:hyperbooks-of hyperbook:*catalog*))
+      (when (typep book 'hyperdoc:hyperdoc)
+        (hyperdoc:ensure-pages-loaded book)))
     (dreyeck/local-fedwiki-view:serve-catalog-with-local-fedwiki-view
      :port port :host host :site-root site-root :pane-width pane-width
      :development development)))

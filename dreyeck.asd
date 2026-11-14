@@ -48,17 +48,22 @@
   (ASDF/LISP-ACTION:TEST-OP (OP COMPONENT) (DECLARE (IGNORE OP COMPONENT))
    (UIOP/PACKAGE:SYMBOL-CALL :DREYECK/HYPERDOC/BOUNDARY-TESTS :RUN-TESTS)))
 
-(ASDF/PARSE-DEFSYSTEM:DEFSYSTEM "dreyeck/hyperdoc/library-tests"
-  :DESCRIPTION
-  "CST comparison against the verified upstream and retained compatibility inventory"
-  :DEPENDS-ON
-  ("hyperdoc/explorer" "hyperbook/fedwiki" "hyperbook/server"
-   "dreyeck/workflow" "dreyeck/git")
-  :COMPONENTS
-  ((:FILE "dreyeck/tests/hyperdoc-library-delta"))
-  :PERFORM
-  (ASDF/LISP-ACTION:TEST-OP (OP COMPONENT) (DECLARE (IGNORE OP COMPONENT))
-   (UIOP/PACKAGE:SYMBOL-CALL :DREYECK/HYPERDOC/LIBRARY-TESTS :RUN-TESTS)))
+(asdf:defsystem "dreyeck/hyperdoc/library-source-tests"
+  :description "Source comparison against the pinned upstream and retained compatibility"
+  :depends-on ("dreyeck/asdf-source" "dreyeck/git")
+  :components ((:file "dreyeck/tests/hyperdoc-library-source"))
+  :perform (asdf:test-op (op component)
+             (declare (ignore op component))
+             (uiop:symbol-call :dreyeck/hyperdoc/library-source-tests :run-tests)))
+
+(asdf:defsystem "dreyeck/hyperdoc/library-tests"
+  :description "Source boundary and FedWiki image compatibility checks"
+  :depends-on ("hyperbook/fedwiki")
+  :components ((:file "dreyeck/tests/hyperdoc-library-delta"))
+  :in-order-to ((asdf:test-op (asdf:test-op "dreyeck/hyperdoc/library-source-tests")))
+  :perform (asdf:test-op (op component)
+             (declare (ignore op component))
+             (uiop:symbol-call :dreyeck/hyperdoc/library-tests :run-tests)))
 
 (ASDF/PARSE-DEFSYSTEM:DEFSYSTEM "dreyeck/hyperdoc"
   :DESCRIPTION
@@ -67,6 +72,27 @@
   ("hyperdoc/explorer" "plump")
   :COMPONENTS
   ((:FILE "dreyeck/src/hyperdoc-pages")))
+
+(asdf:defsystem "dreyeck/fedwiki-story"
+  :description "Dreyeck's browser Mech bridge and Solo Trail Story renderer"
+  :depends-on ("hyperbook/fedwiki" "html-inspector-views" "cl-base64"
+               "flexi-streams" "alexandria" "cl-ppcre" "shasht" "bordeaux-threads")
+  :components ((:file "dreyeck/src/fedwiki-story")
+               (:static-file "assets/dreyeck-fedwiki/mech-story.js")
+               (:static-file "assets/dreyeck-fedwiki/solo-trail-story.js"))
+  :in-order-to ((test-op (test-op "dreyeck/fedwiki-mech/tests"))))
+
+(asdf:defsystem "dreyeck/fedwiki-mech/tests"
+  :description "Original Mech Story browser-host and Solo renderer contracts"
+  :depends-on ("dreyeck/fedwiki-story" "clog-moldable-inspector")
+  :serial t
+  :components ((:file "dreyeck/tests/fedwiki-mech-story")
+               (:file "dreyeck/tests/fedwiki-mech-sitemaps")
+               (:file "dreyeck/tests/fedwiki-mech-topics")
+               (:file "dreyeck/tests/fedwiki-mech-dialog"))
+  :perform (test-op (op system)
+             (declare (ignore op system))
+             (uiop:symbol-call :dreyeck/fedwiki-mech/tests :run-tests)))
 
 (ASDF/PARSE-DEFSYSTEM:DEFSYSTEM #:DREYECK/WIKI-LINK :DESCRIPTION
                                 "Dreyeck FedWiki lookup and story-item operation examples"
@@ -488,7 +514,7 @@
 (asdf:defsystem "dreyeck/authority-policy"
   :description "Operation contracts and disclosure gates over HyperDoc's Inspector: containment, with upstream untouched"
   :depends-on ("html-inspector-views/standard" "cl-who" "closer-mop" "concrete-syntax-tree" "lwcells"
-               "hyperbook" "hyperbook/fedwiki" "hyperdoc" "hyperdoc/explorer" "ironclad")
+               "hyperbook" "hyperbook/fedwiki" "hyperdoc" "hyperdoc/explorer" "ironclad" "plump")
   :components ((:file "dreyeck/src/authority-policy"))
   :in-order-to ((asdf:test-op (asdf:test-op "dreyeck/authority-policy/tests"))))
 
@@ -1041,6 +1067,7 @@
                                 :LICENSE "BSD" :VERSION "0.0.1" :DEPENDS-ON
                                 ("dreyeck/fedwiki-config/reading"
                                  "dreyeck/mech-intake/reading"
+                                 "dreyeck/fedwiki-story"
                                  "dreyeck/nested-actions/reading"
                                  "dreyeck/hyperspec"
                                  "dreyeck/authority-policy"
@@ -3314,7 +3341,7 @@
 
 (defsystem "dreyeck/catalog-application/tests"
   :depends-on ("dreyeck/catalog-application" "dreyeck/local-fedwiki-view/tests"
-               "hyperbook/fedwiki/tests" "dreyeck/catalog/tests")
+               "dreyeck/fedwiki-mech/tests" "dreyeck/catalog/tests")
   :components ((:file "dreyeck/tests/catalog-application"))
   :perform (test-op (op component)
              (declare (ignore op component))

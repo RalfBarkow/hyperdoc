@@ -179,7 +179,7 @@ changed definition, current definition, ASDF owner, impact, decision, required m
 
 `evidence/run-2026-11-02.txt` is the report of the entry point against the real fork and the real upstream (`main` at `c165990`, eight commits after the last
 examined `8a1149197`). Nothing in it was decided: five commits have proposals by rule, `58a2b2c` has the two recorded decisions, and the two newest ones (`8d1cc1c`
-exports one symbol, `c165990` changes CSS only) have a proposal or no code change. The state file still says `8a1149197`.
+exports one symbol, `c165990` changes CSS only) have a proposal or no code change. The state file recorded `8a1149197` at the time of that run. The later source intake records `bdad8d9b` in the [library boundary](../hyperdoc-upstream-boundary.md).
 
 The tests (`dreyeck/upstream-assessment/tests`) use no real upstream. They build an "upstream" repository with four commits and a "fork" that replaced, adopted and
 extended parts of it, with ASDF definitions of their own, and check, among others: that no library source ran (a canary and a package stay untouched),

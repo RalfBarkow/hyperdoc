@@ -266,19 +266,7 @@ Any non-empty string size is retained as presentation metadata."
 ;; HTML snippets
 
 (defmethod render-story-item ((type (eql :html)) item page)
-  (let ((text (text-of item)))
-    (if (and (search "url(#arrow)" text)
-             (cl-ppcre:scan "(?i)^\\s*<svg(?:\\s|>)" text))
-        (progn
-          (views:include-js "/hyperbook/fedwiki/solo-trail-story.js")
-          (views:include-script "mountFedwikiSoloTrailStory(window.currentInspectorView)")
-          (views:html
-            (:div :class "fedwiki-inline-svg"
-                  :data-site (domain-name-of (origin-of page))
-                  :data-slug (origin-id-of page)
-                  :data-item (id-of item)
-              (:template (views:esc text)))))
-        (views:unsafe-html text))))
+  (views:unsafe-html (text-of item)))
 
 ;; Missing story item types (with reference to examples)
 
@@ -324,54 +312,3 @@ Any non-empty string size is retained as presentation metadata."
                                       unless (member type '(:paragraph :pagefold :image :reference))
                                         do (pushnew page (gethash type m)))))
     m))
-
-;; Mech runs in a separately hosted browser Wiki environment. The Lisp side
-;; supplies JSON only, never evaluates or dispatches Wiki JavaScript.
-(defvar *mech-plugin-host-url* nil
-  "HTTP(S) URL of a standalone static Wiki plugin host, at an origin distinct
-from the Inspector. NIL keeps the original item inspectable without execution.")
-
-(defun mech-neighborhood-snapshot (page)
-  "Snapshot only PAGE's origin and existing context, preserving first occurrence.
-This is declared page scope, not a reconstruction of a complete Wiki session."
-  (let ((seen (make-hash-table :test #'equal)))
-    (alexandria:plist-hash-table
-     (list "version" 1 "scope" "page-origin-and-context"
-           "page" (alexandria:plist-hash-table
-                   (list "site" (domain-name-of (origin-of page))
-                         "slug" (origin-id-of page)) :test 'equal)
-           "sites" (coerce
-                    (loop for wiki in (cons (origin-of page) (context-of page))
-                          for domain = (domain-name-of wiki)
-                          unless (gethash domain seen)
-                            collect (progn (setf (gethash domain seen) t)
-                                           (sitemap-snapshot wiki)))
-                    'vector))
-     :test 'equal)))
-
-(defun mech-json-base64 (value)
-  (cl-base64:usb8-array-to-base64-string
-   (flexi-streams:string-to-octets (shasht:write-json value nil)
-                                 :external-format :utf-8)))
-
-(defmethod render-story-item ((type (eql :mech)) item page)
-  (declare (ignore type))
-  (views:include-js "/hyperbook/fedwiki/mech-story.js")
-  (views:include-script "mountFedwikiMech(window.currentInspectorView)")
-  (views:html
-    (:section :class "fedwiki-mech-host"
-              :data-host-url (or *mech-plugin-host-url* "")
-              :data-item-id (id-of item)
-              :data-site (domain-name-of (origin-of page))
-              :data-slug (origin-id-of page)
-              :data-page-json-base64
-              (mech-json-base64 (raw-json-of page))
-              :data-neighborhood-json-base64
-              (mech-json-base64 (mech-neighborhood-snapshot page))
-      (:p :class "mech-host-status"
-          (views:esc (if *mech-plugin-host-url*
-                         "Loading browser Wiki plugin host. No Code item has run."
-                         "Wiki plugin host is not configured. No Code item has run.")))
-      (:p (views:object-ref item :display "Inspect original Mech item" :select "Data"))
-      (:details (:summary "Original Mech item")
-                (:pre (views:esc (text-of item)))))))

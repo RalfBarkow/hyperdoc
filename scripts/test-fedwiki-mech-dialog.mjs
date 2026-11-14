@@ -21,7 +21,7 @@ const host=createMechHost();await new Promise(r=>host.listen(0,'127.0.0.1',r))
 const localHost=`http://127.0.0.1:${host.address().port}`,virtualHost='https://mech.dreyeck.ch',prefix='/assets/hyperdoc-mech/'
 const probe=net.createServer();await new Promise(r=>probe.listen(0,'127.0.0.1',r));const port=probe.address().port;await new Promise(r=>probe.close(r))
 const inspector=`http://127.0.0.1:${port}`,script=path.join(work,'witness.lisp')
-fs.writeFileSync(script,`(require :asdf)\n(asdf:load-system "hyperbook/fedwiki/tests")\n(hyperbook/fedwiki/tests::serve-dialog-browser-witness ${port} "${virtualHost}${prefix}" #p"${stop}" #p"${fixtureFile}")\n`)
+fs.writeFileSync(script,`(require :asdf)\n(asdf:load-system "dreyeck/fedwiki-mech/tests")\n(dreyeck/fedwiki-mech/tests::serve-dialog-browser-witness ${port} "${virtualHost}${prefix}" #p"${stop}" #p"${fixtureFile}")\n`)
 const log=fs.openSync(path.join(output,'lisp.log'),'w'),child=spawn(lisp,['--load',script],{stdio:['ignore',log,log]})
 const report={kind:'Offline intercepted HTTPS Wiki origin / fresh CLOG / original POPUP and regular receiver',provenance,clock:topics.clock,
   virtualHost,productionExecution:false,publicNetworkRequests:0,checks:[],cases:[],unexpectedRequests:[]}
