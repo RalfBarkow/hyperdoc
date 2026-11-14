@@ -409,6 +409,19 @@ registered as unresolved or unsafe."
     (assert (not (member "dreyeck/local-fedwiki-page/activation-inspector" closure :test #'string=))))
   t)
 
+(defun check-read-only-fedwiki-title-bars ()
+  "The local-only and historical pages suppress inherited actions in both modes."
+  (dolist (class '(dreyeck/work/fedwiki-local-only::own-page
+                   dreyeck/work/trails-rendered-reading::context-fedwiki-page))
+    (let ((page (make-instance class)))
+      (flet ((check-title-bar ()
+               (let ((view (hv:title-bar-action-buttons page)))
+                 (assert (string= "" (hv:view-html view)))
+                 (assert (null (hv:view-references view))))))
+        (served #'check-title-bar)
+        (developing #'check-title-bar))))
+  t)
+
 (defun check-adapters-as-reviewed ()
   "Every adapted upstream point is as reviewed; a changed one is reported."
   (assert (null (ap:containment-adapter-drift)) () "Drifted: ~S" (ap:containment-adapter-drift))
@@ -439,6 +452,7 @@ CHECK-ADAPTERS-AS-REVIEWED compares the adapted upstream points and classes with
   (run-gate-tests)
   (check-fedwiki-actions-withheld)
   (check-reload-withheld)
+  (check-read-only-fedwiki-title-bars)
   (check-adapters-as-reviewed)
   (format t "~&AUTHORITY-POLICY-PASS: served, Operations stays and shows contract status; an unreviewed ~
 new method is listed, gets no Evaluate and is refused if invoked anyway; a contracted reader-like ~
