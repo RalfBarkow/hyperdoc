@@ -3701,3 +3701,19 @@
   :perform (test-op (op component)
              (declare (ignore op component))
              (uiop:symbol-call :dreyeck/work/welcome-development :run-domain-version-tests)))
+
+(defsystem "dreyeck/work/topic-maps-conformance-planning"
+  :description "Optional SHOP3 investigation plans over two pinned historical Case Records; no test executor"
+  :depends-on ("dreyeck/shop3" "dreyeck/git" "hyperdoc" "html-inspector-views/standard" "shasht" "ironclad")
+  :serial t
+  :components ((:file "dreyeck/work/topic-maps-conformance-planning")
+               (:module "dreyeck/pages/topic-maps-conformance-planning"
+                :components ((:static-file "Planning Evidence-Based Investigations.html"))))
+  :in-order-to ((test-op (test-op "dreyeck/work/topic-maps-conformance-planning/tests"))))
+
+(defsystem "dreyeck/work/topic-maps-conformance-planning/tests"
+  :depends-on ("dreyeck/work/topic-maps-conformance-planning")
+  :components ((:file "dreyeck/tests/topic-maps-conformance-planning"))
+  :perform (test-op (op component)
+             (declare (ignore op component))
+             (uiop:symbol-call :dreyeck/work/topic-maps-conformance-planning :run-tests)))

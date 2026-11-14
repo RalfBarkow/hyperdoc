@@ -1,0 +1,156 @@
+{
+  "kind": "bounded read-only evidence inventory; not a Case Record importer or registration",
+  "retainedRevision": "88994c1b9e1edbf13e665e984a5c9c3b2cdf7575",
+  "historicalExecutionBase": "1c0b92c68fe1114b926d4405b553dfb096d2f425",
+  "corpusRevision": "cd165b150176c1d6842b37be9cc9051b40d4996b",
+  "sources": [
+    {
+      "path": "docs/slice-22a-conformance-closure.md",
+      "blob": "174be3f3e2ad485a8c0c44851572aa182bdd94b9",
+      "bytes": 59005,
+      "sha256": "984e03f2a7508936617d607f202d47e40dd7ca87ec7d2a245ef5ccd375a29ba3"
+    },
+    {
+      "path": "reports/slice-22a/matrix.json",
+      "blob": "86b7b329cd57bdea5d0a287d2551476450648b27",
+      "bytes": 1059798,
+      "sha256": "86fa8f644456b513975440cde62b1b7db115c2d238064d94ced26051dd22cf90"
+    },
+    {
+      "path": "reports/slice-22a/baseline/ctm.validation.json",
+      "blob": "7f46464fc157a5ff029798f555fed167edaad5c5",
+      "bytes": 165347,
+      "sha256": "649536de5ac2248087913b2e085f9ba6eb930f9bcc1c51101a3a80498a8954df"
+    },
+    {
+      "path": "reports/slice-22a/investigation/ctm-observations.json",
+      "blob": "1b910993137593a90275f2ce6371eb97ab5607ac",
+      "bytes": 34463,
+      "sha256": "ecec85dadeeb8fa71e6bd3c614f63a307980371660b9ea1c756f1fbbbb9e311e"
+    },
+    {
+      "path": "reports/slice-22a/investigation/controls.json",
+      "blob": "84aa24f83c41030ea2e73eb08ed38059ba0628b8",
+      "bytes": 13982,
+      "sha256": "71b3d429e511c78195005d98907cec0a12580eb3e9e64a82a49cd944988edb4a"
+    },
+    {
+      "path": "reports/slice-22a/execution.json",
+      "blob": "eeddaf06678b7cfb6d0ca9b99b78a4606b4a4b69",
+      "bytes": 1790,
+      "sha256": "073f248fd439bde9d631154665efeb19a42b2f04603fdfd06abc92dcf46f1c18"
+    },
+    {
+      "path": "reports/slice-22a/investigation/execution.json",
+      "blob": "569adaadbf1290d69a3eba050903782eec605397",
+      "bytes": 2319,
+      "sha256": "0b2ba44e21cf088fa20ae159d45915f019ae323ff7c93f17df6aa25948177443"
+    },
+    {
+      "path": "vendor/cxtm/ctm/in/include-template.ctm",
+      "blob": "f524328a682dc140934d6271475e72211c8ec078",
+      "bytes": 48,
+      "sha256": "345ee0e00a096195979bdc64cc8aad272e5c60ebeee185c69c4223b5c911f674"
+    },
+    {
+      "path": "vendor/cxtm/ctm/baseline/include-template.ctm.cxtm",
+      "blob": "d146c14b88ff3c5afcb33481adcbd26ce0c4d5a3",
+      "bytes": 401,
+      "sha256": "ebf9e7acc9dd9487ebf19c9f2dc1c8af3933e0371d9a506eee307923c5d65d0c"
+    },
+    {
+      "path": "vendor/cxtm/ctm/in/template-subject-identifier2.ctm",
+      "blob": "390002404c6d2c32e74b7dc0f8a9a12f2f3227a5",
+      "bytes": 81,
+      "sha256": "ffc9a5554b9c908386f6888ef29ccda5cc433e5519924db52f9441769e1df014"
+    },
+    {
+      "path": "vendor/cxtm/ctm/baseline/template-subject-identifier2.ctm.cxtm",
+      "blob": "ba06150381415af20f288cbd4ef148e50239ae6c",
+      "bytes": 204,
+      "sha256": "e138a02738dc4a2526c465b11fa6915bed84724a31748eb3578ddf0f8ab16253"
+    }
+  ],
+  "cases": [
+    {
+      "id": "ctm/in/include-template.ctm",
+      "serializedCaseRecordExcerpt": {
+        "id": "ctm/in/include-template.ctm",
+        "category": "valid",
+        "sourcePathname": "ctm/in/include-template.ctm",
+        "documentIRI": "https://ctm-tests.example.invalid/cd165b150176c1d6842b37be9cc9051b40d4996b/ctm/in/include-template.ctm",
+        "expectedOutcome": "cxtm-equal",
+        "expectedCXTM": "ctm/baseline/include-template.ctm.cxtm",
+        "actualOutcome": "cxtm-mismatch",
+        "status": "fail",
+        "diagnostics": [
+          "Known normative discrepancy: CTM 3.14 / 3.15 / 3.16.2; declaration creates no Topics, imported body executes in caller context, no later definition-source alias rule. Baseline adds include-template.sub#occtype.",
+          "First different byte 58; actual 353 bytes, expected 401 bytes."
+        ],
+        "specificationClauses": [
+          "CTM 3.2",
+          "CTM 3.3.6",
+          "CTM 3.3.8",
+          "CTM 3.14",
+          "CTM 3.15",
+          "CTM 3.16.2",
+          "TMDM 5-6",
+          "CXTM 3.13",
+          "CXTM 3.18"
+        ]
+      },
+      "matrixPointer": "/cases/id=ctm/in/include-template.ctm",
+      "sourceSHA256": "345ee0e00a096195979bdc64cc8aad272e5c60ebeee185c69c4223b5c911f674",
+      "baselineSHA256": "ebf9e7acc9dd9487ebf19c9f2dc1c8af3933e0371d9a506eee307923c5d65d0c",
+      "historicalReaderCondition": null,
+      "normativeDisposition": "C: unresolved",
+      "registeredStatusNotChanged": true,
+      "controlByteExact": null,
+      "controlIsOriginalPASS": false
+    },
+    {
+      "id": "ctm/in/template-subject-identifier2.ctm",
+      "serializedCaseRecordExcerpt": {
+        "id": "ctm/in/template-subject-identifier2.ctm",
+        "category": "valid",
+        "sourcePathname": "ctm/in/template-subject-identifier2.ctm",
+        "documentIRI": "https://ctm-tests.example.invalid/cd165b150176c1d6842b37be9cc9051b40d4996b/ctm/in/template-subject-identifier2.ctm",
+        "expectedOutcome": "cxtm-equal",
+        "expectedCXTM": "ctm/baseline/template-subject-identifier2.ctm.cxtm",
+        "actualOutcome": null,
+        "status": "not-run",
+        "diagnostics": [],
+        "specificationClauses": []
+      },
+      "matrixPointer": "/cases/id=ctm/in/template-subject-identifier2.ctm",
+      "sourceSHA256": "ffc9a5554b9c908386f6888ef29ccda5cc433e5519924db52f9441769e1df014",
+      "baselineSHA256": "e138a02738dc4a2526c465b11fa6915bed84724a31748eb3578ddf0f8ab16253",
+      "historicalReaderCondition": {
+        "condition": "INVALID-TEMPLATE-BODY",
+        "message": "TEMPLATE-IDENTITY-TAIL in ctm/in/template-subject-identifier2.ctm at CHARACTER 34 (line 3, column 15): Unmarked variable identities in Topic Tails remain outside the supported grammar.",
+        "code": "template-identity-tail",
+        "position": 34,
+        "line": 3,
+        "column": 15,
+        "positionUnit": "character",
+        "source": "ctm/in/template-subject-identifier2.ctm",
+        "cause": null,
+        "context": null
+      },
+      "normativeDisposition": "C: unresolved",
+      "registeredStatusNotChanged": true,
+      "controlByteExact": true,
+      "controlIsOriginalPASS": false
+    }
+  ],
+  "planningAssumptions": [
+    {
+      "goal": "preparation",
+      "classification": "proposed investigation scope; no completion asserted"
+    },
+    {
+      "goal": "edition-qualified-disposition",
+      "classification": "proposed scope requiring a completed published-edition review; the recorded 22A review is explicitly incomplete"
+    }
+  ]
+}
