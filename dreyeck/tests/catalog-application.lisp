@@ -71,6 +71,29 @@
     (assert (assoc "/view" (getf observed :routes) :test #'equal))
     (assert (assoc "/gesture" (getf observed :routes) :test #'equal))))
 
+(defun check-first-page-request ()
+  "Start with a cold Work HyperDoc and check its route before CLOG can serve it."
+  (let* ((hyperbook:*catalog* (make-instance 'hyperbook:catalog))
+         (book (hyperdoc:make-hyperdoc
+                :id "dreyeck/work/reading" :title "Working on HyperDoc"
+                :asdf-system-name "dreyeck/work/reading"
+                :subdirectory "dreyeck/pages/work" :code-subdirectory "dreyeck/work"
+                :main-page-id "Work Breakdown"))
+         (title "From Two Hubs to One Trail")
+         (page-at-start nil))
+    (setf (hyperbook:hyperbooks-of hyperbook:*catalog*) (list book))
+    (assert (null (gethash title (hyperdoc:pages-of book))))
+    (dreyeck/local-fedwiki-view/tests::call-recording-clog
+     (lambda ()
+       (dreyeck/catalog-application:start-catalog
+        :port 8099 :host "127.0.0.1"
+        :site-root (dreyeck/local-fedwiki-view/tests::fixture-site-root)))
+     :on-initialize
+     (lambda ()
+       (setf page-at-start (gethash title (hyperdoc:pages-of book)))
+       (assert (typep page-at-start 'hyperdoc:html-page))))
+    (assert (eq page-at-start (hyperbook:lookup-path book (list title))))))
+
 (defun check-mech-host-startup ()
   ;; Use the actual original-page Story view, without opening a browser/server.
   (let ((dreyeck/fedwiki-story:*mech-plugin-host-url* "https://manual.fixture.test/")
@@ -163,6 +186,7 @@ as the one book that no source declares, and nothing else."
   (check-configuration)
   (check-start)
   (check-start-with-another-hyperbook)
+  (check-first-page-request)
   (check-mech-host-startup)
   (check-lifecycle)
   (format t "~&Catalog application tests passed: graph, configuration, routes, lifecycle; a further registered HyperBook is tolerated by these checks and named by the admission check.~%")

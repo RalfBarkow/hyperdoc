@@ -49,6 +49,11 @@ Interactive callers own shutdown. MAIN owns executable lifetime."
     ;; The default membership is already a static ASDF dependency.
     (unless (equal catalog-system "dreyeck/catalog")
       (asdf:load-system catalog-system))
+    ;; The Explorer lazily fills two shared page tables on first access.
+    ;; Finish that work before any CLOG connection can start a page lookup.
+    (dolist (book (hyperbook:hyperbooks-of hyperbook:*catalog*))
+      (when (typep book 'hyperdoc:hyperdoc)
+        (hyperdoc:ensure-pages-loaded book)))
     (dreyeck/local-fedwiki-view:serve-catalog-with-local-fedwiki-view
      :port port :host host :site-root site-root :pane-width pane-width
      :development development)))

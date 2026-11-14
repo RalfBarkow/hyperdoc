@@ -42,13 +42,14 @@
     (html-inspector-views:view-html
      view)))
 
-(defun call-recording-clog (thunk)
+(defun call-recording-clog (thunk &key on-initialize)
   "Run THUNK with CLOG's server entry points replaced by recorders.
 
 No socket is opened. What is under test is which arguments reach
 CLOG:INITIALIZE and which routes reach CLOG:SET-ON-NEW-WINDOW, not
 whether a server comes up, and starting a real listener in a unit test
-would bind a port and change global state."
+would bind a port and change global state. ON-INITIALIZE, when supplied,
+observes the application state at the listener boundary."
   (let ((initialize (fdefinition 'clog:initialize))
         (set-on-new-window (fdefinition 'clog:set-on-new-window))
         (parameters (when (boundp 'hyperbook/server::*server-parameters*)
@@ -61,6 +62,7 @@ would bind a port and change global state."
                  (lambda (handler &rest arguments)
                    (declare (ignore handler))
                    (setf recorded arguments)
+                   (when on-initialize (funcall on-initialize))
                    nil))
            (setf (fdefinition 'clog:set-on-new-window)
                  (lambda (handler &key path)
