@@ -256,9 +256,11 @@ registered, so no click can reach it."
       (flet ((render ()
                (let* ((view (hv:👀content page))
                       (html (hv:view-html view))
+                      ;; Highlighted symbols also use eval-ids to open their definitions.
                       (controls (remove-if-not
                                  (lambda (reference)
-                                   (uiop:string-prefix-p "eval-" (car reference)))
+                                   (and (uiop:string-prefix-p "eval-" (car reference))
+                                        (typep (cdr reference) 'hv:thunk)))
                                  (hv:view-references view))))
                  (assert (search "probe-calls" html :test #'char-equal))
                  (assert (zerop *probe-calls*))
