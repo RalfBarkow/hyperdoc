@@ -1,0 +1,16 @@
+<h1>Reading Paul 2026 with Topic Maps</h1>
+<p>Taylor H. Paul (2026), <em>A Network Model for the Automated Planning and Scheduling of Pipelined Workflows</em>, University of Maryland, College Park. This is a bounded, source-backed reading. It does not load or run Paul's WORKSWORLD code.</p>
+<p>The dissertation defines a <strong>resource graph</strong> of sites and links (Definition 3.4.4, pp. 66–67, Figure 3.7) and a <strong>workflow request graph</strong> of alternating data and processing components (Definitions 3.4.5–3.4.6, pp. 68–70). Chapter 4 introduces WORKSWORLD and WORKSWORLD-2 for numeric planning, and WORKSWORLD-2H for SHOP3 HTN planning (pp. 78–98).</p>
+<p>WORKSWORLD-2H's main decomposition follows <code>achieve-all-goals</code> → <code>select-goal-interface</code> → <code>plan-source-coverage</code> → <code>plan-source-delivery</code> → <code>commit-rate-flow</code> (Figure 4.2, Table 4.9, pp. 91–95). The delivery method considers <em>reuse</em>, <em>replicate</em> and <em>transform</em> cases (Table 4.11, pp. 95–97). These are claims about Paul's model, not instructions to mutate HyperDoc.</p>
+<h2>What is merged?</h2>
+<p>The authored HyperDoc context and the dissertation excerpt are two distinct CTM documents. Both explicitly identify the <strong>SHOP3</strong> subject with <code>urn:hyperdoc:subject:shop3</code>. The existing <code>topic-maps.tmdm:import-map-content</code> copies the second Map's content into the first and merges the two SHOP3 Topics by Subject Identifier, preserving native Topic Map semantics, canonical references and navigable Association/Role items. The merge may replace previous Topic handles; use <code>topic-maps.tmdm:canonical-topic</code> to resolve them. These identifiers are local to this reading, not standard PSIs. It is a semantic merge, not a Git-branch merge or a merge of HyperDoc's existing Work Topic objects.</p>
+<p>Select the <strong>Native Topic Map</strong> view and click <em>Read and merge CTM sources</em>. Inspect the returned native TMDM Map in the existing Inspector. Follow Topic → Roles played → Association → Roles → Role player; the native objects, not a second projection graph, hold the relationships.</p>
+<p>Or, in the SLY REPL:</p>
+<pre>(asdf:load-system "dreyeck/work/paul-2026")
+(defparameter *paul-map*
+  (dreyeck/work/paul-2026:read-merged-map))
+(clog-moldable-inspector:clog-inspect :object *paul-map*)</pre>
+<p>This example is optional and is not part of normal Catalog startup. Reading creates an in-memory Map only. The two CTM files and the Lisp runtime's other objects are unchanged. No WORKSWORLD plan has been executed or performance claim independently reproduced.</p>
+<h2>Follow the research and the existing HyperDoc subject</h2>
+<p><a page="Planning with SHOP3" hyperbook="dreyeck/work/reading">HyperDoc's existing Planning with SHOP3 reading</a> is a small documentation-stage experiment. It is not Paul's workflow domain. The same SHOP3 subject links the two without conflating their tasks or empirical outcomes. <a href="https://github.com/taylorpaul/WORKSWORLD">Paul's WORKSWORLD repository</a> is cited by the dissertation; this reading does not fetch its code.</p>
+<p>The repository source, page-number warrants, subject-identifier policy, expected native merge checks, and limits are in <code>docs/paul-2026-topic-map.md</code>.</p>
