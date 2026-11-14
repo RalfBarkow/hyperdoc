@@ -41,7 +41,8 @@ an encoded / or . would pass any such check and appear only after it."
     (site-root
      slug
      &key
-       (wiki-id *default-wiki-id*))
+       (wiki-id *default-wiki-id*)
+       (signal-error? t))
   "Resolve SLUG through the registered LOCAL-FEDWIKI for SITE-ROOT."
   (let ((wiki
           (dreyeck/local-fedwiki-page:register-local-fedwiki
@@ -50,7 +51,7 @@ an encoded / or . would pass any such check and appear only after it."
     (hyperbook:find-page
      wiki
      slug
-     :signal-error? t)))
+     :signal-error? signal-error?)))
 
 (defun ensure-page-attached-workspace-offer (page)
   "Ensure the Catalog offer for PAGE's uniquely matching page-attached ASDF system.
@@ -85,6 +86,17 @@ runtime that is allowed to ask it."
            (error "Page slug ~S matches ~D page-attached ASDF artifacts: ~S"
                   page-slug (length matches) matches)))))
 
+(defun local-fedwiki-view-target (site-root slug wiki-id)
+  (let ((page (make-local-fedwiki-view-page
+               site-root slug :wiki-id wiki-id :signal-error? nil)))
+    (if page
+        (progn
+          (ensure-page-attached-workspace-offer page)
+          page)
+        (make-instance 'hyperbook/server::notfound
+                       :hyperbook (hyperbook:find-hyperbook wiki-id)
+                       :path (list "view" slug)))))
+
 (defun install-local-fedwiki-view-route
        (site-root
         &key (path "/view") (pane-width "700px") (development nil)
@@ -96,15 +108,14 @@ runtime that is allowed to ask it."
        (let* ((pathname (clog:property (clog:location body) "pathname"))
               (slug (view-slug-from-pathname pathname)))
          (unless slug (error "Expected /view/<slug>, got ~S." pathname))
-         (let ((page
-                (make-local-fedwiki-view-page site-root slug :wiki-id wiki-id)))
-           (ensure-page-attached-workspace-offer page)
-           (clog-moldable-inspector:on-new-inspector body :object page
-                                                     :pane-width pane-width
-                                                     :title
-                                                     (hyperbook:title-of page)
-                                                     :playground?
-                                                     development))))
+         (let ((target (local-fedwiki-view-target site-root slug wiki-id)))
+           (clog-moldable-inspector:on-new-inspector
+            body :object target
+            :pane-width pane-width
+            :title (if (typep target 'hyperbook/server::notfound)
+                       "Not found"
+                       (hyperbook:title-of target))
+            :playground? development))))
      :path path)))
 
 (defun serve-catalog-with-local-fedwiki-view

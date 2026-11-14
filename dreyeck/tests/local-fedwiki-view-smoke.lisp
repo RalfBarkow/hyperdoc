@@ -184,6 +184,21 @@ file is opened."
            (assert (null (hyperbook:find-page wiki "absent-page"))))
       (uiop:delete-directory-tree root :validate t))))
 
+(defun check-missing-page-view-target ()
+  (let* ((hyperbook:*catalog* (make-instance 'hyperbook:catalog))
+         (site-root (fixture-site-root))
+         (slug "absent-page")
+         (target (dreyeck/local-fedwiki-view::local-fedwiki-view-target
+                  site-root slug *fixture-wiki-id*)))
+    (assert (typep target 'hyperbook/server::notfound))
+    (let ((view (find "Not found" (html-inspector-views:all-views target)
+                      :key #'html-inspector-views:view-title :test #'string=)))
+      (assert view)
+      (assert (search "view/absent-page" (html-inspector-views:view-html view))))
+    (assert (not (find "workspace:absent-page"
+                       (hyperbook:hyperbooks-of hyperbook:*catalog*)
+                       :key #'hyperbook:id-of :test #'equal)))))
+
 (defun run-local-fedwiki-view-tests ()
   (assert
    (string=
@@ -197,6 +212,7 @@ file is opened."
      (format nil "/not-view/~A" *fixture-slug*))))
 
   (check-view-slug-boundary)
+  (check-missing-page-view-target)
 
   ;; The authored HyperDoc page names the same executable contracts that
   ;; this smoke test exercises below.
