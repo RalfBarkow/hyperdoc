@@ -23,4 +23,30 @@
 <p>This proves an identifier correspondence for this execution, not stable SVG IDs under arbitrary re-layout, resizing, reload or renaming. It does not recover original trail membership. The original public captures remain historical observations; these new offline runs are separately identified.</p>
 <h2>Smallest requirement for trails[]</h2>
 <p>Before relation deduplication, retain each selected trail's identity within the selection and its ordered occurrences of local nodes/relations, mapped to composite identifiers. Multiple trails must be allowed to refer to the same composite edge. Use an aspect identity qualified by its source/selection, not only a display name. This is a derived requirement for Ward's proposal, not an implementation. No Polyline, new merge semantics or renderer metadata has been added.</p>
+<h2>Why selecting New Trail moves the layout</h2>
+<p>Ward reported that selecting a Trail could scramble the layout and suspected the early declarations for highlighted nodes (Matrix message supplied in Zettel 11727). The test below uses the two Hub aspects and the <code>New Trail</code> aspect from the <a hyperbook="fedwiki:ward.voices.ustawi.wiki" page="dewey-alexander-trail">Dewey Alexander Trail</a> capture. The code under test is Solo 0.1.32-3, revision <a href="https://github.com/WardCunningham/wiki-plugin-solo/blob/6efee09afbe9bf631fd52ba74394a4b17e71f751/client/dialog/index.html#L405-L494">6efee09</a>.</p>
+<p>In this capture, adding the Trail puts nodes <code>3</code>, <code>6</code>, <code>10</code> and <code>14</code> in <code>merged.nids</code>. Solo first emits those IDs under gold node defaults, then emits the regular labelled declarations in array order. The first occurrence of those four nodes has moved, while all 14 emitted edge statements are identical. DOT applies a node default when a node is first defined. See the <a href="https://www.graphviz.org/doc/info/lang.html#semantic-notes">DOT language notes</a>.</p>
+<table>
+<thead><tr><th scope="col">Comparison</th><th scope="col">Nodes with changed x or y</th></tr></thead>
+<tbody>
+<tr><td>Two Hubs → two Hubs with New Trail, original <code>dotify</code></td><td>15 of 15</td></tr>
+<tr><td>Two Hubs → two Hubs with New Trail, highlight in the regular node declarations</td><td>0 of 15</td></tr>
+<tr><td>Same highlight and pen width, early declarations → regular declarations</td><td>15 of 15</td></tr>
+</tbody>
+</table>
+<p>Both Graphviz 2.42.4 and Graphviz WASM 14.1.3 gave these node counts. In the WASM output, some edge endpoints still move slightly with the thicker outline. These runs reproduce the effect on the archived inputs with the identified Solo source. The WASM engine is a second comparison engine and differs from the dependency loaded by the Solo dialog.</p>
+<p>Open the recorded <a expr='(read-observation "dreyeck/work/solo-trail-layout-dot.json")'>Graphviz CLI run</a> or <a expr='(read-observation "dreyeck/work/solo-trail-layout-wasm.json")'>Graphviz WASM run</a>. Under <code>layouts</code>, inspect <code>baseline</code>, <code>selected</code> and <code>inline</code>. Each exposes the exact DOT, Graphviz plain output and coordinates by node ID. Node <code>3</code> (Howard Becker) is an easy first comparison. Under <code>comparisons</code> the lists contain the IDs that moved.</p>
+<h3>A candidate change to Solo</h3>
+<p>Emit each labelled node once, in array order, using the normal node defaults. Attach the merged-node gold fill and thicker outline to that node's regular declaration, preserving explicit color and type emphasis. This keeps the order of first declarations stable when the Trail only reuses nodes. A Trail that adds new graph nodes can still change the layout.</p>
+<pre><code>// Inside the existing graph.nodes.map((node, id) =&gt; …)
+const highlight = mergedIds.has(id)
+const color = emphasis[node.type] ||
+  (node.props.color ? `fillcolor="${node.props.color}"` :
+   highlight ? 'fillcolor=gold' : '')
+const weight = highlight ? 'penwidth=2' : ''
+// Include weight and color in the regular labelled node statement.
+// Omit the earlier block of bare merged.nids.</code></pre>
+<p>The record's <code>reverseControl</code> covers a second case. A synthetic Trail going against an ordinary edge made Solo emit <code>dir=both</code> for that edge. Filtering <code>Trail</code> relations before both edge emission and reverse-edge lookup restores the baseline edge statements. Solo draws the red curve <a href="https://github.com/WardCunningham/wiki-plugin-solo/blob/6efee09afbe9bf631fd52ba74394a4b17e71f751/client/dialog/index.html#L200-L252">after Graphviz returns its SVG</a>.</p>
+<p>The <a expr='(asdf:system-relative-pathname "dreyeck/work/reading" "scripts/test-solo-trail-layout.mjs")' view="Text">replay script</a> contains both trial changes. Supply the exact <code>client/dialog/index.html</code> from the linked Solo revision and an output path. The script verifies source hashes before running. It uses local <code>dot</code> by default and accepts an optional absolute path to a Viz.js ES module for the WASM run.</p>
+<pre><code>node scripts/test-solo-trail-layout.mjs SOLO_DIALOG OUTPUT_JSON [VIZ_MODULE]</code></pre>
 <p>Return to <a page="Following One Recorded Trail">Following One Recorded Trail</a> or <a page="Trails Rendered public reproduction">Trails Rendered public reproduction</a>.</p>

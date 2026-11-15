@@ -3186,6 +3186,8 @@
                       (:static-file "trails-rendered-witness.mjs")
                       (:static-file "trails-rendered-witness.json")
                       (:static-file "solo-trail-identity.json")
+                      (:static-file "solo-trail-layout-dot.json")
+                      (:static-file "solo-trail-layout-wasm.json")
                       (:static-file "trails-rendered-evidence/next.ward.dojo.fed.wiki--how-trails-travel.json")
                       (:static-file "trails-rendered-browser-repro.mjs")
                       (:module "trails-rendered-browser-evidence" :components

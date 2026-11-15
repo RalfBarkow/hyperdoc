@@ -1,0 +1,389 @@
+{
+  "sourceURL": "https://github.com/WardCunningham/wiki-plugin-solo/blob/6efee09afbe9bf631fd52ba74394a4b17e71f751/client/dialog/index.html",
+  "soloSHA256": "cdeaa4f5143b98eb51b98d0d63bbf3dc6da0023c08f42f5a32662940b5a165b3",
+  "pagePath": "dreyeck/work/hubs-evidence/ward.voices.ustawi.wiki--dewey-alexander-trail.json",
+  "pageSHA256": "739ea473cd67f800ee748ab25107d48d53d3cb57cb2224da7ba8cdd7df7289bf",
+  "engine": "dot - graphviz version 2.42.4 (0)",
+  "nodeCount": 15,
+  "edgeCount": 14,
+  "earlyNodeIDs": [
+    3,
+    6,
+    10,
+    14
+  ],
+  "comparisons": {
+    "selectTrail": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "6",
+      "7",
+      "8",
+      "9",
+      "10",
+      "11",
+      "12",
+      "13",
+      "14"
+    ],
+    "candidateWithTrail": [],
+    "sameWidthControl": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "6",
+      "7",
+      "8",
+      "9",
+      "10",
+      "11",
+      "12",
+      "13",
+      "14"
+    ]
+  },
+  "reverseControl": {
+    "baseline": "1->0 [label=\"\"  labeltooltip=\"source: hub 21 john-dewey\"]",
+    "original": "1->0 [label=\"\"  labeltooltip=\"source: hub 21 john-dewey\" dir=both]",
+    "candidate": "1->0 [label=\"\"  labeltooltip=\"source: hub 21 john-dewey\"]"
+  },
+  "layouts": {
+    "baseline": {
+      "dot": "strict digraph {\noverlap = false; splines=true\nlayout = dot\nnode [shape=box style=filled fillcolor=gold penwidth=2]\nnode [fillcolor=palegreen penwidth=1]\n0 [label=\"John\nDewey\"   tooltip=\"name: John Dewey\\ntitle: John Dewey\\nsite: ward.voices.ustawi.wiki\"]\n1 [label=\"Trails\nRendered\"   tooltip=\"name: Trails Rendered\\ntitle: Trails Rendered\\nsite: jan.voices.ustawi.wiki\"]\n2 [label=\"How\nWe\nThink\"   tooltip=\"name: How We Think\\ntitle: How We Think\\nsite: jan.voices.ustawi.wiki\"]\n3 [label=\"Howard\nBecker\"   tooltip=\"name: Howard Becker\\ntitle: Howard Becker\\nsite: jan.voices.ustawi.wiki\"]\n4 [label=\"Susan\nLeigh\nStar\"   tooltip=\"name: Susan Leigh Star\\ntitle: Susan Leigh Star\\nsite: jan.voices.ustawi.wiki\"]\n5 [label=\"Social\nWorld\"   tooltip=\"name: Social World\\ntitle: Social World\\nsite: jan.voices.ustawi.wiki\"]\n6 [label=\"Donald\nSchön\"   tooltip=\"name: Donald Schön\\ntitle: Donald Schön\\nsite: jan.voices.ustawi.wiki\"]\n7 [label=\"Reflective\nPractice\"   tooltip=\"name: Reflective Practice\\ntitle: Reflective Practice\\nsite: jan.voices.ustawi.wiki\"]\n8 [label=\"Lakoff\nand\nJohnson\"   tooltip=\"name: Lakoff and Johnson\\ntitle: Lakoff and Johnson\\nsite: ward.voices.ustawi.wiki\"]\n9 [label=\"Christopher\nAlexander\"   tooltip=\"name: Christopher Alexander\\ntitle: Christopher Alexander\\nsite: ward.voices.ustawi.wiki\"]\n10 [label=\"Erin\nKissane\"   tooltip=\"name: Erin Kissane\\ntitle: Erin Kissane\\nsite: ward.voices.ustawi.wiki\"]\n11 [label=\"Takashi\nIba\"   tooltip=\"name: Takashi Iba\\ntitle: Takashi Iba\\nsite: thompson.voices.ustawi.wiki\"]\n12 [label=\"Vincent\nScully\"   tooltip=\"name: Vincent Scully\\ntitle: Vincent Scully\\nsite: thompson.voices.ustawi.wiki\"]\n13 [label=\"Interesting\nPeople\"   tooltip=\"name: Interesting People\\ntitle: Interesting People\\nsite: thompson.voices.ustawi.wiki\"]\n14 [label=\"Natural\nOrder\"   tooltip=\"name: Natural Order\\ntitle: Natural Order\\nsite: thompson.voices.ustawi.wiki\"]\n1->0 [label=\"\"  labeltooltip=\"source: hub 21 john-dewey\"]\n2->0 [label=\"\"  labeltooltip=\"source: hub 21 john-dewey\"]\n3->0 [label=\"\"  labeltooltip=\"source: hub 21 john-dewey\"]\n0->4 [label=\"\"  labeltooltip=\"source: hub 21 john-dewey\"]\n3->4 [label=\"\"  labeltooltip=\"source: hub 21 john-dewey\"]\n5->4 [label=\"\"  labeltooltip=\"source: hub 21 john-dewey\"]\n0->6 [label=\"\"  labeltooltip=\"source: hub 21 john-dewey\"]\n7->6 [label=\"\"  labeltooltip=\"source: hub 21 john-dewey\"]\n8->6 [label=\"\"  labeltooltip=\"source: hub 21 john-dewey\"]\n10->9 [label=\"\"  labeltooltip=\"source: hub 4 christopher-alexander\"]\n11->9 [label=\"\"  labeltooltip=\"source: hub 4 christopher-alexander\" dir=both]\n12->9 [label=\"\"  labeltooltip=\"source: hub 4 christopher-alexander\"]\n13->11 [label=\"\"  labeltooltip=\"source: hub 4 christopher-alexander\"]\n9->14 [label=\"\"  labeltooltip=\"source: hub 4 christopher-alexander\"]\n}",
+      "plain": "graph 1 9.1389 4.2361\nnode 0 2.2292 2.6319 0.90278 0.52778 \"John\nDewey\" filled box black palegreen\nnode 1 3.0903 3.8681 1.1944 0.52778 \"Trails\nRendered\" filled box black palegreen\nnode 2 1.8542 3.8681 0.77778 0.73611 \"How\nWe\nThink\" filled box black palegreen\nnode 3 0.50694 3.8681 1.0139 0.52778 \"Howard\nBecker\" filled box black palegreen\nnode 4 1.1181 1.3958 0.83333 0.73611 \"Susan\nLeigh\nStar\" filled box black palegreen\nnode 5 1.1181 2.6319 0.81944 0.52778 \"Social\nWorld\" filled box black palegreen\nnode 6 3.4375 1.3958 0.93056 0.52778 \"Donald\nSchön\" filled box black palegreen\nnode 7 4.7986 2.6319 1.2083 0.52778 \"Reflective\nPractice\" filled box black palegreen\nnode 8 3.4375 2.6319 1.0139 0.73611 \"Lakoff\nand\nJohnson\" filled box black palegreen\nnode 9 7.4097 1.3958 1.4167 0.52778 \"Christopher\nAlexander\" filled box black palegreen\nnode 10 6.1597 2.6319 1 0.52778 \"Erin\nKissane\" filled box black palegreen\nnode 11 7.4097 2.6319 0.98611 0.52778 \"Takashi\nIba\" filled box black palegreen\nnode 12 8.6458 2.6319 0.98611 0.52778 \"Vincent\nScully\" filled box black palegreen\nnode 13 7.4097 3.8681 1.3333 0.52778 \"Interesting\nPeople\" filled box black palegreen\nnode 14 7.4097 0.26389 0.98611 0.52778 \"Natural\nOrder\" filled box black palegreen\nedge 0 4 4 1.9989 2.3677 1.8663 2.2234 1.6954 2.0376 1.5395 1.8681 solid black\nedge 0 6 4 2.4795 2.3677 2.6545 2.1927 2.8906 1.9566 3.0846 1.7626 solid black\nedge 1 0 4 2.9119 3.6038 2.7895 3.4321 2.6251 3.2014 2.4883 3.0095 solid black\nedge 2 0 4 1.9647 3.4982 2.0102 3.3515 2.063 3.1812 2.1094 3.0316 solid black\nedge 3 0 4 0.86379 3.6038 1.1224 3.4223 1.4748 3.1751 1.7567 2.9773 solid black\nedge 3 4 7 0.47845 3.5993 0.45155 3.2794 0.43393 2.7174 0.57639 2.2639 0.6174 2.1333 0.68364 2.0031 0.75595 1.8851 solid black\nedge 5 4 4 1.1181 2.3677 1.1181 2.2343 1.1181 2.0654 1.1181 1.9067 solid black\nedge 7 6 4 4.5166 2.3677 4.3177 2.1911 4.0486 1.9522 3.8289 1.7572 solid black\nedge 8 6 4 3.4375 2.2621 3.4375 2.1169 3.4375 1.9486 3.4375 1.8001 solid black\nedge 9 14 4 7.4097 1.1314 7.4097 0.99542 7.4097 0.82424 7.4097 0.67093 solid black\nedge 10 9 4 6.4187 2.3677 6.6014 2.1911 6.8485 1.9522 7.0503 1.7572 solid black\nedge 11 9 4 7.4097 2.2266 7.4097 2.0899 7.4097 1.9365 7.4097 1.7999 solid black\nedge 12 9 4 8.3897 2.3677 8.2091 2.1911 7.9647 1.9522 7.7652 1.7572 solid black\nedge 13 11 4 7.4097 3.6038 7.4097 3.4402 7.4097 3.2231 7.4097 3.0369 solid black\nstop\n",
+      "positions": {
+        "0": [
+          2.2292,
+          2.6319
+        ],
+        "1": [
+          3.0903,
+          3.8681
+        ],
+        "2": [
+          1.8542,
+          3.8681
+        ],
+        "3": [
+          0.50694,
+          3.8681
+        ],
+        "4": [
+          1.1181,
+          1.3958
+        ],
+        "5": [
+          1.1181,
+          2.6319
+        ],
+        "6": [
+          3.4375,
+          1.3958
+        ],
+        "7": [
+          4.7986,
+          2.6319
+        ],
+        "8": [
+          3.4375,
+          2.6319
+        ],
+        "9": [
+          7.4097,
+          1.3958
+        ],
+        "10": [
+          6.1597,
+          2.6319
+        ],
+        "11": [
+          7.4097,
+          2.6319
+        ],
+        "12": [
+          8.6458,
+          2.6319
+        ],
+        "13": [
+          7.4097,
+          3.8681
+        ],
+        "14": [
+          7.4097,
+          0.26389
+        ]
+      }
+    },
+    "selected": {
+      "dot": "strict digraph {\noverlap = false; splines=true\nlayout = dot\nnode [shape=box style=filled fillcolor=gold penwidth=2]\n3\n6\n10\n14\nnode [fillcolor=palegreen penwidth=1]\n0 [label=\"John\nDewey\"   tooltip=\"name: John Dewey\\ntitle: John Dewey\\nsite: ward.voices.ustawi.wiki\"]\n1 [label=\"Trails\nRendered\"   tooltip=\"name: Trails Rendered\\ntitle: Trails Rendered\\nsite: jan.voices.ustawi.wiki\"]\n2 [label=\"How\nWe\nThink\"   tooltip=\"name: How We Think\\ntitle: How We Think\\nsite: jan.voices.ustawi.wiki\"]\n3 [label=\"Howard\nBecker\"   tooltip=\"name: Howard Becker\\ntitle: Howard Becker\\nsite: jan.voices.ustawi.wiki\"]\n4 [label=\"Susan\nLeigh\nStar\"   tooltip=\"name: Susan Leigh Star\\ntitle: Susan Leigh Star\\nsite: jan.voices.ustawi.wiki\"]\n5 [label=\"Social\nWorld\"   tooltip=\"name: Social World\\ntitle: Social World\\nsite: jan.voices.ustawi.wiki\"]\n6 [label=\"Donald\nSchön\"   tooltip=\"name: Donald Schön\\ntitle: Donald Schön\\nsite: jan.voices.ustawi.wiki\"]\n7 [label=\"Reflective\nPractice\"   tooltip=\"name: Reflective Practice\\ntitle: Reflective Practice\\nsite: jan.voices.ustawi.wiki\"]\n8 [label=\"Lakoff\nand\nJohnson\"   tooltip=\"name: Lakoff and Johnson\\ntitle: Lakoff and Johnson\\nsite: ward.voices.ustawi.wiki\"]\n9 [label=\"Christopher\nAlexander\"   tooltip=\"name: Christopher Alexander\\ntitle: Christopher Alexander\\nsite: ward.voices.ustawi.wiki\"]\n10 [label=\"Erin\nKissane\"   tooltip=\"name: Erin Kissane\\ntitle: Erin Kissane\\nsite: ward.voices.ustawi.wiki\"]\n11 [label=\"Takashi\nIba\"   tooltip=\"name: Takashi Iba\\ntitle: Takashi Iba\\nsite: thompson.voices.ustawi.wiki\"]\n12 [label=\"Vincent\nScully\"   tooltip=\"name: Vincent Scully\\ntitle: Vincent Scully\\nsite: thompson.voices.ustawi.wiki\"]\n13 [label=\"Interesting\nPeople\"   tooltip=\"name: Interesting People\\ntitle: Interesting People\\nsite: thompson.voices.ustawi.wiki\"]\n14 [label=\"Natural\nOrder\"   tooltip=\"name: Natural Order\\ntitle: Natural Order\\nsite: thompson.voices.ustawi.wiki\"]\n1->0 [label=\"\"  labeltooltip=\"source: hub 21 john-dewey\"]\n2->0 [label=\"\"  labeltooltip=\"source: hub 21 john-dewey\"]\n3->0 [label=\"\"  labeltooltip=\"source: hub 21 john-dewey\"]\n0->4 [label=\"\"  labeltooltip=\"source: hub 21 john-dewey\"]\n3->4 [label=\"\"  labeltooltip=\"source: hub 21 john-dewey\"]\n5->4 [label=\"\"  labeltooltip=\"source: hub 21 john-dewey\"]\n0->6 [label=\"\"  labeltooltip=\"source: hub 21 john-dewey\"]\n7->6 [label=\"\"  labeltooltip=\"source: hub 21 john-dewey\"]\n8->6 [label=\"\"  labeltooltip=\"source: hub 21 john-dewey\"]\n10->9 [label=\"\"  labeltooltip=\"source: hub 4 christopher-alexander\"]\n11->9 [label=\"\"  labeltooltip=\"source: hub 4 christopher-alexander\" dir=both]\n12->9 [label=\"\"  labeltooltip=\"source: hub 4 christopher-alexander\"]\n13->11 [label=\"\"  labeltooltip=\"source: hub 4 christopher-alexander\"]\n9->14 [label=\"\"  labeltooltip=\"source: hub 4 christopher-alexander\"]\n}",
+      "plain": "graph 1 9.125 4.2361\nnode 3 4.2431 3.8681 1.0139 0.52778 \"Howard\nBecker\" filled box black gold\nnode 6 1.9653 1.3958 0.93056 0.52778 \"Donald\nSchön\" filled box black gold\nnode 10 6.1458 2.6319 1 0.52778 \"Erin\nKissane\" filled box black gold\nnode 14 7.3958 0.26389 0.98611 0.52778 \"Natural\nOrder\" filled box black gold\nnode 0 3.1736 2.6319 0.90278 0.52778 \"John\nDewey\" filled box black palegreen\nnode 1 1.8542 3.8681 1.1944 0.52778 \"Trails\nRendered\" filled box black palegreen\nnode 2 3.0903 3.8681 0.77778 0.73611 \"How\nWe\nThink\" filled box black palegreen\nnode 4 4.1736 1.3958 0.83333 0.73611 \"Susan\nLeigh\nStar\" filled box black palegreen\nnode 5 4.9792 2.6319 0.81944 0.52778 \"Social\nWorld\" filled box black palegreen\nnode 7 0.60417 2.6319 1.2083 0.52778 \"Reflective\nPractice\" filled box black palegreen\nnode 8 1.9653 2.6319 1.0139 0.73611 \"Lakoff\nand\nJohnson\" filled box black palegreen\nnode 9 7.3958 1.3958 1.4167 0.52778 \"Christopher\nAlexander\" filled box black palegreen\nnode 11 7.3958 2.6319 0.98611 0.52778 \"Takashi\nIba\" filled box black palegreen\nnode 12 8.6319 2.6319 0.98611 0.52778 \"Vincent\nScully\" filled box black palegreen\nnode 13 7.3958 3.8681 1.3333 0.52778 \"Interesting\nPeople\" filled box black palegreen\nedge 3 0 4 4.0215 3.6038 3.868 3.4304 3.6615 3.1971 3.4907 3.0041 solid black\nedge 3 4 4 4.2359 3.6018 4.2246 3.2043 4.2025 2.425 4.1878 1.9107 solid black\nedge 10 9 4 6.4048 2.3677 6.5875 2.1911 6.8346 1.9522 7.0364 1.7572 solid black\nedge 0 6 4 2.9232 2.3677 2.7483 2.1927 2.5122 1.9566 2.3181 1.7626 solid black\nedge 0 4 4 3.3808 2.3677 3.4991 2.2248 3.6511 2.0411 3.7903 1.8729 solid black\nedge 1 0 4 2.1276 3.6038 2.3204 3.4272 2.5812 3.1883 2.7942 2.9933 solid black\nedge 2 0 4 3.1148 3.4982 3.1248 3.353 3.1364 3.1847 3.1467 3.0362 solid black\nedge 5 4 4 4.8123 2.3677 4.7188 2.2275 4.5992 2.0481 4.4888 1.8825 solid black\nedge 7 6 4 0.88619 2.3677 1.0851 2.1911 1.3542 1.9522 1.5739 1.7572 solid black\nedge 8 6 4 1.9653 2.2621 1.9653 2.1169 1.9653 1.9486 1.9653 1.8001 solid black\nedge 9 14 4 7.3958 1.1314 7.3958 0.99542 7.3958 0.82424 7.3958 0.67093 solid black\nedge 11 9 4 7.3958 2.2266 7.3958 2.0899 7.3958 1.9365 7.3958 1.7999 solid black\nedge 12 9 4 8.3758 2.3677 8.1952 2.1911 7.9508 1.9522 7.7513 1.7572 solid black\nedge 13 11 4 7.3958 3.6038 7.3958 3.4402 7.3958 3.2231 7.3958 3.0369 solid black\nstop\n",
+      "positions": {
+        "0": [
+          3.1736,
+          2.6319
+        ],
+        "1": [
+          1.8542,
+          3.8681
+        ],
+        "2": [
+          3.0903,
+          3.8681
+        ],
+        "3": [
+          4.2431,
+          3.8681
+        ],
+        "4": [
+          4.1736,
+          1.3958
+        ],
+        "5": [
+          4.9792,
+          2.6319
+        ],
+        "6": [
+          1.9653,
+          1.3958
+        ],
+        "7": [
+          0.60417,
+          2.6319
+        ],
+        "8": [
+          1.9653,
+          2.6319
+        ],
+        "9": [
+          7.3958,
+          1.3958
+        ],
+        "10": [
+          6.1458,
+          2.6319
+        ],
+        "11": [
+          7.3958,
+          2.6319
+        ],
+        "12": [
+          8.6319,
+          2.6319
+        ],
+        "13": [
+          7.3958,
+          3.8681
+        ],
+        "14": [
+          7.3958,
+          0.26389
+        ]
+      }
+    },
+    "inline": {
+      "dot": "strict digraph {\noverlap = false; splines=true\nlayout = dot\nnode [shape=box style=filled fillcolor=palegreen penwidth=1]\n0 [label=\"John\nDewey\"    tooltip=\"name: John Dewey\\ntitle: John Dewey\\nsite: ward.voices.ustawi.wiki\"]\n1 [label=\"Trails\nRendered\"    tooltip=\"name: Trails Rendered\\ntitle: Trails Rendered\\nsite: jan.voices.ustawi.wiki\"]\n2 [label=\"How\nWe\nThink\"    tooltip=\"name: How We Think\\ntitle: How We Think\\nsite: jan.voices.ustawi.wiki\"]\n3 [label=\"Howard\nBecker\" penwidth=2 fillcolor=gold  tooltip=\"name: Howard Becker\\ntitle: Howard Becker\\nsite: jan.voices.ustawi.wiki\"]\n4 [label=\"Susan\nLeigh\nStar\"    tooltip=\"name: Susan Leigh Star\\ntitle: Susan Leigh Star\\nsite: jan.voices.ustawi.wiki\"]\n5 [label=\"Social\nWorld\"    tooltip=\"name: Social World\\ntitle: Social World\\nsite: jan.voices.ustawi.wiki\"]\n6 [label=\"Donald\nSchön\" penwidth=2 fillcolor=gold  tooltip=\"name: Donald Schön\\ntitle: Donald Schön\\nsite: jan.voices.ustawi.wiki\"]\n7 [label=\"Reflective\nPractice\"    tooltip=\"name: Reflective Practice\\ntitle: Reflective Practice\\nsite: jan.voices.ustawi.wiki\"]\n8 [label=\"Lakoff\nand\nJohnson\"    tooltip=\"name: Lakoff and Johnson\\ntitle: Lakoff and Johnson\\nsite: ward.voices.ustawi.wiki\"]\n9 [label=\"Christopher\nAlexander\"    tooltip=\"name: Christopher Alexander\\ntitle: Christopher Alexander\\nsite: ward.voices.ustawi.wiki\"]\n10 [label=\"Erin\nKissane\" penwidth=2 fillcolor=gold  tooltip=\"name: Erin Kissane\\ntitle: Erin Kissane\\nsite: ward.voices.ustawi.wiki\"]\n11 [label=\"Takashi\nIba\"    tooltip=\"name: Takashi Iba\\ntitle: Takashi Iba\\nsite: thompson.voices.ustawi.wiki\"]\n12 [label=\"Vincent\nScully\"    tooltip=\"name: Vincent Scully\\ntitle: Vincent Scully\\nsite: thompson.voices.ustawi.wiki\"]\n13 [label=\"Interesting\nPeople\"    tooltip=\"name: Interesting People\\ntitle: Interesting People\\nsite: thompson.voices.ustawi.wiki\"]\n14 [label=\"Natural\nOrder\" penwidth=2 fillcolor=gold  tooltip=\"name: Natural Order\\ntitle: Natural Order\\nsite: thompson.voices.ustawi.wiki\"]\n1->0 [label=\"\"  labeltooltip=\"source: hub 21 john-dewey\"]\n2->0 [label=\"\"  labeltooltip=\"source: hub 21 john-dewey\"]\n3->0 [label=\"\"  labeltooltip=\"source: hub 21 john-dewey\"]\n0->4 [label=\"\"  labeltooltip=\"source: hub 21 john-dewey\"]\n3->4 [label=\"\"  labeltooltip=\"source: hub 21 john-dewey\"]\n5->4 [label=\"\"  labeltooltip=\"source: hub 21 john-dewey\"]\n0->6 [label=\"\"  labeltooltip=\"source: hub 21 john-dewey\"]\n7->6 [label=\"\"  labeltooltip=\"source: hub 21 john-dewey\"]\n8->6 [label=\"\"  labeltooltip=\"source: hub 21 john-dewey\"]\n10->9 [label=\"\"  labeltooltip=\"source: hub 4 christopher-alexander\"]\n11->9 [label=\"\"  labeltooltip=\"source: hub 4 christopher-alexander\" dir=both]\n12->9 [label=\"\"  labeltooltip=\"source: hub 4 christopher-alexander\"]\n13->11 [label=\"\"  labeltooltip=\"source: hub 4 christopher-alexander\"]\n9->14 [label=\"\"  labeltooltip=\"source: hub 4 christopher-alexander\"]\n}",
+      "plain": "graph 1 9.1389 4.2361\nnode 0 2.2292 2.6319 0.90278 0.52778 \"John\nDewey\" filled box black palegreen\nnode 1 3.0903 3.8681 1.1944 0.52778 \"Trails\nRendered\" filled box black palegreen\nnode 2 1.8542 3.8681 0.77778 0.73611 \"How\nWe\nThink\" filled box black palegreen\nnode 3 0.50694 3.8681 1.0139 0.52778 \"Howard\nBecker\" filled box black gold\nnode 4 1.1181 1.3958 0.83333 0.73611 \"Susan\nLeigh\nStar\" filled box black palegreen\nnode 5 1.1181 2.6319 0.81944 0.52778 \"Social\nWorld\" filled box black palegreen\nnode 6 3.4375 1.3958 0.93056 0.52778 \"Donald\nSchön\" filled box black gold\nnode 7 4.7986 2.6319 1.2083 0.52778 \"Reflective\nPractice\" filled box black palegreen\nnode 8 3.4375 2.6319 1.0139 0.73611 \"Lakoff\nand\nJohnson\" filled box black palegreen\nnode 9 7.4097 1.3958 1.4167 0.52778 \"Christopher\nAlexander\" filled box black palegreen\nnode 10 6.1597 2.6319 1 0.52778 \"Erin\nKissane\" filled box black gold\nnode 11 7.4097 2.6319 0.98611 0.52778 \"Takashi\nIba\" filled box black palegreen\nnode 12 8.6458 2.6319 0.98611 0.52778 \"Vincent\nScully\" filled box black palegreen\nnode 13 7.4097 3.8681 1.3333 0.52778 \"Interesting\nPeople\" filled box black palegreen\nnode 14 7.4097 0.26389 0.98611 0.52778 \"Natural\nOrder\" filled box black gold\nedge 0 4 4 1.9989 2.3677 1.8663 2.2234 1.6954 2.0376 1.5395 1.8681 solid black\nedge 0 6 4 2.4795 2.3677 2.6545 2.1927 2.8906 1.9566 3.0846 1.7626 solid black\nedge 1 0 4 2.9119 3.6038 2.7895 3.4321 2.6251 3.2014 2.4883 3.0095 solid black\nedge 2 0 4 1.9647 3.4982 2.0102 3.3515 2.063 3.1812 2.1094 3.0316 solid black\nedge 3 0 4 0.86379 3.6038 1.1224 3.4223 1.4748 3.1751 1.7567 2.9773 solid black\nedge 3 4 7 0.47845 3.5993 0.45155 3.2794 0.43393 2.7174 0.57639 2.2639 0.6174 2.1333 0.68364 2.0031 0.75595 1.8851 solid black\nedge 5 4 4 1.1181 2.3677 1.1181 2.2343 1.1181 2.0654 1.1181 1.9067 solid black\nedge 7 6 4 4.5166 2.3677 4.3177 2.1911 4.0486 1.9522 3.8289 1.7572 solid black\nedge 8 6 4 3.4375 2.2621 3.4375 2.1169 3.4375 1.9486 3.4375 1.8001 solid black\nedge 9 14 4 7.4097 1.1314 7.4097 0.99542 7.4097 0.82424 7.4097 0.67093 solid black\nedge 10 9 4 6.4187 2.3677 6.6014 2.1911 6.8485 1.9522 7.0503 1.7572 solid black\nedge 11 9 4 7.4097 2.2266 7.4097 2.0899 7.4097 1.9365 7.4097 1.7999 solid black\nedge 12 9 4 8.3897 2.3677 8.2091 2.1911 7.9647 1.9522 7.7652 1.7572 solid black\nedge 13 11 4 7.4097 3.6038 7.4097 3.4402 7.4097 3.2231 7.4097 3.0369 solid black\nstop\n",
+      "positions": {
+        "0": [
+          2.2292,
+          2.6319
+        ],
+        "1": [
+          3.0903,
+          3.8681
+        ],
+        "2": [
+          1.8542,
+          3.8681
+        ],
+        "3": [
+          0.50694,
+          3.8681
+        ],
+        "4": [
+          1.1181,
+          1.3958
+        ],
+        "5": [
+          1.1181,
+          2.6319
+        ],
+        "6": [
+          3.4375,
+          1.3958
+        ],
+        "7": [
+          4.7986,
+          2.6319
+        ],
+        "8": [
+          3.4375,
+          2.6319
+        ],
+        "9": [
+          7.4097,
+          1.3958
+        ],
+        "10": [
+          6.1597,
+          2.6319
+        ],
+        "11": [
+          7.4097,
+          2.6319
+        ],
+        "12": [
+          8.6458,
+          2.6319
+        ],
+        "13": [
+          7.4097,
+          3.8681
+        ],
+        "14": [
+          7.4097,
+          0.26389
+        ]
+      }
+    },
+    "early": {
+      "dot": "strict digraph {\noverlap = false; splines=true\nlayout = dot\nnode [shape=box style=filled fillcolor=gold penwidth=2]\n3 [fillcolor=gold penwidth=1]\n6 [fillcolor=gold penwidth=1]\n10 [fillcolor=gold penwidth=1]\n14 [fillcolor=gold penwidth=1]\nnode [fillcolor=palegreen penwidth=1]\n0 [label=\"John\nDewey\"   tooltip=\"name: John Dewey\\ntitle: John Dewey\\nsite: ward.voices.ustawi.wiki\"]\n1 [label=\"Trails\nRendered\"   tooltip=\"name: Trails Rendered\\ntitle: Trails Rendered\\nsite: jan.voices.ustawi.wiki\"]\n2 [label=\"How\nWe\nThink\"   tooltip=\"name: How We Think\\ntitle: How We Think\\nsite: jan.voices.ustawi.wiki\"]\n3 [label=\"Howard\nBecker\"   tooltip=\"name: Howard Becker\\ntitle: Howard Becker\\nsite: jan.voices.ustawi.wiki\"]\n4 [label=\"Susan\nLeigh\nStar\"   tooltip=\"name: Susan Leigh Star\\ntitle: Susan Leigh Star\\nsite: jan.voices.ustawi.wiki\"]\n5 [label=\"Social\nWorld\"   tooltip=\"name: Social World\\ntitle: Social World\\nsite: jan.voices.ustawi.wiki\"]\n6 [label=\"Donald\nSchön\"   tooltip=\"name: Donald Schön\\ntitle: Donald Schön\\nsite: jan.voices.ustawi.wiki\"]\n7 [label=\"Reflective\nPractice\"   tooltip=\"name: Reflective Practice\\ntitle: Reflective Practice\\nsite: jan.voices.ustawi.wiki\"]\n8 [label=\"Lakoff\nand\nJohnson\"   tooltip=\"name: Lakoff and Johnson\\ntitle: Lakoff and Johnson\\nsite: ward.voices.ustawi.wiki\"]\n9 [label=\"Christopher\nAlexander\"   tooltip=\"name: Christopher Alexander\\ntitle: Christopher Alexander\\nsite: ward.voices.ustawi.wiki\"]\n10 [label=\"Erin\nKissane\"   tooltip=\"name: Erin Kissane\\ntitle: Erin Kissane\\nsite: ward.voices.ustawi.wiki\"]\n11 [label=\"Takashi\nIba\"   tooltip=\"name: Takashi Iba\\ntitle: Takashi Iba\\nsite: thompson.voices.ustawi.wiki\"]\n12 [label=\"Vincent\nScully\"   tooltip=\"name: Vincent Scully\\ntitle: Vincent Scully\\nsite: thompson.voices.ustawi.wiki\"]\n13 [label=\"Interesting\nPeople\"   tooltip=\"name: Interesting People\\ntitle: Interesting People\\nsite: thompson.voices.ustawi.wiki\"]\n14 [label=\"Natural\nOrder\"   tooltip=\"name: Natural Order\\ntitle: Natural Order\\nsite: thompson.voices.ustawi.wiki\"]\n1->0 [label=\"\"  labeltooltip=\"source: hub 21 john-dewey\"]\n2->0 [label=\"\"  labeltooltip=\"source: hub 21 john-dewey\"]\n3->0 [label=\"\"  labeltooltip=\"source: hub 21 john-dewey\"]\n0->4 [label=\"\"  labeltooltip=\"source: hub 21 john-dewey\"]\n3->4 [label=\"\"  labeltooltip=\"source: hub 21 john-dewey\"]\n5->4 [label=\"\"  labeltooltip=\"source: hub 21 john-dewey\"]\n0->6 [label=\"\"  labeltooltip=\"source: hub 21 john-dewey\"]\n7->6 [label=\"\"  labeltooltip=\"source: hub 21 john-dewey\"]\n8->6 [label=\"\"  labeltooltip=\"source: hub 21 john-dewey\"]\n10->9 [label=\"\"  labeltooltip=\"source: hub 4 christopher-alexander\"]\n11->9 [label=\"\"  labeltooltip=\"source: hub 4 christopher-alexander\" dir=both]\n12->9 [label=\"\"  labeltooltip=\"source: hub 4 christopher-alexander\"]\n13->11 [label=\"\"  labeltooltip=\"source: hub 4 christopher-alexander\"]\n9->14 [label=\"\"  labeltooltip=\"source: hub 4 christopher-alexander\"]\n}",
+      "plain": "graph 1 9.125 4.2361\nnode 3 4.2431 3.8681 1.0139 0.52778 \"Howard\nBecker\" filled box black gold\nnode 6 1.9653 1.3958 0.93056 0.52778 \"Donald\nSchön\" filled box black gold\nnode 10 6.1458 2.6319 1 0.52778 \"Erin\nKissane\" filled box black gold\nnode 14 7.3958 0.26389 0.98611 0.52778 \"Natural\nOrder\" filled box black gold\nnode 0 3.1736 2.6319 0.90278 0.52778 \"John\nDewey\" filled box black palegreen\nnode 1 1.8542 3.8681 1.1944 0.52778 \"Trails\nRendered\" filled box black palegreen\nnode 2 3.0903 3.8681 0.77778 0.73611 \"How\nWe\nThink\" filled box black palegreen\nnode 4 4.1736 1.3958 0.83333 0.73611 \"Susan\nLeigh\nStar\" filled box black palegreen\nnode 5 4.9792 2.6319 0.81944 0.52778 \"Social\nWorld\" filled box black palegreen\nnode 7 0.60417 2.6319 1.2083 0.52778 \"Reflective\nPractice\" filled box black palegreen\nnode 8 1.9653 2.6319 1.0139 0.73611 \"Lakoff\nand\nJohnson\" filled box black palegreen\nnode 9 7.3958 1.3958 1.4167 0.52778 \"Christopher\nAlexander\" filled box black palegreen\nnode 11 7.3958 2.6319 0.98611 0.52778 \"Takashi\nIba\" filled box black palegreen\nnode 12 8.6319 2.6319 0.98611 0.52778 \"Vincent\nScully\" filled box black palegreen\nnode 13 7.3958 3.8681 1.3333 0.52778 \"Interesting\nPeople\" filled box black palegreen\nedge 3 0 4 4.0215 3.6038 3.868 3.4304 3.6615 3.1971 3.4907 3.0041 solid black\nedge 3 4 4 4.2359 3.6018 4.2246 3.2043 4.2025 2.425 4.1878 1.9107 solid black\nedge 10 9 4 6.4048 2.3677 6.5875 2.1911 6.8346 1.9522 7.0364 1.7572 solid black\nedge 0 6 4 2.9232 2.3677 2.7483 2.1927 2.5122 1.9566 2.3181 1.7626 solid black\nedge 0 4 4 3.3808 2.3677 3.4991 2.2248 3.6511 2.0411 3.7903 1.8729 solid black\nedge 1 0 4 2.1276 3.6038 2.3204 3.4272 2.5812 3.1883 2.7942 2.9933 solid black\nedge 2 0 4 3.1148 3.4982 3.1248 3.353 3.1364 3.1847 3.1467 3.0362 solid black\nedge 5 4 4 4.8123 2.3677 4.7188 2.2275 4.5992 2.0481 4.4888 1.8825 solid black\nedge 7 6 4 0.88619 2.3677 1.0851 2.1911 1.3542 1.9522 1.5739 1.7572 solid black\nedge 8 6 4 1.9653 2.2621 1.9653 2.1169 1.9653 1.9486 1.9653 1.8001 solid black\nedge 9 14 4 7.3958 1.1314 7.3958 0.99542 7.3958 0.82424 7.3958 0.67093 solid black\nedge 11 9 4 7.3958 2.2266 7.3958 2.0899 7.3958 1.9365 7.3958 1.7999 solid black\nedge 12 9 4 8.3758 2.3677 8.1952 2.1911 7.9508 1.9522 7.7513 1.7572 solid black\nedge 13 11 4 7.3958 3.6038 7.3958 3.4402 7.3958 3.2231 7.3958 3.0369 solid black\nstop\n",
+      "positions": {
+        "0": [
+          3.1736,
+          2.6319
+        ],
+        "1": [
+          1.8542,
+          3.8681
+        ],
+        "2": [
+          3.0903,
+          3.8681
+        ],
+        "3": [
+          4.2431,
+          3.8681
+        ],
+        "4": [
+          4.1736,
+          1.3958
+        ],
+        "5": [
+          4.9792,
+          2.6319
+        ],
+        "6": [
+          1.9653,
+          1.3958
+        ],
+        "7": [
+          0.60417,
+          2.6319
+        ],
+        "8": [
+          1.9653,
+          2.6319
+        ],
+        "9": [
+          7.3958,
+          1.3958
+        ],
+        "10": [
+          6.1458,
+          2.6319
+        ],
+        "11": [
+          7.3958,
+          2.6319
+        ],
+        "12": [
+          8.6319,
+          2.6319
+        ],
+        "13": [
+          7.3958,
+          3.8681
+        ],
+        "14": [
+          7.3958,
+          0.26389
+        ]
+      }
+    },
+    "sameWidth": {
+      "dot": "strict digraph {\noverlap = false; splines=true\nlayout = dot\nnode [shape=box style=filled fillcolor=palegreen penwidth=1]\n0 [label=\"John\nDewey\"    tooltip=\"name: John Dewey\\ntitle: John Dewey\\nsite: ward.voices.ustawi.wiki\"]\n1 [label=\"Trails\nRendered\"    tooltip=\"name: Trails Rendered\\ntitle: Trails Rendered\\nsite: jan.voices.ustawi.wiki\"]\n2 [label=\"How\nWe\nThink\"    tooltip=\"name: How We Think\\ntitle: How We Think\\nsite: jan.voices.ustawi.wiki\"]\n3 [label=\"Howard\nBecker\" penwidth=1 fillcolor=gold  tooltip=\"name: Howard Becker\\ntitle: Howard Becker\\nsite: jan.voices.ustawi.wiki\"]\n4 [label=\"Susan\nLeigh\nStar\"    tooltip=\"name: Susan Leigh Star\\ntitle: Susan Leigh Star\\nsite: jan.voices.ustawi.wiki\"]\n5 [label=\"Social\nWorld\"    tooltip=\"name: Social World\\ntitle: Social World\\nsite: jan.voices.ustawi.wiki\"]\n6 [label=\"Donald\nSchön\" penwidth=1 fillcolor=gold  tooltip=\"name: Donald Schön\\ntitle: Donald Schön\\nsite: jan.voices.ustawi.wiki\"]\n7 [label=\"Reflective\nPractice\"    tooltip=\"name: Reflective Practice\\ntitle: Reflective Practice\\nsite: jan.voices.ustawi.wiki\"]\n8 [label=\"Lakoff\nand\nJohnson\"    tooltip=\"name: Lakoff and Johnson\\ntitle: Lakoff and Johnson\\nsite: ward.voices.ustawi.wiki\"]\n9 [label=\"Christopher\nAlexander\"    tooltip=\"name: Christopher Alexander\\ntitle: Christopher Alexander\\nsite: ward.voices.ustawi.wiki\"]\n10 [label=\"Erin\nKissane\" penwidth=1 fillcolor=gold  tooltip=\"name: Erin Kissane\\ntitle: Erin Kissane\\nsite: ward.voices.ustawi.wiki\"]\n11 [label=\"Takashi\nIba\"    tooltip=\"name: Takashi Iba\\ntitle: Takashi Iba\\nsite: thompson.voices.ustawi.wiki\"]\n12 [label=\"Vincent\nScully\"    tooltip=\"name: Vincent Scully\\ntitle: Vincent Scully\\nsite: thompson.voices.ustawi.wiki\"]\n13 [label=\"Interesting\nPeople\"    tooltip=\"name: Interesting People\\ntitle: Interesting People\\nsite: thompson.voices.ustawi.wiki\"]\n14 [label=\"Natural\nOrder\" penwidth=1 fillcolor=gold  tooltip=\"name: Natural Order\\ntitle: Natural Order\\nsite: thompson.voices.ustawi.wiki\"]\n1->0 [label=\"\"  labeltooltip=\"source: hub 21 john-dewey\"]\n2->0 [label=\"\"  labeltooltip=\"source: hub 21 john-dewey\"]\n3->0 [label=\"\"  labeltooltip=\"source: hub 21 john-dewey\"]\n0->4 [label=\"\"  labeltooltip=\"source: hub 21 john-dewey\"]\n3->4 [label=\"\"  labeltooltip=\"source: hub 21 john-dewey\"]\n5->4 [label=\"\"  labeltooltip=\"source: hub 21 john-dewey\"]\n0->6 [label=\"\"  labeltooltip=\"source: hub 21 john-dewey\"]\n7->6 [label=\"\"  labeltooltip=\"source: hub 21 john-dewey\"]\n8->6 [label=\"\"  labeltooltip=\"source: hub 21 john-dewey\"]\n10->9 [label=\"\"  labeltooltip=\"source: hub 4 christopher-alexander\"]\n11->9 [label=\"\"  labeltooltip=\"source: hub 4 christopher-alexander\" dir=both]\n12->9 [label=\"\"  labeltooltip=\"source: hub 4 christopher-alexander\"]\n13->11 [label=\"\"  labeltooltip=\"source: hub 4 christopher-alexander\"]\n9->14 [label=\"\"  labeltooltip=\"source: hub 4 christopher-alexander\"]\n}",
+      "plain": "graph 1 9.1389 4.2361\nnode 0 2.2292 2.6319 0.90278 0.52778 \"John\nDewey\" filled box black palegreen\nnode 1 3.0903 3.8681 1.1944 0.52778 \"Trails\nRendered\" filled box black palegreen\nnode 2 1.8542 3.8681 0.77778 0.73611 \"How\nWe\nThink\" filled box black palegreen\nnode 3 0.50694 3.8681 1.0139 0.52778 \"Howard\nBecker\" filled box black gold\nnode 4 1.1181 1.3958 0.83333 0.73611 \"Susan\nLeigh\nStar\" filled box black palegreen\nnode 5 1.1181 2.6319 0.81944 0.52778 \"Social\nWorld\" filled box black palegreen\nnode 6 3.4375 1.3958 0.93056 0.52778 \"Donald\nSchön\" filled box black gold\nnode 7 4.7986 2.6319 1.2083 0.52778 \"Reflective\nPractice\" filled box black palegreen\nnode 8 3.4375 2.6319 1.0139 0.73611 \"Lakoff\nand\nJohnson\" filled box black palegreen\nnode 9 7.4097 1.3958 1.4167 0.52778 \"Christopher\nAlexander\" filled box black palegreen\nnode 10 6.1597 2.6319 1 0.52778 \"Erin\nKissane\" filled box black gold\nnode 11 7.4097 2.6319 0.98611 0.52778 \"Takashi\nIba\" filled box black palegreen\nnode 12 8.6458 2.6319 0.98611 0.52778 \"Vincent\nScully\" filled box black palegreen\nnode 13 7.4097 3.8681 1.3333 0.52778 \"Interesting\nPeople\" filled box black palegreen\nnode 14 7.4097 0.26389 0.98611 0.52778 \"Natural\nOrder\" filled box black gold\nedge 0 4 4 1.9989 2.3677 1.8663 2.2234 1.6954 2.0376 1.5395 1.8681 solid black\nedge 0 6 4 2.4795 2.3677 2.6545 2.1927 2.8906 1.9566 3.0846 1.7626 solid black\nedge 1 0 4 2.9119 3.6038 2.7895 3.4321 2.6251 3.2014 2.4883 3.0095 solid black\nedge 2 0 4 1.9647 3.4982 2.0102 3.3515 2.063 3.1812 2.1094 3.0316 solid black\nedge 3 0 4 0.86379 3.6038 1.1224 3.4223 1.4748 3.1751 1.7567 2.9773 solid black\nedge 3 4 7 0.47845 3.5993 0.45155 3.2794 0.43393 2.7174 0.57639 2.2639 0.6174 2.1333 0.68364 2.0031 0.75595 1.8851 solid black\nedge 5 4 4 1.1181 2.3677 1.1181 2.2343 1.1181 2.0654 1.1181 1.9067 solid black\nedge 7 6 4 4.5166 2.3677 4.3177 2.1911 4.0486 1.9522 3.8289 1.7572 solid black\nedge 8 6 4 3.4375 2.2621 3.4375 2.1169 3.4375 1.9486 3.4375 1.8001 solid black\nedge 9 14 4 7.4097 1.1314 7.4097 0.99542 7.4097 0.82424 7.4097 0.67093 solid black\nedge 10 9 4 6.4187 2.3677 6.6014 2.1911 6.8485 1.9522 7.0503 1.7572 solid black\nedge 11 9 4 7.4097 2.2266 7.4097 2.0899 7.4097 1.9365 7.4097 1.7999 solid black\nedge 12 9 4 8.3897 2.3677 8.2091 2.1911 7.9647 1.9522 7.7652 1.7572 solid black\nedge 13 11 4 7.4097 3.6038 7.4097 3.4402 7.4097 3.2231 7.4097 3.0369 solid black\nstop\n",
+      "positions": {
+        "0": [
+          2.2292,
+          2.6319
+        ],
+        "1": [
+          3.0903,
+          3.8681
+        ],
+        "2": [
+          1.8542,
+          3.8681
+        ],
+        "3": [
+          0.50694,
+          3.8681
+        ],
+        "4": [
+          1.1181,
+          1.3958
+        ],
+        "5": [
+          1.1181,
+          2.6319
+        ],
+        "6": [
+          3.4375,
+          1.3958
+        ],
+        "7": [
+          4.7986,
+          2.6319
+        ],
+        "8": [
+          3.4375,
+          2.6319
+        ],
+        "9": [
+          7.4097,
+          1.3958
+        ],
+        "10": [
+          6.1597,
+          2.6319
+        ],
+        "11": [
+          7.4097,
+          2.6319
+        ],
+        "12": [
+          8.6458,
+          2.6319
+        ],
+        "13": [
+          7.4097,
+          3.8681
+        ],
+        "14": [
+          7.4097,
+          0.26389
+        ]
+      }
+    }
+  }
+}
