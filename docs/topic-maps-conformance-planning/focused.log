@@ -1,0 +1,153 @@
+WARNING: System definition file #P"/workspace/tools/nix-portable-data/.nix-portable/nix/store/fdrq5ji4dvm7jj0wzfvxcyr0rwiq2c24-sbcl-cl-who-20241012-git/cl-who.asd" contains definition for system "cl-who-test". Please only define "cl-who" and secondary systems with a name starting with "cl-who/" (e.g. "cl-who/test") in that file.
+
+
+SHOP3 version 4.3.1
+Copyright (C) 2004-2026 SIFT, LLC.
+
+Original SHOP2 code Copyright (C) 2002  University of Maryland.
+
+This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+KIND, either express or implied.  This software is distributed under an
+MPL/GPL/LGPL triple license.  For details, see the software source file.
+;;; Computing Hangul syllable namesSTYLE-WARNING:
+   The new FTYPE proclamation for FSET::VECTOR-SET-BINARY-SEARCH-LO
+     (FUNCTION (SIMPLE-VECTOR T) FIXNUM)
+   does not match the derived return type
+     (FUNCTION (SIMPLE-VECTOR T)
+      (VALUES (INTEGER -4611686018427387904 4611686018427387904) &OPTIONAL))
+STYLE-WARNING:
+   The new FTYPE proclamation for FSET::WB-BAG-TREE-TOTAL-COUNT
+     (FUNCTION (FSET::WB-BAG-TREE) INTEGER)
+   does not match the derived return type
+     (FUNCTION ((OR LIST FSET::WB-BAG-TREE-NODE)) *)
+STYLE-WARNING:
+   The new FTYPE proclamation for FSET::HASH-VALUE-FIXNUM
+     (FUNCTION (T) FIXNUM)
+   does not match the derived return type
+     (FUNCTION (T) (VALUES INTEGER &OPTIONAL))
+STYLE-WARNING:
+   The new FTYPE proclamation for FSET::CH-SET-NODE-ENTRY-MASK
+     (FUNCTION (T) FIXNUM)
+   does not match the derived return type
+     (FUNCTION (SIMPLE-VECTOR) (VALUES T &OPTIONAL))
+STYLE-WARNING:
+   The new FTYPE proclamation for FSET::CH-SET-NODE-SUBNODE-MASK
+     (FUNCTION (T) FIXNUM)
+   does not match the derived return type
+     (FUNCTION (SIMPLE-VECTOR) (VALUES T &OPTIONAL))
+STYLE-WARNING:
+   The new FTYPE proclamation for FSET::CH-SET-NODE-SIZE
+     (FUNCTION (T) FIXNUM)
+   does not match the derived return type
+     (FUNCTION (SIMPLE-VECTOR) (VALUES T &OPTIONAL))
+STYLE-WARNING:
+   The new FTYPE proclamation for FSET::CH-SET-NODE-HASH-VALUE
+     (FUNCTION (T) FIXNUM)
+   does not match the derived return type
+     (FUNCTION (SIMPLE-VECTOR) (VALUES T &OPTIONAL))
+STYLE-WARNING:
+   The new FTYPE proclamation for FSET::CH-MAP-NODE-ENTRY-MASK
+     (FUNCTION (T) FIXNUM)
+   does not match the derived return type
+     (FUNCTION (SIMPLE-VECTOR) (VALUES T &OPTIONAL))
+STYLE-WARNING:
+   The new FTYPE proclamation for FSET::CH-MAP-NODE-SUBNODE-MASK
+     (FUNCTION (T) FIXNUM)
+   does not match the derived return type
+     (FUNCTION (SIMPLE-VECTOR) (VALUES T &OPTIONAL))
+STYLE-WARNING:
+   The new FTYPE proclamation for FSET::CH-MAP-NODE-SIZE
+     (FUNCTION (T) FIXNUM)
+   does not match the derived return type
+     (FUNCTION (SIMPLE-VECTOR) (VALUES T &OPTIONAL))
+STYLE-WARNING:
+   The new FTYPE proclamation for FSET::CH-MAP-NODE-HASH-VALUE
+     (FUNCTION (T) FIXNUM)
+   does not match the derived return type
+     (FUNCTION (SIMPLE-VECTOR) (VALUES T &OPTIONAL))
+STYLE-WARNING:
+   Generic function FSET:ITERATOR clobbers an earlier FTYPE proclamation
+   (FUNCTION (T &KEY &ALLOW-OTHER-KEYS) (VALUES FUNCTION &REST T)) for the same
+   name with (FUNCTION (T &KEY &ALLOW-OTHER-KEYS) *).
+STYLE-WARNING:
+   The new FTYPE proclamation for SWANK/BACKEND:GETPID
+     (FUNCTION NIL (VALUES (SIGNED-BYTE 32) &OPTIONAL))
+   does not match the derived return type
+     (FUNCTION NIL *)
+WARNING:
+   redefining EMACS-INSPECT (#<SB-PCL:SYSTEM-CLASS COMMON-LISP:T>) in DEFMETHOD
+WARNING:
+   redefining 👀PRINT-STRING (#<SB-PCL:SYSTEM-CLASS COMMON-LISP:T>) in DEFMETHOD
+WARNING: redefining IRONCLAD:BLOCK-LENGTH in DEFGENERIC
+
+; compiling file "/workspace/work/topic-maps-conformance-planning/dreyeck/work/topic-maps-conformance-planning.lisp" (written 11 NOV 2026 08:39:52 PM):
+
+; wrote /workspace/work/defederation-fasls/workspace/work/topic-maps-conformance-planning/dreyeck/work/topic-maps-conformance-planning-tmpGHU3ALSW.fasl
+; compilation finished in 0:00:00.103
+
+Defining domain CONFORMANCE-INVESTIGATION...
+INVESTIGATION TEST ENVIRONMENT SBCL 2.4.10; Linux; /workspace/work/topic-maps-conformance-planning/
+INVESTIGATION SOURCE d23d2daf8be79277c5f90bb85bb8e8a97aa3d73aadd0cb9eb83e2417db74e736 dreyeck.asd
+INVESTIGATION SOURCE 168bb2a11c7680bcb218d47c42cec43363becb0a423fe5d233f3deb0fdd1d0ea dreyeck/work/topic-maps-conformance-planning.lisp
+INVESTIGATION SOURCE bed25fd1988c17fe4b415d1a8f7c6b4b8caa58bf7c18dabcdd29305cf9742c49 dreyeck/tests/topic-maps-conformance-planning.lisp
+INVESTIGATION SOURCE a2358bb41f789c054cad73f41a3e19c1c8a85f3948a7d4331a2fa76c5193e056 dreyeck/pages/topic-maps-conformance-planning/Planning Evidence-Based Investigations.html
+; compiling file "/workspace/work/topic-maps-conformance-planning/dreyeck/tests/topic-maps-conformance-planning.lisp" (written 11 NOV 2026 08:37:01 PM):
+
+; wrote /workspace/work/defederation-fasls/workspace/work/topic-maps-conformance-planning/dreyeck/tests/topic-maps-conformance-planning-tmpAAURSO1.fasl
+; compilation finished in 0:00:00.039
+CONFORMANCE CASE-A PASS: 2 native plans/trees/states, :PLAN-ONLY; methods (DREYECK/WORK/TOPIC-MAPS-CONFORMANCE-PLANNING::REVIEW-OBSERVED-MISMATCH
+                                                                           DREYECK/WORK/TOPIC-MAPS-CONFORMANCE-PLANNING::PREPARE-NORMATIVE-QUESTION)
+  (((DREYECK/WORK/TOPIC-MAPS-CONFORMANCE-PLANNING::!PREPARE-BYTE-REVIEW
+     "ctm/in/include-template.ctm")
+    (DREYECK/WORK/TOPIC-MAPS-CONFORMANCE-PLANNING::!FRAME-DISPOSITION-QUESTION
+     "ctm/in/include-template.ctm" :CXTM-DIFFERENCE))
+   ((DREYECK/WORK/TOPIC-MAPS-CONFORMANCE-PLANNING::!PREPARE-EDITION-REVIEW
+     "ctm/in/include-template.ctm")
+    (DREYECK/WORK/TOPIC-MAPS-CONFORMANCE-PLANNING::!FRAME-DISPOSITION-QUESTION
+     "ctm/in/include-template.ctm" :INCLUDE-ENVIRONMENT)))
+CONFORMANCE CASE-B PASS: 1 native plans/trees/states, :PLAN-ONLY; methods (DREYECK/WORK/TOPIC-MAPS-CONFORMANCE-PLANNING::INVESTIGATE-REGISTERED-NOT-RUN)
+  (((DREYECK/WORK/TOPIC-MAPS-CONFORMANCE-PLANNING::!SEPARATE-ORIGINAL-AND-CONTROL
+     "ctm/in/template-subject-identifier2.ctm")
+    (DREYECK/WORK/TOPIC-MAPS-CONFORMANCE-PLANNING::!PREPARE-ORIGINAL-INQUIRY
+     "ctm/in/template-subject-identifier2.ctm")))
+CONFORMANCE EXPLICIT-MISSING-PREREQUISITE PASS: 1 native plans/trees/states, :PLAN-ONLY; methods (DREYECK/WORK/TOPIC-MAPS-CONFORMANCE-PLANNING::REPORT-EXPLICIT-PREREQUISITE-GAP)
+  (((DREYECK/WORK/TOPIC-MAPS-CONFORMANCE-PLANNING::!REPORT-MISSING-PREREQUISITE
+     "ctm/in/include-template.ctm" :COMPLETED-PUBLISHED-EDITION-REVIEW)))
+CONFORMANCE UNKNOWN-PREREQUISITE PASS: 0 native plans/trees/states, :PLAN-ONLY; methods NIL
+  NIL
+CONFORMANCE MISSING-COMPARISON PASS: 1 native plans/trees/states, :PLAN-ONLY; methods (DREYECK/WORK/TOPIC-MAPS-CONFORMANCE-PLANNING::PREPARE-NORMATIVE-QUESTION)
+  (((DREYECK/WORK/TOPIC-MAPS-CONFORMANCE-PLANNING::!PREPARE-EDITION-REVIEW
+     "ctm/in/include-template.ctm")
+    (DREYECK/WORK/TOPIC-MAPS-CONFORMANCE-PLANNING::!FRAME-DISPOSITION-QUESTION
+     "ctm/in/include-template.ctm" :INCLUDE-ENVIRONMENT)))
+CONFORMANCE MISSING-NORMATIVE-REFERENCES PASS: 1 native plans/trees/states, :PLAN-ONLY; methods (DREYECK/WORK/TOPIC-MAPS-CONFORMANCE-PLANNING::REVIEW-OBSERVED-MISMATCH)
+  (((DREYECK/WORK/TOPIC-MAPS-CONFORMANCE-PLANNING::!PREPARE-BYTE-REVIEW
+     "ctm/in/include-template.ctm")
+    (DREYECK/WORK/TOPIC-MAPS-CONFORMANCE-PLANNING::!FRAME-DISPOSITION-QUESTION
+     "ctm/in/include-template.ctm" :CXTM-DIFFERENCE)))
+CONFORMANCE BOTH-ROUTES-UNJUSTIFIED PASS: 0 native plans/trees/states, :PLAN-ONLY; methods NIL
+  NIL
+CONFORMANCE (MISSING KNOWN-CASE) PASS: 0 native plans/trees/states, :PLAN-ONLY; methods NIL
+  NIL
+CONFORMANCE (MISSING EVIDENCE-VERIFIED) PASS: 0 native plans/trees/states, :PLAN-ONLY; methods NIL
+  NIL
+CONFORMANCE (MISSING REGISTERED-STATUS) PASS: 0 native plans/trees/states, :PLAN-ONLY; methods NIL
+  NIL
+CONFORMANCE (MISSING EXPANDED-CONTROL) PASS: 0 native plans/trees/states, :PLAN-ONLY; methods NIL
+  NIL
+CONFORMANCE (MISSING READER-REJECTION) PASS: 0 native plans/trees/states, :PLAN-ONLY; methods NIL
+  NIL
+CONFORMANCE UNRELATED-STATUS-PRESERVED PASS: 1 native plans/trees/states, :PLAN-ONLY; methods (DREYECK/WORK/TOPIC-MAPS-CONFORMANCE-PLANNING::INVESTIGATE-REGISTERED-NOT-RUN)
+  (((DREYECK/WORK/TOPIC-MAPS-CONFORMANCE-PLANNING::!SEPARATE-ORIGINAL-AND-CONTROL
+     "ctm/in/template-subject-identifier2.ctm")
+    (DREYECK/WORK/TOPIC-MAPS-CONFORMANCE-PLANNING::!PREPARE-ORIGINAL-INQUIRY
+     "ctm/in/template-subject-identifier2.ctm")))
+CONFORMANCE CHANGED-METHOD-PRECONDITION PASS: 1 native plans/trees/states, :PLAN-ONLY; methods (DREYECK/WORK/TOPIC-MAPS-CONFORMANCE-PLANNING::PREPARE-NORMATIVE-QUESTION)
+  (((DREYECK/WORK/TOPIC-MAPS-CONFORMANCE-PLANNING::!PREPARE-EDITION-REVIEW
+     "ctm/in/include-template.ctm")
+    (DREYECK/WORK/TOPIC-MAPS-CONFORMANCE-PLANNING::!FRAME-DISPOSITION-QUESTION
+     "ctm/in/include-template.ctm" :INCLUDE-ENVIRONMENT)))
+CONFORMANCE NO-UNEXPECTED-FALLBACK PASS: 0 native plans/trees/states, :PLAN-ONLY; methods NIL
+  NIL
+CONFORMANCE-INVESTIGATION-PASS: 195 assertions; pinned sources unchanged; no corpus PASS, test execution, Topic Maps code load or implementation edit.
+INVESTIGATION RUN PASS focused: source hashes unchanged; no conformance run or Topic Maps worktree edit.

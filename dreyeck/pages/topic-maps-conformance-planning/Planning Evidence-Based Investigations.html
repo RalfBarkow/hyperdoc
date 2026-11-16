@@ -1,0 +1,32 @@
+<h1>Planning Evidence-Based Investigations</h1>
+<p>This optional example asks SHOP3 to plan an investigation of a known Topic Maps test case. It does not run the test, edit its source, change a registered Case Record, or declare conformance. The planning domain is <code>conformance-investigation</code>; its task is <code>qualify-test-case</code>.</p>
+<p>The evidence is retained at Topic Maps commit <code>88994c1b9e1edbf13e665e984a5c9c3b2cdf7575</code>. The reader uses explicit Git file-at-commit objects. It does not load Topic Maps code or consult a moving worktree. The Slice 22A observations were made against base <code>1c0b92c68fe1114b926d4405b553dfb096d2f425</code>; retaining them at the later commit does not make them new executions.</p>
+<p>Case A, <code>ctm/in/include-template.ctm</code>, is registered FAIL. The recorded original deserializes, but actual CXTM has 353 bytes against a 401-byte baseline, first differing at byte 58. Formal normative disposition C is unresolved. Both preparations are justified: <em>review-observed-mismatch</em> prepares a byte-difference review; <em>prepare-normative-question</em> prepares an edition-qualified question about include environments. SHOP3 returns both with <code>:which :all</code>. Neither is a claim that the baseline or implementation is correct.</p>
+<p>Case B, <code>ctm/in/template-subject-identifier2.ctm</code>, remains registered NOT-RUN with no registered actual outcome. A separate reader observation reports <code>INVALID-TEMPLATE-BODY / template-identity-tail</code> at character 34, line 3, column 15. An expanded control matches 204/204 CXTM bytes. The method <em>investigate-registered-not-run</em> plans to separate these observations and frame an inquiry about the original. Control success is never promoted to original-case PASS.</p>
+<p>The report explicitly records incomplete review of the published CTM edition beyond the preview. Requesting an <code>:edition-qualified-disposition</code> therefore yields <em>report-explicit-prerequisite-gap</em>. This scope is a proposed planning request; the incomplete review is a historical recorded limitation. It does not prove the standard is unavailable or the reader lacks a normative capability. If that negative observation is removed, the planner has no basis for a blocker and returns no plan.</p>
+<p>Registered statuses, reader observations, normative assessments and proposed goals remain distinct. Operators add only <code>planned-*</code> facts to simulated states. Unknown evidence stays unknown. The new ASDF system is <code>dreyeck/work/topic-maps-conformance-planning</code>; no new Topic Maps model, corpus importer, runner or Fable API is involved.</p>
+<h2>Inspect the real SHOP3 results</h2>
+<p>Use the intended local SLY image. Evaluate each block as a separate request so packages exist before later forms are read. Loading the optional system registers this reading HyperDoc but starts no listener and reads no external evidence automatically.</p>
+<pre>(asdf:load-system "dreyeck/work/topic-maps-conformance-planning")</pre>
+<p>The following explicit local repository path is the prepared Cloud example. On another machine, replace only the root with the actual Topic Maps Git repository containing the pinned objects. The worktree may be changing: only objects at the fixed commit are read, never its current implementation files.</p>
+<pre>(defparameter *conformance-evidence-repository*
+  (make-instance 'dreyeck/git:git-repository-checkout
+    :root #P"/workspace/topic-maps/"
+    :root-source :explicit-read-only-evidence))
+(defparameter *conformance-a*
+  (dreyeck/work/topic-maps-conformance-planning:investigate-case
+   *conformance-evidence-repository* :include-template))
+(defparameter *conformance-b*
+  (dreyeck/work/topic-maps-conformance-planning:investigate-case
+   *conformance-evidence-repository* :template-subject-identifier2))
+(defparameter *conformance-blocked*
+  (dreyeck/work/topic-maps-conformance-planning:investigate-case
+   *conformance-evidence-repository* :include-template
+   :goal :edition-qualified-disposition))
+(inspect *conformance-a*)</pre>
+<p>Expected: two alternatives for A, one distinct inquiry for B and one prerequisite-blocker proposal. In <strong>Investigation alternatives</strong>, open the native result and each native plan tree. The method names come from SHOP3's own tree, not a reconstructed checklist. Source references lead to the unchanged serialized Case Records, matrix, original/baseline files and historical execution provenance.</p>
+<p>With CLOG Moldable Inspector already loaded and connected in that same image, these forms inspect the reading and the existing native result directly. They are not instructions to start or restart a service:</p>
+<pre>(clog-moldable-inspector:clog-inspect :object *conformance-a*)</pre>
+<pre>(clog-moldable-inspector:clog-inspect
+ :object (dreyeck/work/topic-maps-conformance-planning:run-result *conformance-b*))</pre>
+<p>All results are <code>:plan-only</code>. A successful blocker plan is not completed qualification. No alternative is automatically selected or executed. Actual source inspection and Lisp tests can be recorded separately; interactive browser navigation is not established by HTML-reference tests.</p>
