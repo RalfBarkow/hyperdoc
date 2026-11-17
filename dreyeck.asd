@@ -3473,10 +3473,11 @@
              (declare (ignore operation component))
              (uiop:symbol-call :dreyeck/work/topic-maps-project-example/tests :run-tests)))
 
-;; Optional local review of one falsifiable claim about the Topic Maps 22U CTM reader. Not part of any service start.
+;; Topic Maps readings selected by the Catalog service via HYPERDOC_CATALOG_SYSTEM.
 (defsystem "dreyeck/work/topic-maps-ctm-review"
-  :description "Read, execute on request and inspect one falsifiable claim about the pinned Topic Maps 22U CTM reader"
-  :depends-on ("dreyeck/work/topic-maps-project-example" "topic-maps/ctm" "topic-maps/cxtm" "dreyeck/inspector/tmdm"
+  :description "Inspect the pinned Topic Maps CTM reader and the Paul 2026 reading"
+  :depends-on ("dreyeck/work/topic-maps-project-example" "dreyeck/work/paul-2026"
+               "topic-maps/ctm" "topic-maps/cxtm" "dreyeck/inspector/tmdm"
                "dreyeck/evaluation-record" "dreyeck/git" "dreyeck/source-snapshot" "ironclad" "dreyeck/authority-policy")
   :serial t
   :components ((:file "dreyeck/work/topic-maps-ctm-review")
@@ -3733,3 +3734,25 @@
   :perform (test-op (op component)
              (declare (ignore op component))
              (uiop:symbol-call :dreyeck/work/welcome-development :run-domain-version-tests)))
+
+(defsystem "dreyeck/work/paul-2026"
+  :description "Read two source-backed CTM maps and inspect a native TMDM SHOP3 subject merge"
+  :depends-on ("topic-maps/ctm" "topic-maps/tmdm" "topic-maps/cxtm"
+               "dreyeck/inspector/tmdm" "dreyeck/authority-policy"
+               "hyperdoc/explorer")
+  :serial t
+  :components ((:module "dreyeck/work/paul-2026"
+                :components ((:file "merged-reading")
+                             (:static-file "hyperdoc-context.ctm")
+                             (:static-file "paul-2026.ctm")))
+               (:module "dreyeck/pages/paul-2026"
+                :components ((:static-file "Reading Paul 2026 with Topic Maps.html"))))
+  :in-order-to ((test-op (test-op "dreyeck/work/paul-2026/tests"))))
+
+(defsystem "dreyeck/work/paul-2026/tests"
+  :description "Native source-preserving cross-map identity and Role tests for Paul's workflow reading"
+  :depends-on ("dreyeck/work/paul-2026")
+  :components ((:file "dreyeck/tests/paul-2026-topic-map"))
+  :perform (test-op (operation component)
+             (declare (ignore operation component))
+             (uiop:symbol-call :dreyeck/work/paul-2026/tests :run-tests)))

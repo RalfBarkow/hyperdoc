@@ -146,7 +146,10 @@ RUN-BUTTON-LABELS). The objects are made when the list is used, not when this fi
         (list "CTM review page" (lambda () (hyperdoc:page "Reviewing the CTM Reader" :hyperbook "dreyeck/work/topic-maps-ctm-review"))
               '() '())
         (list "CTM review claim scheme-plus" (lambda () (review:claim-named "scheme-plus"))
-              '() '("Run the experiment"))))
+              '() '("Run the experiment"))
+        (list "Paul 2026 reading page"
+              (lambda () (hyperdoc:page "Reading Paul 2026 with Topic Maps" :hyperbook "dreyeck/work/paul-2026"))
+              '("Native Topic Map") '("Read and merge CTM sources"))))
 
 (defun %references (view)
   (hv:view-html view)
@@ -351,11 +354,26 @@ cursor moves and moves back, and a Workspace sign moves the Point (restored afte
     (assert (search "Existing Work Workspace" (developing (lambda () (rendered topic))))))
   t)
 
+(defun check-paul-map-link ()
+  (served
+   (lambda ()
+     (let* ((page (hyperdoc:page "Reading Paul 2026 with Topic Maps" :hyperbook "dreyeck/work/paul-2026"))
+            (view (find "Native Topic Map" (hv:all-views page) :key #'hv:view-title :test #'string=))
+            (map (find-if (lambda (object) (typep object 'topic-maps.tmdm:topic-map))
+                          (%references view))))
+       (assert map () "The Paul reading does not link to a native Topic Map.")
+       (assert (uiop:symbol-call :dreyeck/work/paul-2026 :find-subject map "urn:hyperdoc:subject:shop3"))
+       (assert (uiop:symbol-call :dreyeck/work/paul-2026 :find-subject map
+                                 "urn:hyperdoc:paul-2026:domain:worksworld-2h"))
+       (assert (find "Topics" (hv:all-views map) :key #'hv:view-title :test #'string=)))))
+  t)
+
 (defparameter +reading-systems+
-  '("dreyeck/work/topic-maps-project-example" "dreyeck/work/topic-maps-ctm-review" "dreyeck/work/tmdm-reading"))
+  '("dreyeck/work/topic-maps-project-example" "dreyeck/work/topic-maps-ctm-review"
+    "dreyeck/work/tmdm-reading" "dreyeck/work/paul-2026"))
 
 (defun check-readings-make-no-direct-controls ()
-  "Every control the three readings make goes through RUN-BUTTON: their sources hold no other construction of one."
+  "Every execution control these readings make goes through RUN-BUTTON."
   (dolist (name +reading-systems+)
     (dolist (component (asdf:component-children (asdf:find-system name)))
       (when (typep component 'asdf:cl-source-file)
@@ -447,6 +465,7 @@ A class the policy's drift report names (CONTEXT-FEDWIKI-PAGE) is covered throug
     (check-refused-systems-unreachable)
     (check-title-bar-actions-withheld)
     (check-workspace-link-withheld)
+    (check-paul-map-link)
     (check-an-extra-button-is-refused)
     (uiop:symbol-call :dreyeck/authority-policy/tests :run-gate-tests)
     (let ((walk (check-reachable-controls)))

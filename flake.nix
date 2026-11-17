@@ -261,6 +261,12 @@
               export CL_SOURCE_REGISTRY="${workflow-source-editor}//:$CL_SOURCE_REGISTRY"
             '';
           };
+          topic-maps = pkgs.mkShell {
+            inputsFrom = [ self.devShells.${system}.default ];
+            shellHook = ''
+              export CL_SOURCE_REGISTRY="${self.packages.${system}.topic-maps-source}//:$CL_SOURCE_REGISTRY"
+            '';
+          };
           tala = pkgs.mkShell {
             inputsFrom = [ self.devShells.${system}.default ];
             packages = [ self.packages.${system}.d2-tala ];

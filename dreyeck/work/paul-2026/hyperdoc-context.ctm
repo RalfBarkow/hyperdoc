@@ -1,0 +1,15 @@
+# HyperDoc-owned context. This is a bounded crosswalk, not a serialization
+# of existing HyperDoc work topics or the running Lisp image.
+# urn:hyperdoc:* identifiers are local to this example, not standard PSIs.
+%version 1.0
+shop3 <urn:hyperdoc:subject:shop3>;
+  - "SHOP3";
+  local-source: "dreyeck/shop3/manual-topics.lisp".
+planning-page <urn:hyperdoc:page:planning-with-shop3>;
+  - "Planning with SHOP3";
+  local-source: "dreyeck/pages/work/Planning with SHOP3.html".
+local-source - "Source path in HyperDoc".
+concerns - "Concerns".
+work - "Work".
+subject - "Subject".
+concerns(work: planning-page, subject: shop3)

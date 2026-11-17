@@ -17,4 +17,6 @@
 (asdf:test-system "dreyeck/source-snapshot")
 (asdf:test-system "dreyeck/work/topic-maps-project-example")
 (asdf:test-system "dreyeck/work/topic-maps-ctm-review")
+(asdf:test-system "dreyeck/work/paul-2026")
+(format t "~&PAUL-2026-NATIVE-MERGE-PASS~%")
 (format t "~&RUN-FINISHED ~A~%CATALOG-TOPIC-MAPS-PACKAGE-PASS~%" (get-universal-time))
