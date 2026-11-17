@@ -1091,6 +1091,7 @@
                                  "dreyeck/clog-tutorial/reading"
                                  "dreyeck/ccnx-federated-wiki"
                                  "dreyeck/work/remote-control-planning/reading"
+                                 "dreyeck/work/paul-2026"
                                  "dreyeck/work/fedwiki-local-only"
                                  "dreyeck/traverse/reading"
                                  ;; Read-only unless its own configuration embeds the loopback test editor.
@@ -3473,11 +3474,10 @@
              (declare (ignore operation component))
              (uiop:symbol-call :dreyeck/work/topic-maps-project-example/tests :run-tests)))
 
-;; Topic Maps readings selected by the Catalog service via HYPERDOC_CATALOG_SYSTEM.
+;; Optional review of one falsifiable claim about the pinned Topic Maps 22U CTM reader.
 (defsystem "dreyeck/work/topic-maps-ctm-review"
-  :description "Inspect the pinned Topic Maps CTM reader and the Paul 2026 reading"
-  :depends-on ("dreyeck/work/topic-maps-project-example" "dreyeck/work/paul-2026"
-               "topic-maps/ctm" "topic-maps/cxtm" "dreyeck/inspector/tmdm"
+  :description "Read, execute on request and inspect one falsifiable claim about the pinned Topic Maps 22U CTM reader"
+  :depends-on ("dreyeck/work/topic-maps-project-example" "topic-maps/ctm" "topic-maps/cxtm" "dreyeck/inspector/tmdm"
                "dreyeck/evaluation-record" "dreyeck/git" "dreyeck/source-snapshot" "ironclad" "dreyeck/authority-policy")
   :serial t
   :components ((:file "dreyeck/work/topic-maps-ctm-review")
@@ -3509,15 +3509,15 @@
              (declare (ignore operation component))
              (uiop:symbol-call :dreyeck/source-snapshot/tests :run-tests)))
 
-;; The separate hyperdoc-catalog-topic-maps executable (nix/catalog-topic-maps.nix). hyperdoc-catalog does not load it.
+;; The packaged Catalog verifies the snapshot before loading the application and its standard readings.
 (defsystem "dreyeck/catalog-topic-maps"
   :description "Catalog startup with the verified Topic Maps snapshot: origins checked, Project Workspace refused"
-  :depends-on ("dreyeck/catalog-application" "dreyeck/source-snapshot")
+  :depends-on ("dreyeck/source-snapshot")
   :components ((:file "dreyeck/src/catalog-topic-maps"))
   :in-order-to ((test-op (test-op "dreyeck/catalog-topic-maps/tests"))))
 
 (defsystem "dreyeck/catalog-topic-maps/tests"
-  :depends-on ("dreyeck/catalog-topic-maps" "dreyeck/work/topic-maps-project-example")
+  :depends-on ("dreyeck/catalog-topic-maps" "dreyeck/catalog-application" "dreyeck/work/topic-maps-project-example")
   :components ((:file "dreyeck/tests/catalog-topic-maps"))
   :perform (test-op (operation component)
              (declare (ignore operation component))

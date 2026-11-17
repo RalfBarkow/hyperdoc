@@ -37,7 +37,6 @@ class CatalogExecutableTests(unittest.TestCase):
         self.env = {
             "HOME": str(self.root), "PATH": str(poison),
             "CL_SOURCE_REGISTRY": str(poison) + "//",
-            "HYPERDOC_CATALOG_SYSTEM": "dreyeck/catalog",
             "HYPERDOC_CATALOG_HOST": "127.0.0.1",
             "HYPERDOC_FEDWIKI_SITE_ROOT": str(FIXTURE),
         }

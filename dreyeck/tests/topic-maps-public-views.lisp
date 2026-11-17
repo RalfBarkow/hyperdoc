@@ -131,8 +131,8 @@ threads on both, acts only in its own thread, and leaves an operation that a cal
     (funcall thunk)))
 
 (defun public-views ()
-  "Each Topic Maps view that loading dreyeck/work/topic-maps-ctm-review adds to a Catalog: (LABEL OBJECT-THUNK VIEW-TITLES
-RUN-BUTTON-LABELS). The objects are made when the list is used, not when this file is loaded."
+  "Topic Maps views from the standard Catalog and the optional CTM review.
+Each entry is (LABEL OBJECT-THUNK VIEW-TITLES RUN-BUTTON-LABELS). The objects are made when the list is used."
   (list (list "22U reading page" (lambda () (hyperdoc:page "Reading Slice 22U" :hyperbook "dreyeck/work/topic-maps-project-example"))
               '("Topic Maps 22U") '("Read a fresh 22U Map" "Exercise on a separate fresh Map"))
         (list "Work Breakdown page (an existing page, gaining two views)"

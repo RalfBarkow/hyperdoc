@@ -1,16 +1,6 @@
-;;;; The hyperdoc-catalog-topic-maps executable: the Catalog with the pinned Topic Maps snapshot in its registry.
-;;;;
-;;;; A separate executable for loopback staging; hyperdoc-catalog and its startup are unchanged and never see topic-maps.
-;;;; Before serving it verifies the snapshot and that every Topic Maps system comes from it, and it refuses the Project
-;;;; Workspace. Until 2026-10-28 its reader was pinned to another Topic Maps lineage (5a4a668); it is now bound to the packaged commit,
-;;;; but admitting it to this runtime is a separate, tested decision, so the refusal stays.
-;;;; The refusal is a check of this application's own startup: the Catalog loads exactly one system by choice, the one
-;;;; HYPERDOC_CATALOG_SYSTEM names, and MAIN looks at that system's definition, and at its dependencies' definitions, before
-;;;; the Catalog starts. It adds no method to ASDF and replaces none: ASDF's own methods stay ASDF's.
-;;;; What it protects, and what it does not, is stated in docs/topic-maps-deployment/README.md (The guard's scope). In short: the
-;;;; Project Workspace is not loaded at startup, and the one application path that could load a system named by a wiki page
-;;;; after startup, dreyeck/page-attached-hyperdoc, is refused the same way, so that it is not in this runtime at all.
-;;;; Its plain v:thunk run buttons are not gated by dreyeck/authority-policy, so it serves loopback only.
+;;;; Shared packaged Catalog startup. Its launchers supply the ASDF registry with the pinned Topic Maps snapshot.
+;;;; Verify the snapshot and check the requested Catalog system before loading the application.
+;;;; The guard excludes the Project Workspace and the page-attached loader. See docs/topic-maps-deployment/README.md.
 
 (defpackage #:dreyeck/catalog-topic-maps
   (:use #:cl)
@@ -95,4 +85,5 @@ host is checked by scripts/catalog-topic-maps-main.lisp before anything is loade
       (error (condition)
         (format *error-output* "~&Topic Maps Catalog startup refused: ~A~%" condition)
         (return-from main 2))))
-  (dreyeck/catalog-application:main arguments))
+  (asdf:load-system "dreyeck/catalog-application")
+  (uiop:symbol-call :dreyeck/catalog-application :main arguments))

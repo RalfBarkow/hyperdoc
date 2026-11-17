@@ -48,7 +48,7 @@ The original TMDM source and target are in-memory objects; the two CTM files are
 
 The first SLY run on 2026-11-12 reached the integration test but refuted its initial `(eq old-target current)` assertion. Both printed objects showed the merged identifiers because the public printer reads canonical properties; their object identities were different. The independent `topic-maps` implementation explicitly constructs a new Topic in `merge-two-topics` and forwards both old handles to it. The corrected test returned `T` in the reported SLY run on 2026-11-12. That run used a local Topic Maps checkout.
 
-For a fresh SLY image from this checkout, use `nix develop .#topic-maps -c hyperdoc-sly`. The shell registers the same Topic Maps source snapshot (`88994c1b`) that the packaged Catalog uses. Evaluate the load form first, then the other forms in the connected mREPL.
+For a fresh SLY image from this checkout, use `nix develop -c hyperdoc-sly`. The default shell registers the same Topic Maps source snapshot (`88994c1b`) that the packaged Catalog uses. Evaluate the load form first, then the other forms in the connected mREPL.
 
 ```lisp
 (asdf:load-system "dreyeck/work/paul-2026")
@@ -62,10 +62,10 @@ For a fresh SLY image from this checkout, use `nix develop .#topic-maps -c hyper
 
 ### Packaged Catalog
 
-Start the packaged Catalog with `HYPERDOC_CATALOG_SYSTEM=dreyeck/work/topic-maps-ctm-review` to include this HyperBook along with the other Topic Maps readings. On a NixOS service already using this setting, updating its HyperDoc flake input to a revision with this change is sufficient. The packaged Catalog verifies its existing Topic Maps snapshot before starting.
+The packaged Catalog loads this HyperBook through the standard `dreyeck/catalog` system. Its startup verifies the packaged Topic Maps snapshot. The usual NixOS service can expose the reading by updating its HyperDoc flake input to a revision with this change.
 
 Open **Paul 2026: Workflow Planning as Topic Maps**, select **Native Topic Map**, and follow **Inspect merged Topic Map**. This is a reference to the native map built from the packaged CTM files. The existing run-button policy applies to **Read and merge CTM sources**, which is available in development. The CTM identifiers are local names; opening the map makes no network requests.
 
-The existing `checks.x86_64-linux.catalog` check runs the native merge tests against the packaged registry and checks that the served view links to the map through the native **Topics** view.
+The platform's Catalog check verifies default membership and the main page, runs the native merge tests against the packaged registry, and checks that the served view links to the map through the native **Topics** view.
 
 **Acceptance boundary:** validate actual parsing, native `EQ` identity *between canonical representatives*, forwarding of a retained target handle, source nonmutation and resolvable WORKSWORLD-2H/SHOP3 Role players in a fresh Lisp. Static checks of the Lisp syntax or CTM text are **not** substitutes for this execution. If a test has not been run, record it as NOT-RUN, not PASS.

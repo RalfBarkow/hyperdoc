@@ -1,6 +1,5 @@
-# hyperdoc-catalog: the one production Catalog. It carries the verified Topic Maps snapshot in its ASDF registry and its
-# startup (dreyeck/catalog-topic-maps) verifies that snapshot and refuses the Project Workspace before anything is served;
-# which Topic Maps readings are loaded is a choice of the service (HYPERDOC_CATALOG_SYSTEM), not of the package.
+# The production Catalog carries the Topic Maps snapshot in its ASDF registry.
+# Its startup verifies the snapshot before loading the application and its standard readings.
 { lib, writeShellApplication, git, runtime, source, topicMaps, d2-tala, revision }:
 writeShellApplication {
   name = "hyperdoc-catalog";

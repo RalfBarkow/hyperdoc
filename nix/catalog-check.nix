@@ -32,6 +32,7 @@ runCommand "catalog-startup-contract" { nativeBuildInputs = [ python3 ]; } ''
     || { cat "$out/membership-default.log"; exit 1; }
   grep -q '^CATALOG-MEMBERSHIP-SELF-TESTS-PASS' "$out/membership-default.log"
   grep -q '^CATALOG-MEMBERSHIP-SCRIPT-PASS$' "$out/membership-default.log"
+  grep -q '^PAUL-2026-DEFAULT-CATALOG-PASS$' "$out/membership-default.log"
   HYPERDOC_CATALOG_SYSTEM=dreyeck/work/topic-maps-ctm-review ${runtime.sbcl}/bin/sbcl --noinform --no-sysinit --no-userinit --non-interactive \
     --load ${source}/scripts/check-catalog-membership.lisp >"$out/membership-ctm-review.log" 2>&1 \
     || { cat "$out/membership-ctm-review.log"; exit 1; }

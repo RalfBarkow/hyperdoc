@@ -244,7 +244,7 @@
               hyperdocDev
             ] ++ pkgs.lib.optionals pkgs.stdenv.isLinux [ demoPkgs.chromium ];
             shellHook = ''
-              export CL_SOURCE_REGISTRY="$PWD//:${runtime.sourceRegistry}"
+              export CL_SOURCE_REGISTRY="$PWD//:${self.packages.${system}.topic-maps-source}//:${runtime.sourceRegistry}"
               export HYPERDOC_HYPERSPEC_ROOT="${runtime.hyperspecRoot}"
               export HYPERDOC_FEDWIKI_SBCL="${sbcl}/bin/sbcl"
               ${pkgs.lib.optionalString pkgs.stdenv.isLinux ''
@@ -261,12 +261,7 @@
               export CL_SOURCE_REGISTRY="${workflow-source-editor}//:$CL_SOURCE_REGISTRY"
             '';
           };
-          topic-maps = pkgs.mkShell {
-            inputsFrom = [ self.devShells.${system}.default ];
-            shellHook = ''
-              export CL_SOURCE_REGISTRY="${self.packages.${system}.topic-maps-source}//:$CL_SOURCE_REGISTRY"
-            '';
-          };
+          topic-maps = self.devShells.${system}.default;
           tala = pkgs.mkShell {
             inputsFrom = [ self.devShells.${system}.default ];
             packages = [ self.packages.${system}.d2-tala ];
@@ -283,7 +278,7 @@
             ];
 
             shellHook = ''
-              export CL_SOURCE_REGISTRY="${runtime.sourceRegistry}:$PWD//"
+              export CL_SOURCE_REGISTRY="${runtime.sourceRegistry}:${self.packages.${system}.topic-maps-source}//:$PWD//"
               export HYPERDOC_HYPERSPEC_ROOT="${runtime.hyperspecRoot}"
               # Orientation only for an interactive terminal: nix develop --command and scripts stay silent.
               if [[ $- == *i* && -t 1 ]]; then hyperdoc-dev greeting; fi

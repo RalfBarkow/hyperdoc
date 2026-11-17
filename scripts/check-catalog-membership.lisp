@@ -28,8 +28,10 @@
   (format t "~&DEFAULT-CATALOG ~D HyperBooks, each once; every HyperDoc declared by the sources of dreyeck/catalog's systems is present with its main page, and no HyperDoc is present that no declaration names.~%"
           (length (m :catalog-ids))))
 
-;; 2. The Original Wiki Editor demo: a declared member, once.
+;; 2. These books must be present before any additional system is loaded.
 (m :assert-hyperbook-present "dreyeck/fedwiki-original-editor-demo")
+(m :assert-hyperbook-present "dreyeck/work/paul-2026")
+(format t "~&PAUL-2026-DEFAULT-CATALOG-PASS~%")
 
 ;; 3. An additional system, as the service would name it.
 (let ((system (let ((value (uiop:getenv "HYPERDOC_CATALOG_SYSTEM"))) (and value (plusp (length value)) value))))
