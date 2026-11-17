@@ -1,0 +1,79 @@
+<h1>ZIP entpacken und Plansystem laden</h1>
+
+<style>
+  .den-v2-executable-form > table > tbody > tr > td,
+  .den-v2-executable-form > table > tr > td {
+    vertical-align: top;
+  }
+  .den-v2-executable-form pre {
+    margin-block-start: 0;
+  }
+</style>
+
+<p>Lege <code>den-v2-delivery-outlook.zip</code> in <code>~/Downloads/</code> ab.
+Das Archiv enthält die SHOP3-Domäne zum Lieferentwurf aus Zettel 11781.</p>
+
+<h2>1. Plansystem laden</h2>
+
+<p>Klicke im lokalen Entwicklungsimage auf den Play-Button links neben
+dem Codeblock oder kopiere die Form in den SLY mREPL desselben Images. Die Form entpackt das ZIP in ein frisches
+Verzeichnis und liest die ASDF-Datei von dort. Das Ergebnis zeigt
+<code>:version</code> und <code>:source</code>.</p>
+
+<div class="den-v2-executable-form">
+<lisp-code package="CL-USER" executable="true">
+(let* ((downloads (merge-pathnames "Downloads/" (user-homedir-pathname)))
+       (archive (merge-pathnames "den-v2-delivery-outlook.zip" downloads))
+       (name "den-v2-delivery-outlook"))
+  (unless (probe-file archive)
+    (error "ZIP fehlt unter ~A." archive))
+  (let* ((template (merge-pathnames "den-v2-outlook.XXXXXXXX" downloads))
+         (stage
+           (uiop:ensure-directory-pathname
+            (uiop:run-program
+             (list "/usr/bin/mktemp" "-d" (namestring template))
+             :output '(:string :stripped t))))
+         (asd (merge-pathnames
+               "den-v2-delivery-outlook/den-v2-delivery-outlook.asd" stage))
+         (root (uiop:pathname-directory-pathname asd))
+         (asdf:*central-registry* (cons root asdf:*central-registry*)))
+    (uiop:run-program
+     (list "/usr/bin/unzip" "-q" (namestring archive) "-d" (namestring stage)))
+    (let* ((system (asdf:find-system name))
+           (source (asdf:system-source-file system)))
+      (unless (and source (equal (probe-file source) (truename asd)))
+        (error "Plansystem nicht aus ~A aufgelöst. ASDF meldet ~S."
+               asd source))
+      (unless (asdf:version-satisfies system "0.1.1")
+        (error "ASDF-Version ~A in ~A. Verwende das ZIP ab Version 0.1.1."
+               (asdf:component-version system) archive))
+      (asdf:load-system system)
+      (list :version (asdf:component-version system)
+            :source (asdf:system-source-file system)))))
+</lisp-code>
+</div>
+
+<h2>2. Planfälle prüfen</h2>
+
+<p>Erwartet wird <code>(:STATUS :OK :EXECUTION-MODE :PLAN-ONLY)</code>.</p>
+
+<div class="den-v2-executable-form">
+<lisp-code package="CL-USER" executable="true">
+(uiop:symbol-call "DEN-V2-DELIVERY-OUTLOOK" "CHECK-PLANS")
+</lisp-code>
+</div>
+
+<h2>3. Checkpoint-Plan lesen</h2>
+
+<p>Klicke auf den Play-Button links neben dem Codeblock, um das
+Planergebnis im Inspector zu öffnen. In SLY bzw. im Playground kannst du
+dieselbe Form auswerten. Füge im Tab <strong>Playground</strong>
+die folgende Form allein in den Editor ein und klicke auf <strong>Eval</strong>.
+Im Plan ist <code>!RECORD-CHECKPOINT-EVIDENCE</code> als erster Schritt zu
+erwarten.</p>
+
+<div class="den-v2-executable-form">
+<lisp-code package="CL-USER" executable="true">
+(uiop:symbol-call "DEN-V2-DELIVERY-OUTLOOK" "RUN-PLAN" :checkpoint)
+</lisp-code>
+</div>

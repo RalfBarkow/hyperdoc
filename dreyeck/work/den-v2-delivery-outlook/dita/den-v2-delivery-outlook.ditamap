@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE map PUBLIC "-//OASIS//DTD DITA Map//EN" "map.dtd">
+<map id="den-v2-delivery-outlook">
+  <title>Den v2 (Den on Gen) delivery outlook</title>
+  <topicref href="delivery-outlook.dita"/>
+  <topicref href="review-checkpoint.dita"/>
+  <topicref href="review-release.dita"/>
+</map>

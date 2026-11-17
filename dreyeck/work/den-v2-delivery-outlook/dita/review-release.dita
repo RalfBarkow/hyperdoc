@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE task PUBLIC "-//OASIS//DTD DITA Task//EN" "task.dtd">
+<task id="review-release" xml:lang="de">
+  <title>Den v2 zur Freigabe prüfen</title>
+  <shortdesc>Ordne jeden Nachweis dem konkreten Release-Kandidaten zu
+    und leite daraus ab, ob eine Freigabeentscheidung ansteht.</shortdesc>
+  <taskbody>
+    <steps>
+      <step id="candidate">
+        <cmd>Identifiziere den Kandidaten und erhebe die vorhandenen Nachweise.</cmd>
+        <info>Der Fall <codeph>:release-review</codeph> benennt die
+          Lücken. Prüfe Foundation und Parität, den integrierten Funktionspfad,
+          repräsentative Migration, Fehler und Recovery, Regression, Performance,
+          Kompatibilität und Gebrauchstauglichkeit der Dokumentation.</info>
+      </step>
+      <step id="acceptance">
+        <cmd>Erfasse die dokumentierte Abnahme des Kandidaten.</cmd>
+        <info>Verwende eine eindeutige Kandidaten-ID für alle Belege.
+          Die Freigabebedingungen gelten für jeden Zieltermin.</info>
+      </step>
+      <step id="decision">
+        <cmd>Berechne <codeph>:release</codeph> mit den belegten Fakten.</cmd>
+        <info>Bei vollständiger Evidenz führt der Plan zur dokumentierten
+          Freigabeentscheidung durch das zuständige Team.</info>
+      </step>
+    </steps>
+    <result>Der Plan enthält einen Vorschlag zur Freigabeentscheidung, wenn
+      die Belege für denselben Kandidaten vorliegen.</result>
+  </taskbody>
+</task>

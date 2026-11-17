@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE concept PUBLIC "-//OASIS//DTD DITA Concept//EN" "concept.dtd">
+<concept id="delivery-outlook" xml:lang="de">
+  <title>Lieferziel und Liefernachweis für Den v2</title>
+  <shortdesc>Den v2 ist die erste vorgesehene Produktionslieferung auf Gen.
+    Der 1. Januar 2027 ist das Ziel der Planung. Ein belastbarer Lieferkorridor
+    setzt eine geprüfte Aufwandsschätzung und Integrationsbelege voraus.</shortdesc>
+  <conbody>
+    <section>
+      <title>Abhängigkeiten bis zur Lieferung</title>
+      <p>Drei Paritätsklassen brauchen jeweils einen akzeptierten und
+        testbaren Konstruktionsansatz vor ihrer Implementierung und Integration.
+        Unabhängige Grundlagenarbeit und die Definition des Produkts können
+        weiterlaufen. Die Roadmap stellt diese Beziehungen durch geordnete
+        Teilaufgaben innerhalb ungeordneter Blöcke dar. Ihre Reihenfolge im
+        ausgegebenen Plan ist eine zulässige Linearisierung.</p>
+      <p>Die Planung verbindet den integrierten Funktionspfad mit repräsentativer
+        Migration, erprobter Wiederherstellung und Release-Qualifikation.
+        Die Nachweise für einen konkreten Kandidaten werden im
+        <xref href="review-release.dita">Freigabe-Task</xref> geprüft.</p>
+    </section>
+    <section>
+      <title>Support, Kapazität und Aufwand</title>
+      <p>Für das bisherige effects-basierte Den sind Support und
+        Fehlerkorrekturen bis einschließlich Q1 2027 vorgesehen. Nach
+        bestätigter xmsg-Bereitschaft kann die Planung zusätzliche Kapazität
+        berücksichtigen, sobald deren Verfügbarkeit und nützlicher Durchsatz
+        belegt sind.</p>
+      <p>Kombiniere verträgliche Änderungen unter Beibehaltung der Review-Grenzen
+        und Regressionstests pro Änderung. Verwende fokussierte Tests früh und
+        führe die vorgeschriebenen Abnahmeprüfungen aus. Der Fall
+        <codeph>:evidence-reuse</codeph> prüft beim Wiederverwenden von Belegen
+        Quellstand, Abhängigkeiten, Testaufbau, Abnahmebedingungen und die
+        Wiederholungsregel. Erfasse Integrationswartezeit, Wiederholung und
+        Nacharbeit. Miss Fortschritt an akzeptierten integrierten Fähigkeiten.
+        Bündele offene Entscheidungen und halte für jedes akzeptierte Design
+        den nächsten Implementierungsschritt oder die Blockade fest.</p>
+    </section>
+    <section>
+      <title>Quelle und Modell</title>
+      <p>Grundlage sind Zettel 11781 und der
+        <xref href="https://gist.github.com/sini/cbaeb289453aa89e5a9bf285fe50f94a/c83c4a86460175413b2a4cff2bfb58191dd96b84"
+              format="html" scope="external">Lieferentwurf vom 16. November 2026</xref>.
+        Die drei Paritäts-IDs stehen für im Entwurf unbenannte Klassen.
+        Die SHOP3-Operationen erzeugen Vorschläge für die weitere Arbeit.
+        Belegfakten werden beim nächsten Lauf aus dem geprüften Stand übernommen.</p>
+    </section>
+  </conbody>
+</concept>

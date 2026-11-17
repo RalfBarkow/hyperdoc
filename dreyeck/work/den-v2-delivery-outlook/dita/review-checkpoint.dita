@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE task PUBLIC "-//OASIS//DTD DITA Task//EN" "task.dtd">
+<task id="review-checkpoint" xml:lang="de">
+  <title>Den Lieferkorridor am Planungstermin prüfen</title>
+  <shortdesc>Erhebe die Prognose-Eingaben und prüfe, welche Aussage zum
+    Neujahrsziel der aktuelle Belegstand trägt.</shortdesc>
+  <taskbody>
+    <steps>
+      <step id="checkpoint">
+        <cmd>Berechne den SHOP3-Fall <codeph>:checkpoint</codeph>.</cmd>
+        <info>Halte akzeptierte Ergebnisse, aktuelle Blockaden und den Stand
+          aller drei Paritätskonstruktionen fest.</info>
+      </step>
+      <step id="sizing">
+        <cmd>Ergänze die geprüften Prognose-Eingaben.</cmd>
+        <info>Benötigt werden das geprüfte Produktdesign, eine begrenzte
+          Aufwandszerlegung mit offen ausgewiesenen Unsicherheiten, die
+          Abhängigkeitskette und beobachteter Integrationsdurchsatz für
+          relevante Arbeit. Akzeptierte Konstruktionen liefern Belege für die
+          Aufwandsschätzung der abhängigen Arbeit.</info>
+      </step>
+      <step id="target">
+        <cmd>Beurteile das Neujahrsziel beim nächsten Planungstermin erneut.</cmd>
+        <info>Wenn ein geprüfter Befund das Ziel als unrealistisch einstuft,
+          schlägt SHOP3 vor, die Änderung zeitnah mitzuteilen. Eine mögliche
+          Umfangsänderung braucht eine eigene Entscheidung.</info>
+      </step>
+    </steps>
+    <result>Der Plan fordert fehlende Belege an oder schlägt vor, auf Basis der
+      vorhandenen Nachweise einen Lieferkorridor zu berechnen.</result>
+  </taskbody>
+</task>
