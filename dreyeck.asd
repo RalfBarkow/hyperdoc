@@ -1242,7 +1242,7 @@
   :SERIAL
   T
   :DEPENDS-ON
-  (#:UIOP #:SHASHT)
+  (#:UIOP #:SHASHT #:ZIP)
   :COMPONENTS
   ((:FILE "fedwiki-assets-package") (:FILE "fedwiki-page-slug") (:FILE "fedwiki-assets"))
   :IN-ORDER-TO
@@ -1554,7 +1554,7 @@
   :SERIAL
   T
   :DEPENDS-ON
-  (#:UIOP #:HYPERBOOK/FEDWIKI #:DREYECK/FEDWIKI-ASSETS #:SHASHT #:IRONCLAD)
+  (#:UIOP #:HYPERBOOK/FEDWIKI #:DREYECK/FEDWIKI-ASSETS #:SHASHT #:IRONCLAD #:CL-BASE64 #:ALEXANDRIA)
   :COMPONENTS
   ((:FILE "local-fedwiki-page-package") (:FILE "local-fedwiki-page")
    (:FILE "local-fedwiki-page-source"))
@@ -1687,7 +1687,7 @@
    #:DREYECK/CATALOG #:DREYECK/GESTURE/CLOG #:DREYECK/FEDWIKI-STORY)
   :COMPONENTS
   ((:FILE "local-fedwiki-view-package") (:FILE "local-fedwiki-view")
-   (:FILE "local-fedwiki-page-source-views"))
+   (:FILE "local-fedwiki-page-source-views") (:FILE "local-fedwiki-offer-view"))
   :IN-ORDER-TO
   ((ASDF/LISP-ACTION:TEST-OP
     (ASDF/LISP-ACTION:TEST-OP "dreyeck/local-fedwiki-view/tests"))))

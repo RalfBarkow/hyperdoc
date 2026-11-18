@@ -3,6 +3,7 @@
   (:export
    #:*default-wiki-id*
    #:configured-site-root
+   #:page-offer-destination
    #:view-slug-from-pathname
    #:make-local-fedwiki-view-page
    #:install-local-fedwiki-view-route

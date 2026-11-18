@@ -1,0 +1,17 @@
+(asdf:defsystem "scratch"
+  :description "Vorläufige Topic Map zum Federated Wiki Matrix-Auszug vom 16.–18. November 2026"
+  :version "0.1.1"
+  :depends-on ("hyperdoc" "plump" "html-inspector-views" "alexandria" "cl-base64")
+  :serial t
+  :components
+  ((:module "src"
+    :components ((:file "topic-index")))
+   (:module "pages"
+    :components ((:static-file "Topics aus dem Federated Wiki Matrix Room.html")))
+   (:static-file "scratch.ctm")
+   (:module "evidence"
+    :components ((:static-file "typed-trail.png")))
+   (:module "fedwiki"
+    :components ((:static-file "scratch.json") (:static-file "matrix-index.json")))
+   (:file "hyperdoc")
+   (:file "reading")))

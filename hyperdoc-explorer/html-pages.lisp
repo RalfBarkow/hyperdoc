@@ -192,22 +192,19 @@
   (string-equal name "img"))
 
 (plump:define-tag-printer img (element)
-  (let* ((src (plump:attribute element "src"))
-         (uri (puri:parse-uri src)))
-    ;; If the src has a URI scheme, leave as a img element.  If the
-    ;; src starts with "/", do the same.  Otherwise, it's a local file
-    ;; that a browser cannot access, replace it with a data URL.
-    (unless (or (puri:uri-scheme uri) (str:starts-with? "/" src))
-      (let* ((hyperdoc hb::*current-hyperbook*)
-             (directory (directory-of hyperdoc))
-             (pathname (merge-pathnames src directory))
-             (bytes (alexandria:read-file-into-byte-vector pathname))
-             (encoded (base64:usb8-array-to-base64-string bytes))
-             (image-type (-> pathname pathname-type str:downcase))
-             (mime-type (if (equal image-type "jpg") "jpeg" image-type))
-             (data-url (str:concat "data:image/" mime-type ";base64," encoded)))
-        (plump:set-attribute element "src" data-url)
-        (hb:render-node element))))
+  (let ((src (plump:attribute element "src")))
+    (if (or (null src) (str:starts-with? "/" src) (puri:uri-scheme (puri:parse-uri src)))
+        (hb:render-node element)
+        (let* ((directory (directory-of hb::*current-hyperbook*))
+               (pathname (merge-pathnames src directory))
+               (bytes (alexandria:read-file-into-byte-vector pathname))
+               (encoded (base64:usb8-array-to-base64-string bytes))
+               (image-type (-> pathname pathname-type str:downcase))
+               (mime-type (if (equal image-type "jpg") "jpeg" image-type))
+               (copy (plump:clone-node element nil)))
+          ;; Other panes render the same parsed page. Keep its relative src.
+          (plump:set-attribute copy "src" (str:concat "data:image/" mime-type ";base64," encoded))
+          (hb:render-node copy))))
   t)
 
 (defmethod hb:serialize-a-element ((attr (eql ':expr)) element)

@@ -110,6 +110,11 @@ opened."
       (gethash "title" page-json)))
 
     (assert (= 1 (length items)))
+    (let ((pasted (alexandria:copy-hash-table item)))
+      (setf (gethash "text" pasted) (format nil "~A~C~%" reference #\Return))
+      (assert (equal reference (dreyeck/fedwiki-assets:assets-reference-of pasted)))
+      (assert (equal directory (dreyeck/fedwiki-assets:resolve-local-assets site-root pasted)))
+      (assert (char= #\Newline (char (gethash "text" pasted) (1- (length (gethash "text" pasted)))))))
 
     (assert
      (string=

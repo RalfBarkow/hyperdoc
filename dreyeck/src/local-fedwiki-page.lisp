@@ -78,6 +78,16 @@ a different HyperBook that already owns WIKI-ID."
   (:documentation
    "A FEDWIKI-PAGE whose local page-store root is explicit provenance."))
 
+(defmethod hyperbook/fedwiki::page-json-for-reload ((page local-fedwiki-page))
+  (dreyeck/fedwiki-assets:read-local-fedwiki-page
+   (local-fedwiki-page-site-root-of page) (hyperbook:id-of page)))
+
+(defmethod hyperbook/fedwiki::story-favicon-url ((page local-fedwiki-page))
+  (let ((path (merge-pathnames "status/favicon.png" (local-fedwiki-page-site-root-of page))))
+    (when (equal path (probe-file path))
+      (concatenate 'string "data:image/png;base64,"
+                   (cl-base64:usb8-array-to-base64-string (alexandria:read-file-into-byte-vector path))))))
+
 (defun make-local-fedwiki-page (site-root wiki slug)
   "Read SLUG from SITE-ROOT and return a hydrated LOCAL-FEDWIKI-PAGE in WIKI."
   (check-type slug string)

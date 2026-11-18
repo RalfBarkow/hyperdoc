@@ -52,7 +52,7 @@ access and does not load HYPERBOOK/FEDWIKI."
   (let ((reference
           (gethash "text" assets-item)))
     (check-type reference string)
-    reference))
+    (string-trim '(#\Space #\Tab #\Return #\Newline) reference)))
 
 (defparameter +default-local-site-name+ "dreyeck.ch"
   "The site a runtime serves when nothing says otherwise.")
@@ -138,6 +138,22 @@ nor loads any discovered system."
         (discover-asdf-files
          (resolve-local-assets site-root item)))))
 
+(defun page-asdf-archive (site-root slug items)
+  "Observe the slug-named definition in the page's own ZIP without evaluating it."
+  (let* ((ref (format nil "pages/~A" slug))
+         (item (find ref items :key #'assets-reference-of :test #'equal))
+         (path (merge-pathnames (format nil "~A.zip" slug)
+                                (page-assets-directory (truename site-root) slug)))
+         (member (format nil "~A/~A.asd" slug slug)))
+    (when (and item (equal path (probe-file path)))
+      (handler-case
+          (zip:with-zipfile (archive path)
+            (when (zip:get-zipfile-entry member archive)
+              (list :zip path :member member :assets-reference ref
+                    :item-id (gethash "id" item))))
+        ;; An unreadable optional attachment must not prevent reading the page.
+        (error () nil)))))
+
 (defun page-attached-asdf-discovery-observation (site-root slug)
   "Return inspectable evidence for page-attached ASDF discovery."
   (let* ((page-file
@@ -165,4 +181,5 @@ nor loads any discovered system."
      :assets-items items
      :assets-references references
      :assets-directories directories
-     :asdf-files asdf-files)))
+     :asdf-files asdf-files
+     :asdf-archive (page-asdf-archive site-root slug items))))

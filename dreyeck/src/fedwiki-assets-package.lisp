@@ -13,6 +13,7 @@
    #:resolve-local-assets
    #:discover-asdf-files
    #:discover-page-attached-asdf-files
+   #:page-asdf-archive
    #:page-attached-asdf-discovery-observation
    #:fedwiki-page-slug-p
    #:check-fedwiki-page-slug

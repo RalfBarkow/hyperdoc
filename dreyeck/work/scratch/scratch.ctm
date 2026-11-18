@@ -1,0 +1,470 @@
+# CTM 1.0 · Federated Wiki Matrix Room · 2026-11-16–18.
+# Tag-IRIs bezeichnen vorläufige Topics und Fundstellen dieses Auszugs.
+# Bildpfade sind relativ zum Archivordner scratch/.
+%prefix s <tag:dreyeck.ch,2026:hyperdoc/scratch/matrix-2026-11-18/schema/>
+%prefix t <tag:dreyeck.ch,2026:hyperdoc/scratch/matrix-2026-11-18/topic/>
+%prefix q <tag:dreyeck.ch,2026:hyperdoc/scratch/matrix-2026-11-18/source/>
+%prefix a <tag:dreyeck.ch,2026:hyperdoc/scratch/matrix-2026-11-18/statement/>
+%prefix r <tag:dreyeck.ch,2026:hyperdoc/scratch/matrix-2026-11-18/relation/>
+
+s:matrix-beitrag - "Matrix-Beitrag" .
+s:kontextquelle - "Kontextquelle" .
+s:topic-kandidat - "Topic-Kandidat" .
+s:aussage - "Relation mit Fundstellen" .
+s:beschreibung - "Beschreibung" .
+s:bereich - "Themenbereich" .
+s:bezug - "Herkunft der Topic-Zuordnung" .
+s:geltung - "Geltung der Relation" .
+s:zeit - "Matrix-Anzeigezeit" .
+s:autor - "Autor" .
+s:url - "Quell-URL" .
+s:datei - "Belegdatei" .
+s:sha256 - "SHA-256 des Belegs" .
+s:subjekt - "Subjekt der Relation" .
+s:objekt - "Objekt der Relation" .
+s:hat-fundstelle - "Bezug durch Fundstelle" .
+s:bezogenes - "Topic oder Aussage mit Fundstelle" .
+s:fundstelle - "Fundstelle" .
+r:zeichnet - "zeichnet" .
+r:adressiert - "adressiert" .
+r:unterscheidet-knoten-im - "unterscheidet knoten im" .
+r:bundelt-anderung-fur - "bündelt änderung für" .
+r:beeinflusst - "beeinflusst" .
+r:konkretisiert - "konkretisiert" .
+r:zielt-auf - "zielt auf" .
+r:folgt-im-gesprach-auf - "folgt im gespräch auf" .
+r:kommentiert - "kommentiert" .
+r:wird-genannt-mit - "wird genannt mit" .
+r:entwickelte - "entwickelte" .
+r:wird-verwendet-von - "wird verwendet von" .
+r:ist-vermittelt-verbunden-mit - "ist vermittelt verbunden mit" .
+
+q:m01 isa s:matrix-beitrag ;
+    - "Ein Trail durch Marcs Solo-Beispiel" ;
+    s:beschreibung: "Beim Zeichnen eines Trails im Call scheiterte die Zuordnung bei verschieden typisierten Knoten. In Marcs Beispiel unterscheiden sich die Platzhalter durch ihre Typen. Ward beschreibt den Graphen als Schema, das sich im Gebrauch weiter ausarbeiten lässt." ;
+    s:zeit: "2026-11-16 · 23:50" ;
+    s:autor: "Ward" .
+
+q:m02 isa s:matrix-beitrag ;
+    - "Solo 0.1.32-4" ;
+    s:beschreibung: "Ward meldet, dass typisierte Knoten im Trail und das stabilere Layout gemeinsam ausgeliefert wurden und der Quellcode auf GitHub steht." ;
+    s:zeit: "2026-11-16 · 23:56" ;
+    s:autor: "Ward" .
+
+q:m03 isa s:matrix-beitrag ;
+    - "KAPOW und Pageviews" ;
+    s:beschreibung: "Ward verweist auf Wikimedias Bot-Erkennung. Die Einordnung von Zugriffen als automatisiert oder menschlich wirkt sich auf die Seitenaufrufstatistik aus." ;
+    s:zeit: "2026-11-17 · 17:09" ;
+    s:autor: "Ward" ;
+    s:url: "https://wikitech.wikimedia.org/wiki/KAPOW_(bot_detection_system)" .
+
+q:m04 isa s:matrix-beitrag ;
+    - "Öffentliche Beschreibung, interne Details" ;
+    s:beschreibung: "Ward hebt hervor, dass Wikimedia aus Gründen des Infrastrukturschutzes Code, Detaildokumentation und Ausgabedaten von KAPOW intern hält. Für Phabricator-Tickets gilt eine fallweise Sichtbarkeit." ;
+    s:zeit: "2026-11-17 · 17:11" ;
+    s:autor: "Ward" .
+
+q:m05 isa s:matrix-beitrag ;
+    - "Codegenerierung für CPUs und Beschleuniger" ;
+    s:beschreibung: "Ward kündigt Lattners Vortrag als Blick auf das Programmieren für verschiedene Prozessoren und Beschleuniger an. Ein Bild zur Ankündigung ist im Auszug erwähnt." ;
+    s:zeit: "2026-11-17 · 22:10" ;
+    s:autor: "Ward" .
+
+q:m06 isa s:matrix-beitrag ;
+    - "SPLASH’26: Mojo" ;
+    s:beschreibung: "Ward nennt die Keynote „Mojo: Towards One Systems Language for All Hardware“ und berichtet, dass sich der Videolink über SPLASH schwer teilen liess." ;
+    s:zeit: "2026-11-17 · 22:13" ;
+    s:autor: "Ward" .
+
+q:m07 isa s:matrix-beitrag ;
+    - "Lisp und die verpasste Gelegenheit" ;
+    s:beschreibung: "Ward vermutet, dass Lisp-Programmierer Ähnliches früher hätten tun können. Er nennt die damalige Hardware und die wirtschaftlichen Anreize als mögliche Bedingungen und beschreibt seine eigene Abkehr." ;
+    s:zeit: "2026-11-17 · 22:31" ;
+    s:autor: "Ward" .
+
+q:m08 isa s:matrix-beitrag ;
+    - "Link zur SPLASH-Keynote" ;
+    s:beschreibung: "Robert reicht den YouTube-Link nach." ;
+    s:zeit: "2026-11-17 · 22:35" ;
+    s:autor: "Robert Sterbal" ;
+    s:url: "https://youtu.be/9-97SB5XJh4?is=LUyoGU09tUPBvmn1" .
+
+q:m09 isa s:matrix-beitrag ;
+    - "Keynote-Q&A und Swift" ;
+    s:beschreibung: "Ward bestätigt das Video und hebt den Q&A-Teil hervor, insbesondere Lattners Rückblick auf Swift bei Apple." ;
+    s:zeit: "2026-11-17 · 23:02" ;
+    s:autor: "Ward" .
+
+q:m10 isa s:matrix-beitrag ;
+    - "Die Zukunft des Programmierens" ;
+    s:beschreibung: "Ward beschreibt Vortragsdichte und Fachjargon und sieht darin einen Bezugsrahmen für künftige Programmiersprachen." ;
+    s:zeit: "2026-11-17 · 23:04" ;
+    s:autor: "Ward" .
+
+q:m11 isa s:matrix-beitrag ;
+    - "Application Accelerators" ;
+    s:beschreibung: "Ward stellt den Link zur FedWiki-Seite in die Diskussion." ;
+    s:zeit: "2026-11-17 · 23:16" ;
+    s:autor: "Ward" ;
+    s:url: "http://code.fed.wiki.org/application-accelerators.html" .
+
+q:m12 isa s:matrix-beitrag ;
+    - "Lattner-Interview über KI, Mojo und Softwarearbeit" ;
+    s:beschreibung: "Ward teilt ein Interview zu KI-Agenten und Vibe Coding, Entscheidungen darüber, was sich zu bauen lohnt, Mojo, Erfahrungen mit dem Swift-Start und dem Druck auf Open-Source-Maintainer." ;
+    s:zeit: "2026-11-18 · 03:03" ;
+    s:autor: "Ward" ;
+    s:url: "https://www.youtube.com/watch?v=VHZUeM1BduQ" .
+
+q:m13 isa s:matrix-beitrag ;
+    - "Sprachinnovation bei Minute 55" ;
+    s:beschreibung: "Ward markiert ungefähr Minute 55 im Interview. Dort geht es laut Ward darum, wie Sprachinnovation verändert, wie wir über das Verhalten von Programmen sprechen." ;
+    s:zeit: "2026-11-18 · 03:35" ;
+    s:autor: "Ward" ;
+    s:url: "https://www.youtube.com/watch?v=VHZUeM1BduQ&t=3300s" .
+
+q:m14 isa s:matrix-beitrag ;
+    - "Die richtige Person zur richtigen Zeit" ;
+    s:beschreibung: "Ward nennt Chris Lattner und Mike Bostock als zwei Personen, die für die Zukunft der Software zur richtigen Zeit an den richtigen Fragen arbeiten könnten." ;
+    s:zeit: "2026-11-18 · 03:47" ;
+    s:autor: "Ward" .
+
+q:image isa s:kontextquelle ;
+    - "Angehängte Graphviz-Abbildung" ;
+    s:beschreibung: "Die rote Kurve beginnt bei Ecology, biegt bei Role ab und endet mit einer Pfeilspitze bei Result. Die meisten Knoten tragen ein Fragezeichen unter ihrem Typnamen. Kreuzen und Überdecken von Knoten oder Kanten verrät keine zusätzlichen Trail-Stationen. Unter den sichtbaren Legenden stehen EIP Graphviz Decorations und Spring Layout." ;
+    s:datei: "evidence/typed-trail.png" ;
+    s:sha256: "7b6deaea6533c64c581f6dc9113b588a84962604b9daca3860a2839729e83dbe" .
+
+q:release isa s:kontextquelle ;
+    - "Solo-Commit 0.1.32-4" ;
+    s:beschreibung: "Im Quellrepo nachgesehener Versionscommit." ;
+    s:url: "https://github.com/WardCunningham/wiki-plugin-solo/commit/cd2c43356e4ce2ba6092bda991bd73158d076aa0" .
+
+q:solo isa s:kontextquelle ;
+    - "Solo-Quelltext von 0.1.32-4" ;
+    s:beschreibung: "Der Quelltext verwendet dotlabel für die Zuordnung von Trail-Knoten zu SVG-Text und übernimmt Hervorhebungen in die reguläre Knotendeklaration. Er importiert D3 und verwendet curveNatural für die rote Kurve." ;
+    s:url: "https://github.com/WardCunningham/wiki-plugin-solo/blob/cd2c43356e4ce2ba6092bda991bd73158d076aa0/client/dialog/index.html" .
+
+q:trails isa s:kontextquelle ;
+    - "How Trails Travel · Zettel 11727" ;
+    s:beschreibung: "HyperDoc-Replay zur Layoutstabilität mit Dewey Alexander Trail und Solo 0.1.32-3." ;
+    s:url: "https://github.com/RalfBarkow/hyperdoc/pull/50" .
+
+q:wikitech isa s:kontextquelle ;
+    - "Wikitech · KAPOW" ;
+    s:beschreibung: "Wikimedia dokumentiert den Einfluss auf Pageviews und die Sichtbarkeit interner Details." ;
+    s:url: "https://wikitech-static.wikimedia.org/wiki/KAPOW_%28bot_detection_system%29.html" .
+
+q:splash isa s:kontextquelle ;
+    - "ACM SPLASH 2026 · Keynote-Abstract" ;
+    s:beschreibung: "Das Programm nennt parametrisierte Metaprogrammierung und ein Ownership-Modell auf Grundlage von Origins als Schwerpunkte der Keynote." ;
+    s:url: "https://2026.splashcon.org/details/splash-2026-splash-keynotes/2/TBA" .
+
+q:lattner isa s:kontextquelle ;
+    - "Chris Lattner" ;
+    s:beschreibung: "Von Ward verlinktes Personenprofil." ;
+    s:url: "https://en.wikipedia.org/wiki/Chris_Lattner" .
+
+q:bostock isa s:kontextquelle ;
+    - "Mike Bostock" ;
+    s:beschreibung: "Von Ward verlinktes Personenprofil." ;
+    s:url: "https://en.wikipedia.org/wiki/Mike_Bostock" .
+
+q:d3 isa s:kontextquelle ;
+    - "Mike Bostock bei Observable" ;
+    s:beschreibung: "Bostock nennt D3 als sein Projekt." ;
+    s:url: "https://observablehq.com/@mbostock" .
+
+t:solo isa s:topic-kandidat ;
+    - "Solo" ;
+    s:beschreibung: "FedWiki-Plugin, in dem Ward und andere Trails zeichnen und Graphen anzeigen." ;
+    s:bereich: "Solo, Trails und Graphviz" ;
+    s:bezug: "explizit" .
+
+s:hat-fundstelle(s:bezogenes: t:solo, s:fundstelle: q:m01)
+s:hat-fundstelle(s:bezogenes: t:solo, s:fundstelle: q:m02)
+s:hat-fundstelle(s:bezogenes: t:solo, s:fundstelle: q:solo)
+
+t:trail isa s:topic-kandidat ;
+    - "Trail" ;
+    s:beschreibung: "Gezeichneter Verlauf über Graphknoten. In der Abbildung verläuft die rote Kurve von Ecology über Role in Richtung Result." ;
+    s:bereich: "Solo, Trails und Graphviz" ;
+    s:bezug: "explizit" .
+
+s:hat-fundstelle(s:bezogenes: t:trail, s:fundstelle: q:m01)
+s:hat-fundstelle(s:bezogenes: t:trail, s:fundstelle: q:image)
+s:hat-fundstelle(s:bezogenes: t:trail, s:fundstelle: q:solo)
+
+t:typed-nodes isa s:topic-kandidat ;
+    - "Typisierte Knoten" ;
+    s:beschreibung: "Gleich beschriftete Platzhalter werden durch Typnamen unterschieden. Die Abbildung zeigt unter anderem Ecology, Role, Person und Result mit einem Fragezeichen." ;
+    s:bereich: "Solo, Trails und Graphviz" ;
+    s:bezug: "explizit" .
+
+s:hat-fundstelle(s:bezogenes: t:typed-nodes, s:fundstelle: q:m01)
+s:hat-fundstelle(s:bezogenes: t:typed-nodes, s:fundstelle: q:image)
+s:hat-fundstelle(s:bezogenes: t:typed-nodes, s:fundstelle: q:solo)
+
+t:graph-schema isa s:topic-kandidat ;
+    - "Graphschema im Gebrauch" ;
+    s:beschreibung: "Ward liest Marcs Beispiel als Schema. Beziehungen und Knotentypen stehen bereits fest genug, um einen Trail zu skizzieren, während die Knoten im Gebrauch weiter konkretisiert werden können." ;
+    s:bereich: "Solo, Trails und Graphviz" ;
+    s:bezug: "explizit" .
+
+s:hat-fundstelle(s:bezogenes: t:graph-schema, s:fundstelle: q:m01)
+s:hat-fundstelle(s:bezogenes: t:graph-schema, s:fundstelle: q:image)
+
+t:graphviz-layout isa s:topic-kandidat ;
+    - "Graphviz und Layoutstabilität" ;
+    s:beschreibung: "Wie lässt sich ein Trail sichtbar machen, ohne die Knotenanordnung des bestehenden Graphen zu verschieben? Das Replay in Zettel 11727 prüft den früheren Layoutfall." ;
+    s:bereich: "Solo, Trails und Graphviz" ;
+    s:bezug: "explizit" .
+
+s:hat-fundstelle(s:bezogenes: t:graphviz-layout, s:fundstelle: q:m02)
+s:hat-fundstelle(s:bezogenes: t:graphviz-layout, s:fundstelle: q:image)
+s:hat-fundstelle(s:bezogenes: t:graphviz-layout, s:fundstelle: q:trails)
+s:hat-fundstelle(s:bezogenes: t:graphviz-layout, s:fundstelle: q:solo)
+
+t:solo-release isa s:topic-kandidat ;
+    - "Solo 0.1.32-4" ;
+    s:beschreibung: "Ward ordnet die Korrektur für typisierte Knoten und die Layoutverbesserung derselben Version zu. Der Versionscommit und der Stand des Dialogs sind verlinkt." ;
+    s:bereich: "Solo, Trails und Graphviz" ;
+    s:bezug: "explizit" .
+
+s:hat-fundstelle(s:bezogenes: t:solo-release, s:fundstelle: q:m02)
+s:hat-fundstelle(s:bezogenes: t:solo-release, s:fundstelle: q:release)
+s:hat-fundstelle(s:bezogenes: t:solo-release, s:fundstelle: q:solo)
+
+t:kapow isa s:topic-kandidat ;
+    - "KAPOW" ;
+    s:beschreibung: "Wikimedias System zur Klassifikation automatisierter und menschlicher Zugriffe." ;
+    s:bereich: "Wikimedia, Bot-Erkennung und Öffentlichkeit" ;
+    s:bezug: "explizit" .
+
+s:hat-fundstelle(s:bezogenes: t:kapow, s:fundstelle: q:m03)
+s:hat-fundstelle(s:bezogenes: t:kapow, s:fundstelle: q:m04)
+s:hat-fundstelle(s:bezogenes: t:kapow, s:fundstelle: q:wikitech)
+
+t:pageviews isa s:topic-kandidat ;
+    - "Pageviews als klassifizierte Messgrösse" ;
+    s:beschreibung: "Die Bot-Klassifikation beeinflusst, welche Zugriffe in die Seitenaufrufstatistik eingehen." ;
+    s:bereich: "Wikimedia, Bot-Erkennung und Öffentlichkeit" ;
+    s:bezug: "explizit" .
+
+s:hat-fundstelle(s:bezogenes: t:pageviews, s:fundstelle: q:m03)
+s:hat-fundstelle(s:bezogenes: t:pageviews, s:fundstelle: q:wikitech)
+
+t:visibility isa s:topic-kandidat ;
+    - "Sichtbarkeit von Infrastrukturdetails" ;
+    s:beschreibung: "Ward hebt die Grenze zwischen öffentlicher Beschreibung und eingeschränkter Einsicht in Code, Detaildokumentation und Ausgabedaten hervor." ;
+    s:bereich: "Wikimedia, Bot-Erkennung und Öffentlichkeit" ;
+    s:bezug: "explizit" .
+
+s:hat-fundstelle(s:bezogenes: t:visibility, s:fundstelle: q:m04)
+s:hat-fundstelle(s:bezogenes: t:visibility, s:fundstelle: q:wikitech)
+
+t:heterogeneous-hardware isa s:topic-kandidat ;
+    - "Heterogene Hardware und Codegenerierung" ;
+    s:beschreibung: "Lattners Keynote behandelt eine gemeinsame Systemsprache für unterschiedliche Prozessoren und Beschleuniger." ;
+    s:bereich: "Mojo, Lisp und heterogene Hardware" ;
+    s:bezug: "explizit" .
+
+s:hat-fundstelle(s:bezogenes: t:heterogeneous-hardware, s:fundstelle: q:m05)
+s:hat-fundstelle(s:bezogenes: t:heterogeneous-hardware, s:fundstelle: q:m06)
+s:hat-fundstelle(s:bezogenes: t:heterogeneous-hardware, s:fundstelle: q:m10)
+s:hat-fundstelle(s:bezogenes: t:heterogeneous-hardware, s:fundstelle: q:splash)
+
+t:mojo isa s:topic-kandidat ;
+    - "Mojo" ;
+    s:beschreibung: "Das SPLASH-Abstract nennt parametrisierte Metaprogrammierung und ein Ownership-Modell auf Grundlage von Origins." ;
+    s:bereich: "Mojo, Lisp und heterogene Hardware" ;
+    s:bezug: "explizit" .
+
+s:hat-fundstelle(s:bezogenes: t:mojo, s:fundstelle: q:m06)
+s:hat-fundstelle(s:bezogenes: t:mojo, s:fundstelle: q:m08)
+s:hat-fundstelle(s:bezogenes: t:mojo, s:fundstelle: q:m12)
+s:hat-fundstelle(s:bezogenes: t:mojo, s:fundstelle: q:splash)
+
+t:application-accelerators isa s:topic-kandidat ;
+    - "Application Accelerators" ;
+    s:beschreibung: "Ward bringt die FedWiki-Seite unmittelbar nach der Keynote-Diskussion ein. Die konkrete Beziehung zu Mojo bleibt offen." ;
+    s:bereich: "Mojo, Lisp und heterogene Hardware" ;
+    s:bezug: "explizit" .
+
+s:hat-fundstelle(s:bezogenes: t:application-accelerators, s:fundstelle: q:m11)
+
+t:lisp-hardware-economics isa s:topic-kandidat ;
+    - "Lisp, Hardware und wirtschaftliche Anreize" ;
+    s:beschreibung: "Wards rückblickende Vermutung über eine frühere Gelegenheit, samt möglichen technischen und ökonomischen Bedingungen." ;
+    s:bereich: "Mojo, Lisp und heterogene Hardware" ;
+    s:bezug: "zugeschriebene-these" .
+
+s:hat-fundstelle(s:bezogenes: t:lisp-hardware-economics, s:fundstelle: q:m07)
+
+t:swift isa s:topic-kandidat ;
+    - "Swift und Erfahrungen aus dem Sprachstart" ;
+    s:beschreibung: "Ward verweist auf Swift im Keynote-Q&A und im zweiten, separaten Interview." ;
+    s:bereich: "Mojo, Lisp und heterogene Hardware" ;
+    s:bezug: "explizit" .
+
+s:hat-fundstelle(s:bezogenes: t:swift, s:fundstelle: q:m09)
+s:hat-fundstelle(s:bezogenes: t:swift, s:fundstelle: q:m12)
+
+t:language-innovation isa s:topic-kandidat ;
+    - "Sprachinnovation und Programmverständnis" ;
+    s:beschreibung: "Der von Ward markierte Interviewausschnitt um Minute 55 dient als Einstieg zur Frage, wie Sprachen das Sprechen über Programme verändern." ;
+    s:bereich: "Sprachinnovation, Softwarearbeit und Personen" ;
+    s:bezug: "explizit" .
+
+s:hat-fundstelle(s:bezogenes: t:language-innovation, s:fundstelle: q:m13)
+
+t:ai-and-software-work isa s:topic-kandidat ;
+    - "KI-Agenten, Vibe Coding und Softwarearbeit" ;
+    s:beschreibung: "Zur Interviewankündigung gehören die Auswahl dessen, was sich zu bauen lohnt, und der Druck auf Open-Source-Maintainer." ;
+    s:bereich: "Sprachinnovation, Softwarearbeit und Personen" ;
+    s:bezug: "explizit" .
+
+s:hat-fundstelle(s:bezogenes: t:ai-and-software-work, s:fundstelle: q:m12)
+
+t:lattner isa s:topic-kandidat ;
+    - "Chris Lattner" ;
+    s:beschreibung: "Keynote-Sprecher und Interviewgast. Wards Vergleich nennt Lattner neben Bostock." ;
+    s:bereich: "Sprachinnovation, Softwarearbeit und Personen" ;
+    s:bezug: "explizit" .
+
+s:hat-fundstelle(s:bezogenes: t:lattner, s:fundstelle: q:m05)
+s:hat-fundstelle(s:bezogenes: t:lattner, s:fundstelle: q:m06)
+s:hat-fundstelle(s:bezogenes: t:lattner, s:fundstelle: q:m09)
+s:hat-fundstelle(s:bezogenes: t:lattner, s:fundstelle: q:m12)
+s:hat-fundstelle(s:bezogenes: t:lattner, s:fundstelle: q:m14)
+s:hat-fundstelle(s:bezogenes: t:lattner, s:fundstelle: q:lattner)
+s:hat-fundstelle(s:bezogenes: t:lattner, s:fundstelle: q:splash)
+
+t:bostock isa s:topic-kandidat ;
+    - "Mike Bostock" ;
+    s:beschreibung: "Ward nennt Bostock als zweite Person neben Lattner. Die Verbindung zu Solo über D3 ist als eigene Ableitung erfasst." ;
+    s:bereich: "Sprachinnovation, Softwarearbeit und Personen" ;
+    s:bezug: "explizit" .
+
+s:hat-fundstelle(s:bezogenes: t:bostock, s:fundstelle: q:m14)
+s:hat-fundstelle(s:bezogenes: t:bostock, s:fundstelle: q:bostock)
+
+t:d3 isa s:topic-kandidat ;
+    - "D3 und die Trail-Kurve" ;
+    s:beschreibung: "Mögliche Verbindung von Bostock zu Solo. Solo erzeugt die rote Kurve mit D3, dessen Urheber Bostock ist." ;
+    s:bereich: "Sprachinnovation, Softwarearbeit und Personen" ;
+    s:bezug: "abgeleitet" .
+
+s:hat-fundstelle(s:bezogenes: t:d3, s:fundstelle: q:solo)
+s:hat-fundstelle(s:bezogenes: t:d3, s:fundstelle: q:d3)
+
+a:r01 isa s:aussage ;
+    - "Solo zeichnet Trail" ;
+    s:geltung: "belegt" .
+
+r:zeichnet(s:subjekt: t:solo, s:objekt: t:trail) ~ a:r01
+s:hat-fundstelle(s:bezogenes: a:r01, s:fundstelle: q:m01)
+s:hat-fundstelle(s:bezogenes: a:r01, s:fundstelle: q:solo)
+
+a:r02 isa s:aussage ;
+    - "Trail adressiert Typisierte Knoten" ;
+    s:geltung: "belegt" .
+
+r:adressiert(s:subjekt: t:trail, s:objekt: t:typed-nodes) ~ a:r02
+s:hat-fundstelle(s:bezogenes: a:r02, s:fundstelle: q:m01)
+s:hat-fundstelle(s:bezogenes: a:r02, s:fundstelle: q:image)
+s:hat-fundstelle(s:bezogenes: a:r02, s:fundstelle: q:solo)
+
+a:r03 isa s:aussage ;
+    - "Typisierte Knoten unterscheidet knoten im Graphschema im Gebrauch" ;
+    s:geltung: "belegt" .
+
+r:unterscheidet-knoten-im(s:subjekt: t:typed-nodes, s:objekt: t:graph-schema) ~ a:r03
+s:hat-fundstelle(s:bezogenes: a:r03, s:fundstelle: q:m01)
+s:hat-fundstelle(s:bezogenes: a:r03, s:fundstelle: q:image)
+
+a:r04 isa s:aussage ;
+    - "Solo 0.1.32-4 bündelt änderung für Typisierte Knoten" ;
+    s:geltung: "gemeldet" .
+
+r:bundelt-anderung-fur(s:subjekt: t:solo-release, s:objekt: t:typed-nodes) ~ a:r04
+s:hat-fundstelle(s:bezogenes: a:r04, s:fundstelle: q:m02)
+s:hat-fundstelle(s:bezogenes: a:r04, s:fundstelle: q:release)
+s:hat-fundstelle(s:bezogenes: a:r04, s:fundstelle: q:solo)
+
+a:r05 isa s:aussage ;
+    - "Solo 0.1.32-4 bündelt änderung für Graphviz und Layoutstabilität" ;
+    s:geltung: "gemeldet" .
+
+r:bundelt-anderung-fur(s:subjekt: t:solo-release, s:objekt: t:graphviz-layout) ~ a:r05
+s:hat-fundstelle(s:bezogenes: a:r05, s:fundstelle: q:m02)
+s:hat-fundstelle(s:bezogenes: a:r05, s:fundstelle: q:release)
+s:hat-fundstelle(s:bezogenes: a:r05, s:fundstelle: q:solo)
+
+a:r06 isa s:aussage ;
+    - "KAPOW beeinflusst Pageviews als klassifizierte Messgrösse" ;
+    s:geltung: "belegt" .
+
+r:beeinflusst(s:subjekt: t:kapow, s:objekt: t:pageviews) ~ a:r06
+s:hat-fundstelle(s:bezogenes: a:r06, s:fundstelle: q:m03)
+s:hat-fundstelle(s:bezogenes: a:r06, s:fundstelle: q:wikitech)
+
+a:r07 isa s:aussage ;
+    - "KAPOW konkretisiert Sichtbarkeit von Infrastrukturdetails" ;
+    s:geltung: "belegt" .
+
+r:konkretisiert(s:subjekt: t:kapow, s:objekt: t:visibility) ~ a:r07
+s:hat-fundstelle(s:bezogenes: a:r07, s:fundstelle: q:m04)
+s:hat-fundstelle(s:bezogenes: a:r07, s:fundstelle: q:wikitech)
+
+a:r08 isa s:aussage ;
+    - "Mojo zielt auf Heterogene Hardware und Codegenerierung" ;
+    s:geltung: "belegt" .
+
+r:zielt-auf(s:subjekt: t:mojo, s:objekt: t:heterogeneous-hardware) ~ a:r08
+s:hat-fundstelle(s:bezogenes: a:r08, s:fundstelle: q:m06)
+s:hat-fundstelle(s:bezogenes: a:r08, s:fundstelle: q:splash)
+
+a:r09 isa s:aussage ;
+    - "Application Accelerators folgt im gespräch auf Heterogene Hardware und Codegenerierung" ;
+    s:geltung: "belegt" .
+
+r:folgt-im-gesprach-auf(s:subjekt: t:application-accelerators, s:objekt: t:heterogeneous-hardware) ~ a:r09
+s:hat-fundstelle(s:bezogenes: a:r09, s:fundstelle: q:m10)
+s:hat-fundstelle(s:bezogenes: a:r09, s:fundstelle: q:m11)
+
+a:r10 isa s:aussage ;
+    - "Lisp, Hardware und wirtschaftliche Anreize kommentiert Heterogene Hardware und Codegenerierung" ;
+    s:geltung: "zugeschriebene-these" .
+
+r:kommentiert(s:subjekt: t:lisp-hardware-economics, s:objekt: t:heterogeneous-hardware) ~ a:r10
+s:hat-fundstelle(s:bezogenes: a:r10, s:fundstelle: q:m05)
+s:hat-fundstelle(s:bezogenes: a:r10, s:fundstelle: q:m07)
+
+a:r11 isa s:aussage ;
+    - "Chris Lattner wird genannt mit Mike Bostock" ;
+    s:geltung: "belegt" .
+
+r:wird-genannt-mit(s:subjekt: t:lattner, s:objekt: t:bostock) ~ a:r11
+s:hat-fundstelle(s:bezogenes: a:r11, s:fundstelle: q:m14)
+
+a:r12 isa s:aussage ;
+    - "Mike Bostock entwickelte D3 und die Trail-Kurve" ;
+    s:geltung: "belegt" .
+
+r:entwickelte(s:subjekt: t:bostock, s:objekt: t:d3) ~ a:r12
+s:hat-fundstelle(s:bezogenes: a:r12, s:fundstelle: q:d3)
+
+a:r13 isa s:aussage ;
+    - "D3 und die Trail-Kurve wird verwendet von Solo" ;
+    s:geltung: "belegt" .
+
+r:wird-verwendet-von(s:subjekt: t:d3, s:objekt: t:solo) ~ a:r13
+s:hat-fundstelle(s:bezogenes: a:r13, s:fundstelle: q:solo)
+
+a:r14 isa s:aussage ;
+    - "Mike Bostock ist vermittelt verbunden mit Solo" ;
+    s:geltung: "abgeleitet" .
+
+r:ist-vermittelt-verbunden-mit(s:subjekt: t:bostock, s:objekt: t:solo) ~ a:r14
+s:hat-fundstelle(s:bezogenes: a:r14, s:fundstelle: q:solo)
+s:hat-fundstelle(s:bezogenes: a:r14, s:fundstelle: q:d3)

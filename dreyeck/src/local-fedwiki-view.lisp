@@ -69,18 +69,18 @@ development flag said.
 Nothing is lost by not evaluating, because only a system whose name
 equals the page slug was ever admitted. That condition is decidable
 from the filename: the .asd a page offers is the one named after the
-page. The offer therefore says a page-attached ASDF artifact is here;
+page, either directly or as <slug>/<slug>.asd inside <slug>.zip.
+The offer therefore says a page-attached ASDF artifact is here;
 whether a system can be built from it is a later question, asked in a
 runtime that is allowed to ask it."
-  (let* ((discovery
-          (dreyeck/local-fedwiki-page:local-fedwiki-page-asdf-discovery page))
+  (let* ((discovery (dreyeck/local-fedwiki-page:local-fedwiki-page-asdf-discovery page))
          (page-slug (getf discovery :slug))
          (matches
           (remove-if-not
            (lambda (asd) (equal page-slug (pathname-name asd)))
            (getf discovery :asdf-files))))
-    (cond ((null matches) nil)
-          ((= 1 (length matches))
+    (cond ((and (null matches) (null (getf discovery :asdf-archive))) nil)
+          ((<= (length matches) 1)
            (dreyeck/catalog::admit :catalog page-slug))
           (t
            (error "Page slug ~S matches ~D page-attached ASDF artifacts: ~S"
@@ -90,7 +90,9 @@ runtime that is allowed to ask it."
   (let ((page (make-local-fedwiki-view-page
                site-root slug :wiki-id wiki-id :signal-error? nil)))
     (if page
-        (progn
+        (let ((json (hyperbook/fedwiki::page-json-for-reload page)))
+          (unless (%json-equal json (hyperbook/fedwiki::raw-json-of page))
+            (hyperbook/fedwiki::set-page-data page json))
           (ensure-page-attached-workspace-offer page)
           page)
         (make-instance 'hyperbook/server::notfound
@@ -118,6 +120,32 @@ runtime that is allowed to ask it."
             :playground? development))))
      :path path)))
 
+(defun archive-url (slug)
+  (format nil "/page-attachments/~A.zip" slug))
+
+(defun wrap-page-archive-downloads (app site-root)
+  "Serve the observed ZIP of a local page, from the same store as /view/."
+  (lambda (request)
+    (let ((url (getf request :path-info)) (prefix "/page-attachments/"))
+      (if (and (stringp url) (uiop:string-prefix-p prefix url))
+          (or (when (and (member (getf request :request-method) '(:get :head))
+                         (> (length url) (+ (length prefix) 4))
+                         (uiop:string-suffix-p url ".zip"))
+                (let ((slug (subseq url (length prefix) (- (length url) 4))))
+                  (when (and (dreyeck/fedwiki-assets:fedwiki-page-slug-p slug)
+                             (probe-file (dreyeck/fedwiki-assets:local-fedwiki-page-pathname site-root slug)))
+                    (let* ((json (dreyeck/fedwiki-assets:read-local-fedwiki-page site-root slug))
+                           (archive (dreyeck/fedwiki-assets:page-asdf-archive
+                                     site-root slug (dreyeck/fedwiki-assets:assets-story-items json)))
+                           (zip (getf archive :zip)))
+                      (when zip
+                        (list 200 (list :content-type "application/zip"
+                                        :content-disposition "attachment"
+                                        :x-content-type-options "nosniff")
+                              zip))))))
+              '(404 (:content-type "text/plain") ("Not found")))
+          (funcall app request)))))
+
 (defun serve-catalog-with-local-fedwiki-view
     (&key
        (site-root
@@ -144,7 +172,9 @@ attached Mech browser assets and the /gesture marking-menu window."
      :development development
      :lack-middleware-list
      (list (lambda (app)
-             (dreyeck/fedwiki-story-assets:wrap-mastodon-assets app asset-site-root)))))
+             (wrap-page-archive-downloads
+              (dreyeck/fedwiki-story-assets:wrap-mastodon-assets app asset-site-root)
+              asset-site-root)))))
 
   (install-local-fedwiki-view-route
    site-root

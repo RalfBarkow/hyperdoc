@@ -1,0 +1,49 @@
+{
+  "title": "scratch",
+  "story": [
+    {
+      "type": "assets",
+      "id": "6efc97a9d8dc7bf4",
+      "text": "pages/scratch\n"
+    }
+  ],
+  "journal": [
+    {
+      "type": "create",
+      "item": {
+        "title": "scratch",
+        "story": []
+      },
+      "date": 1794910603967
+    },
+    {
+      "type": "edit",
+      "id": "d2a004304b70f908",
+      "item": {
+        "type": "code",
+        "id": "d2a004304b70f908",
+        "text": ";; This buffer is for text that is not saved, and for Lisp evaluation.\n;; To create a file, visit it with ‘C-x C-f’ and enter text in its buffer.\n\n"
+      },
+      "date": 1794910608777
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "6efc97a9d8dc7bf4"
+      },
+      "id": "6efc97a9d8dc7bf4",
+      "type": "add",
+      "date": 1794981336005
+    },
+    {
+      "type": "edit",
+      "id": "6efc97a9d8dc7bf4",
+      "item": {
+        "type": "assets",
+        "id": "6efc97a9d8dc7bf4",
+        "text": "pages/scratch\n"
+      },
+      "date": 1794981345931
+    }
+  ]
+}

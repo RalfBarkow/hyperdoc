@@ -321,7 +321,10 @@ file is opened."
     (assert (string= workspace-id (hyperbook:id-of first-offer)))
     (assert (= 1 offer-count-after-first))
     (assert (eq first-offer second-offer))
-    (assert (= 1 offer-count-after-second)))
+    (assert (= 1 offer-count-after-second))
+    (let ((view (dreyeck/local-fedwiki-view::👀systemangebot page-from-semantic-link-contract)))
+      (assert (equal "Systemangebot" (html-inspector-views:view-title view)))
+      (assert (search "reading-java-source-as-data.asd" (html-inspector-views:view-html view)))))
   ;; Offering must not evaluate what it offers. This used to call
   ;; REGISTER-ASD-SYSTEMS, whose docstring begins "Evaluate trusted
   ;; ASD-PATHNAME": ASDF:LOAD-ASD runs the file. Since the offer is made
@@ -336,6 +339,8 @@ file is opened."
     (assert (eq fixture-registered-before
                 (and (asdf:registered-system *fixture-slug*) t))))
 
+  ;; This store fixture has no site icon.
+  (assert (not (search "favicon.png" html)))
   (assert (search "Reading Java Source as Data" html :test #'char-equal))
   (assert
    (search "This page treats Java source as inspectable" html :test

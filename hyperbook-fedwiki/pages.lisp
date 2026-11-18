@@ -93,12 +93,14 @@ images, etc.")
   (unless (story-of page)
     (reload-page page)))
 
+(defgeneric page-json-for-reload (page)
+  (:method ((page fedwiki-page))
+    (let ((origin (origin-of page)))
+      (fetch-page-json (domain-name-of origin) (protocol-of origin) (origin-id-of page)))))
+
 (defun reload-page (page)
-  (let* ((origin (origin-of page))
-         (id (origin-id-of page))
-         (page-data (fetch-page-json (domain-name-of origin)
-                                     (protocol-of origin)
-                                     id)))
+  (let ((origin (origin-of page))
+        (page-data (page-json-for-reload page)))
     (set-page-data page page-data)
     ;; For remote pages, add the origin to the page context
     (unless (eq origin (hb:hyperbook-of page))
@@ -253,6 +255,10 @@ Each site's position corresponds to its most recent occurrence in JOURNAL."
 ;; Views
 ;;
 
+(defgeneric story-favicon-url (page)
+  (:method ((page fedwiki-page))
+    (wiki-url (-> page origin-of domain-name-of) (-> page origin-of protocol-of) "/favicon.png")))
+
 (views:defview 👀story (page fedwiki-page)
   (load-page page)
   (views:html-view :title "Story" :priority 2
@@ -263,10 +269,9 @@ Each site's position corresponds to its most recent occurrence in JOURNAL."
     (views:include-css "/hyperbook/css/hyperbook.css")
     (views:html
       (:div :class "hyperbook-page"
-            (:h1 (:img :src (wiki-url (-> page origin-of domain-name-of)
-                                      (-> page origin-of protocol-of)
-                                      "/favicon.png"))
-                 (views:esc " ")
+            (:h1 (let ((url (story-favicon-url page)))
+                   (when url
+                     (views:html (:img :src url :alt "" :width 16 :height 16) (views:esc " "))))
                  (views:esc (hb:title-of page)))
             (loop for item across (story-of page)
                   do (views:html

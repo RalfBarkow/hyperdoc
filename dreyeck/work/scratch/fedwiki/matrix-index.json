@@ -1,0 +1,21 @@
+{
+  "title": "Scratch",
+  "story": [
+    {
+      "type": "paragraph",
+      "id": "503c80c9f97d4b3c",
+      "text": "Vorläufiger Topic-Index zum Federated Wiki Matrix Room vom 16.–18. November 2026."
+    },
+    {
+      "type": "paragraph",
+      "id": "a3c1de364e36c683",
+      "text": "Solo, typisierte Knoten, Trails und Graphviz-Layout. Wikimedia, KAPOW und Pageviews. Mojo, Lisp und heterogene Hardware. Sprachinnovation, Softwarearbeit, Chris Lattner und Mike Bostock."
+    },
+    {
+      "type": "assets",
+      "id": "e5cf46a2dee4bcb4",
+      "text": "pages/scratch"
+    }
+  ],
+  "journal": []
+}

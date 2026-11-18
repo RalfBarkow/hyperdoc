@@ -92,7 +92,7 @@ can never reach the state where the slot is bound."
                (:td (html-inspector-views:esc (hyperbook:id-of offer))))
           (:tr (:th "page")
                (:td (html-inspector-views:esc (page-slug-of offer))))
-          (:tr (:th "ASDF artifact")
+          (:tr (:th "ASDF path in the unpacked layout")
                (:td (html-inspector-views:esc
                      (page-attached-relative-asd offer))))
           (:tr (:th "state")
