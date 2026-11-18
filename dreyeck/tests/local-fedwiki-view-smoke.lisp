@@ -125,7 +125,9 @@ The catalog is a copy of the loaded one, so every book route the launcher
 installs is checked and the fixture wiki it registers does not leak into
 the image. Each path must be installed once: a second handler for the
 same path would silently replace the first."
-  (let* ((loaded (hyperbook:hyperbooks-of hyperbook:*catalog*))
+  (let* ((offer-id (format nil "workspace:~A" *fixture-slug*))
+         (loaded (remove offer-id (hyperbook:hyperbooks-of hyperbook:*catalog*)
+                         :key #'hyperbook:id-of :test #'equal))
          (hyperbook:*catalog* (make-instance 'hyperbook:catalog)))
     (setf (hyperbook:hyperbooks-of hyperbook:*catalog*) (copy-list loaded))
     (let* ((routes
@@ -134,7 +136,12 @@ same path would silently replace the first."
               (lambda ()
                 (dreyeck/local-fedwiki-view:serve-catalog-with-local-fedwiki-view
                  :site-root (fixture-site-root) :port 8099 :host "127.0.0.1"
-                 :wiki-id *fixture-wiki-id*)))
+                 :wiki-id *fixture-wiki-id*)
+                ;; A first page visit after startup discovers the offer.
+                ;; Its own URL must work, also after a second visit.
+                (dotimes (visit 2)
+                  (dreyeck/local-fedwiki-view::local-fedwiki-view-target
+                   (fixture-site-root) *fixture-slug* *fixture-wiki-id*))))
              :routes))
            (paths (mapcar #'car routes))
            (books (hyperbook:hyperbooks-of hyperbook:*catalog*)))
@@ -145,6 +152,11 @@ same path would silently replace the first."
            (cdr (assoc "/gesture" routes :test #'equal))))
       (assert (assoc "/view" routes :test #'equal))
       (assert (hyperbook:find-hyperbook *fixture-wiki-id*))
+      (let* ((offer (hyperbook:find-hyperbook offer-id :signal-error? t))
+             (slug (hyperbook/server::slug offer)))
+        (assert (search slug (url-view-html offer)))
+        (assert (assoc (format nil "/~A" slug) routes :test #'equal))
+        (assert (not (slot-boundp offer 'dreyeck/page-attached-workspace-offer::workspace))))
       (dolist (book books)
         (assert
          (assoc (format nil "/~A" (hyperbook/server::slug book)) routes :test

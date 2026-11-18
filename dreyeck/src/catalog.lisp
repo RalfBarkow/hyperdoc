@@ -23,28 +23,15 @@
 
 
 
-(DEFUN ADMIT (COMMON-LISP-USER::TARGET COMMON-LISP-USER::SYSTEM-DESIGNATOR)
-  (ECASE COMMON-LISP-USER::TARGET
-    (:CATALOG
-     (LET* ((COMMON-LISP-USER::CATALOG HYPERBOOK:*CATALOG*)
-            (COMMON-LISP-USER::ID
-             (FORMAT NIL "workspace:~A" COMMON-LISP-USER::SYSTEM-DESIGNATOR))
-            (COMMON-LISP-USER::EXISTING
-             (FIND COMMON-LISP-USER::ID
-                   (HYPERBOOK:HYPERBOOKS-OF COMMON-LISP-USER::CATALOG) :KEY
-                   #'HYPERBOOK:ID-OF :TEST #'STRING=)))
-       (OR COMMON-LISP-USER::EXISTING
-           (LET ((COMMON-LISP-USER::OFFER
-                  (MAKE-INSTANCE
-                   'DREYECK/PAGE-ATTACHED-WORKSPACE-OFFER:PAGE-ATTACHED-WORKSPACE-OFFER
-                   :ID COMMON-LISP-USER::ID :TITLE
-                   COMMON-LISP-USER::SYSTEM-DESIGNATOR)))
-             (SETF (HYPERBOOK:HYPERBOOKS-OF COMMON-LISP-USER::CATALOG)
-                     (APPEND
-                      (HYPERBOOK:HYPERBOOKS-OF COMMON-LISP-USER::CATALOG)
-                      (LIST COMMON-LISP-USER::OFFER)))
-             COMMON-LISP-USER::OFFER))))))
-
-
-
-
+(defun admit (target system-designator)
+  (ecase target
+    (:catalog
+     (let* ((id (format nil "workspace:~A" system-designator))
+            (existing (find id (hyperbook:hyperbooks-of hyperbook:*catalog*)
+                            :key #'hyperbook:id-of :test #'string=)))
+       (or existing
+           (let ((offer (make-instance
+                         'dreyeck/page-attached-workspace-offer:page-attached-workspace-offer
+                         :id id :title system-designator)))
+             (hyperbook:register offer)
+             offer))))))
