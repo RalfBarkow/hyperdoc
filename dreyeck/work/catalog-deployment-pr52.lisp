@@ -4,7 +4,7 @@
                     (#:policy #:dreyeck/authority-policy) (#:git #:dreyeck/git)
                     (#:hb #:hyperbook) (#:tm #:dreyeck/topicmap))
   (:export #:make-deployment #:plan-next #:record-receipt #:serve
-           #:open-task #:open-local-host #:submit-receipt #:enable-server-readback-ssh))
+           #:open-task #:open-local-host #:submit-receipt #:submit-service-observation))
 (in-package #:dreyeck/work/catalog-deployment-pr52)
 
 (defparameter +reviewed-head+ "91e8fd65911e687472fb3e30d1574fa5e9119b1b")
@@ -32,7 +32,7 @@
    (message :initform nil :accessor message-of)
    (server-topic :initform nil :accessor server-topic-of)
    (server-observation :initform nil :accessor server-observation-of)
-   (server-readback-ssh :initarg :server-readback-ssh :initform nil :accessor server-readback-ssh-p)
+   (catalog-service :initform nil :accessor catalog-service-of)
    (publish-enabled :initform nil :accessor publish-enabled-p)
    (lock :initform (sb-thread:make-mutex :name "PR 52 deployment") :reader lock-of)))
 
@@ -84,7 +84,7 @@
                                                             :hyperbook book :deployment deployment)))
 
 (defun make-deployment (&key (repository (asdf:system-source-directory "dreyeck"))
-                             remote (source-remote remote) server-readback-ssh
+                             remote (source-remote remote)
                              candidate expected-base candidate-ref)
   "Bind the task to selected Git remotes and optionally to a preassembled candidate."
   (dolist (name (list remote source-remote))
@@ -104,8 +104,7 @@
                              :expected-base (or expected-base +reviewed-base+)
                              :candidate (or candidate +reviewed-head+)
                              :candidate-ref (or candidate-ref +candidate-ref+)
-                             :preassembled (not (null candidate))
-                             :server-readback-ssh server-readback-ssh))
+                             :preassembled (not (null candidate))))
 
 (shop3:defdomain (catalog-deployment-pr52 :noset t)
   ((:operator (!offer ?step) () () ((offered ?step)))
@@ -375,30 +374,6 @@
       (setf (command deployment) nil (message-of deployment) nil))
     (plan-next deployment)))
 
-(defun parse-ssh-readback (output)
-  (destructuring-bind (revision system pid local-http public-http)
-      (uiop:split-string (string-right-trim '(#\Newline #\Return) output) :separator '(#\Tab))
-    (list :active-readback revision system (parse-integer pid)
-          (parse-integer local-http) (parse-integer public-http))))
-
-(defun play-server-readback (deployment)
-  (handler-case
-      (let ((revision (target-revision deployment)))
-        (unless (and (publish-enabled-p deployment) (server-readback-ssh-p deployment)
-                     (hex-revision-p revision) (eq :baseline (offered-step (plan-next deployment))))
-          (error "Dieser Server-Readback gehört zu einem lokalen Angebot :BASELINE mit aktivierter SSH-Verbindung."))
-        (with-input-from-string (input (deployment-script))
-          (multiple-value-bind (output diagnostic exit)
-              (uiop:run-program (list "ssh" "-T" "-o" "BatchMode=yes" "-o" "StrictHostKeyChecking=yes"
-                                      "-o" "ConnectTimeout=10" "-o" "ClearAllForwardings=yes"
-                                      "root@dreyeck.ch" (format nil "bash -s -- readback ~A" revision))
-                                :input input :output :string :error-output :string :ignore-error-status t)
-            (unless (eql 0 exit)
-              (error "Server-Readback über SSH (Exit ~D): ~A" exit diagnostic))
-            (record-receipt deployment (parse-ssh-readback output)))))
-    (error (condition) (setf (message-of deployment) (princ-to-string condition))))
-  (deployment-server-topic deployment))
-
 (defun deployment-step-button (deployment step)
   (case step
     (:publish-ref
@@ -409,12 +384,6 @@
      (v:eval-button (if (eq step :review-candidate) "Play · Diesen Kandidaten freigeben" "Play")
                     (policy:reviewed-thunk "catalog-deployment-pr52/play"
                       (play-step deployment step))))))
-
-(defun server-readback-button (deployment)
-  (v:eval-button "Play · Laufenden Catalog lesen"
-                 (policy:reviewed-thunk "catalog-deployment-pr52/server-readback"
-                   (play-server-readback deployment))
-                 "Liest Dienst, Revision und HTTP über die lokale SSH-Sitzung"))
 
 (defun render-executable-task (task-id step render-buttons)
   (let* ((source (asdf:system-relative-pathname
@@ -441,8 +410,8 @@
    "catalog-deployment-pr52" step
    (lambda ()
      (v:html (deployment-step-button deployment step)
-             (when (and (eq step :baseline) (server-readback-ssh-p deployment))
-               (v:html " " (server-readback-button deployment)))))))
+             (when (eq step :baseline)
+               (v:html " " (service-observation-button (deployment-catalog-service deployment) :baseline)))))))
 
 (defun task-view (deployment)
   (v:html-view :title "DITA Task" :priority -100
@@ -480,14 +449,13 @@
       (v:html (:h2 (v:esc (tm:topicmap-topic-label-of topic)))
               (:p "NixOS · hyperdoc.service · Catalog auf Port 8080")
               (:p (:code (v:esc (tm:topicmap-topic-id-of topic))))
+              (:p (v:object-ref (deployment-catalog-service deployment) :select "Dienst"
+                                :display "Dienst hyperdoc.service öffnen"))
               (:p (v:object-ref observation
                                 :select "DITA Task" :display "Iststand und Git-Branches prüfen"))
               (render-observed-server observation)
               (when (and task (publish-enabled-p deployment))
                 (v:html (:p (v:object-ref task :select "DITA Task" :display "Catalog-Deployment öffnen"))))
-              (when (and (not readback) (server-readback-ssh-p deployment)
-                         (eq :baseline (offered-step (plan-next deployment))))
-                (v:html (:p (server-readback-button deployment))))
               (when (and (not readback) (message-of deployment))
                 (v:html (:p :role "status" (v:esc (message-of deployment)))))
               (when readback
@@ -523,21 +491,14 @@
             port (hyperbook/server::slug book) (hb:path-item-of page))))
 
 (defun open-task (&key (repository (asdf:system-source-directory "dreyeck"))
-                       remote (source-remote remote) (port 18752) server-readback-ssh
+                       remote (source-remote remote) (port 18752)
                        candidate expected-base candidate-ref)
   "Create a local task in the Catalog. Return the direct task URL, the Catalog URL, and the task state."
   (let* ((deployment (make-deployment :repository repository :remote remote :source-remote source-remote
-                                      :candidate candidate :expected-base expected-base :candidate-ref candidate-ref
-                                      :server-readback-ssh server-readback-ssh))
+                                      :candidate candidate :expected-base expected-base :candidate-ref candidate-ref))
          (url (serve deployment :port port)))
     (values url (format nil "http://127.0.0.1:~D/" port) deployment)))
 
 (defun submit-receipt (evidence)
   "Record the server readback in the task opened by OPEN-TASK."
   (record-receipt (or *open-deployment* (error "Öffne zuerst das Task Topic mit OPEN-TASK.")) evidence))
-
-(defun enable-server-readback-ssh ()
-  "Allow the local operator's readback button for the already open task."
-  (let ((deployment (or *open-deployment* (error "Öffne zuerst das Task Topic mit OPEN-TASK."))))
-    (setf (server-readback-ssh-p deployment) t)
-    (deployment-server-topic deployment)))

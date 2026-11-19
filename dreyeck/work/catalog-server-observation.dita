@@ -4,11 +4,12 @@
   <title>Server dreyeck.ch und Git-Branches vergleichen</title>
   <shortdesc>Die laufende Catalog-Revision mit den Branch-Spitzen aller konfigurierten Git-Remotes vergleichen.</shortdesc>
   <taskbody>
-    <prereq><p>Für den Server-Iststand verwendet das lokale Image die aktivierte SSH-Verbindung zu dreyeck.ch.</p></prereq>
+    <prereq><p>Für den Server-Iststand braucht der Operator eine bereits autorisierte administrative Sitzung auf dreyeck.ch.</p></prereq>
     <context><p>Unter SHOP3-Pläne lässt sich vor dem ersten Play die Reihenfolge der beiden Beobachtungen wählen.</p></context>
     <steps>
       <step id="observe-server">
-        <cmd>Dienst, PID, laufende Revision und NixOS-Generation lesen.</cmd>
+        <cmd>Eine lesende Abfrage am Dienst hyperdoc.service vorbereiten.</cmd>
+        <info><p>Play zeigt den Auftrag. Führe den angezeigten Befehl in der administrativen Sitzung aus und übernimm dessen Beleg im lokalen mREPL.</p></info>
         <stepresult>Der Serverbeleg nennt auch den lokalen und öffentlichen HTTP-Status.</stepresult>
       </step>
       <step id="observe-remotes">

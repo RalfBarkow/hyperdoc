@@ -500,11 +500,11 @@ decision is taken again when it is evaluated, not only when it was shown."))
 (register-reviewed-control "catalog-deployment-pr52/publish-ref"
   :effect "Publishes the verified commit to the selected Git peer's dreyeck.ch ref."
   :audit "PUBLISH-REF checks the integration, uses an old-value lease and reads the ref back.")
-(register-reviewed-control "catalog-deployment-pr52/server-readback"
-  :effect "Checks the active Catalog after publication through the local operator's SSH route."
-  :audit "PLAY-SERVER-READBACK uses the fixed readback stage and validates the published revision.")
+(register-reviewed-control "catalog-service-status/prepare"
+  :effect "Creates one local read request for the Catalog service and shows a command for its operator."
+  :audit "PREPARE-SERVICE-OBSERVATION does not execute the command or open a network connection.")
 (register-reviewed-control "catalog-server-observation/play"
-  :effect "Reads the current server or configured Git remotes, then compares their revisions in the image."
+  :effect "Prepares an operator read request or reads configured Git remotes, then compares their revisions in the image."
   :audit "PLAY-OBSERVATION checks the selected SHOP3 offer and only invokes a read operation.")
 (register-reviewed-control "catalog-server-observation/plan"
   :effect "Selects an available observation plan or starts a new observation in the image."

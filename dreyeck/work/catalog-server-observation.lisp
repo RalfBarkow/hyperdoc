@@ -81,35 +81,6 @@
       (!compare-revisions :compare-revisions)
       ((nil) nil))))
 
-(defun parse-server-observation (output)
-  (destructuring-bind (state revision system pid local-http public-http)
-      (uiop:split-string (string-right-trim '(#\Newline #\Return) output) :separator '(#\Tab))
-    (let ((service-pid (parse-integer pid))
-          (local (parse-integer local-http))
-          (public (parse-integer public-http)))
-      (unless (and (member state '("active" "inactive" "failed" "activating"
-                                  "deactivating" "reloading" "maintenance" "refreshing")
-                           :test #'string=)
-                   (or (equal revision "-") (hex-revision-p revision))
-                   (system-path-p system) (<= 0 service-pid)
-                   (<= 0 local 599) (<= 0 public 599))
-        (error "Ungültige Iststand-Ausgabe von dreyeck.ch."))
-      (list :at (get-universal-time) :state state :revision (unless (equal revision "-") revision)
-            :system system :pid service-pid :http (list local public)))))
-
-(defun read-server-observation (observation)
-  (unless (server-readback-ssh-p (observation-deployment observation))
-    (error "Aktiviere den lokalen SSH-Readback im mREPL mit ENABLE-SERVER-READBACK-SSH."))
-  (with-input-from-string (input (deployment-script))
-    (multiple-value-bind (output diagnostic exit)
-        (uiop:run-program '("ssh" "-T" "-o" "BatchMode=yes" "-o" "StrictHostKeyChecking=yes"
-                            "-o" "ConnectTimeout=10" "-o" "ClearAllForwardings=yes"
-                            "root@dreyeck.ch" "bash -s -- observe")
-                          :input input :output :string :error-output :string :ignore-error-status t)
-      (unless (eql 0 exit)
-        (error "Server-Iststand über SSH (Exit ~D): ~A" exit diagnostic))
-      (parse-server-observation output))))
-
 (defun parse-remote-heads (output)
   (loop for line in (uiop:split-string output :separator '(#\Newline))
         for fields = (uiop:split-string (string-right-trim '(#\Return) line) :separator '(#\Tab))
@@ -171,7 +142,7 @@
                                     (list (list peer nil nil :no-branches)))))))))
 
 (defun play-observation (observation step generation
-                         &key (read-server #'read-server-observation)
+                         &key read-server
                               (read-remotes #'read-remote-observations))
   (sb-thread:with-mutex ((observation-lock observation))
     ;; Two clicks on the same rendered button share a generation.
@@ -180,7 +151,16 @@
       (handler-case
           (progn
             (ecase step
-              (:observe-server (setf (observed-server observation) (funcall read-server observation)))
+              (:observe-server
+               (unless read-server
+                 (return-from play-observation
+                   (prepare-service-observation
+                    (deployment-catalog-service (observation-deployment observation))
+                    :consumer (list observation generation)
+                    :accept (lambda (evidence)
+                              (play-observation observation :observe-server generation
+                                                :read-server (constantly evidence))))))
+               (setf (observed-server observation) (funcall read-server observation)))
               (:observe-remotes (setf (observed-remotes observation) (funcall read-remotes observation)))
               (:compare-revisions (setf (observed-comparison observation)
                                         (compare-observations observation))))
@@ -227,15 +207,7 @@
     (:no-branches "Keine Branches angeboten")))
 
 (defun render-observed-server (observation)
-  (let ((server (observed-server observation)))
-    (when server
-      (v:html (:h3 "Laufender Catalog")
-              (:p (v:esc (observation-time (getf server :at))))
-              (:p (v:esc (format nil "Dienst ~A · PID ~D" (getf server :state) (getf server :pid))))
-              (:p (:code (v:esc (or (getf server :revision) "Keine gemeldete Revision"))))
-              (:p (:code (v:esc (getf server :system))))
-              (:p (v:esc (format nil "HTTP lokal ~D · öffentlich ~D"
-                                 (first (getf server :http)) (second (getf server :http)))))))))
+  (render-service-evidence (observed-server observation)))
 
 (v:defview observation-task (observation server-observation)
   (v:html-view :title "DITA Task" :priority -100
@@ -249,7 +221,10 @@
               (render-executable-task
                "catalog-server-observation" step
                (lambda ()
-                 (v:eval-button "Play"
+                 (v:eval-button (case step
+                                                 (:observe-server "Play · Lokale Dienstabfrage vorbereiten")
+                                                 (:observe-remotes "Play · Konfigurierte Git-Remotes lesen")
+                                                 (otherwise "Play"))
                                 (policy:reviewed-thunk "catalog-server-observation/play"
                                   (play-observation observation step generation))
                                 "Aktuellen SHOP3-Schritt ausführen")))
@@ -320,7 +295,7 @@
                             (v:html (observation-plan-button observation generation order)))))))))))))
 
 (defun open-local-host (&key (repository (asdf:system-source-directory "dreyeck"))
-                             (remote "origin") server-readback-ssh)
+                             (remote "origin"))
   "Start the loopback Catalog on port 8080 with the local and remote Host views."
   (let* ((root (truename (uiop:ensure-directory-pathname repository)))
          (existing (and (clog:is-running-p) *local-server-book*))
@@ -328,14 +303,11 @@
     (if existing
         (let ((deployment (deployment-of (server-page-of book))))
           (unless (and (equal root (repository-of deployment)) (equal remote (remote-of deployment)))
-            (error "Dieser lokale Catalog beobachtet bereits einen anderen Checkout oder Zielremote."))
-          (when server-readback-ssh
-            (setf (server-readback-ssh-p deployment) t)))
+            (error "Dieser lokale Catalog beobachtet bereits einen anderen Checkout oder Zielremote.")))
         (progn
           (when (clog:is-running-p)
             (error "In diesem Lisp-Image läuft bereits ein Catalog. Starte den lokalen Catalog auf 8080 in einem frischen Image."))
-          (let ((deployment (make-deployment :repository root :remote remote
-                                             :server-readback-ssh server-readback-ssh)))
+          (let ((deployment (make-deployment :repository root :remote remote)))
             (let ((remote-host (make-instance 'server-page :id +server-page-id+
                                               :hyperbook book :deployment deployment)))
               (setf (server-page-of book) remote-host

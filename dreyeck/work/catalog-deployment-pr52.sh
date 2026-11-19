@@ -2,8 +2,9 @@
 # Operator-owned stages for the executable Catalog update task.
 set -euo pipefail
 umask 077
+export GIT_ALLOW_PROTOCOL=file:http:https
 stage=${1:?stage}
-revision=${2:-}
+revision=${2:?merge revision}
 receipt=${3:-}
 fail() { printf '%s\n' "$*" >&2; exit 1; }
 emit_receipt() {
@@ -28,11 +29,11 @@ locked_hyperdoc_rev() { locked_hyperdoc_field rev; }
 uses_git_input() {
   local url
   url=$(nix eval --raw --impure --expr '(import /etc/nixos/flake.nix).inputs.hyperdoc.url or ""') || return 1
-  [[ $url == git+* ]]
+  [[ $url == git+https://* || $url == git+http://* || $url == git+file:* ]]
 }
 
 check_git_input() {
-  uses_git_input || fail 'Setze den HyperDoc-Input in /etc/nixos auf eine vom Server lesbare git+…-URL.'
+  uses_git_input || fail 'Setze den HyperDoc-Input in /etc/nixos auf eine vom Server lesbare git+https-, git+http- oder git+file-URL.'
 }
 
 system_path() {
@@ -64,9 +65,6 @@ readback_catalog() {
   case "$stage" in
     baseline)
       emit_receipt '(:active-readback "%s" "%s" %s %s %s)' "$running" "$system" "$pid" "$local_status" "$public_status"
-      ;;
-    readback)
-      printf '%s\t%s\t%s\t%s\t%s\n' "$running" "$system" "$pid" "$local_status" "$public_status"
       ;;
     verify)
       emit_receipt '(:verify "%s" "%s" "%s" %s %s %s)' "$running" "$receipt" "$system" "$pid" "$local_status" "$public_status"
@@ -100,35 +98,7 @@ restore_failed_build_lock() {
   exit "$status"
 }
 
-if [[ $stage == observe ]]; then
-  active=$(readlink -f /run/current-system)
-  system_path "$active" || fail 'Ungültige aktive Systemgeneration.'
-  state=$(systemctl show hyperdoc.service -p ActiveState --value)
-  pid=$(systemctl show hyperdoc.service -p MainPID --value)
-  [[ $pid =~ ^[0-9]+$ ]] || fail 'hyperdoc.service meldet keine gültige PID.'
-  running=-
-  if [[ $pid != 0 ]]; then
-    observed=$(catalog_revision "$pid")
-    if [[ $observed =~ ^[0-9a-f]{40}$ ]]; then running=$observed; fi
-  fi
-  local_status=$(curl -sS --max-time 10 -o /dev/null -w '%{http_code}' http://127.0.0.1:8080/) || local_status=000
-  public_status=$(curl -sS --max-time 15 -o /dev/null -w '%{http_code}' https://dreyeck.ch/) || public_status=000
-  [[ $(systemctl show hyperdoc.service -p ActiveState --value) == "$state" &&
-     $(systemctl show hyperdoc.service -p MainPID --value) == "$pid" &&
-     $(readlink -f /run/current-system) == "$active" ]] || fail 'Dienst oder Systemgeneration hat sich während des Readbacks geändert.'
-  printf '%s\t%s\t%s\t%s\t%s\t%s\n' "$state" "$running" "$active" "$pid" "$local_status" "$public_status"
-  exit 0
-fi
-
 [[ $revision =~ ^[0-9a-f]{40}$ ]] || fail 'Ungültige Merge-SHA.'
-
-if [[ $stage == readback ]]; then
-  active=$(readlink -f /run/current-system)
-  system_path "$active"
-  pid=$(catalog_pid)
-  readback_catalog "$active" "$pid"
-  exit 0
-fi
 
 if [[ $stage == baseline ]]; then
   previous=$(readlink -f /run/current-system)

@@ -3677,10 +3677,12 @@
                "dreyeck/topicmap" "html-inspector-views" "clog" "hyperbook/server" "ironclad" "plump")
   :serial t
   :components ((:file "dreyeck/work/catalog-deployment-pr52")
+               (:file "dreyeck/work/catalog-service-status")
                (:file "dreyeck/work/catalog-server-observation")
                (:static-file "dreyeck/work/catalog-deployment-pr52.dita")
                (:static-file "dreyeck/work/catalog-deployment-pr52.sh")
-               (:static-file "dreyeck/work/catalog-server-observation.dita"))
+               (:static-file "dreyeck/work/catalog-server-observation.dita")
+               (:static-file "dreyeck/work/catalog-service-status.sh"))
   :in-order-to ((asdf:test-op (asdf:test-op "dreyeck/work/catalog-deployment-pr52/tests"))))
 
 (asdf:defsystem "dreyeck/work/catalog-deployment-pr52/tests"
