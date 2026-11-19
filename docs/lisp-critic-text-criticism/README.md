@@ -1,19 +1,8 @@
 # Source-backed criticism of a text page
 
-> **DRAFT — work-in-progress checkpoint, 12 November 2026.** Not reviewed, not accepted.
->
-> - Outstanding documents: `worked-reading.md` is not written. `rule-base.md`,
->   `shop3-planning-handover.md` and `terminology-and-sources.md` are drafts.
-> - **Unresolved, and not yet reconsidered here:** the section "Reading without
->   running" and the reader contract in the table describe `read-claim-table` as
->   committed at `1da262deee28c614ab63c2311f5355de2dfaafc5`. Codex has since
->   reported three violations of that contract (a `#S` constructor effect, a false
->   definition inside a block comment, a feature-dependent table) and published a
->   correction at `c0b5f8328805ebfaa929f4ff4c2e51052dd39511` on
->   `codex/lisp-critic-reader-safety`. That correction is under independent review.
->   Until this document is revised, do not rely on its statements about what
->   reading the claim table cannot do.
-> - Everything else below is as written before that report.
+> **The claim-table reader on this branch has known contract violations.** See
+> "Reading without running" below before relying on it. The corrected reader is
+> Codex's A1, on `codex/lisp-critic-reader-safety`; it is not merged here.
 
 Branch `claude/lisp-critic-text-criticism`, based on `dreyeck.ch` at
 `596344ae95d746f436705808462259371f5a593c`. An optional slice: it adds three
@@ -24,7 +13,7 @@ ASDF systems and changes no existing source file, page, test or dependency pin.
 | this file | what the slice is, its behavioural contract, what it is not |
 | [review-report.md](review-report.md) | the criticisms of the reviewed pages and code, each with its origin |
 | [rule-base.md](rule-base.md) | the Riesbeck/Beane rule base as read from source, its limits, a deferred diagnostic |
-| [worked-reading.md](worked-reading.md) | one engine Critique and one reviewer judgement read side by side (draft page text) |
+| [worked-reading.md](worked-reading.md) | one engine Critique and one reviewer judgement read side by side, as draft page text |
 | [shop3-planning-handover.md](shop3-planning-handover.md) | how SHOP3 is meant to use these records; reuse analysis; the next slice |
 | [terminology-and-sources.md](terminology-and-sources.md) | the vocabulary, and which sources were read |
 | [evidence/](evidence/README.md) | what was executed, what was NOT RUN |
@@ -95,20 +84,39 @@ A result is about a revision only when the answer was `:verified`.
 ### Reading without running
 
 The claim table is taken from source text, never from a loaded function.
-`read-claim-table` finds the one line that begins `(defun historical-claims`,
-and reads one form from there with the standard readtable, `*read-eval*` false
-and a package made for the purpose and deleted afterwards. `#.` is therefore a
-reader error. The form is never evaluated, compiled or loaded. It is accepted
-only if it is exactly
-`(defun historical-claims () [docstring] (copy-tree (quote table)))` and the
-table is a list of property lists with keyword keys and literal values
-(keywords, strings, integers, T, NIL, proper lists of these). Everything else is
-refused with a reason.
+`read-claim-table`, as committed here (`1da262deee28c614ab63c2311f5355de2dfaafc5`),
+finds the one line that begins `(defun historical-claims`, and reads one form from
+there with the standard readtable, `*read-eval*` false and a package made for the
+purpose. It accepts only `(defun historical-claims () [docstring] (copy-tree
+(quote table)))` with a table of property lists with keyword keys and literal
+values.
 
-The existing structural reader of `html-inspector-views` was not used: its
-client does not override Eclector's read-time evaluation, so by its source it
-does not by itself rule out `#.`. That is a reading of its source, not a test
-of it.
+That contract was claimed too broadly. Codex found three violations, and the
+independent review of the correction reproduced all three at `1da262d`
+(`docs/lisp-critic-reader-safety/reviews/claude-2026-11-12/` on
+`claude/lisp-critic-a1-review`):
+
+- `#S(…)` in the table runs a structure constructor while reading, before the
+  table is refused;
+- a definition inside `#| … |#` is found by the line search and read;
+- `#+`/`#-` select different tables under different `*features*`.
+
+`*read-eval*` false does not stop `#S`, `#+` or `#-`, and a line search does not
+know comments. So the reader here is not safe on untrusted text. The one
+committed source it is meant for contains none of these constructs, but
+`criticise-passage` on this branch reads the table even when that source's
+digest does not match the recorded one.
+
+Codex's A1 (`9228ab022e003de815822bdbb1cf4bbd3ba8aba7`, handover
+`c0b5f8328805ebfaa929f4ff4c2e51052dd39511`) replaces the Lisp reader with an inert
+structural scanner and parses the claims only after the coherence gate. The
+review found it removes all three violations, and left one finding open: a
+character literal directly followed by `"` or `;` lets a string or a comment
+supply the definition. Whether A1 is merged is the owner's decision.
+
+`dreyeck/src/upstream-assessment.lisp` already reads source text as inert tokens
+("No package is consulted"). It was not considered when this reader was written;
+it should be when the reader is next changed.
 
 ## Compatibility with the existing judgement-basis resolver
 
@@ -126,7 +134,8 @@ positively and negatively; they were not run by the implementer (see
   mechanism and the instance are in one dependency-light system so that its
   tests can run without HyperDoc; only the integration tests need HyperDoc.
 - The claim table is read with the standard reader under `*read-eval*` false,
-  not with the `html-inspector-views` parser, for the reason given above.
+  not with the `html-inspector-views` parser, whose Eclector client does not
+  override read-time evaluation. Both choices are superseded by A1 (above).
 
 ## What this slice is not
 
