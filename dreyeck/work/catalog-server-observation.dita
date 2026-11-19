@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE task PUBLIC "-//OASIS//DTD DITA Task//EN" "task.dtd">
+<task id="catalog-server-observation" xml:lang="de-CH">
+  <title>Server dreyeck.ch und Git-Branches vergleichen</title>
+  <shortdesc>Die laufende Catalog-Revision mit den Branch-Spitzen aller konfigurierten Git-Remotes vergleichen.</shortdesc>
+  <taskbody>
+    <prereq><p>Für den Server-Iststand verwendet das lokale Image die aktivierte SSH-Verbindung zu dreyeck.ch.</p></prereq>
+    <context><p>Unter SHOP3-Pläne lässt sich vor dem ersten Play die Reihenfolge der beiden Beobachtungen wählen.</p></context>
+    <steps>
+      <step id="observe-server">
+        <cmd>Dienst, PID, laufende Revision und NixOS-Generation lesen.</cmd>
+        <stepresult>Der Serverbeleg nennt auch den lokalen und öffentlichen HTTP-Status.</stepresult>
+      </step>
+      <step id="observe-remotes">
+        <cmd>Die angebotenen Branch-Spitzen aller im Checkout konfigurierten Remotes lesen.</cmd>
+        <stepresult>Branch und SHA sind je Remote belegt. Fehler sind beim betreffenden Remote sichtbar.</stepresult>
+      </step>
+      <step id="compare-revisions">
+        <cmd>Die Serverrevision mit den beobachteten Branch-Spitzen vergleichen.</cmd>
+        <stepresult>Der Branch-View zeigt Übereinstimmung und, soweit lokal belegt, die Git-Verwandtschaft.</stepresult>
+      </step>
+    </steps>
+    <result><p>Eine gesunde laufende Revision, die mit dem gewünschten Branch übereinstimmt, ist bereits bereitgestellt.</p></result>
+  </taskbody>
+</task>

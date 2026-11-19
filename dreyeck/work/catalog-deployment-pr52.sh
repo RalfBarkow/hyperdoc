@@ -3,7 +3,7 @@
 set -euo pipefail
 umask 077
 stage=${1:?stage}
-revision=${2:?merge revision}
+revision=${2:-}
 receipt=${3:-}
 fail() { printf '%s\n' "$*" >&2; exit 1; }
 emit_receipt() {
@@ -11,7 +11,6 @@ emit_receipt() {
   printf -v evidence "$@"
   printf "(dreyeck/work/catalog-deployment-pr52:submit-receipt '%s)\n" "$evidence"
 }
-[[ $revision =~ ^[0-9a-f]{40}$ ]] || fail 'Ungültige Merge-SHA.'
 [[ $EUID == 0 && $(hostname -s) == dreyeck ]] || fail 'Dieser Schritt gehört in die administrative Bash auf dreyeck.ch.'
 cd /etc/nixos
 
@@ -100,6 +99,28 @@ restore_failed_build_lock() {
   rm -f "$prior_lock" "$selected_lock"
   exit "$status"
 }
+
+if [[ $stage == observe ]]; then
+  active=$(readlink -f /run/current-system)
+  system_path "$active" || fail 'Ungültige aktive Systemgeneration.'
+  state=$(systemctl show hyperdoc.service -p ActiveState --value)
+  pid=$(systemctl show hyperdoc.service -p MainPID --value)
+  [[ $pid =~ ^[0-9]+$ ]] || fail 'hyperdoc.service meldet keine gültige PID.'
+  running=-
+  if [[ $pid != 0 ]]; then
+    observed=$(catalog_revision "$pid")
+    if [[ $observed =~ ^[0-9a-f]{40}$ ]]; then running=$observed; fi
+  fi
+  local_status=$(curl -sS --max-time 10 -o /dev/null -w '%{http_code}' http://127.0.0.1:8080/) || local_status=000
+  public_status=$(curl -sS --max-time 15 -o /dev/null -w '%{http_code}' https://dreyeck.ch/) || public_status=000
+  [[ $(systemctl show hyperdoc.service -p ActiveState --value) == "$state" &&
+     $(systemctl show hyperdoc.service -p MainPID --value) == "$pid" &&
+     $(readlink -f /run/current-system) == "$active" ]] || fail 'Dienst oder Systemgeneration hat sich während des Readbacks geändert.'
+  printf '%s\t%s\t%s\t%s\t%s\t%s\n' "$state" "$running" "$active" "$pid" "$local_status" "$public_status"
+  exit 0
+fi
+
+[[ $revision =~ ^[0-9a-f]{40}$ ]] || fail 'Ungültige Merge-SHA.'
 
 if [[ $stage == readback ]]; then
   active=$(readlink -f /run/current-system)
