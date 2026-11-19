@@ -158,7 +158,8 @@
 
 (defun publish-page (plan fixture source expected-revision &key cookie-jar)
   "Consume a native SHOP3 offer. FIXTURE is a private, single-writer test instance.
-SOURCE contains the approved release.json and pages/<slug>. Keep its forkDate across retries."
+SOURCE contains the approved release.json and pages/<slug>. Keep its forkDate across retries.
+When a page was compared, also return that HTTP readback and its revision."
   (sb-thread:with-mutex (*writer*)
     (let ((release (read-release source)))
       (unless (binding-valid-p plan fixture release expected-revision)
@@ -172,11 +173,12 @@ SOURCE contains the approved release.json and pages/<slug>. Keep its forkDate ac
                                           (target-origin fixture) problem))))))
       (multiple-value-bind (current before) (observe-target fixture release)
         (when (matches-fork-p release before)
-          (return-from publish-page (receipt release fixture current before :already-published)))
+          (return-from publish-page (values (receipt release fixture current before :already-published) before current)))
         (unless (equal current expected-revision)
           (return-from publish-page
-            (list :status :reconcile-target :expected expected-revision :observed current
-                  :evidence (list :target-conflict (target-reference fixture release current))))))
+            (values (list :status :reconcile-target :expected expected-revision :observed current
+                          :evidence (list :target-conflict (target-reference fixture release current)))
+                    before current))))
       (let ((action (fork-action release)))
         (setf (gethash "forkPage" action) (release-page release))
         (let ((status (request fixture (format nil "/page/~A/action" (release-slug release))
@@ -185,6 +187,7 @@ SOURCE contains the approved release.json and pages/<slug>. Keep its forkDate ac
             (return-from publish-page (list :status :unauthorized :http status)))
           ;; A lost response can follow a committed write. Always reread before deciding.
           (multiple-value-bind (revision page) (observe-target fixture release)
-            (if (matches-fork-p release page)
-                (append (receipt release fixture revision page :published) (list :http status))
-                (list :status :unverified :http status :observed revision))))))))
+            (values (if (matches-fork-p release page)
+                        (append (receipt release fixture revision page :published) (list :http status))
+                        (list :status :unverified :http status :observed revision))
+                    page revision)))))))

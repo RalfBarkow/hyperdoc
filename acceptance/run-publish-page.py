@@ -1,5 +1,6 @@
 """Run the real FedWiki fork fixture and SHOP3 in a disposable single-writer store."""
 import argparse
+from contextlib import contextmanager
 import hashlib
 import json
 import os
@@ -7,6 +8,7 @@ from pathlib import Path
 import shutil
 import stat
 import subprocess
+import sys
 import tempfile
 import time
 import zipfile
@@ -56,8 +58,8 @@ def setup_release(work):
     return digests
 
 
-def run(work, wiki, hyperdoc):
-    assets = setup_release(work)
+@contextmanager
+def running_wiki(work, wiki):
     origin = f"http://{work.name}.test"
     sock = work / "wiki.sock"
     # Reuse the original login, server, routing and storage. Only the listener in
@@ -89,20 +91,17 @@ listening.prependListener('request',(req,res)=>res.once('finish',()=>{
             else:
                 raise RuntimeError("FedWiki socket did not start")
             assert stat.S_IMODE(work.stat().st_mode) == 0o700 and sock.is_socket()
-            listeners = subprocess.run(["/usr/sbin/lsof", "-nP", "-a", "-p", str(server.pid),
+            unix_sockets = subprocess.check_output(["/usr/sbin/lsof", "-w", "-nP", "-a", "-p",
+                                                    str(server.pid), "-U", "-Fn"])
+            assert os.fsencode(sock) in unix_sockets.splitlines()[1:] or b"n" + os.fsencode(sock) in unix_sockets.splitlines()
+            listeners = subprocess.run(["/usr/sbin/lsof", "-w", "-nP", "-a", "-p", str(server.pid),
                                         "-iTCP", "-sTCP:LISTEN"], capture_output=True)
             assert (listeners.returncode, listeners.stdout, listeners.stderr) == (1, b"", b""), listeners
             subprocess.run(["/usr/bin/curl", "--disable", "--fail", "--silent", "--show-error",
                             "--noproxy", "*", "--unix-socket", sock, "--cookie-jar", work / "owner.jar",
                             "--max-time", "8", "--request", "POST", origin + "/fixture/login"],
                            stdout=subprocess.DEVNULL, check=True)
-            env = dict(os.environ, FORK_FIXTURE=str(work) + "/")
-            subprocess.run(["nix", "develop", "--no-write-lock-file", "-c", "sbcl",
-                            "--noinform", "--no-sysinit", "--no-userinit", "--non-interactive",
-                            "--load", HERE / "ki-plan-next.lisp",
-                            "--load", HERE.parent / "publication/publish-page.lisp",
-                            "--load", HERE / "test-publish-page.lisp"],
-                           cwd=hyperdoc, env=env, check=True, timeout=240)
+            yield origin
         finally:
             server.terminate()
             try:
@@ -110,6 +109,18 @@ listening.prependListener('request',(req,res)=>res.once('finish',()=>{
             except subprocess.TimeoutExpired:
                 server.kill()
                 server.wait()
+
+
+def run(work, wiki, hyperdoc):
+    assets = setup_release(work)
+    with running_wiki(work, wiki) as origin:
+        env = dict(os.environ, FORK_FIXTURE=str(work) + "/")
+        subprocess.run(["nix", "develop", "--no-write-lock-file", "-c", "sbcl",
+                        "--noinform", "--no-sysinit", "--no-userinit", "--non-interactive",
+                        "--load", HERE / "ki-plan-next.lisp",
+                        "--load", HERE.parent / "publication/publish-page.lisp",
+                        "--load", HERE / "test-publish-page.lisp"],
+                       cwd=hyperdoc, env=env, check=True, timeout=240)
 
     trace = [json.loads(line) for line in (work / "requests.jsonl").read_text().splitlines()]
     writes = [r for r in trace if r["method"] == "PUT"]
@@ -138,9 +149,17 @@ if __name__ == "__main__":
     p.add_argument("--wiki", type=Path, default=Path.home() / "Projects/RalfBarkow/wiki")
     p.add_argument("--hyperdoc", type=Path, default=Path.home() / "workspace/hyperdoc-dreyeck-ch")
     p.add_argument("--report", type=Path, help="Save the HTTP trace and SHOP3 receipts as JSON")
+    p.add_argument("--serve", action="store_true", help="Serve one private fixture until the owning image closes stdin")
     args = p.parse_args()
     os.umask(0o077)
     with tempfile.TemporaryDirectory(prefix="fork-test-", dir="/private/tmp") as directory:
-        results, evidence = run(Path(directory), args.wiki.resolve(), args.hyperdoc.resolve())
+        work = Path(directory)
+        if args.serve:
+            setup_release(work)
+            with running_wiki(work, args.wiki.resolve()):
+                print(directory + "/", flush=True)
+                sys.stdin.readline()
+            sys.exit(0)
+        results, evidence = run(work, args.wiki.resolve(), args.hyperdoc.resolve())
     if args.report:
         json_file(args.report, dict(evidence, shop3Receipts=results))
