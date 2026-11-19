@@ -22,6 +22,10 @@
   ((repository :initarg :repository :reader repository-of)
    (remote :initarg :remote :reader remote-of)
    (source-remote :initarg :source-remote :reader source-remote-of)
+   (expected-base :initarg :expected-base :initform +reviewed-base+ :reader expected-base-of)
+   (candidate :initarg :candidate :initform +reviewed-head+ :reader candidate-of)
+   (candidate-ref :initarg :candidate-ref :initform +candidate-ref+ :reader candidate-ref-of)
+   (preassembled :initarg :preassembled :initform nil :reader preassembled-p)
    (push-endpoint-digest :initform nil :accessor push-endpoint-digest-of)
    (observations :initform nil :accessor observations)
    (command :initform nil :accessor command)
@@ -73,21 +77,38 @@
                                                             :hyperbook book :deployment deployment)))
 
 (defun make-deployment (&key (repository (asdf:system-source-directory "dreyeck"))
-                             remote (source-remote remote) server-readback-ssh)
-  "Bind the task to an existing Git checkout and explicitly selected Git remotes."
+                             remote (source-remote remote) server-readback-ssh
+                             candidate expected-base candidate-ref)
+  "Bind the task to selected Git remotes and optionally to a preassembled candidate."
   (dolist (name (list remote source-remote))
     (unless (and (stringp name) (plusp (length name)) (char/= #\- (char name 0))
                  (every (lambda (c) (find c "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._/")) name))
       (error "Gib ein konfiguriertes Git-Remote mit :REMOTE an.")))
+  (when (or candidate expected-base candidate-ref)
+    (unless (and (hex-revision-p candidate) (hex-revision-p expected-base)
+                 (not (string= candidate expected-base)) (stringp candidate-ref)
+                 (uiop:string-prefix-p "refs/heads/" candidate-ref)
+                 (> (length candidate-ref) (length "refs/heads/"))
+                 (every (lambda (c) (find c "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._/"))
+                        candidate-ref))
+      (error "Gib :CANDIDATE und :EXPECTED-BASE als volle Git-SHAs und :CANDIDATE-REF als Branch-Ref an.")))
   (make-instance 'deployment :repository (uiop:ensure-directory-pathname repository)
                              :remote remote :source-remote source-remote
+                             :expected-base (or expected-base +reviewed-base+)
+                             :candidate (or candidate +reviewed-head+)
+                             :candidate-ref (or candidate-ref +candidate-ref+)
+                             :preassembled (not (null candidate))
                              :server-readback-ssh server-readback-ssh))
 
 (shop3:defdomain (catalog-deployment-pr52 :noset t)
   ((:operator (!offer ?step) () () ((offered ?step)))
    (:method (next-deployment-step)
      observe-git ((not (observed :observe-git))) ((!offer :observe-git))
-     integrate ((observed :observe-git) (not (observed :integrate))) ((!offer :integrate))
+     review-candidate ((preassembled-candidate) (observed :observe-git)
+                       (not (observed :review-candidate))) ((!offer :review-candidate))
+     integrate ((not (preassembled-candidate)) (observed :observe-git)
+                (not (observed :integrate))) ((!offer :integrate))
+     publish-candidate ((observed :review-candidate) (not (observed :publish-ref))) ((!offer :publish-ref))
      publish-ref ((observed :integrate) (not (observed :publish-ref))) ((!offer :publish-ref))
      complete-from-readback ((observed :publish-ref) (observed :active-readback)) ()
      read-baseline ((observed :publish-ref) (not (observed :active-readback))
@@ -106,8 +127,9 @@
            ;; SHOP3 4.3.1's tree extractor requires a nonempty primitive plan.
            (collect-trees-p (not (or (assoc :active-readback evidence)
                                      (assoc :verify evidence))))
-           (facts (loop for (step . values) in evidence
-                        collect (list 'observed step) collect (list 'evidence step values)))
+           (facts (append (when (preassembled-p deployment) '((preassembled-candidate)))
+                          (loop for (step . values) in evidence
+                                collect (list 'observed step) collect (list 'evidence step values))))
            (domain 'catalog-deployment-pr52)
            (shop3::*problem* shop3::*problem*)
            (problem (shop3:make-problem (list name :domain domain :silently t)
@@ -192,61 +214,79 @@
     (assert (hex-revision-p tree))
     tree))
 
+(defun check-candidate (deployment)
+  (let ((candidate (candidate-of deployment)) (base (expected-base-of deployment)))
+    (unless (and (commit-present-p deployment candidate) (commit-present-p deployment base)
+                 (if (preassembled-p deployment)
+                     (zerop (nth-value 2 (git:git-run-values (repository-of deployment)
+                                                            "--no-replace-objects" "merge-base"
+                                                            "--is-ancestor" base candidate)))
+                     (equal (list candidate base) (revision-lineage deployment candidate))))
+      (error "Der Kandidat kann nicht von der geprüften Git-Basis übernommen werden."))
+    candidate))
+
 (defun observe-git (deployment)
-  (let ((url (git-remote-url deployment (remote-of deployment) :push t)))
-    (unless (equal +reviewed-base+ (git-ref-at deployment url +target-ref+))
+  (let* ((url (git-remote-url deployment (remote-of deployment) :push t))
+         (target (git-ref-at deployment url +target-ref+))
+         (base (expected-base-of deployment))
+         (candidate (candidate-of deployment))
+         (ref (candidate-ref-of deployment)))
+    (unless (or (equal target base) (and (preassembled-p deployment) (equal target candidate)))
       (error "Der Git-Zielref dreyeck.ch weicht von der geprüften Basis ab."))
-    (unless (commit-present-p deployment +reviewed-head+)
+    (unless (commit-present-p deployment candidate)
       (let ((source (git-remote-url deployment (source-remote-of deployment))))
-        (unless (equal +reviewed-head+ (git-ref-at deployment source +candidate-ref+))
+        (unless (equal candidate (git-ref-at deployment source ref))
           (error "Der Git-Quellref enthält eine andere als die geprüfte Revision."))
-        (peer-git deployment "fetch" "--no-tags" "--no-write-fetch-head" "--" source +candidate-ref+)))
-    (unless (and (commit-present-p deployment +reviewed-head+)
-                 (commit-present-p deployment +reviewed-base+)
-                 (equal (list +reviewed-head+ +reviewed-base+)
-                        (revision-lineage deployment +reviewed-head+)))
-      (error "Die geprüfte Revision liegt nicht als direkter Nachfolger der geprüften Basis vor."))
+        (peer-git deployment "fetch" "--no-tags" "--no-write-fetch-head" "--" source ref)))
+    (check-candidate deployment)
     (setf (push-endpoint-digest-of deployment) (endpoint-digest url))
-    (list +reviewed-base+ +reviewed-head+ (remote-of deployment))))
+    (list target candidate (remote-of deployment))))
 
 (defun check-integration (deployment revision)
   (unless (and (hex-revision-p revision)
-               (equal (list revision +reviewed-base+ +reviewed-head+)
+               (equal (list revision (expected-base-of deployment) (candidate-of deployment))
                       (revision-lineage deployment revision))
                (equal (revision-tree deployment revision)
-                      (revision-tree deployment +reviewed-head+)))
+                      (revision-tree deployment (candidate-of deployment))))
     (error "Eltern und Baum stimmen nicht mit dem geprüften Integrationsstand überein."))
   revision)
 
 (defun integrate (deployment)
   ;; The candidate is a direct child of the base. Its tested tree is the complete merge tree.
   ;; COMMIT-TREE leaves HEAD, the index, and all refs untouched.
-  (let ((merge (local-git deployment "commit-tree" (revision-tree deployment +reviewed-head+)
-                          "-p" +reviewed-base+ "-p" +reviewed-head+
+  (let ((merge (local-git deployment "commit-tree" (revision-tree deployment (candidate-of deployment))
+                          "-p" (expected-base-of deployment) "-p" (candidate-of deployment)
                           "-m" "Integrate reviewed Lisp Critic reader A2 (Zettel 11667)")))
     (check-integration deployment merge)
-    (list merge +reviewed-base+ +reviewed-head+)))
+    (list merge (expected-base-of deployment) (candidate-of deployment))))
 
 (defun publish-ref (deployment)
   (unless (publish-enabled-p deployment)
     (error "Starte den lokalen Operator-Inspector mit SERVE, um den Git-Push zu nutzen."))
-  (let* ((merge (check-integration deployment (second (assoc :integrate (observations deployment)))))
+  (let* ((base (expected-base-of deployment))
+         (candidate (candidate-of deployment))
+         (merge (if (preassembled-p deployment)
+                    (let ((checked (check-candidate deployment)))
+                      (unless (equal checked (second (assoc :review-candidate (observations deployment))))
+                        (error "Die Freigabe gilt nicht für diesen Kandidaten."))
+                      checked)
+                    (check-integration deployment (second (assoc :integrate (observations deployment))))))
          (url (git-remote-url deployment (remote-of deployment) :push t)))
     (unless (equal (push-endpoint-digest-of deployment) (endpoint-digest url))
       (error "Der konfigurierte Push-Endpunkt hat sich seit der Beobachtung geändert."))
     (let ((current (git-ref-at deployment url +target-ref+)))
       (unless (equal current merge)
-        (unless (equal current +reviewed-base+)
+        (unless (equal current base)
           (error "Git-Zielref hat sich seit der Beobachtung geändert."))
-        ;; The verified first parent makes this a fast-forward. The explicit lease
+        ;; The verified ancestry makes this a fast-forward. The explicit lease
         ;; checks the old value at the receiver, including a concurrent push.
         (let ((exit (nth-value 2 (git:git-run-values (repository-of deployment)
                                                     "push" (format nil "--force-with-lease=~A:~A"
-                                                                   +target-ref+ +reviewed-base+)
+                                                                   +target-ref+ base)
                                                     "--" url (format nil "~A:~A" merge +target-ref+)))))
           (unless (equal merge (git-ref-at deployment url +target-ref+))
             (error "Git-Zielref bestätigt den Integrationscommit nicht (Push-Exit ~D)." exit)))))
-    (list merge +reviewed-base+ +reviewed-head+ (remote-of deployment))))
+    (list merge base candidate (remote-of deployment))))
 
 (defun target-revision (deployment)
   (second (assoc :publish-ref (observations deployment))))
@@ -274,6 +314,10 @@
              (push (cons step (observe-git deployment)) (observations deployment)))
             (:integrate
              (push (cons step (integrate deployment)) (observations deployment)))
+            (:review-candidate
+             (let ((candidate (check-candidate deployment)))
+               (push (list step candidate (revision-tree deployment candidate))
+                     (observations deployment))))
             (:publish-ref
              (push (cons step (publish-ref deployment)) (observations deployment))
              (setf (message-of deployment)
@@ -349,7 +393,7 @@
   (deployment-server-topic deployment))
 
 (policy:register-reviewed-control "catalog-deployment-pr52/play"
-  :effect "Observes selected Git refs, constructs a local commit object, or prepares an operator-owned server command."
+  :effect "Observes Git refs, constructs a local commit, records candidate approval, or prepares an operator-owned server command."
   :audit "PLAY-STEP only dispatches the current native SHOP3 offer.")
 
 (policy:register-reviewed-control "catalog-deployment-pr52/publish-ref"
@@ -362,6 +406,7 @@
 
 (defun control-for (step)
   (case step
+    (:review-candidate (values "Play · Diesen Kandidaten freigeben" "catalog-deployment-pr52/play"))
     (:publish-ref (values "Play · Git-Ref veröffentlichen" "catalog-deployment-pr52/publish-ref"))
     (otherwise (values "Play" "catalog-deployment-pr52/play"))))
 
@@ -403,8 +448,10 @@
                 (v:html (:p :role "status" (v:esc (message-of deployment)))))
               (:p (v:object-ref (deployment-server-topic deployment) :select "Server"
                                 :display "Server-Topic dreyeck.ch"))
-              (:p "Git-Remote " (v:esc (remote-of deployment)) " · dreyeck.ch · geprüfter Commit "
-                  (v:esc (subseq +reviewed-head+ 0 8)))
+              (:p "Git-Remote " (v:esc (remote-of deployment)) " · dreyeck.ch · Kandidat "
+                  (:code (v:esc (candidate-of deployment))))
+              (when (preassembled-p deployment)
+                (v:html (:p "Erwartete Basis " (:code (v:esc (expected-base-of deployment))))))
               (render-task deployment step)
               (when (command deployment)
                 (v:html (:h3 "Befehl für die administrative Bash auf dreyeck.ch")
@@ -464,9 +511,11 @@
             port (hyperbook/server::slug book) (hb:path-item-of page))))
 
 (defun open-task (&key (repository (asdf:system-source-directory "dreyeck"))
-                       remote (source-remote remote) (port 18752) server-readback-ssh)
+                       remote (source-remote remote) (port 18752) server-readback-ssh
+                       candidate expected-base candidate-ref)
   "Create a local task in the Catalog. Return the direct task URL, the Catalog URL, and the task state."
   (let* ((deployment (make-deployment :repository repository :remote remote :source-remote source-remote
+                                      :candidate candidate :expected-base expected-base :candidate-ref candidate-ref
                                       :server-readback-ssh server-readback-ssh))
          (url (serve deployment :port port)))
     (values url (format nil "http://127.0.0.1:~D/" port) deployment)))

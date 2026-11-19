@@ -15,8 +15,16 @@
         <cmd>Den Integrationscommit mit dem geprüften Baum und beiden Eltern erzeugen.</cmd>
         <stepresult>Der Integrationscommit ist lokal vorhanden. Arbeitsbaum, Index und Branch-Refs bleiben unverändert.</stepresult>
       </step>
+      <step id="review-candidate">
+        <cmd>Den vorbereiteten Release-Kandidaten prüfen und freigeben.</cmd>
+        <info>
+          <p>Vergleiche die vollständige Kandidaten-SHA im Pane mit der geprüften Revision. Klicke Play nach den Prüfungen für genau diese SHA.</p>
+          <p>Führe in einem frischen SLY-Image <codeph>(asdf:test-system "dreyeck/work/catalog-deployment-pr52")</codeph> und im Kandidaten-Checkout den Catalog-Check des Hosts aus. Prüfe den Start von SBCL aus dem FedWiki-Frame bis zur Lisp-Auswertung im verbundenen mREPL.</p>
+        </info>
+        <stepresult>Der Freigabebeleg nennt die Kandidaten-SHA und ihren Git-Baum.</stepresult>
+      </step>
       <step id="publish-ref">
-        <cmd>Den Integrationscommit auf refs/heads/dreyeck.ch veröffentlichen.</cmd>
+        <cmd>Den freigegebenen Stand auf refs/heads/dreyeck.ch veröffentlichen.</cmd>
         <info><p>Dieser Play-Klick gibt den Push frei. Der Empfänger muss noch die zuvor beobachtete Basis haben. Play liest den Zielref nach dem Push zurück.</p></info>
         <stepresult>Der zurückgelesene Git-Ref bestimmt die erwartete Serverrevision.</stepresult>
       </step>
