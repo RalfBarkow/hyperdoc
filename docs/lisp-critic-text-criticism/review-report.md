@@ -1,20 +1,22 @@
 # Review report: selected Lisp Critic pages and code
 
-> **DRAFT — work-in-progress checkpoint, 12 November 2026.** Not reviewed, not accepted.
->
-> - Complete as far as it goes: T1–T8. Not yet written: a severity summary, and the
->   review of "Inspecting One Acceptance Evidence Chain" against the eight criteria
->   (only referred to at the end).
-> - Source references still to be checked against a second reading: the section
->   and page numbers of the Fischer 1987 quotations (taken from OCR text of the
->   IJCAI PDF, without page numbers); Fischer & Mastaglio 1991 was not read.
-> - T1 cites a probe of the slice whose claim-table reader is the subject of a
->   reported contract violation (see the banner of `README.md`). The observation
->   in T1 was also made by reading the source; it must be reconsidered together
->   with that report.
+Reviewer: Claude Code, 12 November 2026; completed 19 November 2026. Read-only
+review, except for the slice described in [README.md](README.md). The reviewer
+wrote that slice, so T1 is not an independent finding about it.
 
-Reviewer: Claude Code, 12 November 2026. Read-only review, except for the slice
-described in [README.md](README.md).
+## Summary
+
+| Id | Target | Finding | Significance | Origin |
+|---|---|---|---|---|
+| T1 | "The Fischer Critic as an Environment", paragraph on what was read | contradicts the claim records it summarizes | medium | S, P, J |
+| T2 | same page, "Not a pipeline" | the 1987 paper does state a direction, both ways | medium | S, J |
+| T9 | "Inspecting One Acceptance Evidence Chain" | "A lossy round-trip is refused" is not true for invalid UTF-8 | medium | S, P, R, J |
+| T3 | "Anatomy of a Critique"; claim `:lisp-critic-zmacs` | accept/deny and explanation on demand are documented for 1987 already | low | S, J |
+| T4 | "Anatomy of a Critique" | unconditional sentence over a conditional example | low to medium | S, J |
+| T5 | "Reading the Lisp Critic Genealogy" | the engine returns structured findings, not only printed ones | low | S, J |
+| T6 | claim `:riesbeck-engine` | subject wider than its locator | low | S, J |
+| T7 | `lisp-critic-critique.lisp`, `-critique-views.lisp`, `lisp-critic.lisp` | two words for an absent station; live Critiques do not locate their match; policy slots read by no code | low | S, J |
+| T8 | PR #43, F1 | how such a finding should be kept: by kind, not as a Critique | — | S, P, R, J |
 
 **Origin of every finding below.** None was produced by the Riesbeck engine: no
 rule was run for this review, and no finding is a `critique`. Each finding is
@@ -48,6 +50,10 @@ applicability and limits explained; (7) useful at several levels of expertise;
   (`dreyeck/src/lisp-critic-reading.lisp`, from line 344) holds ten claims
   citing a primary paper, five with `:observed-evidence-kind :primary-paper`
   (**S**, and **P**: `observe-now` of the slice, 80-check run).
+  The probe's claim-table reader has known contract violations (README,
+  "Reading without running"); none of the constructs involved occurs in the
+  committed claims source, and the reading of the source (**S**) gives the same
+  count, so the finding does not rest on the probe alone.
 - **Finding (J):** the paragraph and the records disagree. Significance:
   medium — the page's subject is exactly the difference between cited and
   observed evidence, and this paragraph states it wrongly for the current
@@ -66,7 +72,7 @@ applicability and limits explained; (7) useful at several levels of expertise;
   down, in either direction", and the conclusion that a user model "cannot be
   something the explanation eventually feeds".
 - **Criterion:** 5.
-- **Evidence (S):** Fischer 1987, section 4, on the system's structure: "The
+- **Evidence (S):** Fischer 1987, section 4, p. 181, on the system's structure: "The
   user model … obtains information from the rules that have fired, from the
   statistical analyzer and from the knowledge structures that have been
   visited. In return, it determines which rules should fire and what kind of
@@ -88,7 +94,7 @@ applicability and limits explained; (7) useful at several levels of expertise;
   `historical-claims`, which cites Fischer & Mastaglio 1991 and reports
   `:none-observed`.
 - **Criterion:** 5.
-- **Evidence (S):** Fischer 1987, section 4: "the user can inspect the
+- **Evidence (S):** Fischer 1987, section 4, p. 181: "the user can inspect the
   modifications and accept or deny them. On demand, the system explains and
   justifies its suggestions."
 - **Finding (J):** accepting or denying a suggestion and asking for an
@@ -184,11 +190,44 @@ applicability and limits explained; (7) useful at several levels of expertise;
   two working-tree files; the source-state part of the slice already identifies
   such a target.
 
+## T9 — "A lossy round-trip is refused"
+
+- **Target:** `dreyeck/pages/acceptance-evidence-chain/Inspecting One Acceptance
+  Evidence Chain.html` at `53928946`, line 28: "Before hashing it, the adapter
+  verifies that the decoded text re-encodes to octets with the exact original Git
+  blob identity. A lossy round-trip is refused."
+- **Criteria:** 2, 5 (the claim is about this software's behaviour).
+- **Evidence:** the same as T8. The comparison exists (**S**), but invalid UTF-8
+  never reaches it: decoding signals first (**P**, on other code; **R**, Codex's
+  probes on the PR's code).
+- **Finding (J):** the sentence states a refusal that does not happen for the
+  case it is most needed for; the condition escapes untyped. Significance:
+  medium, as the page is the reader's account of what the inspection guarantees.
+- **Recommendation:** narrow the sentence to what is checked, or let it stand once
+  the remedy proposed for F1 is in.
+
+The page otherwise meets the criteria well, and is a model for them: it keeps
+**reported** statements apart from checked artifact properties (lines 3, 27);
+says that "a matching digest establishes content consistency, not that every
+historical event occurred as reported" (line 3); calls the revision an
+"explicit inspection context" rather than the tested one (line 4); names the
+Git version it needs (line 12); and denies acceptance, independent assessment
+and deployment authority in so many words (line 29). One label, "Specified tested
+HyperDoc revision" (line 24), still suggests that the revision was tested, which
+the page itself says is not established (low).
+
 ## Pages and code reviewed without a finding worth recording
 
 `dreyeck/src/lisp-critic-examples.lisp` and `lisp-critic-snapshot.lisp` keep
 their stated distinctions (occurrence, execution, evaluation, critique; record,
 snapshot, presentation) and say what they do not do. "Reading a Recorded
 Critique" and "Lisp Critic on the Federated Context" were read as models for
-the slice. "Inspecting One Acceptance Evidence Chain" was reviewed with PR #43
-earlier; its findings are in that review and are not repeated here.
+the slice.
+
+## Not settled by this review
+
+- Whether the claim records or the paragraph of T1 are right: that needs the
+  workspace in which the papers were said to have been read.
+- Fischer and Mastaglio 1991 was not read; T3's second half depends on it.
+- No rule was run. Every finding about what the engine would do on some input is
+  derived from its source.
