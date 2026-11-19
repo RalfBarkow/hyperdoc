@@ -3646,6 +3646,30 @@
              (declare (ignore op component))
              (uiop:symbol-call :dreyeck/lisp-critic/engine-integration/tests :run-page-station-layout-tests)))
 
+(asdf:defsystem "dreyeck/lisp-critic/text-criticism"
+  :description "Optional: a text-page passage and the records it restates, bound to a recorded source state; observations, a derived discrepancy, a judgement and a recommendation. No critic rule, no Critique"
+  :depends-on ("ironclad")
+  :components ((:file "dreyeck/src/lisp-critic-text-passage")
+               (:file "dreyeck/src/lisp-critic-text-criticism"
+                :depends-on ("dreyeck/src/lisp-critic-text-passage")))
+  :in-order-to ((asdf:test-op (asdf:test-op "dreyeck/lisp-critic/text-criticism/tests"))))
+
+(asdf:defsystem "dreyeck/lisp-critic/text-criticism/tests"
+  :description "Tests of the text criticism that need only this repository's sources, Ironclad and Git"
+  :depends-on ("dreyeck/lisp-critic/text-criticism")
+  :components ((:file "dreyeck/tests/lisp-critic-text-criticism"))
+  :perform (asdf:test-op (op component)
+             (declare (ignore op component))
+             (uiop:symbol-call :dreyeck/lisp-critic/text-criticism/tests :run-tests)))
+
+(asdf:defsystem "dreyeck/lisp-critic/text-criticism/integration-tests"
+  :description "Tests of the text criticism against the federated context's judgement-basis resolver and the loaded claim table: need a complete HyperDoc"
+  :depends-on ("dreyeck/lisp-critic/text-criticism" "dreyeck/lisp-critic/reading")
+  :components ((:file "dreyeck/tests/lisp-critic-text-criticism-integration"))
+  :perform (asdf:test-op (op component)
+             (declare (ignore op component))
+             (uiop:symbol-call :dreyeck/lisp-critic/text-criticism/integration-tests :run-tests)))
+
 
 (defsystem "dreyeck/work/remote-control-planning"
   :description "Optional plan-only mobile-control architecture experiment; no executor"
