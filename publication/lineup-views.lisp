@@ -39,8 +39,13 @@
        (:dl (:dt "Freigegebene Release") (:dd (:code (v:esc (fork:release-reference (release-of offer)))))
             (:dt "Ziel-Slug") (:dd (v:esc (fork:release-slug (release-of offer))))
             (:dt "Beobachtete Zielrevision") (:dd (:code (v:esc (revision offer))))
-            (:dt "SHOP3-Angebot") (:dd (:code (v:esc (format nil "~S" (step-of (plan offer)))))))
-       (show-play-step offer)
+            (:dt "SHOP3-Angebot") (:dd (:code (v:esc (format nil "~S" (step-of (plan offer))))))
+            (:dt "Ersetzungsentscheidung")
+            (:dd (v:esc (if (replacement offer) "für genau diese Zielrevision erteilt" "keine"))))
+       (if (eq :publish-page (step-of (plan offer)))
+           (show-play-step offer)
+           (v:html (:p "Kein Play: Der vorhandene Zielstand weicht von der Release ab. "
+                       "Ersetzt wird er erst nach einer ausdrücklichen Entscheidung für genau diese Zielrevision.")))
        (:p (recent-link offer))))))
 
 (defun put-count (run)

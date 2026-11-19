@@ -10,7 +10,7 @@
   (:use #:cl)
   (:local-nicknames (#:v #:html-inspector-views) (#:hb #:hyperbook)
                     (#:dita #:dreyeck/dita-story-item) (#:fork #:fedwiki-fork))
-  (:export #:start #:prepare #:change-test-target #:page-url #:*book*))
+  (:export #:start #:prepare #:approve-replacement #:change-test-target #:page-url #:*book*))
 (in-package #:fork-lineup)
 
 (defparameter *directory* (uiop:pathname-directory-pathname *load-truename*))
@@ -22,10 +22,12 @@
 (defclass publication-book (hb:hyperbook)
   ((fixture :initarg :fixture :reader fixture) (server :initarg :server :reader server)
    (pages :initform (make-hash-table :test 'equal) :reader pages)
-   (latest :accessor latest :initform nil) (runs :accessor runs :initform nil)))
+   (latest :accessor latest :initform nil) (runs :accessor runs :initform nil)
+   (replacements :accessor replacements :initform nil)))
 (defclass offer (hb:page)
   ((plan :reader plan :initarg :plan) (evidence :reader evidence :initarg :evidence)
    (release :reader release-of :initarg :release) (revision :reader revision :initarg :revision)
+   (replacement :reader replacement :initarg :replacement)
    (result :accessor result :initform nil)))
 (defclass publication-run (hb:page)
   ((offer :reader offer-of :initarg :offer) (receipt :accessor receipt :initform nil)
@@ -63,7 +65,12 @@
   "Freeze a new offer. Only observations occur here; rendering reuses the offer."
   (sb-thread:with-mutex (*lock*)
     (let* ((root (source book)) (release (fork:read-release root)) (slug (fork:release-slug release))
-           (revision (fork:observe-target (fixture book) release))
+           (observation (multiple-value-list (fork:observe-target (fixture book) release)))
+           (revision (first observation))
+           (replacement (find (fork:replacement-decision (fixture book) release revision)
+                              (replacements book) :test #'equal))
+           (target (fork:target-evidence (fixture book) release revision (second observation) replacement))
+           (ready (eq :target-ready (first target)))
            (assets (fork:verify-assets (fixture book) release))
            (page (dreyeck/local-fedwiki-view:make-local-fedwiki-view-page
                   root slug :wiki-id (format nil "fedwiki:~A" (car (last (pathname-directory (fixture book)))))))
@@ -78,15 +85,26 @@
                              (list :local-zip-discovery-verified
                                    (format nil "~A ~A" (hb:id-of workspace) (getf archive :member)))
                              (list :release-reviewed ref)
-                             (list :target-ready (fork:target-reference (fixture book) release revision))
-                             (list :public-assets-verified assets)))
-             (plan (shop3-planning-domains/publication:plan-next evidence :completed *completed*))
+                             target))
+             (evidence (if ready (append evidence (list (list :public-assets-verified assets))) evidence))
+             (plan (shop3-planning-domains/publication:plan-next
+                    evidence :completed (if ready *completed* (remove :publish-assets *completed*))))
              (id (new-id "angebot"))
              (offer (make-instance 'offer :id id :hyperbook book :plan plan :release release
-                                         :evidence evidence :revision revision)))
-        (assert (eq :publish-page (step-of plan)))
+                                         :evidence evidence :revision revision :replacement replacement)))
+        (assert (eq (if ready :publish-page :reconcile-target) (step-of plan)))
         (setf (gethash id (pages book)) offer (latest book) offer)
         offer))))
+
+(defun approve-replacement (offer)
+  "Operator decision outside Play: replace exactly the target revision OFFER observed, for its
+release, origin and slug. Then freeze a new offer. A later change of the target needs a new decision."
+  (sb-thread:with-mutex (*lock*)
+    (let ((book (hb:hyperbook-of offer)))
+      (assert (eq :reconcile-target (step-of (plan offer))))
+      (pushnew (fork:replacement-decision (fixture book) (release-of offer) (revision offer))
+               (replacements book) :test #'equal)))
+  (prepare (hb:hyperbook-of offer)))
 
 (defun replan (run)
   (let* ((offer (offer-of run)) (receipt (receipt run)) (status (getf receipt :status))
@@ -128,7 +146,8 @@
         (file-position trace :end)
         (handler-case
             (multiple-value-bind (receipt json revision)
-                (fork:publish-page (plan offer) (fixture book) (source book) (revision offer) :cookie-jar (jar book))
+                (fork:publish-page (plan offer) (fixture book) (source book) (revision offer)
+                                   :cookie-jar (jar book) :replacement (replacement offer))
               (setf (receipt run) receipt (readback run) json (revision run) revision
                     (next-plan run) (replan run)))
           (error (c) (setf (diagnostic run) (princ-to-string c))))

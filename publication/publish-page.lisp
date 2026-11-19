@@ -11,7 +11,8 @@
 (defpackage #:fedwiki-fork
   (:use #:cl)
   (:export #:read-release #:observe-target #:verify-assets #:release-reference
-           #:target-reference #:publish-page #:target-origin #:release-slug))
+           #:target-reference #:publish-page #:target-origin #:release-slug
+           #:replacement-decision #:target-evidence))
 (in-package #:fedwiki-fork)
 
 (defstruct release id slug page manifest)
@@ -97,6 +98,16 @@
   (format nil "~A origin=~A slug=~A revision=~A"
           (release-reference release) (target-origin fixture) (release-slug release) revision))
 
+(defun replacement-decision (fixture release revision)
+  "An explicit decision to replace exactly REVISION of the release's slug at FIXTURE's origin."
+  (list :replace-target :release (release-id release) :origin (target-origin fixture)
+        :slug (release-slug release) :revision revision))
+
+(defun ready-reference (fixture release revision replacement)
+  (if replacement
+      (format nil "~A replacement-approved-for=~A" (target-reference fixture release revision) revision)
+      (target-reference fixture release revision)))
+
 (defun assets-reference (fixture release)
   (format nil "~A assets=~A/assets/pages/~A/ verified-by-sha256"
           (release-reference release) (target-origin fixture) (release-slug release)))
@@ -114,14 +125,14 @@
    (required (release-manifest release) "assets"))
   (assets-reference fixture release))
 
-(defun binding-valid-p (plan fixture release revision)
+(defun binding-valid-p (plan fixture release revision replacement)
   (let ((facts (dreyeck/shop3:initial-facts-of plan)))
     (and (eq :plan-only (dreyeck/shop3:execution-mode-of plan))
          (equal (dreyeck/shop3:plans-of plan)
                 '(((shop3-planning-domains/publication::!propose-publication-step :publish-page))))
          (loop for (key reference) in
                (list (list :release-reviewed (release-reference release))
-                     (list :target-ready (target-reference fixture release revision))
+                     (list :target-ready (ready-reference fixture release revision replacement))
                      (list :public-assets-verified (assets-reference fixture release)))
                always (and (member (list 'shop3-planning-domains/publication::observed key)
                                    facts :test #'equal)
@@ -146,6 +157,15 @@
             (concatenate 'vector (required expected "journal") (vector (fork-action release))))
       (dreyeck/fedwiki-page-edit-plan::%json-equal expected page))))
 
+(defun target-evidence (fixture release revision page replacement)
+  "The target observation for PLAN-NEXT. An absent page or this release's own fork is ready.
+Any other existing page is ready only under REPLACEMENT for exactly its observed REVISION."
+  (cond ((or (eq revision :absent) (matches-fork-p release page))
+         (list :target-ready (target-reference fixture release revision)))
+        ((equal replacement (replacement-decision fixture release revision))
+         (list :target-ready (ready-reference fixture release revision replacement)))
+        (t (list :target-conflict (target-reference fixture release revision)))))
+
 (defun receipt (release fixture revision target-page status)
   (list :status status :evidence
         (list :public-page-verified (target-reference fixture release revision))
@@ -156,13 +176,15 @@
         :fork-site (required (release-manifest release) "sourceSite")
         :fork-date (required (release-manifest release) "forkDate")))
 
-(defun publish-page (plan fixture source expected-revision &key cookie-jar)
+(defun publish-page (plan fixture source expected-revision &key cookie-jar replacement)
   "Consume a native SHOP3 offer. FIXTURE is a private, single-writer test instance.
 SOURCE contains the approved release.json and pages/<slug>. Keep its forkDate across retries.
+An existing page other than this release's fork is replaced only under REPLACEMENT,
+the decision for exactly the observed revision of this release, origin and slug.
 When a page was compared, also return that HTTP readback and its revision."
   (sb-thread:with-mutex (*writer*)
     (let ((release (read-release source)))
-      (unless (binding-valid-p plan fixture release expected-revision)
+      (unless (binding-valid-p plan fixture release expected-revision replacement)
         (return-from publish-page (list :status :plan-mismatch)))
       (multiple-value-bind (assets problem) (verify-assets fixture release)
         (unless assets
@@ -174,7 +196,9 @@ When a page was compared, also return that HTTP readback and its revision."
       (multiple-value-bind (current before) (observe-target fixture release)
         (when (matches-fork-p release before)
           (return-from publish-page (values (receipt release fixture current before :already-published) before current)))
-        (unless (equal current expected-revision)
+        (unless (and (equal current expected-revision)
+                     (or (eq current :absent)
+                         (equal replacement (replacement-decision fixture release current))))
           (return-from publish-page
             (values (list :status :reconcile-target :expected expected-revision :observed current
                           :evidence (list :target-conflict (target-reference fixture release current)))
