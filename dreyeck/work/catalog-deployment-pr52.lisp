@@ -82,6 +82,8 @@
       (uiop:run-program (append '("env" "GH_PROMPT_DISABLED=1" "GH_DEBUG="
                                   "GH_NO_UPDATE_NOTIFIER=1" "gh") arguments)
                         :output :string :error-output :string :ignore-error-status t)
+    (when (= status 127)
+      (error "GitHub CLI fehlt im SLY-Prozess. Starte dieses Image mit: nix develop --no-write-lock-file .#catalog-deployment-pr52 -c hyperdoc-sly"))
     (unless (zerop status)
       (error "GitHub-CLI (Exit ~D): ~A" status
              (string-trim '(#\Space #\Tab #\Newline #\Return) diagnostic)))

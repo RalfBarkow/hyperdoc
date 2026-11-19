@@ -4,7 +4,7 @@
   <title>Catalog auf dreyeck.ch nach PR #52 aktualisieren</title>
   <shortdesc>Den geprüften Merge als NixOS-Generation bauen, aktivieren und im laufenden Catalog nachweisen.</shortdesc>
   <taskbody>
-    <prereq><p>Das Lineup läuft im lokalen SLY-Image. Die GitHub CLI gh ist dort erreichbar und für github.com mit Schreibrecht für RalfBarkow/hyperdoc angemeldet. Für den Serverteil steht eine administrative Bash-Sitzung auf dreyeck.ch bereit.</p></prereq>
+    <prereq><p>Starte das lokale SLY-Image aus dem Checkout mit <codeph>nix develop --no-write-lock-file .#catalog-deployment-pr52 -c hyperdoc-sly</codeph>. Diese Entwicklungsumgebung bringt die GitHub CLI gh mit. Sie verwendet die lokale Anmeldung für github.com mit Schreibrecht für RalfBarkow/hyperdoc. Für den Serverteil steht eine administrative Bash-Sitzung auf dreyeck.ch bereit.</p></prereq>
     <steps>
       <step id="ready-for-review">
         <cmd>PR #52 am geprüften HEAD auf Ready for review setzen.</cmd>
