@@ -1,0 +1,94 @@
+diff --git a/acceptance/run-publish-page.py b/acceptance/run-publish-page.py
+index 8cfcef5aed63c6ca75cd64b04487f104c89734f8..53604270187c2fbea4929b57f1ecebff6ddf4b2a 100644
+--- a/acceptance/run-publish-page.py
++++ b/acceptance/run-publish-page.py
+@@ -38,6 +38,8 @@ def setup_release(work):
+     page = {"title": "Publish Page Test", "story": story}
+     page["journal"] = [{"type": "create", "date": 1700000000000,
+                         "item": {"title": page["title"], "story": story}}]
++    historical = {"type": "fork", "site": "older.fixture.test", "date": 1700000001000}
++    page["journal"].append(historical)
+     snapshot = source / "pages" / SLUG
+     json_file(snapshot, page)
+     baseline = {"title": page["title"], "story": [dict(story[0], text="Observed target.")], "journal": []}
+@@ -124,7 +126,7 @@ def run(work, wiki, hyperdoc):
+ 
+     trace = [json.loads(line) for line in (work / "requests.jsonl").read_text().splitlines()]
+     writes = [r for r in trace if r["method"] == "PUT"]
+-    expected = [("fork", 403, True), ("edit", 200, False), ("fork", 200, True)]
++    expected = [("fork", 403, True), ("fork", 200, True), ("fork", 200, True)]
+     assert [(r["type"], r["status"], r["forkPage"]) for r in writes] == expected, writes
+     assert all(r["path"] == f"/page/{SLUG}/action" for r in writes)
+     stored = json.loads((work / "data/pages" / SLUG).read_bytes())
+@@ -134,7 +136,10 @@ def run(work, wiki, hyperdoc):
+             "releaseSha256": sha(work / "source/release.json")}
+     assert stored == dict(approved, journal=approved["journal"] + [fork])
+     print("Verified target assets:", assets)
+-    assert all(r["action"] == dict(fork, forkPage=approved) for r in writes if r["type"] == "fork")
++    marked = dict(fork, forkPage=approved)
++    unmarked = {k: v for k, v in marked.items() if k != "releaseSha256"}
++    assert [row["action"] for row in writes] == [marked, unmarked, marked]
++    assert stored["journal"][-2] == {"type": "fork", "site": "older.fixture.test", "date": 1700000001000}
+     print("Wire writes:", [(r["type"], r["status"]) for r in writes])
+     return (json.loads((work / "results.json").read_text()), {"origin": origin, "slug": SLUG,
+             "transport": {"socket": "private Unix socket", "parentMode": "0700", "tcpListeners": 0},
+diff --git a/acceptance/test-publish-page.lisp b/acceptance/test-publish-page.lisp
+index 3d3797ec0e1034c573956fcf7f3d84616036bf6b..0317c5d00de806419ed67896e1e5d9a3b064c5d6 100644
+--- a/acceptance/test-publish-page.lisp
++++ b/acceptance/test-publish-page.lisp
+@@ -99,20 +99,30 @@
+               :unauthorized 1 before)
+       (assert (equal baseline (fedwiki-fork:observe-target fixture release)))
+ 
+-      ;; Same exclusive writer, ordinary authorized Wiki edit BETWEEN observation and execution.
+-      (let* ((item (shasht:read-json
+-                    "{\"id\":\"c2e7839577a01d01\",\"type\":\"paragraph\",\"text\":\"Separate target revision.\"}"))
+-             (edit (alexandria:plist-hash-table
+-                    (list "type" "edit" "id" (gethash "id" item) "item" item "date" (* 1000 (- (get-universal-time) 2208988800)))
+-                    :test 'equal)))
++      ;; Replay an older client. Everything except the final release digest
++      ;; must match the identity-aware client's expected page, even the fork date.
++      (let* ((manifest (fedwiki-fork::release-manifest release))
++             (legacy (alexandria:plist-hash-table
++                      (list "type" "fork" "site" (gethash "sourceSite" manifest)
++                            "date" (gethash "forkDate" manifest)
++                            "forkPage" (fedwiki-fork::release-page release)) :test 'equal)))
+         (assert (= 200 (fedwiki-fork::request fixture (format nil "/page/~A/action" slug)
+-                                              :action edit :cookie-jar jar))))
++                                              :action legacy :cookie-jar jar))))
++      (multiple-value-bind (revision page) (fedwiki-fork:observe-target fixture release)
++        (assert (not (equal revision baseline)))
++        (let* ((copy (dreyeck/fedwiki-page-edit-plan::%copy-json page))
++               (journal (gethash "journal" copy))
++               (last-fork (aref journal (1- (length journal)))))
++          (assert (not (nth-value 1 (gethash "releaseSha256" last-fork))))
++          (assert (not (fedwiki-fork::matches-fork-p release page)))
++          (setf (gethash "releaseSha256" last-fork) (fedwiki-fork::release-id release))
++          (assert (fedwiki-fork::matches-fork-p release copy))))
+       (let* ((before (observed-puts fixture))
+              (changed (fedwiki-fork:observe-target fixture release))
+              (conflict (fedwiki-fork:publish-page offered fixture source baseline :cookie-jar jar
+                                                   :replacement approved)))
+         (assert (not (equal baseline changed)))
+-        (record :changed-revision conflict :reconcile-target 0 before)
++        (record :legacy-after-planning conflict :reconcile-target 0 before)
+         (fork-fixture-plan (append local (list (getf conflict :evidence)))
+                            (remove :publish-assets completed) :reconcile-target)
+         (assert (equal changed (fedwiki-fork:observe-target fixture release)))
+@@ -128,14 +138,14 @@
+                (published (fedwiki-fork:publish-page next fixture source changed :cookie-jar jar
+                                                      :replacement decision))
+                (verified (getf published :evidence)))
+-          (record :authorized-fork published :published 1 before)
++          (record :reviewed-legacy-revision published :published 1 before)
+           (fork-fixture-plan (append (evidence changed decision) (list verified))
+                              (cons :publish-page completed) :verify-publication)
+           (let* ((before (observed-puts fixture))
+                  (current (fedwiki-fork:observe-target fixture release))
+                  (repeated (fedwiki-fork:publish-page next fixture source changed :cookie-jar jar
+                                                       :replacement decision)))
+-            (record :repeat repeated :already-published 0 before)
++            (record :tagged-retry repeated :already-published 0 before)
+             (multiple-value-bind (observed target-page) (fedwiki-fork:observe-target fixture release)
+               (assert (equal current observed))
+               (setf rejected-fields (reject-altered-readbacks release target-page)))

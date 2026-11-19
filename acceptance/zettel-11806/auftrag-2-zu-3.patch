@@ -1,0 +1,535 @@
+diff --git a/acceptance/check-publish-lineup.mjs b/acceptance/check-publish-lineup.mjs
+new file mode 100644
+index 0000000000000000000000000000000000000000..4d49a84bac5e402ad27af1b145f36c8d4a4a5291
+--- /dev/null
++++ b/acceptance/check-publish-lineup.mjs
+@@ -0,0 +1,92 @@
++// node check-publish-lineup.mjs <offer URL> <private fixture directory> open|conflict|publish
++// In conflict mode, send a newline after the operator has edited the target in SLY.
++import assert from 'node:assert/strict'
++import { readFileSync } from 'node:fs'
++import { join } from 'node:path'
++import { createHash } from 'node:crypto'
++import { createInterface } from 'node:readline/promises'
++
++const { chromium } = await import(process.env.PLAYWRIGHT_MODULE || 'playwright')
++const [url, root, mode] = process.argv.slice(2)
++assert(['open', 'conflict', 'publish'].includes(mode))
++const bytes = path => readFileSync(join(root, path))
++const read = path => JSON.parse(bytes(path))
++const hash = data => createHash('sha256').update(data).digest('hex')
++const trace = () => bytes('requests.jsonl').toString().trim().split('\n').map(line => JSON.parse(line))
++const browser = await chromium.launch({ executablePath: process.env.CHROME_BIN })
++const page = await browser.newPage()
++page.setDefaultTimeout(12000)
++try {
++  const release = read('source/release.json')
++  const approved = read('source/pages/' + release.slug)
++  const start = trace().length
++  const http = await page.goto(url)
++  assert.equal(http.status(), 200)
++  const offer = page.getByRole('region', { name: 'Publikationsangebot', exact: true })
++  const play = offer.getByRole('button', { name: 'Play', exact: true })
++  await play.waitFor()
++  const facts = await offer.locator('dl dd').allTextContents()
++  assert.deepEqual(facts.slice(0, 2), ['manifest-sha256=' + hash(bytes('source/release.json')), release.slug])
++  assert.match(facts[2], /^[0-9a-f]{64}$/)
++  assert.equal(facts[3], ':PUBLISH-PAGE')
++  assert.deepEqual(trace().slice(start), [])
++  console.log(JSON.stringify({url, facts, requestsOnOpen: 0}))
++  if (mode === 'conflict') {
++    const input = createInterface({input:process.stdin,output:process.stdout})
++    try { await input.question('Ready for the target edit. Send a newline to click Play.\n') }
++    finally {input.close()}
++  }
++  if (mode !== 'open') {
++    const offset = trace().length
++    await play.click()
++    const result = page.getByRole('region', { name: 'Ergebnis', exact: true })
++    await result.waitFor()
++    const fields = await result.locator('dl dd').allTextContents()
++    const [id,status,puts,next,expected,actual] = fields
++    assert.match(id,/^lauf-[0-9a-f]+$/)
++    assert.equal(expected,facts[2])
++    assert.notEqual(actual, expected)
++    const wire = trace().slice(offset)
++    const writes = wire.filter(row => row.method === 'PUT')
++    assert.equal(writes.length,mode === 'conflict' ? 0 : 1)
++    assert.equal(Number(puts), writes.length)
++    const httpRows = await result.locator('li code').allTextContents()
++    assert.deepEqual(httpRows,wire.map(r => r.method+' '+r.path+' → HTTP '+r.status))
++    const json = JSON.parse(await result.locator('pre').innerText())
++    assert.deepEqual(json,read('data/pages/'+release.slug))
++    assert.equal(wire.at(-1).path,'/'+release.slug+'.json')
++    assert.equal(wire.at(-1).status,200)
++    const fact = await result.locator('h3 + p code').innerText()
++    assert(fact.includes(facts[0]) && fact.includes('revision='+actual))
++    if (mode === 'conflict') {
++      assert.equal(status,':RECONCILE-TARGET')
++      assert.equal(next,':RECONCILE-TARGET')
++      assert(fact.startsWith(':TARGET-CONFLICT '))
++      assert.equal(json.journal.at(-1).type,'edit')
++    } else {
++      assert.equal(status,':PUBLISHED')
++      assert.equal(next,':VERIFY-PUBLICATION')
++      assert(fact.startsWith(':PUBLIC-PAGE-VERIFIED '))
++      assert.deepEqual(writes[0].action.forkPage,approved)
++      assert.equal(writes[0].status,200)
++      assert.deepEqual(json,{...approved,journal:[...approved.journal,
++        {type:'fork',site:release.sourceSite,date:release.forkDate,releaseSha256:facts[0].split('=')[1]}]})
++    }
++    const runURL = await result.getByRole('link',{name:id}).getAttribute('href')
++    await result.getByText('Recent Changes',{exact:true}).click()
++    const history = page.getByRole('region',{name:'Recent Changes',exact:true})
++    const link = history.getByText(id,{exact:true})
++    await link.waitFor()
++    await link.click()
++    const reopened = page.getByRole('region',{name:'Ergebnis',exact:true}).last()
++    await reopened.waitFor()
++    assert.equal(await reopened.getByRole('link',{name:id}).getAttribute('href'),runURL)
++    assert.deepEqual(trace().slice(offset),wire)
++    console.log(JSON.stringify({url,runURL,id,status,puts,next,expected,actual,fact,httpRows,json,recentChanges:id}))
++  }
++} catch (error) {
++  console.error((await page.locator('body').innerText()).slice(-3500))
++  throw error
++} finally {
++  await browser.close()
++}
+diff --git a/acceptance/run-publish-page.py b/acceptance/run-publish-page.py
+index ac8c9651cfbb8b3f487941faf6a3bfd628c70107..8cfcef5aed63c6ca75cd64b04487f104c89734f8 100644
+--- a/acceptance/run-publish-page.py
++++ b/acceptance/run-publish-page.py
+@@ -1,5 +1,6 @@
+ """Run the real FedWiki fork fixture and SHOP3 in a disposable single-writer store."""
+ import argparse
++from contextlib import contextmanager
+ import hashlib
+ import json
+ import os
+@@ -7,6 +8,7 @@ from pathlib import Path
+ import shutil
+ import stat
+ import subprocess
++import sys
+ import tempfile
+ import time
+ import zipfile
+@@ -56,8 +58,8 @@ def setup_release(work):
+     return digests
+ 
+ 
+-def run(work, wiki, hyperdoc):
+-    assets = setup_release(work)
++@contextmanager
++def running_wiki(work, wiki):
+     origin = f"http://{work.name}.test"
+     sock = work / "wiki.sock"
+     # Reuse the original login, server, routing and storage. Only the listener in
+@@ -89,20 +91,17 @@ listening.prependListener('request',(req,res)=>res.once('finish',()=>{
+             else:
+                 raise RuntimeError("FedWiki socket did not start")
+             assert stat.S_IMODE(work.stat().st_mode) == 0o700 and sock.is_socket()
+-            listeners = subprocess.run(["/usr/sbin/lsof", "-nP", "-a", "-p", str(server.pid),
++            unix_sockets = subprocess.check_output(["/usr/sbin/lsof", "-w", "-nP", "-a", "-p",
++                                                    str(server.pid), "-U", "-Fn"])
++            assert os.fsencode(sock) in unix_sockets.splitlines()[1:] or b"n" + os.fsencode(sock) in unix_sockets.splitlines()
++            listeners = subprocess.run(["/usr/sbin/lsof", "-w", "-nP", "-a", "-p", str(server.pid),
+                                         "-iTCP", "-sTCP:LISTEN"], capture_output=True)
+             assert (listeners.returncode, listeners.stdout, listeners.stderr) == (1, b"", b""), listeners
+             subprocess.run(["/usr/bin/curl", "--disable", "--fail", "--silent", "--show-error",
+                             "--noproxy", "*", "--unix-socket", sock, "--cookie-jar", work / "owner.jar",
+                             "--max-time", "8", "--request", "POST", origin + "/fixture/login"],
+                            stdout=subprocess.DEVNULL, check=True)
+-            env = dict(os.environ, FORK_FIXTURE=str(work) + "/")
+-            subprocess.run(["nix", "develop", "--no-write-lock-file", "-c", "sbcl",
+-                            "--noinform", "--no-sysinit", "--no-userinit", "--non-interactive",
+-                            "--load", HERE / "ki-plan-next.lisp",
+-                            "--load", HERE.parent / "publication/publish-page.lisp",
+-                            "--load", HERE / "test-publish-page.lisp"],
+-                           cwd=hyperdoc, env=env, check=True, timeout=240)
++            yield origin
+         finally:
+             server.terminate()
+             try:
+@@ -111,6 +110,18 @@ listening.prependListener('request',(req,res)=>res.once('finish',()=>{
+                 server.kill()
+                 server.wait()
+ 
++
++def run(work, wiki, hyperdoc):
++    assets = setup_release(work)
++    with running_wiki(work, wiki) as origin:
++        env = dict(os.environ, FORK_FIXTURE=str(work) + "/")
++        subprocess.run(["nix", "develop", "--no-write-lock-file", "-c", "sbcl",
++                        "--noinform", "--no-sysinit", "--no-userinit", "--non-interactive",
++                        "--load", HERE / "ki-plan-next.lisp",
++                        "--load", HERE.parent / "publication/publish-page.lisp",
++                        "--load", HERE / "test-publish-page.lisp"],
++                       cwd=hyperdoc, env=env, check=True, timeout=240)
++
+     trace = [json.loads(line) for line in (work / "requests.jsonl").read_text().splitlines()]
+     writes = [r for r in trace if r["method"] == "PUT"]
+     expected = [("fork", 403, True), ("edit", 200, False), ("fork", 200, True)]
+@@ -138,9 +149,17 @@ if __name__ == "__main__":
+     p.add_argument("--wiki", type=Path, default=Path.home() / "Projects/RalfBarkow/wiki")
+     p.add_argument("--hyperdoc", type=Path, default=Path.home() / "workspace/hyperdoc-dreyeck-ch")
+     p.add_argument("--report", type=Path, help="Save the HTTP trace and SHOP3 receipts as JSON")
++    p.add_argument("--serve", action="store_true", help="Serve one private fixture until the owning image closes stdin")
+     args = p.parse_args()
+     os.umask(0o077)
+     with tempfile.TemporaryDirectory(prefix="fork-test-", dir="/private/tmp") as directory:
+-        results, evidence = run(Path(directory), args.wiki.resolve(), args.hyperdoc.resolve())
++        work = Path(directory)
++        if args.serve:
++            setup_release(work)
++            with running_wiki(work, args.wiki.resolve()):
++                print(directory + "/", flush=True)
++                sys.stdin.readline()
++            sys.exit(0)
++        results, evidence = run(work, args.wiki.resolve(), args.hyperdoc.resolve())
+     if args.report:
+         json_file(args.report, dict(evidence, shop3Receipts=results))
+diff --git a/publication/lineup-views.lisp b/publication/lineup-views.lisp
+new file mode 100644
+index 0000000000000000000000000000000000000000..93589e6bf0e943870e48bb3096a609099280b6ce
+--- /dev/null
++++ b/publication/lineup-views.lisp
+@@ -0,0 +1,93 @@
++(in-package #:fork-lineup)
++
++(defparameter *stylesheet*
++  ".publication{max-width:68ch;margin:1rem auto;padding:0 1rem 1rem;font:1rem/1.55 system-ui,sans-serif;color:#242729}
++.publication h2,.publication h3{line-height:1.25}.publication dl{margin-block:1rem}.publication dt{font-weight:650;margin-top:.55rem}.publication dd{margin:0}
++.publication code,.publication pre{font-size:.86em;overflow-wrap:anywhere}.publication pre{padding:.8rem;background:#f3f5f5;white-space:pre-wrap}
++.publication button{font:inherit;padding:.22rem .85rem}.publication li{margin-block:.6rem}.publication a{text-decoration:underline}")
++
++(dreyeck/authority-policy:register-reviewed-control "fork-lineup/play-test-fork"
++  :effect "Executes the frozen publication offer on its private FedWiki fixture and records one run."
++  :audit "publication/lineup.lisp PLAY calls FEDWIKI-FORK:PUBLISH-PAGE with the offer's release and revision.")
++
++(defun show-play-step (offer)
++  ;; Only this exact trusted DITA step is executable. The renderer still owns the document.
++  (let* ((file (merge-pathnames "publish-page.dita" *directory*))
++         (root (dita:parse-dita-topic (uiop:read-file-string file :external-format :utf-8)))
++         (step (plump:get-element-by-id root "publish-page"))
++         (marker (symbol-name (gensym "PLAY-"))))
++    (assert (and (eq :publish-page (step-of (plan offer))) (equal "task" (plump:tag-name root))
++                 (equal "publish-release" (plump:attribute root "id"))
++                 step (equal "step" (plump:tag-name step))))
++    (plump:make-text-node (plump:make-element (elt (plump:get-elements-by-tag-name step "cmd") 0) "ph") marker)
++    (let* ((html (dita:render-dita-topic (plump:serialize root nil)))
++           (pos (or (search marker html) (error "DITA Play step cannot be rendered."))))
++      (v:html (v:str (subseq html 0 pos)))
++      (v:html " ")
++      (v:eval-button "Play" (dreyeck/authority-policy:reviewed-thunk "fork-lineup/play-test-fork" (play offer))
++                     "Freigegebenen Test-Fork ausführen")
++      (v:html (v:str (subseq html (+ pos (length marker))))))))
++
++(defun recent-link (object)
++  (let ((book (hb:hyperbook-of object)))
++    (v:object-ref (gethash "recent-changes" (pages book)) :select "Recent Changes" :display "Recent Changes")))
++
++(v:defview offer-view (offer offer)
++  (v:html-view :title "DITA Task" :priority -100
++    (v:html (:style (v:str *stylesheet*))
++      (:section :class "publication" :aria-label "Publikationsangebot"
++       (:dl (:dt "Freigegebene Release") (:dd (:code (v:esc (fork:release-reference (release-of offer)))))
++            (:dt "Ziel-Slug") (:dd (v:esc (fork:release-slug (release-of offer))))
++            (:dt "Beobachtete Zielrevision") (:dd (:code (v:esc (revision offer))))
++            (:dt "SHOP3-Angebot") (:dd (:code (v:esc (format nil "~S" (step-of (plan offer)))))))
++       (show-play-step offer)
++       (:p (recent-link offer))))))
++
++(defun put-count (run)
++  (count "PUT" (http-log run) :key (lambda (entry) (gethash "method" entry)) :test #'equal))
++
++(v:defview run-view (run publication-run)
++  (v:html-view :title "Ergebnis" :priority -100
++    (let ((status (getf (receipt run) :status))
++          (fact (getf (receipt run) :evidence)))
++      (v:html (:style (v:str *stylesheet*))
++        (:section :class "publication" :aria-label "Ergebnis"
++         (:h2 (v:esc (case status (:published "Fork bestätigt") (:already-published "Fork bereits vorhanden")
++                            (:reconcile-target "Zielkonflikt") (otherwise "Ausführungsbefund"))))
++         (:dl (:dt "Laufreferenz") (:dd (:a :href (page-url run) (v:esc (hb:id-of run))))
++              (:dt "Ergebnis") (:dd (:code (v:esc (format nil "~S" status))))
++              (:dt "PUTs dieses Laufs") (:dd (v:esc (princ-to-string (put-count run))))
++              (:dt "Nächster SHOP3-Schritt")
++              (:dd (:code (v:esc (if (next-plan run) (format nil "~S" (step-of (next-plan run))) "offen"))))
++              (:dt "Geplante Zielrevision") (:dd (:code (v:esc (revision (offer-of run)))))
++              (:dt "Zurückgelesene Zielrevision") (:dd (:code (v:esc (revision run)))))
++         (when (diagnostic run) (v:html (:p (v:esc (diagnostic run)))))
++         (when fact (v:html (:h3 "Beleg an PLAN-NEXT")
++                            (:p (:code (v:esc (format nil "~S" (first fact))) " " (v:esc (second fact))))))
++         (:h3 "HTTP-Befund")
++         (:ul (dolist (entry (http-log run))
++                (v:html (:li (:code (v:esc (format nil "~A ~A → HTTP ~D"
++                                                   (gethash "method" entry) (gethash "path" entry)
++                                                   (gethash "status" entry))))))))
++         (:h3 "JSON-Readback")
++         (:pre (v:esc (if (readback run) (let ((*print-pretty* t)) (shasht:write-json (readback run) nil))
++                           "Kein Seiten-JSON zurückgelesen.")))
++         (:p (recent-link run)))))))
++
++(v:defview history-view (page recent-changes)
++  (v:html-view :title "Recent Changes" :priority -100
++    (let ((entries (sb-thread:with-mutex (*lock*) (copy-list (runs (hb:hyperbook-of page))))))
++      (v:html (:style (v:str *stylesheet*))
++        (:section :class "publication" :aria-label "Recent Changes"
++         (:h2 "Recent Changes")
++         (if entries
++             (v:html (:ol (dolist (run entries)
++                            (v:html (:li (v:object-ref run :select "Ergebnis" :display (hb:id-of run))
++                                         " · " (v:esc (format nil "~S" (getf (receipt run) :status)))
++                                         " · " (v:esc (princ-to-string (put-count run))) " PUT(s)")))))
++             (v:html (:p "Bisher kein Play-Lauf."))))))))
++
++(v:defview book-view (book publication-book)
++  (v:html-view :title "Publikation" :priority -100
++    (v:html (:p (v:object-ref (latest book) :select "DITA Task" :display "Publikationsangebot öffnen"))
++            (:p (v:object-ref (gethash "recent-changes" (pages book)) :display "Recent Changes")))))
+diff --git a/publication/lineup.lisp b/publication/lineup.lisp
+new file mode 100644
+index 0000000000000000000000000000000000000000..320076cee337e7edb16dc8c904b21ff6e9e759e8
+--- /dev/null
++++ b/publication/lineup.lisp
+@@ -0,0 +1,178 @@
++;;;; Local HyperBook — a frozen SHOP3 offer, a DITA Play action and its run history.
++(require :asdf)
++(asdf:load-system "hyperbook/server")
++(asdf:load-system "dreyeck/local-fedwiki-view")
++(asdf:load-system "dreyeck/dita-story-item")
++(asdf:load-system "dreyeck/authority-policy")
++(load (merge-pathnames "publish-page.lisp" *load-truename*))
++
++(defpackage #:fork-lineup
++  (:use #:cl)
++  (:local-nicknames (#:v #:html-inspector-views) (#:hb #:hyperbook)
++                    (#:dita #:dreyeck/dita-story-item) (#:fork #:fedwiki-fork))
++  (:export #:start #:prepare #:change-test-target #:page-url #:*book*))
++(in-package #:fork-lineup)
++
++(defparameter *directory* (uiop:pathname-directory-pathname *load-truename*))
++(defvar *book* nil)
++(defvar *lock* (sb-thread:make-mutex :name "Publication lineup"))
++(defparameter *completed* '(:observe-local :fill-local :attach-local :verify-zip-discovery
++                             :prepare-release :observe-target :publish-assets))
++
++(defclass publication-book (hb:hyperbook)
++  ((fixture :initarg :fixture :reader fixture) (server :initarg :server :reader server)
++   (pages :initform (make-hash-table :test 'equal) :reader pages)
++   (latest :accessor latest :initform nil) (runs :accessor runs :initform nil)))
++(defclass offer (hb:page)
++  ((plan :reader plan :initarg :plan) (evidence :reader evidence :initarg :evidence)
++   (release :reader release-of :initarg :release) (revision :reader revision :initarg :revision)
++   (result :accessor result :initform nil)))
++(defclass publication-run (hb:page)
++  ((offer :reader offer-of :initarg :offer) (receipt :accessor receipt :initform nil)
++   (readback :accessor readback :initform nil) (revision :accessor revision :initform nil)
++   (http-log :accessor http-log :initform nil) (next-plan :accessor next-plan :initform nil)
++   (diagnostic :accessor diagnostic :initform nil)))
++(defclass recent-changes (hb:page) ())
++
++(defmethod hb:title-of ((book publication-book)) "FedWiki Publikation")
++(defmethod hb:title-of ((page offer)) "Publikationsangebot")
++(defmethod hb:title-of ((page publication-run)) "Ergebnis")
++(defmethod hb:title-of ((page recent-changes)) "Recent Changes")
++(defmethod hb:find-page ((book publication-book) id &key signal-error?)
++  (or (gethash id (pages book))
++      (when signal-error? (error 'hb:page-lookup-failure :hyperbook book :page-id id))))
++
++(defun page-url (page)
++  (let* ((book (if (typep page 'publication-book) page (hb:hyperbook-of page)))
++         (slug (hyperbook/server::slug book)))
++    (format nil "http://127.0.0.1:~D/~A~@[/~A~]"
++            clog::*clog-port* slug (unless (eq book page) (hb:id-of page)))))
++
++(defun new-id (prefix)
++  (format nil "~A-~A" prefix (ironclad:byte-array-to-hex-string (ironclad:random-data 8))))
++
++(defun source (book) (merge-pathnames "source/" (fixture book)))
++(defun jar (book) (merge-pathnames "owner.jar" (fixture book)))
++(defun step-of (plan)
++  (destructuring-bind (((operator step))) (dreyeck/shop3:plans-of plan)
++    (assert (and (eq :plan-only (dreyeck/shop3:execution-mode-of plan))
++                 (eq operator 'shop3-planning-domains/publication::!propose-publication-step)))
++    step))
++
++(defun prepare (&optional (book *book*))
++  "Freeze a new offer. Only observations occur here; rendering reuses the offer."
++  (sb-thread:with-mutex (*lock*)
++    (let* ((root (source book)) (release (fork:read-release root)) (slug (fork:release-slug release))
++           (revision (fork:observe-target (fixture book) release))
++           (assets (fork:verify-assets (fixture book) release))
++           (page (dreyeck/local-fedwiki-view:make-local-fedwiki-view-page
++                  root slug :wiki-id (format nil "fedwiki:~A" (car (last (pathname-directory (fixture book)))))))
++           (workspace (dreyeck/local-fedwiki-view::ensure-page-attached-workspace-offer page))
++           (archive (getf (dreyeck/fedwiki-assets:page-attached-asdf-discovery-observation root slug)
++                          :asdf-archive))
++           (ref (fork:release-reference release)))
++      (assert (and assets workspace archive))
++      (let* ((evidence (list (list :local-page-present (namestring (merge-pathnames (format nil "pages/~A" slug) root)))
++                             (list :local-content-verified ref)
++                             (list :local-attachment-verified (namestring (getf archive :zip)))
++                             (list :local-zip-discovery-verified
++                                   (format nil "~A ~A" (hb:id-of workspace) (getf archive :member)))
++                             (list :release-reviewed ref)
++                             (list :target-ready (fork:target-reference (fixture book) release revision))
++                             (list :public-assets-verified assets)))
++             (plan (shop3-planning-domains/publication:plan-next evidence :completed *completed*))
++             (id (new-id "angebot"))
++             (offer (make-instance 'offer :id id :hyperbook book :plan plan :release release
++                                         :evidence evidence :revision revision)))
++        (assert (eq :publish-page (step-of plan)))
++        (setf (gethash id (pages book)) offer (latest book) offer)
++        offer))))
++
++(defun replan (run)
++  (let* ((offer (offer-of run)) (receipt (receipt run)) (status (getf receipt :status))
++         (fact (getf receipt :evidence)) (evidence (evidence offer))
++         (key (car fact)))
++    (cond ((member status '(:published :already-published))
++           (assert (and (eq key :public-page-verified)
++                        (equal (second fact)
++                               (fork:target-reference (fixture (hb:hyperbook-of offer))
++                                                      (release-of offer) (revision run)))))
++           (shop3-planning-domains/publication:plan-next
++            (cons fact evidence) :completed (cons :publish-page *completed*)))
++          ((eq status :reconcile-target)
++           (assert (eq key :target-conflict))
++           (shop3-planning-domains/publication:plan-next
++            (cons fact (remove-if (lambda (e) (member (first e) '(:target-ready :public-assets-verified)))
++                                  evidence))
++            :completed (remove :publish-assets *completed*))))))
++
++(defun check-local-listener ()
++  ;; CLOG may already be serving another catalog when this file is loaded.
++  (let* ((port clog::*clog-port*)
++         (listeners (uiop:run-program
++                     (list "/usr/sbin/lsof" "-w" "-nP" "-a" "-p" (princ-to-string (sb-unix:unix-getpid))
++                           (format nil "-iTCP:~D" port) "-sTCP:LISTEN" "-Fn")
++                     :output :lines)))
++    (assert (equal (remove-if-not (lambda (s) (uiop:string-prefix-p "n" s)) listeners)
++                   (list (format nil "n127.0.0.1:~D" port))) ()
++            "Der Publikations-Inspector benötigt einen lokalen Listener auf Port ~D." port)))
++
++(defun play (offer)
++  (sb-thread:with-mutex (*lock*)
++    (when (result offer) (return-from play (result offer)))
++    (check-local-listener)
++    (let* ((book (hb:hyperbook-of offer))
++           (id (new-id "lauf"))
++           (run (make-instance 'publication-run :id id :hyperbook book :offer offer)))
++      (with-open-file (trace (merge-pathnames "requests.jsonl" (fixture book)) :external-format :utf-8)
++        (file-position trace :end)
++        (handler-case
++            (multiple-value-bind (receipt json revision)
++                (fork:publish-page (plan offer) (fixture book) (source book) (revision offer) :cookie-jar (jar book))
++              (setf (receipt run) receipt (readback run) json (revision run) revision
++                    (next-plan run) (replan run)))
++          (error (c) (setf (diagnostic run) (princ-to-string c))))
++        (setf (http-log run) (loop for line = (read-line trace nil) while line collect (shasht:read-json line))))
++      (setf (gethash id (pages book)) run (result offer) run)
++      (push run (runs book))
++      run)))
++
++(defun change-test-target (text &optional (book *book*))
++  "Operator control for the acceptance test, intentionally outside Play and outside its HTTP trace."
++  (sb-thread:with-mutex (*lock*)
++    (sb-thread:with-mutex (fork::*writer*)
++      (let* ((release (fork:read-release (source book)))
++             (page (nth-value 1 (fork:observe-target (fixture book) release)))
++             (item (alexandria:copy-hash-table (aref (gethash "story" page) 0))))
++        (setf (gethash "text" item) text)
++        (assert (= 200 (fork::request (fixture book) (format nil "/page/~A/action" (fork:release-slug release))
++                                     :action (alexandria:plist-hash-table
++                                              (list "type" "edit" "id" (gethash "id" item) "item" item
++                                                    "date" (* 1000 (- (get-universal-time) 2208988800))) :test 'equal)
++                                     :cookie-jar (jar book))))
++        (fork:observe-target (fixture book) release)))))
++
++(defun start (&key (port 8080))
++  (when (and *book* (uiop:process-alive-p (server *book*)))
++    (return-from start (page-url (latest *book*))))
++  (let* ((script (truename (merge-pathnames "../acceptance/run-publish-page.py" *directory*)))
++         (proc (uiop:launch-program (list "python3" (namestring script) "--serve")
++                                    :input :stream :output :stream :error-output :stream)))
++    (handler-case
++        (let* ((ready (read-line (uiop:process-info-output proc) nil))
++               (root (or (and ready (uiop:absolute-pathname-p ready) (uiop:directory-exists-p ready))
++                         (error "Testwiki konnte nicht starten. ~A ~A" ready
++                                (uiop:slurp-stream-string (uiop:process-info-error-output proc)))))
++               (book (make-instance 'publication-book :id "test-fedwiki-publish-page" :fixture root :server proc)))
++          (setf (gethash "recent-changes" (pages book))
++                (make-instance 'recent-changes :id "recent-changes" :hyperbook book))
++          (prepare book)
++          (unless (clog:is-running-p)
++            (hyperbook/server:serve-catalog :host "127.0.0.1" :port port :development nil))
++          (check-local-listener)
++          (hb:register book)
++          (setf *book* book)
++          (page-url (latest book)))
++      (error (c) (close (uiop:process-info-input proc)) (error c)))))
++
++(load (merge-pathnames "lineup-views.lisp" *directory*))
+diff --git a/publication/publish-page.dita b/publication/publish-page.dita
+new file mode 100644
+index 0000000000000000000000000000000000000000..3a589f36531847fce45dd564d0e20aac949edcb6
+--- /dev/null
++++ b/publication/publish-page.dita
+@@ -0,0 +1,13 @@
++<?xml version="1.0" encoding="UTF-8"?>
++<!DOCTYPE task PUBLIC "-//OASIS//DTD DITA Task//EN" "task.dtd">
++<task id="publish-release" xml:lang="de-CH">
++  <title>Testseite publizieren</title>
++  <taskbody>
++    <steps>
++      <step id="publish-page">
++        <cmd>Den freigegebenen Snapshot auf die beobachtete Zielrevision übernehmen.</cmd>
++        <stepresult>Der HTTP-Readback bestimmt den nächsten SHOP3-Schritt.</stepresult>
++      </step>
++    </steps>
++  </taskbody>
++</task>
+diff --git a/publication/publish-page.lisp b/publication/publish-page.lisp
+index 19a1ef71e4cb53817994539cfbabd2ae0b1288c9..1624b23e2d98539fb3dff3230f2d300453b29f9e 100644
+--- a/publication/publish-page.lisp
++++ b/publication/publish-page.lisp
+@@ -158,7 +158,8 @@
+ 
+ (defun publish-page (plan fixture source expected-revision &key cookie-jar)
+   "Consume a native SHOP3 offer. FIXTURE is a private, single-writer test instance.
+-SOURCE contains the approved release.json and pages/<slug>. Keep its forkDate across retries."
++SOURCE contains the approved release.json and pages/<slug>. Keep its forkDate across retries.
++When a page was compared, also return that HTTP readback and its revision."
+   (sb-thread:with-mutex (*writer*)
+     (let ((release (read-release source)))
+       (unless (binding-valid-p plan fixture release expected-revision)
+@@ -172,11 +173,12 @@ SOURCE contains the approved release.json and pages/<slug>. Keep its forkDate ac
+                                           (target-origin fixture) problem))))))
+       (multiple-value-bind (current before) (observe-target fixture release)
+         (when (matches-fork-p release before)
+-          (return-from publish-page (receipt release fixture current before :already-published)))
++          (return-from publish-page (values (receipt release fixture current before :already-published) before current)))
+         (unless (equal current expected-revision)
+           (return-from publish-page
+-            (list :status :reconcile-target :expected expected-revision :observed current
+-                  :evidence (list :target-conflict (target-reference fixture release current))))))
++            (values (list :status :reconcile-target :expected expected-revision :observed current
++                          :evidence (list :target-conflict (target-reference fixture release current)))
++                    before current))))
+       (let ((action (fork-action release)))
+         (setf (gethash "forkPage" action) (release-page release))
+         (let ((status (request fixture (format nil "/page/~A/action" (release-slug release))
+@@ -185,6 +187,7 @@ SOURCE contains the approved release.json and pages/<slug>. Keep its forkDate ac
+             (return-from publish-page (list :status :unauthorized :http status)))
+           ;; A lost response can follow a committed write. Always reread before deciding.
+           (multiple-value-bind (revision page) (observe-target fixture release)
+-            (if (matches-fork-p release page)
+-                (append (receipt release fixture revision page :published) (list :http status))
+-                (list :status :unverified :http status :observed revision))))))))
++            (values (if (matches-fork-p release page)
++                        (append (receipt release fixture revision page :published) (list :http status))
++                        (list :status :unverified :http status :observed revision))
++                    page revision)))))))

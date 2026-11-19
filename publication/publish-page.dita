@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE task PUBLIC "-//OASIS//DTD DITA Task//EN" "task.dtd">
+<task id="publish-release" xml:lang="de-CH">
+  <title>Testseite publizieren</title>
+  <taskbody>
+    <steps>
+      <step id="publish-page">
+        <cmd>Den freigegebenen Snapshot auf die beobachtete Zielrevision übernehmen.</cmd>
+        <stepresult>Der HTTP-Readback bestimmt den nächsten SHOP3-Schritt.</stepresult>
+      </step>
+    </steps>
+  </taskbody>
+</task>
