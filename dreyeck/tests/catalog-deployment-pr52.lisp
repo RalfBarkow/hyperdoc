@@ -8,7 +8,7 @@
          (peer (merge-pathnames "peer/" directory))
          (checkout (merge-pathnames "checkout/" directory)))
     (labels ((run (dir &rest args) (git:trim-git-output (apply #'git:git-run-string dir args)))
-             (identity (dir)
+             (configure-git-author (dir)
                (run dir "config" "user.email" "fixture@example.invalid")
                (run dir "config" "user.name" "Catalog fixture"))
              (write-fixture (value)
@@ -21,12 +21,12 @@
            (progn
              (run directory "init" "--initial-branch=dreyeck.ch" (namestring author))
              (run directory "init" "--bare" "--initial-branch=dreyeck.ch" (namestring peer))
-             (identity author)
+             (configure-git-author author)
              (let ((+reviewed-base+ (write-fixture "base")))
                (run author "push" (namestring peer) (format nil "HEAD:~A" +target-ref+))
                (run directory "clone" "--single-branch" "--branch" "dreyeck.ch"
                     (format nil "file://~A" (namestring peer)) (namestring checkout))
-               (identity checkout)
+               (configure-git-author checkout)
                (let* ((+reviewed-head+ (write-fixture "reviewed candidate"))
                       (deployment (make-deployment :repository checkout :remote "origin")))
                  (run author "push" (namestring peer) (format nil "HEAD:~A" +candidate-ref+))
