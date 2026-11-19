@@ -1,9 +1,10 @@
 (defpackage #:dreyeck/work/catalog-deployment-pr52
   (:use #:cl)
   (:local-nicknames (#:v #:html-inspector-views) (#:dita #:dreyeck/dita-story-item)
-                    (#:policy #:dreyeck/authority-policy) (#:git #:dreyeck/git) (#:hb #:hyperbook))
+                    (#:policy #:dreyeck/authority-policy) (#:git #:dreyeck/git)
+                    (#:hb #:hyperbook) (#:tm #:dreyeck/topicmap))
   (:export #:make-deployment #:plan-next #:record-receipt #:serve
-           #:open-task #:submit-receipt))
+           #:open-task #:submit-receipt #:enable-server-readback-ssh))
 (in-package #:dreyeck/work/catalog-deployment-pr52)
 
 (defparameter +reviewed-head+ "91e8fd65911e687472fb3e30d1574fa5e9119b1b")
@@ -12,6 +13,8 @@
 (defparameter +target-ref+ "refs/heads/dreyeck.ch")
 (defparameter +task-book-id+ "z11667-catalog-deployment")
 (defparameter +task-page-id+ "catalog-deployment-pr52")
+(defparameter +server-topic-id+ "tag:dreyeck.ch,2026:hyperdoc/server/dreyeck.ch")
+(defparameter +server-page-id+ "server-dreyeck-ch")
 (defvar *planner-lock* (sb-thread:make-mutex :name "PR 52 SHOP3 search"))
 (defvar *open-deployment* nil)
 
@@ -23,36 +26,62 @@
    (observations :initform nil :accessor observations)
    (command :initform nil :accessor command)
    (message :initform nil :accessor message-of)
+   (server-topic :initform nil :accessor server-topic-of)
+   (server-readback-ssh :initarg :server-readback-ssh :initform nil :accessor server-readback-ssh-p)
    (publish-enabled :initform nil :accessor publish-enabled-p)
    (lock :initform (sb-thread:make-mutex :name "PR 52 deployment") :reader lock-of)))
 
 (defclass deployment-book (hb:hyperbook)
-  ((task-page :initform nil :accessor task-page-of)))
+  ((task-page :initform nil :accessor task-page-of)
+   (server-page :initform nil :accessor server-page-of)))
 
 (defclass deployment-page (hb:page)
   ((deployment :initarg :deployment :reader deployment-of)))
 
+(defclass server-topic (tm:topicmap-topic) ())
+
+(defclass server-page (hb:page)
+  ((task-page :initarg :task-page :reader task-page-of)))
+
+(defun deployment-server-topic (deployment)
+  (or (server-topic-of deployment)
+      (setf (server-topic-of deployment)
+            (make-instance 'server-topic :id +server-topic-id+ :label "dreyeck.ch"
+                                         :type :nixos-server :object deployment))))
+
 (defmethod hb:title-of ((book deployment-book)) "Catalog Deployment")
 (defmethod hb:title-of ((page deployment-page)) "Geprüften HyperDoc-Stand in dreyeck.ch übernehmen")
-(defmethod hb:main-page-id-of ((book deployment-book)) +task-page-id+)
+(defmethod hb:title-of ((page server-page)) "Server dreyeck.ch")
+(defmethod hb:main-page-id-of ((book deployment-book)) +server-page-id+)
+
+(defun ensure-server-page (book)
+  (or (server-page-of book)
+      (when (task-page-of book)
+        (setf (server-page-of book)
+              (make-instance 'server-page :id +server-page-id+ :hyperbook book
+                                          :task-page (task-page-of book))))))
 
 (defmethod hb:find-page ((book deployment-book) id &key signal-error?)
-  (or (and (equal id +task-page-id+) (task-page-of book))
+  (or (cond ((equal id +task-page-id+) (task-page-of book))
+            ((equal id +server-page-id+) (ensure-server-page book)))
       (when signal-error?
         (error 'hb:page-lookup-failure :hyperbook book :page-id id))))
 
 (defun attach-task-page (book deployment)
+  (setf (server-page-of book) nil)
   (setf (task-page-of book) (make-instance 'deployment-page :id +task-page-id+
                                                             :hyperbook book :deployment deployment)))
 
-(defun make-deployment (&key (repository (asdf:system-source-directory "dreyeck")) remote (source-remote remote))
+(defun make-deployment (&key (repository (asdf:system-source-directory "dreyeck"))
+                             remote (source-remote remote) server-readback-ssh)
   "Bind the task to an existing Git checkout and explicitly selected Git remotes."
   (dolist (name (list remote source-remote))
     (unless (and (stringp name) (plusp (length name)) (char/= #\- (char name 0))
                  (every (lambda (c) (find c "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._/")) name))
       (error "Gib ein konfiguriertes Git-Remote mit :REMOTE an.")))
   (make-instance 'deployment :repository (uiop:ensure-directory-pathname repository)
-                             :remote remote :source-remote source-remote))
+                             :remote remote :source-remote source-remote
+                             :server-readback-ssh server-readback-ssh))
 
 (shop3:defdomain (catalog-deployment-pr52 :noset t)
   ((:operator (!offer ?step) () () ((offered ?step)))
@@ -60,7 +89,9 @@
      observe-git ((not (observed :observe-git))) ((!offer :observe-git))
      integrate ((observed :observe-git) (not (observed :integrate))) ((!offer :integrate))
      publish-ref ((observed :integrate) (not (observed :publish-ref))) ((!offer :publish-ref))
-     read-baseline ((observed :publish-ref) (not (observed :baseline))) ((!offer :baseline))
+     complete-from-readback ((observed :publish-ref) (observed :active-readback)) ()
+     read-baseline ((observed :publish-ref) (not (observed :active-readback))
+                    (not (observed :baseline))) ((!offer :baseline))
      git-source ((observed :baseline) (not (observed :git-source))) ((!offer :git-source))
      build ((observed :git-source) (not (observed :build))) ((!offer :build))
      activate ((observed :build) (not (observed :activate))) ((!offer :activate))
@@ -216,13 +247,16 @@
 (defun target-revision (deployment)
   (second (assoc :publish-ref (observations deployment))))
 
+(defun deployment-script ()
+  (uiop:read-file-string (asdf:system-relative-pathname "dreyeck/work/catalog-deployment-pr52"
+                                                       "dreyeck/work/catalog-deployment-pr52.sh")
+                         :external-format :utf-8))
+
 (defun server-command (deployment step)
-  (let ((script (asdf:system-relative-pathname "dreyeck/work/catalog-deployment-pr52"
-                                             "dreyeck/work/catalog-deployment-pr52.sh"))
-        (dir (third (assoc :baseline (observations deployment)))))
+  (let ((dir (third (assoc :baseline (observations deployment)))))
     (format nil "bash -s -- ~A '~A'~@[ '~A'~] <<'HYPERDOC_PR52'~%~AHYPERDOC_PR52~%"
             (string-downcase (symbol-name step)) (target-revision deployment) dir
-            (uiop:read-file-string script :external-format :utf-8))))
+            (deployment-script))))
 
 (defun play-step (deployment step)
   (sb-thread:with-mutex ((lock-of deployment))
@@ -244,31 +278,71 @@
       (error (condition) (setf (message-of deployment) (princ-to-string condition)))))
   deployment)
 
-(defun record-receipt (deployment evidence)
-  "Record operator readback. Evidence is Lisp data, never an executable form."
-  (sb-thread:with-mutex ((lock-of deployment))
+(defun catalog-health-p (values)
+  (and (= (length values) 3)
+       (typep (first values) '(integer 1))
+       (equal (rest values) '(200 200))))
+
+(defun check-receipt (deployment evidence)
+  (let ((offered (offered-step (plan-next deployment)))
+        (target (target-revision deployment)))
+    (when (eq :active-readback (first evidence))
+      (destructuring-bind (revision path &rest health) (rest evidence)
+        (return-from check-receipt
+          (and (eq offered :baseline) (equal revision target)
+               (system-path-p path) (catalog-health-p health)))))
     (destructuring-bind (step revision dir path &rest extra) evidence
       (let ((baseline (assoc :baseline (observations deployment)))
             (build (assoc :build (observations deployment))))
-        (unless (and (command deployment) (eq step (offered-step (plan-next deployment)))
-                     (equal revision (target-revision deployment))
-                     (receipt-path-p dir) (system-path-p path)
-                     (or (eq step :baseline) (equal dir (third baseline)))
-                     (ecase step
-                       (:baseline (and (= (length extra) 2) (hex-revision-p (first extra))
-                                       (member (second extra) '(:git :other))))
-                       (:git-source (and (null extra) (equal path (fourth baseline))))
-                       (:build (null extra))
-                       (:activate (and (null extra) (equal path (fourth build))))
-                       (:verify (and (equal path (fourth build)) (= (length extra) 3)
-                                     (typep (first extra) '(integer 1))
-                                     (equal (rest extra) '(200 200))))))
-          (error "Serverbeleg passt nicht zum angebotenen Schritt, zur Revision oder zum Systempfad."))
-        (push (copy-tree evidence) (observations deployment))
-        (when (and (eq step :baseline) (eq :git (second extra)))
-          (push (list :git-source revision dir path) (observations deployment)))
-        (setf (command deployment) nil (message-of deployment) nil))))
-  (plan-next deployment))
+        (and (command deployment) (eq step offered)
+             (equal revision target) (receipt-path-p dir) (system-path-p path)
+             (or (eq step :baseline) (equal dir (third baseline)))
+             (case step
+               (:baseline (and (= (length extra) 2) (hex-revision-p (first extra))
+                               (member (second extra) '(:git :other))))
+               (:git-source (and (null extra) (equal path (fourth baseline))))
+               (:build (null extra))
+               (:activate (and (null extra) (equal path (fourth build))))
+               (:verify (and (equal path (fourth build)) (catalog-health-p extra)))))))))
+
+(defun record-receipt (deployment evidence)
+  "Record operator readback as data for the current SHOP3 offer."
+  (sb-thread:with-mutex ((lock-of deployment))
+    (unless (and (eq :active-readback (first evidence))
+                 (equal evidence (first (observations deployment))))
+      (unless (check-receipt deployment evidence)
+        (error "Serverbeleg passt nicht zum angebotenen Schritt, zur Revision oder zum Systempfad."))
+      (push (copy-tree evidence) (observations deployment))
+      (when (and (eq (first evidence) :baseline) (eq (sixth evidence) :git))
+        (destructuring-bind (step revision dir path &rest extra) evidence
+          (declare (ignore step extra))
+          (push (list :git-source revision dir path) (observations deployment))))
+      (setf (command deployment) nil (message-of deployment) nil))
+    (plan-next deployment)))
+
+(defun parse-ssh-readback (output)
+  (destructuring-bind (revision system pid local-http public-http)
+      (uiop:split-string (string-right-trim '(#\Newline #\Return) output) :separator '(#\Tab))
+    (list :active-readback revision system (parse-integer pid)
+          (parse-integer local-http) (parse-integer public-http))))
+
+(defun play-server-readback (deployment)
+  (handler-case
+      (let ((revision (target-revision deployment)))
+        (unless (and (publish-enabled-p deployment) (server-readback-ssh-p deployment)
+                     (hex-revision-p revision) (eq :baseline (offered-step (plan-next deployment))))
+          (error "Dieser Server-Readback gehört zu einem lokalen Angebot :BASELINE mit aktivierter SSH-Verbindung."))
+        (with-input-from-string (input (deployment-script))
+          (multiple-value-bind (output diagnostic exit)
+              (uiop:run-program (list "ssh" "-T" "-o" "BatchMode=yes" "-o" "StrictHostKeyChecking=yes"
+                                      "-o" "ConnectTimeout=10" "-o" "ClearAllForwardings=yes"
+                                      "root@dreyeck.ch" (format nil "bash -s -- readback ~A" revision))
+                                :input input :output :string :error-output :string :ignore-error-status t)
+            (unless (eql 0 exit)
+              (error "Server-Readback über SSH (Exit ~D): ~A" exit diagnostic))
+            (record-receipt deployment (parse-ssh-readback output)))))
+    (error (condition) (setf (message-of deployment) (princ-to-string condition))))
+  (deployment-server-topic deployment))
 
 (policy:register-reviewed-control "catalog-deployment-pr52/play"
   :effect "Observes selected Git refs, constructs a local commit object, or prepares an operator-owned server command."
@@ -278,10 +352,20 @@
   :effect "Publishes the verified Git merge commit to the configured peer's dreyeck.ch ref."
   :audit "PUBLISH-REF verifies parents and tree, uses an explicit old-value lease, and reads the ref back.")
 
+(policy:register-reviewed-control "catalog-deployment-pr52/server-readback"
+  :effect "Reads the active Catalog as the local operator via the fixed dreyeck.ch SSH route."
+  :audit "PLAY-SERVER-READBACK uses only the fixed readback stage and validates its evidence against the published revision.")
+
 (defun control-for (step)
   (case step
     (:publish-ref (values "Play · Git-Ref veröffentlichen" "catalog-deployment-pr52/publish-ref"))
     (otherwise (values "Play" "catalog-deployment-pr52/play"))))
+
+(defun server-readback-button (deployment)
+  (v:eval-button "Play · Laufenden Catalog lesen"
+                 (policy:reviewed-thunk "catalog-deployment-pr52/server-readback"
+                   (play-server-readback deployment))
+                 "Liest Dienst, Revision und HTTP über die lokale SSH-Sitzung"))
 
 (defun render-task (deployment step)
   (let* ((source (asdf:system-relative-pathname "dreyeck/work/catalog-deployment-pr52"
@@ -301,6 +385,8 @@
             (v:html (v:str (subseq html 0 offset)) " "
                     (v:eval-button label (policy:reviewed-thunk identity (play-step deployment step))
                                    "Diesen SHOP3-Schritt ausführen")
+                    (when (and (eq step :baseline) (server-readback-ssh-p deployment))
+                      (v:html " " (server-readback-button deployment)))
                     (v:str (subseq html (+ offset (length marker))))))
           (v:html (v:str html))))))
 
@@ -310,6 +396,8 @@
       (v:html (:p (v:object-ref plan :display "Nativer SHOP3-Plan") " · "
                   (v:esc (format nil "~S" (or step :complete))))
               (when (message-of deployment) (v:html (:p :role "status" (v:esc (message-of deployment)))))
+              (:p (v:object-ref (deployment-server-topic deployment) :select "Server"
+                                :display "Server-Topic dreyeck.ch"))
               (:p "Git-Remote " (v:esc (remote-of deployment)) " · dreyeck.ch · geprüfter Commit "
                   (v:esc (subseq +reviewed-head+ 0 8)))
               (render-task deployment step)
@@ -326,10 +414,35 @@
 (v:defview deployment-page-task (page deployment-page)
   (task-view (deployment-of page)))
 
+(defun catalog-server-view (topic task)
+  (let* ((deployment (tm:topicmap-topic-object-of topic))
+         (readback (or (assoc :active-readback (observations deployment))
+                       (assoc :verify (observations deployment)))))
+    (v:html-view :title "Server" :priority -100
+      (v:html (:h2 (v:esc (tm:topicmap-topic-label-of topic)))
+              (:p "NixOS · hyperdoc.service · Catalog auf Port 8080")
+              (:p (:code (v:esc (tm:topicmap-topic-id-of topic))))
+              (:p (v:object-ref task :select "DITA Task" :display "Catalog-Deployment öffnen"))
+              (when (and (server-readback-ssh-p deployment)
+                         (eq :baseline (offered-step (plan-next deployment))))
+                (v:html (:p (server-readback-button deployment))))
+              (when (message-of deployment)
+                (v:html (:p :role "status" (v:esc (message-of deployment)))))
+              (when readback
+                (v:html (:h3 "Letzter Readback dieses Laufs")
+                        (:pre (v:esc (format nil "~S" readback)))))))))
+
+(v:defview server-topic-overview (topic server-topic)
+  (catalog-server-view topic (tm:topicmap-topic-object-of topic)))
+
+(v:defview server-page-overview (page server-page)
+  (let ((task (task-page-of page)))
+    (catalog-server-view (deployment-server-topic (deployment-of task)) task)))
+
 (v:defview deployment-book-task (book deployment-book)
-  (v:html-view :title "Aufgabe" :priority -100
-    (v:html (:p (v:object-ref (task-page-of book) :select "DITA Task"
-                             :display "Ausführbares DITA Task Topic öffnen")))))
+  (v:html-view :title "Server" :priority -100
+    (v:html (:p (v:object-ref (ensure-server-page book) :select "Server"
+                             :display "Server dreyeck.ch öffnen")))))
 
 (defun serve (deployment &key (port 18752))
   "Register the task page in a local HyperBook Catalog and return its Inspector URL."
@@ -345,12 +458,20 @@
     (format nil "http://127.0.0.1:~D/~A/~A"
             port (hyperbook/server::slug book) (hb:path-item-of page))))
 
-(defun open-task (&key (repository (asdf:system-source-directory "dreyeck")) remote (source-remote remote) (port 18752))
+(defun open-task (&key (repository (asdf:system-source-directory "dreyeck"))
+                       remote (source-remote remote) (port 18752) server-readback-ssh)
   "Create a local task in the Catalog. Return the direct task URL, the Catalog URL, and the task state."
-  (let* ((deployment (make-deployment :repository repository :remote remote :source-remote source-remote))
+  (let* ((deployment (make-deployment :repository repository :remote remote :source-remote source-remote
+                                      :server-readback-ssh server-readback-ssh))
          (url (serve deployment :port port)))
     (values url (format nil "http://127.0.0.1:~D/" port) deployment)))
 
 (defun submit-receipt (evidence)
   "Record the server readback in the task opened by OPEN-TASK."
   (record-receipt (or *open-deployment* (error "Öffne zuerst das Task Topic mit OPEN-TASK.")) evidence))
+
+(defun enable-server-readback-ssh ()
+  "Allow the local operator's readback button for the already open task."
+  (let ((deployment (or *open-deployment* (error "Öffne zuerst das Task Topic mit OPEN-TASK."))))
+    (setf (server-readback-ssh-p deployment) t)
+    (deployment-server-topic deployment)))

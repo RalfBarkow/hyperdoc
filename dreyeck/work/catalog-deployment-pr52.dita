@@ -21,8 +21,9 @@
         <stepresult>Der zurückgelesene Git-Ref bestimmt die erwartete Serverrevision.</stepresult>
       </step>
       <step id="baseline">
-        <cmd>Den bisherigen Catalog-Stand und die NixOS-Generation sichern.</cmd>
-        <stepresult>Der Serverbeleg nennt Revision, Systempfad, Sicherungsverzeichnis und ob der HyperDoc-Input bereits auf Git zeigt.</stepresult>
+        <cmd>Die laufende Catalog-Revision lesen und bei Bedarf den bisherigen Stand sichern.</cmd>
+        <info><p>Falls die Zielrevision bereits läuft, prüft der Befehl Dienst und HTTP und liefert den Abschlussbeleg. Sonst sichert er die aktuelle NixOS-Generation und den Lockfile vor dem Build.</p></info>
+        <stepresult>Der Beleg bestätigt den laufenden Zielstand oder erfasst die Ausgangslage für den Build.</stepresult>
       </step>
       <step id="git-source">
         <cmd>Den HyperDoc-Input auf eine vom Server lesbare Git-Flake-URL umstellen und prüfen.</cmd>
@@ -42,6 +43,6 @@
         <stepresult>Der Prozess meldet den Integrationscommit und beide HTTP-Abfragen geben 200 zurück.</stepresult>
       </step>
     </steps>
-    <result><p>Öffne auch eine bekannte Catalog-Seite im Browser und folge einem Inspector-Link. Der gesicherte Lockfile und der ursprüngliche Systempfad stehen für den dokumentierten Rollback bereit.</p></result>
+    <result><p>Öffne auch eine bekannte Catalog-Seite im Browser und folge einem Inspector-Link. Bei einem durch diesen Task ausgeführten Deployment stehen der gesicherte Lockfile und der ursprüngliche Systempfad für den dokumentierten Rollback bereit.</p></result>
   </taskbody>
 </task>

@@ -40,6 +40,41 @@ system_path() {
   [[ $1 =~ ^/nix/store/[0-9a-z]{32}-nixos-system-dreyeck-[A-Za-z0-9.+_-]+$ ]]
 }
 
+catalog_pid() {
+  local pid
+  systemctl is-active --quiet hyperdoc.service || fail 'hyperdoc.service ist nicht aktiv.'
+  pid=$(systemctl show hyperdoc.service -p MainPID --value)
+  [[ $pid =~ ^[1-9][0-9]*$ ]] || fail 'hyperdoc.service meldet keine PID.'
+  printf '%s\n' "$pid"
+}
+
+catalog_revision() {
+  local pid=$1
+  tr '\000' '\n' < "/proc/$pid/environ" | sed -n 's/^HYPERDOC_SOURCE_REVISION=//p'
+}
+
+readback_catalog() {
+  local system=$1 pid=$2 running local_status public_status
+  running=$(catalog_revision "$pid")
+  [[ $running == "$revision" ]] || fail 'Der laufende Catalog meldet eine andere HyperDoc-Revision.'
+  local_status=$(curl -sS --max-time 10 -o /dev/null -w '%{http_code}' http://127.0.0.1:8080/)
+  public_status=$(curl -sS --max-time 15 -o /dev/null -w '%{http_code}' https://dreyeck.ch/)
+  [[ $local_status == 200 && $public_status == 200 ]] || fail 'Der Catalog-Readback ergibt nicht zweimal HTTP 200.'
+  [[ $(catalog_pid) == "$pid" && $(readlink -f /run/current-system) == "$system" ]] ||
+    fail 'PID oder Systemgeneration hat sich während des Readbacks geändert.'
+  case "$stage" in
+    baseline)
+      emit_receipt '(:active-readback "%s" "%s" %s %s %s)' "$running" "$system" "$pid" "$local_status" "$public_status"
+      ;;
+    readback)
+      printf '%s\t%s\t%s\t%s\t%s\n' "$running" "$system" "$pid" "$local_status" "$public_status"
+      ;;
+    verify)
+      emit_receipt '(:verify "%s" "%s" "%s" %s %s %s)' "$running" "$receipt" "$system" "$pid" "$local_status" "$public_status"
+      ;;
+  esac
+}
+
 approve_revision() {
   local answer
   printf '%s\n' "$1" >/dev/tty
@@ -66,11 +101,24 @@ restore_failed_build_lock() {
   exit "$status"
 }
 
+if [[ $stage == readback ]]; then
+  active=$(readlink -f /run/current-system)
+  system_path "$active"
+  pid=$(catalog_pid)
+  readback_catalog "$active" "$pid"
+  exit 0
+fi
+
 if [[ $stage == baseline ]]; then
-  systemctl is-active --quiet hyperdoc.service
-  df -h /nix/store
   previous=$(readlink -f /run/current-system)
   system_path "$previous"
+  pid=$(catalog_pid)
+  running=$(catalog_revision "$pid")
+  if [[ $running == "$revision" ]]; then
+    readback_catalog "$previous" "$pid"
+    exit 0
+  fi
+  df -h /nix/store
   old_rev=$(locked_hyperdoc_rev)
   [[ $old_rev =~ ^[0-9a-f]{40}$ ]]
   kind=other
@@ -136,16 +184,8 @@ case "$stage" in
     built=$(cat "$receipt/built-system")
     system_path "$built"
     [[ $(readlink -f /run/current-system) == "$built" ]] || fail 'Die aktive Generation weicht vom Build ab.'
-    systemctl is-active --quiet hyperdoc.service
-    pid=$(systemctl show hyperdoc.service -p MainPID --value)
-    [[ $pid =~ ^[1-9][0-9]*$ ]]
-    running=$(tr '\000' '\n' < "/proc/$pid/environ" | sed -n 's/^HYPERDOC_SOURCE_REVISION=//p')
-    [[ $running == "$revision" ]] || fail 'Der laufende Catalog meldet eine andere HyperDoc-Revision.'
-    local_status=$(curl -fsS --max-time 10 -o /dev/null -w '%{http_code}' http://127.0.0.1:8080/)
-    public_status=$(curl -fsS --max-time 15 -o /dev/null -w '%{http_code}' https://dreyeck.ch/)
-    [[ $local_status == 200 && $public_status == 200 ]] || fail 'Der Catalog-Readback ergibt nicht zweimal HTTP 200.'
-    [[ $(systemctl show hyperdoc.service -p MainPID --value) == "$pid" ]]
-    emit_receipt '(:verify "%s" "%s" "%s" %s %s %s)' "$running" "$receipt" "$built" "$pid" "$local_status" "$public_status"
+    pid=$(catalog_pid)
+    readback_catalog "$built" "$pid"
     ;;
   *) printf 'Unbekannter Catalog-Schritt: %s\n' "$stage" >&2; exit 2 ;;
 esac
