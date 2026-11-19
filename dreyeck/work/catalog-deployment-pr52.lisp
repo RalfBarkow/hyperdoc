@@ -399,7 +399,8 @@
     (let* ((plan (plan-next deployment)) (step (offered-step plan)))
       (v:html (:p (v:object-ref plan :display "Nativer SHOP3-Plan") " · "
                   (v:esc (format nil "~S" (or step :complete))))
-              (when (message-of deployment) (v:html (:p :role "status" (v:esc (message-of deployment)))))
+              (when (and step (message-of deployment))
+                (v:html (:p :role "status" (v:esc (message-of deployment)))))
               (:p (v:object-ref (deployment-server-topic deployment) :select "Server"
                                 :display "Server-Topic dreyeck.ch"))
               (:p "Git-Remote " (v:esc (remote-of deployment)) " · dreyeck.ch · geprüfter Commit "
@@ -427,10 +428,10 @@
               (:p "NixOS · hyperdoc.service · Catalog auf Port 8080")
               (:p (:code (v:esc (tm:topicmap-topic-id-of topic))))
               (:p (v:object-ref task :select "DITA Task" :display "Catalog-Deployment öffnen"))
-              (when (and (server-readback-ssh-p deployment)
+              (when (and (not readback) (server-readback-ssh-p deployment)
                          (eq :baseline (offered-step (plan-next deployment))))
                 (v:html (:p (server-readback-button deployment))))
-              (when (message-of deployment)
+              (when (and (not readback) (message-of deployment))
                 (v:html (:p :role "status" (v:esc (message-of deployment)))))
               (when readback
                 (v:html (:h3 "Letzter Readback dieses Laufs")
