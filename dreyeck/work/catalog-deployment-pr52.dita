@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE task PUBLIC "-//OASIS//DTD DITA Task//EN" "task.dtd">
+<task id="catalog-deployment-pr52" xml:lang="de-CH">
+  <title>Geprüften HyperDoc-Stand in dreyeck.ch übernehmen</title>
+  <shortdesc>Den geprüften Commit mit Git integrieren, den Zielref zurücklesen und die neue Catalog-Generation bereitstellen.</shortdesc>
+  <taskbody>
+    <prereq><p>Das lokale SLY-Image verwendet dreyeck/git. Der Operator wählt das Git-Zielremote und bei Bedarf ein separates Git-Quellremote. Für die NixOS-Schritte steht eine administrative Bash-Sitzung auf dreyeck.ch bereit.</p></prereq>
+    <steps>
+      <step id="observe-git">
+        <cmd>Den geprüften Commit und die Basis des Git-Zielrefs beobachten.</cmd>
+        <info><p>Play liest das ausgewählte Zielremote. Fehlt das geprüfte Commit-Objekt lokal, holt Play es vom gewählten Quellremote.</p></info>
+        <stepresult>Ausgangsrevision, Kandidat und Zielremote liegen als SHOP3-Beleg vor.</stepresult>
+      </step>
+      <step id="integrate">
+        <cmd>Den Integrationscommit mit dem geprüften Baum und beiden Eltern erzeugen.</cmd>
+        <stepresult>Der Integrationscommit ist lokal vorhanden. Arbeitsbaum, Index und Branch-Refs bleiben unverändert.</stepresult>
+      </step>
+      <step id="publish-ref">
+        <cmd>Den Integrationscommit auf refs/heads/dreyeck.ch veröffentlichen.</cmd>
+        <info><p>Dieser Play-Klick gibt den Push frei. Der Empfänger muss noch die zuvor beobachtete Basis haben. Play liest den Zielref nach dem Push zurück.</p></info>
+        <stepresult>Der zurückgelesene Git-Ref bestimmt die erwartete Serverrevision.</stepresult>
+      </step>
+      <step id="baseline">
+        <cmd>Die laufende Catalog-Revision lesen und bei Bedarf den bisherigen Stand sichern.</cmd>
+        <info><p>Falls die Zielrevision bereits läuft, prüft der Befehl Dienst und HTTP und liefert den Abschlussbeleg. Sonst sichert er die aktuelle NixOS-Generation und den Lockfile vor dem Build.</p></info>
+        <stepresult>Der Beleg bestätigt den laufenden Zielstand oder erfasst die Ausgangslage für den Build.</stepresult>
+      </step>
+      <step id="git-source">
+        <cmd>Den HyperDoc-Input auf eine vom Server lesbare Git-Flake-URL umstellen und prüfen.</cmd>
+        <info><p>Dieser Schritt ist dran, wenn der gesicherte Input noch nicht als git+… deklariert ist. Bearbeite die bestehende NixOS-Deklaration und führe den von Play erzeugten Lesebefehl aus.</p></info>
+        <stepresult>Die Deklaration belegt einen Git-Input. Der Build prüft danach den aufgelösten Commit im Lockfile.</stepresult>
+      </step>
+      <step id="build">
+        <cmd>Den HyperDoc-Pin aktualisieren, Lock-Diff prüfen, Generation bauen und Aktivierungsvorschau lesen.</cmd>
+        <stepresult>Der Serverbeleg bindet die gebaute Generation an den veröffentlichten Git-Commit.</stepresult>
+      </step>
+      <step id="activate">
+        <cmd>Nach Prüfung der Vorschau die gebaute NixOS-Generation als Operator aktivieren.</cmd>
+        <stepresult>Der Serverbeleg bestätigt die aktive Systemgeneration.</stepresult>
+      </step>
+      <step id="verify">
+        <cmd>Dienst, laufende Quellrevision sowie den lokalen und den öffentlichen Catalog zurücklesen.</cmd>
+        <stepresult>Der Prozess meldet den Integrationscommit und beide HTTP-Abfragen geben 200 zurück.</stepresult>
+      </step>
+    </steps>
+    <result><p>Öffne auch eine bekannte Catalog-Seite im Browser und folge einem Inspector-Link. Bei einem durch diesen Task ausgeführten Deployment stehen der gesicherte Lockfile und der ursprüngliche Systempfad für den dokumentierten Rollback bereit.</p></result>
+  </taskbody>
+</task>
