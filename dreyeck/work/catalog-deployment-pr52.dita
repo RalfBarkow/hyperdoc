@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE task PUBLIC "-//OASIS//DTD DITA Task//EN" "task.dtd">
+<task id="catalog-deployment-pr52" xml:lang="de-CH">
+  <title>Catalog auf dreyeck.ch nach PR #52 aktualisieren</title>
+  <shortdesc>Den geprüften Merge als NixOS-Generation bauen, aktivieren und im laufenden Catalog nachweisen.</shortdesc>
+  <taskbody>
+    <prereq><p>Der Operator bedient GitHub und eine administrative Bash-Sitzung auf dreyeck.ch. Das Lineup läuft im lokalen SLY-Image.</p></prereq>
+    <steps>
+      <step id="merge">
+        <cmd>PR #52 nach eigener Freigabe auf GitHub mergen und den Merge zurücklesen.</cmd>
+        <info><p>Play liest PR-HEAD, Merge-Commit und Zielbranch über GitHub.</p></info>
+        <stepresult>Der beobachtete Merge-Commit bestimmt die erwartete Serverrevision.</stepresult>
+      </step>
+      <step id="baseline">
+        <cmd>Den bisherigen Catalog-Stand und die NixOS-Generation sichern.</cmd>
+        <stepresult>Der Serverbeleg nennt Quellrevision, Systempfad und Sicherungsverzeichnis.</stepresult>
+      </step>
+      <step id="build">
+        <cmd>Den HyperDoc-Pin aktualisieren, den Lock-Diff prüfen, die Generation bauen und die Aktivierungsvorschau lesen.</cmd>
+        <stepresult>Der Serverbeleg bindet die gebaute Generation an den geprüften Merge-Commit.</stepresult>
+      </step>
+      <step id="activate">
+        <cmd>Nach Prüfung der Vorschau die gebaute NixOS-Generation als Operator aktivieren.</cmd>
+        <stepresult>Der Serverbeleg bestätigt die aktive Systemgeneration.</stepresult>
+      </step>
+      <step id="verify">
+        <cmd>Dienst, laufende Quellrevision sowie den lokalen und den öffentlichen Catalog zurücklesen.</cmd>
+        <stepresult>Der Prozess meldet den Merge-Commit und beide HTTP-Abfragen geben 200 zurück.</stepresult>
+      </step>
+    </steps>
+    <result><p>Öffne auch eine bekannte Catalog-Seite im Browser und folge einem Inspector-Link. Der gesicherte Lockfile und der ursprüngliche Systempfad stehen für den dokumentierten Rollback bereit.</p></result>
+  </taskbody>
+</task>

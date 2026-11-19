@@ -3647,6 +3647,22 @@
              (uiop:symbol-call :dreyeck/lisp-critic/engine-integration/tests :run-page-station-layout-tests)))
 
 
+(asdf:defsystem "dreyeck/work/catalog-deployment-pr52"
+  :description "Optional operator-owned SHOP3 and executable DITA Catalog deployment for PR #52"
+  :depends-on ("dreyeck/shop3" "dreyeck/authority-policy" "dreyeck/dita-story-item"
+               "html-inspector-views" "clog" "clog-moldable-inspector" "shasht" "plump")
+  :components ((:file "dreyeck/work/catalog-deployment-pr52")
+               (:static-file "dreyeck/work/catalog-deployment-pr52.dita")
+               (:static-file "dreyeck/work/catalog-deployment-pr52.sh"))
+  :in-order-to ((asdf:test-op (asdf:test-op "dreyeck/work/catalog-deployment-pr52/tests"))))
+
+(asdf:defsystem "dreyeck/work/catalog-deployment-pr52/tests"
+  :depends-on ("dreyeck/work/catalog-deployment-pr52")
+  :components ((:file "dreyeck/tests/catalog-deployment-pr52"))
+  :perform (asdf:test-op (operation component)
+             (declare (ignore operation component))
+             (uiop:symbol-call "DREYECK/WORK/CATALOG-DEPLOYMENT-PR52" "RUN-TESTS")))
+
 (defsystem "dreyeck/work/remote-control-planning"
   :description "Optional plan-only mobile-control architecture experiment; no executor"
   :depends-on ("dreyeck/shop3")
