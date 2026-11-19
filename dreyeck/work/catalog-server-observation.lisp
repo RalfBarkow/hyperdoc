@@ -22,11 +22,14 @@
 
 (v:defview local-operator-host (page local-host-page)
   (let* ((remote-host (remote-host-of page))
-         (deployment (deployment-of remote-host)))
+         (deployment (deployment-of remote-host))
+         (image-root (uiop:getenv "HYPERDOC_REPO_ROOT")))
     (v:html-view :title "Host" :priority -100
       (v:html (:h2 (v:esc (local-host-name page)))
               (:p (v:esc (format nil "Lokaler HyperDoc-Catalog · Port 8080 · PID ~D" (sb-unix:unix-getpid))))
-              (:p (:code (v:esc (namestring (repository-of deployment)))))
+              (:p "Image-Checkout " (:code (v:esc (or image-root "Unbekannt"))))
+              (:p "Git-Repository für den Branch-Vergleich "
+                  (:code (v:esc (namestring (repository-of deployment)))))
               (:p (v:object-ref remote-host :select "Host" :display "Host dreyeck.ch öffnen"))))))
 
 (defun ensure-server-observation (deployment)
