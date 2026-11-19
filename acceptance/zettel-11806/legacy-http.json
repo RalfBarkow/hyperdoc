@@ -1,0 +1,468 @@
+{
+  "origin": "http://fork-test-u6mhk30o.test",
+  "slug": "publish-page-test",
+  "transport": {
+    "socket": "private Unix socket",
+    "parentMode": "0700",
+    "tcpListeners": 0
+  },
+  "approvedManifest": {
+    "slug": "publish-page-test",
+    "sourceSite": "source.fixture.test",
+    "forkDate": 1795062396074,
+    "pageSha256": "450d60f0f8fbcf9a97d940c50a8c280031df092aa2938c80c12f9b36a81a754d",
+    "assetsItem": "c2e7839577a01d03",
+    "assets": {
+      "note.txt": "802cf7799930ddeed76cdc648b6090261630d5fa256f2237bd067b6c0cc7cf72",
+      "publish-page-test.zip": "bb49a5912710fd2f797a4f43f68a3c983185495ca243aea1566266436e4e4019"
+    }
+  },
+  "server": "0.26.2",
+  "manifestSha256": "b9ff9866a862c9a37f11f92e3d86ecec97df960fddd7e2d5f47e19551bbae81d",
+  "assetSha256": {
+    "note.txt": "802cf7799930ddeed76cdc648b6090261630d5fa256f2237bd067b6c0cc7cf72",
+    "publish-page-test.zip": "bb49a5912710fd2f797a4f43f68a3c983185495ca243aea1566266436e4e4019"
+  },
+  "requests": [
+    {
+      "method": "POST",
+      "path": "/fixture/login",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/pages/publish-page-test/note.txt",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/pages/publish-page-test/publish-page-test.zip",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/publish-page-test.json",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/pages/publish-page-test/note.txt",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/pages/publish-page-test/publish-page-test.zip",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/publish-page-test.json",
+      "status": 200
+    },
+    {
+      "method": "PUT",
+      "path": "/page/publish-page-test/action",
+      "status": 403,
+      "type": "fork",
+      "forkPage": true,
+      "action": {
+        "type": "fork",
+        "site": "source.fixture.test",
+        "date": 1795062396074,
+        "releaseSha256": "b9ff9866a862c9a37f11f92e3d86ecec97df960fddd7e2d5f47e19551bbae81d",
+        "forkPage": {
+          "title": "Publish Page Test",
+          "story": [
+            {
+              "id": "c2e7839577a01d01",
+              "type": "paragraph",
+              "text": "Freigegebene Prüffassung."
+            },
+            {
+              "id": "c2e7839577a01d02",
+              "type": "markdown",
+              "text": "**Zweiter** Absatz."
+            },
+            {
+              "id": "c2e7839577a01d03",
+              "type": "assets",
+              "text": "pages/publish-page-test"
+            }
+          ],
+          "journal": [
+            {
+              "type": "create",
+              "date": 1700000000000,
+              "item": {
+                "title": "Publish Page Test",
+                "story": [
+                  {
+                    "id": "c2e7839577a01d01",
+                    "type": "paragraph",
+                    "text": "Freigegebene Prüffassung."
+                  },
+                  {
+                    "id": "c2e7839577a01d02",
+                    "type": "markdown",
+                    "text": "**Zweiter** Absatz."
+                  },
+                  {
+                    "id": "c2e7839577a01d03",
+                    "type": "assets",
+                    "text": "pages/publish-page-test"
+                  }
+                ]
+              }
+            },
+            {
+              "type": "fork",
+              "site": "older.fixture.test",
+              "date": 1700000001000
+            }
+          ]
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/publish-page-test.json",
+      "status": 200
+    },
+    {
+      "method": "PUT",
+      "path": "/page/publish-page-test/action",
+      "status": 200,
+      "type": "fork",
+      "forkPage": true,
+      "action": {
+        "type": "fork",
+        "site": "source.fixture.test",
+        "date": 1795062396074,
+        "forkPage": {
+          "title": "Publish Page Test",
+          "story": [
+            {
+              "id": "c2e7839577a01d01",
+              "type": "paragraph",
+              "text": "Freigegebene Prüffassung."
+            },
+            {
+              "id": "c2e7839577a01d02",
+              "type": "markdown",
+              "text": "**Zweiter** Absatz."
+            },
+            {
+              "id": "c2e7839577a01d03",
+              "type": "assets",
+              "text": "pages/publish-page-test"
+            }
+          ],
+          "journal": [
+            {
+              "type": "create",
+              "date": 1700000000000,
+              "item": {
+                "title": "Publish Page Test",
+                "story": [
+                  {
+                    "id": "c2e7839577a01d01",
+                    "type": "paragraph",
+                    "text": "Freigegebene Prüffassung."
+                  },
+                  {
+                    "id": "c2e7839577a01d02",
+                    "type": "markdown",
+                    "text": "**Zweiter** Absatz."
+                  },
+                  {
+                    "id": "c2e7839577a01d03",
+                    "type": "assets",
+                    "text": "pages/publish-page-test"
+                  }
+                ]
+              }
+            },
+            {
+              "type": "fork",
+              "site": "older.fixture.test",
+              "date": 1700000001000
+            }
+          ]
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/publish-page-test.json",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/publish-page-test.json",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/pages/publish-page-test/note.txt",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/pages/publish-page-test/publish-page-test.zip",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/publish-page-test.json",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/publish-page-test.json",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/pages/publish-page-test/note.txt",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/pages/publish-page-test/publish-page-test.zip",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/publish-page-test.json",
+      "status": 200
+    },
+    {
+      "method": "PUT",
+      "path": "/page/publish-page-test/action",
+      "status": 200,
+      "type": "fork",
+      "forkPage": true,
+      "action": {
+        "type": "fork",
+        "site": "source.fixture.test",
+        "date": 1795062396074,
+        "releaseSha256": "b9ff9866a862c9a37f11f92e3d86ecec97df960fddd7e2d5f47e19551bbae81d",
+        "forkPage": {
+          "title": "Publish Page Test",
+          "story": [
+            {
+              "id": "c2e7839577a01d01",
+              "type": "paragraph",
+              "text": "Freigegebene Prüffassung."
+            },
+            {
+              "id": "c2e7839577a01d02",
+              "type": "markdown",
+              "text": "**Zweiter** Absatz."
+            },
+            {
+              "id": "c2e7839577a01d03",
+              "type": "assets",
+              "text": "pages/publish-page-test"
+            }
+          ],
+          "journal": [
+            {
+              "type": "create",
+              "date": 1700000000000,
+              "item": {
+                "title": "Publish Page Test",
+                "story": [
+                  {
+                    "id": "c2e7839577a01d01",
+                    "type": "paragraph",
+                    "text": "Freigegebene Prüffassung."
+                  },
+                  {
+                    "id": "c2e7839577a01d02",
+                    "type": "markdown",
+                    "text": "**Zweiter** Absatz."
+                  },
+                  {
+                    "id": "c2e7839577a01d03",
+                    "type": "assets",
+                    "text": "pages/publish-page-test"
+                  }
+                ]
+              }
+            },
+            {
+              "type": "fork",
+              "site": "older.fixture.test",
+              "date": 1700000001000
+            }
+          ]
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/publish-page-test.json",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/publish-page-test.json",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/pages/publish-page-test/note.txt",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/pages/publish-page-test/publish-page-test.zip",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/publish-page-test.json",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/publish-page-test.json",
+      "status": 200
+    }
+  ],
+  "journal": [
+    {
+      "type": "create",
+      "date": 1700000000000,
+      "item": {
+        "title": "Publish Page Test",
+        "story": [
+          {
+            "id": "c2e7839577a01d01",
+            "type": "paragraph",
+            "text": "Freigegebene Prüffassung."
+          },
+          {
+            "id": "c2e7839577a01d02",
+            "type": "markdown",
+            "text": "**Zweiter** Absatz."
+          },
+          {
+            "id": "c2e7839577a01d03",
+            "type": "assets",
+            "text": "pages/publish-page-test"
+          }
+        ]
+      }
+    },
+    {
+      "type": "fork",
+      "site": "older.fixture.test",
+      "date": 1700000001000
+    },
+    {
+      "type": "fork",
+      "site": "source.fixture.test",
+      "date": 1795062396074,
+      "releaseSha256": "b9ff9866a862c9a37f11f92e3d86ecec97df960fddd7e2d5f47e19551bbae81d"
+    }
+  ],
+  "shop3Receipts": {
+    "fixture": "http://fork-test-u6mhk30o.test",
+    "offered": "publish-page",
+    "plan-mode": "plan-only",
+    "plan-archive": "e4f3612f0d80c87571e37b99d1f927144fea9de28dd47a82a7567aee52fb33ff",
+    "release": "manifest-sha256=b9ff9866a862c9a37f11f92e3d86ecec97df960fddd7e2d5f47e19551bbae81d",
+    "runs": [
+      {
+        "case": "wrong-plan-binding",
+        "puts": 0,
+        "result": {
+          "status": "plan-mismatch"
+        }
+      },
+      {
+        "case": "wrong-release",
+        "puts": 0,
+        "result": {
+          "status": "plan-mismatch"
+        }
+      },
+      {
+        "case": "missing-login",
+        "puts": 1,
+        "result": {
+          "status": "unauthorized",
+          "http": 403
+        }
+      },
+      {
+        "case": "legacy-after-planning",
+        "puts": 0,
+        "result": {
+          "status": "reconcile-target",
+          "expected": "f84a41b1a0124cd23bd5d686b0595a9ffe7382545cf13d8b0e6f238c24a4bf1f",
+          "observed": "604bb0ae95866423eb94c925c7efe415260d21e95397b3014595f158810b3211",
+          "evidence": {
+            "target-conflict": "manifest-sha256=b9ff9866a862c9a37f11f92e3d86ecec97df960fddd7e2d5f47e19551bbae81d origin=http://fork-test-u6mhk30o.test slug=publish-page-test revision=604bb0ae95866423eb94c925c7efe415260d21e95397b3014595f158810b3211"
+          }
+        }
+      },
+      {
+        "case": "reviewed-legacy-revision",
+        "puts": 1,
+        "result": {
+          "status": "published",
+          "evidence": {
+            "public-page-verified": "manifest-sha256=b9ff9866a862c9a37f11f92e3d86ecec97df960fddd7e2d5f47e19551bbae81d origin=http://fork-test-u6mhk30o.test slug=publish-page-test revision=c72c55b6544585e931f2b90621a9850a729ba4954db02f6047eb0052b7351da4"
+          },
+          "title": "Publish Page Test",
+          "item-ids": [
+            "c2e7839577a01d01",
+            "c2e7839577a01d02",
+            "c2e7839577a01d03"
+          ],
+          "assets-item": "c2e7839577a01d03",
+          "journal-length": 3,
+          "fork-site": "source.fixture.test",
+          "fork-date": 1795062396074,
+          "http": 200
+        }
+      },
+      {
+        "case": "tagged-retry",
+        "puts": 0,
+        "result": {
+          "status": "already-published",
+          "evidence": {
+            "public-page-verified": "manifest-sha256=b9ff9866a862c9a37f11f92e3d86ecec97df960fddd7e2d5f47e19551bbae81d origin=http://fork-test-u6mhk30o.test slug=publish-page-test revision=c72c55b6544585e931f2b90621a9850a729ba4954db02f6047eb0052b7351da4"
+          },
+          "title": "Publish Page Test",
+          "item-ids": [
+            "c2e7839577a01d01",
+            "c2e7839577a01d02",
+            "c2e7839577a01d03"
+          ],
+          "assets-item": "c2e7839577a01d03",
+          "journal-length": 3,
+          "fork-site": "source.fixture.test",
+          "fork-date": 1795062396074
+        }
+      }
+    ],
+    "rejected-readback-fields": [
+      "title",
+      "text",
+      "id",
+      "order",
+      "assets-reference",
+      "source-journal",
+      "extra-fork",
+      "fork-site",
+      "fork-date",
+      "release-digest"
+    ],
+    "next-step": "verify-publication"
+  }
+}
