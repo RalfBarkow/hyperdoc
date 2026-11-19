@@ -1,5 +1,6 @@
 """Own a fresh SBCL and attach Emacs to its reported Slynk endpoint."""
 
+import argparse
 import os
 from pathlib import Path
 import queue
@@ -60,7 +61,36 @@ def stop(process):
             process.wait()
 
 
+def start_lisp(repo, env, log):
+    """Start one fresh image and wait for its private endpoint announcement."""
+    lisp = None
+    reader, writer = os.pipe()
+    try:
+        try:
+            lisp = subprocess.Popen([
+                "sbcl", "--dynamic-space-size", "8192", "--noinform",
+                "--no-sysinit", "--no-userinit", "--non-interactive",
+                "--load", str(repo / "scripts" / "hyperdoc-slynk.lisp")
+            ], cwd=repo, env=dict(env, HYPERDOC_ENDPOINT_FD=str(writer)),
+                stdin=subprocess.DEVNULL, stdout=log, stderr=log,
+                pass_fds=(writer,), start_new_session=True)
+        finally:
+            os.close(writer)
+        return lisp, read_endpoint(reader)
+    except BaseException:
+        stop(lisp)
+        raise
+    finally:
+        os.close(reader)
+
+
 def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--fedwiki", action="store_true")
+    parser.add_argument("--install-page", type=Path, metavar="SITE_ROOT")
+    options = parser.parse_args()
+    if options.install_page and not options.fedwiki:
+        parser.error("--install-page requires --fedwiki")
     repo = Path(subprocess.check_output(
         ["git", "rev-parse", "--show-toplevel"], text=True).strip())
     scripts = repo / "scripts"
@@ -75,29 +105,20 @@ def main():
     env = dict(os.environ, HYPERDOC_REPO_ROOT=str(repo),
                HYPERDOC_SLYNK_LOADER=loader)
     lisp = editor = None
-    reader, writer = os.pipe()
-    env["HYPERDOC_ENDPOINT_FD"] = str(writer)
 
     def interrupted(signum, _frame):
         raise SystemExit(128 + signum)
 
     for signum in (signal.SIGINT, signal.SIGTERM, signal.SIGHUP):
         signal.signal(signum, interrupted)
+    if options.fedwiki:
+        from hyperdoc_sly_fedwiki import serve
+        return serve(repo, env, start_lisp, stop, banner, options.install_page)
     with tempfile.TemporaryFile(mode="w+b") as log:
         try:
             print("Starting a fresh SBCL image...", flush=True)
-            try:
-                lisp = subprocess.Popen([
-                    "sbcl", "--dynamic-space-size", "8192", "--noinform",
-                    "--no-sysinit", "--no-userinit", "--non-interactive",
-                    "--load", str(scripts / "hyperdoc-slynk.lisp")
-                ], cwd=repo, env=env, stdin=subprocess.DEVNULL,
-                    stdout=log, stderr=log, pass_fds=(writer,), start_new_session=True)
-            finally:
-                os.close(writer)
-            endpoint = read_endpoint(reader)
+            lisp, endpoint = start_lisp(repo, env, log)
             print(banner(repo, endpoint), flush=True)
-            env.pop("HYPERDOC_ENDPOINT_FD")
             env.update(HYPERDOC_SLYNK_HOST=endpoint[0],
                        HYPERDOC_SLYNK_PORT=str(endpoint[1]))
             editor = subprocess.Popen(
@@ -120,7 +141,6 @@ def main():
             print(log.read().decode("utf-8", errors="replace"), flush=True)
             raise
         finally:
-            os.close(reader)
             stop(editor)
             stop(lisp)
 

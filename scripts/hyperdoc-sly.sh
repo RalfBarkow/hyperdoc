@@ -3,4 +3,4 @@ set -euo pipefail
 
 repo_root="$(git rev-parse --show-toplevel)"
 cd "$repo_root"
-exec python3 "$repo_root/scripts/hyperdoc-sly.py"
+exec python3 "$repo_root/scripts/hyperdoc-sly.py" "$@"
