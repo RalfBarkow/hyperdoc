@@ -102,7 +102,11 @@
   "Return the native plan result for operator evidence already recorded."
   (sb-thread:with-mutex (*planner-lock*)
     (let* ((name (gensym "CATALOG-PR52-"))
-           (facts (loop for (step . values) in (observations deployment)
+           (evidence (observations deployment))
+           ;; SHOP3 4.3.1's tree extractor requires a nonempty primitive plan.
+           (collect-trees-p (not (or (assoc :active-readback evidence)
+                                     (assoc :verify evidence))))
+           (facts (loop for (step . values) in evidence
                         collect (list 'observed step) collect (list 'evidence step values)))
            (domain 'catalog-deployment-pr52)
            (shop3::*problem* shop3::*problem*)
@@ -111,7 +115,7 @@
       (unwind-protect
            (multiple-value-bind (raw seconds trees states)
                (shop3:find-plans problem :domain (shop3:find-domain domain) :which :all
-                                :verbose 0 :plan-tree t :collect-state t)
+                                :verbose 0 :plan-tree collect-trees-p :collect-state t)
              (make-instance 'dreyeck/shop3:hyperdoc-htn-plan-result
                             :problem-name name :raw-plans raw :plans (mapcar #'shop3:shorter-plan raw)
                             :time seconds :plan-trees trees :final-states states :initial-facts facts
