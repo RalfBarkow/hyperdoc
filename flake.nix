@@ -261,10 +261,6 @@
               export CL_SOURCE_REGISTRY="${workflow-source-editor}//:$CL_SOURCE_REGISTRY"
             '';
           };
-          catalog-deployment-pr52 = pkgs.mkShell {
-            inputsFrom = [ self.devShells.${system}.default ];
-            packages = [ pkgs.gh ];
-          };
           topic-maps = self.devShells.${system}.default;
           tala = pkgs.mkShell {
             inputsFrom = [ self.devShells.${system}.default ];

@@ -1,28 +1,37 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE task PUBLIC "-//OASIS//DTD DITA Task//EN" "task.dtd">
 <task id="catalog-deployment-pr52" xml:lang="de-CH">
-  <title>Catalog auf dreyeck.ch nach PR #52 aktualisieren</title>
-  <shortdesc>Den geprüften Merge als NixOS-Generation bauen, aktivieren und im laufenden Catalog nachweisen.</shortdesc>
+  <title>Geprüften HyperDoc-Stand in dreyeck.ch übernehmen</title>
+  <shortdesc>Den geprüften Commit mit Git integrieren, den Zielref zurücklesen und die neue Catalog-Generation bereitstellen.</shortdesc>
   <taskbody>
-    <prereq><p>Starte das lokale SLY-Image aus dem Checkout mit <codeph>nix develop --no-write-lock-file .#catalog-deployment-pr52 -c hyperdoc-sly</codeph>. Diese Entwicklungsumgebung bringt die GitHub CLI gh mit. Sie verwendet die lokale Anmeldung für github.com mit Schreibrecht für RalfBarkow/hyperdoc. Für den Serverteil steht eine administrative Bash-Sitzung auf dreyeck.ch bereit.</p></prereq>
+    <prereq><p>Das lokale SLY-Image verwendet dreyeck/git. Der Operator wählt das Git-Zielremote und bei Bedarf ein separates Git-Quellremote. Für die NixOS-Schritte steht eine administrative Bash-Sitzung auf dreyeck.ch bereit.</p></prereq>
     <steps>
-      <step id="ready-for-review">
-        <cmd>PR #52 am geprüften HEAD auf Ready for review setzen.</cmd>
-        <info><p>Play prüft den Head und Zielbranch und führt Ready for review über die GitHub CLI aus.</p></info>
-        <stepresult>GitHub bestätigt den Statuswechsel. SHOP3 bietet den Merge an.</stepresult>
+      <step id="observe-git">
+        <cmd>Den geprüften Commit und die Basis des Git-Zielrefs beobachten.</cmd>
+        <info><p>Play liest das ausgewählte Zielremote. Fehlt das geprüfte Commit-Objekt lokal, holt Play es vom gewählten Quellremote.</p></info>
+        <stepresult>Ausgangsrevision, Kandidat und Zielremote liegen als SHOP3-Beleg vor.</stepresult>
       </step>
-      <step id="merge">
-        <cmd>Den geprüften PR #52 in dreyeck.ch mergen.</cmd>
-        <info><p>Dieser Play-Klick gibt den Merge frei. GitHub prüft die erwartete Head-SHA. Das Lineup liest Merge-Commit, Eltern und Zielbranch zurück.</p></info>
-        <stepresult>Der beobachtete Merge-Commit bestimmt die erwartete Serverrevision.</stepresult>
+      <step id="integrate">
+        <cmd>Den Integrationscommit mit dem geprüften Baum und beiden Eltern erzeugen.</cmd>
+        <stepresult>Der Integrationscommit ist lokal vorhanden. Arbeitsbaum, Index und Branch-Refs bleiben unverändert.</stepresult>
+      </step>
+      <step id="publish-ref">
+        <cmd>Den Integrationscommit auf refs/heads/dreyeck.ch veröffentlichen.</cmd>
+        <info><p>Dieser Play-Klick gibt den Push frei. Der Empfänger muss noch die zuvor beobachtete Basis haben. Play liest den Zielref nach dem Push zurück.</p></info>
+        <stepresult>Der zurückgelesene Git-Ref bestimmt die erwartete Serverrevision.</stepresult>
       </step>
       <step id="baseline">
         <cmd>Den bisherigen Catalog-Stand und die NixOS-Generation sichern.</cmd>
-        <stepresult>Der Serverbeleg nennt Quellrevision, Systempfad und Sicherungsverzeichnis.</stepresult>
+        <stepresult>Der Serverbeleg nennt Revision, Systempfad, Sicherungsverzeichnis und ob der HyperDoc-Input bereits auf Git zeigt.</stepresult>
+      </step>
+      <step id="git-source">
+        <cmd>Den HyperDoc-Input auf eine vom Server lesbare Git-Flake-URL umstellen und prüfen.</cmd>
+        <info><p>Dieser Schritt ist dran, wenn der gesicherte Input noch nicht als git+… deklariert ist. Bearbeite die bestehende NixOS-Deklaration und führe den von Play erzeugten Lesebefehl aus.</p></info>
+        <stepresult>Die Deklaration belegt einen Git-Input. Der Build prüft danach den aufgelösten Commit im Lockfile.</stepresult>
       </step>
       <step id="build">
-        <cmd>Den HyperDoc-Pin aktualisieren, den Lock-Diff prüfen, die Generation bauen und die Aktivierungsvorschau lesen.</cmd>
-        <stepresult>Der Serverbeleg bindet die gebaute Generation an den geprüften Merge-Commit.</stepresult>
+        <cmd>Den HyperDoc-Pin aktualisieren, Lock-Diff prüfen, Generation bauen und Aktivierungsvorschau lesen.</cmd>
+        <stepresult>Der Serverbeleg bindet die gebaute Generation an den veröffentlichten Git-Commit.</stepresult>
       </step>
       <step id="activate">
         <cmd>Nach Prüfung der Vorschau die gebaute NixOS-Generation als Operator aktivieren.</cmd>
@@ -30,7 +39,7 @@
       </step>
       <step id="verify">
         <cmd>Dienst, laufende Quellrevision sowie den lokalen und den öffentlichen Catalog zurücklesen.</cmd>
-        <stepresult>Der Prozess meldet den Merge-Commit und beide HTTP-Abfragen geben 200 zurück.</stepresult>
+        <stepresult>Der Prozess meldet den Integrationscommit und beide HTTP-Abfragen geben 200 zurück.</stepresult>
       </step>
     </steps>
     <result><p>Öffne auch eine bekannte Catalog-Seite im Browser und folge einem Inspector-Link. Der gesicherte Lockfile und der ursprüngliche Systempfad stehen für den dokumentierten Rollback bereit.</p></result>

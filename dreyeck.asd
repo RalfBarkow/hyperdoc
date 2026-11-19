@@ -3648,9 +3648,9 @@
 
 
 (asdf:defsystem "dreyeck/work/catalog-deployment-pr52"
-  :description "Optional operator-owned SHOP3 and executable DITA Catalog deployment for PR #52"
-  :depends-on ("dreyeck/shop3" "dreyeck/authority-policy" "dreyeck/dita-story-item"
-               "html-inspector-views" "clog" "clog-moldable-inspector" "shasht" "plump")
+  :description "Optional operator-owned SHOP3 and executable DITA Catalog deployment via Git"
+  :depends-on ("dreyeck/shop3" "dreyeck/git" "dreyeck/authority-policy" "dreyeck/dita-story-item"
+               "html-inspector-views" "clog" "clog-moldable-inspector" "ironclad" "plump")
   :components ((:file "dreyeck/work/catalog-deployment-pr52")
                (:static-file "dreyeck/work/catalog-deployment-pr52.dita")
                (:static-file "dreyeck/work/catalog-deployment-pr52.sh"))

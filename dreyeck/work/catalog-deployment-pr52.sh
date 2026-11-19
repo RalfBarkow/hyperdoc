@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Operator-owned stages for the executable PR #52 DITA task.
+# Operator-owned stages for the executable Catalog update task.
 set -euo pipefail
 umask 077
 stage=${1:?stage}
@@ -10,14 +10,25 @@ fail() { printf '%s\n' "$*" >&2; exit 1; }
 [[ $EUID == 0 && $(hostname -s) == dreyeck ]] || fail 'Dieser Schritt gehört in die administrative Bash auf dreyeck.ch.'
 cd /etc/nixos
 
-locked_hyperdoc_rev() {
-  nix eval --raw --impure --expr '
+locked_hyperdoc_field() {
+  nix eval --raw --impure --expr "
     let lock = builtins.fromJSON (builtins.readFile /etc/nixos/flake.lock);
-        key = lock.nodes.${lock.root}.inputs.hyperdoc;
-        node = lock.nodes.${key}.locked;
+        key = lock.nodes.\${lock.root}.inputs.hyperdoc;
+        node = lock.nodes.\${key}.locked;
     in assert builtins.isString key;
-       assert node.owner == "RalfBarkow" && node.repo == "hyperdoc";
-       node.rev'
+       builtins.getAttr \"$1\" node"
+}
+
+locked_hyperdoc_rev() { locked_hyperdoc_field rev; }
+
+uses_git_input() {
+  local url
+  url=$(nix eval --raw --impure --expr '(import /etc/nixos/flake.nix).inputs.hyperdoc.url or ""') || return 1
+  [[ $url == git+* ]]
+}
+
+check_git_input() {
+  uses_git_input || fail 'Setze den HyperDoc-Input in /etc/nixos auf eine vom Server lesbare git+…-URL.'
 }
 
 system_path() {
@@ -33,6 +44,7 @@ approve_revision() {
 
 check_pin() {
   [[ $(locked_hyperdoc_rev) == "$revision" ]] || fail 'Der Lockfile verweist auf eine andere HyperDoc-Revision.'
+  [[ $(locked_hyperdoc_field type) == git ]] || fail 'Der Lockfile verwendet für HyperDoc keinen Git-Input.'
 }
 
 configured_system() {
@@ -56,11 +68,13 @@ if [[ $stage == baseline ]]; then
   system_path "$previous"
   old_rev=$(locked_hyperdoc_rev)
   [[ $old_rev =~ ^[0-9a-f]{40}$ ]]
+  kind=other
+  if uses_git_input; then kind=git; fi
   receipt=$(mktemp -d /var/tmp/hyperdoc-pr52.XXXXXXXX)
   cp -p flake.nix flake.lock "$receipt/"
   printf '%s\n' "$revision" > "$receipt/target-revision"
   printf '%s\n' "$previous" > "$receipt/previous-system"
-  printf '(:baseline "%s" "%s" "%s" "%s")\n' "$revision" "$receipt" "$previous" "$old_rev"
+  printf '(:baseline "%s" "%s" "%s" "%s" :%s)\n' "$revision" "$receipt" "$previous" "$old_rev" "$kind"
   exit 0
 fi
 
@@ -68,7 +82,14 @@ fi
 [[ -d $receipt && -O $receipt && ! -L $receipt ]]
 [[ $(cat "$receipt/target-revision") == "$revision" ]]
 case "$stage" in
+  git-source)
+    check_git_input
+    previous=$(cat "$receipt/previous-system")
+    system_path "$previous"
+    printf '(:git-source "%s" "%s" "%s")\n' "$revision" "$receipt" "$previous"
+    ;;
   build)
+    check_git_input
     prior_lock=$(mktemp "$receipt/prior-lock.XXXXXXXX")
     selected_lock=$(mktemp "$receipt/selected-lock.XXXXXXXX")
     cp -p flake.lock "$prior_lock"
