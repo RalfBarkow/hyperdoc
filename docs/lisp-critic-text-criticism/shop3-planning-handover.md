@@ -1,18 +1,10 @@
 # SHOP3 as a planning aid for the Critic workflow — handover
 
-> **DRAFT — work-in-progress checkpoint, 12 November 2026.** Not reviewed.
->
-> Complete: the role of the planner, the reuse analysis, the three states of the
-> worked case as a design, the mapping from evidence records to proposed
-> planning inputs. Outstanding: line references for every row of the reuse
-> table; a check of the mapping against the corrected claim-table reader under
-> review (`c0b5f8328805ebfaa929f4ff4c2e51052dd39511`); the test handover list in
-> its final form.
->
-> **Nothing here was executed.** No SHOP3 domain exists for criticism, no method
-> was run, no plan was produced. Predicate, task and operator names are
-> proposals. The SHOP3 tests of the existing domains were not run for this
-> document.
+**Nothing here was executed.** No SHOP3 domain exists for criticism, no method
+was run, no plan was produced. Predicate, task and operator names are proposals.
+The SHOP3 tests of the existing domains were not run for this document. Line
+references are to `596344ae95d746f436705808462259371f5a593c`, and for the
+conformance domain to `25f83196733a611810da2ea9596af1b4b2d215fb`.
 
 ## Role
 
@@ -39,16 +31,16 @@ domain at `25f83196733a611810da2ea9596af1b4b2d215fb` (draft PR #41, not on
 
 | Existing object | Provides | Reusable? |
 |---|---|---|
-| `hyperdoc-htn-plan-result` (`dreyeck/shop3/plan-objects.lisp`) | plans, raw plans, plan trees, final states, `execution-mode` default `:plan-only` | yes, unchanged |
-| `classify-` / `normalize-hyperdoc-plan-step`, `hyperdoc-plan-checklist` (same file) | sorts steps into source-edit, commit, verification; an unknown operator becomes `:source-edit` | no: an investigation step would be labelled a source edit. `welcome-development` declines it too |
-| `plan-development-state` (`welcome-development.lisp`), `plan-state` (`topic-maps-conformance-planning.lisp`) | temporary problem, `find-plans :which :all :plan-tree t :collect-state t`, cleanup | as a pattern |
-| `read-case-evidence`, `investigation-state` (conformance planning) | facts only from evidence read at a fixed revision and cross-checked; the goal is a proposal; no absent observation becomes a negative | as a pattern for investigation |
-| `(requires ?c ?p)` with `(recorded-prerequisite ?c ?p :incomplete)` → `!report-missing-prerequisite` | a missing prerequisite as a positive, sourced fact | as a pattern; the one to use for evidence |
-| `method-names` (conformance planning) | method labels read from the native plan tree | as a pattern |
-| `development-record` classes, `accepted-records`, `project-development-records`, `refuse-record` (`welcome-development-records.lisp`) | validated records → facts; `:fixture` and `:observed` never mixed; planned effects refused as input; implementer may not verify or review | as a pattern for a correction's workflow |
-| `plan-assignment-binding`, `result-next-action-view` | a chosen action bound to the complete search; every alternative kept, `:execution :not-executed` | as a pattern |
-| the `welcome-development` domain | task `(advance-welcome)`; slices `s1`–`s4` named in the domain; records about commits of Welcome slices | no |
-| the `conformance-investigation` domain | two fixed CTM cases, CXTM-specific predicates | no |
+| `hyperdoc-htn-plan-result` (`dreyeck/shop3/plan-objects.lisp:3`) | plans, raw plans, plan trees, final states, `execution-mode` default `:plan-only` | yes, unchanged |
+| `classify-` / `normalize-hyperdoc-plan-step`, `hyperdoc-plan-checklist` (same file, `:42`, `:49`, `:82`) | sorts steps into source-edit, commit, verification; an unknown operator becomes `:source-edit` | no: an investigation step would be labelled a source edit. `welcome-development` declines it too |
+| `plan-development-state` (`dreyeck/work/welcome-development.lisp:75`), `plan-state` (`dreyeck/work/topic-maps-conformance-planning.lisp:159`) | temporary problem, `find-plans :which :all :plan-tree t :collect-state t`, cleanup | as a pattern |
+| `read-case-evidence`, `investigation-state` (conformance planning, `:78`, `:141–143`) | facts only from evidence read at a fixed revision and cross-checked; the goal is a proposal; no absent observation becomes a negative | as a pattern for investigation |
+| `(requires ?c ?p)` with `(recorded-prerequisite ?c ?p :incomplete)` → `!report-missing-prerequisite` (conformance planning, `:31`, `:52`) | a missing prerequisite as a positive, sourced fact | as a pattern; the one to use for evidence |
+| `method-names` (conformance planning, `:182`) | method labels read from the native plan tree | as a pattern |
+| `refuse-record`, `observed-record-value`, `accepted-records`, `project-development-records` (`dreyeck/work/welcome-development-records.lisp:8`, `:55–65`, `:67`, `:248`; refusals `:144–145`, `:301`, `:326`) | validated records → facts; `:fixture` and `:observed` never mixed; planned effects refused as input; implementer may not verify or review | as a pattern for a correction's workflow |
+| `plan-assignment-binding`, `result-next-action-view` (`welcome-development.lisp:127`, `:174`) | a chosen action bound to the complete search; every alternative kept, `:execution :not-executed` | as a pattern |
+| the `welcome-development` domain (`welcome-development.lisp:4–61`) | task `(advance-welcome)`; slices `s1`–`s4` named in the domain; records about commits of Welcome slices | no |
+| the `conformance-investigation` domain (conformance planning, `:15–52`) | two fixed CTM cases, CXTM-specific predicates | no |
 
 Neither domain supports Critic investigations, and neither should be extended
 for them. `welcome-development` negates over its record ledger, which is sound
@@ -69,7 +61,7 @@ from an absent field.
 | | `:not-verified` | `(revision-membership k :not-verified <reason>)` |
 | | `:contradicted` | `(revision-membership k :contradicted <reason>)` |
 | `:passage :status` | `:present-once` / `:absent` / `:ambiguous` / `:not-observed` | `(passage-status k <status>)` |
-| `:claims` | an observation / `:claims-unreadable` | `(claims-status k :read)` / `(claims-status k :unreadable <reason>)` |
+| `:claims` | an observation / `:claims-unreadable` / `:claims-not-parsed` (A1 only) | `(claims-status k :read)` / `(claims-status k :unreadable <reason>)` / `(claims-status k :not-parsed <reason>)` — *not parsed* means the coherence gate stopped before reading, which is not the same as reading and failing |
 | `:discrepancies` | a non-empty list | one `(discrepancy k <assertion-id>)` per entry, and `(discrepancy-scope k <scope>)` |
 | | `NIL` | `(reading-borne-out k <scope>)` |
 | | `:not-determined` | `(discrepancy-status k :not-determined)` — **no** `discrepancy` atom and **no** `reading-borne-out` atom |
@@ -79,8 +71,19 @@ from an absent field.
 
 Rules for the projection: a `:verified` membership fact only from an observation
 that says `:verified`; `:recorded-content` never promoted to a revision;
-`planned-*` atoms refused as input; a judgement is a fact that a judgement was
-recorded and by whom, not a fact that it is right.
+`planned-*` atoms refused as input (as `observed-record-value` refuses them,
+`welcome-development-records.lisp:65`); a judgement is a fact that a judgement was
+recorded and by whom, not a fact that it is right; no operator may add a fact
+that a judgement was accepted or a correction applied — those come only from a
+record made by a named reviewer or executor.
+
+**Which reader the facts may come from.** The claims status may be projected
+only from a reader that is safe on the source it reads. On this branch's base
+(`1da262d`) the reader is not (three violations, see the README). With A1
+(`c0b5f83`) it is, except for one open finding: a character literal directly
+followed by `"` or `;` lets a string or a comment supply the definition. Until
+that is closed, a successful extraction is evidence about the recorded text only
+for sources without such a sequence; the committed claims source has none.
 
 ## The worked case in three states (a design)
 
@@ -117,6 +120,12 @@ negative fact. Based on `dreyeck.ch`, not on the draft PR #41.
 
 ## Tests that need independent execution in a complete HyperDoc environment
 
-See [evidence/README.md](evidence/README.md): the integration tests of the text
-criticism and the existing federated-context, reading, recorded and critique
-test systems were NOT RUN by the implementer.
+| Test system | Run so far | Needed |
+|---|---|---|
+| `dreyeck/lisp-critic/text-criticism/tests` | the implementer, at `1da262d`; the A1 reviewer, at `1da262d` and `c0b5f83` | a run on the revision that is accepted |
+| `dreyeck/lisp-critic/text-criticism/integration-tests` | Codex (9 checks), not by an independent party | an independent run: it exercises `resolve-judgement-basis` unchanged |
+| `dreyeck/lisp-critic/federated-context/tests`, `…/reading/tests`, `…/recorded/tests` | Codex | regression after merging either revision |
+| `dreyeck/lisp-critic/critique/tests`, `…/engine-integration/tests`, `…/page-station/tests` | nobody beyond the source-station prerequisite | a legitimate source station |
+| `dreyeck/catalog/tests` | Codex: fails on base and A1 at a missing Git object (`8a1149197fab…`) | a checkout with that object |
+
+The SHOP3 planning slice itself has no tests yet; it does not exist.
