@@ -4,11 +4,16 @@
   <title>Catalog auf dreyeck.ch nach PR #52 aktualisieren</title>
   <shortdesc>Den geprüften Merge als NixOS-Generation bauen, aktivieren und im laufenden Catalog nachweisen.</shortdesc>
   <taskbody>
-    <prereq><p>Der Operator bedient GitHub und eine administrative Bash-Sitzung auf dreyeck.ch. Das Lineup läuft im lokalen SLY-Image.</p></prereq>
+    <prereq><p>Das Lineup läuft im lokalen SLY-Image. Die GitHub CLI gh ist dort erreichbar und für github.com mit Schreibrecht für RalfBarkow/hyperdoc angemeldet. Für den Serverteil steht eine administrative Bash-Sitzung auf dreyeck.ch bereit.</p></prereq>
     <steps>
+      <step id="ready-for-review">
+        <cmd>PR #52 am geprüften HEAD auf Ready for review setzen.</cmd>
+        <info><p>Play prüft den Head und Zielbranch und führt Ready for review über die GitHub CLI aus.</p></info>
+        <stepresult>GitHub bestätigt den Statuswechsel. SHOP3 bietet den Merge an.</stepresult>
+      </step>
       <step id="merge">
-        <cmd>PR #52 nach eigener Freigabe auf GitHub mergen und den Merge zurücklesen.</cmd>
-        <info><p>Play liest PR-HEAD, Merge-Commit und Zielbranch über GitHub.</p></info>
+        <cmd>Den geprüften PR #52 in dreyeck.ch mergen.</cmd>
+        <info><p>Dieser Play-Klick gibt den Merge frei. GitHub prüft die erwartete Head-SHA. Das Lineup liest Merge-Commit, Eltern und Zielbranch zurück.</p></info>
         <stepresult>Der beobachtete Merge-Commit bestimmt die erwartete Serverrevision.</stepresult>
       </step>
       <step id="baseline">
