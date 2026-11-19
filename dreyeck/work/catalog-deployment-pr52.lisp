@@ -1,15 +1,19 @@
 (defpackage #:dreyeck/work/catalog-deployment-pr52
   (:use #:cl)
   (:local-nicknames (#:v #:html-inspector-views) (#:dita #:dreyeck/dita-story-item)
-                    (#:policy #:dreyeck/authority-policy) (#:git #:dreyeck/git))
-  (:export #:make-deployment #:plan-next #:record-receipt #:serve))
+                    (#:policy #:dreyeck/authority-policy) (#:git #:dreyeck/git) (#:hb #:hyperbook))
+  (:export #:make-deployment #:plan-next #:record-receipt #:serve
+           #:open-task #:submit-receipt))
 (in-package #:dreyeck/work/catalog-deployment-pr52)
 
 (defparameter +reviewed-head+ "91e8fd65911e687472fb3e30d1574fa5e9119b1b")
 (defparameter +reviewed-base+ "1b3fbd3cc62ba27f00b76b48e4ea7246fe2106f8")
 (defparameter +candidate-ref+ "refs/heads/codex/z11667-lisp-critic-a2-integration")
 (defparameter +target-ref+ "refs/heads/dreyeck.ch")
+(defparameter +task-book-id+ "z11667-catalog-deployment")
+(defparameter +task-page-id+ "catalog-deployment-pr52")
 (defvar *planner-lock* (sb-thread:make-mutex :name "PR 52 SHOP3 search"))
+(defvar *open-deployment* nil)
 
 (defclass deployment ()
   ((repository :initarg :repository :reader repository-of)
@@ -21,6 +25,25 @@
    (message :initform nil :accessor message-of)
    (publish-enabled :initform nil :accessor publish-enabled-p)
    (lock :initform (sb-thread:make-mutex :name "PR 52 deployment") :reader lock-of)))
+
+(defclass deployment-book (hb:hyperbook)
+  ((task-page :initform nil :accessor task-page-of)))
+
+(defclass deployment-page (hb:page)
+  ((deployment :initarg :deployment :reader deployment-of)))
+
+(defmethod hb:title-of ((book deployment-book)) "Catalog Deployment")
+(defmethod hb:title-of ((page deployment-page)) "Geprüften HyperDoc-Stand in dreyeck.ch übernehmen")
+(defmethod hb:main-page-id-of ((book deployment-book)) +task-page-id+)
+
+(defmethod hb:find-page ((book deployment-book) id &key signal-error?)
+  (or (and (equal id +task-page-id+) (task-page-of book))
+      (when signal-error?
+        (error 'hb:page-lookup-failure :hyperbook book :page-id id))))
+
+(defun attach-task-page (book deployment)
+  (setf (task-page-of book) (make-instance 'deployment-page :id +task-page-id+
+                                                            :hyperbook book :deployment deployment)))
 
 (defun make-deployment (&key (repository (asdf:system-source-directory "dreyeck")) remote (source-remote remote))
   "Bind the task to an existing Git checkout and explicitly selected Git remotes."
@@ -281,7 +304,7 @@
                     (v:str (subseq html (+ offset (length marker))))))
           (v:html (v:str html))))))
 
-(v:defview deployment-task (deployment deployment)
+(defun task-view (deployment)
   (v:html-view :title "DITA Task" :priority -100
     (let* ((plan (plan-next deployment)) (step (offered-step plan)))
       (v:html (:p (v:object-ref plan :display "Nativer SHOP3-Plan") " · "
@@ -293,15 +316,41 @@
               (when (command deployment)
                 (v:html (:h3 "Befehl für die administrative Bash auf dreyeck.ch")
                         (:pre :style "white-space:pre-wrap" (v:esc (command deployment)))
-                        (:p "Übernimm die abschliessende Belegliste in das mREPL mit RECORD-RECEIPT.")))
+                        (:p "Werte die letzte Ausgabezeile mit SUBMIT-RECEIPT im mREPL aus und aktualisiere dieses Pane.")))
               (:h3 "Beobachtungen")
               (:pre (v:esc (format nil "~S" (reverse (observations deployment)))))))))
 
+(v:defview deployment-task (deployment deployment)
+  (task-view deployment))
+
+(v:defview deployment-page-task (page deployment-page)
+  (task-view (deployment-of page)))
+
+(v:defview deployment-book-task (book deployment-book)
+  (v:html-view :title "Aufgabe" :priority -100
+    (v:html (:p (v:object-ref (task-page-of book) :select "DITA Task"
+                             :display "Ausführbares DITA Task Topic öffnen")))))
+
 (defun serve (deployment &key (port 18752))
-  "Open the local operator task in a fresh SLY image."
-  (assert (not (clog:is-running-p)))
-  (clog:initialize (lambda (body) (clog-moldable-inspector:on-new-inspector
-                                   body :object deployment :pane-width "850px"))
-                   :host "127.0.0.1" :port port)
-  (setf (publish-enabled-p deployment) t)
-  (format nil "http://127.0.0.1:~D/" port))
+  "Register the task page in a local HyperBook Catalog and return its Inspector URL."
+  (when (clog:is-running-p)
+    (error "In diesem Image läuft bereits CLOG. Starte die Aufgabe im eigenen SLY-Image."))
+  (let* ((book (or (hb:find-hyperbook +task-book-id+)
+                   (make-instance 'deployment-book :id +task-book-id+)))
+         (page (attach-task-page book deployment)))
+    (hyperbook/server:serve-catalog :host "127.0.0.1" :port port :development nil :pane-width "850px")
+    (hb:register book)
+    (setf (publish-enabled-p deployment) t
+          *open-deployment* deployment)
+    (format nil "http://127.0.0.1:~D/~A/~A"
+            port (hyperbook/server::slug book) (hb:path-item-of page))))
+
+(defun open-task (&key (repository (asdf:system-source-directory "dreyeck")) remote (source-remote remote) (port 18752))
+  "Create a local task in the Catalog. Return the direct task URL, the Catalog URL, and the task state."
+  (let* ((deployment (make-deployment :repository repository :remote remote :source-remote source-remote))
+         (url (serve deployment :port port)))
+    (values url (format nil "http://127.0.0.1:~D/" port) deployment)))
+
+(defun submit-receipt (evidence)
+  "Record the server readback in the task opened by OPEN-TASK."
+  (record-receipt (or *open-deployment* (error "Öffne zuerst das Task Topic mit OPEN-TASK.")) evidence))

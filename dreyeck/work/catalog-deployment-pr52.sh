@@ -6,6 +6,11 @@ stage=${1:?stage}
 revision=${2:?merge revision}
 receipt=${3:-}
 fail() { printf '%s\n' "$*" >&2; exit 1; }
+emit_receipt() {
+  local evidence
+  printf -v evidence "$@"
+  printf "(dreyeck/work/catalog-deployment-pr52:submit-receipt '%s)\n" "$evidence"
+}
 [[ $revision =~ ^[0-9a-f]{40}$ ]] || fail 'Ungültige Merge-SHA.'
 [[ $EUID == 0 && $(hostname -s) == dreyeck ]] || fail 'Dieser Schritt gehört in die administrative Bash auf dreyeck.ch.'
 cd /etc/nixos
@@ -74,7 +79,7 @@ if [[ $stage == baseline ]]; then
   cp -p flake.nix flake.lock "$receipt/"
   printf '%s\n' "$revision" > "$receipt/target-revision"
   printf '%s\n' "$previous" > "$receipt/previous-system"
-  printf '(:baseline "%s" "%s" "%s" "%s" :%s)\n' "$revision" "$receipt" "$previous" "$old_rev" "$kind"
+  emit_receipt '(:baseline "%s" "%s" "%s" "%s" :%s)' "$revision" "$receipt" "$previous" "$old_rev" "$kind"
   exit 0
 fi
 
@@ -86,7 +91,7 @@ case "$stage" in
     check_git_input
     previous=$(cat "$receipt/previous-system")
     system_path "$previous"
-    printf '(:git-source "%s" "%s" "%s")\n' "$revision" "$receipt" "$previous"
+    emit_receipt '(:git-source "%s" "%s" "%s")' "$revision" "$receipt" "$previous"
     ;;
   build)
     check_git_input
@@ -108,7 +113,7 @@ case "$stage" in
     check_pin
     [[ $(configured_system) == "$built" ]] || fail 'Die Konfiguration hat sich während der Vorschau geändert.'
     printf '%s\n' "$built" > "$receipt/built-system"
-    printf '(:build "%s" "%s" "%s")\n' "$revision" "$receipt" "$built"
+    emit_receipt '(:build "%s" "%s" "%s")' "$revision" "$receipt" "$built"
     ;;
   activate)
     built=$(cat "$receipt/built-system")
@@ -125,7 +130,7 @@ case "$stage" in
       nixos-rebuild switch --flake /etc/nixos#dreyeck --no-write-lock-file
     fi
     [[ $(readlink -f /run/current-system) == "$built" ]] || fail 'Die aktive Generation weicht vom Build ab.'
-    printf '(:activate "%s" "%s" "%s")\n' "$revision" "$receipt" "$built"
+    emit_receipt '(:activate "%s" "%s" "%s")' "$revision" "$receipt" "$built"
     ;;
   verify)
     built=$(cat "$receipt/built-system")
@@ -140,7 +145,7 @@ case "$stage" in
     public_status=$(curl -fsS --max-time 15 -o /dev/null -w '%{http_code}' https://dreyeck.ch/)
     [[ $local_status == 200 && $public_status == 200 ]] || fail 'Der Catalog-Readback ergibt nicht zweimal HTTP 200.'
     [[ $(systemctl show hyperdoc.service -p MainPID --value) == "$pid" ]]
-    printf '(:verify "%s" "%s" "%s" %s %s %s)\n' "$running" "$receipt" "$built" "$pid" "$local_status" "$public_status"
+    emit_receipt '(:verify "%s" "%s" "%s" %s %s %s)' "$running" "$receipt" "$built" "$pid" "$local_status" "$public_status"
     ;;
   *) printf 'Unbekannter Catalog-Schritt: %s\n' "$stage" >&2; exit 2 ;;
 esac
