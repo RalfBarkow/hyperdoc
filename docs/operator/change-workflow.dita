@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE task PUBLIC "-//OASIS//DTD DITA Task//EN" "task.dtd">
+<task id="change-workflow" xml:lang="de-CH">
+  <title>Eine Änderung vom Branch bis auf die Server bringen</title>
+  <shortdesc>Ausgerollt wird nur, was in einem Pull Request liegt; auf Produktion nur, was gemergt ist. Agenten bereiten vor und prüfen, der Operator mergt und aktiviert.</shortdesc>
+  <taskbody>
+    <context>
+      <p>Zwei Repositories hängen voneinander ab: hyperdoc (Standardbranch <codeph>dreyeck.ch</codeph>) liefert Inhalte und Pakete, fleet (Standardbranch <codeph>main</codeph>) pinnt sie und beschreibt die Hosts staging, dreyeck und wiki. Agenten öffnen keine SSH-Sitzung, mergen nicht und aktivieren nichts; das tut der Operator.</p>
+      <simpletable>
+        <sthead><stentry>Rolle</stentry><stentry>tut</stentry><stentry>tut nicht</stentry></sthead>
+        <strow><stentry>Agent (Claude, Codex)</stentry><stentry>Branch, Tests, Beleg, Pull Request, Auswertung erwarteter Systempfade, Prüfung über HTTPS</stentry><stentry>mergen, SSH, aktivieren</stentry></strow>
+        <strow><stentry>Operator</stentry><stentry>Review, Merge, Übertragung auf den Host, Build, Aktivierung</stentry><stentry>—</stentry></strow>
+      </simpletable>
+    </context>
+    <steps>
+      <step id="branch">
+        <cmd>Einen Branch vom Standardbranch anlegen und die Änderung mit Tests und Beleg committen.</cmd>
+        <info><p>hyperdoc von <codeph>dreyeck.ch</codeph>, fleet von <codeph>main</codeph>. Belege nennen Commit, Umgebung und was nicht geprüft ist.</p></info>
+      </step>
+      <step id="pull-request">
+        <cmd>Sofort einen Pull Request anlegen.</cmd>
+        <info><p>Der PR nennt die Prüfergebnisse und für fleet den erwarteten Systempfad je betroffenem Host. Die CI läuft am PR.</p></info>
+      </step>
+      <step id="review">
+        <cmd>Den PR prüfen lassen und Korrekturen im selben PR nachreichen.</cmd>
+      </step>
+      <step id="staging">
+        <cmd>Den PR-Kopf auf staging abnehmen.</cmd>
+        <info>
+          <p>Vom fleet-Checkout auf dem Rechner des Operators:</p>
+          <codeblock>git fetch origin BRANCH &amp;&amp; git archive COMMIT | ssh root@staging.dreyeck.ch 'rm -rf /root/fleet &amp;&amp; mkdir /root/fleet &amp;&amp; tar -x -C /root/fleet'</codeblock>
+          <p>Auf staging zuerst bauen und den Pfad mit dem im PR genannten vergleichen, erst bei Übereinstimmung aktivieren:</p>
+          <codeblock>cd /root/fleet &amp;&amp; nixos-rebuild build --flake .#staging &amp;&amp; readlink -f result
+nixos-rebuild switch --flake .#staging
+readlink -f /run/current-system</codeblock>
+          <p>Danach prüft der Agent die ausgelieferten Seiten über HTTPS und trägt das Ergebnis als Kommentar in den PR ein.</p>
+        </info>
+        <stepresult>Abnahme im PR festgehalten: gebauter und aktiver Pfad, Prüfung über HTTPS.</stepresult>
+      </step>
+      <step id="merge">
+        <cmd>Den PR mergen.</cmd>
+        <info>
+          <p>Hängt ein fleet-PR an einem hyperdoc-PR, zuerst hyperdoc mergen, dann den fleet-Pin auf den gemergten hyperdoc-Commit umstellen, dann fleet mergen. Ein Pin in <codeph>main</codeph> zeigt nie auf einen Branch, der verschwinden kann.</p>
+        </info>
+      </step>
+      <step id="production">
+        <cmd>Produktion nur aus <codeph>main</codeph> ausrollen.</cmd>
+        <info><p>dreyeck.ch und wiki.ralfbarkow.ch wie staging: übertragen, bauen, Pfad vergleichen, aktivieren, lesend prüfen.</p></info>
+      </step>
+    </steps>
+    <result><p>Jeder Host läuft auf einem Stand, der in <codeph>main</codeph> steht, und jeder Schritt dorthin ist im PR nachvollziehbar.</p></result>
+    <postreq>
+      <note type="important">Nie zwei fleet-Branches nacheinander auf denselben Host ausrollen, ohne dass der erste gemergt oder verworfen ist: Der zweite nimmt dem Host die Änderungen des ersten wieder weg.</note>
+    </postreq>
+  </taskbody>
+</task>
