@@ -1,0 +1,40 @@
+UTC=2026-11-20T07:17:27Z
+checkout=26d51897c529202d3319822f40adf55d1fa59281
+flake.lock SHA-256=019dcaff428e1abf426f165c3afd70fe163077454d1c348d4965d86a93a7e836
+nixpkgs=50ab793786d9de88ee30ec4e4c24fb4236fc2674
+platform=x86_64-darwin
+case=source SBCL=2.4.10 ASDF=3.3.1
+cache=/private/tmp/nix-shell.7nPigm/tmp.jaC7yRg8zw/source-cache/ writable; source=/private/tmp/nix-shell.7nPigm/tmp.jaC7yRg8zw/source/answer.lisp; predicted=/private/tmp/nix-shell.7nPigm/tmp.jaC7yRg8zw/source-cache/common-lisp/sbcl-2.4.10-macosx-x64/private/tmp/nix-shell.7nPigm/tmp.jaC7yRg8zw/source/answer.fasl
+PASS source: wrote /private/tmp/nix-shell.7nPigm/tmp.jaC7yRg8zw/source-cache/common-lisp/sbcl-2.4.10-macosx-x64/private/tmp/nix-shell.7nPigm/tmp.jaC7yRg8zw/source/answer.fasl; loaded answer=42
+case=packaged SBCL=2.4.10 ASDF=3.3.1
+ASD=/nix/store/kx4fxynbmzg2k9bqwhl803wzw1ip8jak-sbcl-salza2-2.1/salza2.asd; existing FASL=/nix/store/kx4fxynbmzg2k9bqwhl803wzw1ip8jak-sbcl-salza2-2.1/package.fasl
+; Registering system trivial-gray-streams
+;; loading #P"/nix/store/i1ifr695bf1k6lgm9jn7v8pbrcyz4w8f-sbcl-trivial-gray-streams-20241012-git/trivial-gray-streams.asd"
+;; loading #P"/nix/store/i1ifr695bf1k6lgm9jn7v8pbrcyz4w8f-sbcl-trivial-gray-streams-20241012-git/package.fasl"
+;; loading #P"/nix/store/i1ifr695bf1k6lgm9jn7v8pbrcyz4w8f-sbcl-trivial-gray-streams-20241012-git/streams.fasl"
+;; loading #P"/nix/store/kx4fxynbmzg2k9bqwhl803wzw1ip8jak-sbcl-salza2-2.1/package.fasl"
+;; loading #P"/nix/store/kx4fxynbmzg2k9bqwhl803wzw1ip8jak-sbcl-salza2-2.1/reset.fasl"
+;; loading #P"/nix/store/kx4fxynbmzg2k9bqwhl803wzw1ip8jak-sbcl-salza2-2.1/specials.fasl"
+;; loading #P"/nix/store/kx4fxynbmzg2k9bqwhl803wzw1ip8jak-sbcl-salza2-2.1/types.fasl"
+;; loading #P"/nix/store/kx4fxynbmzg2k9bqwhl803wzw1ip8jak-sbcl-salza2-2.1/checksum.fasl"
+;; loading #P"/nix/store/kx4fxynbmzg2k9bqwhl803wzw1ip8jak-sbcl-salza2-2.1/adler32.fasl"
+;; loading #P"/nix/store/kx4fxynbmzg2k9bqwhl803wzw1ip8jak-sbcl-salza2-2.1/crc32.fasl"
+;; loading #P"/nix/store/kx4fxynbmzg2k9bqwhl803wzw1ip8jak-sbcl-salza2-2.1/chains.fasl"
+;; loading #P"/nix/store/kx4fxynbmzg2k9bqwhl803wzw1ip8jak-sbcl-salza2-2.1/bitstream.fasl"
+;; loading #P"/nix/store/kx4fxynbmzg2k9bqwhl803wzw1ip8jak-sbcl-salza2-2.1/matches.fasl"
+;; loading #P"/nix/store/kx4fxynbmzg2k9bqwhl803wzw1ip8jak-sbcl-salza2-2.1/compress.fasl"
+;; loading #P"/nix/store/kx4fxynbmzg2k9bqwhl803wzw1ip8jak-sbcl-salza2-2.1/huffman.fasl"
+;; loading #P"/nix/store/kx4fxynbmzg2k9bqwhl803wzw1ip8jak-sbcl-salza2-2.1/closures.fasl"
+;; loading #P"/nix/store/kx4fxynbmzg2k9bqwhl803wzw1ip8jak-sbcl-salza2-2.1/utilities.fasl"
+;; loading #P"/nix/store/kx4fxynbmzg2k9bqwhl803wzw1ip8jak-sbcl-salza2-2.1/compressor.fasl"
+;; loading #P"/nix/store/kx4fxynbmzg2k9bqwhl803wzw1ip8jak-sbcl-salza2-2.1/zlib.fasl"
+;; loading #P"/nix/store/kx4fxynbmzg2k9bqwhl803wzw1ip8jak-sbcl-salza2-2.1/gzip.fasl"
+;; loading #P"/nix/store/kx4fxynbmzg2k9bqwhl803wzw1ip8jak-sbcl-salza2-2.1/user.fasl"
+;; loading #P"/nix/store/kx4fxynbmzg2k9bqwhl803wzw1ip8jak-sbcl-salza2-2.1/stream.fasl"
+PASS packaged: salza2 2.1; gzip header=1F8B
+case=missing SBCL=2.4.10 ASDF=3.3.1
+cache=/private/tmp/nix-shell.7nPigm/tmp.jaC7yRg8zw/missing-cache/ writable; source=/private/tmp/nix-shell.7nPigm/tmp.jaC7yRg8zw/source/answer.lisp; predicted=/private/tmp/nix-shell.7nPigm/tmp.jaC7yRg8zw/missing-cache/common-lisp/sbcl-2.4.10-macosx-x64/private/tmp/nix-shell.7nPigm/tmp.jaC7yRg8zw/source/answer.fasl
+;
+; compilation unit aborted
+;   caught 1 fatal ERROR condition
+PASS missing: SB-INT:SIMPLE-FILE-ERROR for /private/tmp/nix-shell.7nPigm/tmp.jaC7yRg8zw/source/answer.lisp; no FASL

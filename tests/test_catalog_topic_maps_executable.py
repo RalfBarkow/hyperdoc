@@ -2,6 +2,7 @@
 
 Run: python3 tests/test_catalog_topic_maps_executable.py /nix/store/.../bin/hyperdoc-catalog-topic-maps
 """
+import json
 import os
 from pathlib import Path
 import signal
@@ -92,6 +93,17 @@ class CatalogTopicMapsExecutableTests(unittest.TestCase):
                             log.seek(0)
                             self.fail("Catalog not ready:\n" + log.read().decode(errors="replace"))
                         time.sleep(0.2)
+                origin = f"http://127.0.0.1:{port}"
+                with opener.open(origin + "/faq/", timeout=10) as response:
+                    self.assertIn(b'asdf-fasl-nix-store.html', response.read())
+                with opener.open(origin + "/faq/index.json", timeout=10) as response:
+                    self.assertEqual("application/json", response.headers.get_content_type())
+                    entries = json.load(response)["topics"]
+                entry, = [topic for topic in entries if topic["topicId"] == "asdf-fasl-nix-store"]
+                assets = Path(__file__).resolve().parents[1] / "assets/faq"
+                for path in [entry["url"], entry["ditaUrl"], entry["evidenceUrl"], "/faq/faq.css"]:
+                    with opener.open(origin + path, timeout=10) as response:
+                        self.assertEqual((assets / Path(path).name).read_bytes(), response.read())
                 self.assertIsNone(process.poll())
                 process.send_signal(signal.SIGTERM)
                 self.assertEqual(0, process.wait(timeout=15))

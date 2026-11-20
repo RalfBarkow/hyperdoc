@@ -1,0 +1,13 @@
+{
+  "topics": [
+    {
+      "topicId": "asdf-fasl-nix-store",
+      "url": "/faq/asdf-fasl-nix-store.html",
+      "scope": "HyperDoc-Dev-Shell auf x86_64-darwin, SBCL 2.4.10 und ASDF 3.3.1. Quellkompilierung mit Benutzer-Cache, paketiertes salza2 2.1 und fehlende Quellkomponente.",
+      "evidenceStatus": "verified",
+      "lastSuccessfulRun": "2026-11-20",
+      "evidenceUrl": "/faq/asdf-fasl-nix-store-check.txt",
+      "ditaUrl": "/faq/asdf-fasl-nix-store.dita"
+    }
+  ]
+}

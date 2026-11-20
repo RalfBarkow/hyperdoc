@@ -1,0 +1,7 @@
+html { color-scheme: light dark; font: 100%/1.6 system-ui, sans-serif; }
+body { max-width: 70ch; margin: 2rem auto 4rem; padding: 0 1rem; overflow-wrap: anywhere; }
+h1, h2 { line-height: 1.18; }
+h1 { font-size: 2rem; } h2 { margin-top: 2rem; font-size: 1.4rem; }
+li + li { margin-top: .5rem; }
+pre { overflow-x: auto; padding: 1rem; border: 1px solid; }
+code, pre { font-size: .95em; }
