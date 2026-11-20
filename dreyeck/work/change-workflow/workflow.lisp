@@ -175,6 +175,9 @@
                         :output :string :error-output :string :ignore-error-status t)
     (unless (zerop code) (error "curl ~D: ~A" code err))
     (let ((json (shasht:read-json out)))
+      (unless (and (hash-table-p json) (gethash "state" json))
+        (error "GitHub gab für PR #~D keinen Stand zurück~@[: ~A~]" number
+               (and (hash-table-p json) (gethash "message" json))))
       (list :state (gethash "state" json) :merged (gethash "merged" json)
             :head (let ((h (gethash "head" json))) (and h (gethash "sha" h)))))))
 
