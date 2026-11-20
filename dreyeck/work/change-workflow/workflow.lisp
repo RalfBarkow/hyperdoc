@@ -163,15 +163,19 @@
                                                              mine)))
                      absent)))))
 
-;;; Play: read the state of public hyperdoc pull requests (GET only), and mark merges in this image
+;;; Play: read the state of public hyperdoc pull requests (GET only), and mark merges in this image.
+;;; Each press returns a PR-OBSERVATION: what GitHub answered, which facts it added, and the plan before and after.
 
 (defvar *message* nil)
+(defvar *observations* nil "Every observation made in this image, newest first.")
+
+(defun pull-request-url (number) (format nil "https://api.github.com/repos/RalfBarkow/hyperdoc/pulls/~D" number))
 
 (defun read-pull-request (number)
+  "One GET on the GitHub API: (:state :merged :head :html-url :json)."
   (multiple-value-bind (out err code)
       (uiop:run-program (list "env" "-u" "LD_LIBRARY_PATH" "-u" "DYLD_LIBRARY_PATH" "curl" "-sS" "--max-time" "20"
-                              "--proto" "=https" "-H" "Accept: application/vnd.github+json"
-                              (format nil "https://api.github.com/repos/RalfBarkow/hyperdoc/pulls/~D" number))
+                              "--proto" "=https" "-H" "Accept: application/vnd.github+json" (pull-request-url number))
                         :output :string :error-output :string :ignore-error-status t)
     (unless (zerop code) (error "curl ~D: ~A" code err))
     (let ((json (shasht:read-json out)))
@@ -179,25 +183,107 @@
         (error "GitHub gab für PR #~D keinen Stand zurück~@[: ~A~]" number
                (and (hash-table-p json) (gethash "message" json))))
       (list :state (gethash "state" json) :merged (gethash "merged" json)
-            :head (let ((h (gethash "head" json))) (and h (gethash "sha" h)))))))
+            :head (let ((h (gethash "head" json))) (and h (gethash "sha" h)))
+            :html-url (gethash "html_url" json) :json json))))
+
+(defvar *pr-reader* 'read-pull-request "Function of a PR number; the tests replace it, so they need no network.")
+
+(defclass pr-observation ()
+  ((time :initarg :time :reader observation-time)
+   (entries :initarg :entries :initform nil :reader observation-entries
+            :documentation "Per PR: (:change :number :state :merged :head :html-url :url :json :added :error).")
+   (offers-before :initarg :offers-before :reader offers-before)
+   (offers-after :initarg :offers-after :reader offers-after))
+  (:documentation "One press of the Play control: what GitHub answered for each hyperdoc PR in the register, which
+facts that added in this image, and the plan's offers before and after."))
+
+(defun time-string (universal)
+  (multiple-value-bind (s mi h d mo y) (decode-universal-time universal 0)
+    (format nil "~D-~2,'0D-~2,'0D ~2,'0D:~2,'0D:~2,'0D UTC" y mo d h mi s)))
+
+(defun entry-summary (e)
+  (if (getf e :error)
+      (format nil "#~D Fehler" (getf e :number))
+      (format nil "#~D ~A~:[~; gemergt~] (Kopf ~A)" (getf e :number) (getf e :state) (getf e :merged)
+              (subseq (or (getf e :head) "?") 0 (min 8 (length (or (getf e :head) "?")))))))
+
+(defmethod v:text-representation ((o pr-observation))
+  (format nil "PR-Beobachtung ~A · ~{~A~^ · ~}" (time-string (observation-time o))
+          (or (mapcar #'entry-summary (observation-entries o)) '("keine hyperdoc-PRs im Register"))))
 
 (defun refresh-pull-requests ()
-  (let ((today (multiple-value-bind (s mi h d mo y) (decode-universal-time (get-universal-time) 0)
-                 (declare (ignore s mi h)) (format nil "~D-~2,'0D-~2,'0D" y mo d)))
-        (report nil))
-    (dolist (c (register))
-      (when (and (eq (getf c :repo) :hyperdoc) (getf c :pr))
-        (let ((pr (read-pull-request (getf c :pr))))
-          (push (format nil "#~D ~A~:[~; gemergt~] (Kopf ~A)" (getf c :pr) (getf pr :state) (getf pr :merged)
-                        (subseq (or (getf pr :head) "?") 0 (min 8 (length (or (getf pr :head) "?")))))
-                report)
-          (when (and (getf pr :merged) (not (has-fact c :merged)))
-            (push (list :merged today "von GitHub gelesen (Play, in diesem Image)") (getf c :facts))))))
-    (format nil "~{~A~^ · ~}" (or (nreverse report) '("keine hyperdoc-PRs im Register")))))
+  "Read every public hyperdoc PR named in the register, add :merged where GitHub says so, and return the observation."
+  (let* ((now (get-universal-time))
+         (today (subseq (time-string now) 0 10))
+         (before (offers))
+         (entries
+           (loop for c in (register)
+                 when (and (eq (getf c :repo) :hyperdoc) (getf c :pr))
+                   collect (let ((number (getf c :pr)))
+                             (handler-case
+                                 (let* ((pr (funcall *pr-reader* number))
+                                        (added (when (and (getf pr :merged) (not (has-fact c :merged)))
+                                                 (let ((fact (list :merged today "von GitHub gelesen (Play, in diesem Image)")))
+                                                   (push fact (getf c :facts))
+                                                   (list fact)))))
+                                   (list* :change (getf c :id) :number number :url (pull-request-url number)
+                                          :added added pr))
+                               (error (e) (list :change (getf c :id) :number number :url (pull-request-url number)
+                                                :error (princ-to-string e)))))))
+         (observation (make-instance 'pr-observation :time now :entries entries
+                                                     :offers-before before :offers-after (offers))))
+    (push observation *observations*)
+    observation))
+
+(defun play-refresh ()
+  "The Play control: observe, keep the summary for the page, and return the observation for the Inspector."
+  (let ((o (refresh-pull-requests)))
+    (setf *message* (v:text-representation o))
+    o))
+
+(defun offer-text (o)
+  (format nil "~A: ~A" (or (getf (change (second o)) :title) (second o)) (step-word (first o))))
+
+(v:defview observation-view (o pr-observation)
+  (v:html-view :title "Beobachtung" :priority -100
+    (v:html
+     (:p (v:esc (format nil "Gelesen ~A, je PR eine GET-Anfrage an die GitHub-API." (time-string (observation-time o)))))
+     (:table :class "inspector-table"
+      (:tr (:th "PR") (:th "Änderung") (:th "Zustand") (:th "Kopf") (:th "Neu eingetragen") (:th "Antwort"))
+      (dolist (e (observation-entries o))
+        (v:html (:tr (:td (if (getf e :html-url)
+                              (v:html (:a :href (getf e :html-url) :target "_blank" (v:esc (format nil "#~D" (getf e :number)))))
+                              (v:esc (format nil "#~D" (getf e :number)))))
+                     (:td (v:esc (or (getf (change (getf e :change)) :title) "")))
+                     (:td (v:esc (if (getf e :error) (getf e :error)
+                                     (format nil "~A~:[~;, gemergt~]" (getf e :state) (getf e :merged)))))
+                     (:td (:code (v:esc (or (getf e :head) "—"))))
+                     (:td (v:esc (format nil "~:[—~;~:*~{~(~A~)~^, ~}~]" (mapcar #'first (getf e :added)))))
+                     (:td (if (getf e :json)
+                              (v:object-ref (getf e :json) :display "Rohantwort (JSON)")
+                              (v:esc (getf e :url)))))))))))
+
+(v:defview plan-change-view (o pr-observation)
+  (v:html-view :title "Plan vorher / nachher" :priority -90
+    (let* ((before (offers-before o)) (after (offers-after o))
+           (gone (set-difference before after :test #'equal))
+           (new (set-difference after before :test #'equal)))
+      (v:html
+       (:p (v:esc (if (or gone new)
+                      "Die Beobachtung hat die Vorschläge geändert."
+                      "Die Beobachtung hat die Vorschläge nicht geändert.")))
+       (:h4 "Vorher")
+       (:ul (dolist (x before)
+              (v:html (:li :style (if (member x gone :test #'equal) "text-decoration:line-through" "")
+                           (v:esc (offer-text x))))))
+       (:h4 "Nachher")
+       (:ul (dolist (x after)
+              (v:html (:li :style (if (member x new :test #'equal) "font-weight:bold" "")
+                           (v:esc (offer-text x))))))))))
 
 (policy:register-reviewed-control "change-workflow/refresh"
   :effect "Reads the state of the public hyperdoc pull requests named in the register with one GET each and marks merged ones in this image."
-  :audit "REFRESH-PULL-REQUESTS runs curl --proto =https against api.github.com; it writes no file and changes no repository.")
+  :audit "PLAY-REFRESH runs curl --proto =https against api.github.com; it writes no file and changes no repository. It returns a PR-OBSERVATION.")
 
 ;;; Book
 
@@ -221,8 +307,12 @@
       (v:html
        (:p (v:object-ref plan :display "Nativer SHOP3-Plan") " · nur Vorschläge; gemergt und aktiviert wird durch den Operator.")
        (when *message* (v:html (:p :role "status" (v:esc *message*))))
+       (when *observations*
+         (v:html (:p "Beobachtungen in diesem Image: "
+                     (loop for o in *observations* for i from 0 below 5
+                           do (v:html (v:object-ref o :display (time-string (observation-time o))) " ")))))
        (:p (v:eval-button "Play" (policy:reviewed-thunk "change-workflow/refresh"
-                                   (setf *message* (handler-case (refresh-pull-requests) (error (c) (princ-to-string c)))))
+                                   (play-refresh))
                           "PR-Stand der hyperdoc-PRs lesend von GitHub holen")
            " PR-Stand lesen (nur GET, nur öffentliche hyperdoc-PRs)")
        (:table :class "inspector-table"

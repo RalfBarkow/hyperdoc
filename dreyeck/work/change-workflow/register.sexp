@@ -45,7 +45,7 @@
  :flags (:needs-view)
  :facts ())
 
-(:id :acceptance-catalog :repo :fleet :branch "review/staging-acceptance-catalog" :head "34154a29" :pr 9
+(:id :acceptance-catalog :repo :fleet :branch "review/staging-acceptance-catalog" :head "951b5f65" :pr 9
  :title "fleet: Abnahme-Catalog auf staging"
  :flags (:needs-staging)
  :facts ((:pr-open "2026-11-20" "PR RalfBarkow/fleet#9 angelegt; vor dem Ausrollen DNS catalog.staging.dreyeck.ch setzen")))

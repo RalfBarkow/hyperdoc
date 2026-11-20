@@ -75,6 +75,34 @@
     (check (offered (offers plan) 'wait-for-staging :operator-keys))
     (check (search "fleet: staging-Pin der FAQ" why))))
 
+(defun test-observation ()
+  "A Play press, with GitHub replaced by a reader that reports #61 as merged."
+  (let* ((*register* (initial-register))
+         (*observations* nil)
+         (*pr-reader* (lambda (n) (list :state "closed" :merged t :head "f5974047a2ea" :html-url
+                                        (format nil "https://github.com/RalfBarkow/hyperdoc/pull/~D" n)
+                                        :json (make-hash-table :test #'equal))))
+         (o (play-refresh)))
+    (check (typep o 'pr-observation))
+    (check (eq o (first *observations*)))
+    (check (equal '(:merged) (mapcar #'first (getf (first (observation-entries o)) :added))))
+    (check (offered (offers-before o) 'merge :faq-store-gc))
+    (check (not (offered (offers-after o) 'merge :faq-store-gc)))
+    (check (offered (offers-after o) 'repin :fleet-faq-pin))
+    (check (search "#61 closed gemergt" (v:text-representation o)))
+    (let ((titles (mapcar #'v:view-title (v:all-views o))))
+      (check (member "Beobachtung" titles :test #'equal))
+      (check (member "Plan vorher / nachher" titles :test #'equal)))
+    (check (search "line-through" (v:view-html (find "Plan vorher / nachher" (v:all-views o) :key #'v:view-title :test #'equal))))
+    ;; A second press finds the fact already there and adds nothing.
+    (check (null (getf (first (observation-entries (play-refresh))) :added))))
+  ;; A failing reader is recorded per PR, not raised.
+  (let* ((*register* (initial-register)) (*observations* nil)
+         (*pr-reader* (lambda (n) (error "GitHub gab für PR #~D keinen Stand zurück" n)))
+         (o (play-refresh)))
+    (check (getf (first (observation-entries o)) :error))
+    (check (search "Fehler" (v:text-representation o)))))
+
 (defun test-view ()
   (let* ((*register* (initial-register))
          (page (hb:find-page (make-instance 'workflow-book :id +book-id+) "overview" :signal-error? t))
@@ -88,6 +116,6 @@
 
 (defun run-tests ()
   (let ((*checks* 0))
-    (test-register-now) (test-progress) (test-live-register) (test-reasons) (test-view)
+    (test-register-now) (test-progress) (test-live-register) (test-reasons) (test-observation) (test-view)
     (format t "~&change-workflow: ~D checks passed.~%" *checks*)
     *checks*))
