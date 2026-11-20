@@ -1,0 +1,47 @@
+<!DOCTYPE html
+  SYSTEM "about:legacy-compat">
+<html lang="de-ch"><head><meta charset="UTF-8"><meta name="copyright" content="(C) Copyright 2026"><meta name="generator" content="DITA-OT"><meta name="description" content="Ein laufendes Image merkt sich Store-Pfade; verschwindet einer, scheitert erst das nächste Laden."><meta name="status" content="verified"><meta name="topic-id" content="asdf-registry-store-gc"><title>Warum findet ASDF eine .asd im Nix Store nicht mehr?</title><link rel="stylesheet" type="text/css" href="faq.css"><meta name="viewport" content="width=device-width, initial-scale=1"></head><body id="asdf-registry-store-gc"><main role="main"><article role="article" aria-labelledby="ariaid-title1">
+  <h1 class="title topictitle1" id="ariaid-title1">Warum findet ASDF eine .asd im Nix Store nicht mehr?</h1>
+
+
+  <div class="body refbody"><p class="shortdesc">Ein laufendes Image merkt sich Store-Pfade; verschwindet einer, scheitert erst das nächste Laden.</p>
+    <section class="section"><h2 class="title sectiontitle">Antwort und Geltungsbereich</h2>
+
+      <p class="p">In der gepinnten HyperDoc-Dev-Shell startet <code class="ph codeph">sbcl</code> über einen Nix-Wrapper. Er setzt <code class="ph codeph">CL_SOURCE_REGISTRY</code> auf die Store-Pfade aller mitgelieferten Lisp-Pakete, je als Baum mit <code class="ph codeph">//</code>, etwa <span class="ph filepath">/nix/store/…-sbcl-zip-20150608-git//</span>. Beim ersten Suchen durchläuft ASDF diese Bäume einmal und merkt sich für jedes System den Pfad seiner <span class="ph filepath">.asd</span>. Geladen wird ein System erst, wenn es gebraucht wird.</p>
+      <p class="p">Wird der Store-Pfad danach entfernt, etwa durch <code class="ph codeph">nix-collect-garbage</code> oder die automatische Garbage Collection, bleibt der gemerkte Eintrag im Image stehen. Die Store-Pfade einer Dev-Shell sind keine GC-Wurzeln. Braucht ein <code class="ph codeph">asdf:load-system</code> das System später als Abhängigkeit, meldet ASDF <code class="ph codeph">LOAD-SYSTEM-DEFINITION-ERROR</code> mit <em class="ph i">Couldn't load …/zip.asd: file does not exist</em>. Ein direktes <code class="ph codeph">asdf:find-system</code> auf dasselbe System meldet stattdessen <code class="ph codeph">MISSING-COMPONENT</code>.</p>
+      <p class="p">Abhilfe: Den fehlenden Pfad wiederherstellen und im Debugger <code class="ph codeph">RETRY</code> wählen. Derselbe Store-Pfad entsteht wieder, wenn dieselbe Dev-Shell erneut ausgewertet wird. Im selben Prozess lädt ASDF danach ohne Neustart. Ergibt der Checkout eine andere Dev-Shell als die, aus der das Image stammt, entstehen andere Pfade; dann das Image aus dem aktuellen Checkout neu starten. Eine GC-Wurzel auf die Dev-Shell verhindert, dass die Pfade wieder verschwinden.</p>
+      <pre class="pre codeblock"><code>nix develop --no-update-lock-file -c true
+nix develop --no-update-lock-file --profile ~/.cache/hyperdoc-devshell -c true</code></pre>
+    </section>
+    <section class="section"><h2 class="title sectiontitle">Belege</h2>
+
+      <p class="p">Beobachtet beim Operator am 2026-11-20 im lokalen SLY-Image auf dem Mac, beim Laden von <code class="ph codeph">dreyeck/fedwiki-hyperdoc</code> (über <code class="ph codeph">dreyeck/fedwiki-story</code>, das <code class="ph codeph">zip</code> braucht): <code class="ph codeph">LOAD-SYSTEM-DEFINITION-ERROR</code> für <span class="ph filepath">/nix/store/m65hc7qy2z2pxsrbqil48gilvfwfl624-sbcl-zip-20150608-git/zip.asd</span>, <em class="ph i">file does not exist</em>, aus <code class="ph codeph">LOAD-ASD</code> innerhalb von <code class="ph codeph">FIND-SYSTEM</code>. Ob der Pfad durch eine Garbage Collection verschwand und ob die Wiederherstellung dort gelang, ist noch nicht berichtet.</p>
+      <p class="p">Das verlinkte Prüfprotokoll stellt den Ablauf mit einem echten, eigens angelegten Store-Pfad nach. Es nennt den geprüften HyperDoc-Commit, die Lock-Prüfsumme, die nixpkgs-Revision, die Plattform, den Benutzer und den Abschlusszeitpunkt. Der archivierte Lauf erfolgte auf <code class="ph codeph">x86_64-linux</code> mit SBCL 2.4.10 und ASDF 3.3.1, als root in einem Container mit Nix 2.34.6.</p>
+      <ul class="ul">
+        <li class="li"><strong class="ph b">Registriert.</strong> Ein kleines Verzeichnis mit <span class="ph filepath">faq-gc-probe.asd</span> wird mit <code class="ph codeph">nix store add-path</code> in den Store gelegt und wie vom Wrapper als Baum eingetragen. Vor jedem Laden zeigt die Quellregistrierung von ASDF auf die <span class="ph filepath">.asd</span> im Store.</li>
+        <li class="li"><strong class="ph b">Verschwunden.</strong> <code class="ph codeph">nix-store --delete</code> entfernt genau diesen Pfad. Ein System ausserhalb des Store, das davon abhängt, scheitert bei <code class="ph codeph">asdf:load-system</code> mit <code class="ph codeph">LOAD-SYSTEM-DEFINITION-ERROR</code> und <em class="ph i">file does not exist</em> für den gemerkten Pfad. Ein direktes <code class="ph codeph">find-system</code> meldet <code class="ph codeph">MISSING-COMPONENT</code>.</li>
+        <li class="li"><strong class="ph b">Diagnose.</strong> Die Form unten findet den Eintrag als verschwunden.</li>
+        <li class="li"><strong class="ph b">Wiederhergestellt.</strong> Dasselbe Verzeichnis ergibt beim erneuten Hinzufügen denselben Store-Pfad. Im selben Prozess gelingt das Laden danach ohne Neustart; die geladene Funktion liefert 42.</li>
+        <li class="li"><strong class="ph b">Mit GC-Wurzel.</strong> Solange <code class="ph codeph">nix-store --add-root</code> auf den Pfad zeigt, verweigert <code class="ph codeph">nix-store --delete</code> das Löschen (<em class="ph i">still alive</em>).</li>
+      </ul>
+      <p class="p">Die Garbage Collection selbst wurde nicht ausgelöst; der Lauf löscht nur seinen eigenen Pfad. Ob eine GC unter macOS Pfade schont, die ein laufendes Image nur über seine Umgebung kennt, ist nicht geprüft.</p>
+      <p class="p"><a class="xref" href="asdf-registry-store-gc-check.txt">Prüfprotokoll mit Pfaden, Versionen und Lock-Prüfsumme</a> · <a class="xref" href="https://asdf.common-lisp.dev/asdf.html#Configuring-ASDF-to-find-your-systems" target="_blank" rel="external noopener">ASDF-Quellregistrierung</a> · <a class="xref" href="https://nix.dev/manual/nix/stable/package-management/garbage-collector-roots" target="_blank" rel="external noopener">Nix-GC-Wurzeln</a></p>
+    </section>
+    <section class="section"><h2 class="title sectiontitle">Prüfung im laufenden Image</h2>
+
+      <p class="p">Im SLY-Debugger zuerst <code class="ph codeph">*ABORT</code> wählen, um zum mREPL-Prompt zurückzukehren. Die Form listet Einträge der Quellregistrierung und registrierte Systeme, deren <span class="ph filepath">.asd</span> nicht mehr existiert. Sie lädt nichts und ändert nichts.</p>
+      <pre class="pre codeblock lisp"><code>(append
+ (loop for name being the hash-keys of asdf/source-registry::*source-registry* using (hash-value asd)
+       unless (probe-file asd) collect (list :registry name asd))
+ (loop for name in (asdf:registered-systems)
+       for asd = (asdf:system-source-file (asdf:registered-system name))
+       when (and asd (not (probe-file asd))) collect (list :registered name asd)))</code></pre>
+      <p class="p">Eine leere Liste heisst: Jede gemerkte Systemdefinition liegt noch vor. Jeder Eintrag nennt einen Pfad, der vor dem nächsten Laden wiederhergestellt werden muss.</p>
+    </section>
+    <section class="section"><h2 class="title sectiontitle">Prüflauf wiederholen</h2>
+
+      <p class="p">Im HyperDoc-Checkout legt dieser Befehl ein eigenes kleines Verzeichnis in den Store, löscht genau diesen Pfad, legt ihn wieder an und prüft die GC-Wurzel. Andere Store-Pfade fasst er nicht an. Für <code class="ph codeph">nix-store --delete</code> braucht der Benutzer das Recht, Store-Pfade zu löschen.</p>
+      <pre class="pre codeblock"><code>nix develop --no-update-lock-file -c bash scripts/check-asdf-registry-store-gc.sh</code></pre>
+    </section>
+  </div>
+</article></main></body></html>
