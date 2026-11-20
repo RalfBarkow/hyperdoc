@@ -1,0 +1,4 @@
+640d50e3899c857071fce890f7a634cc0c20aca36871d25d3684ff6729f2680e  asdf-fasl-nix-store.md
+929ba46ff8aaa0fd4c8290b36af7ab7b3a1a10d3ef58b87db36c381060fb1293  check-asdf-fasl-destination.lisp
+37b20d2d7931cb2bcfca39841bd7bec2720601cc2fad2c4282c4c11c8581a1a0  diagnose-asdf-fasl-destination.lisp
+f2704bd40ac6462f2e46c8e168edfcfb7e5e49dea61103f9bd5d429f0a2d16ec  HANDOVER.md
