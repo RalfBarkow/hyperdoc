@@ -3,9 +3,10 @@
 (IN-PACKAGE #:DREYECK/GIT)
 
 (DEFUN GIT-RUN-VALUES-WITH-INPUT (REPOSITORY-ROOT INPUT &REST ARGUMENTS)
-       "Run exactly the requested Git command, disabling implicit promisor fetching.
-Unsupported Git options and other command failures remain Git errors."
-       (UIOP/RUN-PROGRAM:RUN-PROGRAM (LIST* "git" "--no-lazy-fetch" ARGUMENTS)
+       "Run Git with local-file and HTTP(S) transports and no implicit promisor fetching.
+Git enforces the transport allowlist after URL rewriting."
+       (UIOP/RUN-PROGRAM:RUN-PROGRAM (LIST* "env" "GIT_ALLOW_PROTOCOL=file:http:https"
+                                           "git" "--no-lazy-fetch" ARGUMENTS)
                                      :DIRECTORY REPOSITORY-ROOT :INPUT INPUT
                                      :OUTPUT :STRING :ERROR-OUTPUT :STRING
                                      :IGNORE-ERROR-STATUS T))

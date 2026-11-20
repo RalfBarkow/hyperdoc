@@ -494,6 +494,21 @@ decision is taken again when it is evaluated, not only when it was shown."))
 (register-reviewed-control "conversation/select-message"
   :effect "sets the bounded message cursor of one conversation session, and nothing else"
   :audit "dreyeck/work/conversation-coordinates-reading.lisp SELECT-MESSAGE")
+(register-reviewed-control "catalog-deployment-pr52/play"
+  :effect "Observes Git refs, constructs a local commit, records approval, or prepares an operator command."
+  :audit "PLAY-STEP dispatches the current native SHOP3 offer in the optional deployment task.")
+(register-reviewed-control "catalog-deployment-pr52/publish-ref"
+  :effect "Publishes the verified commit to the selected Git peer's dreyeck.ch ref."
+  :audit "PUBLISH-REF checks the integration, uses an old-value lease and reads the ref back.")
+(register-reviewed-control "catalog-service-status/prepare"
+  :effect "Creates one local read request for the Catalog service and shows a command for its operator."
+  :audit "PREPARE-SERVICE-OBSERVATION does not execute the command or open a network connection.")
+(register-reviewed-control "catalog-server-observation/play"
+  :effect "Prepares an operator read request or reads configured Git remotes, then compares their revisions in the image."
+  :audit "PLAY-OBSERVATION checks the selected SHOP3 offer and only invokes a read operation.")
+(register-reviewed-control "catalog-server-observation/plan"
+  :effect "Selects an available observation plan or starts a new observation in the image."
+  :audit "CHOOSE-OBSERVATION-PLAN checks the offered plan; RESTART-OBSERVATION resets only the observation state.")
 (register-reviewed-control "topicmap/workspace-go-to"
   :effect "moves the Point of a Topicmap Workspace to a Topic of it (pushing the old Point on its history)"
   :audit "dreyeck/src/topicmap.lisp TOPICMAP-WORKSPACE-GO-TO")

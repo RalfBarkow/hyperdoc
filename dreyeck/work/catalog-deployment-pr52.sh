@@ -2,6 +2,7 @@
 # Operator-owned stages for the executable Catalog update task.
 set -euo pipefail
 umask 077
+export GIT_ALLOW_PROTOCOL=file:http:https
 stage=${1:?stage}
 revision=${2:?merge revision}
 receipt=${3:-}
@@ -11,7 +12,6 @@ emit_receipt() {
   printf -v evidence "$@"
   printf "(dreyeck/work/catalog-deployment-pr52:submit-receipt '%s)\n" "$evidence"
 }
-[[ $revision =~ ^[0-9a-f]{40}$ ]] || fail 'Ungültige Merge-SHA.'
 [[ $EUID == 0 && $(hostname -s) == dreyeck ]] || fail 'Dieser Schritt gehört in die administrative Bash auf dreyeck.ch.'
 cd /etc/nixos
 
@@ -29,11 +29,11 @@ locked_hyperdoc_rev() { locked_hyperdoc_field rev; }
 uses_git_input() {
   local url
   url=$(nix eval --raw --impure --expr '(import /etc/nixos/flake.nix).inputs.hyperdoc.url or ""') || return 1
-  [[ $url == git+* ]]
+  [[ $url == git+https://* || $url == git+http://* || $url == git+file:* ]]
 }
 
 check_git_input() {
-  uses_git_input || fail 'Setze den HyperDoc-Input in /etc/nixos auf eine vom Server lesbare git+…-URL.'
+  uses_git_input || fail 'Setze den HyperDoc-Input in /etc/nixos auf eine vom Server lesbare git+https-, git+http- oder git+file-URL.'
 }
 
 system_path() {
@@ -65,9 +65,6 @@ readback_catalog() {
   case "$stage" in
     baseline)
       emit_receipt '(:active-readback "%s" "%s" %s %s %s)' "$running" "$system" "$pid" "$local_status" "$public_status"
-      ;;
-    readback)
-      printf '%s\t%s\t%s\t%s\t%s\n' "$running" "$system" "$pid" "$local_status" "$public_status"
       ;;
     verify)
       emit_receipt '(:verify "%s" "%s" "%s" %s %s %s)' "$running" "$receipt" "$system" "$pid" "$local_status" "$public_status"
@@ -101,13 +98,7 @@ restore_failed_build_lock() {
   exit "$status"
 }
 
-if [[ $stage == readback ]]; then
-  active=$(readlink -f /run/current-system)
-  system_path "$active"
-  pid=$(catalog_pid)
-  readback_catalog "$active" "$pid"
-  exit 0
-fi
+[[ $revision =~ ^[0-9a-f]{40}$ ]] || fail 'Ungültige Merge-SHA.'
 
 if [[ $stage == baseline ]]; then
   previous=$(readlink -f /run/current-system)
