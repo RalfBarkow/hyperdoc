@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE task PUBLIC "-//OASIS//DTD DITA Task//EN" "task.dtd">
+<task id="site-observation-observe-site" xml:lang="de-CH">
+  <title>SITE-HOST über HTTPS beobachten</title>
+  <shortdesc>Lesend prüfen, ob die Site den erwarteten Stand ausliefert.</shortdesc>
+  <taskbody>
+    <steps>
+      <step id="observe-https">
+        <cmd>Die Site über HTTPS lesen und den Beleg aufnehmen.</cmd>
+        <info>
+          <p>Play führt aus diesem Image nur GET-Anfragen aus, entsprechend:</p>
+          <codeblock>curl -sS -o /dev/null -w '%{http_code} %{http_version}' https://SITE-HOST/view/welcome-visitors
+curl -sS -o /dev/null -w '%{certs}' https://SITE-HOST/view/welcome-visitors   # Issuer, Expire date
+curl -fsS https://SITE-HOST/system/version.json                              # "wiki"
+curl -fsS https://SITE-HOST/dialog/index.html | grep -F 'event.origin !== window.location.origin'</codeblock>
+          <p>Antwortet <codeph>/system/version.json</codeph> nicht mit 200 (auf staging.dreyeck.ch mit 403 beobachtet), gilt die Version als ungeprüft, nicht als Abweichung; dann bleibt die Dialog-Korrektur der Beleg für den ausgelieferten Stand.</p>
+          <p>Für den HyperDoc-Katalog auf dreyeck.ch prüft Play statt Version und Dialog den Pfad <codeph>/</codeph> auf <codeph>/js/boot.js</codeph>.</p>
+        </info>
+        <stepresult>Der Beleg nennt Zeitpunkt, Status, HTTP-Version, Zertifikat, Wiki-Version, Dialog-Korrektur und jede Abweichung vom erwarteten Stand.</stepresult>
+      </step>
+    </steps>
+  </taskbody>
+</task>
