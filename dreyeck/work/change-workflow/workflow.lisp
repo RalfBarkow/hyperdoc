@@ -243,6 +243,10 @@
        (:h3 "Der Task")
        (v:str (dita:render-dita-topic (uiop:read-file-string (system-file "change-workflow.dita") :external-format :utf-8)))))))
 
+;; Registered when the system is loaded, so that a Catalog that loads it as HYPERDOC_CATALOG_SYSTEM before serving
+;; gives the book its route like any other. OPEN-TASK finds this instance.
+(unless (hb:find-hyperbook +book-id+) (hb:register (make-instance 'workflow-book :id +book-id+)))
+
 (defun page-paths (book)
   (list (cons "overview" (format nil "/~A/overview" (hyperbook/server::slug book)))))
 
