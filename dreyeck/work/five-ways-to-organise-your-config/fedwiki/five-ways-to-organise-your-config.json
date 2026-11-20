@@ -8,6 +8,11 @@
     },
     {
       "type": "paragraph",
+      "id": "5f1a2b3c4d5e6f70",
+      "text": "HyperDoc im lokalen HyperBook Catalog (Port 18080): [http://127.0.0.1:18080/35622-funf-wege-eine-nixos-konfigura Fünf Wege, eine NixOS-Konfiguration zu ordnen] · [http://127.0.0.1:18080/ HyperBook Catalog]"
+    },
+    {
+      "type": "paragraph",
       "id": "08e9f967cabe294e",
       "text": "Page-attached ASDF-System five-ways-to-organise-your-config. Die CTM-Dateien in ctm/ geben die Seite und ihre fünf Unterseiten wieder; ctm/fleet.ctm ordnet fleet ein und ist als Einordnung markiert. SOURCE und SHA256SUMS in den Assets halten fest, von welchem Commit die Kopie stammt."
     },
@@ -51,6 +56,17 @@
         ]
       },
       "date": 1795193521935
+    },
+    {
+      "type": "add",
+      "id": "5f1a2b3c4d5e6f70",
+      "item": {
+        "type": "paragraph",
+        "id": "5f1a2b3c4d5e6f70",
+        "text": "HyperDoc im lokalen HyperBook Catalog (Port 18080): [http://127.0.0.1:18080/35622-funf-wege-eine-nixos-konfigura Fünf Wege, eine NixOS-Konfiguration zu ordnen] · [http://127.0.0.1:18080/ HyperBook Catalog]"
+      },
+      "after": "1ae1b64dbdfd2e7b",
+      "date": 1795200000000
     }
   ]
 }
