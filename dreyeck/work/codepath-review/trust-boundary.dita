@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE concept PUBLIC "-//OASIS//DTD DITA Concept//EN" "concept.dtd">
+<concept id="codepath-review-trust-boundary" xml:lang="de-CH">
+  <title>Die Vertrauensgrenze</title>
+  <shortdesc>Code, der mit einer Wiki-Seite kommt, darf in einem öffentlich ausgelieferten Catalog nie ausgewertet werden. Diese Lesung zeigt, an welchen Stellen das Image es könnte und ob dort eine Sperre steht.</shortdesc>
+  <conbody>
+    <section>
+      <title>Woher der Code kommt</title>
+      <p>Eine Wiki-Seite kann Assets tragen, darunter eine <filepath>.asd</filepath> und Lisp-Dateien unter <filepath>assets/pages/&lt;slug&gt;/</filepath>. Hochladen kann sie, wer sich bei der Wiki-Farm als Besitzer anmeldet. Die Route <codeph>/view/&lt;slug&gt;</codeph> des Catalog liest diese Seiten.</p>
+    </section>
+    <section>
+      <title>Wo er ausgewertet würde</title>
+      <p>ASDF wertet eine <filepath>.asd</filepath> aus, sobald es sie findet oder lädt. Eine Seite wird für ASDF sichtbar, wo etwas ihr Asset-Verzeichnis auf <codeph>asdf:*central-registry*</codeph> setzt oder bindet, oder wo <codeph>asdf:load-asd</codeph> eine Datei lädt. Jedes spätere <codeph>find-system</codeph> oder <codeph>load-system</codeph> geschieht innerhalb einer solchen Stelle. Diese Stellen heissen hier <i>Senken</i>.</p>
+    </section>
+    <section>
+      <title>Die Sperre</title>
+      <p>Ein ausgelieferter Catalog ohne Entwicklungsmodus verweigert Seiten-Code: <codeph>execution-permitted-p</codeph> ist dort falsch. Eine Senke ist sicher, wenn sie die Sperre selbst prüft oder jeder Weg, der zu ihr führt, sie prüft. Die Quelltext-Kommentare halten fest, dass diese Sperre zweimal fehlte oder nicht wirkte. Darum wird sie hier je Senke nachgewiesen, nicht vorausgesetzt.</p>
+      <p>Beide Schalter, Playground und Seiten-Code, folgen dem zweiten Element von <codeph>hyperbook/server::*server-parameters*</codeph>. Wer es im Image auf <codeph>T</codeph> setzt, öffnet beides.</p>
+    </section>
+    <section>
+      <title>Was die Übersicht zeigt</title>
+      <ul>
+        <li><b>Senken</b> mit ihrem Status: prüft selbst, geschützt durch alle Aufrufer, ungeprüft ohne Aufrufer in diesem Image, offen.</li>
+        <li><b>Aufrufer</b> bis fünf Ebenen hinauf, mit Abdeckung: jeder Weg zur Senke prüft die Sperre, oder nicht.</li>
+        <li>Die <b>Topicmap</b> derselben Pfade: Senken unten, Aufrufer darüber. Ein Klick auf ein Thema öffnet die Funktion.</li>
+      </ul>
+    </section>
+  </conbody>
+</concept>

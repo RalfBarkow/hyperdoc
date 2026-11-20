@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE concept PUBLIC "-//OASIS//DTD DITA Concept//EN" "concept.dtd">
+<concept id="codepath-review-method" xml:lang="de-CH">
+  <title>Methode und Grenzen</title>
+  <shortdesc>Zwei unabhängige Quellen, beide aus dem laufenden Image: SBCLs Querverweise und der Text der geladenen Quelldateien. Was nur eine von beiden sieht, wird als solches gezeigt.</shortdesc>
+  <conbody>
+    <section>
+      <title>Querverweise</title>
+      <p><codeph>sb-introspect:who-binds</codeph> und <codeph>who-sets</codeph> auf <codeph>asdf:*central-registry*</codeph> und <codeph>who-calls</codeph> auf <codeph>asdf:load-asd</codeph> liefern die Senken; <codeph>who-calls</codeph> auf jede Funktion liefert ihre Aufrufer. Pakete von ASDF, UIOP und SBCL bleiben aussen vor. Eine Funktion prüft die Sperre per Querverweis, wenn sie eine Funktion mit <codeph>EXECUTION-PERMITTED-P</codeph> im Namen direkt aufruft.</p>
+    </section>
+    <section>
+      <title>Text</title>
+      <p>Gelesen werden die Quelldateien aller geladenen Systeme unter dem Verzeichnis von <codeph>dreyeck</codeph>, je Datei aufgeteilt in Formen der obersten Ebene. Eine Form, die <codeph>load-asd</codeph>, <codeph>central-registry</codeph> oder <codeph>source-registry</codeph> nennt, wird zur Senke „nur im Text“. Eine Form, die den Namen einer Funktion nennt, gilt als möglicher Aufrufer. Eine Definition, die <codeph>execution-permitted-p</codeph> nennt, prüft die Sperre „nur im Text“, etwa über <codeph>uiop:symbol-call</codeph>.</p>
+    </section>
+    <section>
+      <title>Grenzen</title>
+      <ul>
+        <li>Querverweise sehen keine Aufrufe über <codeph>symbol-call</codeph>, <codeph>funcall</codeph> eines berechneten Namens oder generische Funktionen und keine Befehlszeilen für andere Prozesse. Der Text sieht sie, auch in Kommentaren und Docstrings: ein Textfund ist ein Hinweis zum Lesen, kein Beweis.</li>
+        <li>„Kein Aufrufer gefunden“ heisst: weder Querverweis noch Text in den geladenen Quellen. Ein Aufruf aus der REPL, aus einem anderen System oder über einen Namen, der erst zur Laufzeit entsteht, bleibt unsichtbar.</li>
+        <li>„Nur im Text geprüft“ heisst: Die Definition nennt die Sperre. Ob sie sie auf jedem Weg prüft, zeigt erst ihr Quelltext auf der Code-Seite.</li>
+        <li>Die Aufrufer werden bis fünf Ebenen hinauf verfolgt. Öffentliche Einstiege wie Routen, Views und Knöpfe erscheinen als Definitionen ohne weiteren Aufrufer.</li>
+        <li>Untersucht wird, was in diesem Image geladen ist. Für eine Aussage über dreyeck.ch muss das Image den Produktionsstand geladen haben.</li>
+      </ul>
+    </section>
+  </conbody>
+</concept>

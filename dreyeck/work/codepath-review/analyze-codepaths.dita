@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE task PUBLIC "-//OASIS//DTD DITA Task//EN" "task.dtd">
+<task id="codepath-review-analyze" xml:lang="de-CH">
+  <title>Codepfade ermitteln</title>
+  <shortdesc>Lesend feststellen, welche Definitionen dieses Images Seiten-Code für ASDF sichtbar machen oder laden können, und ob jeder Weg dorthin die Sperre prüft.</shortdesc>
+  <taskbody>
+    <prereq><p>Für eine Aussage über dreyeck.ch: ein eigenes Image, auf Loopback, ohne Entwicklungsmodus, mit dem Produktionsstand geladen (<codeph>(asdf:load-system "dreyeck/catalog-application")</codeph> in der Revision des fleet-Pins).</p></prereq>
+    <steps>
+      <step id="analyze">
+        <cmd>Querverweise und Quelltext dieses Images lesen und die Pfade klassifizieren.</cmd>
+        <info><p>Play lädt, kompiliert und wertet nichts aus. Es ruft <codeph>sb-introspect</codeph> auf und liest Dateien.</p></info>
+        <stepresult>Revision, Zeitpunkt, Senken, Knoten, Kanten und die Zahl der offenen Pfade; darunter die Tabelle und die Topicmap.</stepresult>
+      </step>
+      <step id="read">
+        <cmd>Jede Senke, die nicht „prüft die Sperre selbst“ oder „geschützt“ ist, auf der Code-Seite lesen.</cmd>
+        <info><p>Ein Textfund in einem Kommentar ist keine Senke. Eine Befehlszeile für einen anderen Prozess ist eine.</p></info>
+      </step>
+    </steps>
+  </taskbody>
+</task>
