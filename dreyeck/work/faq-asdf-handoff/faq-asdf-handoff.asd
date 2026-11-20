@@ -15,7 +15,7 @@
                              (:static-file "check-mac.dita") (:static-file "hand-over-codex.dita")))
                (:static-file "run-checks.sh")
                (:static-file "restore-probe.lisp")
-               (:module "evidence" :components ((:static-file "browser-run-linux.sexp"))))
+               (:module "evidence" :components ((:static-file "browser-run-linux.sexp") (:static-file "browser-run-darwin.sexp"))))
   :in-order-to ((asdf:test-op (asdf:test-op "faq-asdf-handoff/tests"))))
 
 (asdf:defsystem "faq-asdf-handoff/tests"
