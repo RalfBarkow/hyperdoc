@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Run with nix develop --no-write-lock-file -c bash scripts/check-asdf-fasl-nix-store.sh
+# Run with nix develop --no-update-lock-file -c bash scripts/check-asdf-fasl-nix-store.sh
 set -eu
 cd "$(git rev-parse --show-toplevel)"
 scratch=$(mktemp -d)
