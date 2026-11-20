@@ -58,6 +58,23 @@
     (check (offered o 'merge :fleet-faq-pin))
     (check (not (find :faq-store-gc o :key #'second)))))
 
+(defun test-reasons ()
+  (let* ((*register* (load-register)) (plan (plan-next)) (facts (dreyeck/shop3::initial-facts-of plan)))
+    ;; Every offer has a method of the domain behind it.
+    (dolist (o (offers plan))
+      (check (assoc (first o) +methods+))
+      (check (search "Methode" (first (reasons (first o) (second o) facts)))))
+    (let ((why (format nil "~{~A~^ | ~}" (reasons 'merge :fleet-faq-pin facts))))
+      (check (search "Methode merge" why))
+      (check (search "pin-on-merged" why))
+      (check (search "staging-accepted" why))))
+  ;; Blocked staging names the branch that holds staging.
+  (let* ((*register* (with-facts (load-register) '(:operator-keys :pr-open)))
+         (plan (plan-next *register*))
+         (why (format nil "~{~A~^ | ~}" (reasons 'wait-for-staging :operator-keys (dreyeck/shop3::initial-facts-of plan)))))
+    (check (offered (offers plan) 'wait-for-staging :operator-keys))
+    (check (search "fleet: staging-Pin der FAQ" why))))
+
 (defun test-view ()
   (let* ((*register* (initial-register))
          (page (hb:find-page (make-instance 'workflow-book :id +book-id+) "overview" :signal-error? t))
@@ -66,10 +83,11 @@
     (check (search "Play" html))
     ;; The renderer may write the umlaut as an entity; the rest of the title is plain.
     (check (search "nderung vom Branch bis auf die Server bringen" html))
+    (check (search "Methode" html))
     (check (not (search "dita-unsupported" html)))))
 
 (defun run-tests ()
   (let ((*checks* 0))
-    (test-register-now) (test-progress) (test-live-register) (test-view)
+    (test-register-now) (test-progress) (test-live-register) (test-reasons) (test-view)
     (format t "~&change-workflow: ~D checks passed.~%" *checks*)
     *checks*))

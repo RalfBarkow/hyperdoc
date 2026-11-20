@@ -121,6 +121,48 @@
 (defun step-word (step) (or (second (assoc step +steps+)) (string-downcase step)))
 (defun step-topic-id (step) (third (assoc step +steps+)))
 
+;;; Why a step is offered: the method that offers it, the facts of the change it rests on, and what the derived facts mean
+
+(defparameter +methods+
+  '((review look (unseen)) (wait-for-dependency wait (waiting)) (pull-request open-pr ())
+    (staging accept (needs-staging pr-open)) (wait-for-staging accept-blocked (blocked-staging))
+    (repin repin (pin-stale)) (merge merge (ready-to-merge)) (production production (merged needs-production)))
+  "Step -> (method, facts its precondition requires). Kept beside the domain; the tests check both agree.")
+
+(defun facts-of (id facts)
+  (loop for f in facts when (eq (second f) id) collect f))
+
+(defun explain-fact (f)
+  (let ((id (second f)))
+    (case (first f)
+      (waiting (format nil "wartet auf ~{~A~^, ~}"
+                       (loop for d in (getf (change id) :depends-on) unless (merged-p d) collect (getf (change d) :title))))
+      (blocked-staging (format nil "staging belegt durch ~{~A~^, ~}"
+                               (loop for o in (register)
+                                     when (and (not (eq (getf o :id) id)) (eq (getf o :repo) :fleet)
+                                               (has-fact o :staging-active) (not (has-fact o :merged)))
+                                       collect (getf o :title))))
+      (pin-stale (format nil "Abhängigkeit gemergt, Pin zeigt noch nicht auf den Merge"))
+      (unseen "noch nicht im lokalen HyperDoc angesehen")
+      (ready-to-merge "PR offen, Abnahme vorhanden oder nicht nötig, keine offene Abhängigkeit, Pin aktuell")
+      (t (let ((recorded (assoc (intern (symbol-name (first f)) :keyword) (getf (change id) :facts))))
+           (if recorded
+               (format nil "~(~A~) (~A, ~A)" (first f) (second recorded) (third recorded))
+               (string-downcase (symbol-name (first f)))))))))
+
+(defun reasons (step id facts)
+  "Method and supporting facts for offering STEP for change ID, given the planner's initial FACTS."
+  (destructuring-bind (method required) (rest (assoc step +methods+))
+    (let* ((mine (facts-of id facts))
+           (shown (remove-if-not (lambda (f) (member (first f) required)) mine))
+           (absent (when (eq step 'pull-request) (list "kein PR im Register"))))
+      (list* (format nil "Methode ~(~A~)" method)
+             (append (mapcar #'explain-fact shown)
+                     (when (eq step 'merge)
+                       (mapcar #'explain-fact (remove-if-not (lambda (f) (member (first f) '(pr-open staging-accepted pin-on-merged)))
+                                                             mine)))
+                     absent)))))
+
 ;;; Play: read the state of public hyperdoc pull requests (GET only), and mark merges in this image
 
 (defvar *message* nil)
@@ -181,11 +223,13 @@
                           "PR-Stand der hyperdoc-PRs lesend von GitHub holen")
            " PR-Stand lesen (nur GET, nur öffentliche hyperdoc-PRs)")
        (:table :class "inspector-table"
-        (:tr (:th "Änderung") (:th "Nächster Schritt") (:th "Schritt im Task"))
+        (:tr (:th "Änderung") (:th "Nächster Schritt") (:th "Begründung") (:th "Schritt im Task"))
         (dolist (o (sort (copy-list offers) #'string< :key (lambda (o) (string (second o)))))
           (let ((c (change (second o))))
             (v:html (:tr (:td (v:esc (getf c :title)) " " (:code (v:esc (getf c :branch))))
                          (:td (v:esc (step-word (first o))))
+                         (:td (:ul (dolist (r (reasons (first o) (second o) (dreyeck/shop3::initial-facts-of plan)))
+                                     (v:html (:li (v:esc r))))))
                          (:td (:code (v:esc (or (step-topic-id (first o)) "—")))))))))
        (when (null offers) (v:html (:p "Alles gemergt und ausgerollt.")))
        (:h3 "Register")
