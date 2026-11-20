@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE task PUBLIC "-//OASIS//DTD DITA Task//EN" "task.dtd">
+<task id="start-local-hyperdoc" xml:lang="de-CH">
+  <title>Lokales HyperDoc auf localhost:8080 starten</title>
+  <shortdesc>Ein frisches SLY-Image aktiviert die seitengebundenen HyperDocs einer lokalen Federated Wiki und startet danach den HyperBook Catalog auf 127.0.0.1:8080.</shortdesc>
+  <taskbody>
+    <prereq>
+      <ul>
+        <li>Ein HyperDoc-Checkout mit Nix. Die Wiki läuft lokal, etwa auf <codeph>localhost:3000</codeph>; ihr Seiten-Root ist das Verzeichnis mit <filepath>pages/</filepath>, im Farm-Modus <filepath>~/.wiki/localhost/</filepath>.</li>
+        <li>Jedes seitengebundene System ist an seine Seite angehängt, etwa mit <cmdname>scripts/attach-page-system.sh</cmdname>: Unter <filepath>assets/pages/<varname>slug</varname>/</filepath> liegt genau eine <filepath><varname>slug</varname>.asd</filepath>.</li>
+        <li>Port 8080 ist frei. Belegt ihn ein Prozess, zeigt ihn <codeph>lsof -nP -iTCP:8080 -sTCP:LISTEN</codeph>.</li>
+      </ul>
+    </prereq>
+    <steps>
+      <step id="fresh-image">
+        <cmd>Im Checkout ein frisches Image starten.</cmd>
+        <info>
+          <codeblock>nix develop
+hyperdoc-sly</codeblock>
+          <p>Ein frisches Image, weil CLOG je Image nur einmal läuft und weil seine ASDF-Suchpfade zur gerade ausgewerteten Dev-Shell passen.</p>
+        </info>
+      </step>
+      <step id="activate-and-start">
+        <cmd>Die Seiten aktivieren und danach den Catalog starten.</cmd>
+        <info>
+          <p>Die ersten drei Zeilen anpassen. Die Form nennt Pakete nur als Strings; sie liest darum auch ein, bevor die Systeme geladen sind.</p>
+          <codeblock outputclass="lisp">(let ((site-root #p"/Users/rgb/.wiki/localhost/")
+      (slugs '("five-ways-to-organise-your-config"))
+      (port 8080))
+  (asdf:load-system "dreyeck/catalog-application")
+  (asdf:load-system "dreyeck/fedwiki-hyperdoc")
+  (list :activated
+        (loop for slug in slugs
+              collect (getf (uiop:symbol-call "DREYECK/FEDWIKI-HYPERDOC" "ACTIVATE-LOCAL-FEDWIKI-PAGE-HYPERDOC"
+                                              site-root slug)
+                            :selected-presentation-system))
+        :catalog
+        (progn (uiop:symbol-call "DREYECK/CATALOG-APPLICATION" "START-CATALOG"
+                                 :port port :host "127.0.0.1" :site-root site-root)
+               (format nil "http://localhost:~D/" port))))</codeblock>
+          <p>Erst aktivieren, dann starten: Ein gestarteter Catalog ohne Entwicklungsmodus verweigert Code, der mit einer Seite kommt. <codeph>:host "127.0.0.1"</codeph> hält den Catalog auf diesem Rechner; ohne Angabe lauscht er auf allen Adressen.</p>
+        </info>
+        <stepresult>Eine Liste mit den Namen der aktivierten Systeme und der Catalog-URL, etwa <codeph>(:ACTIVATED ("five-ways-to-organise-your-config") :CATALOG "http://localhost:8080/")</codeph>.</stepresult>
+      </step>
+      <step id="open">
+        <cmd>Den Catalog im Browser öffnen und ein Buch wählen.</cmd>
+        <info>
+          <p>Jedes Buch hat ausserdem eine eigene Adresse: die ersten fünf Zeichen des SHA-1 seiner ID, ein Bindestrich und der gekürzte Titel, etwa <codeph>http://localhost:8080/35622-funf-wege-eine-nixos-konfigura</codeph>. Die Wiki-Seiten zeigt der Catalog unter <codeph>/view/<varname>slug</varname></codeph>.</p>
+        </info>
+      </step>
+      <step id="check-binding">
+        <cmd>Prüfen, dass der Catalog nur auf Loopback lauscht.</cmd>
+        <info><codeblock>lsof -nP -iTCP:8080 -sTCP:LISTEN</codeblock></info>
+        <stepresult>Nur <codeph>127.0.0.1:8080</codeph>, kein <codeph>*:8080</codeph>.</stepresult>
+      </step>
+    </steps>
+    <result><p>Der Catalog läuft im Image, bis es endet oder bis <codeph>(uiop:symbol-call "CLOG" "SHUTDOWN")</codeph> ihn stoppt.</p></result>
+    <postreq>
+      <p>Meldet ASDF beim Laden <i>Couldn't load …/<varname>system</varname>.asd: file does not exist</i> für einen Pfad im Nix Store, ist ein Store-Pfad seit dem Start des Images verschwunden; siehe den FAQ-Eintrag <i>Warum findet ASDF eine .asd im Nix Store nicht mehr?</i> (<filepath>assets/faq/asdf-registry-store-gc.dita</filepath>). Danach dieses Topic in einem frischen Image wiederholen.</p>
+      <p>Der paketierte Catalog (<codeph>HYPERDOC_CATALOG_HOST=127.0.0.1 nix run .#catalog -- 8080</codeph>) startet ohne SLY, aktiviert aber keine seitengebundenen Systeme: Er bietet sie nur an.</p>
+    </postreq>
+  </taskbody>
+</task>
