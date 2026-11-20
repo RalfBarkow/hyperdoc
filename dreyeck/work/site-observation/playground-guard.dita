@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE concept PUBLIC "-//OASIS//DTD DITA Concept//EN" "concept.dtd">
+<concept id="site-observation-playground-guard" xml:lang="de-CH">
+  <title>Die Playground-Schranke</title>
+  <shortdesc><codeph>ENSURE-CATALOG-ROUTE :DEVELOPMENT T</codeph> schaltet die Playgrounds nur ein, wenn dieser Prozess den CLOG-Port ausschliesslich auf Loopback bindet. Sonst wird der Aufruf verweigert, bevor sich etwas ändert.</shortdesc>
+  <conbody>
+    <section>
+      <title>Was der Playground freigibt</title>
+      <p>Ein Playground wertet jeden eingegebenen Lisp-Ausdruck in diesem Image aus, mit den Rechten des Benutzers, der das Image gestartet hat: Dateien, SSH-Schlüssel, Git-Zugangsdaten, Programme. Wer den Playground erreicht, kann all das. Die Play-Knöpfe der Site-Beobachtung brauchen ihn nicht; sie sind geprüfte, festgelegte Aktionen.</p>
+    </section>
+    <section>
+      <title>Was die Schranke prüft</title>
+      <p>CLOG hält die Adresse, auf der es gestartet wurde, nicht fest, und lauscht ohne Angabe auf <codeph>0.0.0.0</codeph> (beobachtet im Quelltext von CLOG 20241012, <filepath>source/clog-connection-websockets.lisp</filepath>, <codeph>initialize</codeph>). Die Schranke fragt darum das Betriebssystem: <cmdname>lsof</cmdname> listet die Sockets, auf denen dieser Prozess am CLOG-Port lauscht.</p>
+      <ul>
+        <li><codeph>:loopback</codeph>: jede Adresse ist <codeph>127.x</codeph>, <codeph>[::1]</codeph> oder <codeph>localhost</codeph>. Nur dann werden die Playgrounds eingeschaltet.</li>
+        <li><codeph>:exposed</codeph>: mindestens eine Adresse ist keine Loopback-Adresse, etwa <codeph>*:18080</codeph>. Verweigert.</li>
+        <li><codeph>:not-determined</codeph>: <cmdname>lsof</cmdname> fehlt, scheitert oder meldet nichts. Verweigert: was nicht beobachtet wurde, gilt nicht als Loopback.</li>
+      </ul>
+      <p>Die Prüfung läuft vor jeder Änderung. Eine Verweigerung (<codeph>DEVELOPMENT-REFUSED</codeph>) lässt Routen und Einstellungen, wie sie waren. <codeph>:DEVELOPMENT NIL</codeph> wird nie verweigert, so lassen sich die Playgrounds immer wieder ausschalten.</p>
+    </section>
+    <section>
+      <title>Was die Schranke nicht abdeckt</title>
+      <p>Loopback hält andere Rechner fern, nicht aber zwei Wege auf demselben Rechner:</p>
+      <ul>
+        <li><b>Webseiten im Browser.</b> CLOG 20241012 prüft beim WebSocket-Aufbau weder den <codeph>Origin</codeph>- noch den <codeph>Host</codeph>-Header (beobachtet: <codeph>clog-server</codeph> in derselben Datei erzeugt den Server ohne solche Prüfung). Eine fremde Seite kann also eine Verbindung zu <codeph>127.0.0.1</codeph> versuchen, direkt oder über DNS-Rebinding. Dass ein solcher Angriff den Playground tatsächlich bedienen kann, ist abgeleitet, nicht vorgeführt.</li>
+        <li><b>Andere Programme und Benutzer auf demselben Rechner</b> erreichen Loopback ebenfalls.</li>
+      </ul>
+      <p>Darum: Playgrounds nur einschalten, solange sie gebraucht werden; in diesem Browser dabei keine fremden Seiten öffnen oder ein eigenes Browserprofil verwenden; nie auf einem öffentlich erreichbaren Catalog wie dreyeck.ch.</p>
+    </section>
+    <section>
+      <title>Wo es weitergeht</title>
+      <p>Der Code der Schranke steht auf der Seite <i>Code: Playground-Schranke</i>. Die aktuelle Bindung dieses Images prüft der Task <i>CLOG-Bindung prüfen</i> auf derselben Seite mit einem Play-Knopf.</p>
+    </section>
+  </conbody>
+</concept>

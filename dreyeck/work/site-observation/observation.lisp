@@ -5,7 +5,7 @@
   (:use #:cl)
   (:local-nicknames (#:v #:html-inspector-views) (#:dita #:dreyeck/dita-story-item)
                     (#:policy #:dreyeck/authority-policy) (#:hb #:hyperbook))
-  (:export #:open-task #:ensure-catalog-route #:trust-staging-roots #:source-state #:observe-site #:plan-next #:offered-sites #:*sites* #:site-host
+  (:export #:open-task #:ensure-catalog-route #:clog-binding #:development-refused #:trust-staging-roots #:source-state #:observe-site #:plan-next #:offered-sites #:*sites* #:site-host
            #:observations-of #:latest-observation #:*max-age-seconds*))
 (in-package #:site-observation)
 
@@ -211,27 +211,38 @@
 
 ;;; DITA
 
-(defun topic-path () (asdf:system-relative-pathname "site-observation" "observe-site.dita"))
 
-(defun render-task (site)
-  (let* ((xml (uiop:frob-substrings (uiop:read-file-string (topic-path) :external-format :utf-8)
-                                    '("SITE-HOST") (site-host site)))
-         (root (dita:parse-dita-topic xml))
-         (node (plump:get-element-by-id root "observe-https"))
-         (marker (symbol-name (gensym "SITE-PLAY-"))))
+(defun topic-file (name) (asdf:system-relative-pathname "site-observation" name))
+(defun read-topic (name) (uiop:read-file-string (topic-file name) :external-format :utf-8))
+
+(defun split-at-step (xml step-id)
+  "Render the DITA topic XML; return the HTML before and after the end of the <cmd> of step STEP-ID,
+where the caller puts its Play button."
+  (let* ((root (dita:parse-dita-topic xml))
+         (node (plump:get-element-by-id root step-id))
+         (marker (symbol-name (gensym "PLAY-"))))
     (plump:make-text-node (plump:make-element (elt (plump:get-elements-by-tag-name node "cmd") 0) "ph") marker)
     (let* ((html (dita:render-dita-topic (plump:serialize root nil)))
            (offset (search marker html)))
-      (v:html (v:str (subseq html 0 offset)) " "
-              (v:eval-button "Play" (policy:reviewed-thunk "site-observation/observe" (play-observe site))
-                             (format nil "~A über HTTPS lesen" (site-host site)))
-              (v:str (subseq html (+ offset (length marker))))))))
+      (values (subseq html 0 offset) (subseq html (+ offset (length marker)))))))
+
+(defun render-task (site)
+  (multiple-value-bind (before after)
+      (split-at-step (uiop:frob-substrings (read-topic "observe-site.dita") '("SITE-HOST") (site-host site))
+                     "observe-https")
+    (v:html (v:str before) " "
+            (v:eval-button "Play" (policy:reviewed-thunk "site-observation/observe" (play-observe site))
+                           (format nil "~A über HTTPS lesen" (site-host site)))
+            (v:str after))))
 
 ;;; Pages: one overview, one page per machine
 
 (defclass observation-book (hb:hyperbook) ())
 (defclass machine-page (hb:page) ((machine :initarg :machine :reader machine-of)))
 (defclass overview-page (hb:page) ())
+(defclass guard-text-page (hb:page) ())
+(defclass guard-code-page (hb:page) ())
+(defparameter +guard-pages+ '(("playground-guard" . guard-text-page) ("playground-guard-code" . guard-code-page)))
 
 (defparameter +book-id+ "dreyeck-site-observation")
 (defun machines () (remove-duplicates (mapcar #'site-machine *sites*) :test #'equal :from-end t))
@@ -240,10 +251,14 @@
 (defmethod hb:title-of ((book observation-book)) "Site-Beobachtung")
 (defmethod hb:title-of ((page overview-page)) "Übersicht")
 (defmethod hb:title-of ((page machine-page)) (format nil "Host ~A" (machine-of page)))
+(defmethod hb:title-of ((page guard-text-page)) "Playground-Schranke")
+(defmethod hb:title-of ((page guard-code-page)) "Code: Playground-Schranke")
 (defmethod hb:main-page-id-of ((book observation-book)) "overview")
 
 (defmethod hb:find-page ((book observation-book) id &key signal-error?)
   (or (and (equal id "overview") (make-instance 'overview-page :id "overview" :hyperbook book))
+      (let ((class (cdr (assoc id +guard-pages+ :test #'equal))))
+        (and class (make-instance class :id id :hyperbook book)))
       (let ((machine (find id (machines) :key #'machine-page-id :test #'equal)))
         (and machine (make-instance 'machine-page :id id :hyperbook book :machine machine)))
       (when signal-error? (error 'hb:page-lookup-failure :hyperbook book :page-id id))))
@@ -259,9 +274,13 @@
           (t (format nil "~A · wie erwartet~@[ · wiki ~A~] · Zertifikat bis ~A"
                      (time-string (getf o :time)) (getf o :wiki) (getf o :expires))))))
 
+(defun guard-page-ref (book id)
+  (let ((page (hb:find-page book id :signal-error? t)))
+    (v:object-ref page :display (hb:title-of page))))
+
 (v:defview overview-view (page overview-page)
   (v:html-view :title "Übersicht" :priority -100
-    (let ((plan (plan-next)))
+    (let ((plan (plan-next)) (book (hb:hyperbook-of page)))
       (v:html (:p (v:object-ref plan :display "Nativer SHOP3-Plan") " · als Nächstes beobachten: "
                   (v:esc (format nil "~{~(~A~)~^, ~}" (or (offered-sites plan) '(:keine)))))
               (let ((state (source-state)))
@@ -271,6 +290,8 @@
                                                (getf state :commit) (getf state :attached)
                                                (getf state :intact) (getf state :changed))
                                        (format nil "Repository-Checkout ~A" (getf state :directory)))))))
+              (:p "Playgrounds dieses Images: " (guard-page-ref book "playground-guard") " · "
+                  (guard-page-ref book "playground-guard-code"))
               (:p "Erwartet: wiki " (:code (v:esc +expected-wiki+)) " mit Dialog-Korrektur; Belege gelten "
                   (v:esc (princ-to-string (floor *max-age-seconds* 3600))) " Stunden.")
               (:table
@@ -297,7 +318,7 @@
 
 (defun page-paths (book)
   (let ((slug (hyperbook/server::slug book)))
-    (loop for id in (cons "overview" (mapcar #'machine-page-id (machines)))
+    (loop for id in (append (list "overview") (mapcar #'machine-page-id (machines)) (mapcar #'car +guard-pages+))
           collect (cons id (format nil "/~A/~A" slug id)))))
 
 (defun add-routes (book)
@@ -323,13 +344,70 @@ loopback Catalog on PORT when CLOG is not running. Return the overview URL."
     (add-routes book)
     (format nil "http://127.0.0.1:~D~A" clog:*clog-port* (cdr (first (page-paths book))))))
 
+;;; Playground guard. CLOG (20241012) does not record the address it was started on, and its default is
+;;; 0.0.0.0, so the guard asks the operating system: lsof lists the sockets on which this process listens.
+
+(defun process-id ()
+  #+sbcl (sb-unix:unix-getpid)
+  #-sbcl nil)
+
+(defun loopback-address-p (address)
+  "True for an lsof listen address such as 127.0.0.1:18080, [::1]:18080 or localhost:18080."
+  (some (lambda (prefix) (uiop:string-prefix-p prefix address)) '("127." "[::1]:" "localhost:")))
+
+(defun lsof-listen-addresses (output)
+  "The addresses in lsof -F n OUTPUT: its lines that start with n, without the n."
+  (loop for line in (uiop:split-string output :separator '(#\Newline))
+        when (uiop:string-prefix-p "n" line) collect (subseq line 1)))
+
+(defun binding-status (addresses)
+  ":LOOPBACK when every address is a loopback address, :EXPOSED when one is not, :NOT-DETERMINED for none."
+  (cond ((null addresses) :not-determined)
+        ((every #'loopback-address-p addresses) :loopback)
+        (t :exposed)))
+
+(defun clog-binding (&optional (port clog:*clog-port*) (pid (process-id)))
+  "Where this process listens on PORT: (values STATUS ADDRESSES REASON). STATUS is :LOOPBACK, :EXPOSED or
+:NOT-DETERMINED. A failed or empty lsof answer is :NOT-DETERMINED, never :LOOPBACK."
+  (if (not (and (integerp port) (plusp port) pid))
+      (values :not-determined nil "kein Port oder keine Prozessnummer")
+      (multiple-value-bind (out err exit)
+          (ignore-errors
+           (uiop:run-program (list "env" "-u" "LD_LIBRARY_PATH" "-u" "DYLD_LIBRARY_PATH"
+                                   "lsof" "-nP" "-a" "-p" (princ-to-string pid)
+                                   (format nil "-iTCP:~D" port) "-sTCP:LISTEN" "-F" "n")
+                             :output :string :error-output :string :ignore-error-status t))
+        (let ((addresses (and out (lsof-listen-addresses out))))
+          (values (binding-status addresses) addresses
+                  (cond ((null out) "lsof liess sich nicht starten")
+                        ((null addresses) (format nil "lsof meldet keinen lauschenden Socket (Exit ~A~@[, ~A~])"
+                                                  exit (and err (plusp (length err)) (string-trim '(#\Newline) err))))))))))
+
+(define-condition development-refused (error)
+  ((status :initarg :status :reader refused-status)
+   (addresses :initarg :addresses :reader refused-addresses)
+   (reason :initarg :reason :initform nil :reader refused-reason))
+  (:report (lambda (c s)
+             (format s "DEVELOPMENT T verweigert: CLOG lauscht ~:[nicht nachweislich nur auf Loopback~;auch ausserhalb von Loopback~] ~
+(~(~A~)~@[, ~{~A~^, ~}~]~@[; ~A~]). Nichts wurde geändert. Starte CLOG mit :HOST \"127.0.0.1\"."
+                     (eq :exposed (refused-status c)) (refused-status c) (refused-addresses c) (refused-reason c)))))
+
+(defun require-loopback-for-development (&optional (port clog:*clog-port*))
+  "Signal DEVELOPMENT-REFUSED unless this process listens on PORT on loopback addresses only."
+  (multiple-value-bind (status addresses reason) (clog-binding port)
+    (unless (eq status :loopback)
+      (error 'development-refused :status status :addresses addresses :reason reason))
+    addresses))
+
 (defun ensure-catalog-route (&key (pane-width "850px") development)
   "Serve the HyperBook Catalog at / of the running CLOG server, and the routes of every registered book,
 as SERVE-CATALOG does after starting CLOG. For an image whose CLOG another application started.
-DEVELOPMENT T enables the playgrounds, which evaluate arbitrary Lisp in this image: use it only for a
-local image whose CLOG listens on loopback. Return the Catalog URL."
+DEVELOPMENT T enables the playgrounds, which evaluate arbitrary Lisp in this image. It is refused, before
+anything changes, unless this process listens on the CLOG port on loopback only (REQUIRE-LOOPBACK-FOR-DEVELOPMENT).
+Return the Catalog URL."
   (unless (clog:is-running-p)
     (error "In diesem Image läuft kein CLOG; starte den Catalog mit HYPERBOOK/SERVER:SERVE-CATALOG."))
+  (when development (require-loopback-for-development))
   (clog:set-on-new-window
    (lambda (body)
      (clog-moldable-inspector:on-new-inspector body :object hyperbook:*catalog* :pane-width pane-width
@@ -345,3 +423,76 @@ local image whose CLOG listens on loopback. Return the Catalog URL."
   "Let curl verify staging.dreyeck.ch against the Let's Encrypt staging roots in the file PEM."
   (let ((path (or (probe-file pem) (error "Datei ~A fehlt." pem))))
     (setf (site-ca-file (find-site :staging-dreyeck-ch)) path)))
+
+;;; The Playground guard as HyperDoc pages: a text page (DITA concept) and a code page (DITA reference with
+;;; the definitions read from this file, and a DITA task whose Play only observes the binding).
+
+(defun definition-source (name &optional (file (topic-file "observation.lisp")))
+  "The text of the top-level definition of NAME in FILE, as it stands in the file."
+  (let* ((text (uiop:read-file-string file :external-format :utf-8))
+         (start (loop for head in '("(defun " "(define-condition " "(defparameter " "(defvar ")
+                      for probe = (format nil "~A~A" head name)
+                      for at = (loop for from = 0 then (1+ found)
+                                     for found = (search probe text :start2 from :test #'char-equal)
+                                     while found
+                                     when (and (< (+ found (length probe)) (length text))
+                                               (member (char text (+ found (length probe))) '(#\Space #\Newline #\))))
+                                       return found)
+                      when at return at)))
+    (unless start (error "Keine Definition von ~A in ~A." name file))
+    (let ((*package* (find-package '#:site-observation)) (*read-suppress* t))
+      (subseq text start (nth-value 1 (read-from-string text t nil :start start))))))
+
+(defun xml-escape (text)
+  (with-output-to-string (s)
+    (loop for c across text
+          do (case c (#\& (write-string "&amp;" s)) (#\< (write-string "&lt;" s)) (#\> (write-string "&gt;" s))
+                     (t (write-char c s))))))
+
+(defun fill-sources (xml)
+  "Replace every codeblock text SOURCE:name in XML by the escaped definition of name."
+  (let ((out xml))
+    (loop for at = (search ">SOURCE:" out)
+          while at
+          do (let* ((start (+ at (length ">SOURCE:")))
+                    (end (position #\< out :start start))
+                    (name (subseq out start end)))
+               (setf out (concatenate 'string (subseq out 0 (1+ at)) (xml-escape (definition-source name))
+                                      (subseq out end)))))
+    out))
+
+(defvar *binding-message* nil)
+
+(defun play-check-binding ()
+  (setf *binding-message*
+        (handler-case
+            (multiple-value-bind (status addresses reason) (clog-binding)
+              (format nil "~A · Port ~A · ~(~A~)~@[ · ~{~A~^, ~}~]~@[ · ~A~]"
+                      (time-string (get-universal-time)) clog:*clog-port* status addresses reason))
+          (error (c) (princ-to-string c)))))
+
+(policy:register-reviewed-control "site-observation/check-binding"
+  :effect "Lists with lsof the sockets on which this process listens on the CLOG port, and shows the result."
+  :audit "PLAY-CHECK-BINDING runs lsof -nP -a -p <own pid> -iTCP:<clog port> -sTCP:LISTEN -F n; it changes no route, no setting.")
+
+(defun render-binding-task ()
+  (multiple-value-bind (before after) (split-at-step (read-topic "check-playground-binding.dita") "check-binding")
+    (v:html (v:str before) " "
+            (v:eval-button "Play" (policy:reviewed-thunk "site-observation/check-binding" (play-check-binding))
+                           "CLOG-Bindung dieses Images lesen")
+            (v:str after))))
+
+(v:defview guard-text-view (page guard-text-page)
+  (v:html-view :title "Text" :priority -100
+    (v:html (v:str (dita:render-dita-topic (read-topic "playground-guard.dita")))
+            (:p "Weiter: " (guard-page-ref (hb:hyperbook-of page) "playground-guard-code")))))
+
+(v:defview guard-code-view (page guard-code-page)
+  (v:html-view :title "Code" :priority -100
+    (v:html (v:str (dita:render-dita-topic (fill-sources (read-topic "playground-guard-code.dita"))))
+            (:p "Als Objekte: " (v:object-ref #'clog-binding :display "clog-binding") " · "
+                (v:object-ref #'require-loopback-for-development :display "require-loopback-for-development") " · "
+                (v:object-ref #'ensure-catalog-route :display "ensure-catalog-route"))
+            (when *binding-message* (v:html (:p :role "status" (v:esc *binding-message*))))
+            (render-binding-task)
+            (:p "Zurück: " (guard-page-ref (hb:hyperbook-of page) "playground-guard")))))

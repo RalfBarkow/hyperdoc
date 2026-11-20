@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE task PUBLIC "-//OASIS//DTD DITA Task//EN" "task.dtd">
+<task id="site-observation-check-playground-binding" xml:lang="de-CH">
+  <title>CLOG-Bindung prüfen</title>
+  <shortdesc>Lesend feststellen, auf welchen Adressen dieses Image den CLOG-Port bindet, bevor die Playgrounds eingeschaltet werden.</shortdesc>
+  <taskbody>
+    <steps>
+      <step id="check-binding">
+        <cmd>Die lauschenden Sockets dieses Prozesses am CLOG-Port lesen.</cmd>
+        <info>
+          <p>Play führt nur <cmdname>lsof</cmdname> für die eigene Prozessnummer aus, entsprechend:</p>
+          <codeblock>lsof -nP -a -p PID -iTCP:PORT -sTCP:LISTEN -F n</codeblock>
+          <p>Play ändert nichts: weder Routen noch Playgrounds.</p>
+        </info>
+        <stepresult>Status <codeph>:loopback</codeph>, <codeph>:exposed</codeph> oder <codeph>:not-determined</codeph>, mit Adressen und Grund.</stepresult>
+      </step>
+      <step id="enable">
+        <cmd>Nur bei <codeph>:loopback</codeph> die Playgrounds einschalten, und danach wieder aus.</cmd>
+        <info>
+          <codeblock>(uiop:symbol-call "SITE-OBSERVATION" "ENSURE-CATALOG-ROUTE" :development t)
+(uiop:symbol-call "SITE-OBSERVATION" "ENSURE-CATALOG-ROUTE" :development nil)</codeblock>
+          <p>Das Einschalten bleibt eine Eingabe in SLY, kein Play-Knopf. Bei jedem anderen Status verweigert die erste Form mit <codeph>DEVELOPMENT-REFUSED</codeph>.</p>
+        </info>
+      </step>
+    </steps>
+  </taskbody>
+</task>

@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE reference PUBLIC "-//OASIS//DTD DITA Reference//EN" "reference.dtd">
+<reference id="site-observation-playground-guard-code" xml:lang="de-CH">
+  <title>Code: Playground-Schranke</title>
+  <shortdesc>Die Definitionen der Schranke aus <filepath>observation.lisp</filepath>. Jeder Codeblock wird beim Anzeigen aus der Datei gelesen, aus der dieses Image das System geladen hat; er kann also nicht vom geladenen Quelltext abweichen.</shortdesc>
+  <refbody>
+    <section id="clog-binding">
+      <title>Die Beobachtung: CLOG-BINDING</title>
+      <p>Fragt <cmdname>lsof</cmdname> nach den lauschenden Sockets dieses Prozesses am CLOG-Port. Wie <cmdname>curl</cmdname> in der Beobachtung läuft <cmdname>lsof</cmdname> ohne den Bibliothekspfad des Images. Ergebnis: Status, Adressen, Grund.</p>
+      <codeblock outputclass="lisp">SOURCE:clog-binding</codeblock>
+      <codeblock outputclass="lisp">SOURCE:lsof-listen-addresses</codeblock>
+    </section>
+    <section id="binding-status">
+      <title>Die Ableitung: BINDING-STATUS</title>
+      <p>Aus den Adressen wird einer von drei Werten. Keine Adresse heisst <codeph>:not-determined</codeph>, nie <codeph>:loopback</codeph>.</p>
+      <codeblock outputclass="lisp">SOURCE:binding-status</codeblock>
+      <codeblock outputclass="lisp">SOURCE:loopback-address-p</codeblock>
+    </section>
+    <section id="refusal">
+      <title>Die Verweigerung</title>
+      <p><codeph>REQUIRE-LOOPBACK-FOR-DEVELOPMENT</codeph> signalisiert <codeph>DEVELOPMENT-REFUSED</codeph> für alles ausser <codeph>:loopback</codeph>. <codeph>ENSURE-CATALOG-ROUTE</codeph> ruft sie vor der ersten Änderung auf und nur bei <codeph>:DEVELOPMENT T</codeph>.</p>
+      <codeblock outputclass="lisp">SOURCE:require-loopback-for-development</codeblock>
+      <codeblock outputclass="lisp">SOURCE:development-refused</codeblock>
+      <codeblock outputclass="lisp">SOURCE:ensure-catalog-route</codeblock>
+    </section>
+    <section id="tests">
+      <title>Tests</title>
+      <p><codeph>TEST-PLAYGROUND-GUARD</codeph> in <filepath>tests/observation.lisp</filepath> prüft die Ableitung an festen <cmdname>lsof</cmdname>-Ausgaben und die Beobachtung an zwei echten Sockets dieses Prozesses, einer auf <codeph>127.0.0.1</codeph> und einer auf <codeph>0.0.0.0</codeph>. Ohne <cmdname>lsof</cmdname> muss die Beobachtung <codeph>:not-determined</codeph> liefern.</p>
+    </section>
+  </refbody>
+</reference>

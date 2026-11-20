@@ -7,11 +7,13 @@
   :license "BSD"
   :depends-on ("dreyeck/shop3" "dreyeck/authority-policy" "dreyeck/dita-story-item"
                "html-inspector-views" "hyperbook/server" "clog" "clog-moldable-inspector" "plump" "shasht" "ironclad")
-  :components ((:file "observation") (:static-file "observe-site.dita"))
+  :components ((:file "observation") (:static-file "observe-site.dita")
+               (:static-file "playground-guard.dita") (:static-file "playground-guard-code.dita")
+               (:static-file "check-playground-binding.dita"))
   :in-order-to ((asdf:test-op (asdf:test-op "site-observation/tests"))))
 
 (asdf:defsystem "site-observation/tests"
-  :depends-on ("site-observation")
+  :depends-on ("site-observation" "usocket")
   :components ((:module "tests" :components ((:file "observation"))))
   :perform (asdf:test-op (operation component)
              (declare (ignore operation component))
