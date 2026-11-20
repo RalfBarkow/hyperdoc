@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE task PUBLIC "-//OASIS//DTD DITA Task//EN" "task.dtd">
+<task id="faq-handoff-check-mac" xml:lang="de-CH">
+  <title>3 · Mac prüfen</title>
+  <shortdesc>Die Lesediagnose im laufenden weissen SLY-Image und den lesenden Lauf im frischen SBCL-Prozess erfassen.</shortdesc>
+  <taskbody>
+    <prereq><p>Diese Seite ist im weissen SLY-Image geöffnet, dessen Catalog auf Port 8080 läuft. Play wertet dann in genau diesem Image aus.</p></prereq>
+    <steps>
+      <step id="mac-live">
+        <cmd>Die Lesediagnose im laufenden Image aufrufen.</cmd>
+        <info>
+          <p>Play lädt die unveränderte Datei in dieses Image und nimmt ihre Ausgabe auf. Im SLY-mREPL entspricht das:</p>
+          <codeblock>(load (merge-pathnames "docs/faq/asdf-fasl-nix-store/revision-2/diagnose-asdf-fasl-destination.lisp"
+                       (faq-asdf-handoff:repository-of faq-asdf-handoff:*open-handoff*)))</codeblock>
+          <p>Die Diagnose liest ASDF-Zustand und prüft Dateien. Sie kompiliert nichts, lädt kein System, durchsucht keine Registry und legt keine Datei an. Hat das Image seine Ausgabeübersetzungen noch nicht initialisiert, initialisiert der Aufruf sie; <codeph>translations-initialized</codeph> steht davor.</p>
+        </info>
+        <stepresult>Der Beleg enthält Plattform, SBCL- und ASDF-Version, den Catalog-Port und alle Zeilen der Diagnose.</stepresult>
+      </step>
+      <step id="mac-fresh">
+        <cmd>Das Originalskript lesend in einem frischen SBCL-Prozess ausführen.</cmd>
+        <info>
+          <p>Play führt im Checkout diesen Befehl aus, ohne die vom SBCL-Wrapper des Images gesetzten Variablen <codeph>LD_LIBRARY_PATH</codeph> und <codeph>DYLD_LIBRARY_PATH</codeph>:</p>
+          <codeblock>nix develop --no-update-lock-file -c bash dreyeck/work/faq-asdf-handoff/run-checks.sh read-only</codeblock>
+          <p>Der Lauf erbt die Umgebung dieses Images. R1 prüft salza2, R2 einen Store-Pfad ausserhalb des Wrappers, beide mit <codeph>FAQ_CHECK_READ_ONLY=1</codeph>. <codeph>--no-userinit</codeph> überspringt <filepath>~/.sbclrc</filepath>; was das Image von dort hat, zeigt nur der vorige Schritt.</p>
+        </info>
+        <stepresult>Der Beleg enthält für R1 und R2 Exit-Code, Zielpfad und letzte Zeile.</stepresult>
+      </step>
+    </steps>
+  </taskbody>
+</task>

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE task PUBLIC "-//OASIS//DTD DITA Task//EN" "task.dtd">
+<task id="faq-handoff-bind-revision" xml:lang="de-CH">
+  <title>1 · Revision binden</title>
+  <shortdesc>Den Handoff-Commit, die Revision-2-Dateien und den Lockfile im Checkout prüfen.</shortdesc>
+  <taskbody>
+    <prereq><p>Das Image hat <codeph>faq-asdf-handoff</codeph> aus einem Checkout des Branches <codeph>handoff/faq-asdf-fasl-nix-store-rev2</codeph> geladen. Play prüft genau diesen Checkout.</p></prereq>
+    <steps>
+      <step id="bind-revision">
+        <cmd>Commit, Skript-Hashes und flake.lock prüfen.</cmd>
+        <info>
+          <p>Play führt diese Prüfungen aus, mit Git und SHA-256 aus dem Image:</p>
+          <codeblock>git rev-parse --verify 'HEAD^{commit}'
+git merge-base --is-ancestor 07b7f51f13494d11cc48e16a72b01da65b77256c HEAD
+(cd docs/faq/asdf-fasl-nix-store/revision-2 &amp;&amp; sha256sum -c SHA256SUMS)
+sha256sum flake.lock   # 019dcaff428e1abf426f165c3afd70fe163077454d1c348d4965d86a93a7e836</codeblock>
+          <p>Zusätzlich vergleicht Play jede Datei mit dem im Plan festgehaltenen Hash und liest die nixpkgs-Revision aus <filepath>flake.lock</filepath>.</p>
+        </info>
+        <stepresult>Der Beleg nennt die tatsächlich verwendete Revision, ob der Arbeitsbaum sauber ist, die nixpkgs-Revision und den Checkout des Images. Bei einer Abweichung bricht der Schritt ab und nimmt keinen Beleg auf.</stepresult>
+      </step>
+    </steps>
+  </taskbody>
+</task>

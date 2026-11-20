@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE task PUBLIC "-//OASIS//DTD DITA Task//EN" "task.dtd">
+<task id="faq-handoff-hand-over-codex" xml:lang="de-CH">
+  <title>4 · An Codex übergeben</title>
+  <shortdesc>Einen Beleg mit Commit-SHA, Prüfergebnissen und offenen Schritten erzeugen.</shortdesc>
+  <taskbody>
+    <steps>
+      <step id="hand-over">
+        <cmd>Den Beleg für Codex erzeugen.</cmd>
+        <info>
+          <p>Play fasst die Belege der Schritte 1 bis 3 zusammen. Im SLY-mREPL liefert dieselbe Form den Beleg als Liste:</p>
+          <codeblock>(faq-asdf-handoff:handover-receipt faq-asdf-handoff:*open-handoff*)</codeblock>
+          <p>Codex verwendet den Handoff-Commit für die Überarbeitung von PR #57. Die öffentliche Auslieferung unter <filepath>/faq/</filepath> bleibt Teil des separaten fleet-PRs für staging.</p>
+        </info>
+        <stepresult>Der Beleg nennt Handoff-Commit, verwendete Revision, Plattformen, Fälle, Gegenprobe, Abweichungen und offene Schritte.</stepresult>
+      </step>
+    </steps>
+  </taskbody>
+</task>

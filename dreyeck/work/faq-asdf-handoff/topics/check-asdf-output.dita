@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE task PUBLIC "-//OASIS//DTD DITA Task//EN" "task.dtd">
+<task id="faq-handoff-check-asdf-output" xml:lang="de-CH">
+  <title>2 · ASDF-Ausgabe prüfen</title>
+  <shortdesc>Die Originalprüfung im gepinnten Dev-Shell ausführen und die Wiederherstellung nachweisen.</shortdesc>
+  <taskbody>
+    <steps>
+      <step id="check-asdf">
+        <cmd>Die elf Aufrufe aus HANDOVER.md und die Gegenprobe ausführen.</cmd>
+        <info>
+          <p>Play führt im Checkout diesen Befehl aus, ohne die vom SBCL-Wrapper des Images gesetzten Variablen <codeph>LD_LIBRARY_PATH</codeph> und <codeph>DYLD_LIBRARY_PATH</codeph>:</p>
+          <codeblock>nix develop --no-update-lock-file -c bash dreyeck/work/faq-asdf-handoff/run-checks.sh</codeblock>
+          <p>Jeder Aufruf startet einen frischen SBCL-Prozess mit eigenem, leerem <codeph>HOME</codeph> und ohne geerbtes <codeph>ASDF_OUTPUT_TRANSLATIONS</codeph> oder <codeph>XDG_CACHE_HOME</codeph>. Als root wird C6 übersprungen. Die Gegenprobe <filepath>restore-probe.lisp</filepath> berechnet nur Zielpfade; sie lädt und kompiliert nichts.</p>
+          <simpletable>
+            <sthead><stentry>Fall</stentry><stentry>Exit</stentry><stentry>Zielpfad</stentry></sthead>
+            <strow><stentry>C1, C7, C11</stentry><stentry>0</stentry><stentry>Benutzer-Cache</stentry></strow>
+            <strow><stentry>C2, C3, C10</stentry><stentry>0</stentry><stentry>Store, mitgelieferte FASL</stentry></strow>
+            <strow><stentry>C4, C5</stentry><stentry>1</stentry><stentry>Store, FASL fehlt</stentry></strow>
+            <strow><stentry>C6</stentry><stentry>2</stentry><stentry>/nonexistent/.cache/…</stentry></strow>
+            <strow><stentry>C8</stentry><stentry>3</stentry><stentry>keiner</stentry></strow>
+            <strow><stentry>C9</stentry><stentry>0</stentry><stentry>…/.cache/asdf-nix-store/…</stentry></strow>
+            <strow><stentry>Wrapper</stentry><stentry/><stentry>Store</stentry></strow>
+            <strow><stentry>nach dem Override</stentry><stentry/><stentry>Benutzer-Cache</stentry></strow>
+            <strow><stentry>nach <codeph>(asdf:initialize-output-translations)</codeph></stentry><stentry/><stentry>Benutzer-Cache</stentry></strow>
+            <strow><stentry>nach <codeph>(asdf:initialize-output-translations nil)</codeph></stentry><stentry/><stentry>Store</stentry></strow>
+          </simpletable>
+        </info>
+        <stepresult>Der Beleg enthält für jeden Fall Exit-Code, Zielpfad und letzte Zeile, die vier Zielpfade der Gegenprobe und jede Abweichung von HANDOVER.md.</stepresult>
+      </step>
+    </steps>
+  </taskbody>
+</task>

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE map PUBLIC "-//OASIS//DTD DITA Map//EN" "map.dtd">
+<map id="faq-asdf-handoff" xml:lang="de-CH">
+  <title>FAQ asdf-fasl-nix-store: Revision 2 an Codex übergeben</title>
+  <topicref href="topics/bind-revision.dita" type="task"/>
+  <topicref href="topics/check-asdf-output.dita" type="task"/>
+  <topicref href="topics/check-mac.dita" type="task"/>
+  <topicref href="topics/hand-over-codex.dita" type="task"/>
+</map>
