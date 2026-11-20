@@ -9,7 +9,7 @@
     {
       "type": "paragraph",
       "id": "5f1a2b3c4d5e6f70",
-      "text": "HyperDoc im lokalen HyperBook Catalog (Port 18080): [http://127.0.0.1:18080/35622-funf-wege-eine-nixos-konfigura Fünf Wege, eine NixOS-Konfiguration zu ordnen] · [http://127.0.0.1:18080/ HyperBook Catalog]"
+      "text": "HyperDoc im lokalen HyperBook Catalog: [http://localhost:8080/35622-funf-wege-eine-nixos-konfigura Fünf Wege, eine NixOS-Konfiguration zu ordnen] · [http://localhost:8080/ HyperBook Catalog]"
     },
     {
       "type": "paragraph",
@@ -63,7 +63,7 @@
       "item": {
         "type": "paragraph",
         "id": "5f1a2b3c4d5e6f70",
-        "text": "HyperDoc im lokalen HyperBook Catalog (Port 18080): [http://127.0.0.1:18080/35622-funf-wege-eine-nixos-konfigura Fünf Wege, eine NixOS-Konfiguration zu ordnen] · [http://127.0.0.1:18080/ HyperBook Catalog]"
+        "text": "HyperDoc im lokalen HyperBook Catalog: [http://localhost:8080/35622-funf-wege-eine-nixos-konfigura Fünf Wege, eine NixOS-Konfiguration zu ordnen] · [http://localhost:8080/ HyperBook Catalog]"
       },
       "after": "1ae1b64dbdfd2e7b",
       "date": 1795200000000
