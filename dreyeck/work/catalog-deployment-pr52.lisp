@@ -4,7 +4,9 @@
                     (#:policy #:dreyeck/authority-policy) (#:git #:dreyeck/git)
                     (#:hb #:hyperbook) (#:tm #:dreyeck/topicmap))
   (:export #:make-deployment #:plan-next #:record-receipt #:serve
-           #:open-task #:open-local-host #:submit-receipt #:submit-service-observation))
+           #:open-task #:open-local-host #:submit-receipt #:submit-service-observation
+           ;; Retired; kept so that an image holding the old export reloads.
+           #:enable-server-readback-ssh))
 (in-package #:dreyeck/work/catalog-deployment-pr52)
 
 (defparameter +reviewed-head+ "91e8fd65911e687472fb3e30d1574fa5e9119b1b")
@@ -502,3 +504,21 @@
 (defun submit-receipt (evidence)
   "Record the server readback in the task opened by OPEN-TASK."
   (record-receipt (or *open-deployment* (error "Öffne zuerst das Task Topic mit OPEN-TASK.")) evidence))
+
+;;;; Retired SSH entry points. A running image may still hold Play buttons whose
+;;;; closures call these names; after a reload they refuse instead of starting SSH.
+
+(defun enable-server-readback-ssh ()
+  "Retired. SSH readback was removed; use the service read request instead."
+  (error "SSH-Readback wurde entfernt. Nutze den lesenden Auftrag am Dienst hyperdoc.service."))
+
+(defun play-server-readback (deployment)
+  "Retired. Refuses instead of opening an SSH session."
+  (setf (message-of deployment)
+        "SSH-Readback wurde entfernt. Nutze den lesenden Auftrag am Dienst hyperdoc.service.")
+  (deployment-server-topic deployment))
+
+(defun read-server-observation (observation)
+  "Retired. Refuses instead of opening an SSH session."
+  (declare (ignore observation))
+  (error "SSH-Iststand wurde entfernt. Nutze den lesenden Auftrag am Dienst hyperdoc.service."))
