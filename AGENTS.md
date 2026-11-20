@@ -18,4 +18,12 @@ bash scripts/render-faq.sh
 python3 scripts/faq-evidence.py --check
 ```
 
+Der zweite Eintrag (`asdf-registry-store-gc`) hat einen eigenen Prüflauf. Er legt einen eigenen kleinen Store-Pfad an und löscht nur diesen:
+
+```sh
+nix develop --no-update-lock-file -c bash scripts/check-asdf-registry-store-gc.sh > /tmp/faq-gc-check.txt &&
+  python3 scripts/faq-evidence.py --topic asdf-registry-store-gc --record /tmp/faq-gc-check.txt
+python3 scripts/faq-evidence.py --topic asdf-registry-store-gc --check
+```
+
 Der Index nennt das Datum des letzten **archivierten** erfolgreichen Laufs. Die CI prüft den zugehörigen SHA-256 und wiederholt die Fälle in frischen Prozessen. Die Auslieferung der Dateien aus `assets/faq/` auf dem Staging-Host ist über Fleet vorgesehen.
