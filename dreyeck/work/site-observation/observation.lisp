@@ -5,7 +5,7 @@
   (:use #:cl)
   (:local-nicknames (#:v #:html-inspector-views) (#:dita #:dreyeck/dita-story-item)
                     (#:policy #:dreyeck/authority-policy) (#:hb #:hyperbook))
-  (:export #:open-task #:trust-staging-roots #:source-state #:observe-site #:plan-next #:offered-sites #:*sites* #:site-host
+  (:export #:open-task #:ensure-catalog-route #:trust-staging-roots #:source-state #:observe-site #:plan-next #:offered-sites #:*sites* #:site-host
            #:observations-of #:latest-observation #:*max-age-seconds*))
 (in-package #:site-observation)
 
@@ -320,6 +320,23 @@ loopback Catalog on PORT when CLOG is not running. Return the overview URL."
     (hb:register book)
     (add-routes book)
     (format nil "http://127.0.0.1:~D~A" clog:*clog-port* (cdr (first (page-paths book))))))
+
+(defun ensure-catalog-route (&key (pane-width "850px"))
+  "Serve the HyperBook Catalog at / of the running CLOG server, and the routes of every registered book,
+as SERVE-CATALOG does after starting CLOG. For an image whose CLOG another application started.
+The playground stays off. Return the Catalog URL."
+  (unless (clog:is-running-p)
+    (error "In diesem Image läuft kein CLOG; starte den Catalog mit HYPERBOOK/SERVER:SERVE-CATALOG."))
+  (clog:set-on-new-window
+   (lambda (body)
+     (clog-moldable-inspector:on-new-inspector body :object hyperbook:*catalog* :pane-width pane-width
+                                                    :title "HyperBook Catalog" :playground? nil))
+   :path "/")
+  (dolist (book (hyperbook:hyperbooks-of hyperbook:*catalog*))
+    (hyperbook/server::add-path-to-hyperbook book pane-width nil))
+  ;; Books registered later get their route from HYPERBOOK:REGISTER's :AFTER method.
+  (setf hyperbook/server::*server-parameters* (list pane-width nil))
+  (format nil "http://127.0.0.1:~D/" clog:*clog-port*))
 
 (defun trust-staging-roots (pem)
   "Let curl verify staging.dreyeck.ch against the Let's Encrypt staging roots in the file PEM."

@@ -80,8 +80,13 @@
            (check (eq :repository-checkout (getf (source-state) :origin))))
       (uiop:delete-directory-tree site :validate t))))
 
+(defun test-catalog-route ()
+  "Without CLOG running, ENSURE-CATALOG-ROUTE refuses instead of starting a server."
+  (unless (clog:is-running-p)
+    (check (nth-value 1 (ignore-errors (ensure-catalog-route))))))
+
 (defun run-tests ()
   (let ((*checks* 0))
-    (test-deviations) (test-plan) (test-views) (test-page-copy)
+    (test-deviations) (test-plan) (test-views) (test-page-copy) (test-catalog-route)
     (format t "~&site-observation: ~D checks passed.~%" *checks*)
     *checks*))
