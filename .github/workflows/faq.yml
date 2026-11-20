@@ -1,0 +1,26 @@
+name: Curated FAQ
+on:
+  pull_request:
+    paths: ['assets/faq/**', 'docs/faq/asdf-fasl-nix-store/revision-2/**', 'scripts/*faq*', 'scripts/*asdf-fasl*', 'flake.nix', 'flake.lock', 'nix/lisp-runtime.nix', '.github/workflows/faq.yml']
+  push:
+    branches: [dreyeck.ch]
+    paths: ['assets/faq/**', 'docs/faq/asdf-fasl-nix-store/revision-2/**', 'scripts/*faq*', 'scripts/*asdf-fasl*', 'flake.nix', 'flake.lock', 'nix/lisp-runtime.nix', '.github/workflows/faq.yml']
+
+permissions:
+  contents: read
+
+jobs:
+  asdf-destinations:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - uses: cachix/install-nix-action@3dc140bfc76c49fbd4dd958429132e3746bcb086
+      - name: Verify the published record and repeat the probes
+        run: |
+          set -euo pipefail
+          (cd docs/faq/asdf-fasl-nix-store/revision-2 && sha256sum --check SHA256SUMS)
+          python3 scripts/faq-evidence.py --check
+          nix develop --no-update-lock-file -c bash scripts/check-asdf-fasl-nix-store.sh | tee "$RUNNER_TEMP/faq-check.txt"
+          python3 scripts/faq-evidence.py --validate-run "$RUNNER_TEMP/faq-check.txt"

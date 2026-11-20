@@ -1,0 +1,58 @@
+<!DOCTYPE html
+  SYSTEM "about:legacy-compat">
+<html lang="de-ch"><head><meta charset="UTF-8"><meta name="copyright" content="(C) Copyright 2026"><meta name="generator" content="DITA-OT"><meta name="description" content="Compiler-Ausgabe, vorhandene Nix-FASL und Lisp-Quelle getrennt prüfen."><meta name="status" content="verified"><meta name="topic-id" content="asdf-fasl-nix-store"><title>Warum will ASDF eine FASL in den Nix Store schreiben?</title><link rel="stylesheet" type="text/css" href="faq.css"><meta name="viewport" content="width=device-width, initial-scale=1"></head><body id="asdf-fasl-nix-store"><main role="main"><article role="article" aria-labelledby="ariaid-title1">
+  <h1 class="title topictitle1" id="ariaid-title1">Warum will ASDF eine FASL in den Nix Store schreiben?</h1>
+
+
+  <div class="body refbody"><p class="shortdesc">Compiler-Ausgabe, vorhandene Nix-FASL und Lisp-Quelle getrennt prüfen.</p>
+    <section class="section"><h2 class="title sectiontitle">Antwort und Geltungsbereich</h2>
+
+      <p class="p">In der gepinnten HyperDoc-Dev-Shell startet <code class="ph codeph">sbcl</code> über einen Nix-Wrapper. Dieser setzt <code class="ph codeph">ASDF_OUTPUT_TRANSLATIONS</code> beim Start. Für jede mitgelieferte Lisp-Bibliothek stellt er eine Regel voran, die auf ihr eigenes Store-Verzeichnis zeigt. Dort liegen die beim Nix-Build erzeugten FASLs. Für <code class="ph codeph">salza2/package.lisp</code> errechnet ASDF daher <span class="ph filepath">package.fasl</span> neben der Quelle. Das gilt auch dann, wenn die aufrufende Shell schon eine allgemeine Umleitung für den Store gesetzt hat.</p>
+      <p class="p">Beim regulären Laden kann ASDF die vorhandene, passende FASL verwenden. Hält ASDF eine Neukompilierung für erforderlich oder erzwingt man sie, wird dasselbe Verzeichnis zum Schreibziel. Claude Code hat den Schreibfehler als unprivilegierter Benutzer unter Linux beobachtet. Die vier Zielpfade im verlinkten Mac-Protokoll wurden ausschließlich berechnet. Eine Neukompilierung als root kann das Paket im Store verändern. Verwende für einen eigenen Build eine beschreibbare Quellkopie und einen Benutzer-Cache.</p>
+      <p class="p">Für Quellen außerhalb der Paketliste verwendet dieser Wrapper standardmäßig den Benutzer-Cache. Auch der gepinnte <code class="ph codeph">shop3</code>-Quellbaum im Store fällt darunter. Eine zusätzliche Regel, die den gesamten Store auf sich selbst abbildet, kann solche Quellen wieder in den Store lenken. Eine Umleitung dieser Quellen vor dem Start lässt die spezifischeren Wrapper-Regeln für Bibliotheken wie <code class="ph codeph">salza2</code> wirksam.</p>
+      <p class="p">Eigene Quellsysteme landen in der gepinnten Dev-Shell ohne zusätzliche Einstellung im Benutzer-Cache (Fälle C1 und C11). <code class="ph codeph">XDG_CACHE_HOME</code> kann dessen Ort vor dem SBCL-Start festlegen. Ein expliziter ASDF-Override mit <code class="ph codeph">:ignore-inherited-configuration</code> verwirft die spezifischen Wrapper-Regeln. Bei einem frischen Cache muss ASDF dann auch paketierte Bibliotheken neu kompilieren und benötigt deren Quellen. Im Linux-Referenzlauf der Revision 2 entstanden bei der Neukompilierung von <code class="ph codeph">salza2</code> 21 kompilierte Dateien. Liegt im laufenden Image ein expliziter Override vor, wendet <code class="ph codeph">(asdf:initialize-output-translations)</code> ihn erneut an. Mit <code class="ph codeph">(asdf:initialize-output-translations nil)</code> liest ASDF die geerbte Konfiguration neu ein. Die Änderung gilt für das gesamte Lisp-Image.</p>
+      <p class="p">Fehlen sowohl die erforderliche Quelle als auch die FASL am berechneten Ziel, prüfe den Quellpfad und den Zustand des gepinnten Pakets. Das Anlegen eines beschreibbaren Caches beschafft die fehlende Quelldatei nicht.</p>
+    </section>
+    <section class="section"><h2 class="title sectiontitle">Belege</h2>
+
+      <p class="p">Früherer Mac-Trace (berichtet, nicht als Prüfprotokoll archiviert): Im lokalen SLY-Image mit SBCL 2.4.10 auf macOS x86-64 wollte ASDF zunächst <span class="ph filepath">package.fasl</span> im Nix Store anlegen. Nach der Umleitung zeigte der Bericht ein Ausgabeziel unter <span class="ph filepath">~/.cache/common-lisp/</span> und einen Fehler beim Auflösen von <span class="ph filepath">salza2/package.lisp</span> am erwarteten Store-Pfad. Ob die FASL oder das ganze Store-Objekt fehlte, blieb offen.</p>
+      <p class="p">Das verlinkte Prüfprotokoll nennt den geprüften HyperDoc-Commit, die Lock-Prüfsumme, die nixpkgs-Revision und den Abschlusszeitpunkt. Der archivierte Lauf erfolgte auf <code class="ph codeph">x86_64-darwin</code> mit SBCL 2.4.10 und ASDF 3.3.1.</p>
+      <ul class="ul">
+        <li class="li"><strong class="ph b">Quellsystem.</strong> Ein frischer Prozess verwendete <code class="ph codeph">:enable-user-cache</code>. Der ASDF-Ausgabepfad war anfangs frei. Nach <code class="ph codeph">asdf:load-system</code> lag <span class="ph filepath">answer.fasl</span> am vorhergesagten Ort unter <span class="ph filepath">$XDG_CACHE_HOME/common-lisp/</span>. Die geladene Funktion lieferte 42.</li>
+        <li class="li"><strong class="ph b">Paketiertes System.</strong> Ein zweiter Prozess erbte die Übersetzungen des Nix-Wrappers. Sein Ladeprotokoll nennt die vorhandene <span class="ph filepath">package.fasl</span> aus dem Store-Paket für salza2 2.1. Ein Aufruf von <code class="ph codeph">salza2:compress-data</code> lieferte Daten mit der Gzip-Kennung <code class="ph codeph">1F 8B</code>.</li>
+        <li class="li"><strong class="ph b">Vier berechnete Ziele für dieselbe Store-Quelle.</strong> Die geerbte Einstellung zeigt neben die Quelle. Ein expliziter Lisp-Override verschiebt das Ziel in den Benutzer-Cache. Der Aufruf ohne Argument ergibt wieder denselben Cache-Pfad. Der Aufruf mit <code class="ph codeph">nil</code> ergibt wieder den ursprünglichen Store-Pfad.</li>
+        <li class="li"><strong class="ph b">Fehlende Quelle.</strong> In einem eigenen frischen Prozess gelang der Schreibtest im frischen Cache. Bei fehlender <span class="ph filepath">answer.lisp</span> und fehlender Ausgabe meldete SBCL <code class="ph codeph">SB-INT:SIMPLE-FILE-ERROR</code> für genau den Quellpfad. Es entstand keine FASL.</li>
+      </ul>
+      <p class="p">Der unabhängige Linux-Bericht zu Revision 2 enthält auch die erzwungene Neukompilierung und die Gegenproben mit einem Store-Pfad außerhalb der Paketliste. Die <a class="xref" href="https://github.com/RalfBarkow/hyperdoc/blob/a4126dccba4443d6d0f82debd3a9437a860fc5c2/dreyeck/work/faq-asdf-handoff/evidence/browser-run-darwin.sexp" target="_blank" rel="external noopener">archivierte Mac-Lesediagnose</a> fand im weissen SLY-Image auf Port 8080 die Quelle und die FASL für <code class="ph codeph">salza2/package</code>. In zwei frischen Prozessen meldete das Originalskript <code class="ph codeph">PASS prebuilt</code> für salza2 und <code class="ph codeph">PASS read-only</code> für den synthetischen Quellpfad. Beide Prozesse endeten mit Exit-Code 0.</p>
+      <p class="p"><a class="xref" href="https://github.com/RalfBarkow/hyperdoc/blob/07b7f51f13494d11cc48e16a72b01da65b77256c/docs/faq/asdf-fasl-nix-store/revision-2/asdf-fasl-nix-store.md" target="_blank" rel="external noopener">Originaleintrag, Revision 2</a> · <a class="xref" href="https://github.com/RalfBarkow/hyperdoc/blob/07b7f51f13494d11cc48e16a72b01da65b77256c/docs/faq/asdf-fasl-nix-store/revision-2/HANDOVER.md" target="_blank" rel="external noopener">Prüfbedingungen, Originalskripte und elf Kontrollfälle</a></p>
+      <p class="p"><a class="xref" href="asdf-fasl-nix-store-check.txt">Prüfprotokoll mit Pfaden, Versionen und Lock-Prüfsumme</a></p>
+      <p class="p"><a class="xref" href="https://github.com/RalfBarkow/hyperdoc/blob/55f03bc2b6448972bafbdccb4c164712fbb4bb3a/nix/lisp-runtime.nix" target="_blank" rel="external noopener">HyperDoc-Lisp-Runtime, geprüfter Quellstand</a> · <a class="xref" href="https://asdf.common-lisp.dev/asdf.html#Controlling-where-ASDF-saves-compiled-files" target="_blank" rel="external noopener">ASDF-Ausgabeübersetzungen</a> · <a class="xref" href="https://nixos.org/manual/nixpkgs/stable/#sec-lisp-modules" target="_blank" rel="external noopener">Nixpkgs-Lisp-Pakete</a></p>
+    </section>
+    <section class="section"><h2 class="title sectiontitle">Prüfung im laufenden Image</h2>
+
+      <p class="p">Im SLY-Debugger zuerst <code class="ph codeph">*ABORT</code> wählen, um zum mREPL-Prompt zurückzukehren. Die Form beobachtet Quelle und ASDF-Ausgabe eines bereits registrierten Systems. Sie lädt kein System und kompiliert keine Datei.</p>
+      <pre class="pre codeblock lisp"><code>(let* ((system (asdf:registered-system "salza2"))
+       (directory (and system (asdf:system-source-directory system)))
+       (package (and system (asdf:find-component system "package")))
+       (source (and package (asdf:component-pathname package)))
+       (fasl (and source (make-pathname :type "fasl" :defaults source)))
+       (output (and package
+                    (first (asdf:output-files
+                            (asdf:make-operation 'asdf:compile-op) package)))))
+  (list :sbcl (lisp-implementation-version)
+        :asdf (asdf:asdf-version)
+        :xdg-cache-home (uiop:getenv "XDG_CACHE_HOME")
+        :system-file (and system (asdf:system-source-file system))
+        :system-directory-found (and directory (uiop:directory-exists-p directory))
+        :source source :source-found (and source (probe-file source))
+        :nearby-fasl (and fasl (probe-file fasl))
+        :asdf-output output :output-found (and output (probe-file output))))</code></pre>
+      <p class="p">Ein vorhandener FASL-Pfad belegt die Datei. Ob ASDF sie erfolgreich lädt, zeigt ein eigener Ladeversuch. Fehlen Quell- und Ausgabedatei, prüfe, ob das Store-Objekt der registrierten Systemdefinition noch vorliegt.</p>
+    </section>
+    <section class="section"><h2 class="title sectiontitle">Prüflauf wiederholen</h2>
+
+      <p class="p">Im HyperDoc-Checkout führt dieser Befehl die vier Fälle in getrennten SBCL-Prozessen aus. Das Skript setzt <code class="ph codeph">XDG_CACHE_HOME</code> für drei der vier Fälle vor dem Prozessstart und legt temporäre Quellen und Caches an.</p>
+      <pre class="pre codeblock"><code>nix develop --no-update-lock-file -c bash scripts/check-asdf-fasl-nix-store.sh</code></pre>
+    </section>
+  </div>
+</article></main></body></html>
