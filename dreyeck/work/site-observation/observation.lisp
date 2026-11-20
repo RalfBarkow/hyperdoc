@@ -308,7 +308,9 @@
               (lambda (body)
                 (clog-moldable-inspector:on-new-inspector
                  body :object (hb:find-page book page-id :signal-error? t)
-                      :pane-width "850px" :title (hb:title-of book) :playground? nil))
+                      :pane-width "850px" :title (hb:title-of book)
+                      ;; Follow the Catalog's setting, so DEVELOPMENT T also applies here.
+                      :playground? (second hyperbook/server::*server-parameters*)))
               :path path))))
 
 (defun open-task (&key (port 18759))
@@ -321,21 +323,22 @@ loopback Catalog on PORT when CLOG is not running. Return the overview URL."
     (add-routes book)
     (format nil "http://127.0.0.1:~D~A" clog:*clog-port* (cdr (first (page-paths book))))))
 
-(defun ensure-catalog-route (&key (pane-width "850px"))
+(defun ensure-catalog-route (&key (pane-width "850px") development)
   "Serve the HyperBook Catalog at / of the running CLOG server, and the routes of every registered book,
 as SERVE-CATALOG does after starting CLOG. For an image whose CLOG another application started.
-The playground stays off. Return the Catalog URL."
+DEVELOPMENT T enables the playgrounds, which evaluate arbitrary Lisp in this image: use it only for a
+local image whose CLOG listens on loopback. Return the Catalog URL."
   (unless (clog:is-running-p)
     (error "In diesem Image läuft kein CLOG; starte den Catalog mit HYPERBOOK/SERVER:SERVE-CATALOG."))
   (clog:set-on-new-window
    (lambda (body)
      (clog-moldable-inspector:on-new-inspector body :object hyperbook:*catalog* :pane-width pane-width
-                                                    :title "HyperBook Catalog" :playground? nil))
+                                                    :title "HyperBook Catalog" :playground? development))
    :path "/")
   (dolist (book (hyperbook:hyperbooks-of hyperbook:*catalog*))
-    (hyperbook/server::add-path-to-hyperbook book pane-width nil))
+    (hyperbook/server::add-path-to-hyperbook book pane-width development))
   ;; Books registered later get their route from HYPERBOOK:REGISTER's :AFTER method.
-  (setf hyperbook/server::*server-parameters* (list pane-width nil))
+  (setf hyperbook/server::*server-parameters* (list pane-width development))
   (format nil "http://127.0.0.1:~D/" clog:*clog-port*))
 
 (defun trust-staging-roots (pem)
