@@ -37,7 +37,9 @@
     (check (equal '(:b) (offered-sites (plan-next))))
     (push (observation :wiki "0.39.2" :deviations '((:wiki "0.39.2"))) (observations-of (first *sites*)))
     (check (equal '(:a :b) (sort (copy-list (offered-sites (plan-next))) #'string<)))
-    (check (eq :plan-only (dreyeck/shop3:execution-mode-of (plan-next))))))
+    (check (eq :plan-only (dreyeck/shop3:execution-mode-of (plan-next))))
+    (let ((view (find "Read the Plan" (v:all-views (plan-next)) :key #'v:view-title :test #'equal)))
+      (check (and view (search "Alternative 1" (v:view-html view)) (search "OFFER" (v:view-html view)))))))
 
 (defun test-views ()
   (let* ((book (make-instance 'observation-book :id +book-id+))
@@ -50,8 +52,36 @@
     (check (and view (search "hyperdoc.dreyeck.ch" (v:view-html view)) (search "Play" (v:view-html view))))
     (check (= 3 (count "dreyeck.ch" *sites* :key #'site-machine :test #'equal)))))
 
+(defun test-page-copy ()
+  "Attach the system with the script into a scratch site and check SOURCE and SHA256SUMS."
+  (let* ((site (uiop:ensure-directory-pathname
+                (uiop:run-program '("mktemp" "-d") :output '(:string :stripped t))))
+         (top (uiop:ensure-directory-pathname
+               (uiop:run-program (list "git" "-C" (namestring (system-directory)) "rev-parse" "--show-toplevel")
+                                 :output '(:string :stripped t))))
+         (commit (uiop:run-program (list "git" "-C" (namestring top) "rev-parse" "HEAD")
+                                   :output '(:string :stripped t)))
+         (copy (merge-pathnames "assets/pages/site-observation/" site)))
+    (unwind-protect
+         (progn
+           (ensure-directories-exist (merge-pathnames "pages/" site))
+           (uiop:run-program (list "bash" "scripts/attach-page-system.sh" "dreyeck/work/site-observation"
+                                   "site-observation" (namestring site))
+                             :directory top :output nil)
+           (let ((state (source-state copy)))
+             (check (eq :page-copy (getf state :origin)))
+             (check (equal commit (getf state :commit)))
+             (check (getf state :intact)))
+           (with-open-file (s (merge-pathnames "observe-site.dita" copy) :direction :output :if-exists :append)
+             (write-line "<!-- edited -->" s))
+           (let ((state (source-state copy)))
+             (check (not (getf state :intact)))
+             (check (equal '("observe-site.dita") (getf state :changed))))
+           (check (eq :repository-checkout (getf (source-state) :origin))))
+      (uiop:delete-directory-tree site :validate t))))
+
 (defun run-tests ()
   (let ((*checks* 0))
-    (test-deviations) (test-plan) (test-views)
+    (test-deviations) (test-plan) (test-views) (test-page-copy)
     (format t "~&site-observation: ~D checks passed.~%" *checks*)
     *checks*))

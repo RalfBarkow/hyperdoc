@@ -5,7 +5,7 @@
   (:use #:cl)
   (:local-nicknames (#:v #:html-inspector-views) (#:dita #:dreyeck/dita-story-item)
                     (#:policy #:dreyeck/authority-policy) (#:hb #:hyperbook))
-  (:export #:open-task #:trust-staging-roots #:observe-site #:plan-next #:offered-sites #:*sites* #:site-host
+  (:export #:open-task #:trust-staging-roots #:source-state #:observe-site #:plan-next #:offered-sites #:*sites* #:site-host
            #:observations-of #:latest-observation #:*max-age-seconds*))
 (in-package #:site-observation)
 
@@ -114,6 +114,35 @@
      (:hyperdoc-catalog
       (unless (getf observation :catalog) (list (list :catalog :not-recognized)))))))
 
+;;; Where this code comes from: a repository checkout, or a page copy of one commit
+
+(defun system-directory () (asdf:system-source-directory "site-observation"))
+
+(defun file-sha256 (path)
+  (ironclad:byte-array-to-hex-string (ironclad:digest-file :sha256 path)))
+
+(defun source-state (&optional (directory (system-directory)))
+  "Repository checkout, or the page copy with its commit and whether every file still matches SHA256SUMS."
+  (let ((source (merge-pathnames "SOURCE" directory))
+        (sums (merge-pathnames "SHA256SUMS" directory)))
+    (if (not (probe-file source))
+        (list :origin :repository-checkout :directory (namestring directory))
+        (let* ((fields (loop for line in (uiop:read-file-lines source)
+                             for colon = (position #\: line)
+                             when colon collect (cons (subseq line 0 colon)
+                                                      (string-trim " " (subseq line (1+ colon))))))
+               (changed (and (probe-file sums)
+                             (loop for line in (uiop:read-file-lines sums)
+                                   for (hash name) = (let ((p (position #\Space line)))
+                                                       (list (subseq line 0 p)
+                                                             (string-left-trim " *" (subseq line p))))
+                                   for path = (merge-pathnames name directory)
+                                   unless (and (probe-file path) (equal hash (file-sha256 path)))
+                                     collect name))))
+          (list :origin :page-copy :commit (cdr (assoc "commit" fields :test #'equal))
+                :attached (cdr (assoc "attached" fields :test #'equal))
+                :intact (and (probe-file sums) (null changed)) :changed changed)))))
+
 ;;; The plan: which site to observe next
 
 (shop3:defdomain (site-observation :noset t)
@@ -149,11 +178,11 @@
            (multiple-value-bind (raw seconds trees states)
                (shop3:find-plans problem :domain (shop3:find-domain 'site-observation) :which :all
                                 :verbose 0 :plan-tree nil :collect-state t)
-             (declare (ignore trees))
              (make-instance 'dreyeck/shop3:hyperdoc-htn-plan-result
                             :problem-name name :raw-plans raw :plans (mapcar #'shop3:shorter-plan raw)
                             :time seconds :final-states states :initial-facts facts
-                            :execution-mode :plan-only))
+                            ;; The Read the Plan view reads this slot; without it the view stays empty.
+                            :plan-trees trees :execution-mode :plan-only))
         (shop3:delete-problem problem)))))
 
 (defun offered-sites (plan)
@@ -235,6 +264,13 @@
     (let ((plan (plan-next)))
       (v:html (:p (v:object-ref plan :display "Nativer SHOP3-Plan") " · als Nächstes beobachten: "
                   (v:esc (format nil "~{~(~A~)~^, ~}" (or (offered-sites plan) '(:keine)))))
+              (let ((state (source-state)))
+                (v:html (:p "Quelle: "
+                            (v:esc (if (eq :page-copy (getf state :origin))
+                                       (format nil "Seitenkopie von Commit ~A (~A)~:[ · GEÄNDERT: ~{~A~^, ~}~;~*, unverändert~]"
+                                               (getf state :commit) (getf state :attached)
+                                               (getf state :intact) (getf state :changed))
+                                       (format nil "Repository-Checkout ~A" (getf state :directory)))))))
               (:p "Erwartet: wiki " (:code (v:esc +expected-wiki+)) " mit Dialog-Korrektur; Belege gelten "
                   (v:esc (princ-to-string (floor *max-age-seconds* 3600))) " Stunden.")
               (:table
