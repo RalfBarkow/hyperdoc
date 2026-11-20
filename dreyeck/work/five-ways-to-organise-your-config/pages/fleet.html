@@ -1,0 +1,12 @@
+<!doctype html>
+<html lang="de-CH">
+<head><meta charset="utf-8"><title>Wo fleet steht</title></head>
+<body>
+<in-package>five-ways</in-package>
+<h1>Wo fleet steht</h1>
+<p><b>Eine Einordnung, nicht aus der Quelle.</b> Sie steht in <code>ctm/fleet.ctm</code> und ist aus fleet abgeleitet (main <code>cf0487d</code> und der Branch <code>review/operator-ssh-keys</code>, gelesen am 2026-11-20).</p>
+<p><a expr="(topic :fleet)">fleet</a> ist eine Flake, also Stufe 2: <code>flake.nix</code> legt nixpkgs, die Wiki und HyperDoc als Eingänge fest, und <code>nixosConfigurations</code> nennt staging, dreyeck und wiki beim Namen. Geordnet ist fleet nach Rechner, mit <code>hosts/&lt;host&gt;/configuration.nix</code>.</p>
+<p>Zwei Dinge gehen schon darüber hinaus: Geteilte Module wie <code>modules/fedwiki-production.nix</code> oder <code>modules/operator-ssh-keys.nix</code> sind Features im Sinn von <a page="Stufe 4: Das dendritische Muster">Stufe 4</a>, nur von Hand in <code>flake.nix</code> verdrahtet. Und die importierten Konfigurationen bleiben byteweise wie exportiert; <code>extendModules</code> legt das Gemeinsame davor.</p>
+<p><a expr="(workspace :flakes)" view="Topicmap">Die Topicmap um Stufe 2</a> zeigt die Begriffe, auf die fleet sich bezieht.</p>
+<p><a page="Fünf Wege, eine NixOS-Konfiguration zu ordnen">Zur Leiter</a></p>
+</body></html>

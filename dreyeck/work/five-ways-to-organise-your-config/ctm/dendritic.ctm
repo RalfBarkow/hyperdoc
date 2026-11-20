@@ -1,0 +1,69 @@
+# CTM 1.0 · Stufe 4: The dendritic pattern
+# Quelle: https://nixarms.com/brewhouse/dendritic/ ("Checked 11 Nov 2026 on NixOS 26.05"), gelesen am 2026-11-20.
+%prefix s <tag:dreyeck.ch,2026:hyperdoc/five-ways/schema/>
+%prefix t <tag:dreyeck.ch,2026:hyperdoc/five-ways/topic/>
+
+t:seite-dendritic isa s:seite ; - "The dendritic pattern (The Brewhouse, Step 4)" ; = <https://nixarms.com/brewhouse/dendritic/> .
+s:beschrieben-auf(s:thema: t:dendritic, s:seite-rolle: t:seite-dendritic)
+
+t:dendritic
+    s:beschreibung: "Das dendritische Muster stülpt die Konfiguration um: Statt dass jeder Rechner alles aufzählt, was er braucht, lebt jedes Feature (Gaming, ein Desktop, die Shell) in einer Datei, und Rechner wählen die Features, die sie wollen. Jede Datei ist ein Modul derselben obersten Konfiguration, und alle werden automatisch geladen. Es begann als «jede Datei ist ein flake-parts-Modul», ist aber nicht mehr an flake-parts gebunden; es geht auch ohne Flakes." ;
+    s:fuer-wen: "Wer drei oder mehr Rechner hat, oder genug davon, in Host-Ordnern zu suchen, wo eine Einstellung steht." ;
+    s:weiter-wenn: "Man verwaltet auch einen Mac oder eigenständige Home-Manager-Benutzer und will ein Rahmenwerk für die Verdrahtung. Dann lohnt ein Blick auf den." ;
+    s:kann: "Alles zu einem Feature steht in einer Datei: die Systemeinstellung, die Benutzereinstellung, sogar der Flake-Eingang, den es braucht." ;
+    s:kann: "Ein Rechner kommt mit wenigen Zeilen dazu: seine Features wählen, fertig." ;
+    s:kann: "Keine von Hand gepflegten imports-Listen: Datei in den Ordner legen, und sie wird geladen." ;
+    s:kostet: "Nichts zu installieren: es ist ein Muster, also gibt es nicht den einen richtigen Weg, und Konfigurationen danach können recht verschieden aussehen." ;
+    s:kostet: "Schwer zu durchschauen, bis es klickt, und eine fremde anfangs schwer zu lesen." ;
+    s:kostet: "Meist auf flake-parts gebaut, das lernt man also mit." ;
+    s:steam-beispiel: """# flake.nix
+{
+  inputs = {
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-26.05";
+    flake-parts.url = "github:hercules-ci/flake-parts";
+    import-tree.url = "github:denful/import-tree";
+  };
+
+  outputs = inputs:
+    inputs.flake-parts.lib.mkFlake { inherit inputs; } (inputs.import-tree ./modules);
+}
+
+# modules/gaming.nix
+{
+  flake.modules.nixos.gaming = {
+    programs.steam.enable = true;
+  };
+}
+
+# modules/hosts/endgame.nix
+{ config, inputs, ... }:
+{
+  flake.nixosConfigurations.endgame = inputs.nixpkgs.lib.nixosSystem {
+    modules = with config.flake.modules.nixos; [ gaming desktop ];
+  };
+}""" ;
+    s:geprueft: "Checked 11 Nov 2026 on NixOS 26.05" .
+
+t:import-tree isa s:werkzeug ; - "import-tree" ; = <https://github.com/denful/import-tree> ;
+    s:beschreibung: "Lädt jede Datei unter modules/; dadurch schrumpft flake.nix auf fast nichts." .
+t:modules-verzeichnis isa s:datei ; - "modules/" ;
+    s:beschreibung: "Jede Datei darin ist ein flake-parts-Modul und wird automatisch geladen." .
+t:gaming-nix isa s:datei ; - "modules/gaming.nix" ;
+    s:beschreibung: "Steam bekommt eine eigene Datei, als Feature." .
+t:hosts-endgame-dendritic isa s:datei ; - "modules/hosts/endgame.nix" ;
+    s:beschreibung: "Der Rechner wählt seine Features." .
+t:feature isa s:begriff ; - "Feature" ;
+    s:beschreibung: "Eine Fähigkeit wie Gaming, ein Desktop oder die Shell, an einer Stelle beschrieben und von jedem Rechner wählbar." .
+t:flake-modules isa s:begriff ; - "flake.modules" ;
+    s:beschreibung: "Die Option, unter der Features als Module liegen (etwa flake.modules.nixos.gaming). Sie kommt aus dem modules-Modul von flake-parts, das man einmal importiert." .
+
+s:verwendet-werkzeug(s:methode-rolle: t:dendritic, s:werkzeug-rolle: t:import-tree)
+s:verwendet-werkzeug(s:methode-rolle: t:dendritic, s:werkzeug-rolle: t:flake-parts)
+s:verwendet-datei(s:methode-rolle: t:dendritic, s:datei-rolle: t:flake-nix)
+s:verwendet-datei(s:methode-rolle: t:dendritic, s:datei-rolle: t:modules-verzeichnis)
+s:verwendet-datei(s:methode-rolle: t:dendritic, s:datei-rolle: t:gaming-nix)
+s:verwendet-datei(s:methode-rolle: t:dendritic, s:datei-rolle: t:hosts-endgame-dendritic)
+s:fuehrt-ein(s:methode-rolle: t:dendritic, s:begriff-rolle: t:feature)
+s:fuehrt-ein(s:methode-rolle: t:dendritic, s:begriff-rolle: t:flake-modules)
+s:ordnet-nach(s:methode-rolle: t:dendritic, s:achse-rolle: t:nach-feature)
+s:baut-auf(s:aufbauend: t:dendritic, s:grundlage: t:flake-parts)

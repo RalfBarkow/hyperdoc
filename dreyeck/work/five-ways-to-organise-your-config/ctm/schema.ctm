@@ -1,0 +1,57 @@
+# CTM 1.0 · Fünf Wege, eine NixOS-Konfiguration zu ordnen · Schema
+# Typen, Rollen, Assoziations- und Vorkommenstypen, die die übrigen Dateien verwenden.
+# Jede Datei dieses Verzeichnisses ist für sich lesbar; zusammen ergeben sie eine Topic Map.
+%prefix s <tag:dreyeck.ch,2026:hyperdoc/five-ways/schema/>
+
+# Themenarten
+s:methode - "Methode, eine Konfiguration zu ordnen" .
+s:datei - "Datei oder Verzeichnis" .
+s:werkzeug - "Werkzeug oder Eingang" .
+s:begriff - "Begriff" .
+s:achse - "Ordnungsachse" .
+s:seite - "Quellseite" .
+s:fleet-teil - "Teil von fleet" .
+
+# Vorkommen
+s:beschreibung - "Beschreibung (Wiedergabe der Quelle)" .
+s:stufe - "Stufe auf der Leiter" .
+s:bild - "Bild der Quelle" .
+s:fuer-wen - "Für wen" .
+s:weiter-wenn - "Eine Stufe höher, wenn" .
+s:kann - "Was es gut kann" .
+s:kostet - "Was es kostet" .
+s:steam-beispiel - "Steam-Beispiel (Code der Quelle)" .
+s:befehl - "Befehl" .
+s:geprueft - "Von der Quelle geprüft" .
+s:erster-sud - "Guter erster Sud?" .
+s:braucht-flakes - "Braucht Flakes?" .
+s:mehrere-maschinen - "Mehrere Maschinen" .
+s:lernkurve - "Lernkurve" .
+s:einordnung - "Einordnung (abgeleitet, nicht aus der Quelle)" .
+
+# Rollen
+s:vorher - "vorher" .
+s:nachher - "nachher" .
+s:aufbauend - "aufbauend" .
+s:grundlage - "Grundlage" .
+s:methode-rolle - "Methode" .
+s:datei-rolle - "Datei" .
+s:werkzeug-rolle - "Werkzeug" .
+s:begriff-rolle - "Begriff" .
+s:achse-rolle - "Achse" .
+s:ergaenzung - "Ergänzung" .
+s:thema - "Thema" .
+s:seite-rolle - "Seite" .
+s:fleet-rolle - "Teil von fleet" .
+s:entsprechung - "Entsprechung" .
+
+# Assoziationstypen
+s:naechster-schritt - "nächster Schritt" .
+s:baut-auf - "baut auf" .
+s:verwendet-datei - "verwendet Datei" .
+s:verwendet-werkzeug - "verwendet Werkzeug" .
+s:fuehrt-ein - "führt ein" .
+s:ordnet-nach - "ordnet nach" .
+s:funktioniert-mit - "funktioniert mit" .
+s:beschrieben-auf - "beschrieben auf" .
+s:entspricht - "entspricht" .

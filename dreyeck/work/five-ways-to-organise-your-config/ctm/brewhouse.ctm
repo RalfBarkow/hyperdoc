@@ -1,0 +1,47 @@
+# CTM 1.0 · The Brewhouse: Five ways to organise your config
+# Quelle: https://nixarms.com/brewhouse/ (The Nix Arms, "Last brewed 17 Nov 2026"), gelesen am 2026-11-20.
+# Beschreibungen sind deutsche Wiedergaben; Code steht so auf den Seiten (MIT-Lizenz, siehe LICENSE-nixarms.txt).
+%prefix s <tag:dreyeck.ch,2026:hyperdoc/five-ways/schema/>
+%prefix t <tag:dreyeck.ch,2026:hyperdoc/five-ways/topic/>
+
+t:seite-brewhouse isa s:seite ;
+    - "The Brewhouse: Five ways to organise your config" ;
+    = <https://nixarms.com/brewhouse/> ;
+    s:beschreibung: "Jede NixOS-Konfiguration beschreibt einen Rechner. Was sich unterscheidet, ist die Ordnung ihrer Dateien: von der einen Datei des Installers bis zu einem Rahmenwerk aus kleinen Modulen. Jede der fünf Methoden schaltet dasselbe Beispiel ein, Steam; die Steam-Zeile ist immer gleich, nur die Struktur darum wechselt." ;
+    s:geprueft: "Last brewed 17 Nov 2026" .
+
+# Die Leiter, einfachste zuerst
+t:vanilla isa s:methode ; - "Vanilla configuration.nix" ; s:stufe: "1" ; s:bild: "The house pour" .
+t:flakes isa s:methode ; - "Flakes" ; s:stufe: "2" ; s:bild: "Bottle-conditioned" .
+t:flake-parts isa s:methode ; - "flake-parts" ; s:stufe: "3" ; s:bild: "The recipe book" .
+t:dendritic isa s:methode ; - "The dendritic pattern" ; s:stufe: "4" ; s:bild: "Branching out" .
+t:den isa s:methode ; - "den" ; s:stufe: "5" ; s:bild: "The full brewery" .
+
+s:naechster-schritt(s:vorher: t:vanilla, s:nachher: t:flakes)
+s:naechster-schritt(s:vorher: t:flakes, s:nachher: t:flake-parts)
+s:naechster-schritt(s:vorher: t:flake-parts, s:nachher: t:dendritic)
+s:naechster-schritt(s:vorher: t:dendritic, s:nachher: t:den)
+
+# Die Verkostungstafel (The tasting board), Zelle für Zelle
+t:vanilla s:erster-sud: "Yes, start here" ; s:braucht-flakes: "No" ; s:mehrere-maschinen: "One at a time" ; s:lernkurve: "Gentle" .
+t:flakes s:erster-sud: "Yes, with a guide" ; s:braucht-flakes: "Yes" ; s:mehrere-maschinen: "Yes, by hand" ; s:lernkurve: "Gentle" .
+t:flake-parts s:erster-sud: "Once you know flakes" ; s:braucht-flakes: "Yes" ; s:mehrere-maschinen: "Yes, tidily" ; s:lernkurve: "Moderate" .
+t:dendritic s:erster-sud: "Not yet" ; s:braucht-flakes: "Usually (not required)" ; s:mehrere-maschinen: "Built for it" ; s:lernkurve: "Steep" .
+t:den s:erster-sud: "Not yet" ; s:braucht-flakes: "No (optional)" ; s:mehrere-maschinen: "Built for it, Macs too" ; s:lernkurve: "Steep" .
+
+# Home Manager ist keine Stufe: es funktioniert mit allen.
+t:home-manager isa s:werkzeug ; - "Home Manager" ;
+    = <https://nix-community.github.io/home-manager/> ;
+    s:beschreibung: "Tut für den Benutzer, was NixOS für das System tut: Programme, Shell, Editor-Einstellungen und Dotfiles, aufgeschrieben und zurückrollbar. Läuft als Teil der NixOS-Konfiguration oder für sich, auch auf einer anderen Linux-Distribution oder einem Mac. Am leichtesten hinzuzufügen, wenn die Systemseite vertraut ist." .
+s:funktioniert-mit(s:ergaenzung: t:home-manager, s:methode-rolle: t:vanilla)
+s:funktioniert-mit(s:ergaenzung: t:home-manager, s:methode-rolle: t:flakes)
+s:funktioniert-mit(s:ergaenzung: t:home-manager, s:methode-rolle: t:flake-parts)
+s:funktioniert-mit(s:ergaenzung: t:home-manager, s:methode-rolle: t:dendritic)
+s:funktioniert-mit(s:ergaenzung: t:home-manager, s:methode-rolle: t:den)
+
+# Die Ordnungsachsen, wie die Seiten sie nennen
+t:nach-datei isa s:achse ; - "eine Datei" .
+t:nach-maschine isa s:achse ; - "nach Maschine" .
+t:nach-ausgabe isa s:achse ; - "nach Flake-Ausgabe" .
+t:nach-feature isa s:achse ; - "nach Feature" .
+t:nach-aspekt isa s:achse ; - "nach Aspekt" .

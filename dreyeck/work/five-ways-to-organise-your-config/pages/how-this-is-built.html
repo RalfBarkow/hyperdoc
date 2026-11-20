@@ -1,0 +1,16 @@
+<!doctype html>
+<html lang="de-CH">
+<head><meta charset="utf-8"><title>Wie diese Seite gebaut ist</title></head>
+<body>
+<in-package>five-ways</in-package>
+<h1>Wie diese Seite gebaut ist</h1>
+<h2>Quelle</h2>
+<p>The Nix Arms, The Brewhouse: <a href="https://nixarms.com/brewhouse/" target="_blank">Five ways to organise your config</a> und die Seiten <a href="https://nixarms.com/brewhouse/vanilla/" target="_blank">vanilla</a>, <a href="https://nixarms.com/brewhouse/flakes/" target="_blank">flakes</a>, <a href="https://nixarms.com/brewhouse/flake-parts/" target="_blank">flake-parts</a>, <a href="https://nixarms.com/brewhouse/dendritic/" target="_blank">dendritic</a> und <a href="https://nixarms.com/brewhouse/den/" target="_blank">den</a>, gelesen am 2026-11-20 («Last brewed 17 Nov 2026», «Checked 11 Nov 2026 on NixOS 26.05»). Die Beschreibungen sind deutsche Wiedergaben. Der Nix-Code steht so auf den Seiten; ihr Inhalt steht unter der MIT-Lizenz (<code>LICENSE-nixarms.txt</code>).</p>
+<h2>Topic Maps</h2>
+<p>In <code>ctm/</code> liegt je eine CTM-Datei: <code>schema.ctm</code> (Themenarten, Rollen, Assoziations- und Vorkommenstypen), <code>brewhouse.ctm</code> (Leiter, Verkostungstafel, Home Manager, Ordnungsachsen), je eine Datei je Stufe und <code>fleet.ctm</code> (die Einordnung). Jede ist für sich lesbar; die ganze Topic Map ist ihre Verkettung: <a expr="(the-map)">die ganze Topic Map</a>, <a expr="(page-map &quot;den&quot;)">die Karte einer Stufe</a>, <a expr="(ctm-files)">die Dateien</a>.</p>
+<h2>Code</h2>
+<p>Die Code-Pages lesen die Dateien (<i>Die Topic Maps lesen</i>), projizieren sie auf HyperDocs Topicmap (<i>Topicmap und Workspace</i>) und rechnen die Ansichten (<i>Steckbriefe und Verkostungstafel</i>). Geschrieben wird nichts.</p>
+<h2>Workspace</h2>
+<p><a expr="(workspace)" view="Topicmap">Der Workspace</a> zeigt Methoden oben in Leiterreihenfolge und darunter je Spalte, was an dieser Stufe zuerst auftaucht; rechts steht fleet. Ein Klick setzt den Point; jedes Thema hält sein TMDM-Topic.</p>
+<p><a page="Fünf Wege, eine NixOS-Konfiguration zu ordnen">Zur Leiter</a></p>
+</body></html>

@@ -1,0 +1,11 @@
+<!doctype html>
+<html lang="de-CH">
+<head><meta charset="utf-8"><title>Stufe 3: flake-parts</title></head>
+<body>
+<in-package>five-ways</in-package>
+<h1>Stufe 3: flake-parts</h1>
+<p>flake-parts verteilt eine Flake auf Module: ein Rechner, eine Dev-Shell, ein Formatter, je in einer Datei. Es verwendet dasselbe Modulsystem wie NixOS, eine Ebene höher.</p>
+<p><a expr="(method-sheet :flake-parts)" view="Steckbrief">Der Steckbrief</a> zeigt alles, was die Topic Map über diese Stufe weiss: für wen sie ist, wann man weitergeht, was sie kann und kostet, ihr Steam-Beispiel und was sie einführt. <a expr="(workspace :flake-parts)" view="Topicmap">Die Topicmap um diese Stufe</a> zeigt dieselben Zusammenhänge als Bild.</p>
+<h2>Worauf es ankommt</h2><p>Die Module dieser Ebene beschreiben nicht einen Rechner, sondern die Ausgaben der Flake: <a expr="(topic :flake-parts-modul)">flake-parts-Module</a>, gesammelt von <a expr="(topic :mk-flake)">mkFlake</a>. Das lohnt sich, sobald es mehrere Ausgaben zu ordnen gibt; für einen Rechner ist es zu viel. Steam steht weiterhin in <code>configuration.nix</code>.</p>
+<p><a page="Fünf Wege, eine NixOS-Konfiguration zu ordnen">Zur Leiter</a> · <a page="Stufe 2: Flakes">Stufe 2</a> · <a page="Stufe 4: Das dendritische Muster">Stufe 4</a></p>
+</body></html>

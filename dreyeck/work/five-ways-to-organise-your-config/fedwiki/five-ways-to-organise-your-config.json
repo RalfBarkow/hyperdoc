@@ -1,0 +1,56 @@
+{
+  "title": "Five ways to organise your config",
+  "story": [
+    {
+      "type": "paragraph",
+      "id": "1ae1b64dbdfd2e7b",
+      "text": "Fünf Wege, eine NixOS-Konfiguration zu ordnen: eine Lesung von [https://nixarms.com/brewhouse/ The Brewhouse] (The Nix Arms) als Topic Maps, HyperDoc und Topicmap-Workspace."
+    },
+    {
+      "type": "paragraph",
+      "id": "08e9f967cabe294e",
+      "text": "Page-attached ASDF-System five-ways-to-organise-your-config. Die CTM-Dateien in ctm/ geben die Seite und ihre fünf Unterseiten wieder; ctm/fleet.ctm ordnet fleet ein und ist als Einordnung markiert. SOURCE und SHA256SUMS in den Assets halten fest, von welchem Commit die Kopie stammt."
+    },
+    {
+      "type": "assets",
+      "id": "95bee66ba8bcef0b",
+      "text": "pages/five-ways-to-organise-your-config"
+    },
+    {
+      "type": "paragraph",
+      "id": "7f033c1ff3950f5f",
+      "text": "Quelle unter MIT-Lizenz (LICENSE-nixarms.txt); Beschreibungen sind deutsche Wiedergaben, Code steht so auf den Seiten."
+    }
+  ],
+  "journal": [
+    {
+      "type": "create",
+      "item": {
+        "title": "Five ways to organise your config",
+        "story": [
+          {
+            "type": "paragraph",
+            "id": "1ae1b64dbdfd2e7b",
+            "text": "Fünf Wege, eine NixOS-Konfiguration zu ordnen: eine Lesung von [https://nixarms.com/brewhouse/ The Brewhouse] (The Nix Arms) als Topic Maps, HyperDoc und Topicmap-Workspace."
+          },
+          {
+            "type": "paragraph",
+            "id": "08e9f967cabe294e",
+            "text": "Page-attached ASDF-System five-ways-to-organise-your-config. Die CTM-Dateien in ctm/ geben die Seite und ihre fünf Unterseiten wieder; ctm/fleet.ctm ordnet fleet ein und ist als Einordnung markiert. SOURCE und SHA256SUMS in den Assets halten fest, von welchem Commit die Kopie stammt."
+          },
+          {
+            "type": "assets",
+            "id": "95bee66ba8bcef0b",
+            "text": "pages/five-ways-to-organise-your-config"
+          },
+          {
+            "type": "paragraph",
+            "id": "7f033c1ff3950f5f",
+            "text": "Quelle unter MIT-Lizenz (LICENSE-nixarms.txt); Beschreibungen sind deutsche Wiedergaben, Code steht so auf den Seiten."
+          }
+        ]
+      },
+      "date": 1795193521935
+    }
+  ]
+}

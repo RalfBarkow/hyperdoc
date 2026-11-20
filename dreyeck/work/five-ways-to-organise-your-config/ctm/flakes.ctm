@@ -1,0 +1,54 @@
+# CTM 1.0 · Stufe 2: Flakes
+# Quelle: https://nixarms.com/brewhouse/flakes/ ("Checked 11 Nov 2026 on NixOS 26.05"), gelesen am 2026-11-20.
+%prefix s <tag:dreyeck.ch,2026:hyperdoc/five-ways/schema/>
+%prefix t <tag:dreyeck.ch,2026:hyperdoc/five-ways/topic/>
+
+t:seite-flakes isa s:seite ; - "Flakes (The Brewhouse, Step 2)" ; = <https://nixarms.com/brewhouse/flakes/> .
+s:beschrieben-auf(s:thema: t:flakes, s:seite-rolle: t:seite-flakes)
+
+t:flakes
+    s:beschreibung: "Flakes füllen die Konfiguration ab: flake.nix sagt, welche Zutaten verwendet werden, flake.lock hält die genaue Version jeder einzelnen fest. Ein Neubau nächsten Monat oder auf einem anderen Rechner ergibt dasselbe System. configuration.nix ändert sich dabei gar nicht." ;
+    s:fuer-wen: "Alle, die ihre Konfiguration in Git halten, und alle, die fremde Konfigurationen lesen, weil viele davon Flakes verwenden." ;
+    s:weiter-wenn: "flake.nix ist voll mit mehreren Rechnern und geteilten Modulen, und man will etwas Struktur." ;
+    s:kann: "Reproduzierbar: flake.lock legt jeden Eingang fest; nichts ändert sich bis zu nix flake update." ;
+    s:kann: "Liegt irgendwo, meist als Git-Repository im Home-Verzeichnis, und baut jeden Rechner beim Namen." ;
+    s:kann: "Weitere Quellen wie Home Manager oder ein Hardware-Repository kommen als Eingänge dazu." ;
+    s:kostet: "In Nix noch als experimentell bezeichnet; man schaltet es mit einer Einstellung ein. Praktisch weit verbreitet." ;
+    s:kostet: "Flakes sehen nur Dateien, die Git verfolgt. Wer eine neue Datei nicht mit git add aufnimmt, dessen Build findet sie nicht." ;
+    s:kostet: "Eine Datei und ein Begriff mehr, gleich zu Beginn." ;
+    s:steam-beispiel: """# flake.nix
+{
+  inputs.nixpkgs.url = "github:NixOS/nixpkgs/nixos-26.05";
+
+  outputs = { nixpkgs, ... }: {
+    nixosConfigurations.endgame = nixpkgs.lib.nixosSystem {
+      modules = [ ./configuration.nix ];   # Steam is switched on in here
+    };
+  };
+}""" ;
+    s:befehl: "sudo nixos-rebuild switch --flake .#endgame" ;
+    s:befehl: "nix flake update" ;
+    s:geprueft: "Checked 11 Nov 2026 on NixOS 26.05" .
+
+t:flake-nix isa s:datei ; - "flake.nix" ;
+    s:beschreibung: "Liegt neben configuration.nix und sagt, woher alles kommt: inputs und outputs." .
+t:flake-lock isa s:datei ; - "flake.lock" ;
+    s:beschreibung: "Der erste Build schreibt sie und legt den genauen nixpkgs-Commit fest. Beide Dateien werden committet; zurück geht es auch, indem man die Lock-Datei in Git zurücksetzt." .
+t:eingang isa s:begriff ; - "Eingang (input)" ;
+    s:beschreibung: "Eine Quelle, aus der die Flake baut, etwa nixpkgs, Home Manager oder ein Hardware-Repository." .
+t:nixos-configurations isa s:begriff ; - "nixosConfigurations" ;
+    s:beschreibung: "Die Ausgabe, unter der jeder Rechner beim Namen steht. Ein zweiter Rechner ist ein weiterer Eintrag, der auf seine eigenen Dateien zeigt." .
+t:experimental-features isa s:begriff ; - "nix.settings.experimental-features" ;
+    s:beschreibung: "Die Einstellung, mit der man Flakes einschaltet: nix.settings.experimental-features = [ \"nix-command\" \"flakes\" ];" .
+t:git-sichtbarkeit isa s:begriff ; - "Nur von Git verfolgte Dateien" ;
+    s:beschreibung: "Flakes sehen nur Dateien, die Git verfolgt." .
+
+s:verwendet-datei(s:methode-rolle: t:flakes, s:datei-rolle: t:flake-nix)
+s:verwendet-datei(s:methode-rolle: t:flakes, s:datei-rolle: t:flake-lock)
+s:verwendet-datei(s:methode-rolle: t:flakes, s:datei-rolle: t:configuration-nix)
+s:fuehrt-ein(s:methode-rolle: t:flakes, s:begriff-rolle: t:eingang)
+s:fuehrt-ein(s:methode-rolle: t:flakes, s:begriff-rolle: t:nixos-configurations)
+s:fuehrt-ein(s:methode-rolle: t:flakes, s:begriff-rolle: t:experimental-features)
+s:fuehrt-ein(s:methode-rolle: t:flakes, s:begriff-rolle: t:git-sichtbarkeit)
+s:ordnet-nach(s:methode-rolle: t:flakes, s:achse-rolle: t:nach-maschine)
+s:baut-auf(s:aufbauend: t:flakes, s:grundlage: t:vanilla)

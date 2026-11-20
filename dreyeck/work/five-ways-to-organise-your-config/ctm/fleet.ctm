@@ -1,0 +1,26 @@
+# CTM 1.0 · Wo fleet auf der Leiter steht
+# Einordnung von Claude (Anthropic), abgeleitet aus fleet main cf0487d und dem Branch review/operator-ssh-keys (95755858),
+# gelesen am 2026-11-20. Nichts davon steht auf den Seiten von The Nix Arms.
+%prefix s <tag:dreyeck.ch,2026:hyperdoc/five-ways/schema/>
+%prefix t <tag:dreyeck.ch,2026:hyperdoc/five-ways/topic/>
+
+t:fleet isa s:fleet-teil ; - "fleet" ;
+    s:einordnung: "fleet ist eine Flake (Stufe 2): flake.nix legt nixpkgs, die Wiki und HyperDoc als Eingänge fest, flake.lock pinnt sie, und nixosConfigurations nennt drei Rechner beim Namen: staging, dreyeck, wiki." ;
+    s:einordnung: "Geordnet ist fleet nach Maschine: hosts/<host>/configuration.nix je Rechner. Die importierten Konfigurationen von dreyeck und wiki bleiben byteweise wie exportiert; flake.nix erweitert sie mit extendModules." ;
+    s:einordnung: "Geteilte Module wie modules/fedwiki-production.nix und modules/operator-ssh-keys.nix sind schon Features im Sinn der Stufe 4, aber von Hand in flake.nix verdrahtet, nicht automatisch geladen." ;
+    s:einordnung: "Der wiki-Host wurde laut hosts/wiki/IMPORT.md aus einem Channel gebaut, also nach Stufe 1, bevor fleet ihn als Flake aufnahm." .
+
+t:fleet-flake isa s:fleet-teil ; - "fleet/flake.nix" .
+t:fleet-hosts isa s:fleet-teil ; - "fleet/hosts/<host>/configuration.nix" .
+t:fleet-modules isa s:fleet-teil ; - "fleet/modules/*.nix" ;
+    s:einordnung: "fedwiki-staging, fedwiki-production, fedwiki-security, operator-ssh-keys: je ein Belang, von mehreren Rechnern verwendet." .
+t:fleet-extend isa s:fleet-teil ; - "extendModules auf importierten Konfigurationen" ;
+    s:einordnung: "Eine eigene Antwort auf «Einstellungen zwischen Rechnern teilen»: die Exporte unverändert lassen und Gemeinsames davor legen." .
+
+s:entspricht(s:fleet-rolle: t:fleet, s:entsprechung: t:flakes)
+s:entspricht(s:fleet-rolle: t:fleet-flake, s:entsprechung: t:flake-nix)
+s:entspricht(s:fleet-rolle: t:fleet-flake, s:entsprechung: t:nixos-configurations)
+s:entspricht(s:fleet-rolle: t:fleet-hosts, s:entsprechung: t:nach-maschine)
+s:entspricht(s:fleet-rolle: t:fleet-modules, s:entsprechung: t:feature)
+s:entspricht(s:fleet-rolle: t:fleet-modules, s:entsprechung: t:modul)
+s:entspricht(s:fleet-rolle: t:fleet-extend, s:entsprechung: t:modul)

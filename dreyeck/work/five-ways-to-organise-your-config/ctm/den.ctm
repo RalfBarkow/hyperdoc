@@ -1,0 +1,63 @@
+# CTM 1.0 · Stufe 5: den
+# Quelle: https://nixarms.com/brewhouse/den/ ("Checked 11 Nov 2026 on NixOS 26.05"), gelesen am 2026-11-20.
+%prefix s <tag:dreyeck.ch,2026:hyperdoc/five-ways/schema/>
+%prefix t <tag:dreyeck.ch,2026:hyperdoc/five-ways/topic/>
+
+t:seite-den isa s:seite ; - "den (The Brewhouse, Step 5)" ; = <https://nixarms.com/brewhouse/den/> .
+s:beschrieben-auf(s:thema: t:den, s:seite-rolle: t:seite-den)
+
+t:den
+    = <https://den.denful.dev> ;
+    s:beschreibung: "den ist ein Rahmenwerk, kein Muster. Man erklärt Rechner und Benutzer und schreibt Aspekte, etwa Gaming oder Bluetooth; ein Aspekt kann NixOS, einen Mac und den Benutzer zusammen einrichten. den erzeugt für jeden erklärten Rechner und Benutzer einen Aspekt; jeder hält Einstellungen nach Klasse (nixos, darwin, homeManager) und kann andere Aspekte einschliessen. den wuchs aus dem dendritischen Muster, beschreibt sich aber nicht mehr als dendritisch." ;
+    s:fuer-wen: "Wer mehrere NixOS-Rechner, einen Mac mit nix-darwin oder Home-Manager-Benutzer verwaltet und für alles eine Struktur will." ;
+    s:weiter-wenn: "Das ist die oberste Stufe. Von hier an geht es darum, die eigenen Aspekte aufzuräumen und vielleicht zu teilen." ;
+    s:kann: "Ein Aspekt setzt NixOS-, nix-darwin- und Home-Manager-Optionen zusammen." ;
+    s:kann: "Aspekte schliessen andere Aspekte ein; eine Gaming-Rolle holt Steam, Controller und Leistungseinstellungen herein." ;
+    s:kann: "Fertige «batteries» für Routinearbeiten, etwa den Hostnamen setzen oder ein unfreies Paket erlauben." ;
+    s:kann: "Funktioniert mit oder ohne Flakes; die eigene Einstiegsanleitung verwendet reines Nix." ;
+    s:kostet: "Die jüngste und steilste Möglichkeit, noch in Bewegung: prüfen, ob die Dokumentation zur gepinnten Version passt." ;
+    s:kostet: "Ein eigenes Vokabular (aspects, batteries, includes, provides) zusätzlich zu Nix." ;
+    s:kostet: "Eine kleinere Gemeinschaft als reine Flakes, also weniger Beispiele zum Abschauen." ;
+    s:steam-beispiel: """# modules/hosts.nix
+{ den, ... }:
+{
+  den.hosts.x86_64-linux.endgame.users.tom = { };
+
+  den.aspects.endgame.includes = [ den.aspects.gaming ];
+}
+
+# modules/aspects/gaming.nix
+{
+  den.aspects.gaming = {
+    nixos = { pkgs, ... }: {
+      programs.steam.enable = true;
+    };
+  };
+}""" ;
+    s:geprueft: "Checked 11 Nov 2026 on NixOS 26.05" .
+
+t:hosts-nix isa s:datei ; - "modules/hosts.nix" ;
+    s:beschreibung: "Erklärt den Rechner und seinen Benutzer und gibt dem Rechner seine Aspekte." .
+t:aspects-gaming-nix isa s:datei ; - "modules/aspects/gaming.nix" ;
+    s:beschreibung: "Der Gaming-Aspekt, in dem Steam lebt; er könnte am selben Ort Mac- oder Home-Manager-Optionen setzen." .
+t:aspekt isa s:begriff ; - "Aspekt (aspect)" ;
+    s:beschreibung: "Eine wiederverwendbare Einheit wie gaming oder bluetooth, die Einstellungen nach Klasse hält und andere Aspekte einschliessen kann." .
+t:klasse isa s:begriff ; - "Klasse (nixos, darwin, homeManager)" ;
+    s:beschreibung: "Wofür eine Einstellung in einem Aspekt gilt: das NixOS-System, einen Mac mit nix-darwin oder einen Home-Manager-Benutzer." .
+t:includes isa s:begriff ; - "includes" ;
+    s:beschreibung: "Womit ein Aspekt andere Aspekte einschliesst; so entstehen Rollen aus kleinen Stücken." .
+t:batteries isa s:begriff ; - "batteries" ;
+    s:beschreibung: "Fertige Aspekte für Routinearbeiten." .
+t:nix-darwin isa s:werkzeug ; - "nix-darwin" ;
+    s:beschreibung: "Konfiguriert einen Mac so, wie NixOS ein Linux-System konfiguriert." .
+
+s:verwendet-datei(s:methode-rolle: t:den, s:datei-rolle: t:hosts-nix)
+s:verwendet-datei(s:methode-rolle: t:den, s:datei-rolle: t:aspects-gaming-nix)
+s:verwendet-werkzeug(s:methode-rolle: t:den, s:werkzeug-rolle: t:nix-darwin)
+s:verwendet-werkzeug(s:methode-rolle: t:den, s:werkzeug-rolle: t:home-manager)
+s:fuehrt-ein(s:methode-rolle: t:den, s:begriff-rolle: t:aspekt)
+s:fuehrt-ein(s:methode-rolle: t:den, s:begriff-rolle: t:klasse)
+s:fuehrt-ein(s:methode-rolle: t:den, s:begriff-rolle: t:includes)
+s:fuehrt-ein(s:methode-rolle: t:den, s:begriff-rolle: t:batteries)
+s:ordnet-nach(s:methode-rolle: t:den, s:achse-rolle: t:nach-aspekt)
+s:baut-auf(s:aufbauend: t:den, s:grundlage: t:dendritic)

@@ -1,0 +1,11 @@
+<!doctype html>
+<html lang="de-CH">
+<head><meta charset="utf-8"><title>Stufe 4: Das dendritische Muster</title></head>
+<body>
+<in-package>five-ways</in-package>
+<h1>Stufe 4: Das dendritische Muster</h1>
+<p>Das dendritische Muster stülpt die Konfiguration um. Statt dass jeder Rechner aufzählt, was er braucht, lebt jedes Feature in einer Datei, und Rechner wählen ihre Features.</p>
+<p><a expr="(method-sheet :dendritic)" view="Steckbrief">Der Steckbrief</a> zeigt alles, was die Topic Map über diese Stufe weiss: für wen sie ist, wann man weitergeht, was sie kann und kostet, ihr Steam-Beispiel und was sie einführt. <a expr="(workspace :dendritic)" view="Topicmap">Die Topicmap um diese Stufe</a> zeigt dieselben Zusammenhänge als Bild.</p>
+<h2>Worauf es ankommt</h2><p>Zum ersten Mal steht Steam nicht mehr in <code>configuration.nix</code>, sondern in <code>modules/gaming.nix</code>, als <a expr="(topic :feature)">Feature</a> unter <a expr="(topic :flake-modules)">flake.modules</a>. <a expr="(topic :import-tree)">import-tree</a> lädt jede Datei unter <code>modules/</code>; von Hand gepflegte imports-Listen entfallen. Es ist ein Muster, kein Werkzeug: Konfigurationen danach sehen verschieden aus.</p>
+<p><a page="Fünf Wege, eine NixOS-Konfiguration zu ordnen">Zur Leiter</a> · <a page="Stufe 3: flake-parts">Stufe 3</a> · <a page="Stufe 5: den">Stufe 5</a></p>
+</body></html>

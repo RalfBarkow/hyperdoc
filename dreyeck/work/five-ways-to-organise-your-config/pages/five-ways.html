@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="de-CH">
+<head><meta charset="utf-8"><title>Fünf Wege, eine NixOS-Konfiguration zu ordnen</title></head>
+<body>
+<in-package>five-ways</in-package>
+<h1>Fünf Wege, eine NixOS-Konfiguration zu ordnen</h1>
+<p>Jede NixOS-Konfiguration beschreibt einen Rechner. Die Seite <a href="https://nixarms.com/brewhouse/" target="_blank">The Brewhouse</a> von The Nix Arms zeigt fünf Arten, ihre Dateien zu ordnen, einfachste zuerst. Jede schaltet dasselbe ein, Steam; die Steam-Zeile <code>programs.steam.enable = true;</code> bleibt immer gleich. Was wechselt, ist die Struktur darum, und wie gut sie mit weiteren Rechnern und Benutzern zurechtkommt.</p>
+<p>Diese HyperDoc liest die Seite als Topic Map. Jede Aussage hier steht in einer der <a page="Wie diese Seite gebaut ist">CTM-Dateien</a>, und die Ansichten werden aus ihnen gerechnet.</p>
+<h2>Die Leiter</h2>
+<ol>
+<li><a page="Stufe 1: Vanilla configuration.nix">Vanilla configuration.nix</a>: eine Datei in <code>/etc/nixos</code>, so wie der Installer sie anlegt. <a expr="(method-sheet :vanilla)" view="Steckbrief">Steckbrief</a></li>
+<li><a page="Stufe 2: Flakes">Flakes</a>: dazu eine Lock-Datei, die jeden Eingang festlegt. <a expr="(method-sheet :flakes)" view="Steckbrief">Steckbrief</a></li>
+<li><a page="Stufe 3: flake-parts">flake-parts</a>: die Flake auf Module verteilt. <a expr="(method-sheet :flake-parts)" view="Steckbrief">Steckbrief</a></li>
+<li><a page="Stufe 4: Das dendritische Muster">Das dendritische Muster</a>: nach Feature geordnet statt nach Rechner; jede Datei ein Modul, alle automatisch geladen. <a expr="(method-sheet :dendritic)" view="Steckbrief">Steckbrief</a></li>
+<li><a page="Stufe 5: den">den</a>: ein Rahmenwerk für NixOS, nix-darwin und Home Manager zusammen, geordnet in Aspekte. <a expr="(method-sheet :den)" view="Steckbrief">Steckbrief</a></li>
+</ol>
+<p>Ein Faden zieht sich durch: Ein <a expr="(topic :modul)">Modul</a> ist eine Datei, die Einstellungen hinzufügt. Jede höhere Stufe ist eine andere Art, dieselben Module zu ordnen: in einer Datei, nach Rechner, nach Ausgabe der Flake, nach Feature, nach Aspekt.</p>
+<h2>Sehen statt lesen</h2>
+<ul>
+<li><a expr="(workspace)" view="Topicmap">Die ganze Topic Map als Workspace</a>: die Methoden oben, darunter, was an jeder Stufe dazukommt.</li>
+<li><a page="Die Verkostungstafel">Die Verkostungstafel</a>: die fünf Methoden nebeneinander.</li>
+<li><a page="Wo fleet steht">Wo fleet steht</a>: deine fleet auf dieser Leiter (eine Einordnung, nicht aus der Quelle).</li>
+</ul>
+<h2>Home Manager</h2>
+<p><a expr="(topic :home-manager)">Home Manager</a> ist keine Stufe, weil es mit allen funktioniert. Es tut für den Benutzer, was NixOS für das System tut: Programme, Shell, Editor-Einstellungen und Dotfiles, aufgeschrieben und zurückrollbar.</p>
+<p>Die Quelle rät: Mit der Datei des Installers anfangen und erst wiederkommen, wenn ein zweiter Rechner dazukommt oder die eine Datei eng wird.</p>
+</body></html>

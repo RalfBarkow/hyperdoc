@@ -1,0 +1,45 @@
+# CTM 1.0 · Stufe 1: Vanilla configuration.nix
+# Quelle: https://nixarms.com/brewhouse/vanilla/ ("Checked 11 Nov 2026 on NixOS 26.05"), gelesen am 2026-11-20.
+%prefix s <tag:dreyeck.ch,2026:hyperdoc/five-ways/schema/>
+%prefix t <tag:dreyeck.ch,2026:hyperdoc/five-ways/topic/>
+
+t:seite-vanilla isa s:seite ; - "Vanilla configuration.nix (The Brewhouse, Step 1)" ; = <https://nixarms.com/brewhouse/vanilla/> .
+s:beschrieben-auf(s:thema: t:vanilla, s:seite-rolle: t:seite-vanilla)
+
+t:vanilla
+    s:beschreibung: "Eine Datei, configuration.nix, beschreibt den ganzen Rechner. Der Installer legt sie an, und das NixOS-Handbuch ist um sie herum geschrieben." ;
+    s:fuer-wen: "Alle, zu Beginn. Mit einem Rechner braucht man vielleicht nie mehr." ;
+    s:weiter-wenn: "Die Konfiguration soll mit festgelegten Versionen in Git liegen, oder ein zweiter Rechner kommt dazu." ;
+    s:kann: "Nichts einzurichten: nach der Installation schon vorhanden." ;
+    s:kann: "Das NixOS-Handbuch und die meisten Einsteigeranleitungen verwenden diese Anordnung." ;
+    s:kann: "Lässt sich mit imports leicht auf einige Dateien aufteilen." ;
+    s:kostet: "Die Versionen kommen aus dem Channel, der sich getrennt von der Konfiguration ändert. Zwei Rechner, eine Woche auseinander gebaut, können sich unterscheiden." ;
+    s:kostet: "Liegt in /etc/nixos und gehört root; sie in Git zu halten, braucht etwas Einrichtung." ;
+    s:kostet: "Einstellungen zwischen Rechnern teilen geht, aber die Struktur baut man selbst." ;
+    s:steam-beispiel: """# /etc/nixos/configuration.nix
+{ config, pkgs, ... }:
+{
+  imports = [ ./hardware-configuration.nix ];
+
+  programs.steam.enable = true;
+}""" ;
+    s:befehl: "sudo nixos-rebuild switch" ;
+    s:geprueft: "Checked 11 Nov 2026 on NixOS 26.05" .
+
+t:configuration-nix isa s:datei ; - "/etc/nixos/configuration.nix" ;
+    s:beschreibung: "Die Datei, die man bearbeitet." .
+t:hardware-configuration-nix isa s:datei ; - "/etc/nixos/hardware-configuration.nix" ;
+    s:beschreibung: "Beschreibt Platten und Treiber; am besten in Ruhe lassen." .
+t:channel isa s:begriff ; - "Channel" ;
+    s:beschreibung: "Bestimmt, welche Version jedes Pakets man bekommt: eine stabile Ausgabe oder unstable. sudo nixos-rebuild switch --upgrade aktualisiert den Channel und baut in einem Schritt neu." .
+t:modul isa s:begriff ; - "Modul" ;
+    s:beschreibung: "Eine Datei, die Einstellungen hinzufügt. Jede Datei kann über imports andere hereinholen. Jede Methode weiter oben auf der Leiter ist eine andere Art, dieselben Module zu ordnen." .
+t:imports isa s:begriff ; - "imports" ;
+    s:beschreibung: "Die Liste, mit der eine Datei andere Module hereinholt, etwa ./hardware-configuration.nix, ./gaming.nix, ./desktop.nix." .
+
+s:verwendet-datei(s:methode-rolle: t:vanilla, s:datei-rolle: t:configuration-nix)
+s:verwendet-datei(s:methode-rolle: t:vanilla, s:datei-rolle: t:hardware-configuration-nix)
+s:fuehrt-ein(s:methode-rolle: t:vanilla, s:begriff-rolle: t:channel)
+s:fuehrt-ein(s:methode-rolle: t:vanilla, s:begriff-rolle: t:modul)
+s:fuehrt-ein(s:methode-rolle: t:vanilla, s:begriff-rolle: t:imports)
+s:ordnet-nach(s:methode-rolle: t:vanilla, s:achse-rolle: t:nach-datei)

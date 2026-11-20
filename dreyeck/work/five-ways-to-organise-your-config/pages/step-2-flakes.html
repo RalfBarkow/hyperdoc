@@ -1,0 +1,11 @@
+<!doctype html>
+<html lang="de-CH">
+<head><meta charset="utf-8"><title>Stufe 2: Flakes</title></head>
+<body>
+<in-package>five-ways</in-package>
+<h1>Stufe 2: Flakes</h1>
+<p>Eine <code>flake.nix</code> neben der unveränderten <code>configuration.nix</code> sagt, woher alles kommt, und <code>flake.lock</code> hält die genaue Version jedes Eingangs fest. Ein Neubau nächsten Monat oder auf einem anderen Rechner ergibt dasselbe System.</p>
+<p><a expr="(method-sheet :flakes)" view="Steckbrief">Der Steckbrief</a> zeigt alles, was die Topic Map über diese Stufe weiss: für wen sie ist, wann man weitergeht, was sie kann und kostet, ihr Steam-Beispiel und was sie einführt. <a expr="(workspace :flakes)" view="Topicmap">Die Topicmap um diese Stufe</a> zeigt dieselben Zusammenhänge als Bild.</p>
+<h2>Worauf es ankommt</h2><p>Der Unterschied zu Stufe 1 liegt nicht in der Konfiguration, sondern in ihrer Herkunft: Statt des <a expr="(topic :channel)">Channels</a> bestimmt die <a expr="(topic :flake-lock)">Lock-Datei</a> die Versionen, und sie ändert sich nur mit <code>nix flake update</code>. Rechner stehen unter <a expr="(topic :nixos-configurations)">nixosConfigurations</a> beim Namen. Eine Falle: Flakes sehen <a expr="(topic :git-sichtbarkeit)">nur Dateien, die Git verfolgt</a>.</p>
+<p><a page="Fünf Wege, eine NixOS-Konfiguration zu ordnen">Zur Leiter</a> · <a page="Stufe 1: Vanilla configuration.nix">Stufe 1</a> · <a page="Stufe 3: flake-parts">Stufe 3</a></p>
+</body></html>

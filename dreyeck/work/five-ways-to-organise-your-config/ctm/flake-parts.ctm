@@ -1,0 +1,56 @@
+# CTM 1.0 · Stufe 3: flake-parts
+# Quelle: https://nixarms.com/brewhouse/flake-parts/ ("Checked 11 Nov 2026 on NixOS 26.05"), gelesen am 2026-11-20.
+%prefix s <tag:dreyeck.ch,2026:hyperdoc/five-ways/schema/>
+%prefix t <tag:dreyeck.ch,2026:hyperdoc/five-ways/topic/>
+
+t:seite-flake-parts isa s:seite ; - "flake-parts (The Brewhouse, Step 3)" ; = <https://nixarms.com/brewhouse/flake-parts/> .
+s:beschrieben-auf(s:thema: t:flake-parts, s:seite-rolle: t:seite-flake-parts)
+
+t:flake-parts
+    = <https://flake.parts> ;
+    s:beschreibung: "Ein Rezeptbuch für die Flake: Statt einer langen flake.nix lebt jeder Teil (ein Rechner, eine Dev-Shell, ein Formatter) in einem eigenen Modul, mit demselben Modulsystem, das NixOS schon verwendet, nur eine Ebene höher: Seine Module beschreiben die Ausgaben der Flake statt eines Rechners." ;
+    s:fuer-wen: "Wer mehrere Rechner oder Ausgaben hat und dessen flake.nix über einen Bildschirm hinausgewachsen ist." ;
+    s:weiter-wenn: "Man will nach Feature (Gaming, Desktop, Laptop) ordnen statt nach Rechner. Das ist das dendritische Muster." ;
+    s:kann: "Die Flake ist über Dateien verteilt, jede ein normales Modul." ;
+    s:kann: "Eine grosse Sammlung fertiger flake-parts-Module für Dev-Shells, Formatierung, CI-Prüfungen und mehr." ;
+    s:kann: "Die Grundlage, aus der das dendritische Muster gewachsen ist." ;
+    s:kostet: "Eine Schicht mehr zwischen einem selbst und dem Ergebnis, und ein Eingang mehr zu lernen." ;
+    s:kostet: "Fehlermeldungen können in flake-parts selbst zeigen statt in die eigene Datei." ;
+    s:kostet: "Zu viel für einen einzigen Rechner." ;
+    s:steam-beispiel: """# flake.nix
+{
+  inputs = {
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-26.05";
+    flake-parts.url = "github:hercules-ci/flake-parts";
+  };
+
+  outputs = inputs@{ flake-parts, ... }:
+    flake-parts.lib.mkFlake { inherit inputs; } {
+      systems = [ "x86_64-linux" ];
+      imports = [ ./hosts/endgame.nix ];
+    };
+}
+
+# hosts/endgame.nix (a flake-parts module)
+{ inputs, ... }:
+{
+  flake.nixosConfigurations.endgame = inputs.nixpkgs.lib.nixosSystem {
+    modules = [ ../configuration.nix ];   # Steam still lives in here
+  };
+}""" ;
+    s:geprueft: "Checked 11 Nov 2026 on NixOS 26.05" .
+
+t:hosts-endgame-nix isa s:datei ; - "hosts/endgame.nix" ;
+    s:beschreibung: "Ein flake-parts-Modul: ein Rechner als eigenes Modul." .
+t:mk-flake isa s:begriff ; - "flake-parts.lib.mkFlake" ;
+    s:beschreibung: "flake.nix übergibt an flake-parts; mkFlake sammelt die Module, die die Ausgaben der Flake beschreiben." .
+t:flake-parts-modul isa s:begriff ; - "flake-parts-Modul" ;
+    s:beschreibung: "Ein Modul der oberen Ebene: Es beschreibt Ausgaben der Flake (Rechner, Dev-Shells, Pakete, Prüfungen) statt Einstellungen eines Rechners." .
+
+s:verwendet-datei(s:methode-rolle: t:flake-parts, s:datei-rolle: t:flake-nix)
+s:verwendet-datei(s:methode-rolle: t:flake-parts, s:datei-rolle: t:hosts-endgame-nix)
+s:verwendet-datei(s:methode-rolle: t:flake-parts, s:datei-rolle: t:configuration-nix)
+s:fuehrt-ein(s:methode-rolle: t:flake-parts, s:begriff-rolle: t:mk-flake)
+s:fuehrt-ein(s:methode-rolle: t:flake-parts, s:begriff-rolle: t:flake-parts-modul)
+s:ordnet-nach(s:methode-rolle: t:flake-parts, s:achse-rolle: t:nach-ausgabe)
+s:baut-auf(s:aufbauend: t:flake-parts, s:grundlage: t:flakes)
