@@ -25,7 +25,7 @@
  :flags (:needs-staging :needs-production)
  :facts ())
 
-(:id :local-topics :repo :hyperdoc :branch "docs/start-local-hyperdoc" :head nil :pr nil
+(:id :local-topics :repo :hyperdoc :branch "docs/start-local-hyperdoc" :head "7f1fc822" :pr nil
  :title "Start-Topic und Workflow-Plan"
  :flags (:needs-view)
  :facts ())
@@ -44,3 +44,8 @@
  :title "Site-Beobachtung mit Playground-Schranke"
  :flags (:needs-view)
  :facts ())
+
+(:id :acceptance-catalog :repo :fleet :branch "review/staging-acceptance-catalog" :head "34154a29" :pr 9
+ :title "fleet: Abnahme-Catalog auf staging"
+ :flags (:needs-staging)
+ :facts ((:pr-open "2026-11-20" "PR RalfBarkow/fleet#9 angelegt; vor dem Ausrollen DNS catalog.staging.dreyeck.ch setzen")))
