@@ -5,7 +5,7 @@
   (:use #:cl)
   (:local-nicknames (#:v #:html-inspector-views) (#:dita #:dreyeck/dita-story-item)
                     (#:policy #:dreyeck/authority-policy) (#:hb #:hyperbook))
-  (:export #:open-task #:observe-site #:plan-next #:offered-sites #:*sites* #:site-host
+  (:export #:open-task #:trust-staging-roots #:observe-site #:plan-next #:offered-sites #:*sites* #:site-host
            #:observations-of #:latest-observation #:*max-age-seconds*))
 (in-package #:site-observation)
 
@@ -259,13 +259,33 @@
                               (format nil "~S" (subseq (observations-of site) 0
                                                        (min 3 (length (observations-of site)))))))))))))
 
+(defun page-paths (book)
+  (let ((slug (hyperbook/server::slug book)))
+    (loop for id in (cons "overview" (mapcar #'machine-page-id (machines)))
+          collect (cons id (format nil "/~A/~A" slug id)))))
+
+(defun add-routes (book)
+  "One exact CLOG route per page. Works whoever started CLOG, with or without a HyperBook Catalog."
+  (loop for (id . path) in (page-paths book)
+        do (let ((page-id id))
+             (clog:set-on-new-window
+              (lambda (body)
+                (clog-moldable-inspector:on-new-inspector
+                 body :object (hb:find-page book page-id :signal-error? t)
+                      :pane-width "850px" :title (hb:title-of book) :playground? nil))
+              :path path))))
+
 (defun open-task (&key (port 18759))
-  "Register the book in this image's running Catalog (for example the white image on port 8080),
-or start a loopback Catalog on PORT. Return the overview URL."
+  "Open the overview in this image's running CLOG server (for example the white image), or start a
+loopback Catalog on PORT when CLOG is not running. Return the overview URL."
   (let ((book (or (hb:find-hyperbook +book-id+) (make-instance 'observation-book :id +book-id+))))
     (unless (clog:is-running-p)
       (hyperbook/server:serve-catalog :host "127.0.0.1" :port port :development nil :pane-width "850px"))
-    (unless hyperbook/server::*server-parameters*
-      (error "In diesem Image läuft CLOG ohne HyperBook-Catalog."))
     (hb:register book)
-    (format nil "http://127.0.0.1:~D/~A/overview" clog:*clog-port* (hyperbook/server::slug book))))
+    (add-routes book)
+    (format nil "http://127.0.0.1:~D~A" clog:*clog-port* (cdr (first (page-paths book))))))
+
+(defun trust-staging-roots (pem)
+  "Let curl verify staging.dreyeck.ch against the Let's Encrypt staging roots in the file PEM."
+  (let ((path (or (probe-file pem) (error "Datei ~A fehlt." pem))))
+    (setf (site-ca-file (find-site :staging-dreyeck-ch)) path)))
