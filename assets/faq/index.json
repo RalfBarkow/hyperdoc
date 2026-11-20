@@ -10,6 +10,17 @@
       "ditaUrl": "/faq/asdf-fasl-nix-store.dita",
       "evidenceCommit": "414714f0c79bcd483dbbf0f1606a6996e218855f",
       "evidenceSha256": "8c3429de4229dc239f626efbdbcd9739fbb2b3d13ea91120542fc2ded47950ce"
+    },
+    {
+      "topicId": "asdf-registry-store-gc",
+      "url": "/faq/asdf-registry-store-gc.html",
+      "scope": "Gepinnte HyperDoc-Dev-Shell, SBCL 2.4.10 und ASDF 3.3.1. Eine über CL_SOURCE_REGISTRY gemerkte .asd im Nix Store verschwindet nach dem Start des Images; Laden als Abhängigkeit, Diagnose, Wiederherstellung im selben Prozess und GC-Wurzel.",
+      "evidenceStatus": "verified",
+      "lastSuccessfulRun": "2026-11-20",
+      "evidenceUrl": "/faq/asdf-registry-store-gc-check.txt",
+      "ditaUrl": "/faq/asdf-registry-store-gc.dita",
+      "evidenceCommit": "48beef1ce2969ba57391e20ce435c245a77cd806",
+      "evidenceSha256": "aab398823a7ed833da2be23ac96611133c51f52a16bd8aa98f399fc7b7436436"
     }
   ]
 }

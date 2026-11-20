@@ -1,10 +1,10 @@
 name: Curated FAQ
 on:
   pull_request:
-    paths: ['assets/faq/**', 'docs/faq/asdf-fasl-nix-store/revision-2/**', 'scripts/*faq*', 'scripts/*asdf-fasl*', 'flake.nix', 'flake.lock', 'nix/lisp-runtime.nix', '.github/workflows/faq.yml']
+    paths: ['assets/faq/**', 'docs/faq/asdf-fasl-nix-store/revision-2/**', 'scripts/*faq*', 'scripts/*asdf-fasl*', 'scripts/*asdf-registry*', 'flake.nix', 'flake.lock', 'nix/lisp-runtime.nix', '.github/workflows/faq.yml']
   push:
     branches: [dreyeck.ch]
-    paths: ['assets/faq/**', 'docs/faq/asdf-fasl-nix-store/revision-2/**', 'scripts/*faq*', 'scripts/*asdf-fasl*', 'flake.nix', 'flake.lock', 'nix/lisp-runtime.nix', '.github/workflows/faq.yml']
+    paths: ['assets/faq/**', 'docs/faq/asdf-fasl-nix-store/revision-2/**', 'scripts/*faq*', 'scripts/*asdf-fasl*', 'scripts/*asdf-registry*', 'flake.nix', 'flake.lock', 'nix/lisp-runtime.nix', '.github/workflows/faq.yml']
 
 permissions:
   contents: read
@@ -24,3 +24,6 @@ jobs:
           python3 scripts/faq-evidence.py --check
           nix develop --no-update-lock-file -c bash scripts/check-asdf-fasl-nix-store.sh | tee "$RUNNER_TEMP/faq-check.txt"
           python3 scripts/faq-evidence.py --validate-run "$RUNNER_TEMP/faq-check.txt"
+          python3 scripts/faq-evidence.py --topic asdf-registry-store-gc --check
+          nix develop --no-update-lock-file -c bash scripts/check-asdf-registry-store-gc.sh | tee "$RUNNER_TEMP/faq-gc-check.txt"
+          python3 scripts/faq-evidence.py --topic asdf-registry-store-gc --validate-run "$RUNNER_TEMP/faq-gc-check.txt"
