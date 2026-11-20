@@ -32,6 +32,30 @@
               (assert (uiop:subpathp actual (truename cache)))
               (format t "PASS source: wrote ~A; loaded answer=42~%" actual)))))))
 
+(defun test-wrapper-destinations ()
+  ;; This process only computes pathnames. It never runs an ASDF compile or load operation.
+  (let* ((component (asdf:find-component "salza2" "package"))
+         (source (truename (asdf:component-pathname component)))
+         (cache (uiop:ensure-directory-pathname (uiop:getenv "XDG_CACHE_HOME")))
+         (nearby (compile-file-pathname source)))
+    (assert (uiop:subpathp source #P"/nix/store/"))
+    (flet ((destination (label)
+             (let ((path (first (asdf:output-files 'asdf:compile-op component))))
+               (format t "~&~A=~A~%" label path)
+               path)))
+      (let ((inherited (destination "inherited")))
+        (assert (equal inherited nearby))
+        (asdf:initialize-output-translations
+         '(:output-translations :enable-user-cache :ignore-inherited-configuration))
+        (let ((override (destination "override")))
+          (assert (uiop:subpathp override cache))
+          (assert (not (equal inherited override)))
+          (asdf:initialize-output-translations)
+          (assert (equal override (destination "no-argument")))
+          (asdf:initialize-output-translations nil)
+          (assert (equal inherited (destination "explicit-nil")))))
+      (format t "PASS destinations: inherited = explicit-nil; override = no-argument~%"))))
+
 (defun test-package ()
   ;; Do not initialize output translations in this process.
   (assert (not (find-package :salza2)))
@@ -56,6 +80,7 @@
         (lisp-implementation-version) (asdf:asdf-version))
 (let ((name (first (uiop:command-line-arguments))))
   (cond ((equal name "source") (test-source nil))
+        ((equal name "destinations") (test-wrapper-destinations))
         ((equal name "packaged") (test-package))
         ((equal name "missing") (test-source t))
         (t (error "Unknown FAQ test ~S" name))))

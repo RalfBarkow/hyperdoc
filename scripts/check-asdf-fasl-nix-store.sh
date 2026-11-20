@@ -25,5 +25,9 @@ probe() {
 }
 XDG_CACHE_HOME="$scratch/source-cache" probe source
 probe packaged
+# The Nix wrapper prepends its package-specific rules to this caller-supplied rule.
+XDG_CACHE_HOME="$scratch/override-cache" ASDF_OUTPUT_TRANSLATIONS="/nix/store/:$scratch/env-cache/:" probe destinations
 rm "$FAQ_SOURCE_DIR/answer.lisp"
 XDG_CACHE_HOME="$scratch/missing-cache" probe missing
+# The transcript is publishable only after every fresh process has exited successfully.
+printf 'SUCCESS_UTC=%s\n' "$(date -u +%FT%TZ)"

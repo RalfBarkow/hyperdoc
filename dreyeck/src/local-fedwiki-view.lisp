@@ -172,13 +172,6 @@ attached Mech browser assets and the /gesture marking-menu window."
      :development development
      :lack-middleware-list
      (list (lambda (app)
-             (funcall lack/middleware/static:*lack-middleware-static* app
-                      :root (asdf:system-relative-pathname "dreyeck" "assets/faq/")
-                      :path (lambda (path)
-                              (cond ((string= path "/faq/") "/index.html")
-                                    ((cl-ppcre:scan "^/faq/[a-z0-9-]+[.](html|json|dita|txt|css)\\z" path)
-                                     (subseq path (length "/faq")))))))
-           (lambda (app)
              (wrap-page-archive-downloads
               (dreyeck/fedwiki-story-assets:wrap-mastodon-assets app asset-site-root)
               asset-site-root)))))
