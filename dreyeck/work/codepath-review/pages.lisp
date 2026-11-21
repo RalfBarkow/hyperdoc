@@ -200,12 +200,18 @@
                       :playground? (second hyperbook/server::*server-parameters*)))
               :path path))))
 
-(defun open-task (&key (port 18760))
+(defun configured-port (&optional (getenv #'uiop:getenv))
+  "The port the Catalog application is configured for: HYPERDOC_CATALOG_PORT, else that application's own default.
+Asks dreyeck/catalog-application, loading it if needed, so that no port number is kept here."
+  (asdf:load-system "dreyeck/catalog-application")
+  (getf (uiop:symbol-call "DREYECK/CATALOG-APPLICATION" "%CONFIGURATION" nil getenv) :port))
+
+(defun open-task (&key port)
   "Open the overview in this image's running CLOG server, or start a loopback Catalog on PORT when CLOG is not
 running. Return the overview URL."
   (let ((book (or (hb:find-hyperbook +book-id+) (make-instance 'codepath-book :id +book-id+))))
     (unless (clog:is-running-p)
-      (hyperbook/server:serve-catalog :host "127.0.0.1" :port port :development nil :pane-width "850px"))
+      (hyperbook/server:serve-catalog :host "127.0.0.1" :port (or port (configured-port)) :development nil :pane-width "850px"))
     (hb:register book)
     (add-routes book)
     (format nil "http://127.0.0.1:~D~A" clog:*clog-port* (cdr (first (page-paths book))))))

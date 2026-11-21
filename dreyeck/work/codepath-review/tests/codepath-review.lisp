@@ -69,8 +69,16 @@
     (check (search "Play" (v:view-html (first (v:all-views (hb:find-page book "overview" :signal-error? t))))))
     (check (= (length +pages+) (length (page-paths book))))))
 
+(defun test-configured-port ()
+  "The port comes from the Catalog application's configuration: its variable, else its own default."
+  (check (= 18999 (configured-port (lambda (name) (and (equal name "HYPERDOC_CATALOG_PORT") "18999")))))
+  (let ((default (configured-port (constantly nil))))
+    (check (and (integerp default) (<= 1 default 65535)))
+    (check (= default (getf (uiop:symbol-call "DREYECK/CATALOG-APPLICATION" "%CONFIGURATION" nil (constantly nil)) :port)))))
+
 (defun run-tests ()
   (let ((*checks* 0))
+    (test-configured-port)
     (test-fixture-paths)
     (let ((a (test-default-exclusion)))
       (test-this-image a)
