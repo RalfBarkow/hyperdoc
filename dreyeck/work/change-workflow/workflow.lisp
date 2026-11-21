@@ -293,9 +293,13 @@ facts that added in this image, and the plan's offers before and after."))
 (defmethod hb:title-of ((book workflow-book)) "Änderungen bis auf die Server")
 (defmethod hb:title-of ((page workflow-page)) "Nächste Schritte")
 (defmethod hb:main-page-id-of ((book workflow-book)) "overview")
+(defvar *pages* (list (cons "overview" 'workflow-page))
+  "Page id -> page class. Further systems (change-workflow/zettelkasten) add their pages here.")
+
 (defmethod hb:find-page ((book workflow-book) id &key signal-error?)
-  (cond ((equal id "overview") (make-instance 'workflow-page :id id :hyperbook book))
-        (signal-error? (error 'hb:page-lookup-failure :hyperbook book :page-id id))))
+  (let ((class (cdr (assoc id *pages* :test #'equal))))
+    (cond (class (make-instance class :id id :hyperbook book))
+          (signal-error? (error 'hb:page-lookup-failure :hyperbook book :page-id id)))))
 
 (defun fact-text (c)
   (format nil "~:[—~;~:*~{~A~^; ~}~]"
@@ -341,7 +345,7 @@ facts that added in this image, and the plan's offers before and after."))
 (unless (hb:find-hyperbook +book-id+) (hb:register (make-instance 'workflow-book :id +book-id+)))
 
 (defun page-paths (book)
-  (list (cons "overview" (format nil "/~A/overview" (hyperbook/server::slug book)))))
+  (loop for (id) in (reverse *pages*) collect (cons id (format nil "/~A/~A" (hyperbook/server::slug book) id))))
 
 (defun configured-port (&optional (getenv #'uiop:getenv))
   "The port the Catalog application is configured for: HYPERDOC_CATALOG_PORT, else that application's own default.

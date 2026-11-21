@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE task PUBLIC "-//OASIS//DTD DITA Task//EN" "task.dtd">
+<task id="zettelkasten-alignment" xml:lang="de-CH">
+  <title>Topics mit dem Zettelkasten abgleichen</title>
+  <shortdesc>Die Schlagwort-Kandidaten der Topic Maps in <filepath>topics/</filepath> mit den Schlagwörtern und Zetteltiteln einer Zettelkasten-Datei (<filepath>.zkn3</filepath>) vergleichen. Gelesen wird nur; geschrieben wird nichts.</shortdesc>
+  <taskbody>
+    <prereq><p>Die Datei, etwa <filepath>~/workspace/rgb.zkn3</filepath>, liegt auf diesem Rechner. Ihr Pfad steht vor dem Start des Images in <codeph>HYPERDOC_ZETTELKASTEN_FILE</codeph>; ohne die Variable verweigert der Knopf.</p></prereq>
+    <steps>
+      <step id="configure">
+        <cmd>Die Variable setzen und das Image starten.</cmd>
+        <info><codeblock>export HYPERDOC_ZETTELKASTEN_FILE="$HOME/workspace/rgb.zkn3"
+hyperdoc-sly</codeblock>
+          <p>Dann <codeph>change-workflow/zettelkasten</codeph> laden; die Seite <i>Zettelkasten-Abgleich</i> erscheint im Buch <i>Änderungen bis auf die Server</i>.</p></info>
+      </step>
+      <step id="align">
+        <cmd>Play drücken.</cmd>
+        <info><p>Der Knopf öffnet die Datei lesend, liest <filepath>keywordFile.xml</filepath> und <filepath>zknFile.xml</filepath> und vergleicht sie mit den Topic Maps. Er gibt den Abgleich als Objekt zurück.</p></info>
+        <stepresult>Zwei Ansichten: <i>Schlagwörter</i> (je Kandidat vorhanden, vorhanden in anderer Schreibung oder neu, mit den Zetteln, die das Schlagwort tragen) und <i>Topics und Zettel</i> (je Topic die Zettel über Schlagwort und über Titel).</stepresult>
+      </step>
+      <step id="decide">
+        <cmd>Im Zettelkasten entscheiden, was übernommen wird.</cmd>
+        <info><p>Neue Schlagwörter, Querverweise oder Folgezettel legst du im Zettelkasten selbst an. Der Abgleich schlägt nur vor; er ändert weder die Datei noch die Topic Maps.</p></info>
+      </step>
+    </steps>
+  </taskbody>
+</task>

@@ -138,9 +138,51 @@
             (check (some (lambda (o) (equal keyword (funcall si (uiop:symbol-call "TOPIC-MAPS.TMDM" "OCCURRENCE-TYPE" o))))
                          (uiop:symbol-call "TOPIC-MAPS.TMDM" "TOPIC-OCCURRENCES" tp)))))))))
 
+(defun write-zkn3-fixture (path)
+  "A small .zkn3 written the way SaveFileTask writes one: compact XML, one ZIP entry per file."
+  (let ((dir (uiop:ensure-directory-pathname (uiop:run-program '("mktemp" "-d") :output '(:string :stripped t))))
+        (files '(("keywordFile.xml" . "<?xml version=\"1.0\" encoding=\"UTF-8\"?><keywords><entry f=\"1\">Register</entry><entry/><entry f=\"1\">beobachtung</entry><entry f=\"1\">Zettelkasten &amp; Topic Maps</entry></keywords>")
+                 ("zknFile.xml" . "<?xml version=\"1.0\" encoding=\"UTF-8\"?><zettelkasten><zettel zknid=\"a\"><title>Register und Datei</title><content>x</content><author/><keywords>1,3</keywords><manlinks/><links><link>a.pdf</link></links><misc/><luhmann/></zettel><zettel zknid=\"b\"><title>Play «PR-Stand lesen» im Workflow</title><content>y</content><author/><keywords>4,2</keywords><manlinks/><links/><misc/><luhmann/></zettel><zettel zknid=\"c\"><title/><content/><author/><keywords/><manlinks/><links/><misc/><luhmann/></zettel></zettelkasten>"))))
+    (unwind-protect
+         (zip:with-output-to-zipfile (z path :if-exists :supersede)
+           (loop for (name . text) in files
+                 do (let ((file (merge-pathnames name dir)))
+                      (with-open-file (s file :direction :output :external-format :utf-8 :if-exists :supersede)
+                        (write-string text s))
+                      (zip:write-zipentry z name file))))
+      (uiop:delete-directory-tree dir :validate t))
+    path))
+
+(defun test-zettelkasten ()
+  (let ((path (merge-pathnames "fixture.zkn3" (uiop:ensure-directory-pathname
+                                               (uiop:run-program '("mktemp" "-d") :output '(:string :stripped t))))))
+    (unwind-protect
+         (let* ((zkn (read-zettelkasten (write-zkn3-fixture path)))
+                (a (align zkn '(("Register" "Register" "Provenienz") ("Play «PR-Stand lesen»" "Beobachtung"))))
+                (status (lambda (k) (getf (find k (alignment-keywords a) :key (lambda (x) (getf x :keyword)) :test #'equal) :status))))
+           ;; Keyword N is the Nth entry; the empty entry 2 is a deleted keyword and is dropped from note 2.
+           (check (equalp #("Register" "" "beobachtung" "Zettelkasten & Topic Maps") (zkn-keywords zkn)))
+           (check (equal '("Register" "beobachtung") (zkn-note-keywords (first (zkn-notes zkn)))))
+           (check (equal '("Zettelkasten & Topic Maps") (zkn-note-keywords (second (zkn-notes zkn)))))
+           (check (= 3 (length (zkn-notes zkn))))
+           (check (eq :exact (funcall status "Register")))
+           (check (eq :case (funcall status "Beobachtung")))
+           (check (eq :absent (funcall status "Provenienz")))
+           (check (equal '(1) (mapcar #'zkn-note-number (getf (find "Register" (alignment-keywords a) :key (lambda (x) (getf x :keyword)) :test #'equal) :notes))))
+           ;; Title match: the topic name occurs in note 2's title.
+           (check (equal '(2) (mapcar #'zkn-note-number (getf (second (alignment-topics a)) :by-title))))
+           (check (every (lambda (title) (find title (v:all-views a) :key #'v:view-title :test #'equal))
+                         '("Schlagwörter" "Topics und Zettel")))
+           ;; With the real topic maps.
+           (check (plusp (length (alignment-keywords (align zkn))))))
+      (uiop:delete-directory-tree (uiop:pathname-directory-pathname path) :validate t)))
+  (let ((page (hb:find-page (make-instance 'workflow-book :id +book-id+) "zettelkasten" :signal-error? t)))
+    (check (search "Zettelkasten" (v:view-html (first (v:all-views page))))))
+  (check (nth-value 1 (ignore-errors (play-align nil)))))
+
 (defun run-tests ()
   (let ((*checks* 0))
     (test-configured-port)
-    (test-register-now) (test-progress) (test-live-register) (test-reasons) (test-observation) (test-topic-maps) (test-view)
+    (test-register-now) (test-progress) (test-live-register) (test-reasons) (test-observation) (test-topic-maps) (test-zettelkasten) (test-view)
     (format t "~&change-workflow: ~D checks passed.~%" *checks*)
     *checks*))

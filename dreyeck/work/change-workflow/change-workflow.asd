@@ -14,8 +14,13 @@
                              (:static-file "side-chat.ctm") (:static-file "keywords.tsv"))))
   :in-order-to ((asdf:test-op (asdf:test-op "change-workflow/tests"))))
 
+(asdf:defsystem "change-workflow/zettelkasten"
+  :description "Read-only comparison of the change-workflow topic maps with a Zettelkasten 3 file (.zkn3)"
+  :depends-on ("change-workflow" "zip" "plump" "topic-maps/ctm" "topic-maps/tmdm")
+  :components ((:file "zettelkasten") (:static-file "zettelkasten.dita")))
+
 (asdf:defsystem "change-workflow/tests"
-  :depends-on ("change-workflow" "topic-maps/ctm" "topic-maps/tmdm")
+  :depends-on ("change-workflow" "change-workflow/zettelkasten" "topic-maps/ctm" "topic-maps/tmdm" "zip")
   :components ((:module "tests" :components ((:file "workflow") (:static-file "register-2026-11-20-initial.sexp"))))
   :perform (asdf:test-op (operation component)
              (declare (ignore operation component))
