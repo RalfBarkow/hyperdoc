@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE concept PUBLIC "-//OASIS//DTD DITA Concept//EN" "concept.dtd">
+<concept id="local-remote-screen" xml:lang="de-CH">
+  <title>Lokaler Fernbildschirm: der Zettelkasten-Kiosk in einem HyperDoc-Frame</title>
+  <shortdesc>Eine NixOS-VM auf dem Mac zeigt nur den Zettelkasten. wayvnc gibt ihren Bildschirm als WebSocket weiter, noVNC zeichnet ihn im Browser, und eine HyperDoc-Seite bettet noVNC in einen Frame ein. Die Grenze: nur der Mac selbst, und nur ansehen.</shortdesc>
+  <conbody>
+    <note type="important">Stand 21.11.2026: Entwurf. Gebaut und geprüft ist nur der Kiosk selbst (RalfBarkow/zettelkasten, Branch <codeph>nix/package-kiosk</codeph>, <codeph>accb7d6</codeph>, VM-Test <codeph>checks.kiosk</codeph> bestanden). wayvnc, noVNC und der Frame sind noch nicht gebaut; was unten über sie steht, ist die Absicht, keine Beobachtung.</note>
+
+    <section id="pieces">
+      <title>Die vier Teile</title>
+      <dl>
+        <dlentry>
+          <dt>Kiosk-VM</dt>
+          <dd>Eine NixOS-VM (<codeph>nixosModules.kiosk</codeph>), in der der Wayland-Kiosk cage nur den Zettelkasten startet, als unprivilegierter Benutzer, ohne Desktop, Anmeldung oder Terminal. Die VM hat keinen eigenen Bildschirm, den jemand ansieht.</dd>
+        </dlentry>
+        <dlentry>
+          <dt>wayvnc</dt>
+          <dd>Ein VNC-Server in der VM, der den Bildschirm von cage abgreift. Mit <codeph>--websocket</codeph> spricht er VNC direkt über WebSocket, sodass der Browser ohne Zwischendienst verbinden kann. Mit <codeph>--disable-input</codeph> nimmt er keine Tastatur- und Mauseingaben an: Ansehen ist alles, was über diese Verbindung geht.</dd>
+        </dlentry>
+        <dlentry>
+          <dt>noVNC</dt>
+          <dd>Ein VNC-Client aus HTML und JavaScript. Er verbindet sich mit dem WebSocket von wayvnc und zeichnet den Bildschirm in ein Canvas. Seine statischen Dateien liefert ein Webserver auf <codeph>127.0.0.1</codeph> des Mac aus. Sein Parameter <codeph>view_only=true</codeph> unterdrückt Eingaben nur im Client; die Zusicherung kommt von wayvnc.</dd>
+        </dlentry>
+        <dlentry>
+          <dt>HyperDoc-Frame</dt>
+          <dd>Eine HyperDoc-Seite im lokalen Catalog auf <codeph>localhost:8080</codeph> bettet die noVNC-Seite in ein <codeph>&lt;iframe&gt;</codeph> ein. HyperDoc wird damit zum Bildschirm des Kiosks, ohne selbst VNC zu sprechen.</dd>
+        </dlentry>
+      </dl>
+    </section>
+
+    <section id="path">
+      <title>Der Weg eines Bildes</title>
+      <p>cage zeichnet den Zettelkasten → wayvnc kopiert den Bildschirm und sendet ihn über WebSocket → QEMU leitet <codeph>127.0.0.1:5900</codeph> des Mac auf Port 5900 der VM weiter → noVNC im Browser empfängt und zeichnet → der Frame der HyperDoc-Seite zeigt noVNC.</p>
+      <p>In umgekehrter Richtung fliesst nichts, was die VM verändert: wayvnc verwirft Eingaben, und der Frame bekommt keine Verbindung, die schreiben kann.</p>
+    </section>
+
+    <section id="boundary">
+      <title>Wo die Grenze liegt</title>
+      <ul>
+        <li><b>Nur der Mac.</b> QEMU bindet die Weiterleitung an <codeph>127.0.0.1</codeph> des Mac; aus dem Netz ist Port 5900 nicht erreichbar. In der VM muss wayvnc dafür auf der Netzschnittstelle der VM lauschen, nicht auf ihrem eigenen <codeph>127.0.0.1</codeph>, denn QEMU leitet dorthin weiter. Diese Schnittstelle erreicht nur die Weiterleitung von QEMU.</li>
+        <li><b>Nur ansehen.</b> Durchgesetzt von wayvnc (<codeph>--disable-input</codeph>), nicht von noVNC und nicht vom Frame.</li>
+        <li><b>Die Daten bleiben auf dem Mac.</b> Notizen, Einstellungen und das Bild verlassen ihn nicht.</li>
+        <li><b>Nicht für einen Server.</b> Auf staging oder dreyeck.ch wäre dieselbe Anordnung öffentlich; dort bräuchte sie Anmeldung und Verschlüsselung, die dieser Entwurf nicht vorsieht.</li>
+      </ul>
+    </section>
+
+    <section id="residual-risk">
+      <title>Was die Grenze nicht abdeckt</title>
+      <ul>
+        <li><b>Andere Webseiten im selben Browser.</b> Eine fremde Seite darf eine WebSocket-Verbindung zu <codeph>ws://127.0.0.1:5900</codeph> öffnen; WebSocket kennt keine Same-Origin-Sperre, und wayvnc prüft den <codeph>Origin</codeph>-Header nicht. Ohne Anmeldung könnte eine solche Seite den Bildschirm mitlesen. Das ist dieselbe Frage wie bei CLOG (hyperdoc#60). Zu entscheiden, bevor der Fernbildschirm als fertig gilt: ein Passwort für wayvnc, das noVNC abfragt, oder ein Weg, den nur die HyperDoc-Seite kennt.</li>
+        <li><b>Andere Prozesse und Benutzer auf dem Mac</b> erreichen <codeph>127.0.0.1</codeph> ebenso.</li>
+        <li><b>Die Zusicherung „nur ansehen"</b> beruht auf einer Option von wayvnc 0.8. Ein Test kann prüfen, dass die Option gesetzt ist; dass wayvnc sie einhält, ist damit nicht bewiesen.</li>
+      </ul>
+    </section>
+  </conbody>
+</concept>
