@@ -35,12 +35,12 @@
  :flags (:needs-view)
  :facts ())
 
-(:id :codepath-review :repo :hyperdoc :branch "work/codepath-review" :head "ecce6c7a" :pr nil
+(:id :codepath-review :repo :hyperdoc :branch "work/codepath-review" :head "69d7c67d" :pr nil
  :title "Codepfade in Seiten-Code"
  :flags (:needs-view)
  :facts ())
 
-(:id :site-observation :repo :hyperdoc :branch "work/site-observation" :head "53be886e" :pr nil
+(:id :site-observation :repo :hyperdoc :branch "work/site-observation" :head "cd2e6dee" :pr nil
  :title "Site-Beobachtung mit Playground-Schranke"
  :flags (:needs-view)
  :facts ())
