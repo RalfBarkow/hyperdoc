@@ -343,8 +343,9 @@ facts that added in this image, and the plan's offers before and after."))
 (defun page-paths (book)
   (list (cons "overview" (format nil "/~A/overview" (hyperbook/server::slug book)))))
 
-(defun open-task (&key (port 18761))
-  "Open the overview in this image's running CLOG server, or start a loopback Catalog on PORT. Return its URL."
+(defun open-task (&key (port 8080))
+  "Open the overview in this image's running CLOG server, or start a loopback Catalog on PORT (default 8080, the
+operator's local HyperDoc port). Return its URL."
   (let ((book (or (hb:find-hyperbook +book-id+) (make-instance 'workflow-book :id +book-id+))))
     (unless (clog:is-running-p)
       (hyperbook/server:serve-catalog :host "127.0.0.1" :port port :development nil :pane-width "850px"))
