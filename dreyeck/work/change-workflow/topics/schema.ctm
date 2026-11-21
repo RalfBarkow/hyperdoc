@@ -1,0 +1,56 @@
+# CTM 1.0 · Register, Play-Knopf und Herkunft von Fakten im change-workflow · Schema
+# Aus einem Side Chat vom 2026-11-21 umgeschrieben; jede Datei dieses Verzeichnisses ist für sich lesbar.
+# Bezeichner sind englisch, Namen und Texte deutsch. s:keyword sind Kandidaten für den Abgleich mit Zettelkasten-Schlagwörtern.
+%prefix s <tag:dreyeck.ch,2026:hyperdoc/change-workflow/schema/>
+
+# Themenarten
+s:concept - "Begriff" .
+s:artifact - "Datei oder Objekt" .
+s:function - "Funktion oder Variable" .
+s:operation - "Operation" .
+s:principle - "Grundsatz" .
+s:entry-kind - "Art von Eintrag" .
+s:proposal - "Vorschlag" .
+s:check - "Prüfung" .
+s:question - "Frage" .
+
+# Vorkommen
+s:definition - "Definition" .
+s:operational - "Operationelle Bedeutung" .
+s:effect - "Wirkung" .
+s:not - "Was es nicht ist oder nicht tut" .
+s:consequence - "Folge" .
+s:example - "Beispiel" .
+s:code - "Code" .
+s:source - "Quellstelle" .
+s:status - "Status der Aussage" .
+s:keyword - "Schlagwort-Kandidat (Zettelkasten)" .
+s:asked - "Gestellt im Side Chat" .
+
+# Rollen
+s:reader - "Leser" .
+s:read - "Gelesenes" .
+s:changer - "Änderndes" .
+s:changed - "Geändertes" .
+s:part - "Teil" .
+s:whole - "Ganzes" .
+s:one - "das eine" .
+s:other - "das andere" .
+s:requiring - "Voraussetzendes" .
+s:required - "Vorausgesetztes" .
+s:from - "von" .
+s:to - "nach" .
+s:asking - "Frage" .
+s:answer - "Antwort" .
+s:case - "Fall" .
+s:general - "Allgemeines" .
+
+# Assoziationstypen
+s:reads - "liest" .
+s:changes - "ändert" .
+s:part-of - "ist Teil von" .
+s:distinct-from - "ist zu unterscheiden von" .
+s:requires - "setzt voraus" .
+s:transfers-to - "lässt sich übertragen auf" .
+s:answered-by - "wird beantwortet durch" .
+s:instance-of-pattern - "ist ein Fall von" .

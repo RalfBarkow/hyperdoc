@@ -1,0 +1,44 @@
+# CTM 1.0 · Codepath Review übertragen: Wer kann register.sexp schreiben?
+# Quelle: Side Chat 2026-11-21. Die Fragen-Objekte sind ein Entwurf; gebaut ist nichts davon.
+%prefix s <tag:dreyeck.ch,2026:hyperdoc/change-workflow/schema/>
+%prefix t <tag:dreyeck.ch,2026:hyperdoc/change-workflow/topic/>
+
+t:codepath-review isa s:artifact ; - "Codepath Review" ;
+    s:definition: "Arbeitssystem auf work/codepath-review: findet mit SBCL-Querverweisen und Textsuche die Stellen, an denen ein Image Seiten-Code für ASDF sichtbar macht, und ob jeder Weg dorthin die Sperre execution-permitted-p prüft." ;
+    s:source: "hyperdoc work/codepath-review, dreyeck/work/codepath-review/analysis.lisp" ;
+    s:status: "gebaut und getestet (35 Prüfungen, 69d7c67d)" ;
+    s:keyword: "Codepfadanalyse" ; s:keyword: "Querverweise" ; s:keyword: "Sicherheit" .
+
+t:register-write-question isa s:question ; - "Kann etwas register.sexp schreiben?" ;
+    s:definition: "Dieselbe Art Frage wie in Codepath Review, mit anderer Senke. Senken: cl:open (auch über with-open-file), uiop:with-output-file, delete-file, rename-file, uiop:run-program. Keine Sperre, sondern: Zielt der Aufruf auf register.sexp, und schreibt er? Querverweise sehen nicht, ob open mit :direction :output geöffnet wird; das zeigt nur der Text. run-program kann über die Befehlszeile schreiben (curl -o, tee), auch das nur im Text sichtbar." ;
+    s:consequence: "Das Ergebnis belegt nur, dass das Image selbst nicht schreibt, nicht wer schreibt: Editor, Git und Agenten liegen ausserhalb." ;
+    s:example: "Gegenprobe im Betrieb: Play drücken, danach git status zeigt register.sexp unverändert." ;
+    s:status: "durch Textsuche beantwortet am 2026-11-21 (eb9747e6): das einzige with-open-file ist load-register, lesend; run-program nur in read-pull-request, curl mit Ausgabe in einen String. Keine Querverweis-Analyse gelaufen." ;
+    s:keyword: "Schreibzugriff" ; s:keyword: "Codepfadanalyse" ; s:keyword: "register.sexp" .
+
+t:codepath-question isa s:proposal ; - "Fragen-Objekt codepath-question" ;
+    s:definition: "Statt fester Konstanten (+sink-variables+, +sink-functions+, +text-sink-pattern+, +guard-substring+, *excluded-package-prefixes*) beschreibt ein Objekt die Frage: title, sink-variables, sink-functions, text-patterns, guard (Teilname oder NIL), scope (Paketnamen) und relevant-p (Filter auf den Definitionstext). analyze nimmt es entgegen; die heutige Frage wird die erste Instanz." ;
+    s:code: """(defclass codepath-question ()
+  ((title          :initarg :title          :reader question-title)
+   (sink-variables :initarg :sink-variables :initform nil :reader question-sink-variables)
+   (sink-functions :initarg :sink-functions :initform nil :reader question-sink-functions)
+   (text-patterns  :initarg :text-patterns  :initform nil :reader question-text-patterns)
+   (guard          :initarg :guard          :initform nil :reader question-guard)
+   (scope          :initarg :scope          :initform nil :reader question-scope)
+   (relevant-p     :initarg :relevant-p     :initform nil :reader question-relevant-p)))
+
+(defparameter +register-writes+
+  (make-instance 'codepath-question
+    :title "Kann etwas register.sexp schreiben?"
+    :sink-functions '(open uiop:run-program delete-file rename-file)
+    :text-patterns '(":direction :output" "register.sexp" "with-output-file")
+    :scope '("CHANGE-WORKFLOW")
+    :relevant-p (lambda (text) (and (search ":output" text) (search "register" text)))))""" ;
+    s:consequence: "Statussprache hängt an der Frage: mit Sperre geprüft / geschützt / offen; ohne Sperre Schreibpfad gefunden / gefunden, aber nicht relevant / kein Schreibpfad. Je Frage eine Fixture; die heutige Frage muss unverändert dieselben Ergebnisse liefern." ;
+    s:source: "Konstanten belegt in work/codepath-review 69d7c67d, analysis.lisp Zeilen 16 bis 21" ;
+    s:status: "Vorschlag, nicht gebaut" ;
+    s:keyword: "Parametrisierung" ; s:keyword: "Codepfadanalyse" ; s:keyword: "Entwurf" .
+
+s:transfers-to(s:from: t:codepath-review, s:to: t:register-write-question)
+s:requires(s:requiring: t:register-write-question, s:required: t:codepath-question)
+s:answered-by(s:asking: t:register-write-question, s:answer: t:hand-maintained)

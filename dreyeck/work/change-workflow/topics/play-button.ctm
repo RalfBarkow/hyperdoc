@@ -1,0 +1,30 @@
+# CTM 1.0 · Die Wirkung des Play-Knopfs «PR-Stand lesen»
+# Quelle: Side Chat 2026-11-21, beschrieben für den Stand 729bc95e; geprüft und ergänzt an hyperdoc eb9747e6.
+%prefix s <tag:dreyeck.ch,2026:hyperdoc/change-workflow/schema/>
+%prefix t <tag:dreyeck.ch,2026:hyperdoc/change-workflow/topic/>
+
+t:play-button isa s:operation ; - "Play «PR-Stand lesen»" ;
+    s:effect: "Liest bei GitHub: für jede Änderung im Register mit :repo :hyperdoc und PR-Nummer eine GET-Anfrage an https://api.github.com/repos/RalfBarkow/hyperdoc/pulls/<n>, über curl --proto =https. fleet-PRs liest er nicht, weil fleet privat ist." ;
+    s:effect: "Nimmt aus der Antwort state, merged und den Kopf-Commit (head.sha)." ;
+    s:effect: "Trägt einen Fakt ein: Ist der PR gemergt und steht :merged noch nicht im Register, fügt er im Image (:merged Datum \"von GitHub gelesen (Play, in diesem Image)\") hinzu. Das ist die eigentliche Wirkung." ;
+    s:effect: "Beim nächsten Anzeigen rechnet SHOP3 die Vorschläge aus dem geänderten Register neu." ;
+    s:effect: "Gibt seit e15716e5 eine PR-Beobachtung zurück (Reiter Beobachtung und Plan vorher / nachher); im Stand 729bc95e gab er die Statuszeile als String zurück, die der Inspector als simple-base-string zeigte." ;
+    s:not: "Schreibt keine Datei: register.sexp bleibt unverändert; nach einem Neustart des Images ist der eingetragene Fakt weg." ;
+    s:not: "Mergt nichts, ändert kein Repository, öffnet keine Verbindung zu einem Server ausser der GET-Anfrage an GitHub." ;
+    s:example: "Für #61 gilt danach merged: Die FAQ hat keinen offenen Schritt mehr; beim fleet-Pin ist die Abhängigkeit gemergt, darum schlägt der Plan «Mergen» vor." ;
+    s:status: "im Quelltext belegt (eb9747e6: read-pull-request, refresh-pull-requests, play-refresh)" ;
+    s:keyword: "Play-Knopf" ; s:keyword: "Beobachtung" ; s:keyword: "GitHub" ; s:keyword: "Seiteneffekt" .
+
+t:reviewed-control-refresh isa s:artifact ; - "geprüfte Kontrolle change-workflow/refresh" ;
+    s:definition: "Registrierung in dreyeck/authority-policy: reads the state of the public hyperdoc pull requests named in the register with one GET each and marks merged ones in this image." ;
+    s:status: "im Quelltext belegt (eb9747e6)" ;
+    s:keyword: "Authority Policy" ; s:keyword: "Geprüfte Kontrolle" .
+
+t:pr-observation isa s:artifact ; - "pr-observation" ;
+    s:definition: "Rückgabewert des Play-Knopfs seit e15716e5: je PR Zustand, Merge, voller Kopf-Commit, neu eingetragene Fakten, Link und Rohantwort; dazu die Vorschläge vor und nach der Beobachtung. Jede Beobachtung bleibt in *observations*." ;
+    s:status: "im Quelltext belegt (eb9747e6), im Browser gezeigt am 2026-11-20" ;
+    s:keyword: "Beobachtung" ; s:keyword: "Inspector" .
+
+s:changes(s:changer: t:play-button, s:changed: t:register-value)
+s:requires(s:requiring: t:play-button, s:required: t:reviewed-control-refresh)
+s:part-of(s:part: t:pr-observation, s:whole: t:play-button)

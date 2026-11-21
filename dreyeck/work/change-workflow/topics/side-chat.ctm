@@ -1,0 +1,28 @@
+# CTM 1.0 · Die Fragen des Side Chats vom 2026-11-21 und welche Topics sie beantworten
+%prefix s <tag:dreyeck.ch,2026:hyperdoc/change-workflow/schema/>
+%prefix t <tag:dreyeck.ch,2026:hyperdoc/change-workflow/topic/>
+
+t:q-play-effect isa s:question ; - "Was ist die eigentliche Wirkung des Knopfes?" ; s:asked: "2026-11-21" .
+t:q-register isa s:question ; - "Was ist die operationelle Definition des Registers?" ; s:asked: "2026-11-21" .
+t:q-register-file isa s:question ; - "Was ist die operationelle Bedeutung von register.sexp?" ; s:asked: "2026-11-21" .
+t:q-hand-maintained isa s:question ; - "Was bedeutet handgeführt operationell?" ; s:asked: "2026-11-21" .
+t:q-edit isa s:question ; - "Durch welche Operationen wird register.sexp bearbeitet und committet?" ; s:asked: "2026-11-21" .
+t:q-why-outside isa s:question ; - "Warum gibt es keine eigene Funktion; was ist die Idee, dass etwas von aussen schreibt?" ; s:asked: "2026-11-21" .
+t:q-distinguish isa s:question ; - "Wie könnten wir Eingabe und Beobachtung unterscheiden?" ; s:asked: "2026-11-21" .
+t:q-check isa s:question ; - "Wie liesse sich etwas davon prüfen?" ; s:asked: "2026-11-21" .
+t:q-codepath isa s:question ; - "Vergleich mit Codepath Review: Wer kann register.sexp schreiben?" ; s:asked: "2026-11-21" .
+t:q-parameters isa s:question ; - "Wie werden Senken und Textmuster als Parameter übergeben?" ; s:asked: "2026-11-21" .
+
+s:answered-by(s:asking: t:q-play-effect, s:answer: t:play-button)
+s:answered-by(s:asking: t:q-register, s:answer: t:register)
+s:answered-by(s:asking: t:q-register-file, s:answer: t:register-file)
+s:answered-by(s:asking: t:q-hand-maintained, s:answer: t:hand-maintained)
+s:answered-by(s:asking: t:q-edit, s:answer: t:edit-operations)
+s:answered-by(s:asking: t:q-why-outside, s:answer: t:missing-writer)
+s:answered-by(s:asking: t:q-distinguish, s:answer: t:assertion)
+s:answered-by(s:asking: t:q-distinguish, s:answer: t:image-observation)
+s:answered-by(s:asking: t:q-distinguish, s:answer: t:manual-observation)
+s:answered-by(s:asking: t:q-check, s:answer: t:evidence-tests)
+s:answered-by(s:asking: t:q-check, s:answer: t:acceptance-run)
+s:answered-by(s:asking: t:q-codepath, s:answer: t:register-write-question)
+s:answered-by(s:asking: t:q-parameters, s:answer: t:codepath-question)

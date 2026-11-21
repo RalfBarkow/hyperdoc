@@ -1,0 +1,53 @@
+# Schlagwort-Kandidaten aus den CTM-Dateien dieses Verzeichnisses, erzeugt mit dem topic-maps-CTM-Leser.
+# Spalten: Schlagwort, Topics (Namen) mit diesem Schlagwort.
+Abgeleiteter Fakt	Abgeleiteter Fakt; change-facts
+Abnahme	Prüfung im Betrieb
+Arbeitsablauf	Einen Fakt eintragen
+Authority Policy	geprüfte Kontrolle change-workflow/refresh
+Autorität	Git-Veröffentlichung bleibt beim Operator
+Behauptung	Eingabe (Behauptung)
+Beleg	Anfrage, freigegebene Wirkung und beobachtetes Ergebnis sind getrennte Datensätze; Beobachtung durch das Image; FAQ-Belege als Vorbild
+Beobachtung	Anfrage, freigegebene Wirkung und beobachtetes Ergebnis sind getrennte Datensätze; Beobachtung durch das Image; Play «PR-Stand lesen»; pr-observation
+Bestätigung	Bestätigung
+Codepfadanalyse	Codepath Review; Fragen-Objekt codepath-question; Kann etwas register.sexp schreiben?
+Commit	Einen Fakt eintragen; register.sexp
+Dreiwertige Logik	Fehlen ist nicht Nein
+Eingabe	Eingabe (Behauptung)
+Entwurf	Fragen-Objekt codepath-question
+Fakt	Fakt
+Faktenliste	Register
+FAQ	FAQ-Belege als Vorbild
+Fixture	tests/register-2026-11-20-initial.sexp
+Geprüfte Kontrolle	geprüfte Kontrolle change-workflow/refresh
+Git	Einen Fakt eintragen
+GitHub	Play «PR-Stand lesen»
+Grundsatz	Anfrage, freigegebene Wirkung und beobachtetes Ergebnis sind getrennte Datensätze; Git-Veröffentlichung bleibt beim Operator
+Handgeführt	handgeführt
+Image-Zustand	*register*
+Inspector	pr-observation
+Lesen	load-register
+Manuelle Beobachtung	Manuelle Beobachtung
+Manuelle Pflege	handgeführt
+Nachvollziehbarkeit	Fehlender Schreibweg ins Register
+Operationelle Definition	handgeführt; Register
+Operator	Bestätigung; Git-Veröffentlichung bleibt beim Operator; Manuelle Beobachtung
+Parametrisierung	Fragen-Objekt codepath-question
+Play-Knopf	Play «PR-Stand lesen»
+Problem	Fehlender Schreibweg ins Register
+Property-Liste	Eintrag im Register
+Prototyp	Tests, die die Unterscheidung erzwingen
+Provenienz	Fakt; Fehlender Schreibweg ins Register
+Prüfsumme	Beobachtung durch das Image; FAQ-Belege als Vorbild
+Querverweise	Codepath Review
+Register	Register
+register.sexp	Kann etwas register.sexp schreiben?; register.sexp
+Schreibzugriff	Kann etwas register.sexp schreiben?
+Seiteneffekt	Play «PR-Stand lesen»
+SHOP3	change-facts; Register
+Sicherheit	Codepath Review
+staging	Prüfung im Betrieb
+Test	Tests, die die Unterscheidung erzwingen; tests/register-2026-11-20-initial.sexp
+Unabhängige Prüfung	welcome-development-records als Vorbild
+Unbestimmt	Fehlen ist nicht Nein
+Versionierung	register.sexp
+Vorbild	welcome-development-records als Vorbild

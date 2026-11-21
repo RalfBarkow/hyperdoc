@@ -1,0 +1,90 @@
+# CTM 1.0 · Das Register und register.sexp: operationelle Bedeutung
+# Quelle: Side Chat 2026-11-21; Aussagen über den Code geprüft an hyperdoc eb9747e6, dreyeck/work/change-workflow/workflow.lisp.
+%prefix s <tag:dreyeck.ch,2026:hyperdoc/change-workflow/schema/>
+%prefix t <tag:dreyeck.ch,2026:hyperdoc/change-workflow/topic/>
+
+t:register isa s:concept ; - "Register" ;
+    s:operational: "Der Wert von (change-workflow::register) im laufenden Image. Mehr nicht." ;
+    s:definition: "Eine handgeführte, committete Faktenliste plus das, was der Play-Knopf im laufenden Image ergänzt. Der Plan ist nur so richtig wie diese Liste." ;
+    s:not: "Keine geprüfte Wahrheit: Kein Code vergleicht die Fakten mit der Wirklichkeit, ausser der Play-Knopf für den Merge-Zustand öffentlicher hyperdoc-PRs." ;
+    s:not: "Nicht dasselbe in Datei und Image: Das Image kann über die Datei hinausgehen (Play) oder hinter ihr zurückbleiben (älterer Commit geladen)." ;
+    s:not: "Die Quelle eines Fakts wird nicht geprüft; sie ist freier Text." ;
+    s:example: "Ein Image auf 729bc95e zeigte den Merge von #61, den Play eingetragen hatte, aber nicht fleet#9, das erst in 27e86a62 dazukam." ;
+    s:status: "im Quelltext belegt (eb9747e6)" ;
+    s:keyword: "Register" ; s:keyword: "Operationelle Definition" ; s:keyword: "Faktenliste" ; s:keyword: "SHOP3" .
+
+t:register-file isa s:artifact ; - "register.sexp" ;
+    s:source: "dreyeck/work/change-workflow/register.sexp" ;
+    s:operational: "Die Ausgangsliste, aus der ein Image sein Register beim ersten Zugriff liest. Eingabe, nicht Zustand." ;
+    s:effect: "Ladequelle: load-register liest sie einmal aus dem geladenen Stand (Worktree, Seitenkopie oder Abnahme-Catalog) und legt das Ergebnis in *register* ab." ;
+    s:effect: "Gemeinsamer, versionierter Stand: der einzige Teil des Registers, der einen Neustart überlebt; welche Fassung ein Image sieht, bestimmt der geladene Commit (lokal der Worktree, auf staging der Pin hyperdoc-acceptance)." ;
+    s:effect: "Fortschritt nur per Commit: Ein neuer Fakt wird dauerhaft erst, wenn jemand die Datei ändert und committet." ;
+    s:not: "Nicht der laufende Zustand und keine Beobachtung." ;
+    s:not: "Nicht das, wogegen die Tests rechnen; dafür gibt es die eingefrorene Kopie." ;
+    s:status: "im Quelltext belegt (eb9747e6)" ;
+    s:keyword: "register.sexp" ; s:keyword: "Versionierung" ; s:keyword: "Commit" .
+
+t:register-value isa s:function ; - "*register*" ;
+    s:definition: "Zwischenspeicher im Image. Danach liest niemand die Datei wieder, bis das Image neu startet oder jemand *register* zurücksetzt." ;
+    s:code: """(setf (symbol-value (uiop:find-symbol* "*REGISTER*" "CHANGE-WORKFLOW")) nil)""" ;
+    s:status: "im Quelltext belegt (eb9747e6, workflow.lisp Zeile 20 f.)" ;
+    s:keyword: "Image-Zustand" .
+
+t:load-register isa s:function ; - "load-register" ;
+    s:effect: "Öffnet register.sexp lesend mit with-open-file und liest sie mit *read-eval* nil zu einer Liste von Property-Listen, eine je Änderung." ;
+    s:status: "im Quelltext belegt (eb9747e6, workflow.lisp Zeile 15 bis 18)" ;
+    s:keyword: "Lesen" .
+
+t:register-entry isa s:concept ; - "Eintrag im Register" ;
+    s:definition: "Eine Property-Liste mit :id, :repo (:hyperdoc oder :fleet), :branch, :head, :pr, :title, :flags (was die Änderung braucht: :needs-staging, :needs-production, :needs-view), :depends-on (auf welche Änderung sie wartet) und :facts." ;
+    s:status: "im Quelltext belegt (eb9747e6)" ;
+    s:keyword: "Property-Liste" .
+
+t:fact isa s:concept ; - "Fakt" ;
+    s:definition: "Ein Eintrag (Schlüssel Datum Quelle) in :facts, etwa (:merged \"2026-11-20\" \"Merge-Commit 059ea6a4 …\"). Ein Fakt gilt als vorhanden, sobald er in dieser Liste steht." ;
+    s:status: "im Quelltext belegt (eb9747e6)" ;
+    s:keyword: "Fakt" ; s:keyword: "Provenienz" .
+
+t:change-facts isa s:function ; - "change-facts" ;
+    s:effect: "Übersetzt das Register in SHOP3-Fakten und leitet weitere ab: waiting, pin-stale, blocked-staging, unseen, ready-to-merge, done. Nur diese Fakten sieht der Planer." ;
+    s:status: "im Quelltext belegt (eb9747e6)" ;
+    s:keyword: "SHOP3" ; s:keyword: "Abgeleiteter Fakt" .
+
+t:frozen-register isa s:artifact ; - "tests/register-2026-11-20-initial.sexp" ;
+    s:definition: "Eingefrorene Kopie des Ausgangsstands. Gegen sie rechnen die Tests; gegen die aktuelle Datei prüfen sie nur, dass sie lesbar und planbar ist und nur bekannte Schritte ergibt." ;
+    s:status: "im Quelltext belegt (eb9747e6)" ;
+    s:keyword: "Test" ; s:keyword: "Fixture" .
+
+t:hand-maintained isa s:concept ; - "handgeführt" ;
+    s:operational: "Kein Programm schreibt register.sexp. Jede Zeile entsteht, weil eine Person die Datei bearbeitet und committet." ;
+    s:definition: "Ablauf je Fakt: jemand beobachtet etwas ausserhalb des Systems, entscheidet, dass es als Fakt gilt, schreibt den Eintrag mit selbst getipptem Datum und Quelle, committet und pusht; erst dann können Images den Stand laden." ;
+    s:example: ":merged für #61 wurde eingetragen, nachdem git fetch den Merge-Commit 059ea6a4 gezeigt hatte." ;
+    s:example: ":staging-active und :staging-accepted für den fleet-Pin wurden eingetragen, nachdem der Operator die Ausgaben von nixos-rebuild und readlink geschickt hatte." ;
+    s:consequence: "Die Datei ist so aktuell wie der letzte Commit und so richtig wie die Person, die ihn gemacht hat; sie kann hinter der Wirklichkeit zurückliegen oder falsch sein. Die Quellenangabe ist ein Hinweis zum Nachprüfen, kein Beweis." ;
+    s:not: "Kein automatisch geführtes Register: Keine Funktion erzeugt oder aktualisiert die Datei aus GitHub, Git oder den Servern; auch der Play-Knopf nicht." ;
+    s:status: "im Quelltext belegt: das einzige with-open-file in workflow.lisp ist lesend (grep, eb9747e6)" ;
+    s:keyword: "Handgeführt" ; s:keyword: "Manuelle Pflege" ; s:keyword: "Operationelle Definition" .
+
+t:edit-operations isa s:operation ; - "Einen Fakt eintragen" ;
+    s:operational: "Gewöhnliche Datei- und Git-Operationen; weder HyperDoc noch der Workflow-Plan haben dafür eine eigene Funktion." ;
+    s:definition: "1. register.sexp als Text ändern (Editor oder Skript). 2. In einem frischen SBCL der Dev-Shell change-workflow laden und die Tests laufen lassen. 3. git commit mit einer Nachricht, die sagt, was eingetragen wurde. 4. git push. 5. Wo nötig den fleet-Pin hyperdoc-acceptance nachziehen; aktiv erst nach dem Ausrollen von staging." ;
+    s:consequence: "Ein laufendes Image sieht den neuen Stand erst, wenn *register* verworfen ist und die Datei neu gelesen wird." ;
+    s:status: "so ausgeführt am 2026-11-20 und 2026-11-21 (Commits auf docs/start-local-hyperdoc)" ;
+    s:keyword: "Git" ; s:keyword: "Commit" ; s:keyword: "Arbeitsablauf" .
+
+t:operator-git-control isa s:principle ; - "Git-Veröffentlichung bleibt beim Operator" ;
+    s:source: "AGENTS.md: Keep Git publication and server activation under the operator's explicit control." ;
+    s:consequence: "Eine Funktion im Image, die selbst committet und pusht, würde diese Grenze verwischen, erst recht im öffentlichen Abnahme-Catalog, wo jeder Besucher Knöpfe drücken kann." ;
+    s:status: "im Repository belegt (AGENTS.md)" ;
+    s:keyword: "Operator" ; s:keyword: "Autorität" ; s:keyword: "Grundsatz" .
+
+s:reads(s:reader: t:load-register, s:read: t:register-file)
+s:changes(s:changer: t:load-register, s:changed: t:register-value)
+s:part-of(s:part: t:register-entry, s:whole: t:register)
+s:part-of(s:part: t:fact, s:whole: t:register-entry)
+s:reads(s:reader: t:change-facts, s:read: t:register)
+s:distinct-from(s:one: t:register, s:other: t:register-file)
+s:distinct-from(s:one: t:register-file, s:other: t:frozen-register)
+s:changes(s:changer: t:edit-operations, s:changed: t:register-file)
+s:requires(s:requiring: t:hand-maintained, s:required: t:edit-operations)
+s:requires(s:requiring: t:edit-operations, s:required: t:operator-git-control)

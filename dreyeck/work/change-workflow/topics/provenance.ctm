@@ -1,0 +1,72 @@
+# CTM 1.0 · Eingabe und Beobachtung unterscheiden: Arten von Einträgen und wie man sie prüft
+# Quelle: Side Chat 2026-11-21. Bis auf die Vorbilder im Repository ist alles hier ein Vorschlag; gebaut ist nichts davon.
+%prefix s <tag:dreyeck.ch,2026:hyperdoc/change-workflow/schema/>
+%prefix t <tag:dreyeck.ch,2026:hyperdoc/change-workflow/topic/>
+
+t:missing-writer isa s:concept ; - "Fehlender Schreibweg ins Register" ;
+    s:definition: "Weder HyperDoc noch der Workflow-Plan können einen Fakt eintragen. Teils gewollt (Git-Veröffentlichung beim Operator; Host-Beobachtungen kommen aus seiner SSH-Sitzung, Agenten öffnen kein SSH; ein Plan trifft keine Wahrheitsentscheidungen), teils fehlt es: Es gibt keinen Beleg im System, keine Nachvollziehbarkeit, wer was auf welcher Grundlage eingetragen hat, keine Bestätigung durch den Operator, und Eingabe und Beobachtung lassen sich nicht unterscheiden." ;
+    s:status: "abgeleitet aus Quelltext (eb9747e6) und AGENTS.md" ;
+    s:keyword: "Problem" ; s:keyword: "Provenienz" ; s:keyword: "Nachvollziehbarkeit" .
+
+t:separate-records isa s:principle ; - "Anfrage, freigegebene Wirkung und beobachtetes Ergebnis sind getrennte Datensätze" ;
+    s:source: "AGENTS.md: A manual observation can show the bounded command for an already authorized operator session and accept the resulting evidence. A request, an approved effect and an observed result are separate records." ;
+    s:status: "im Repository belegt (AGENTS.md); im Workflow-Plan nicht umgesetzt" ;
+    s:keyword: "Grundsatz" ; s:keyword: "Beobachtung" ; s:keyword: "Beleg" .
+
+t:assertion isa s:entry-kind ; - "Eingabe (Behauptung)" ;
+    s:definition: "Von einer Person frei getippt: Aussage, Autor, Zeitpunkt, ausdrücklich als :asserted markiert. Das System kann sie aufnehmen, aber nicht bestätigen." ;
+    s:status: "Vorschlag, nicht gebaut" ; s:keyword: "Eingabe" ; s:keyword: "Behauptung" .
+
+t:image-observation isa s:entry-kind ; - "Beobachtung durch das Image" ;
+    s:definition: "Von einem Programm im Image erzeugt: Befehl oder URL, Rohantwort, Zeitpunkt, SHA-256 der Rohantwort, Programmstand (Commit)." ;
+    s:example: "#61 gemergt: die JSON-Antwort von api.github.com mit merged: true und Kopf-Commit, nicht nur die Statuszeile." ;
+    s:example: "FAQ ausgeliefert: Statuscodes und SHA-256 der über HTTPS geholten Dateien, verglichen mit dem gepinnten Commit." ;
+    s:status: "Vorschlag; pr-observation hält die Rohantwort seit e15716e5 im Image, ohne SHA-256 und ohne Dauerhaftigkeit" ;
+    s:keyword: "Beobachtung" ; s:keyword: "Beleg" ; s:keyword: "Prüfsumme" .
+
+t:manual-observation isa s:entry-kind ; - "Manuelle Beobachtung" ;
+    s:definition: "Der Operator führt einen vom Image gezeigten, begrenzten Befehl aus und fügt die Ausgabe ein: angezeigter Befehl, Ausgabe, Prüfsumme, Host, Zeitpunkt. Das Image vergleicht die Ausgabe mit dem Erwarteten." ;
+    s:example: "staging abgenommen: die eingefügte Ausgabe von readlink -f /run/current-system, vom Image mit dem im PR genannten Pfad dfirimkmr86… verglichen; das Vergleichsergebnis wird festgehalten." ;
+    s:status: "Vorschlag, nicht gebaut" ; s:keyword: "Manuelle Beobachtung" ; s:keyword: "Operator" .
+
+t:derived-entry isa s:entry-kind ; - "Abgeleiteter Fakt" ;
+    s:definition: "Von einer Regel im Code erzeugt, mit Verweis auf die Beobachtungen, aus denen er folgt, und auf die Regel." ;
+    s:status: "Vorschlag; heute leitet change-facts ab, ohne Verweis auf Belege" ; s:keyword: "Abgeleiteter Fakt" .
+
+t:confirmation isa s:entry-kind ; - "Bestätigung" ;
+    s:definition: "Der Operator lässt eine Beobachtung als Fakt gelten; der Eintrag verweist auf die Beobachtung." ;
+    s:status: "Vorschlag, nicht gebaut" ; s:keyword: "Bestätigung" ; s:keyword: "Operator" .
+
+t:not-determined isa s:principle ; - "Fehlen ist nicht Nein" ;
+    s:definition: "Fehlt der Beleg, heisst der Zustand nicht bestimmt statt ja; das Fehlen einer Beobachtung wird nicht zum Nein. Bestimmte Schritte (etwa Mergen) setzen eine Beobachtung voraus, nicht nur eine Eingabe; die Begründung nennt die Art des Eintrags." ;
+    s:status: "Vorschlag für change-workflow; als Grundsatz in früheren Arbeiten (Conformance-Planung) vorhanden" ;
+    s:keyword: "Unbestimmt" ; s:keyword: "Dreiwertige Logik" .
+
+t:faq-evidence-model isa s:artifact ; - "FAQ-Belege als Vorbild" ;
+    s:definition: "Ein Prüfprotokoll ist an einen Commit gebunden, seine SHA-256 steht im Index, die CI wiederholt den Lauf; python3 scripts/faq-evidence.py --check prüft die Bindung." ;
+    s:status: "im Repository belegt (dreyeck.ch, scripts/faq-evidence.py)" ;
+    s:keyword: "FAQ" ; s:keyword: "Beleg" ; s:keyword: "Prüfsumme" .
+
+t:welcome-records-model isa s:artifact ; - "welcome-development-records als Vorbild" ;
+    s:definition: ":fixture und :observed werden nie vermischt; geplante Wirkungen werden als Eingabe abgewiesen (:records-required-not-planned-effects); wer umsetzt, darf nicht selbst verifizieren (:implementer-cannot-verify, :verifier-not-independent)." ;
+    s:source: "dreyeck.ch: dreyeck/work/welcome-development-records.lisp Zeilen 65, 75, 144, 145, 301" ;
+    s:status: "im Quelltext bestätigt am 2026-11-21 (grep)" ;
+    s:keyword: "Vorbild" ; s:keyword: "Unabhängige Prüfung" .
+
+t:evidence-tests isa s:check ; - "Tests, die die Unterscheidung erzwingen" ;
+    s:definition: "Eingabe allein entsperrt nichts (getipptes :staging-accepted ohne Beleg ergibt nicht bestimmt); Beleg wird nachgerechnet (ein verändertes Byte wird abgewiesen); Vergleich mit dem Erwarteten (anderer Pfad ergibt abweichend); Fehlen ist nicht Nein; geplante Wirkung ist keine Eingabe; Wiederholbarkeit (erneute Beobachtung, Abweichung als neue Beobachtung, nicht als Überschreibung)." ;
+    s:consequence: "Die Tests sollte jemand anderes laufen lassen als der, der den Prototyp baut (Codex, Operator, CI am PR), am committeten Stand." ;
+    s:status: "Vorschlag, nicht gebaut" ; s:keyword: "Test" ; s:keyword: "Prototyp" .
+
+t:acceptance-run isa s:check ; - "Prüfung im Betrieb" ;
+    s:definition: "Eine echte Abnahme mit fleet#9 auf staging durchspielen: Befehl anzeigen, Ausgabe einfügen, vergleichen, bestätigen; danach im HyperDoc nachsehen, ob Begründung und Plan die Art jedes Eintrags nennen." ;
+    s:status: "Vorschlag, nicht durchgeführt" ; s:keyword: "Abnahme" ; s:keyword: "staging" .
+
+s:distinct-from(s:one: t:assertion, s:other: t:image-observation)
+s:distinct-from(s:one: t:assertion, s:other: t:manual-observation)
+s:requires(s:requiring: t:confirmation, s:required: t:manual-observation)
+s:requires(s:requiring: t:derived-entry, s:required: t:image-observation)
+s:instance-of-pattern(s:case: t:faq-evidence-model, s:general: t:image-observation)
+s:instance-of-pattern(s:case: t:welcome-records-model, s:general: t:separate-records)
+s:requires(s:requiring: t:evidence-tests, s:required: t:not-determined)
+s:answered-by(s:asking: t:missing-writer, s:answer: t:separate-records)
