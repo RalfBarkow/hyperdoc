@@ -109,6 +109,20 @@ writeShellApplication {
       if [ -s "$port_file" ]; then
         slynk_port=$(cat "$port_file")
         echo "Emacs:   verbinde mit Slynk auf 127.0.0.1:$slynk_port; Arbeitsverzeichnis $assets"
+        echo
+        echo "Fresh Lisp image:"
+        echo "  implementation/version: SBCL $(${runtime.sbcl}/bin/sbcl --version | cut -d' ' -f2)"
+        echo "  Slynk host: 127.0.0.1"
+        echo "  Slynk port: $slynk_port"
+        echo
+        echo "Attach another SLY client:"
+        echo "  M-x sly-connect"
+        echo "  Host: 127.0.0.1"
+        echo "  Port: $slynk_port"
+        echo
+        echo "Example:"
+        echo "  Spacemacs -> M-x sly-connect -> 127.0.0.1 -> $slynk_port"
+        echo
         HYPERDOC_REPO_ROOT="$assets" HYPERDOC_SLYNK_HOST=127.0.0.1 HYPERDOC_SLYNK_PORT="$slynk_port" \
           ${emacsWithSly}/bin/emacs -Q --load "${source}/scripts/hyperdoc-sly.el" > "$state/emacs.log" 2>&1 &
         pids+=($!)
