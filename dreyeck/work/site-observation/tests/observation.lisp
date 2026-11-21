@@ -132,8 +132,16 @@
     (check (not (search "dita-unsupported" (v:view-html text-view))))
     (check (assoc "playground-guard-code" (page-paths book) :test #'equal))))
 
+(defun test-configured-port ()
+  "The port comes from the Catalog application's configuration: its variable, else its own default."
+  (check (= 18999 (configured-port (lambda (name) (and (equal name "HYPERDOC_CATALOG_PORT") "18999")))))
+  (let ((default (configured-port (constantly nil))))
+    (check (and (integerp default) (<= 1 default 65535)))
+    (check (= default (getf (uiop:symbol-call "DREYECK/CATALOG-APPLICATION" "%CONFIGURATION" nil (constantly nil)) :port)))))
+
 (defun run-tests ()
   (let ((*checks* 0))
+    (test-configured-port)
     (test-deviations) (test-plan) (test-views) (test-page-copy) (test-catalog-route) (test-playground-guard)
     (format t "~&site-observation: ~D checks passed.~%" *checks*)
     *checks*))
