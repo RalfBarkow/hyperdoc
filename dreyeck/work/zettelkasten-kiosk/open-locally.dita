@@ -2,26 +2,27 @@
 <!DOCTYPE task PUBLIC "-//OASIS//DTD DITA Task//EN" "task.dtd">
 <task id="open-zettelkasten-kiosk-locally" xml:lang="de-CH">
   <title>Den Zettelkasten-Kiosk im lokalen HyperDoc öffnen</title>
-  <shortdesc>Ein Befehl im Terminal startet ein frisches Image mit dem lokalen HyperBook Catalog und diesem System; danach zeigt ein Link die Projektseite. Kein Checkout, keine Dev-Shell, kein SLY.</shortdesc>
+  <shortdesc>Ein Befehl im Terminal stellt die Trägerseite mit ihrem System in der lokalen Wiki bereit, startet nötigenfalls die Wiki und ein frisches Image mit dem HyperBook Catalog; danach zeigen Links die Seite und die HyperDoc. Kein Checkout, keine Dev-Shell, kein SLY.</shortdesc>
   <taskbody>
     <prereq>
       <ul>
         <li>Nix mit Flakes auf dem Mac.</li>
         <li>Port 8080 ist frei. Ein laufendes SLY-Image mit Catalog belegt ihn; <codeph>lsof -nP -iTCP:8080 -sTCP:LISTEN</codeph> zeigt den Prozess. Ist er belegt, zuerst jenes Image beenden oder unten <codeph>HYPERDOC_CATALOG_PORT=8081</codeph> voranstellen und im Link 8081 verwenden.</li>
-        <li>Der Seitenordner der lokalen Wiki. Auf dem Mac des Operators ist es <filepath>~/.wiki/localhost</filepath> (Farm auf localhost:3000).</li>
+        <li>Der Seitenordner der lokalen Wiki ist <filepath>~/.wiki/localhost</filepath> (Farm auf localhost:3000), sonst <codeph>HYPERDOC_FEDWIKI_SITE_ROOT</codeph> setzen.</li>
       </ul>
     </prereq>
     <steps>
       <step id="start">
-        <cmd>Im Terminal den Catalog vom Branch starten.</cmd>
+        <cmd>Im Terminal den Bootstrap starten.</cmd>
         <info>
-          <codeblock>HYPERDOC_FEDWIKI_SITE_ROOT="$HOME/.wiki/localhost" HYPERDOC_CATALOG_SYSTEM=zettelkasten-kiosk nix run github:RalfBarkow/hyperdoc/work/zettelkasten-kiosk#catalog</codeblock>
-          <p>Nix baut den Catalog aus genau diesem Branch; das Image lädt das System <codeph>zettelkasten-kiosk</codeph> vor dem Start und lauscht nur auf 127.0.0.1. Der erste Start übersetzt die Lisp-Quellen und dauert einige Minuten; danach ist er schnell. Beenden mit Ctrl-C.</p>
+          <codeblock>nix run github:RalfBarkow/hyperdoc/work/zettelkasten-kiosk#zettelkasten-kiosk</codeblock>
+          <p>Er sagt vor jedem Schritt, was er tut: Die Trägerseite <filepath>pages/zettelkasten-kiosk</filepath> und ihre Assets <filepath>assets/pages/zettelkasten-kiosk/</filepath> (das ASDF-System) legt er im Wiki-Ordner nur an, wenn sie fehlen; Vorhandenes überschreibt er nie. Antwortet auf Port 3000 keine Wiki, startet er die von fleet gepinnte (RalfBarkow/wiki <codeph>7dd4055</codeph>) als Farm auf 127.0.0.1, solange der Befehl läuft. Dann startet er den Catalog dieses Branches mit dem System auf 127.0.0.1:8080 und nennt die Links. Der erste Start baut und übersetzt einiges und dauert Minuten. Beenden mit Ctrl-C.</p>
+          <p>Andere Ordner oder Ports: <codeph>HYPERDOC_FEDWIKI_SITE_ROOT</codeph>, <codeph>HYPERDOC_WIKI_PORT</codeph>, <codeph>HYPERDOC_CATALOG_PORT</codeph> voranstellen.</p>
         </info>
-        <stepresult>Das Terminal bleibt offen; der Catalog antwortet auf <codeph>http://localhost:8080/</codeph>.</stepresult>
+        <stepresult>«Bereit:» mit den Links zur Trägerseite und zur HyperDoc.</stepresult>
       </step>
       <step id="open">
-        <cmd>Die Projektseite öffnen: <xref href="http://localhost:8080/6F061-zettelkasten-kiosk" format="html" scope="external">http://localhost:8080/6F061-zettelkasten-kiosk</xref>.</cmd>
+        <cmd>Die Links öffnen: Trägerseite <xref href="http://localhost:3000/view/zettelkasten-kiosk" format="html" scope="external">http://localhost:3000/view/zettelkasten-kiosk</xref>, HyperDoc <xref href="http://localhost:8080/6F061-zettelkasten-kiosk" format="html" scope="external">http://localhost:8080/6F061-zettelkasten-kiosk</xref>.</cmd>
       </step>
       <step id="check-image">
         <cmd>Mit Play prüfen, dass das Image den aktuellen Stand des Branches zeigt.</cmd>

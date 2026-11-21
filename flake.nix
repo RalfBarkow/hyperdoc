@@ -135,6 +135,12 @@
             d2-tala = self.packages.${system}.d2-tala;
             revision = self.rev or self.dirtyRev or "";
           };
+          # Bootstrap of the page-attached HyperDoc zettelkasten-kiosk: wiki page and assets if missing, a local wiki if
+          # none runs, and the Catalog with the system (nix/zettelkasten-kiosk.nix).
+          zettelkasten-kiosk = pkgs.callPackage ./nix/zettelkasten-kiosk.nix {
+            catalog = self.packages.${system}.hyperdoc-catalog;
+            source = pkgs.lib.cleanSource self.outPath;
+          };
           topic-maps-source = pkgs.callPackage ./nix/topic-maps-source.nix { };
           # Separate from hyperdoc-catalog: the Catalog with the pinned Topic Maps snapshot, loopback only.
           # Retired from production by hyperdoc-catalog itself (docs/one-catalog); kept only because the deployment review
@@ -153,6 +159,11 @@
       );
 
       apps = forAllSystems (system: {
+        zettelkasten-kiosk = {
+          type = "app";
+          inherit (self.packages.${system}.zettelkasten-kiosk) meta;
+          program = "${self.packages.${system}.zettelkasten-kiosk}/bin/zettelkasten-kiosk";
+        };
         catalog = {
           type = "app";
           inherit (self.packages.${system}.hyperdoc-catalog) meta;

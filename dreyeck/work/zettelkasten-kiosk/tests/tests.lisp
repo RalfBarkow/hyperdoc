@@ -135,7 +135,10 @@
               do (check (eval (read-from-string (plump:decode-entities (subseq s (+ at 6) (position #\" s :start (+ at 6))))))))))
     (let ((json (uiop:read-file-string (system-file "fedwiki/zettelkasten-kiosk.json") :external-format :utf-8)))
       (check (search (format nil "localhost:8080/~A" (hyperbook/server::slug *hyperdoc*)) json))
-      (check (search "pages/zettelkasten-kiosk" json)))))
+      (check (search "pages/zettelkasten-kiosk" json))
+      ;; The carrier page carries its own bootstrap as a code item.
+      (check (search "\"type\": \"code\"" json))
+      (check (search "nix run github:RalfBarkow/hyperdoc/work/zettelkasten-kiosk#zettelkasten-kiosk" json)))))
 
 (defun test-check-image ()
   (flet ((status (revision head)
@@ -154,7 +157,7 @@
   (let ((html (loop for view in (v:all-views (open-locally))
                     when (compute-applicable-methods #'v:view-html (list view))
                       collect (plump:decode-entities (v:view-html view)))))
-    (check (some (lambda (h) (search "nix run github:RalfBarkow/hyperdoc/work/zettelkasten-kiosk#catalog" h)) html))
+    (check (some (lambda (h) (search "nix run github:RalfBarkow/hyperdoc/work/zettelkasten-kiosk#zettelkasten-kiosk" h)) html))
     (check (some (lambda (h) (search "localhost:8080/6F061-zettelkasten-kiosk" h)) html))
     (check (some (lambda (h) (search "Play" h)) html))))
 
