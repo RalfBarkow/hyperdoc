@@ -9,7 +9,7 @@
     {
       "type": "paragraph",
       "id": "71212fe68542308b",
-      "text": "Bootstrap: ein Befehl im Terminal. Er legt diese Seite und ihre Assets (das ASDF-System) im lokalen Wiki-Ordner an, falls sie fehlen, und überschreibt nichts; startet die von fleet gepinnte Wiki auf 127.0.0.1:3000, falls dort keine läuft; startet den HyperBook Catalog mit dem System auf 127.0.0.1:8080 und nennt danach die Links."
+      "text": "Bootstrap: ein Befehl im Terminal. Er legt diese Seite und ihre Assets (das ASDF-System) im lokalen Wiki-Ordner an, falls sie fehlen, und überschreibt nichts; startet den HyperBook Catalog mit dem System auf 127.0.0.1:8080; startet die von fleet gepinnte Wiki auf 127.0.0.1:3000, falls dort keine läuft (mit eigenem HOME, damit ~/.wiki/config.json sie nicht verändert); meldet alle 30 Sekunden den Stand und nennt die Links, sobald beide antworten."
     },
     {
       "type": "code",
@@ -25,6 +25,16 @@
       "type": "code",
       "id": "8b22ed1b931e9c1e",
       "text": "HYPERDOC_FEDWIKI_SITE_ROOT=\"$HOME/.wiki/localhost\" HYPERDOC_WIKI_PORT=3000 HYPERDOC_CATALOG_PORT=8080 nix run github:RalfBarkow/hyperdoc/work/zettelkasten-kiosk#zettelkasten-kiosk"
+    },
+    {
+      "type": "paragraph",
+      "id": "47db6327603cbd41",
+      "text": "Mit Emacs: --sly startet statt des verpackten Catalogs ein Entwicklungs-Image wie hyperdoc-sly. Es lädt das System aus den Assets dieser Seite und öffnet ein mit dem Image verbundenes Emacs (SLY), das in diesem Assets-Ordner arbeitet."
+    },
+    {
+      "type": "code",
+      "id": "8bed5b1f5cff36b4",
+      "text": "nix run github:RalfBarkow/hyperdoc/work/zettelkasten-kiosk#zettelkasten-kiosk -- --sly"
     },
     {
       "type": "paragraph",
@@ -120,6 +130,65 @@
         ]
       },
       "date": 1795257830044
+    },
+    {
+      "type": "edit",
+      "item": {
+        "title": "Zettelkasten-Kiosk",
+        "story": [
+          {
+            "type": "paragraph",
+            "id": "5438383e395c6f25",
+            "text": "Zettelkasten-Kiosk: ein Rechner, der nur den Zettelkasten zeigt (NixOS, cage), dazu ein Fernbildschirm, nur zum Ansehen und nur lokal. Code in [https://github.com/RalfBarkow/zettelkasten RalfBarkow/zettelkasten], auf Branches."
+          },
+          {
+            "type": "paragraph",
+            "id": "71212fe68542308b",
+            "text": "Bootstrap: ein Befehl im Terminal. Er legt diese Seite und ihre Assets (das ASDF-System) im lokalen Wiki-Ordner an, falls sie fehlen, und überschreibt nichts; startet den HyperBook Catalog mit dem System auf 127.0.0.1:8080; startet die von fleet gepinnte Wiki auf 127.0.0.1:3000, falls dort keine läuft (mit eigenem HOME, damit ~/.wiki/config.json sie nicht verändert); meldet alle 30 Sekunden den Stand und nennt die Links, sobald beide antworten."
+          },
+          {
+            "type": "code",
+            "id": "3aa4ec27cd3748ea",
+            "text": "nix run github:RalfBarkow/hyperdoc/work/zettelkasten-kiosk#zettelkasten-kiosk"
+          },
+          {
+            "type": "paragraph",
+            "id": "3d75830b7ed612ef",
+            "text": "Anderer Wiki-Ordner oder andere Ports: voranstellen."
+          },
+          {
+            "type": "code",
+            "id": "8b22ed1b931e9c1e",
+            "text": "HYPERDOC_FEDWIKI_SITE_ROOT=\"$HOME/.wiki/localhost\" HYPERDOC_WIKI_PORT=3000 HYPERDOC_CATALOG_PORT=8080 nix run github:RalfBarkow/hyperdoc/work/zettelkasten-kiosk#zettelkasten-kiosk"
+          },
+          {
+            "type": "paragraph",
+            "id": "47db6327603cbd41",
+            "text": "Mit Emacs: --sly startet statt des verpackten Catalogs ein Entwicklungs-Image wie hyperdoc-sly. Es lädt das System aus den Assets dieser Seite und öffnet ein mit dem Image verbundenes Emacs (SLY), das in diesem Assets-Ordner arbeitet."
+          },
+          {
+            "type": "code",
+            "id": "8bed5b1f5cff36b4",
+            "text": "nix run github:RalfBarkow/hyperdoc/work/zettelkasten-kiosk#zettelkasten-kiosk -- --sly"
+          },
+          {
+            "type": "paragraph",
+            "id": "bc25520ca9a71f7f",
+            "text": "HyperDoc im lokalen HyperBook Catalog: [http://localhost:8080/6F061-zettelkasten-kiosk Zettelkasten-Kiosk] · [http://localhost:8080/ HyperBook Catalog]. Dort zeigt «Lokal öffnen» diese Schritte als DITA-Task; sein Play-Knopf prüft, ob das Image den aktuellen Stand des Branches zeigt."
+          },
+          {
+            "type": "paragraph",
+            "id": "53a6d5f9a19f8f68",
+            "text": "Page-attached ASDF-System zettelkasten-kiosk. Das Register status.sexp hält Vorhaben, Belege (wer, wann, bei welchem Commit) und Entscheidungen; den nächsten Schritt berechnet SHOP3. Der Play-Knopf liest nur die Branch-Köpfe von GitHub."
+          },
+          {
+            "type": "assets",
+            "id": "7667f73fb30ebf89",
+            "text": "pages/zettelkasten-kiosk"
+          }
+        ]
+      },
+      "date": 1795260564545
     }
   ]
 }

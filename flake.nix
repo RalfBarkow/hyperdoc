@@ -139,7 +139,10 @@
           # none runs, and the Catalog with the system (nix/zettelkasten-kiosk.nix).
           zettelkasten-kiosk = pkgs.callPackage ./nix/zettelkasten-kiosk.nix {
             catalog = self.packages.${system}.hyperdoc-catalog;
+            runtime = runtimeFor system;
+            topicMaps = self.packages.${system}.topic-maps-source;
             source = pkgs.lib.cleanSource self.outPath;
+            revision = self.rev or self.dirtyRev or "";
           };
           topic-maps-source = pkgs.callPackage ./nix/topic-maps-source.nix { };
           # Separate from hyperdoc-catalog: the Catalog with the pinned Topic Maps snapshot, loopback only.

@@ -16,10 +16,13 @@
         <cmd>Im Terminal den Bootstrap starten.</cmd>
         <info>
           <codeblock>nix run github:RalfBarkow/hyperdoc/work/zettelkasten-kiosk#zettelkasten-kiosk</codeblock>
-          <p>Er sagt vor jedem Schritt, was er tut: Die Trägerseite <filepath>pages/zettelkasten-kiosk</filepath> und ihre Assets <filepath>assets/pages/zettelkasten-kiosk/</filepath> (das ASDF-System) legt er im Wiki-Ordner nur an, wenn sie fehlen; Vorhandenes überschreibt er nie. Antwortet auf Port 3000 keine Wiki, startet er die von fleet gepinnte (RalfBarkow/wiki <codeph>7dd4055</codeph>) als Farm auf 127.0.0.1, solange der Befehl läuft. Dann startet er den Catalog dieses Branches mit dem System auf 127.0.0.1:8080 und nennt die Links. Der erste Start baut und übersetzt einiges und dauert Minuten. Beenden mit Ctrl-C.</p>
+          <p>Er sagt vor jedem Schritt, was er tut. Die Trägerseite <filepath>pages/zettelkasten-kiosk</filepath> und ihre Assets <filepath>assets/pages/zettelkasten-kiosk/</filepath> (das ASDF-System) legt er im Wiki-Ordner nur an, wenn sie fehlen; Vorhandenes überschreibt er nie. Zuerst startet er den Catalog dieses Branches mit dem System auf 127.0.0.1:8080. Antwortet auf Port 3000 keine Wiki, baut und startet er die von fleet gepinnte (RalfBarkow/wiki <codeph>7dd4055</codeph>) als Farm auf 127.0.0.1, mit eigenem HOME, damit <filepath>~/.wiki/config.json</filepath> sie nicht verändert; schreibbar mit <codeph>HYPERDOC_WIKI_LEGACY_EDIT=1</codeph>. Alle 30 Sekunden meldet er den Stand; die Protokolle liegen unter <filepath>~/.cache/hyperdoc/zettelkasten-kiosk/</filepath>. Beenden mit Ctrl-C.</p>
+          <p>Mit Emacs:</p>
+          <codeblock>nix run github:RalfBarkow/hyperdoc/work/zettelkasten-kiosk#zettelkasten-kiosk -- --sly</codeblock>
+          <p>Statt des verpackten Catalogs startet dann ein Entwicklungs-Image wie <cmdname>hyperdoc-sly</cmdname>: Es lädt das System aus den Assets der Seite, und ein Emacs mit SLY verbindet sich, Arbeitsverzeichnis ist der Assets-Ordner. Der verpackte Catalog lädt nach dem Start keine Seiten-Systeme; das bleibt so.</p>
           <p>Andere Ordner oder Ports: <codeph>HYPERDOC_FEDWIKI_SITE_ROOT</codeph>, <codeph>HYPERDOC_WIKI_PORT</codeph>, <codeph>HYPERDOC_CATALOG_PORT</codeph> voranstellen.</p>
         </info>
-        <stepresult>«Bereit:» mit den Links zur Trägerseite und zur HyperDoc.</stepresult>
+        <stepresult>«Bereit:» mit den Links zur Trägerseite und zur HyperDoc, oder «Teilweise bereit» mit dem Grund.</stepresult>
       </step>
       <step id="open">
         <cmd>Die Links öffnen: Trägerseite <xref href="http://localhost:3000/view/zettelkasten-kiosk" format="html" scope="external">http://localhost:3000/view/zettelkasten-kiosk</xref>, HyperDoc <xref href="http://localhost:8080/6F061-zettelkasten-kiosk" format="html" scope="external">http://localhost:8080/6F061-zettelkasten-kiosk</xref>.</cmd>
