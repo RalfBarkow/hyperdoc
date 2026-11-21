@@ -7,7 +7,8 @@
 #     overwritten; a difference is reported.
 #  2. If nothing answers on the wiki port (HYPERDOC_WIKI_PORT, default 3000): start the Federated Wiki that fleet pins
 #     (RalfBarkow/wiki 7dd4055, with the code and assets plugins) in farm mode on 127.0.0.1, for as long as this
-#     command runs. A wiki that already answers is used as it is. HYPERDOC_WIKI_FLAKE names another installable.
+#     command runs. A wiki that already answers is used as it is. HYPERDOC_WIKI_FLAKE names another
+#     installable, HYPERDOC_WIKI_COMMAND an installed wiki program.
 #  3. Start the packaged Catalog of this revision on 127.0.0.1 (HYPERDOC_CATALOG_PORT, default 8080) with the system
 #     loaded, and print the links once both answer.
 { lib, writeShellApplication, coreutils, curl, diffutils, catalog, source }:
@@ -77,8 +78,14 @@ writeShellApplication {
       fi
       log="''${XDG_CACHE_HOME:-$HOME/.cache}/hyperdoc/zettelkasten-kiosk-wiki.log"
       mkdir -p "$(dirname "$log")"
-      echo "Wiki:   starte $wiki_flake auf 127.0.0.1:$wiki_port (Farm, Daten $(dirname "$site_root")); Protokoll $log"
-      nix run "$wiki_flake" -- --farm --data "$(dirname "$site_root")" --host 127.0.0.1 --port "$wiki_port" > "$log" 2>&1 &
+      wiki_args=(--farm --data "$(dirname "$site_root")" --host 127.0.0.1 --port "$wiki_port")
+      if [ -n "''${HYPERDOC_WIKI_COMMAND:-}" ]; then
+        echo "Wiki:   starte $HYPERDOC_WIKI_COMMAND auf 127.0.0.1:$wiki_port (Farm, Daten $(dirname "$site_root")); Protokoll $log"
+        "$HYPERDOC_WIKI_COMMAND" "''${wiki_args[@]}" > "$log" 2>&1 &
+      else
+        echo "Wiki:   starte $wiki_flake auf 127.0.0.1:$wiki_port (Farm, Daten $(dirname "$site_root")); Protokoll $log"
+        nix run "$wiki_flake" -- "''${wiki_args[@]}" > "$log" 2>&1 &
+      fi
       wiki_pid=$!
       for _ in $(seq 1 600); do
         answers "http://127.0.0.1:$wiki_port/" && break
