@@ -12,9 +12,11 @@
                 :components ((:file "package") (:file "register") (:file "plan") (:file "observe") (:file "views")))
                (:static-file "status.sexp")
                (:static-file "project-task.dita")
+               (:static-file "open-locally.dita")
                (:module "pages"
                 :components ((:static-file "zettelkasten-kiosk.html") (:static-file "how-tracked.html")
-                             (:static-file "remote-screen-decision.html") (:static-file "project-task.html")))
+                             (:static-file "remote-screen-decision.html") (:static-file "project-task.html")
+                             (:static-file "open-locally.html")))
                (:module "fedwiki" :components ((:static-file "zettelkasten-kiosk.json")))
                (:file "hyperdoc"))
   :in-order-to ((asdf:test-op (asdf:test-op "zettelkasten-kiosk/tests"))))

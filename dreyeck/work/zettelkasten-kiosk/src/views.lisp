@@ -106,3 +106,33 @@
 (v:defview task-view (o task-topic)
   (v:html-view :title "Task" :priority -100
     (v:str (dita:render-dita-topic (uiop:read-file-string (system-file "project-task.dita") :external-format :utf-8)))))
+
+;;; Der Task «Lokal öffnen» mit seinem Play-Knopf
+
+(defclass open-locally () () (:documentation "Der DITA-Task open-locally.dita mit der Image-Prüfung."))
+(defun open-locally () (make-instance 'open-locally))
+(defmethod v:text-representation ((o open-locally)) "DITA-Task «Den Zettelkasten-Kiosk im lokalen HyperDoc öffnen»")
+
+(v:defview open-locally-view (o open-locally)
+  (v:html-view :title "Task" :priority -100
+    (v:html
+     (v:str (dita:render-dita-topic (uiop:read-file-string (system-file "open-locally.dita") :external-format :utf-8)))
+     (:h4 "Schritt 3: Image prüfen")
+     (:p (v:eval-button "Play" (policy:reviewed-thunk "zettelkasten-kiosk/check-image" (play-check-image))
+                        "Gebaute Revision mit dem Branch-Kopf vergleichen")
+         " Revision dieses Images mit dem Kopf von " (:code (v:esc +own-branch+)) " vergleichen (eine GET-Anfrage; schreibt nichts)")
+     (when *image-observations*
+       (let ((last (first *image-observations*)))
+         (v:html (:p :role "status" (v:esc (image-status-text (image-status last))) " "
+                     (v:object-ref last :display "Beobachtung"))))))))
+
+(v:defview image-observation-view (o image-observation)
+  (v:html-view :title "Beobachtung" :priority -100
+    (v:html
+     (:p (v:esc (image-status-text (image-status o))))
+     (:table :class "inspector-table"
+      (:tr (:th "Gebaut aus") (:td (:code (v:esc (or (image-revision o) "— (nicht angegeben)")))))
+      (:tr (:th (v:esc (format nil "Kopf von ~A" +own-branch+)))
+           (:td (:code (v:esc (or (image-branch-head o) (image-error o) "—")))))
+      (:tr (:th "System geladen aus") (:td (:code (v:esc (image-system-directory o)))))
+      (:tr (:th "Gelesen") (:td (v:esc (time-string (observation-time o)))))))))

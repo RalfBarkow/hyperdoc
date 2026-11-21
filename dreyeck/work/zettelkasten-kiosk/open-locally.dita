@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE task PUBLIC "-//OASIS//DTD DITA Task//EN" "task.dtd">
+<task id="open-zettelkasten-kiosk-locally" xml:lang="de-CH">
+  <title>Den Zettelkasten-Kiosk im lokalen HyperDoc öffnen</title>
+  <shortdesc>Ein Befehl im Terminal startet ein frisches Image mit dem lokalen HyperBook Catalog und diesem System; danach zeigt ein Link die Projektseite. Kein Checkout, keine Dev-Shell, kein SLY.</shortdesc>
+  <taskbody>
+    <prereq>
+      <ul>
+        <li>Nix mit Flakes auf dem Mac.</li>
+        <li>Port 8080 ist frei. Ein laufendes SLY-Image mit Catalog belegt ihn; <codeph>lsof -nP -iTCP:8080 -sTCP:LISTEN</codeph> zeigt den Prozess. Ist er belegt, zuerst jenes Image beenden oder unten <codeph>HYPERDOC_CATALOG_PORT=8081</codeph> voranstellen und im Link 8081 verwenden.</li>
+        <li>Der Seitenordner der lokalen Wiki. Auf dem Mac des Operators ist es <filepath>~/.wiki/localhost</filepath> (Farm auf localhost:3000).</li>
+      </ul>
+    </prereq>
+    <steps>
+      <step id="start">
+        <cmd>Im Terminal den Catalog vom Branch starten.</cmd>
+        <info>
+          <codeblock>HYPERDOC_FEDWIKI_SITE_ROOT="$HOME/.wiki/localhost" HYPERDOC_CATALOG_SYSTEM=zettelkasten-kiosk nix run github:RalfBarkow/hyperdoc/work/zettelkasten-kiosk#catalog</codeblock>
+          <p>Nix baut den Catalog aus genau diesem Branch; das Image lädt das System <codeph>zettelkasten-kiosk</codeph> vor dem Start und lauscht nur auf 127.0.0.1. Der erste Start übersetzt die Lisp-Quellen und dauert einige Minuten; danach ist er schnell. Beenden mit Ctrl-C.</p>
+        </info>
+        <stepresult>Das Terminal bleibt offen; der Catalog antwortet auf <codeph>http://localhost:8080/</codeph>.</stepresult>
+      </step>
+      <step id="open">
+        <cmd>Die Projektseite öffnen: <xref href="http://localhost:8080/6F061-zettelkasten-kiosk" format="html" scope="external">http://localhost:8080/6F061-zettelkasten-kiosk</xref>.</cmd>
+      </step>
+      <step id="check-image">
+        <cmd>Mit Play prüfen, dass das Image den aktuellen Stand des Branches zeigt.</cmd>
+        <info><p>Play liest die Revision, mit der Nix dieses Image gebaut hat, und mit einer GET-Anfrage den Kopf des Branches auf GitHub, und vergleicht beide. Es schreibt nichts.</p></info>
+        <stepresult>«Aktuell», oder der Hinweis, den Befehl aus Schritt 1 neu zu starten, weil der Branch weitergegangen ist. Mit <codeph>nix run --refresh …</codeph> holt Nix den neuen Kopf sicher.</stepresult>
+      </step>
+    </steps>
+  </taskbody>
+</task>

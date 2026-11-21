@@ -79,3 +79,56 @@
 (policy:register-reviewed-control "zettelkasten-kiosk/read-heads"
   :effect "Reads the current head of each branch named in the Zettelkasten-kiosk register with one GET to the public GitHub API, and uses it in this image."
   :audit "PLAY-READ-HEADS runs curl --proto =https against api.github.com; it writes no file and changes no repository. It returns a HEAD-OBSERVATION.")
+
+;;;; Play im Task «Lokal öffnen»: zeigt das Image den aktuellen Stand?
+;;;;
+;;;; Das verpackte Image kennt die Revision, aus der Nix es gebaut hat (HYPERDOC_SOURCE_REVISION; «…-dirty» bei
+;;;; ungesicherten Änderungen). Play liest mit einer GET-Anfrage den Kopf des Branches dieses Systems und vergleicht.
+
+(defparameter +own-repo+ "RalfBarkow/hyperdoc")
+(defparameter +own-branch+ "work/zettelkasten-kiosk")
+(defvar *revision-reader* (lambda () (uiop:getenv "HYPERDOC_SOURCE_REVISION"))
+  "Funktion ohne Argumente: die Revision, aus der dieses Image gebaut ist, oder NIL.")
+
+(defclass image-observation ()
+  ((time :initarg :time :reader observation-time)
+   (revision :initarg :revision :reader image-revision)
+   (head :initarg :head :reader image-branch-head)
+   (error :initarg :error :initform nil :reader image-error)
+   (status :initarg :status :reader image-status
+           :documentation ":current, :behind, :dirty, :unknown (keine Revision, etwa in der Dev-Shell) oder :error.")
+   (system-directory :initarg :system-directory :reader image-system-directory))
+  (:documentation "Ein Druck auf Play im Task «Lokal öffnen»: gebaute Revision gegen den Branch-Kopf auf GitHub."))
+
+(defun image-status-text (status)
+  (ecase status
+    (:current "Aktuell: das Image ist aus dem Kopf des Branches gebaut.")
+    (:behind "Der Branch ist weitergegangen: den Befehl aus Schritt 1 mit «nix run --refresh» neu starten.")
+    (:dirty "Gebaut aus einem Arbeitsbaum mit ungesicherten Änderungen; kein Vergleich möglich.")
+    (:unknown "Keine Revision angegeben: dieses Image läuft nicht aus dem verpackten Catalog (etwa SLY in der Dev-Shell).")
+    (:error "Der Branch-Kopf liess sich nicht lesen.")))
+
+(defmethod v:text-representation ((o image-observation))
+  (format nil "Image-Prüfung ~A: ~A" (time-string (observation-time o)) (image-status-text (image-status o))))
+
+(defun check-image ()
+  (let* ((revision (let ((r (funcall *revision-reader*))) (and r (plusp (length r)) r)))
+         (head nil) (error nil))
+    (handler-case (setf head (funcall *head-reader* +own-repo+ +own-branch+))
+      (error (e) (setf error (princ-to-string e))))
+    (make-instance 'image-observation
+                   :time (get-universal-time) :revision revision :head head :error error
+                   :system-directory (namestring (asdf:system-source-directory "zettelkasten-kiosk"))
+                   :status (cond ((null revision) :unknown)
+                                 ((search "dirty" revision) :dirty)
+                                 (error :error)
+                                 ((same-commit-p revision head) :current)
+                                 (t :behind)))))
+
+(defvar *image-observations* nil "Jede Image-Prüfung in diesem Image, neueste zuerst.")
+(defun play-check-image ()
+  (let ((o (check-image))) (push o *image-observations*) o))
+
+(policy:register-reviewed-control "zettelkasten-kiosk/check-image"
+  :effect "Compares the revision this image was built from with the head of the branch work/zettelkasten-kiosk, read with one GET to the public GitHub API."
+  :audit "PLAY-CHECK-IMAGE reads HYPERDOC_SOURCE_REVISION and runs curl --proto =https against api.github.com; it writes no file. It returns an IMAGE-OBSERVATION.")
