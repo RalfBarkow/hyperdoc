@@ -6,6 +6,8 @@
   <conbody>
     <note type="important">Stand 21.11.2026: Entwurf. Gebaut und geprüft ist nur der Kiosk selbst (RalfBarkow/zettelkasten, Branch <codeph>nix/package-kiosk</codeph>, <codeph>accb7d6</codeph>, VM-Test <codeph>checks.kiosk</codeph> bestanden). wayvnc, noVNC und der Frame sind noch nicht gebaut; was unten über sie steht, ist die Absicht, keine Beobachtung.</note>
 
+    <note type="attention">Befund vom 21.11.2026 (RalfBarkow/zettelkasten <codeph>75bac1b</codeph>): wayvnc 0.8.0 und 0.10.2 (neatvnc 0.8 und 1.0.4) bieten mit <codeph>enable_auth=true</codeph> nur die Sicherheitstypen 129 (RA2_256) und 5 (RA2) an; mit <codeph>relax_encryption=true</codeph> zusätzlich 30 (Apple Diffie-Hellman). noVNC 1.4.0 und 1.7.0 kennen unter den RSA-AES-Typen nur 6 (RA2ne): Die Zugangsdaten gehen verschlüsselt, der Bildstrom danach unverschlüsselt. Es gibt keinen gemeinsamen Typ; noVNC kommt nicht zur Anmeldung. Wie der Vertrag angepasst oder die Anordnung geändert wird, ist offen.</note>
+
     <section id="pieces">
       <title>Die vier Teile</title>
       <dl>
