@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE task PUBLIC "-//OASIS//DTD DITA Task//EN" "task.dtd">
+<task id="zettelkasten-kiosk-project" xml:lang="de-CH">
+  <title>Den Zettelkasten-Kiosk fertigstellen</title>
+  <shortdesc>Jedes Vorhaben geht dieselben Schritte. SHOP3 schlägt aus dem Register vor, welcher als nächster dran ist; die Schritt-IDs unten stehen in der Spalte «Im Task».</shortdesc>
+  <taskbody>
+    <context>
+      <p>Das Register <filepath>status.sexp</filepath> hält Vorhaben, Belege und Entscheidungen. Ein Beleg nennt Art, Datum, wer beobachtet hat und bei welchem Commit; er gilt nur für diesen Commit. Agenten setzen um, prüfen und tragen Belege ein. Der Operator entscheidet, sieht an, mergt und aktiviert. Niemand öffnet für dieses Projekt eine SSH-Sitzung.</p>
+    </context>
+    <steps>
+      <step id="decide">
+        <cmd>Eine offene Entscheidung treffen.</cmd>
+        <info><p>Der Operator wählt eine Option. Claude trägt sie als <codeph>:status :decided :choice …</codeph> ein, mit Datum.</p></info>
+        <stepresult>Die blockierten Vorhaben werden wieder planbar.</stepresult>
+      </step>
+      <step id="implement">
+        <cmd>Ein Vorhaben auf einem eigenen Branch umsetzen oder einen Defekt beheben.</cmd>
+        <info><p>Ein Branch je Vorhaben. Der neue Kopf kommt ins Register.</p></info>
+      </step>
+      <step id="verify">
+        <cmd>Prüfen und den Beleg eintragen.</cmd>
+        <info><p>Der Beleg nennt den geprüften Commit, die Umgebung und was nicht geprüft ist. Bewegt sich der Kopf danach, gilt die Prüfung als veraltet; Play zeigt das, sobald es die Köpfe liest.</p></info>
+        <stepresult>Ein Beleg <codeph>:verified</codeph> oder <codeph>:failed</codeph> beim aktuellen Kopf.</stepresult>
+      </step>
+      <step id="review">
+        <cmd>Ansehen.</cmd>
+        <info><p>Der Operator sieht das Ergebnis an, etwa im lokalen HyperDoc; danach trägt Claude <codeph>:seen</codeph> ein.</p></info>
+      </step>
+      <step id="pull-request">
+        <cmd>Auf Auftrag des Operators einen Pull Request anlegen.</cmd>
+        <info><p>Der PR nennt die Belege und ihren Commit.</p></info>
+      </step>
+      <step id="merge">
+        <cmd>Mergen.</cmd>
+        <info><p>Nur der Operator. Danach <codeph>:merged</codeph> eintragen.</p></info>
+      </step>
+    </steps>
+    <result><p>Alle Vorhaben gemergt; SHOP3 schlägt keinen Schritt mehr vor.</p></result>
+  </taskbody>
+</task>

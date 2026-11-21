@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="de-CH">
+<head><meta charset="utf-8"><title>Wie der Projektstatus geführt wird</title></head>
+<body>
+<in-package>zettelkasten-kiosk</in-package>
+<h1>Wie der Projektstatus geführt wird</h1>
+<h2>Register</h2>
+<p>Die Datei <code>status.sexp</code> hält <a expr="(items)">die Vorhaben</a> und <a expr="(decisions)">die Entscheidungen</a>. Sie wird von Hand geführt: Claude trägt nach jedem Schritt ein, der Operator nach seinen Beobachtungen. Jede Änderung ist ein Commit, also nachvollziehbar.</p>
+<h2>Belege</h2>
+<p>Ein Beleg nennt Art (geprüft, nicht bestanden, angesehen, PR offen, gemergt), Datum, wer beobachtet hat (Claude oder der Operator), was beobachtet wurde und bei welchem Commit. Er gilt nur für diesen Commit: Bewegt sich der Branch, ist die Prüfung veraltet, und SHOP3 schlägt vor, erneut zu prüfen.</p>
+<h2>Fakten und Plan</h2>
+<p>Aus dem Register entstehen <a expr="(project-facts)">die Fakten</a>, eingetragene und abgeleitete (veraltet, wartet, blockiert). Daraus rechnet SHOP3 <a expr="(plan-next)">den Plan</a>: eine Methode je Art von Schritt, jede anwendbare als eigene Alternative.</p>
+<h2>Vorrangregel</h2>
+<p>Die Reihenfolge der Methoden ist die Vorrangregel, und die erste Alternative ist die Empfehlung:</p>
+<ol>
+<li>offene Entscheidungen, die Vorhaben blockieren;</li>
+<li>nicht bestandene Prüfungen beheben;</li>
+<li>veraltete Prüfungen wiederholen;</li>
+<li>Ungeprüftes prüfen;</li>
+<li>Fertiges vom Operator ansehen lassen;</li>
+<li>Pull Request anlegen (auf Auftrag);</li>
+<li>Mergen (Operator);</li>
+<li>Neues umsetzen;</li>
+<li>Warten auf Entscheidungen oder Abhängigkeiten (kein Schritt, nur angezeigt).</li>
+</ol>
+<p>Begründung: Eine Entscheidung gibt meist mehrere Vorhaben frei; ein Defekt entwertet alles, was darauf aufbaut; ein PR ohne gültige Prüfung wäre ein Versprechen ohne Beleg.</p>
+<h2>Play</h2>
+<p>Der Play-Knopf auf der Ansicht <a expr="(project)" view="Nächster Schritt">Nächster Schritt</a> liest je Branch den Kopf von der öffentlichen GitHub-API, eine GET-Anfrage je Branch, und nimmt ihn in diesem Image als aktuellen Kopf. Er schreibt keine Datei und ändert kein Repository. Jeder Druck liefert eine Beobachtung mit den gelesenen Köpfen und den Vorschlägen vorher und nachher.</p>
+<p><a page="Zettelkasten-Kiosk">Zum Projekt</a></p>
+</body></html>

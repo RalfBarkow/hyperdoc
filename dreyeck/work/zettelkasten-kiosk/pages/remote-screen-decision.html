@@ -1,0 +1,18 @@
+<!doctype html>
+<html lang="de-CH">
+<head><meta charset="utf-8"><title>Entscheidung: RSA-AES beim Fernbildschirm</title></head>
+<body>
+<in-package>zettelkasten-kiosk</in-package>
+<h1>Entscheidung: RSA-AES beim Fernbildschirm</h1>
+<p>Der Sicherheitsvertrag verlangt, dass wayvnc nur mit Anmeldung über RSA-AES zugänglich ist und dass eine fremde Webseite ohne Zugangsdaten keine Sitzung bekommt. Der VM-Test <code>checks.remote-screen</code> und eine Probe ausserhalb der VM haben gezeigt, dass das mit noVNC so nicht zustande kommt.</p>
+<h2>Befund</h2>
+<ul>
+<li>wayvnc 0.8.0 und 0.10.2 (neatvnc 0.8 und 1.0.4) bieten mit <code>enable_auth=true</code> die Sicherheitstypen 129 (RA2_256) und 5 (RA2) an, mit <code>relax_encryption=true</code> zusätzlich 30 (Apple Diffie-Hellman).</li>
+<li>noVNC 1.4.0 und 1.7.0 kennen unter RSA-AES nur 6 (RA2ne): Die Zugangsdaten gehen verschlüsselt, der Bildstrom danach unverschlüsselt.</li>
+<li>Es gibt keinen gemeinsamen Typ. noVNC kommt nicht zur Anmeldung.</li>
+</ul>
+<p>Was bereits hält: ohne Zugangsdaten und mit zu offenen Rechten startet wayvnc nicht; mit Zugangsdaten lauscht es nur auf 127.0.0.1:5900, und das Passwort steht in keiner Befehlszeile. Die Belege stehen bei <a expr="(item :remote-screen)">dem Vorhaben Fernbildschirm</a>.</p>
+<h2>Optionen</h2>
+<p><a expr="(decision :rsa-aes-variant)">Die Entscheidung im Register</a> und <a expr="(project)" view="Entscheidungen">alle Entscheidungen mit ihren Folgen</a>. Solange sie offen ist, blockiert sie den Fernbildschirm, die Abnahme-Schritte und den HyperDoc-Frame.</p>
+<p><a page="Zettelkasten-Kiosk">Zum Projekt</a></p>
+</body></html>
